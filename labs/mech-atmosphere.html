@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大氣壓力虛擬實驗室｜92學年度屏東區複賽 物理實驗第一題</title>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --ink:#1d2733; --sub:#5b6b7c; --line:#d9e1e8;
+  --acc:#0b7285; --acc2:#e8590c; --ok:#2b8a3e; --warn:#e67700; --bad:#c92a2a;
+  --soft:#e7f1f4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
+  line-height:1.65;font-size:15px}
+header{background:linear-gradient(135deg,#0b7285,#1098ad);color:#fff;padding:18px 20px}
+header h1{margin:0 0 4px;font-size:20px;letter-spacing:.5px}
+header p{margin:0;font-size:13px;opacity:.9}
+nav{display:flex;flex-wrap:wrap;gap:4px;background:#e3ebef;padding:6px 10px;
+  position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}
+nav button{border:1px solid transparent;background:transparent;padding:8px 12px;border-radius:8px;
+  cursor:pointer;font-size:14px;color:var(--sub);font-family:inherit}
+nav button:hover{background:#d3dfe5}
+nav button.on{background:var(--card);color:var(--acc);font-weight:700;border-color:var(--line)}
+main{max-width:1120px;margin:0 auto;padding:16px 14px 60px}
+section{display:none}
+section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:17px;color:var(--acc);border-left:4px solid var(--acc);padding-left:9px}
+.card h3{margin:16px 0 6px;font-size:15px;color:#2b4a5a}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+.eq{background:var(--soft);border-radius:8px;padding:10px 14px;margin:8px 0;
+  font-family:"Cambria Math","Times New Roman",serif;font-size:16px;overflow-x:auto}
+.note{background:#fff9db;border-left:4px solid var(--warn);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:13.5px}
+.good{background:#ebfbee;border-left:4px solid var(--ok);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:13.5px}
+.danger{background:#fff5f5;border-left:4px solid var(--bad);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0;font-size:13.5px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 7px;text-align:center}
+th{background:#eef4f6;font-weight:600}
+td input{width:70px;border:1px solid var(--line);border-radius:4px;padding:2px 4px;text-align:center;font-family:inherit;font-size:13px}
+button.act{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:8px 14px;
+  cursor:pointer;font-size:14px;font-family:inherit;margin:3px 4px 3px 0}
+button.act:hover{filter:brightness(1.1)}
+button.act.alt{background:var(--acc2)}
+button.act.gray{background:#748796}
+button.act:disabled{background:#b6c2cb;cursor:not-allowed}
+label{font-size:13.5px}
+select,input[type=number],input[type=text]{border:1px solid var(--line);border-radius:6px;padding:5px 7px;
+  font-family:inherit;font-size:13.5px;background:#fff;max-width:100%}
+.row label{max-width:100%}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.kv{display:flex;flex-wrap:wrap;gap:8px}
+.kv div{background:var(--soft);border-radius:8px;padding:6px 10px;font-size:13px}
+.kv b{color:var(--acc);font-size:15px}
+.big{font-size:22px;font-weight:700;color:var(--acc)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.stat{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12.5px;font-weight:700}
+.stat.wait{background:#fff3bf;color:#a06800}
+.stat.rdy{background:#d3f9d8;color:#2b8a3e}
+.stat.err{background:#ffe3e3;color:#c92a2a}
+ul{padding-left:20px;margin:6px 0}
+li{margin:3px 0}
+small{color:var(--sub)}
+.flex{display:flex;gap:14px;flex-wrap:wrap}
+.flex>div{flex:1;min-width:270px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>大氣壓力虛擬實驗室</h1>
+  <p>屏東區九十二學年度高級中學數學及自然學科競賽複賽｜物理科實驗試題第一題：請利用列表器材設計實驗測出目前的大氣壓力</p>
+</header>
+
+<nav>
+  <button class="on" data-t="1">① 原理推導</button>
+  <button data-t="2">② 針筒校正</button>
+  <button data-t="3">③ 裝置組裝</button>
+  <button data-t="4">④ 加載量測</button>
+  <button data-t="5">⑤ 迴歸分析</button>
+  <button data-t="6">⑥ 誤差與真值</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB 1 ============ -->
+<section id="s1" class="on">
+  <div class="card">
+    <h2>一、實驗構想</h2>
+    <p>器材裡沒有壓力計，但有<b>針筒</b>、<b>三通</b>、<b>天平</b>、<b>直尺</b>與<b>已知質量的螺絲</b>。把一段空氣密封在針筒裡，用外加重物改變活塞受力，氣體體積就會依波以耳定律改變——量出「外加質量 <i>m</i>」與「氣體體積 <i>V</i>」的關係，就能反推大氣壓力 <i>P</i>₀。</p>
+    <div class="note">保特瓶在本實驗中的角色是<b>大質量配重</b>（裝水後由棉繩、塑膠袋懸掛）；天平上限只有 300 g，因此大質量必須用「空瓶秤重＋針筒量水體積」推算。</div>
+  </div>
+
+  <div class="card">
+    <h2>二、推導</h2>
+    <div class="flex">
+      <div>
+        <h3>1. 密封氣柱</h3>
+        <p>三通打開時筒內壓力等於大氣壓 <i>P</i>₀，此時體積記為 <i>V</i><sub>s</sub>。關閉三通後氣體莫耳數固定，等溫時：</p>
+        <div class="eq">P<sub>gas</sub> · V = P₀ · V<sub>s</sub></div>
+
+        <h3>2. 活塞力平衡</h3>
+        <p>設活塞截面積 <i>A</i>、活塞自身質量 <i>m</i><sub>p</sub>、外加質量 <i>m</i>、活塞與筒壁摩擦力 <i>f</i>：</p>
+        <div class="eq">拉伸（筒口朝上、重物下掛）：P<sub>gas</sub> = P₀ − (m+m<sub>p</sub>)g / A ± f/A</div>
+        <div class="eq">壓縮（筒口朝下、重物上壓）：P<sub>gas</sub> = P₀ + (m+m<sub>p</sub>)g / A ∓ f/A</div>
+        <p><small>摩擦力方向恆與活塞<b>移動方向</b>相反，所以「加載」與「卸載」兩組數據的偏差符號相反。</small></p>
+
+        <h3>3. 線性化</h3>
+        <p>把兩式合併並取倒數（以拉伸為例）：</p>
+        <div class="eq">1/V = 1/V<sub>s</sub> − [ g / (A·P₀·V<sub>s</sub>) ] · m − m<sub>p</sub>g / (A·P₀·V<sub>s</sub>)</div>
+        <p>以 <b>m 為橫軸、1/V 為縱軸</b>作圖得一直線，斜率 <i>k</i>、截距 <i>b</i>：</p>
+        <div class="eq">P₀ = | g · b / (A · k) |</div>
+        <div class="good">妙處：<i>V</i><sub>s</sub> 不必知道，也不必知道死體積的絕對值——<b>截距與斜率的比值</b>就把它消掉了。你只需要精確的 <i>A</i>。</div>
+      </div>
+      <div>
+        <h3>互動：看看量測會長什麼樣</h3>
+        <div class="row">
+          <label>構型
+            <select id="d1cfg"><option value="tension">拉伸（下掛重物）</option><option value="compression">壓縮（上壓重物）</option></select>
+          </label>
+          <label>針筒
+            <select id="d1syr"><option>5</option><option selected>10</option><option>20</option><option>30</option></select> ml
+          </label>
+        </div>
+        <div class="row">
+          <label>外加質量 <input type="range" id="d1m" min="0" max="900" value="300" step="10"> <span id="d1mv" class="mono">300</span> g</label>
+        </div>
+        <div class="kv" id="d1out"></div>
+        <div id="d1plot"></div>
+        <div class="note">此頁的示範曲線使用<b>理想無摩擦</b>模型，僅供理解趨勢。第 ④ 頁的量測會包含摩擦、死體積、讀數誤差與熱效應。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>三、誤差來源（決定實驗設計）</h2>
+    <table>
+      <tr><th>來源</th><th>對 P₀ 的影響</th><th>消除方法</th></tr>
+      <tr><td>活塞摩擦 f</td><td>整體偏移 ±f/A，可達數 kPa，<b>最大宗</b></td><td>同構型做「加載」與「卸載」兩趟後<b>平均</b>；輕敲針筒亦可部分釋放</td></tr>
+      <tr><td>活塞自重 m<sub>p</sub></td><td>偏移 ∓m<sub>p</sub>g/A</td><td>拉伸與壓縮兩構型結果<b>平均</b>（符號相反）</td></tr>
+      <tr><td>針筒刻度不準（因子 c）</td><td>P₀ 整體乘上 c，2% 即約 2 kPa</td><td>以天平秤水質量校正刻度，再算 A = c·ΔR/Δx</td></tr>
+      <tr><td>死體積 V<sub>d</sub>（筒口與三通內）</td><td>使 1/R–m 圖<b>微彎</b>，造成系統偏差</td><td>估計 V<sub>d</sub> 後以 V = cR + V<sub>d</sub> 重新迴歸</td></tr>
+      <tr><td>壓縮／膨脹的熱效應</td><td>加載瞬間讀數過衝（絕熱）</td><td>等待約 10 秒回到室溫再讀數</td></tr>
+      <tr><td>壓差過大導致漏氣</td><td>讀數持續漂移、數據失效</td><td>控制 |ΔP| 不超過約 55 kPa</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section id="s2">
+  <div class="card">
+    <h2>針筒校正：求截面積 A 與刻度校正因子 c</h2>
+    <p>迴歸只需要一個外來常數：<b>活塞截面積 A</b>。但針筒刻度本身有製造公差，直接用「標稱容量 ÷ 長度」會把誤差直接帶進 P₀。所以要兩步走。</p>
+    <div class="row">
+      <label>選擇要校正的針筒
+        <select id="c2syr"><option>5</option><option selected>10</option><option>20</option><option>30</option></select> ml
+      </label>
+      <button class="act gray" id="c2reset">清除此針筒校正數據</button>
+    </div>
+  </div>
+
+  <div class="flex">
+    <div class="card">
+      <h2>步驟 A｜直尺量刻度長度</h2>
+      <p>用 30 cm 直尺（最小刻度 1 mm，可估讀到 0.5 mm）量兩個刻度之間的距離 Δx，得<b>表觀截面積</b> ΔR/Δx。</p>
+      <div class="row">
+        <label>起點刻度 <input type="number" id="c2r1" value="1" step="0.5" style="width:70px"> ml</label>
+        <label>終點刻度 <input type="number" id="c2r2" value="9" step="0.5" style="width:70px"> ml</label>
+        <button class="act" id="c2meas">量測一次</button>
+      </div>
+      <div id="c2lenTable"></div>
+      <div id="c2lenOut" class="kv"></div>
+      <div id="c2ruler"></div>
+    </div>
+
+    <div class="card">
+      <h2>步驟 B｜天平秤水校正刻度</h2>
+      <p>吸水至某刻度，秤出水的質量，由 ρ<sub>水</sub> = 0.9970 g/cm³（25 °C）換算真實體積，得刻度校正因子 <b>c = V<sub>真</sub> / R<sub>讀</sub></b>。</p>
+      <div class="row">
+        <label>吸水至刻度 <input type="number" id="c2rw" value="8" step="0.5" style="width:70px"> ml</label>
+        <button class="act" id="c2weigh">秤重一次</button>
+      </div>
+      <div id="c2masTable"></div>
+      <div id="c2masOut" class="kv"></div>
+      <div class="note">操作真實度：筒口殘留水滴會讓質量偏高、吸入小氣泡會讓質量偏低，因此務必重複多次取平均。</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>校正結果</h2>
+    <div class="eq">A = c · (ΔR / Δx)　　（ΔR 以 ml＝cm³ 計，Δx 以 cm 計，A 得 cm²）</div>
+    <div id="c2final" class="kv"></div>
+    <div id="c2warn"></div>
+  </div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section id="s3">
+  <div class="card">
+    <h2>裝置組裝</h2>
+    <div class="row">
+      <label>構型
+        <select id="c3cfg">
+          <option value="tension">拉伸（筒口朝上、重物下掛）</option>
+          <option value="compression">壓縮（筒口朝下、重物上壓）</option>
+        </select>
+      </label>
+    </div>
+    <div class="note"><b>拉伸</b>：針筒筒口朝上夾於支架，活塞在下，重物以棉繩＋大型塑膠袋懸掛於活塞柄。<br>
+    <b>壓縮</b>：針筒筒口朝下夾於支架，活塞在上，以長方木塊（15 cm×2.5 cm）當托盤置放重物。</div>
+    <div class="row">
+      <label>使用針筒
+        <select id="c3syr"><option>5</option><option selected>10</option><option>20</option><option>30</option></select> ml
+      </label>
+      <label>封氣時的刻度 V<sub>s</sub> <input type="number" id="c3seal" value="5" step="0.5" style="width:80px"> ml</label>
+      <button class="act" id="c3apply">套用設定</button>
+    </div>
+    <div id="c3hint"></div>
+    <div id="c3svg"></div>
+  </div>
+
+  <div class="flex">
+    <div class="card">
+      <h2>配重庫（一）螺絲</h2>
+      <p><small>題目所附質量（含不確定度）即為你可用的已知值。</small></p>
+      <table>
+        <tr><th>編號</th><th>數量</th><th>單顆質量 (g)</th></tr>
+        <tr><td>1 號</td><td>3</td><td>5.14 ± 0.06</td></tr>
+        <tr><td>2 號</td><td>1</td><td>23.69 ± 0.05</td></tr>
+        <tr><td>3 號</td><td>3</td><td>44.59 ± 0.10</td></tr>
+        <tr><td>4 號</td><td>3</td><td>132.43 ± 0.20</td></tr>
+      </table>
+      <div class="kv"><div>螺絲總質量 <b>570.17 g</b></div></div>
+    </div>
+
+    <div class="card">
+      <h2>配重庫（二）保特瓶（共 13 個）</h2>
+      <p>以 30 ml 針筒注入定量自來水。<b>天平上限 300 g</b>：總質量在上限內可直接秤重（較準）；超過則只能由「空瓶質量＋水體積×密度」推算（誤差較大）。</p>
+      <div class="row">
+        <label>注水量 <select id="c3water"></select></label>
+        <button class="act" id="c3addb">製作一瓶</button>
+        <button class="act gray" id="c3clrb">清空水瓶</button>
+      </div>
+      <div id="c3btable"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 4 ============ -->
+<section id="s4">
+  <div class="card">
+    <h2>加載量測</h2>
+    <div id="c4status"></div>
+    <div class="flex">
+      <div style="max-width:420px">
+        <div id="c4svg"></div>
+      </div>
+      <div>
+        <div class="kv" id="c4read"></div>
+        <h3>操作</h3>
+        <div class="row">
+          <select id="c4pick" style="min-width:210px"></select>
+          <button class="act" id="c4add">加載此配重</button>
+          <button class="act alt" id="c4rem">卸下最後一項</button>
+        </div>
+        <div class="row">
+          <button class="act gray" id="c4tap">輕敲針筒（釋放靜摩擦）</button>
+          <button class="act" id="c4rec">記錄讀數</button>
+          <button class="act gray" id="c4reseal">重新封氣（歸零）</button>
+        </div>
+        <div id="c4loadlist"></div>
+        <div class="note" id="c4tip"><b>操作要領</b>（做過才知道的事）：
+        <ul>
+        <li>活塞有靜摩擦，<b>第一步要夠重才推得動</b>——請<b>從最重的 4 號螺絲開始疊</b>，由輕到重會卡住好幾步。</li>
+        <li>起動之後每一步的<b>增量</b>只要約 20 g 以上即可。</li>
+        <li><b>卸載方向更難動</b>：反向要克服 f<sub>s</sub>+f<sub>k</sub>，約需一次減掉兩倍的量，或<b>先輕敲針筒</b>再讀數。</li>
+        <li>標準流程：加載趟記完 → 卸載趟記完 → 到第 ③ 頁換另一種構型再做一輪。兩趟平均消摩擦，兩構型平均消活塞自重。</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>數據紀錄</h2>
+    <div class="row">
+      <button class="act gray" id="c4clr">清除全部數據</button>
+      <span id="c4count"></span>
+    </div>
+    <div id="c4table"></div>
+  </div>
+</section>
+
+<!-- ============ TAB 5 ============ -->
+<section id="s5">
+  <div class="card">
+    <h2>迴歸分析：1/R – m 直線</h2>
+    <p>對每一組（構型 × 加載方向）分別作最小平方法直線迴歸，再由 <span class="mono">P₀ = |g·b/(A·k)|</span> 求大氣壓力。</p>
+    <div class="row"><button class="act" id="c5run">執行迴歸</button>
+      <label><input type="checkbox" id="c5vd"> 以估計死體積修正（V = c·R + V<sub>d</sub>）</label>
+      <label>V<sub>d</sub> = <input type="number" id="c5vdv" value="0.15" step="0.01" style="width:70px"> ml</label>
+      <label><input type="checkbox" id="c5keep"> 保留「卡住」的數據點（預設排除）</label>
+    </div>
+    <div class="note">活塞未滑動的點讀數與前一點相同，會把斜率硬拉平、使 P₀ 暴衝。勾起來可以親眼看看差多少。</div>
+    <div id="c5plot"></div>
+    <div id="c5table"></div>
+  </div>
+  <div class="card">
+    <h2>逐層平均</h2>
+    <div id="c5comb"></div>
+  </div>
+  <div class="card">
+    <h2>對照：單點法</h2>
+    <p>若不作圖，直接用單一數據點 <span class="mono">P₀ = m·g·V / [A·(V − V<sub>s</sub>)]</span> 計算，看看散布有多大。</p>
+    <div id="c5single"></div>
+  </div>
+</section>
+
+<!-- ============ TAB 6 ============ -->
+<section id="s6">
+  <div class="card">
+    <h2>誤差分析與真值揭曉</h2>
+    <div class="danger">做完第 ⑤ 頁再打開這裡。一旦看過真值，這一輪的自我評量就結束了。</div>
+    <div class="row">
+      <button class="act alt" id="c6reveal">揭曉隱藏真值</button>
+      <button class="act gray" id="c6new">重新產生一組新真值（開新一輪）</button>
+    </div>
+    <div id="c6out"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ======================= 基礎工具 ======================= */
+var G = 9.80665;            // m/s^2
+var RHO_W = 0.9970;         // g/cm^3 @25C
+var _spare = null;
+function randn(){
+  if(_spare!==null){var v=_spare;_spare=null;return v;}
+  var u,w,s;
+  do{u=Math.random()*2-1;w=Math.random()*2-1;s=u*u+w*w;}while(s>=1||s===0);
+  var m=Math.sqrt(-2*Math.log(s)/s);_spare=w*m;return u*m;
+}
+function rnd(a,b){return a+Math.random()*(b-a);}
+function q(x,step){return Math.round(x/step)*step;}
+function f(x,n){return (x===null||x===undefined||!isFinite(x))?'—':Number(x).toFixed(n);}
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+
+/* ======================= 針筒規格 ======================= */
+var SYRDEF = {
+  '5' :{nom:5 ,L0:4.00,div:0.2,mp:3.5,me:11},
+  '10':{nom:10,L0:5.00,div:0.2,mp:5.0,me:15},
+  '20':{nom:20,L0:6.60,div:0.5,mp:7.5,me:22},
+  '30':{nom:30,L0:7.90,div:1.0,mp:9.0,me:30}
+};
+var SCREWDEF=[{n:'1號',m:5.14,s:0.06,c:3},{n:'2號',m:23.69,s:0.05,c:1},
+              {n:'3號',m:44.59,s:0.10,c:3},{n:'4號',m:132.43,s:0.20,c:3}];
+
+/* ======================= 隱藏真值 ======================= */
+var T={};
+function genTruth(){
+  T={P0:0,syr:{},bottleEmpty:[],screwTrue:[]};
+  T.P0 = Math.min(102300, Math.max(99400, 100900 + randn()*650));   // Pa
+  for(var k in SYRDEF){
+    var d=SYRDEF[k];
+    var c = 1 + rnd(-0.025,0.025);
+    var L = d.L0*(1+rnd(-0.02,0.02));
+    var fs = (0.55+0.50*Math.sqrt(d.nom/10))*rnd(0.85,1.20);
+    T.syr[k]={c:c, L:L, A:c*d.nom/L, Vd:rnd(0.08,0.25),
+              mp:d.mp*(1+rnd(-0.12,0.12)), fs:fs, fk:fs*0.82,
+              me:d.me*(1+rnd(-0.08,0.08))};
+  }
+  for(var i=0;i<13;i++) T.bottleEmpty.push(rnd(23.0,27.0));
+  SCREWDEF.forEach(function(sd){
+    for(var j=0;j<sd.c;j++) T.screwTrue.push({label:sd.n+'螺絲', known:sd.m, tru:sd.m+randn()*sd.s});
+  });
+}
+genTruth();
+
+/* ======================= 全域狀態 ======================= */
+var S = {
+  cal:{},                 // 每支針筒的校正數據 {len:[],mas:[]}
+  syr:'10', cfg:'tension', Rseal:5,
+  sealed:false, Vs:null, Pg:null,
+  Vfinal:null, Vad:null, Pprev:null, Vprev:null,
+  tChange:0, noise:0, leak:false, broken:null,
+  bottles:[], loaded:[], data:[], lastDir:null, revealed:false
+};
+for(var kk in SYRDEF) S.cal[kk]={len:[],mas:[]};
+
+function tr(){return T.syr[S.syr];}
+function def(){return SYRDEF[S.syr];}
+function Am2(A){return A/1e4;}    // cm^2 -> m^2
+
+/* ======================= 分頁 ======================= */
+Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){
+  b.onclick=function(){
+    Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(x){x.classList.remove('on');});
+    Array.prototype.forEach.call(document.querySelectorAll('main section'),function(x){x.classList.remove('on');});
+    b.classList.add('on'); el('s'+b.dataset.t).classList.add('on');
+    window.scrollTo(0,0);
+  };
+});
+
+/* ======================= 繪圖工具 ======================= */
+function niceTicks(lo,hi,n){
+  if(!(isFinite(lo)&&isFinite(hi))||hi<=lo){return [lo,hi];}
+  var raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log(raw)/Math.LN10)), norm=raw/mag, step;
+  if(norm<1.5)step=1*mag; else if(norm<3)step=2*mag; else if(norm<7)step=5*mag; else step=10*mag;
+  var t=[],v=Math.ceil(lo/step)*step;
+  for(;v<=hi*1.0000001;v+=step) t.push(Math.abs(v)<step*1e-9?0:v);
+  return t;
+}
+function svgPlot(W,H,series,xl,yl){
+  var L=64,R=14,Tp=14,B=44, pw=W-L-R, ph=H-Tp-B;
+  var xs=[],ys=[];
+  series.forEach(function(s){ s.pts.forEach(function(p){xs.push(p[0]);ys.push(p[1]);}); });
+  if(!xs.length) return '<div class="note">尚無數據可作圖。</div>';
+  var x0=Math.min.apply(null,xs), x1=Math.max.apply(null,xs);
+  var y0=Math.min.apply(null,ys), y1=Math.max.apply(null,ys);
+  var dx=(x1-x0)||1, dy=(y1-y0)||1;
+  x0-=dx*0.12; x1+=dx*0.12; y0-=dy*0.15; y1+=dy*0.15;
+  if(x0>0&&x0<dx*0.5) x0=0;
+  var X=function(v){return L+(v-x0)/(x1-x0)*pw;};
+  var Y=function(v){return Tp+ph-(v-y0)/(y1-y0)*ph;};
+  var o='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+W+'px;background:#fff;border:1px solid #d9e1e8;border-radius:8px">';
+  niceTicks(x0,x1,5).forEach(function(t){
+    o+='<line x1="'+X(t)+'" y1="'+Tp+'" x2="'+X(t)+'" y2="'+(Tp+ph)+'" stroke="#eef2f4"/>';
+    o+='<text x="'+X(t)+'" y="'+(Tp+ph+16)+'" font-size="11" text-anchor="middle" fill="#5b6b7c">'+(Math.abs(t)<1e-9?0:t.toPrecision(3)*1)+'</text>';
+  });
+  niceTicks(y0,y1,5).forEach(function(t){
+    o+='<line x1="'+L+'" y1="'+Y(t)+'" x2="'+(L+pw)+'" y2="'+Y(t)+'" stroke="#eef2f4"/>';
+    o+='<text x="'+(L-6)+'" y="'+(Y(t)+4)+'" font-size="11" text-anchor="end" fill="#5b6b7c">'+(Math.abs(t)<1e-12?0:t.toPrecision(3)*1)+'</text>';
+  });
+  o+='<line x1="'+L+'" y1="'+(Tp+ph)+'" x2="'+(L+pw)+'" y2="'+(Tp+ph)+'" stroke="#1d2733"/>';
+  o+='<line x1="'+L+'" y1="'+Tp+'" x2="'+L+'" y2="'+(Tp+ph)+'" stroke="#1d2733"/>';
+  series.forEach(function(s){
+    if(s.fit){
+      var a=X(x0),b=X(x1);
+      var ya=Y(s.fit.k*x0+s.fit.b), yb=Y(s.fit.k*x1+s.fit.b);
+      o+='<line x1="'+a+'" y1="'+ya+'" x2="'+b+'" y2="'+yb+'" stroke="'+s.color+'" stroke-width="1.6" opacity=".85"/>';
+    }
+    s.pts.forEach(function(p){
+      o+='<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="3.6" fill="'+s.color+'" stroke="#fff" stroke-width="1"/>';
+    });
+  });
+  var ly=Tp+6;
+  series.forEach(function(s){
+    if(!s.name) return;
+    o+='<rect x="'+(L+10)+'" y="'+(ly-8)+'" width="10" height="10" fill="'+s.color+'"/>';
+    o+='<text x="'+(L+25)+'" y="'+(ly+1)+'" font-size="11.5" fill="#1d2733">'+esc(s.name)+'</text>';
+    ly+=16;
+  });
+  o+='<text x="'+(L+pw/2)+'" y="'+(H-8)+'" font-size="12" text-anchor="middle" fill="#1d2733">'+esc(xl)+'</text>';
+  o+='<text transform="translate(14,'+(Tp+ph/2)+') rotate(-90)" font-size="12" text-anchor="middle" fill="#1d2733">'+esc(yl)+'</text>';
+  return o+'</svg>';
+}
+
+/* ======================= 針筒 SVG ======================= */
+function syringeSVG(W,H,opt){
+  // opt: {cfg,nom,div,R,full,showLoad,loadLabel,scaleOnly}
+  // 依真實幾何決定筒身長寬比：D = 2√(V/(π·L))，10 ml／5 cm 之針筒 D≈1.6 cm
+  var Lcm=SYRDEF[String(opt.nom)]?SYRDEF[String(opt.nom)].L0:5.0;
+  var Dcm=2*Math.sqrt(opt.nom/(Math.PI*Lcm));
+  var up0=(opt.cfg==='tension');
+  // 拉伸時配重掛在下方、壓縮時堆在上方，各自留出空間
+  var top=up0?62:150, bot=up0?(H-130):(H-46), Lpx=bot-top;
+  var bw=Math.max(34,Math.min(120,Lpx*(Dcm/Lcm)));
+  var cx=W*0.40;
+  var o='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+W+'px;background:#fbfdfe;border:1px solid #d9e1e8;border-radius:8px">';
+  var up = (opt.cfg==='tension');   // 筒口朝上
+  // 支架
+  o+='<rect x="'+(W-46)+'" y="30" width="12" height="'+(H-70)+'" fill="#95a5a6"/>';
+  o+='<rect x="'+(W-86)+'" y="'+(H-46)+'" width="70" height="14" rx="3" fill="#7f8c8d"/>';
+  o+='<rect x="'+(cx+bw/2-4)+'" y="'+(top+Lpx*0.45)+'" width="'+(W-46-cx-bw/2+4)+'" height="12" fill="#5d6d7e"/>';
+  // 筒身
+  o+='<rect x="'+(cx-bw/2)+'" y="'+top+'" width="'+bw+'" height="'+Lpx+'" rx="4" fill="#eaf4f8" stroke="#7fa6b5" stroke-width="1.6"/>';
+  // 刻度：R=0 在筒口端
+  var nozY = up? top : bot;
+  var sgn  = up? 1 : -1;
+  var step = opt.div;
+  var majorEvery = (opt.nom<=10)?5:(opt.nom<=20?2:1);
+  var cnt=0;
+  for(var r=0;r<=opt.nom+1e-9;r+=step){
+    var y = nozY + sgn*(r/opt.nom)*Lpx;
+    var major = (cnt%majorEvery===0);
+    o+='<line x1="'+(cx-bw/2)+'" y1="'+y+'" x2="'+(cx-bw/2+(major?16:9))+'" y2="'+y+'" stroke="#41697c" stroke-width="'+(major?1.4:0.8)+'"/>';
+    if(major) o+='<text x="'+(cx-bw/2+19)+'" y="'+(y+4)+'" font-size="9.5" fill="#41697c">'+(Math.round(r*10)/10)+'</text>';
+    cnt++;
+  }
+  // 氣體與活塞
+  var Rv = Math.max(0,Math.min(opt.nom, opt.R===null?0:opt.R));
+  var py = nozY + sgn*(Rv/opt.nom)*Lpx;
+  var gy0 = Math.min(nozY,py), gh=Math.abs(py-nozY);
+  o+='<rect x="'+(cx-bw/2+2)+'" y="'+gy0+'" width="'+(bw-4)+'" height="'+gh+'" fill="#d0ebff" opacity=".8"/>';
+  o+='<text x="'+cx+'" y="'+(gy0+gh/2+4)+'" font-size="11" text-anchor="middle" fill="#1864ab">密封空氣</text>';
+  // 活塞頭
+  o+='<rect x="'+(cx-bw/2+1)+'" y="'+(py-(up?0:7))+'" width="'+(bw-2)+'" height="7" fill="#495057" rx="2"/>';
+  // 活塞桿
+  var hy = up? bot+34 : top-34;
+  o+='<line x1="'+cx+'" y1="'+py+'" x2="'+cx+'" y2="'+hy+'" stroke="#495057" stroke-width="7"/>';
+  o+='<rect x="'+(cx-22)+'" y="'+(up?hy:hy-8)+'" width="44" height="8" rx="3" fill="#495057"/>';
+  // 筒口＋三通
+  var ty = up? top-12 : bot+12;
+  o+='<rect x="'+(cx-5)+'" y="'+(up?top-14:bot)+'" width="10" height="14" fill="#7fa6b5"/>';
+  o+='<circle cx="'+cx+'" cy="'+ty+'" r="10" fill="#e8590c"/>';
+  o+='<text x="'+(cx+15)+'" y="'+(ty+4)+'" font-size="10.5" fill="#e8590c">三通（關閉）</text>';
+  // 配重
+  if(opt.showLoad){
+    if(up){
+      o+='<line x1="'+cx+'" y1="'+(hy+8)+'" x2="'+cx+'" y2="'+(hy+26)+'" stroke="#b08968" stroke-width="2"/>';
+      o+='<path d="M'+(cx-30)+','+(hy+26)+' L'+(cx+30)+','+(hy+26)+' L'+(cx+22)+','+(hy+62)+' L'+(cx-22)+','+(hy+62)+' Z" fill="#ced4da" stroke="#868e96"/>';
+      o+='<text x="'+cx+'" y="'+(hy+48)+'" font-size="11" text-anchor="middle" fill="#212529">'+esc(opt.loadLabel||'')+'</text>';
+    }else{
+      o+='<rect x="'+(cx-40)+'" y="'+(hy-20)+'" width="80" height="11" rx="2" fill="#b08968"/>';
+      o+='<rect x="'+(cx-32)+'" y="'+(hy-52)+'" width="64" height="32" rx="3" fill="#ced4da" stroke="#868e96"/>';
+      o+='<text x="'+cx+'" y="'+(hy-32)+'" font-size="11" text-anchor="middle" fill="#212529">'+esc(opt.loadLabel||'')+'</text>';
+    }
+  }
+  o+='<text x="10" y="20" font-size="12" fill="#0b7285">'+(up?'拉伸構型：筒口朝上，重物下掛':'壓縮構型：筒口朝下，重物上壓')+'</text>';
+  o+='<text x="10" y="38" font-size="11.5" fill="#5b6b7c">'+opt.nom+' ml 針筒（最小刻度 '+opt.div+' ml）</text>';
+  return o+'</svg>';
+}
+
+/* ======================= TAB 1 ======================= */
+function d1(){
+  var key=el('d1syr').value, cfg=el('d1cfg').value, m=+el('d1m').value;
+  el('d1mv').textContent=m;
+  var t=T.syr[key], d=SYRDEF[key];
+  var Vs=d.nom*0.5;                       // 示範用：封在半滿
+  var A=Am2(t.A);
+  var dP=(m/1000+t.mp/1000)*G/A;
+  var P=(cfg==='tension')?(T.P0-dP):(T.P0+dP);
+  var V=(P>1000)?(T.P0*Vs/P):NaN;
+  var ok=(V<=d.nom&&V>=d.nom*0.06);
+  el('d1out').innerHTML=
+    '<div>氣體壓力 <b>'+f(P/1000,1)+'</b> kPa</div>'+
+    '<div>氣體體積 <b>'+f(V,2)+'</b> ml</div>'+
+    '<div>壓差 <b>'+f((P-T.P0)/1000,1)+'</b> kPa</div>'+
+    '<div>'+(ok?'<span class="stat rdy">在量程內</span>':'<span class="stat err">'+(V>d.nom?'活塞已被拉出筒外':'活塞觸底')+'</span>')+'</div>';
+  var pts=[],mm;
+  for(mm=0;mm<=900;mm+=45){
+    var dp=(mm/1000+t.mp/1000)*G/A;
+    var p=(cfg==='tension')?(T.P0-dp):(T.P0+dp);
+    var v=T.P0*Vs/p;
+    if(v<=d.nom*1.02&&v>=d.nom*0.05) pts.push([mm,1/v]);
+  }
+  el('d1plot').innerHTML=svgPlot(460,280,[{pts:pts,color:'#0b7285',name:'1/V 對 m'}],'外加質量 m (g)','1/V (ml⁻¹)');
+}
+['d1syr','d1cfg','d1m'].forEach(function(i){el(i).oninput=d1;el(i).onchange=d1;});
+
+/* ======================= TAB 2 ======================= */
+function cal(){return S.cal[el('c2syr').value];}
+function c2render(){
+  var key=el('c2syr').value, t=T.syr[key], d=SYRDEF[key], c=S.cal[key];
+  // 長度表
+  var h='<div class="scroll"><table><tr><th>#</th><th>ΔR (ml)</th><th>Δx (cm)</th><th>ΔR/Δx (cm²)</th><th></th></tr>';
+  c.len.forEach(function(r,i){
+    h+='<tr><td>'+(i+1)+'</td><td>'+f(r.dR,2)+'</td><td>'+f(r.dx,2)+'</td><td>'+f(r.dR/r.dx,4)+'</td>'+
+       '<td><button class="act gray" style="padding:2px 8px;font-size:12px" onclick="delLen('+i+')">刪</button></td></tr>';
+  });
+  h+='</table></div>';
+  el('c2lenTable').innerHTML = c.len.length? h : '<div class="note">尚未量測。</div>';
+  var aApp=null,sA=null;
+  if(c.len.length){
+    var v=c.len.map(function(r){return r.dR/r.dx;});
+    aApp=v.reduce(function(a,b){return a+b;},0)/v.length;
+    sA=v.length>1? Math.sqrt(v.reduce(function(a,b){return a+(b-aApp)*(b-aApp);},0)/(v.length-1)/v.length) : aApp*0.006;
+    el('c2lenOut').innerHTML='<div>表觀截面積 ΔR/Δx = <b>'+f(aApp,4)+'</b> ± '+f(sA,4)+' cm²（n='+v.length+'）</div>';
+  } else el('c2lenOut').innerHTML='';
+
+  // 質量表
+  var h2='<div class="scroll"><table><tr><th>#</th><th>刻度 R (ml)</th><th>空筒 (g)</th><th>含水 (g)</th><th>水質量 (g)</th><th>c</th><th></th></tr>';
+  c.mas.forEach(function(r,i){
+    var mw=r.m1-r.m0, cc=(mw/RHO_W)/r.R;
+    h2+='<tr><td>'+(i+1)+'</td><td>'+f(r.R,2)+'</td><td>'+f(r.m0,2)+'</td><td>'+f(r.m1,2)+'</td><td>'+f(mw,2)+'</td><td>'+f(cc,4)+'</td>'+
+        '<td><button class="act gray" style="padding:2px 8px;font-size:12px" onclick="delMas('+i+')">刪</button></td></tr>';
+  });
+  h2+='</table></div>';
+  el('c2masTable').innerHTML = c.mas.length? h2 : '<div class="note">尚未秤重。</div>';
+  var cAvg=null,sC=null;
+  if(c.mas.length){
+    var cv=c.mas.map(function(r){return ((r.m1-r.m0)/RHO_W)/r.R;});
+    cAvg=cv.reduce(function(a,b){return a+b;},0)/cv.length;
+    sC=cv.length>1? Math.sqrt(cv.reduce(function(a,b){return a+(b-cAvg)*(b-cAvg);},0)/(cv.length-1)/cv.length) : cAvg*0.008;
+    el('c2masOut').innerHTML='<div>刻度校正因子 c = <b>'+f(cAvg,4)+'</b> ± '+f(sC,4)+'（n='+cv.length+'）</div>';
+  } else el('c2masOut').innerHTML='';
+
+  // 結果
+  if(aApp!==null&&cAvg!==null){
+    var A=cAvg*aApp, sAA=A*Math.sqrt(Math.pow(sA/aApp,2)+Math.pow(sC/cAvg,2));
+    c.A=A; c.sA=sAA; c.c=cAvg; c.sC=sC; c.aApp=aApp;
+    el('c2final').innerHTML='<div>針筒 '+key+' ml</div>'+
+      '<div>A = <b>'+f(A,4)+'</b> ± '+f(sAA,4)+' cm²（相對誤差 '+f(sAA/A*100,2)+'%）</div>'+
+      '<div>若忽略 c 將得 <b>'+f(aApp,4)+'</b> cm²，使 P₀ 偏差約 '+f((cAvg-1)*100,1)+'%</div>';
+    el('c2warn').innerHTML = (c.len.length<3||c.mas.length<3)?
+      '<div class="note">建議長度與質量各至少重複 3 次，才能得到有意義的標準誤。</div>':
+      '<div class="good">校正完成，可前往第 ③ 頁組裝。</div>';
+  }else{
+    c.A=null;
+    el('c2final').innerHTML='<div>尚未完成校正（兩個步驟都要做）。</div>';
+    el('c2warn').innerHTML='';
+  }
+}
+window.delLen=function(i){cal().len.splice(i,1);c2render();};
+window.delMas=function(i){cal().mas.splice(i,1);c2render();};
+el('c2meas').onclick=function(){
+  var key=el('c2syr').value,t=T.syr[key],d=SYRDEF[key];
+  var r1=+el('c2r1').value,r2=+el('c2r2').value;
+  if(!(r2>r1)||r2>d.nom||r1<0){alert('刻度範圍不合法（0 ~ '+d.nom+' ml，且終點需大於起點）。');return;}
+  var dR=r2-r1;
+  var dxTrue=t.L*dR/d.nom;
+  var dx=q(dxTrue+randn()*0.035,0.05);      // 直尺估讀到 0.5 mm
+  cal().len.push({dR:dR,dx:dx}); c2render();
+  el('c2ruler').innerHTML='<div class="good">量得 Δx = '+f(dx,2)+' cm（對應 ΔR = '+f(dR,2)+' ml）</div>';
+};
+el('c2weigh').onclick=function(){
+  var key=el('c2syr').value,t=T.syr[key],d=SYRDEF[key];
+  var Rw=+el('c2rw').value;
+  if(Rw<=0||Rw>d.nom){alert('吸水刻度須在 0 ~ '+d.nom+' ml 之間。');return;}
+  var m0=q(t.me+randn()*0.04,0.05);                               // 空筒
+  var mwTrue=RHO_W*t.c*Rw + randn()*0.03 + rnd(0,0.05) - rnd(0,0.008)*Rw*RHO_W; // 殘滴偏高、氣泡偏低
+  var m1=q(t.me+mwTrue+randn()*0.04,0.05);
+  cal().mas.push({R:Rw,m0:m0,m1:m1}); c2render();
+};
+el('c2syr').onchange=c2render;
+el('c2reset').onclick=function(){var k=el('c2syr').value;S.cal[k]={len:[],mas:[]};c2render();};
+
+/* ======================= TAB 3 ======================= */
+(function(){
+  var sel=el('c3water'),o='';
+  for(var v=0;v<=600;v+=30) o+='<option value="'+v+'">'+v+' ml</option>';
+  sel.innerHTML=o; sel.value=300;
+})();
+function c3render(){
+  var cfg=el('c3cfg').value, key=el('c3syr').value, d=SYRDEF[key];
+  el('c3svg').innerHTML=syringeSVG(430,470,{cfg:cfg,nom:d.nom,div:d.div,R:+el('c3seal').value,
+      showLoad:true,loadLabel:'配重'});
+  var c=S.cal[key];
+  var msg='';
+  if(!c.A) msg+='<div class="danger">針筒 '+key+' ml 尚未完成校正，第 ⑤ 頁無法算出 P₀。請先回第 ② 頁。</div>';
+  var seal=+el('c3seal').value;
+  if(cfg==='tension'&&seal>d.nom*0.55) msg+='<div class="note">拉伸構型體積會<b>變大</b>，封氣刻度建議不超過滿刻度的一半，否則活塞容易被拉出。</div>';
+  if(cfg==='compression'&&seal<d.nom*0.6) msg+='<div class="note">壓縮構型體積會<b>變小</b>，封氣刻度建議取滿刻度的 70~90%，否則很快觸底。</div>';
+  var A=c.A||T.syr[key].A;
+  msg+='<div class="kv"><div>此針筒 100 g 配重可造成壓差約 <b>'+f((0.1*G/Am2(A))/1000,2)+'</b> kPa</div>'+
+       '<div>螺絲全上（570 g）壓差約 <b>'+f((0.570*G/Am2(A))/1000,1)+'</b> kPa</div></div>';
+  el('c3hint').innerHTML=msg;
+  // 水瓶表
+  var h='<div class="scroll"><table><tr><th>#</th><th>注水量 (ml)</th><th>取得質量方式</th><th>已知總質量 (g)</th><th></th></tr>';
+  S.bottles.forEach(function(b,i){
+    h+='<tr><td>'+(i+1)+'</td><td>'+b.V+'</td><td>'+b.how+'</td><td>'+f(b.known,2)+'</td>'+
+       '<td><button class="act gray" style="padding:2px 8px;font-size:12px" onclick="delBottle('+i+')">刪</button></td></tr>';
+  });
+  h+='</table></div>';
+  el('c3btable').innerHTML = S.bottles.length? h :'<div class="note">尚未製作水瓶。小針筒用螺絲即可；20/30 ml 針筒需要公斤級配重時才需要水瓶。</div>';
+}
+window.delBottle=function(i){S.bottles.splice(i,1);c3render();};
+el('c3addb').onclick=function(){
+  if(S.bottles.length>=13){alert('只有 13 個保特瓶。');return;}
+  var V=+el('c3water').value, idx=S.bottles.length;
+  var t30=T.syr['30'];
+  var mEmptyTrue=T.bottleEmpty[idx];
+  var mWaterTrue=RHO_W*t30.c*V*(1+randn()*0.004);
+  var tot=mEmptyTrue+mWaterTrue, known, how;
+  if(tot<=300){ known=q(tot+randn()*0.04,0.05); how='直接秤重'; }
+  else{
+    var me=q(mEmptyTrue+randn()*0.04,0.05);
+    known=me+RHO_W*V;                 // 學生用標稱體積×密度推算（未校正 c）
+    how='空瓶秤重＋體積推算';
+  }
+  S.bottles.push({V:V,known:known,tru:tot,how:how});
+  c3render();
+};
+el('c3clrb').onclick=function(){S.bottles=[];c3render();};
+el('c3apply').onclick=function(){
+  S.cfg=el('c3cfg').value; S.syr=el('c3syr').value; S.Rseal=+el('c3seal').value;
+  var d=def();
+  if(S.Rseal<=0||S.Rseal>=d.nom){alert('封氣刻度須在 0 與 '+d.nom+' ml 之間。');return;}
+  reseal(); c3render(); c4render();
+  alert('已套用：'+(S.cfg==='tension'?'拉伸':'壓縮')+'構型、'+S.syr+' ml 針筒、封氣刻度 '+S.Rseal+' ml。請到第 ④ 頁量測。');
+};
+['c3cfg','c3syr','c3seal'].forEach(function(i){el(i).onchange=c3render;el(i).oninput=c3render;});
+
+/* ======================= TAB 4：物理引擎 ======================= */
+function reseal(){
+  var t=tr();
+  S.Vs = t.c*S.Rseal + t.Vd;      // 真實封閉體積 (ml)
+  S.Pg = T.P0;                    // 封氣瞬間等於大氣壓
+  S.Vfinal=S.Vs; S.Vad=S.Vs; S.Vprev=S.Vs; S.Pprev=T.P0;
+  S.loaded=[]; S.sealed=true; S.broken=null; S.leak=false;
+  S.tChange=performance.now(); S.noise=randn();
+  S.lastDir=null; S.moved=true; S.gap=0; S.need=tr().fs/Am2(tr().A);
+}
+function totalKnownMass(){   // 學生已知的外加質量 (g)
+  var s=0; S.loaded.forEach(function(it){s+=it.known;}); return s;
+}
+function totalTrueMass(){
+  var s=0; S.loaded.forEach(function(it){s+=it.tru;}); return s;
+}
+function settle(tapped){
+  if(!S.sealed||S.broken) return;
+  var t=tr(), d=def();
+  var A=Am2(t.A);
+  var dP=(totalTrueMass()/1000 + t.mp/1000)*G/A;
+  var Peq=(S.cfg==='tension')?(T.P0-dP):(T.P0+dP);
+  var fs=t.fs, fk=t.fk;
+  if(tapped){ var res=rnd(0.10,0.35)*t.fk; fs=res; fk=res; }
+  var Pnew=S.Pg;
+  if(S.Pg > Peq + fs/A)      Pnew = Peq + fk/A;
+  else if(S.Pg < Peq - fs/A) Pnew = Peq - fk/A;
+  // 活塞是否真的滑動？未克服靜摩擦時整組數據無效（讀數與前一點相同）
+  S.moved = (Pnew !== S.Pg);
+  S.gap   = Math.abs(S.Pg - Peq);            // 目前離平衡還差多少壓力
+  S.need  = fs/A;                            // 起動門檻
+  if(!S.moved){ return; }                    // 卡住：不重新計熱平衡時間
+  if(Pnew<=1000){ S.broken='壓差過大，活塞被完全壓死或氣體已漏光'; return; }
+  S.Vprev=currentVolume(); S.Pprev=S.Pg;
+  S.Pg=Pnew;
+  var Vf=T.P0*S.Vs/S.Pg;
+  // 破壞性失效
+  var Rf=(Vf-t.Vd)/t.c;
+  if(Rf>d.nom){ S.broken='活塞被拉出針筒外，空氣灌入——此次封氣失效，請重新封氣並減少配重'; return; }
+  if(Rf<d.nom*0.04){ S.broken='活塞已壓到底，無法再壓縮——請重新封氣並減少配重'; return; }
+  S.Vfinal=Vf;
+  // 絕熱過衝（以前一狀態為基準）
+  S.Vad=S.Vprev*Math.pow(S.Pprev/S.Pg,1/1.4);
+  S.leak = Math.abs(S.Pg-T.P0)>55000;
+  S.tChange=performance.now(); S.noise=randn();
+}
+function currentVolume(){
+  if(!S.sealed||S.Vfinal===null) return null;
+  var tt=(performance.now()-S.tChange)/1000;
+  var V=S.Vfinal+(S.Vad-S.Vfinal)*Math.exp(-tt/3.0);
+  if(S.leak){
+    var dir=(S.Pg<T.P0)?1:-1;
+    V += dir*0.0022*S.Vfinal*Math.min(tt,90);
+  }
+  return V;
+}
+function currentReading(){
+  var V=currentVolume(); if(V===null) return null;
+  var t=tr(), d=def();
+  var R=(V-t.Vd)/t.c;
+  return q(R + S.noise*0.12*d.div, d.div/10);
+}
+function stabilized(){ return (performance.now()-S.tChange)/1000 > 11; }
+
+function c4render(){
+  var d=def(), t=tr();
+  var R=currentReading();
+  el('c4svg').innerHTML=syringeSVG(400,460,{cfg:S.cfg,nom:d.nom,div:d.div,R:R,
+      showLoad:S.loaded.length>0,loadLabel:f(totalKnownMass(),1)+' g'});
+  var st;
+  if(S.broken) st='<span class="stat err">'+esc(S.broken)+'</span>';
+  else if(S.moved===false) st='<span class="stat err">活塞卡住未移動：靜摩擦尚未克服（還差 '+f((S.need-S.gap)/1000,1)+' kPa，約 '+f((S.need-S.gap)*Am2(tr().A)/G*1000,0)+' g）</span>';
+  else if(S.leak) st='<span class="stat err">疑似漏氣：壓差 '+f(Math.abs(S.Pg-T.P0)/1000,0)+' kPa 過大，讀數持續漂移</span>';
+  else if(!stabilized()) st='<span class="stat wait">熱平衡中…請等待讀數穩定（約 10 秒）</span>';
+  else st='<span class="stat rdy">讀數穩定，可記錄</span>';
+  el('c4status').innerHTML='<div class="row">'+st+'　<small>'+(S.cfg==='tension'?'拉伸':'壓縮')+'構型｜'+S.syr+' ml 針筒｜封氣刻度 '+S.Rseal+' ml</small></div>';
+  el('c4read').innerHTML=
+    '<div>目前讀數 <b class="mono">'+(R===null?'—':f(R,2))+'</b> ml</div>'+
+    '<div>外加質量 <b>'+f(totalKnownMass(),2)+'</b> g</div>'+
+    '<div>已記錄 <b>'+S.data.length+'</b> 筆</div>';
+  // 配重下拉
+  var opts='';
+  inventory().forEach(function(it,i){
+    if(S.loaded.indexOf(it)>=0) return;
+    opts+='<option value="'+i+'">'+esc(it.label)+'（'+f(it.known,2)+' g）</option>';
+  });
+  el('c4pick').innerHTML=opts||'<option value="">（無可用配重）</option>';
+  var ll='<h3>目前掛載</h3>';
+  if(!S.loaded.length) ll+='<small>無</small>';
+  else{ ll+='<ol style="font-size:13.5px">'; S.loaded.forEach(function(it){ll+='<li>'+esc(it.label)+'　'+f(it.known,2)+' g</li>';}); ll+='</ol>'; }
+  el('c4loadlist').innerHTML=ll;
+  // 數據表
+  var h='<div class="scroll"><table><tr><th>#</th><th>構型</th><th>方向</th><th>m (g)</th><th>讀數 R (ml)</th><th>1/R</th><th>狀態</th><th></th></tr>';
+  S.data.forEach(function(r,i){
+    h+='<tr'+(r.stuck?' style="background:#fff5f5"':'')+'><td>'+(i+1)+'</td><td>'+(r.cfg==='tension'?'拉伸':'壓縮')+'</td><td>'+(r.dir==='up'?'加載':'卸載')+'</td>'+
+       '<td><input type="number" step="0.01" value="'+f(r.m,2)+'" onchange="editD('+i+',\'m\',this.value)"></td>'+
+       '<td><input type="number" step="0.01" value="'+f(r.R,2)+'" onchange="editD('+i+',\'R\',this.value)"></td>'+
+       '<td>'+f(1/r.R,5)+'</td>'+
+       '<td>'+(r.stuck?'<span class="stat err">卡住</span>':'<span class="stat rdy">有效</span>')+'</td>'+
+       '<td><button class="act gray" style="padding:2px 8px;font-size:12px" onclick="delD('+i+')">刪</button></td></tr>';
+  });
+  h+='</table></div>';
+  el('c4table').innerHTML=S.data.length?h:'<div class="note">尚無數據。</div>';
+  var cnt={};
+  S.data.forEach(function(r){var k=r.cfg+'-'+r.dir;cnt[k]=(cnt[k]||0)+1;});
+  el('c4count').innerHTML='<small>拉伸加載 '+(cnt['tension-up']||0)+' 筆｜拉伸卸載 '+(cnt['tension-down']||0)+
+    ' 筆｜壓縮加載 '+(cnt['compression-up']||0)+' 筆｜壓縮卸載 '+(cnt['compression-down']||0)+' 筆</small>';
+}
+function inventory(){
+  if(!S._inv){
+    S._inv=T.screwTrue.map(function(s,i){return {label:s.label+' #'+(i+1),known:s.known,tru:s.tru};});
+  }
+  var inv=S._inv.slice();
+  S.bottles.forEach(function(b,i){ inv.push({label:'水瓶#'+(i+1)+'（'+b.V+'ml）',known:b.known,tru:b.tru}); });
+  return inv;
+}
+window.editD=function(i,k,v){S.data[i][k]=+v;c4render();};
+window.delD=function(i){S.data.splice(i,1);c4render();};
+el('c4add').onclick=function(){
+  if(S.broken){alert('目前狀態已失效，請先「重新封氣」。');return;}
+  var i=el('c4pick').value; if(i==='')return;
+  var it=inventory()[+i];
+  if(S.loaded.indexOf(it)>=0) return;
+  S.loaded.push(it); S.lastDir='up'; settle(false); c4render();
+};
+el('c4rem').onclick=function(){
+  if(S.broken){alert('目前狀態已失效，請先「重新封氣」。');return;}
+  if(!S.loaded.length) return;
+  S.loaded.pop(); S.lastDir='down'; settle(false); c4render();
+};
+el('c4tap').onclick=function(){ if(S.broken)return; settle(true); c4render(); };
+el('c4reseal').onclick=function(){ reseal(); c4render(); };
+el('c4rec').onclick=function(){
+  if(S.broken){alert('狀態已失效，此讀數無意義。');return;}
+  if(!S.lastDir){alert('請先加載或卸載一項配重，才有可記錄的數據點。');return;}
+  var R=currentReading();
+  if(R===null) return;
+  if(S.moved===false && !confirm('活塞並未移動（靜摩擦未克服），這一點的讀數與前一點相同，放進迴歸會嚴重扭曲斜率。仍要記錄嗎？')) return;
+  if(!stabilized() && !confirm('讀數尚未達熱平衡，現在記錄會帶入絕熱過衝誤差。仍要記錄嗎？')) return;
+  S.data.push({cfg:S.cfg,dir:S.lastDir,m:totalKnownMass(),R:R,Rseal:S.Rseal,syr:S.syr,stuck:(S.moved===false)});
+  c4render();
+};
+el('c4clr').onclick=function(){ if(confirm('確定清除全部數據？')){S.data=[];c4render();} };
+setInterval(function(){ if(el('s4').classList.contains('on')&&S.sealed) c4render(); },700);
+
+/* ======================= TAB 5：迴歸 ======================= */
+function linreg(pts){
+  var n=pts.length; if(n<3) return null;
+  var Sx=0,Sy=0;
+  pts.forEach(function(p){Sx+=p[0];Sy+=p[1];});
+  var mx=Sx/n,my=Sy/n,Sxx=0,Sxy=0,Syy=0;
+  pts.forEach(function(p){Sxx+=(p[0]-mx)*(p[0]-mx);Sxy+=(p[0]-mx)*(p[1]-my);Syy+=(p[1]-my)*(p[1]-my);});
+  if(Sxx===0) return null;
+  var k=Sxy/Sxx, b=my-k*mx, ss=0;
+  pts.forEach(function(p){var e=p[1]-(k*p[0]+b);ss+=e*e;});
+  var s2=ss/(n-2);
+  return {k:k,b:b,n:n,s2:s2,varK:s2/Sxx,varB:s2*(1/n+mx*mx/Sxx),covBK:-s2*mx/Sxx,
+          r2:(Syy>0?1-ss/Syy:1)};
+}
+function p0FromFit(fit,A,sA){
+  var ratio=fit.b/fit.k;                                  // kg
+  var P0=Math.abs(G*ratio/Am2(A));
+  var vr=ratio*ratio*(fit.varB/(fit.b*fit.b)+fit.varK/(fit.k*fit.k)-2*fit.covBK/(fit.b*fit.k));
+  if(!(vr>=0)) vr=0;
+  var rel=Math.sqrt(vr/(ratio*ratio)+Math.pow(sA/A,2));
+  return {P0:P0,s:P0*rel};
+}
+var KEYS=[{k:'tension-up',n:'拉伸·加載',c:'#0b7285'},{k:'tension-down',n:'拉伸·卸載',c:'#66a8b8'},
+          {k:'compression-up',n:'壓縮·加載',c:'#e8590c'},{k:'compression-down',n:'壓縮·卸載',c:'#f0a66f'}];
+function analyse(useVd,VdVal){
+  var out={},A=null,sA=null;
+  var syrUsed=(S.data.length?S.data[0].syr:S.syr);
+  var c=S.cal[syrUsed];
+  if(c&&c.A){A=c.A;sA=c.sA;} else {A=null;}
+  var cf=(c&&c.c)?c.c:1;
+  var dropStuck = !el('c5keep').checked;
+  KEYS.forEach(function(kk){
+    var rows=S.data.filter(function(r){return r.cfg+'-'+r.dir===kk.k&&r.R>0&&!(dropStuck&&r.stuck);});
+    var pts=rows.map(function(r){
+      var y= useVd? 1/(cf*r.R+VdVal) : 1/r.R;
+      return [r.m/1000,y];
+    });
+    var fit=linreg(pts);
+    var res={pts:pts,fit:fit,P0:null,s:null};
+    if(fit&&A){
+      // 無論 y 取 1/R 或 1/(cR+Vd)，P₀ = |g·b/(A·k)| 中的 A 都是校正後的截面積
+      var r=p0FromFit(fit, A, sA);
+      res.P0=r.P0; res.s=r.s;
+    }
+    out[kk.k]=res;
+  });
+  out._A=A;out._sA=sA;out._syr=syrUsed;out._c=cf;
+  return out;
+}
+function c5run(){
+  var useVd=el('c5vd').checked, Vd=+el('c5vdv').value;
+  var a=analyse(useVd,Vd);
+  var series=[];
+  KEYS.forEach(function(kk){
+    var r=a[kk.k]; if(!r.pts.length) return;
+    series.push({pts:r.pts,color:kk.c,name:kk.n,fit:r.fit});
+  });
+  el('c5plot').innerHTML=series.length? svgPlot(720,380,series,'外加質量 m (kg)', useVd?'1/V (ml⁻¹)':'1/R (ml⁻¹)')
+    :'<div class="note">尚無數據，請先到第 ④ 頁量測。</div>';
+  if(!a._A) el('c5plot').innerHTML+='<div class="danger">針筒 '+a._syr+' ml 尚未完成截面積校正，無法算出 P₀。請回第 ② 頁。</div>';
+  var h='<div class="scroll"><table><tr><th>資料組</th><th>n</th><th>斜率 k (ml⁻¹kg⁻¹)</th><th>截距 b (ml⁻¹)</th><th>r²</th><th>P₀ (kPa)</th></tr>';
+  KEYS.forEach(function(kk){
+    var r=a[kk.k];
+    h+='<tr><td>'+kk.n+'</td><td>'+(r.pts.length)+'</td>';
+    if(r.fit) h+='<td>'+r.fit.k.toPrecision(4)+'</td><td>'+r.fit.b.toPrecision(4)+'</td><td>'+f(r.fit.r2,4)+'</td>';
+    else h+='<td colspan="3"><small>資料不足（需 ≥3 點）</small></td>';
+    h+='<td>'+(r.P0?('<b>'+f(r.P0/1000,2)+'</b> ± '+f(r.s/1000,2)):'—')+'</td></tr>';
+  });
+  h+='</table></div>';
+  el('c5table').innerHTML=h;
+  // 逐層平均
+  function avg(a1,a2,lab){
+    var v=[],s=[];
+    if(a1&&a1.P0){v.push(a1.P0);s.push(a1.s);}
+    if(a2&&a2.P0){v.push(a2.P0);s.push(a2.s);}
+    if(!v.length) return null;
+    var m=v.reduce(function(x,y){return x+y;},0)/v.length;
+    var ss=Math.sqrt(s.reduce(function(x,y){return x+y*y;},0))/v.length;
+    return {P0:m,s:ss,n:v.length,lab:lab};
+  }
+  var tenA=avg(a['tension-up'],a['tension-down'],'拉伸（加載/卸載平均 → 消摩擦）');
+  var comA=avg(a['compression-up'],a['compression-down'],'壓縮（加載/卸載平均 → 消摩擦）');
+  var fin=avg(tenA,comA,'最終（拉伸/壓縮平均 → 消活塞自重）');
+  var hh='<div class="scroll"><table><tr><th>層級</th><th>組數</th><th>P₀ (kPa)</th></tr>';
+  [tenA,comA,fin].forEach(function(r){ if(r) hh+='<tr><td>'+r.lab+'</td><td>'+r.n+'</td><td><b>'+f(r.P0/1000,2)+'</b> ± '+f(r.s/1000,2)+'</td></tr>'; });
+  hh+='</table></div>';
+  if(fin) hh+='<div class="big">P₀ = '+f(fin.P0/1000,2)+' ± '+f(fin.s/1000,2)+' kPa</div>';
+  if(tenA&&comA){
+    var gap=Math.abs(tenA.P0-comA.P0)/1000, unc=Math.sqrt(tenA.s*tenA.s+comA.s*comA.s)/1000;
+    hh+='<div class="good">拉伸與壓縮相差 '+f(gap,2)+' ± '+f(unc,2)+' kPa。這個差值的一半是活塞自重 m<sub>p</sub>g/A 的<b>上界估計</b>——'+
+        (gap>unc? '但其中也混了未完全消掉的殘留摩擦與讀數雜訊，不能全部歸給活塞自重。' :
+                  '而且它小於自身的不確定度，代表在目前精度下<b>看不出</b>活塞自重的影響（塑膠活塞很輕，此項通常只有零點幾 kPa）。')+'</div>';
+  }
+  else hh+='<div class="note">只做了一種構型，活塞自重的偏差無法消除。請回第 ③ 頁換構型再測一輪。</div>';
+  var ud=a['tension-up'],dd=a['tension-down'];
+  if(ud&&dd&&ud.P0&&dd.P0) hh+='<div class="good">拉伸加載與卸載相差 '+f(Math.abs(ud.P0-dd.P0)/1000,2)+
+    ' kPa，其一半即為動摩擦造成的偏移量 f<sub>k</sub>/A（若每一點都輕敲過針筒，這個差值會明顯縮小——因為摩擦已被釋放掉大半）。</div>';
+  el('c5comb').innerHTML=hh||'<div class="note">尚無可用結果。</div>';
+  S._last=fin;
+  // 單點法
+  var sh='<div class="scroll"><table><tr><th>#</th><th>構型</th><th>m (g)</th><th>R (ml)</th><th>單點 P₀ (kPa)</th></tr>';
+  var vals=[];
+  S.data.forEach(function(r,i){
+    if(!a._A) return;
+    var Vs=r.Rseal, dV=r.R-Vs;
+    if(Math.abs(dV)<1e-6) return;
+    var p=Math.abs((r.m/1000)*G*r.R/(Am2(a._A)*dV));
+    vals.push(p);
+    sh+='<tr><td>'+(i+1)+'</td><td>'+(r.cfg==='tension'?'拉伸':'壓縮')+'</td><td>'+f(r.m,1)+'</td><td>'+f(r.R,2)+'</td><td>'+f(p/1000,2)+'</td></tr>';
+  });
+  sh+='</table></div>';
+  if(vals.length){
+    var mv=vals.reduce(function(x,y){return x+y;},0)/vals.length;
+    var sd=vals.length>1?Math.sqrt(vals.reduce(function(x,y){return x+(y-mv)*(y-mv);},0)/(vals.length-1)):0;
+    sh+='<div class="note">單點法平均 '+f(mv/1000,2)+' kPa，標準差 '+f(sd/1000,2)+
+        ' kPa。單點法把「截距」硬設為 1/V<sub>s</sub>，因此摩擦、活塞自重與封氣刻度的讀數誤差全都直接進到結果；迴歸法則把它們吸收到截距裡。</div>';
+  }
+  el('c5single').innerHTML=vals.length?sh:'<div class="note">尚無數據。</div>';
+}
+el('c5run').onclick=c5run;
+
+/* ======================= TAB 6 ======================= */
+el('c6reveal').onclick=function(){
+  var syrUsed=(S.data.length?S.data[0].syr:S.syr);
+  var t=T.syr[syrUsed], d=SYRDEF[syrUsed];
+  var c=S.cal[syrUsed];
+  var A=Am2(t.A);
+  var h='<h3>隱藏真值（本輪）</h3><table><tr><th>量</th><th>真值</th><th>你的測定值</th></tr>';
+  h+='<tr><td>大氣壓力 P₀</td><td><b>'+f(T.P0/1000,2)+' kPa</b></td><td>'+(S._last?f(S._last.P0/1000,2)+' kPa':'—')+'</td></tr>';
+  h+='<tr><td>活塞截面積 A（'+syrUsed+' ml）</td><td>'+f(t.A,4)+' cm²</td><td>'+((c&&c.A)?f(c.A,4)+' cm²':'—')+'</td></tr>';
+  h+='<tr><td>刻度校正因子 c</td><td>'+f(t.c,4)+'</td><td>'+((c&&c.c)?f(c.c,4):'—')+'</td></tr>';
+  h+='<tr><td>死體積 V<sub>d</sub></td><td>'+f(t.Vd,3)+' ml</td><td>'+(el('c5vd').checked?f(+el('c5vdv').value,3)+' ml':'未修正')+'</td></tr>';
+  h+='<tr><td>活塞質量 m<sub>p</sub></td><td>'+f(t.mp,2)+' g</td><td>—</td></tr>';
+  h+='<tr><td>靜摩擦 f<sub>s</sub> / 動摩擦 f<sub>k</sub></td><td>'+f(t.fs,2)+' / '+f(t.fk,2)+' N</td><td>—</td></tr>';
+  h+='</table></div>';
+  if(S._last){
+    var dev=S._last.P0-T.P0, sig=S._last.s>0?Math.abs(dev)/S._last.s:NaN;
+    var cls=Math.abs(dev)/1000<1?'good':(Math.abs(dev)/1000<3?'note':'danger');
+    h+='<div class="'+cls+'">偏差 = <b>'+(dev>0?'+':'')+f(dev/1000,2)+' kPa</b>（相對誤差 '+f(Math.abs(dev)/T.P0*100,2)+
+       '%），相當於 <b>'+f(sig,1)+' σ</b>。'+(sig<2?'在統計上與真值一致。':(sig<5?'略超出統計誤差，代表仍有未消除的系統誤差。':'明顯的系統誤差殘留，請檢查是否漏做某一層平均或忽略了刻度校正。'))+'</div>';
+  }else h+='<div class="note">尚未在第 ⑤ 頁得到最終結果。</div>';
+  // 各系統誤差量級
+  var fA=(t.fk/A)/1000, mpA=((t.mp/1000)*G/A)/1000, cB=(t.c-1)*T.P0/1000;
+  var items=[{n:'活塞摩擦 f/A（單一方向時）',v:fA},
+             {n:'活塞自重 m_p·g/A（單一構型時）',v:mpA},
+             {n:'忽略刻度校正 c 的偏差',v:Math.abs(cB)},
+             {n:'死體積造成的曲率偏差（估）',v:Math.abs(estVdBias(syrUsed))}];
+  var mx=Math.max.apply(null,items.map(function(i){return i.v;}))||1;
+  h+='<h3>各系統誤差量級（kPa）</h3><svg viewBox="0 0 640 '+(items.length*34+16)+'" width="100%" style="max-width:640px">';
+  items.forEach(function(it,i){
+    var w=it.v/mx*330;
+    h+='<text x="0" y="'+(i*34+22)+'" font-size="12" fill="#1d2733">'+it.n+'</text>';
+    h+='<rect x="272" y="'+(i*34+10)+'" width="'+w+'" height="16" fill="#0b7285" opacity=".8" rx="3"/>';
+    h+='<text x="'+(278+w)+'" y="'+(i*34+23)+'" font-size="12" fill="#0b7285">'+f(it.v,2)+'</text>';
+  });
+  h+='</svg>';
+  h+='<div class="good"><b>結論</b>：摩擦通常是最大項，但它在「加載↔卸載」中符號相反；活塞自重在「拉伸↔壓縮」中符號相反。兩層平均做完，殘留的主要就是刻度校正與死體積——這兩項只能靠校正與修正，不能靠平均。</div>';
+  el('c6out').innerHTML=h;
+  S.revealed=true;
+};
+function estVdBias(syrUsed){
+  // 以真值重建一組無雜訊數據，比較「用 1/R」與「用 1/(cR+Vd)」所得 P0 差
+  var t=T.syr[syrUsed], d=SYRDEF[syrUsed], A=Am2(t.A);
+  var Rs=S.Rseal, Vs=t.c*Rs+t.Vd, pts1=[],pts2=[];
+  for(var m=0;m<=600;m+=100){
+    var dP=(m/1000+t.mp/1000)*G/A;
+    var P=(S.cfg==='tension')?(T.P0-dP):(T.P0+dP);
+    if(P<=1000) continue;
+    var V=T.P0*Vs/P, R=(V-t.Vd)/t.c;
+    if(R<=0||R>d.nom) continue;
+    pts1.push([m/1000,1/R]); pts2.push([m/1000,1/V]);
+  }
+  var f1=linreg(pts1), f2=linreg(pts2);
+  if(!f1||!f2) return 0;
+  var p1=Math.abs(G*(f1.b/f1.k)/A), p2=Math.abs(G*(f2.b/f2.k)/A);
+  return (p1-p2)/1000;
+}
+el('c6new').onclick=function(){
+  if(!confirm('將重新產生所有隱藏真值並清空數據，開始新的一輪？')) return;
+  genTruth();
+  S.cal={}; for(var k in SYRDEF) S.cal[k]={len:[],mas:[]};
+  S.bottles=[]; S.data=[]; S.loaded=[]; S._inv=null; S._last=null; S.revealed=false; S.sealed=false;
+  el('c6out').innerHTML='<div class="good">已產生新的一輪隱藏真值。請從第 ② 頁重新校正。</div>';
+  c2render(); c3render(); c4render();
+};
+
+/* ======================= 初始化 ======================= */
+d1(); c2render(); c3render(); reseal(); c4render();
+</script>
+</body>
+</html>

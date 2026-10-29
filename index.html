@@ -27,7 +27,7 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 :root{
   --desk:#dfe2e6; --paper:#fbfaf7; --paper-2:#f2f0ea; --ink:#1d2333; --muted:#5f6576; --rule:#d9d6cd;
   --cover:#25306b; --cover-ink:#f3f1ea; --accent:#2f3f94;
-  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e;
+  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a;
   --shadow:0 18px 40px rgba(29,35,51,.18);
   --f-display:"LXGW WenKai TC","Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
   --f-body:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
@@ -36,12 +36,12 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}
 
 body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75}
@@ -192,6 +192,14 @@ const ART={
         ${SPEC.map((c,k)=>`<polygon points="156,62 300,${18+k*16} 300,${32+k*16}" fill="${c}" opacity=".75"/>`).join("")}
         <polygon points="138,12 182,104 94,104" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
       </svg>`,
+  parabola:`<svg class="prism" viewBox="0 0 300 128" aria-hidden="true">
+        <rect x="0" y="22" width="70" height="98" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+        <line x1="0" y1="118" x2="300" y2="118" stroke="var(--muted)" stroke-width="1.5"/>
+        <path d="M70 22 Q 200 22 262 118" fill="none" stroke="var(--c2)" stroke-width="2.5" stroke-dasharray="2 7" stroke-linecap="round"/>
+        ${[0,0.2,0.4,0.6,0.8,1].map(t=>`<circle cx="${70+192*t}" cy="${22+96*t*t}" r="6" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>`).join("")}
+        <line x1="70" y1="112" x2="262" y2="112" stroke="var(--ink)" stroke-width="1.2"/>
+        <text x="160" y="106" text-anchor="middle" font-size="13" fill="var(--ink)" font-style="italic">R</text>
+      </svg>`,
   fit:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
         <line x1="20" y1="108" x2="292" y2="108" stroke="var(--muted)" stroke-width="1.5"/>
         <line x1="20" y1="108" x2="20" y2="6" stroke="var(--muted)" stroke-width="1.5"/>
@@ -224,12 +232,21 @@ const BASIC_EXP=[
   {t:"最小平方法練習",slug:"最小平方法練習",lab:"basic-leastsq",srcText:"自由落體測速實驗・最小平方法數據分析",d:"物體從高塔落下，雷射測速閘每隔一段時間記錄一次瞬時速率。從帶誤差的 v–t 數據用最小平方法求重力加速度，看殘差圖判斷模型是否合適，再把實驗重做 200 次檢驗斜率不確定度。打開空氣阻力可以觀察系統誤差。",f:["最小平方法常態方程式","na + bΣx = Σy　　aΣx + bΣx² = Σxy"],tabs:["進行實驗","原始數據","最小平方法運算","殘差與標準偏差","重複實驗 200 次檢驗 σ","揭曉真值","思考與延伸"],rnd:true}
 ];
 
+const MECH_EXP=[
+  {t:"水平拋射：初速與射程",slug:"水平拋射初速-v-對水平射程-r-的影響",lab:"mech-projectile",src:"103 學年度 臺灣省第 6 區（臺南區）複賽",d:"乒乓球從摺成 V 形的紙槽滾下，在桌緣水平拋出。改變釋放高度 h 得到不同初速，量落點射程 R，檢驗 R 與 v₀ 是否成正比；再用碼錶量水平段，親身體驗人工計時的誤差有多大。",f:["平拋射程","R = v₀ √(2H / g)"],tabs:["實驗原理","器材組裝","發射與落點","v₀ 量測","數據分析","誤差與真值揭曉"],rnd:true},
+  {t:"磁鐵斥力與距離",slug:"磁鐵磁力與距離關係",lab:"mech-magnet",src:"91 學年度 台南區複賽",d:"沒有天平，先用浮體法由量杯排水量秤出砝碼質量；再把兩個黏著磁鐵的塑膠杯同極相對套起來，改變上杯負重、讀磁浮高度，用 log F 對 log R 迴歸找出斥力與距離的次方關係。",f:["對數線性化","log F = log K + α log R"],tabs:["原理","浮體秤重","器材組裝","磁斥量測","作圖迴歸","誤差與真值揭曉"],rnd:true},
+  {t:"待測物體積量測",slug:"待測物體積量測",lab:"mech-volume",src:"106 學年度 臺灣省第 6 區複賽",d:"器材裡沒有已知刻度的尺，方格紙的最小單位也未知。要先用單擺週期和彈簧振盪兩種獨立方法，從「時間」反推方格紙每格的長度，兩法交叉驗證後，才能拿方格紙去量體積。",f:["單擺法迴歸","T² = (4π²u / g)·n + (4π² / g)·d"],tabs:["原理與策略","長度校正 A：單擺法","長度校正 B：彈簧法","校正結果比對","量測待測物體積"],todo:[4],rnd:true},
+  {t:"大氣壓力",slug:"大氣壓力",lab:"mech-atmosphere",src:"92 學年度 屏東區複賽",d:"用針筒封住一段空氣，掛上或壓上已知質量改變活塞受力，依波以耳定律由 1/V 對外加質量 m 的直線求出大氣壓力。過程中要先校正針筒刻度，並處理活塞摩擦、死體積與壓縮時的熱效應。",f:["由斜率 k 與截距 b 求大氣壓","P₀ = | g·b / (A·k) |"],tabs:["原理推導","針筒校正","裝置組裝","加載量測","迴歸分析","誤差與真值"],rnd:true}
+];
+
 /* 每一章一個物件；ready:true 的章才會排進書頁 */
 const CHAPTERS=[
   {no:"一",num:1,name:"基礎能力",path:"基礎能力/",ready:true,color:"var(--c1)",art:"fit",
    intro:"做任何實驗之前的基本功：讀對有效數字、算出不確定度，再用最小平方法從數據求出物理量，並誠實說出結果可靠到什麼程度。",
    sections:null,exps:BASIC_EXP},
-  {no:"二",num:2,name:"力學",path:"主題分類/"},
+  {no:"二",num:2,name:"力學",path:"主題分類/",ready:true,color:"var(--c2)",art:"parabola",
+   intro:"四道複賽題，器材都很克難：用紙槽發射乒乓球、用浮力代替天平、用單擺週期代替尺、用針筒量大氣壓。重點是設計實驗、把關係式線性化，再用迴歸求出結果。",
+   sections:null,exps:MECH_EXP},
   {no:"三",num:3,name:"光學",path:"主題分類/光學/",ready:true,art:"prism",
    intro:"十六個實驗，每個對應一道競賽實驗題。先讀原理，再進虛擬實驗室量測、迴歸，最後揭曉真值，看看自己的誤差有多大。",
    sections:[

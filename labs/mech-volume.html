@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>虛擬實驗室｜106學年度 臺灣省第6區複賽 物理實驗第一題：待測物體積量測</title>
+<style>
+:root{
+  --bg:#0f1419; --panel:#182028; --panel2:#1f2a34; --line:#2e3d4a;
+  --ink:#e8eef3; --dim:#9fb0be; --accent:#4fc3f7; --accent2:#ffb74d;
+  --ok:#66bb6a; --bad:#ef5350; --warn:#ffa726;
+  --paper:#fdfbf4; --grid:#7fb3d5; --gridmaj:#2c6fa8;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  line-height:1.7; font-size:15px;
+}
+header{
+  padding:18px 22px 12px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#16202a,#0f1419);
+}
+header h1{margin:0 0 4px; font-size:19px; letter-spacing:.5px;}
+header .sub{color:var(--dim); font-size:13px;}
+nav{display:flex; gap:4px; padding:10px 18px 0; flex-wrap:wrap; border-bottom:1px solid var(--line); background:#131b23;}
+nav button{
+  background:none; border:1px solid transparent; border-bottom:none; color:var(--dim);
+  padding:9px 16px; font-size:14px; cursor:pointer; border-radius:8px 8px 0 0; font-family:inherit;
+}
+nav button:hover{color:var(--ink); background:#1a242e;}
+nav button.on{color:var(--accent); background:var(--panel); border-color:var(--line); font-weight:600;}
+main{padding:20px; max-width:1240px; margin:0 auto;}
+.tab{display:none;} .tab.on{display:block;}
+h2{font-size:17px; margin:22px 0 10px; color:var(--accent); border-left:4px solid var(--accent); padding-left:10px;}
+h3{font-size:15px; margin:16px 0 8px; color:var(--accent2);}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:14px 0;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.grid-ap{display:grid; grid-template-columns:minmax(300px,420px) 1fr; gap:16px;}
+@media(max-width:900px){.grid2,.grid-ap{grid-template-columns:1fr;}}
+table{border-collapse:collapse; width:100%; font-size:13.5px; font-variant-numeric:tabular-nums;}
+th,td{border:1px solid var(--line); padding:5px 8px; text-align:center;}
+th{background:var(--panel2); color:var(--dim); font-weight:600;}
+td input{width:100%; background:#0e141a; border:1px solid var(--line); color:var(--ink);
+  padding:3px 5px; border-radius:4px; text-align:center; font-family:inherit; font-size:13.5px;}
+td input:focus{outline:1px solid var(--accent); border-color:var(--accent);}
+button.act{
+  background:var(--accent); color:#06222e; border:none; padding:8px 15px; border-radius:7px;
+  cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;
+}
+button.act:hover{filter:brightness(1.12);}
+button.act:disabled{background:#3b4a56; color:#7e8e9b; cursor:not-allowed;}
+button.ghost{background:transparent; border:1px solid var(--line); color:var(--dim);
+  padding:7px 13px; border-radius:7px; cursor:pointer; font-size:13.5px; font-family:inherit;}
+button.ghost:hover{color:var(--ink); border-color:var(--accent);}
+button.danger{background:var(--bad); color:#fff;}
+.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:8px 0;}
+label.ctl{display:block; margin:10px 0 2px; font-size:13px; color:var(--dim);}
+input[type=range]{width:100%; accent-color:var(--accent);}
+.val{color:var(--accent2); font-weight:600; font-variant-numeric:tabular-nums;}
+.note{font-size:13px; color:var(--dim); background:#131c24; border-left:3px solid var(--accent);
+  padding:9px 12px; border-radius:0 6px 6px 0; margin:10px 0;}
+.warn{border-left-color:var(--warn); color:#e9c98d;}
+.bad{border-left-color:var(--bad); color:#f0a9a7;}
+.ok{border-left-color:var(--ok); color:#a9dcab;}
+.stopwatch{font-family:"SF Mono",Consolas,monospace; font-size:30px; color:var(--accent2);
+  background:#0b1117; border:1px solid var(--line); border-radius:8px; padding:6px 16px;
+  letter-spacing:1px; display:inline-block; min-width:150px; text-align:center;}
+.counter{font-size:26px; color:var(--ok); font-weight:700; font-variant-numeric:tabular-nums;}
+.kv{display:grid; grid-template-columns:auto 1fr; gap:4px 14px; font-size:13.5px; margin:8px 0;}
+.kv div:nth-child(odd){color:var(--dim);}
+.kv div:nth-child(even){font-variant-numeric:tabular-nums;}
+.eq{background:#0b1117; border:1px solid var(--line); border-radius:6px; padding:8px 12px;
+  font-family:"SF Mono",Consolas,monospace; font-size:13.5px; color:#cfe6f5; margin:8px 0; overflow-x:auto;}
+.pill{display:inline-block; padding:2px 9px; border-radius:20px; font-size:12px; margin-left:6px;}
+.pill.ok{background:#1e3a22; color:#8fd694;} .pill.bad{background:#3e1f1f; color:#f0a0a0;}
+.pill.warn{background:#3d3117; color:#e8c079;}
+svg{display:block; max-width:100%;}
+ul{margin:8px 0 8px 20px; padding:0;} li{margin:4px 0;}
+.hidevals{filter:blur(6px); user-select:none;}
+.tag{font-size:11px; background:var(--panel2); color:var(--dim); padding:1px 7px; border-radius:4px; margin-left:6px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>虛擬實驗室：待測物體積量測</h1>
+  <div class="sub">106 學年度 普通型高級中等學校數理及資訊學科能力競賽　臺灣省第 6 區複賽　物理科實驗試題第一題</div>
+</header>
+
+<nav>
+  <button class="on" data-tab="intro">① 原理與策略</button>
+  <button data-tab="pend">② 長度校正 A：單擺法</button>
+  <button data-tab="spring">③ 長度校正 B：彈簧法</button>
+  <button data-tab="check">④ 校正結果比對</button>
+</nav>
+
+<main>
+
+<!-- ===================== TAB 1 ===================== -->
+<section class="tab on" id="tab-intro">
+  <div class="card">
+    <h2 style="margin-top:0">題目</h2>
+    <p>請利用下列器材，量測待測物體積。</p>
+    <div class="grid2">
+      <div>
+        <h3>待測物</h3>
+        <ul>
+          <li>A：硬幣 4 枚（考生自備）</li>
+          <li>B：橡皮擦 1 塊</li>
+          <li>C：面紙盒 1 個</li>
+          <li>D：圓柱木棒 1 根</li>
+        </ul>
+      </div>
+      <div>
+        <h3>器材</h3>
+        <ul>
+          <li>厚紙板(A3) 1 張、棉線 1 卷、彈簧 1 條、透明膠帶 1 卷</li>
+          <li>支架 1 具(高 60 cm 以上，附直角夾及長約 20 cm 橫桿)</li>
+          <li>美工刀 1 支、掛碼 1 組(20 g、10 g、5 g 各 1 個)</li>
+          <li><b>方格紙(A4，最小單位未知) 2 張</b>、量角器 1 個</li>
+          <li>碼錶 1 個(可精確至 0.01 秒)、科學型計算機 1 台</li>
+        </ul>
+        <p style="font-size:12.5px;color:var(--dim);margin:6px 0 0">［以上器材不一定全部用到］</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">核心困境：沒有任何「已知刻度」的尺</h2>
+    <p>清單裡唯一可能充當長度量具的是<b>方格紙</b>，但題目明寫「<b>最小單位未知</b>」。
+       量角器只提供角度基準，厚紙板只能做直角規。因此在量任何體積之前，
+       必須先自己<b>建立一個絕對長度基準</b>。</p>
+    <p>清單中<b>已知數值</b>的物理量只有三類：</p>
+    <div class="eq">掛碼質量 m ＝ 20 g、10 g、5 g　　碼錶時間 t（±0.01 s）　　重力加速度 g ＝ 9.789 m/s²（臺中）</div>
+    <p>所以唯一的出路是——<b class="val">用「時間」反推「長度」</b>。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">路徑 A：單擺法</h3>
+      <div class="eq">T = 2π √(L/g)　⟹　L = g T² / 4π²</div>
+      <p>棉線綁掛碼吊在橫桿上，量週期就得到擺長 <b>L 的絕對值</b>（公尺）。
+         再把同一條線放上方格紙數格數 <i>n</i>，即得每格長度 <i>u</i>。</p>
+      <p>實務上要用<b>迴歸</b>而非單點：</p>
+      <div class="eq">T² = (4π²u/g)·n ＋ (4π²/g)·d</div>
+      <p>斜率給出 <i>u</i>；截距 <i>d</i> 正好揭露「線長」與「真正擺長（到掛碼質心）」的差值，
+         這是單點法一定會踩到的系統誤差。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">路徑 B：彈簧法</h3>
+      <div class="eq">T² = (4π²/k)·(m + m<sub>s</sub>/3)</div>
+      <p>先用<b>振盪週期</b>求彈簧常數 k —— 全程只用到質量與時間，<b>完全不需要長度</b>。
+         截距還順便給出彈簧等效質量。</p>
+      <div class="eq">Δn = [ g /(k·u) ]·m</div>
+      <p>再量靜態伸長格數 Δn 對質量 m 迴歸，斜率含 <i>u</i>，即可反推每格長度。</p>
+    </div>
+  </div>
+
+  <div class="note">兩條路徑互相獨立，最後在分頁 ④ 交叉驗證。若兩者在誤差範圍內一致，才有信心拿方格紙去量體積。</div>
+
+  <div class="card">
+    <h3 style="margin-top:0">隱藏真值</h3>
+    <p style="font-size:13.5px;color:var(--dim)">本次模擬的方格紙單位、彈簧常數等皆為隨機生成並隱藏。完成校正後再揭曉，用以自我評估。</p>
+    <div class="row">
+      <button class="ghost" onclick="toggleTruth()">🔓 顯示／隱藏真值</button>
+    </div>
+    <div id="truthBox" class="kv hidevals" style="margin-top:10px">
+      <div>方格紙最小單位 u</div><div id="tv-u"></div>
+      <div>彈簧常數 k</div><div id="tv-k"></div>
+      <div>彈簧質量 m<sub>s</sub></div><div id="tv-ms"></div>
+      <div>掛碼質心偏移 d</div><div id="tv-d"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TAB 2 ===================== -->
+<section class="tab" id="tab-pend">
+  <h2>單擺法：由週期反推絕對長度</h2>
+  <div class="grid-ap">
+    <div class="card" style="margin-top:0">
+      <svg id="pendSvg" viewBox="0 0 400 470"></svg>
+    </div>
+    <div>
+      <div class="card" style="margin-top:0">
+        <label class="ctl">擺線長度（調整繩結位置）　<span class="val" id="pLenTag">—</span></label>
+        <input type="range" id="pLen" min="150" max="560" step="1" value="500">
+        <label class="ctl">釋放角度 θ₀（以量角器設定）　<span class="val" id="pAngTag">8.0°</span></label>
+        <input type="range" id="pAng" min="2" max="35" step="0.5" value="8">
+        <label class="ctl">計時圈數 N</label>
+        <input type="range" id="pN" min="5" max="40" step="1" value="20">
+        <div class="row"><span class="val" id="pNTag">20 次</span></div>
+        <div id="pAngWarn"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">步驟 1　量測擺線長度</h3>
+        <p style="font-size:13px;color:var(--dim);margin:4px 0">把棉線平放在方格紙上，讀出兩端所在格位並相減。放大鏡可讀到 0.1 格。</p>
+        <button class="ghost" onclick="measurePendString()">📏 攤開棉線量測</button>
+        <div id="pRuler"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">步驟 2　釋放並計時</h3>
+        <div class="row">
+          <button class="act" id="pGo" onclick="pendRelease()">釋放擺錘（同時啟動碼錶）</button>
+          <button class="act" id="pStop" onclick="pendStop()" disabled>停止碼錶</button>
+          <button class="ghost" onclick="pendReset()">歸位</button>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <span class="stopwatch" id="pWatch">0.00</span>
+          <div style="margin-left:14px">
+            <div style="font-size:12px;color:var(--dim)">已完成擺動</div>
+            <span class="counter" id="pCount">0</span>
+            <span style="color:var(--dim)"> / <span id="pTarget">20</span> 次</span>
+          </div>
+        </div>
+        <div id="pMsg"></div>
+        <div class="row">
+          <button class="act" id="pRec" onclick="pendRecord()" disabled>登錄這一筆數據</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">數據表 <span class="tag">可直接編輯</span></h3>
+    <table id="pTable">
+      <thead><tr><th>#</th><th>線長 n（格）</th><th>圈數 N</th><th>總時間 t（s）</th><th>T（s）</th><th>T²（s²）</th><th>θ₀</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row" style="margin-top:10px">
+      <button class="act" onclick="pendAnalyze()">執行 T²–n 線性迴歸</button>
+      <button class="ghost" onclick="pendClear()">清空數據</button>
+    </div>
+    <div id="pResult"></div>
+  </div>
+</section>
+
+<!-- ===================== TAB 3 ===================== -->
+<section class="tab" id="tab-spring">
+  <h2>彈簧法：先求 k，再求每格長度</h2>
+  <div class="grid-ap">
+    <div class="card" style="margin-top:0">
+      <svg id="sprSvg" viewBox="0 0 400 470"></svg>
+    </div>
+    <div>
+      <div class="card" style="margin-top:0">
+        <h3 style="margin-top:0">掛碼組合</h3>
+        <div class="row">
+          <label><input type="checkbox" class="wt" value="20" onchange="sprUpdate()"> 20 g</label>
+          <label><input type="checkbox" class="wt" value="10" onchange="sprUpdate()"> 10 g</label>
+          <label><input type="checkbox" class="wt" value="5" onchange="sprUpdate()"> 5 g</label>
+          <span class="val" id="sprMass">0 g</span>
+        </div>
+        <div class="note" style="margin:8px 0 0">三個掛碼可組合出 5、10、15、20、25、30、35 g 共 7 組質量。</div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">A　靜態伸長量測</h3>
+        <p style="font-size:13px;color:var(--dim);margin:4px 0">在彈簧下端貼一小段指針，讀出它在直立方格紙上的格位。</p>
+        <button class="ghost" onclick="measureSpringPos()">📏 讀取指針格位</button>
+        <div id="sRuler"></div>
+        <div class="row"><button class="act" id="sRecA" onclick="sprRecordStatic()">登錄靜態數據</button></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">B　垂直振盪計時</h3>
+        <label class="ctl">下拉振幅 A　<span class="val" id="sAmpTag">15 mm</span></label>
+        <input type="range" id="sAmp" min="4" max="60" step="1" value="15">
+        <label class="ctl">計時圈數 N　<span class="val" id="sNTag">20 次</span></label>
+        <input type="range" id="sN" min="10" max="50" step="1" value="20">
+        <div id="sAmpWarn"></div>
+        <div class="row">
+          <button class="act" id="sGo" onclick="sprRelease()">放手（同時啟動碼錶）</button>
+          <button class="act" id="sStop" onclick="sprStop()" disabled>停止碼錶</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <span class="stopwatch" id="sWatch">0.00</span>
+          <div style="margin-left:14px">
+            <div style="font-size:12px;color:var(--dim)">已完成振盪</div>
+            <span class="counter" id="sCount">0</span>
+            <span style="color:var(--dim)"> / <span id="sTarget">20</span> 次</span>
+          </div>
+        </div>
+        <div id="sMsg"></div>
+        <div class="row"><button class="act" id="sRecB" onclick="sprRecordOsc()" disabled>登錄振盪數據</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">表 A：靜態伸長</h3>
+      <table id="sTableA">
+        <thead><tr><th>#</th><th>m（g）</th><th>指針格位 n（格）</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="row"><button class="ghost" onclick="sprClear('A')">清空</button></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">表 B：振盪週期</h3>
+      <table id="sTableB">
+        <thead><tr><th>#</th><th>m（g）</th><th>N</th><th>t（s）</th><th>T²（s²）</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="row"><button class="ghost" onclick="sprClear('B')">清空</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button class="act" onclick="sprAnalyze()">執行雙迴歸並求 u</button>
+      <button class="ghost danger" onclick="sprNewSpring()">更換彈簧（重置）</button>
+    </div>
+    <div id="sResult"></div>
+  </div>
+</section>
+
+<!-- ===================== TAB 4 ===================== -->
+<section class="tab" id="tab-check">
+  <h2>兩法交叉驗證</h2>
+  <div class="card">
+    <p>兩條路徑使用完全不同的物理機制（重力回復力 vs. 彈性回復力），
+       若得到的每格長度 <i>u</i> 在誤差範圍內一致，代表校正可信，方格紙才可以當尺使用。</p>
+    <div class="row"><button class="act" onclick="crossCheck()">比對兩法結果</button></div>
+    <div id="cResult"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* =========================================================
+   物理常數與隱藏真值
+   ========================================================= */
+const G = 9.789;                 // 臺中重力加速度 m/s²
+const rnd = (a,b)=>a+Math.random()*(b-a);
+const TRUTH = {
+  u   : rnd(2.0, 5.0),           // 方格紙最小單位 (mm)
+  k   : rnd(4.0, 8.0),           // 彈簧常數 (N/m)
+  ms  : rnd(3.0, 9.0),           // 彈簧質量 (g)
+  d   : rnd(7.0, 16.0),          // 掛碼質心相對線端的偏移 (mm)
+  L0  : rnd(45, 70),             // 彈簧自然長度 (mm)
+  origin: rnd(3, 12),            // 方格紙上彈簧懸掛點的格位偏移 (格)
+  damaged:false
+};
+function toggleTruth(){
+  document.getElementById('tv-u').textContent  = TRUTH.u.toFixed(4)+' mm/格';
+  document.getElementById('tv-k').textContent  = TRUTH.k.toFixed(4)+' N/m';
+  document.getElementById('tv-ms').textContent = TRUTH.ms.toFixed(3)+' g';
+  document.getElementById('tv-d').textContent  = TRUTH.d.toFixed(3)+' mm';
+  document.getElementById('truthBox').classList.toggle('hidevals');
+}
+
+/* =========================================================
+   工具：最小二乘迴歸（含標準誤）
+   ========================================================= */
+function linreg(xs, ys){
+  const n = xs.length;
+  if(n < 2) return null;
+  const mx = xs.reduce((a,b)=>a+b,0)/n, my = ys.reduce((a,b)=>a+b,0)/n;
+  let Sxx=0, Sxy=0, Syy=0;
+  for(let i=0;i<n;i++){ const dx=xs[i]-mx, dy=ys[i]-my; Sxx+=dx*dx; Sxy+=dx*dy; Syy+=dy*dy; }
+  if(Sxx===0) return null;
+  const m = Sxy/Sxx, b = my - m*mx;
+  const r2 = Syy>0 ? (Sxy*Sxy)/(Sxx*Syy) : 1;
+  let ss=0; for(let i=0;i<n;i++){ const e=ys[i]-(m*xs[i]+b); ss+=e*e; }
+  const s2 = n>2 ? ss/(n-2) : 0;
+  return { m, b, r2, n,
+           sm: Math.sqrt(s2/Sxx),
+           sb: Math.sqrt(s2*(1/n + mx*mx/Sxx)) };
+}
+const f=(x,d=3)=>(x===null||x===undefined||!isFinite(x))?'—':x.toFixed(d);
+
+/* =========================================================
+   方格紙讀數元件（隱藏真實單位，學生自行判讀格數）
+   ========================================================= */
+function rulerSVG(spanSquares, startSq, endSq, opts={}){
+  const W = 860, H = 118, pad = 26;
+  const total = spanSquares;
+  const px = (W - 2*pad) / total;
+  let s = `<svg viewBox="0 0 ${W} ${H+140}" style="background:transparent">`;
+  s += `<rect x="${pad}" y="14" width="${W-2*pad}" height="${H-30}" fill="var(--paper)" rx="3"/>`;
+  // 細格線
+  for(let i=0;i<=total;i++){
+    const x = pad + i*px;
+    const maj = (i%10===0);
+    if(!maj && px < 2.6) continue;
+    s += `<line x1="${x}" y1="14" x2="${x}" y2="${H-16}" stroke="${maj?'var(--gridmaj)':'var(--grid)'}" stroke-width="${maj?1.3:0.5}" opacity="${maj?0.95:0.5}"/>`;
+    if(maj) s += `<text x="${x}" y="${H+2}" font-size="11" fill="#5b7f9e" text-anchor="middle">${i}</text>`;
+  }
+  // 水平格線
+  for(let j=0;j*px<H-30;j++){
+    const y = 14 + j*px; if(px<2.6) break;
+    s += `<line x1="${pad}" y1="${y}" x2="${W-pad}" y2="${y}" stroke="var(--grid)" stroke-width="0.4" opacity="0.4"/>`;
+  }
+  // 待測物件
+  const x1 = pad + startSq*px, x2 = pad + endSq*px;
+  s += `<rect x="${x1}" y="34" width="${Math.max(x2-x1,1)}" height="26" fill="#8d6e63" opacity="0.88" rx="2"/>`;
+  s += `<line x1="${x1}" y1="26" x2="${x1}" y2="${H-20}" stroke="#d32f2f" stroke-width="1.2"/>`;
+  s += `<line x1="${x2}" y1="26" x2="${x2}" y2="${H-20}" stroke="#d32f2f" stroke-width="1.2"/>`;
+  s += `<text x="${(x1+x2)/2}" y="52" font-size="12" fill="#fff" text-anchor="middle">${opts.label||''}</text>`;
+
+  // 兩個放大鏡
+  const zoom=(cx, cxSq, title, ox)=>{
+    const ZW=380, ZH=96, zp=14, half=3.2;           // 顯示 ±3.2 格
+    const zpx=(ZW-2*zp)/(2*half);
+    let t = `<g transform="translate(${ox},${H+24})">`;
+    t += `<rect x="0" y="0" width="${ZW}" height="${ZH}" fill="var(--paper)" rx="5" stroke="#455a64"/>`;
+    const i0=Math.floor(cxSq-half), i1=Math.ceil(cxSq+half);
+    for(let i=i0;i<=i1;i++){
+      const x = zp + (i-(cxSq-half))*zpx;
+      if(x<zp-1||x>ZW-zp+1) continue;
+      const maj=(i%10===0), mid=(i%5===0);
+      t += `<line x1="${x}" y1="10" x2="${x}" y2="${ZH-24}" stroke="${maj?'var(--gridmaj)':'var(--grid)'}" stroke-width="${maj?1.6:(mid?1.0:0.7)}"/>`;
+      t += `<text x="${x}" y="${ZH-9}" font-size="10.5" fill="#37627f" text-anchor="middle">${i}</text>`;
+      // 每 0.1 格的細分不畫，由學生目測內插
+    }
+    const xc = zp + half*zpx;
+    t += `<line x1="${xc}" y1="6" x2="${xc}" y2="${ZH-24}" stroke="#d32f2f" stroke-width="1.6"/>`;
+    t += `<text x="${ZW/2}" y="-6" font-size="12" fill="var(--dim)" text-anchor="middle">${title}</text>`;
+    t += `</g>`;
+    return t;
+  };
+  s += zoom(x1, startSq, '起點放大 ×', 20);
+  s += zoom(x2, endSq,   '終點放大 ×', 450);
+  s += `</svg>`;
+  return s;
+}
+
+/* =========================================================
+   單擺
+   ========================================================= */
+const P = { len:500, ang:8, N:20, running:false, t0:0, phase:0, cycles:0,
+            raf:null, lastRec:null, rows:[] };
+
+function pendTruePeriod(theta0){
+  const Leff = (P.len + TRUTH.d)/1000;            // m
+  const th = theta0*Math.PI/180;
+  return 2*Math.PI*Math.sqrt(Leff/G)*(1 + th*th/16 + 11*Math.pow(th,4)/3072);
+}
+function drawPend(theta){
+  const svg=document.getElementById('pendSvg');
+  const px = 0.62;                                 // mm -> px
+  const ox=200, oy=58;
+  const L = P.len*px;
+  const x = ox + L*Math.sin(theta), y = oy + L*Math.cos(theta);
+  let s='';
+  s+=`<rect x="0" y="0" width="400" height="470" fill="#141d25"/>`;
+  s+=`<rect x="40" y="430" width="200" height="14" fill="#37474f" rx="3"/>`;      // 底座
+  s+=`<rect x="64" y="40" width="11" height="392" fill="#546e7a" rx="2"/>`;        // 立柱
+  s+=`<rect x="64" y="44" width="180" height="9" fill="#546e7a" rx="2"/>`;         // 橫桿
+  s+=`<circle cx="${ox}" cy="${oy}" r="4.5" fill="#90a4ae"/>`;
+  // 量角器
+  s+=`<path d="M ${ox-54} ${oy} A 54 54 0 0 0 ${ox+54} ${oy}" fill="none" stroke="#4fc3f7" stroke-width="1" opacity="0.5"/>`;
+  s+=`<line x1="${ox}" y1="${oy}" x2="${ox}" y2="${oy+58}" stroke="#4fc3f7" stroke-width="0.8" opacity="0.5" stroke-dasharray="3 3"/>`;
+  s+=`<text x="${ox+58}" y="${oy+16}" font-size="10" fill="#4fc3f7" opacity="0.7">量角器</text>`;
+  s+=`<line x1="${ox}" y1="${oy}" x2="${x}" y2="${y}" stroke="#eceff1" stroke-width="1.4"/>`;
+  s+=`<circle cx="${x}" cy="${y}" r="9" fill="#ffb74d" stroke="#e08b1a" stroke-width="1.5"/>`;
+  s+=`<text x="${x}" y="${y+3.5}" font-size="9" fill="#5d3a00" text-anchor="middle">掛碼</text>`;
+  s+=`<text x="16" y="24" font-size="12" fill="#9fb0be">支架 ≥60 cm</text>`;
+  svg.innerHTML=s;
+}
+function pendUI(){
+  document.getElementById('pLenTag').textContent = '(隱藏實際長度)';
+  document.getElementById('pAngTag').textContent = P.ang.toFixed(1)+'°';
+  document.getElementById('pNTag').textContent   = P.N+' 次';
+  document.getElementById('pTarget').textContent = P.N;
+  const w=document.getElementById('pAngWarn');
+  if(P.ang>15) w.innerHTML='<div class="note warn">θ₀ 過大：單擺已明顯偏離簡諧，週期被拉長 (1+θ₀²/16)，會使 u 系統性偏大。</div>';
+  else if(P.ang>10) w.innerHTML='<div class="note warn">θ₀ 稍大，大角度修正約 +'+ (100*Math.pow(P.ang*Math.PI/180,2)/16).toFixed(2) +' %。</div>';
+  else w.innerHTML='';
+}
+document.getElementById('pLen').oninput=e=>{P.len=+e.target.value; pendReset(); pendUI();};
+document.getElementById('pAng').oninput=e=>{P.ang=+e.target.value; pendReset(); pendUI();};
+document.getElementById('pN').oninput  =e=>{P.N=+e.target.value; pendUI();};
+
+function measurePendString(){
+  const start = TRUTH.origin*0.37 + rnd(-0.12,0.12);          // 對線的隨機微小偏差
+  const end   = start + P.len/TRUTH.u;
+  const span  = Math.ceil((end+6)/10)*10;
+  document.getElementById('pRuler').innerHTML = rulerSVG(span, start, end, {label:'棉線'});
+}
+function pendReset(){
+  cancelAnimationFrame(P.raf); P.running=false; P.cycles=0; P.phase=0;
+  document.getElementById('pWatch').textContent='0.00';
+  document.getElementById('pCount').textContent='0';
+  document.getElementById('pGo').disabled=false;
+  document.getElementById('pStop').disabled=true;
+  document.getElementById('pRec').disabled=true;
+  document.getElementById('pMsg').innerHTML='';
+  drawPend(P.ang*Math.PI/180);
+}
+function pendRelease(){
+  P.running=true; P.t0=performance.now(); P.phase=0; P.cycles=0; P.amp=P.ang;
+  document.getElementById('pGo').disabled=true;
+  document.getElementById('pStop').disabled=false;
+  document.getElementById('pRec').disabled=true;
+  const tau=260;                                              // 空氣阻尼時間常數 (s)
+  let last=P.t0;
+  const loop=(now)=>{
+    if(!P.running) return;
+    const dt=(now-last)/1000; last=now;
+    const el=(now-P.t0)/1000;
+    const amp = P.ang*Math.exp(-el/tau);
+    const T = pendTruePeriod(amp);
+    P.phase += dt/T;
+    P.cycles = Math.floor(P.phase);
+    const th = amp*Math.cos(2*Math.PI*P.phase)*Math.PI/180;
+    drawPend(th);
+    document.getElementById('pWatch').textContent = el.toFixed(2);
+    document.getElementById('pCount').textContent = P.cycles;
+    document.getElementById('pCount').style.color = (P.cycles>=P.N)?'#ffb74d':'#66bb6a';
+    P.raf=requestAnimationFrame(loop);
+  };
+  P.raf=requestAnimationFrame(loop);
+}
+function pendStop(){
+  if(!P.running) return;
+  P.running=false; cancelAnimationFrame(P.raf);
+  const el=(performance.now()-P.t0)/1000;
+  P.lastRec={t:+el.toFixed(2), N:P.N, ang:P.ang, cyc:P.cycles};
+  document.getElementById('pStop').disabled=true;
+  document.getElementById('pGo').disabled=false;
+  document.getElementById('pRec').disabled=false;
+  const dm=document.getElementById('pMsg');
+  if(Math.abs(P.cycles-P.N)>0.6)
+    dm.innerHTML=`<div class="note bad">停錶時實際已完成 <b>${P.cycles}</b> 次，與設定的 ${P.N} 次不符。登錄前請自行修正表中的 N，或重做一次。</div>`;
+  else
+    dm.innerHTML=`<div class="note ok">記錄：${el.toFixed(2)} s／${P.N} 次。反應時間誤差已含在內，這正是要靠多圈計時稀釋的部分。</div>`;
+}
+function pendRecord(){
+  if(!P.lastRec) return;
+  P.rows.push({n:'', N:P.lastRec.N, t:P.lastRec.t, ang:P.lastRec.ang});
+  document.getElementById('pRec').disabled=true;
+  pendRender();
+}
+function pendRender(){
+  const tb=document.querySelector('#pTable tbody'); tb.innerHTML='';
+  P.rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td>
+      <td><input value="${r.n}" placeholder="填入格數" oninput="P.rows[${i}].n=this.value"></td>
+      <td><input value="${r.N}" oninput="P.rows[${i}].N=+this.value;pendCalc(${i})"></td>
+      <td><input value="${r.t}" oninput="P.rows[${i}].t=+this.value;pendCalc(${i})"></td>
+      <td id="pT${i}"></td><td id="pT2${i}"></td><td>${r.ang.toFixed(1)}°</td>
+      <td><button class="ghost" style="padding:2px 8px" onclick="P.rows.splice(${i},1);pendRender()">✕</button></td>`;
+    tb.appendChild(tr);
+    pendCalc(i);
+  });
+}
+/* 只更新衍生欄位，不重建表格，避免輸入中途失焦 */
+function pendCalc(i){
+  const r=P.rows[i]; if(!r) return;
+  const T=(r.N>0)?r.t/r.N:NaN;
+  const a=document.getElementById('pT'+i), b=document.getElementById('pT2'+i);
+  if(a) a.textContent=f(T,4);
+  if(b) b.textContent=f(T*T,4);
+}
+function pendClear(){ P.rows=[]; pendRender(); document.getElementById('pResult').innerHTML=''; }
+
+function pendAnalyze(){
+  const xs=[],ys=[];
+  P.rows.forEach(r=>{
+    const n=parseFloat(r.n);
+    if(isFinite(n)&&r.N>0&&r.t>0){ const T=r.t/r.N; xs.push(n); ys.push(T*T); }
+  });
+  const box=document.getElementById('pResult');
+  if(xs.length<3){ box.innerHTML='<div class="note bad">至少需要 3 組不同擺長的數據才能迴歸。</div>'; return; }
+  const R=linreg(xs,ys);
+  const u  = G*R.m/(4*Math.PI*Math.PI)*1000;          // mm/格
+  const su = G*R.sm/(4*Math.PI*Math.PI)*1000;
+  const d  = G*R.b/(4*Math.PI*Math.PI)*1000;          // mm
+  const sd = G*R.sb/(4*Math.PI*Math.PI)*1000;
+  window.RES_PEND={u,su,n:xs.length};
+  box.innerHTML = `
+    <div class="eq">T² = (${f(R.m,6)} ± ${f(R.sm,6)}) n ＋ (${f(R.b,5)} ± ${f(R.sb,5)})　　r² = ${f(R.r2,5)}</div>
+    <div class="kv">
+      <div>每格長度 u ＝ g·斜率 /4π²</div><div><b class="val">${f(u,4)} ± ${f(su,4)} mm/格</b></div>
+      <div>質心偏移 d ＝ g·截距 /4π²</div><div>${f(d,3)} ± ${f(sd,3)} mm</div>
+      <div>資料點數</div><div>${xs.length}</div>
+    </div>
+    ${plotXY(xs,ys,R,'n（格）','T²（s²）')}
+    <div class="note">截距不為零，代表「線長」不等於真正擺長——掛碼本身有高度，質心在線端下方 ${f(d,1)} mm。
+      若只量一組數據直接代 L = gT²/4π²，這個偏差會整包灌進 u 裡。</div>`;
+}
+
+/* 散佈圖 + 迴歸線 */
+function plotXY(xs,ys,R,xl,yl){
+  const W=620,H=270,pl=62,pb=42,pt=14,pr=14;
+  const xmin=Math.min(...xs),xmax=Math.max(...xs);
+  const ymin=Math.min(...ys),ymax=Math.max(...ys);
+  const dx=(xmax-xmin)||1, dy=(ymax-ymin)||1;
+  const x0=xmin-dx*0.1, x1=xmax+dx*0.1, y0=Math.max(0,ymin-dy*0.15), y1=ymax+dy*0.15;
+  const X=v=>pl+(v-x0)/(x1-x0)*(W-pl-pr);
+  const Y=v=>H-pb-(v-y0)/(y1-y0)*(H-pb-pt);
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="margin-top:10px"><rect width="${W}" height="${H}" fill="#0b1117" rx="6"/>`;
+  for(let i=0;i<=5;i++){
+    const gy=y0+(y1-y0)*i/5, gx=x0+(x1-x0)*i/5;
+    s+=`<line x1="${pl}" y1="${Y(gy)}" x2="${W-pr}" y2="${Y(gy)}" stroke="#223" stroke-width="1"/>`;
+    s+=`<text x="${pl-7}" y="${Y(gy)+4}" font-size="10.5" fill="#7f95a6" text-anchor="end">${gy.toFixed(3)}</text>`;
+    s+=`<text x="${X(gx)}" y="${H-pb+16}" font-size="10.5" fill="#7f95a6" text-anchor="middle">${gx.toFixed(1)}</text>`;
+  }
+  s+=`<line x1="${pl}" y1="${pt}" x2="${pl}" y2="${H-pb}" stroke="#44586a"/>`;
+  s+=`<line x1="${pl}" y1="${H-pb}" x2="${W-pr}" y2="${H-pb}" stroke="#44586a"/>`;
+  s+=`<line x1="${X(x0)}" y1="${Y(R.m*x0+R.b)}" x2="${X(x1)}" y2="${Y(R.m*x1+R.b)}" stroke="#4fc3f7" stroke-width="1.6"/>`;
+  xs.forEach((x,i)=>{ s+=`<circle cx="${X(x)}" cy="${Y(ys[i])}" r="4" fill="#ffb74d"/>`; });
+  s+=`<text x="${W/2}" y="${H-6}" font-size="11.5" fill="#9fb0be" text-anchor="middle">${xl}</text>`;
+  s+=`<text x="14" y="${H/2}" font-size="11.5" fill="#9fb0be" text-anchor="middle" transform="rotate(-90 14 ${H/2})">${yl}</text>`;
+  return s+`</svg>`;
+}
+
+/* =========================================================
+   彈簧
+   ========================================================= */
+const S={ m:0, amp:15, N:20, running:false, t0:0, phase:0, cycles:0, raf:null,
+          rowsA:[], rowsB:[], lastOsc:null, disp:0 };
+
+const sprExt = m => (m/1000)*G/TRUTH.k*1000;                  // 靜態伸長 mm
+const sprT   = m => 2*Math.PI*Math.sqrt(((m+TRUTH.ms/3)/1000)/TRUTH.k);
+
+function drawSpr(dyn){
+  const svg=document.getElementById('sprSvg');
+  const px=1.35, ox=250, oy=52;
+  const ext = TRUTH.L0 + (S.m>0?sprExt(S.m):0) + dyn;
+  const Lp = ext*px;
+  let s=`<rect x="0" y="0" width="400" height="470" fill="#141d25"/>`;
+  // 直立方格紙
+  s+=`<rect x="290" y="30" width="86" height="400" fill="var(--paper)" rx="3" opacity="0.95"/>`;
+  for(let i=0;i<70;i++){ const y=30+i*6; if(y>430) break;
+    s+=`<line x1="290" y1="${y}" x2="376" y2="${y}" stroke="var(--grid)" stroke-width="${i%5===0?0.9:0.4}" opacity="0.6"/>`;}
+  s+=`<text x="333" y="24" font-size="10" fill="#9fb0be" text-anchor="middle">方格紙</text>`;
+  s+=`<rect x="60" y="430" width="200" height="14" fill="#37474f" rx="3"/>`;
+  s+=`<rect x="84" y="40" width="11" height="392" fill="#546e7a" rx="2"/>`;
+  s+=`<rect x="84" y="44" width="180" height="9" fill="#546e7a" rx="2"/>`;
+  // 彈簧
+  const coils=14, w=15;
+  let dpath=`M ${ox} ${oy}`;
+  for(let i=0;i<coils;i++){
+    const y1=oy+Lp*(i+0.5)/coils, y2=oy+Lp*(i+1)/coils;
+    dpath+=` L ${ox+(i%2?-w:w)} ${y1} L ${ox} ${y2}`;
+  }
+  s+=`<path d="${dpath}" fill="none" stroke="${TRUTH.damaged?'#ef5350':'#b0bec5'}" stroke-width="2"/>`;
+  const ye=oy+Lp;
+  // 指針
+  s+=`<rect x="${ox-4}" y="${ye}" width="90" height="3" fill="#ef5350"/>`;
+  s+=`<text x="${ox+50}" y="${ye-5}" font-size="9.5" fill="#ef5350">指針</text>`;
+  if(S.m>0){
+    s+=`<rect x="${ox-17}" y="${ye+3}" width="34" height="26" fill="#ffb74d" stroke="#e08b1a" rx="3"/>`;
+    s+=`<text x="${ox}" y="${ye+20}" font-size="10" fill="#5d3a00" text-anchor="middle">${S.m} g</text>`;
+  }
+  if(TRUTH.damaged) s+=`<text x="20" y="24" font-size="12" fill="#ef5350">⚠ 彈簧已永久變形</text>`;
+  svg.innerHTML=s;
+}
+function sprUpdate(){
+  S.m=0; document.querySelectorAll('.wt').forEach(c=>{ if(c.checked) S.m+=+c.value; });
+  document.getElementById('sprMass').textContent=S.m+' g';
+  sprCheckAmp(); drawSpr(0);
+}
+function sprCheckAmp(){
+  const w=document.getElementById('sAmpWarn');
+  if(S.m===0){ w.innerHTML='<div class="note warn">尚未掛上任何掛碼。</div>'; return; }
+  const xs=sprExt(S.m);
+  if(S.amp>55) w.innerHTML='<div class="note bad">振幅超過彈性限度，放手將使彈簧永久變形。</div>';
+  else if(S.amp>xs) w.innerHTML=`<div class="note bad">振幅 ${S.amp} mm 大於靜態伸長 ${xs.toFixed(1)} mm：上擺時彈簧會鬆弛，運動不再是簡諧，週期失真。</div>`;
+  else w.innerHTML='';
+}
+document.getElementById('sAmp').oninput=e=>{S.amp=+e.target.value;
+  document.getElementById('sAmpTag').textContent=S.amp+' mm'; sprCheckAmp();};
+document.getElementById('sN').oninput=e=>{S.N=+e.target.value;
+  document.getElementById('sNTag').textContent=S.N+' 次';
+  document.getElementById('sTarget').textContent=S.N;};
+
+function measureSpringPos(){
+  if(S.m===0 && !confirm('未掛掛碼，這會是「零載」基準點，仍要量測嗎？')) return;
+  const pos = TRUTH.origin + (TRUTH.L0 + sprExt(S.m))/TRUTH.u + rnd(-0.1,0.1);
+  const span = Math.ceil((pos+8)/10)*10;
+  document.getElementById('sRuler').innerHTML = rulerSVG(span, TRUTH.origin, pos, {label:'彈簧'});
+}
+function sprRecordStatic(){ S.rowsA.push({m:S.m, n:''}); sprRenderA(); }
+function sprRenderA(){
+  const tb=document.querySelector('#sTableA tbody'); tb.innerHTML='';
+  S.rowsA.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td>
+      <td><input value="${r.m}" oninput="S.rowsA[${i}].m=+this.value"></td>
+      <td><input value="${r.n}" placeholder="格位" oninput="S.rowsA[${i}].n=this.value"></td>
+      <td><button class="ghost" style="padding:2px 8px" onclick="S.rowsA.splice(${i},1);sprRenderA()">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function sprRelease(){
+  if(S.m===0){ alert('請先掛上掛碼'); return; }
+  if(S.amp>55){ TRUTH.damaged=true; TRUTH.k*=rnd(0.72,0.88);
+    document.getElementById('sMsg').innerHTML='<div class="note bad">彈簧被拉過頭，已永久變形，k 值改變。先前的數據全部作廢，請按「更換彈簧」重來。</div>';
+    drawSpr(0); return; }
+  S.running=true; S.t0=performance.now(); S.phase=0; S.cycles=0;
+  document.getElementById('sGo').disabled=true;
+  document.getElementById('sStop').disabled=false;
+  document.getElementById('sRecB').disabled=true;
+  const T=sprT(S.m), tau=45; let last=S.t0;
+  const loop=now=>{
+    if(!S.running) return;
+    const dt=(now-last)/1000; last=now;
+    const el=(now-S.t0)/1000;
+    S.phase+=dt/T; S.cycles=Math.floor(S.phase);
+    const a=S.amp*Math.exp(-el/tau);
+    drawSpr(a*Math.cos(2*Math.PI*S.phase));
+    document.getElementById('sWatch').textContent=el.toFixed(2);
+    document.getElementById('sCount').textContent=S.cycles;
+    document.getElementById('sCount').style.color=(S.cycles>=S.N)?'#ffb74d':'#66bb6a';
+    S.raf=requestAnimationFrame(loop);
+  };
+  S.raf=requestAnimationFrame(loop);
+}
+function sprStop(){
+  if(!S.running) return;
+  S.running=false; cancelAnimationFrame(S.raf);
+  const el=(performance.now()-S.t0)/1000;
+  S.lastOsc={m:S.m, N:S.N, t:+el.toFixed(2), cyc:S.cycles};
+  document.getElementById('sStop').disabled=true;
+  document.getElementById('sGo').disabled=false;
+  document.getElementById('sRecB').disabled=false;
+  const bad=(S.amp>sprExt(S.m));
+  document.getElementById('sMsg').innerHTML = bad
+    ? `<div class="note bad">本次振幅超過靜態伸長，彈簧曾鬆弛，週期不可信。</div>`
+    : `<div class="note ok">記錄：${el.toFixed(2)} s／${S.N} 次（實際完成 ${S.cycles} 次）。</div>`;
+  drawSpr(0);
+}
+function sprRecordOsc(){
+  if(!S.lastOsc) return;
+  S.rowsB.push({...S.lastOsc}); document.getElementById('sRecB').disabled=true; sprRenderB();
+}
+function sprRenderB(){
+  const tb=document.querySelector('#sTableB tbody'); tb.innerHTML='';
+  S.rowsB.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td>
+      <td><input value="${r.m}" oninput="S.rowsB[${i}].m=+this.value"></td>
+      <td><input value="${r.N}" oninput="S.rowsB[${i}].N=+this.value;sprCalc(${i})"></td>
+      <td><input value="${r.t}" oninput="S.rowsB[${i}].t=+this.value;sprCalc(${i})"></td>
+      <td id="sT2${i}"></td>
+      <td><button class="ghost" style="padding:2px 8px" onclick="S.rowsB.splice(${i},1);sprRenderB()">✕</button></td>`;
+    tb.appendChild(tr);
+    sprCalc(i);
+  });
+}
+function sprCalc(i){
+  const r=S.rowsB[i]; if(!r) return;
+  const T=(r.N>0)?r.t/r.N:NaN;
+  const c=document.getElementById('sT2'+i);
+  if(c) c.textContent=f(T*T,5);
+}
+function sprClear(w){ if(w==='A'){S.rowsA=[];sprRenderA();} else {S.rowsB=[];sprRenderB();} }
+function sprNewSpring(){
+  TRUTH.k=rnd(4,8); TRUTH.damaged=false; TRUTH.L0=rnd(45,70);
+  S.rowsA=[];S.rowsB=[];sprRenderA();sprRenderB();
+  document.getElementById('sResult').innerHTML='';
+  document.getElementById('sMsg').innerHTML='<div class="note">已換上新彈簧，k 為新的隨機值。</div>';
+  drawSpr(0);
+}
+function sprAnalyze(){
+  const box=document.getElementById('sResult');
+  const xb=[],yb=[];
+  S.rowsB.forEach(r=>{ if(r.m>0&&r.N>0&&r.t>0){ const T=r.t/r.N; xb.push(r.m/1000); yb.push(T*T);} });
+  const xa=[],ya=[];
+  S.rowsA.forEach(r=>{ const n=parseFloat(r.n); if(isFinite(n)&&r.m>=0){ xa.push(r.m/1000); ya.push(n);} });
+  if(xb.length<3||xa.length<3){ box.innerHTML='<div class="note bad">兩張表各需至少 3 組不同質量的數據。</div>'; return; }
+  const RB=linreg(xb,yb), RA=linreg(xa,ya);
+  const k  = 4*Math.PI*Math.PI/RB.m, sk = 4*Math.PI*Math.PI*RB.sm/(RB.m*RB.m);
+  const ms = 3*RB.b/RB.m*1000;
+  const u  = G/(k*RA.m)*1000, su = u*Math.sqrt((sk/k)**2+(RA.sm/RA.m)**2);
+  window.RES_SPR={u,su,k,sk};
+  box.innerHTML=`
+    <h3>迴歸 B：T² – m</h3>
+    <div class="eq">T² = (${f(RB.m,5)} ± ${f(RB.sm,5)}) m ＋ (${f(RB.b,6)} ± ${f(RB.sb,6)})　r² = ${f(RB.r2,5)}</div>
+    <div class="kv"><div>彈簧常數 k = 4π²/斜率</div><div><b class="val">${f(k,4)} ± ${f(sk,4)} N/m</b></div>
+      <div>彈簧質量 m<sub>s</sub> = 3·截距/斜率</div><div>${f(ms,2)} g</div></div>
+    ${plotXY(xb,yb,RB,'m（kg）','T²（s²）')}
+    <h3>迴歸 A：Δ格位 – m</h3>
+    <div class="eq">n = (${f(RA.m,3)} ± ${f(RA.sm,3)}) m ＋ (${f(RA.b,3)})　r² = ${f(RA.r2,5)}</div>
+    <div class="kv"><div>每格長度 u = g /(k·斜率)</div><div><b class="val">${f(u,4)} ± ${f(su,4)} mm/格</b></div></div>
+    ${plotXY(xa,ya,RA,'m（kg）','指針格位 n（格）')}
+    <div class="note">截距對應「彈簧自然長度 + 懸掛點位置」，不影響斜率，所以不必先量零載位置——這正是迴歸法優於單點法之處。</div>`;
+}
+
+/* =========================================================
+   交叉驗證
+   ========================================================= */
+function crossCheck(){
+  const box=document.getElementById('cResult');
+  const A=window.RES_PEND, B=window.RES_SPR;
+  if(!A||!B){ box.innerHTML='<div class="note bad">請先在分頁 ② 與 ③ 各完成一次迴歸分析。</div>'; return; }
+  const diff=Math.abs(A.u-B.u), sc=Math.sqrt(A.su**2+B.su**2);
+  const z=diff/sc;
+  const zA=Math.abs(A.u-TRUTH.u)/A.su, zB=Math.abs(B.u-TRUTH.u)/B.su;
+  const tag=x=>x<2?'<span class="pill ok">一致</span>':(x<3?'<span class="pill warn">邊緣</span>':'<span class="pill bad">不一致</span>');
+  box.innerHTML=`
+    <div class="kv">
+      <div>單擺法 u</div><div>${f(A.u,4)} ± ${f(A.su,4)} mm/格</div>
+      <div>彈簧法 u</div><div>${f(B.u,4)} ± ${f(B.su,4)} mm/格</div>
+      <div>兩法差距</div><div>${f(diff,4)} mm ＝ ${f(z,2)} σ ${tag(z)}</div>
+    </div>
+    <h3>與真值比較</h3>
+    <div class="kv">
+      <div>真值 u</div><div><b class="val">${f(TRUTH.u,4)} mm/格</b></div>
+      <div>單擺法偏差</div><div>${f(zA,2)} σ ${tag(zA)}</div>
+      <div>彈簧法偏差</div><div>${f(zB,2)} σ ${tag(zB)}</div>
+    </div>
+    <div class="note ${z<2?'ok':'warn'}">${z<2
+      ? '兩條獨立路徑一致，方格紙校正完成，可進入待測物體積量測。'
+      : '兩法差距超過 2σ，通常來自：大角度未修正、停錶反應時間、彈簧鬆弛，或格數讀錯。請回頭檢查。'}</div>`;
+}
+
+/* =========================================================
+   初始化
+   ========================================================= */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.getElementById('tab-'+b.dataset.tab).classList.add('on');
+  };
+});
+pendUI(); pendReset(); sprUpdate(); sprRenderA(); sprRenderB();
+</script>
+</body>
+</html>

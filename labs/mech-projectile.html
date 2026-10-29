@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>水平拋射虛擬實驗室</title>
+<style>
+:root{--bg:#f5f6f8;--card:#ffffff;--ink:#1c2230;--mut:#5d6677;--line:#d7dce4;--acc:#1f6feb;--acc2:#d9480f;--ok:#2b8a3e;--warn:#c76a00;--tbl:#e8dcc4;--box:#c9a46e;--board:#9b7446;--paper:#f3f7ff;--grid:#9fb6d9;--ball:#ff9f1c;--soft:#eef2f8;}
+@media (prefers-color-scheme:dark){:root{--bg:#11141a;--card:#1a1f28;--ink:#e5e8ee;--mut:#9aa3b3;--line:#2d3441;--acc:#5ea3ff;--acc2:#ff8a4c;--ok:#5bd07a;--warn:#ffae52;--tbl:#3b3427;--box:#8d6c40;--board:#c49a63;--paper:#26303f;--grid:#5c7aa5;--ball:#ffb347;--soft:#222935;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6}
+header{padding:14px 18px 6px;max-width:1180px;margin:auto}
+header h1{font-size:1.25rem;margin:0}
+header p{margin:2px 0;color:var(--mut);font-size:.9rem}
+nav{display:flex;flex-wrap:wrap;gap:6px;max-width:1180px;margin:8px auto 0;padding:0 18px}
+nav button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:8px 8px 0 0;cursor:pointer;font-size:.92rem}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+nav button.todo{opacity:.55}
+main{max-width:1180px;margin:0 auto;padding:0 18px 40px}
+section{display:none;background:var(--card);border:1px solid var(--line);border-radius:0 10px 10px 10px;padding:16px}
+section.on{display:block}
+h2{font-size:1.1rem;margin:.2em 0 .6em}
+h3{font-size:1rem;margin:.9em 0 .4em;color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
+.card h4{margin:0 0 6px;font-size:.95rem}
+.formula{background:var(--soft);border-left:4px solid var(--acc);padding:8px 12px;border-radius:6px;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:1.05rem}
+.note{color:var(--mut);font-size:.88rem}
+.warnbox{border-left:4px solid var(--warn);background:var(--soft);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:.92rem}
+.okbox{border-left:4px solid var(--ok);background:var(--soft);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:.92rem}
+button.b{border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.9rem;margin:2px 4px 2px 0}
+button.g{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.9rem;margin:2px 4px 2px 0}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=range]{width:100%}
+label{font-size:.9rem}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.chip{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:0 8px;font-size:.82rem;font-variant-numeric:tabular-nums}
+.stat{font-size:.88rem;font-variant-numeric:tabular-nums}
+svg.scene{width:100%;height:auto;background:var(--card);border:1px solid var(--line);border-radius:8px;display:block}
+svg text{fill:var(--ink);font-size:13px}
+.tbl{fill:var(--tbl)} .boxr{fill:var(--box);stroke:#0004} .tick{stroke:var(--mut);stroke-width:1}
+.tlab{fill:var(--mut)!important;font-size:11px!important;text-anchor:middle}
+.paper{fill:var(--paper);stroke:var(--grid);stroke-width:.6}
+.groove{fill:none;stroke:var(--board);stroke-width:3;stroke-linejoin:round}
+.wall{fill:none;stroke:var(--board);stroke-opacity:.35;stroke-linejoin:round}
+.leg{stroke:#b8864b;stroke-width:4;stroke-linecap:round}
+.plumb{stroke:var(--mut);stroke-width:1;stroke-dasharray:3 3}
+.ballc{fill:var(--ball);stroke:#0005}
+.trail{fill:none;stroke:var(--acc2);stroke-width:1.5;stroke-dasharray:4 3}
+.mark{stroke:#e03131;stroke-width:2}
+.markold{stroke:#e0313188;stroke-width:1.5}
+table.dt{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+table.dt th,table.dt td{border:1px solid var(--line);padding:3px 4px;text-align:center}
+table.dt th{background:var(--soft)}
+table.dt tr.sel td{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+table.dt tr.stale td{color:var(--warn)}
+table.dt input{width:62px;border:1px solid transparent;background:transparent;color:var(--ink);text-align:center;font:inherit}
+table.dt input:focus{border-color:var(--acc);outline:none;background:var(--card)}
+.tablewrap{overflow-x:auto}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222c;color:#fff;padding:8px 16px;border-radius:8px;font-size:.9rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
+.big{font-size:1.3rem;font-weight:bold;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.planned li{margin:4px 0}
+.sw{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:2.2rem;font-weight:bold;letter-spacing:1px;font-variant-numeric:tabular-nums}
+svg.chart{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:8px;margin:4px 0 8px}
+svg.chart .ax{stroke:var(--mut);stroke-width:1}
+svg.chart .gr{stroke:var(--line);stroke-width:1}
+svg.chart text{font-size:12px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;margin:4px 0}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.z-ok{color:var(--ok);font-weight:bold}.z-mid{color:var(--warn);font-weight:bold}.z-bad{color:#e03131;font-weight:bold}
+td.l{text-align:left!important}
+</style>
+</head>
+<body>
+<header>
+<h1>水平拋射：初速 v₀ 對水平射程 R 的影響（虛擬實驗室）</h1>
+<p>103 學年度 高級中等學校數理與資訊學科能力競賽 臺灣省第 6 區複賽 物理科實驗試題第一題</p>
+<p class="note">器材：紙盒、厚紙板 2 張、棉線、竹筷、乒乓球、透明膠帶、小刀、直尺（45 cm，最小刻度 1 mm）、量角器、方格紙、白紙、碼錶（0.01 s）。本模擬含隨機隱藏真值，每次開啟都不同。
+<button class="g" id="btnNew" style="margin-left:6px">換一組新器材（重設全部）</button></p>
+</header>
+<nav id="nav">
+<button data-t="t1" class="on">① 實驗原理</button>
+<button data-t="t2">② 器材組裝</button>
+<button data-t="t3">③ 發射與落點</button>
+<button data-t="t4">④ v₀ 量測</button>
+<button data-t="t5">⑤ 數據分析</button>
+<button data-t="t6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ ① 原理 ============ -->
+<section id="t1" class="on">
+<h2>① 實驗原理</h2>
+<div class="two">
+<div>
+<h3>1. 水平拋射</h3>
+<p>球以水平速度 v₀ 離開槽口後，只受重力（先忽略空氣）作用，水平方向做等速度運動，鉛直方向做自由落體：</p>
+<div class="formula">x = v₀ t，　Δy = ½ g t²　⇒　R = v₀ √(2H / g)</div>
+<p>高度 H 不變時，飛行時間固定，<b>R 與 v₀ 成正比</b>，R–v₀ 圖應為通過原點的直線，斜率 √(2H/g)。</p>
+<div class="warnbox">H 應是<b>球心</b>從離槽到觸地所下降的高度，而不是「桌面到槽底」。乒乓球半徑 2.00 cm，而且球坐在 V 形槽裡，球心比槽底摺線高 r / sin α。所以 H = (槽底高度) + r / sin α − r，這個差距在 ⑥ 會量化。</div>
+</div>
+<div>
+<svg viewBox="0 0 420 260" class="scene" aria-label="平拋示意圖">
+<rect x="0" y="230" width="420" height="30" class="tbl"/>
+<rect x="20" y="95" width="90" height="135" class="boxr"/>
+<text x="42" y="170">紙盒</text>
+<line x1="20" y1="92" x2="110" y2="92" class="groove"/>
+<circle cx="104" cy="80" r="11" class="ballc"/>
+<path d="M104 80 Q 230 82 330 219" class="trail"/>
+<line x1="104" y1="80" x2="160" y2="80" stroke="var(--acc)" stroke-width="2" marker-end="url(#ar)"/>
+<text x="140" y="72">v₀</text>
+<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8z" fill="var(--acc)"/></marker></defs>
+<line x1="104" y1="80" x2="104" y2="230" class="plumb"/>
+<line x1="380" y1="80" x2="380" y2="219" stroke="var(--mut)"/>
+<text x="386" y="155">H</text>
+<line x1="104" y1="248" x2="330" y2="248" stroke="var(--mut)"/>
+<text x="210" y="244">R</text>
+<circle cx="330" cy="219" r="11" class="ballc" opacity=".5"/>
+<text x="98" y="245" class="tlab">O</text>
+</svg>
+</div>
+</div>
+
+<div class="two">
+<div>
+<h3>2. 怎麼產生不同的 v₀：斜軌釋放高度 h</h3>
+<p>把厚紙板摺成 V 形槽，做成「斜軌＋水平段」，接到紙盒邊緣。球從斜軌上高度 h 處由靜止釋放。乒乓球是<b>薄球殼</b>，轉動慣量 I = (2/3) m r²，不是實心球的 2/5。</p>
+<p>球在 V 形槽中是以兩側接觸點為軸滾動。有效滾動半徑 r<sub>eff</sub> = r sin α（α 為槽的半張角），所以 ω = v / r<sub>eff</sub> 比平面上更大，轉動能占的比例更高：</p>
+<div class="formula">m g h = ½ m v₀² + ½ I (v₀/r<sub>eff</sub>)²<br>⇒　v₀² = 2 g h / (1 + κ)，　κ = I/(m r<sub>eff</sub>²) = 2 / (3 sin²α)</div>
+<table class="dt" style="max-width:420px">
+<tr><th>V 槽張角 2α</th><th>κ</th><th>v₀² / (g h)</th></tr>
+<tr><td>180°（平面）</td><td>0.667</td><td>1.200</td></tr>
+<tr><td>120°</td><td>0.889</td><td>1.059</td></tr>
+<tr><td>90°</td><td>1.333</td><td>0.857</td></tr>
+<tr><td>60°</td><td>2.667</td><td>0.545</td></tr>
+</table>
+<p>代入平拋式，g 會消去：</p>
+<div class="formula">R = 2 √( H h / (1 + κ) )　⇒　R ∝ √h，R² ∝ h</div>
+</div>
+<div>
+<svg viewBox="0 0 420 250" class="scene" aria-label="V形槽截面">
+<text x="12" y="22">V 形槽截面（沿槽方向看）</text>
+<path d="M90 60 L210 200 L330 60" class="groove" stroke-width="4"/>
+<line x1="210" y1="200" x2="210" y2="50" class="plumb"/>
+<circle cx="210" cy="108.7" r="60" class="ballc" opacity=".85"/>
+<circle cx="210" cy="108.7" r="3" fill="var(--ink)"/>
+<line x1="164" y1="147.3" x2="256" y2="147.3" stroke="var(--acc2)" stroke-width="2" stroke-dasharray="5 3"/>
+<line x1="210" y1="108.7" x2="164" y2="147.3" stroke="var(--ink)"/>
+<text x="168" y="122">r</text>
+<line x1="226" y1="108.7" x2="226" y2="147.3" stroke="var(--acc)" stroke-width="2"/>
+<text x="232" y="134" style="fill:var(--acc)">r_eff = r sin α</text>
+<text x="200" y="222">α</text>
+<path d="M 197 185 A 18 18 0 0 1 210 180" fill="none" stroke="var(--ink)"/>
+<text x="258" y="165" style="fill:var(--acc2)">接觸點連線＝轉軸</text>
+<text x="20" y="240" class="note" style="font-size:12px">α 越小（槽越窄），r_eff 越小，同樣 h 得到的 v₀ 越小</text>
+</svg>
+</div>
+</div>
+
+<h3>3. 直接量 v₀：碼錶量水平段</h3>
+<p>在水平段上做兩個記號，間距 L，用碼錶量球通過的時間 t，得 v₀ ≈ L / t。碼錶可讀到 0.01 s，但人按錶的反應時間約 0.1–0.2 s，而球通過 20 cm 只需約 0.2 s。這個方法的誤差會很大，第 ④ 頁會讓你親身體驗，並和由 h 推算的結果對照。</p>
+
+<h3>4. 預期要檢驗的關係</h3>
+<ul>
+<li>R–v₀：理想上是過原點直線，斜率 √(2H/g)。</li>
+<li>R–√h（或 R²–h）：理想上是過原點直線，斜率 2√(H/(1+κ))。</li>
+</ul>
+
+<h3>5. 真實世界會偏離理想的地方（這個模擬都有忠實納入）</h3>
+<div class="grid">
+<div class="card"><h4>槽面阻力</h4>紙板槽的滾動阻力會吃掉一部分能量。釋放太低時球甚至滾不動，所以 R²–h 圖會出現<b>截距</b>。</div>
+<div class="card"><h4>斜軌與水平段的接法</h4>直接折角時，球撞上水平段會損失垂直分速；滾轉與平移也不匹配，會打滑。彎成平滑弧面可以大幅降低損失。</div>
+<div class="card"><h4>空氣阻力</h4>乒乓球只有 2.7 g，截面卻大，阻力不可忽略，而且 v₀ 越大影響越明顯。</div>
+<div class="card"><h4>Magnus 效應</h4>球離槽時正在往前滾，也就是帶著<b>上旋</b>，Magnus 力方向<b>向下</b>，使球提早落地。</div>
+<div class="card"><h4>浮力與附加質量</h4>乒乓球的體積相對質量很大，空氣浮力約為重量的 1.5%。加上附加質量，實際下落加速度比 g 小約 2%。</div>
+<div class="card"><h4>出口不水平</h4>紙盒或桌面若稍傾斜，球離槽時會帶有鉛直分速。組裝時要放球檢查、墊紙片調整。</div>
+</div>
+<p class="note">上述效應的實際大小是隨機隱藏值，第 ⑥ 頁揭曉。</p>
+</section>
+
+<!-- ============ ② 組裝 ============ -->
+<section id="t2">
+<h2>② 器材組裝與前置量測</h2>
+<p class="note">先組好裝置並量好各項固定參數。組裝改變後，③ 已記錄的數據會標示為「舊組裝」。目前組裝版本：<b id="verLab">#1</b></p>
+<svg id="sc2" viewBox="0 0 960 440" class="scene"></svg>
+<div class="grid" style="margin-top:12px">
+<div class="card"><h4>1. 摺 V 形槽</h4>
+<label>預定張角 2α：<b id="foldV">90</b>°</label>
+<input type="range" id="foldR" min="60" max="160" step="5" value="90">
+<p class="note">厚紙板沿摺線摺起，用膠帶固定。紙板會回彈，實際張角不一定等於預定值，要用量角器量。</p>
+<button class="g" id="mFold">用量角器量張角</button>
+<div class="chips" id="cFold"></div><div class="stat" id="sFold"></div>
+</div>
+<div class="card"><h4>2. 斜軌傾角 θ</h4>
+<label>預定傾角：<b id="rampV">20</b>°</label>
+<input type="range" id="rampR" min="6" max="35" step="1" value="20">
+<p class="note">斜軌長 40 cm，下方以竹筷撐起。</p>
+<button class="g" id="mRamp">用量角器量傾角</button>
+<div class="chips" id="cRamp"></div><div class="stat" id="sRamp"></div>
+</div>
+<div class="card"><h4>3. 過渡段</h4>
+<label><input type="radio" name="trans" value="smooth" checked> 紙板彎成平滑弧面</label><br>
+<label><input type="radio" name="trans" value="kink"> 直接折角相接</label>
+<p class="note">可以兩種都試，比較同樣 h 時落點的差異。</p>
+</div>
+<div class="card"><h4>4. 水平段（出口段）</h4>
+<label>水平段長度：約 <b id="LhV">20</b> cm</label>
+<input type="range" id="LhR" min="8" max="35" step="1" value="20">
+<button class="g" id="mLh">用直尺量長度</button>
+<div class="chips" id="cLh"></div><div class="stat" id="sLh"></div>
+<hr style="border:none;border-top:1px solid var(--line)">
+<b>水平檢查</b>：把球輕放在水平段中央。<br>
+<button class="g" id="lvl">放球檢查</button>
+<div id="lvlMsg" class="stat"></div>
+<div class="row"><button class="g" id="shimE">出口端墊一片</button><button class="g" id="shimI">入口端墊一片</button><button class="g" id="shim0">撤掉紙片</button></div>
+<div class="stat" id="shimLab">未墊紙片</div>
+<p class="note">一片摺紙約 0.5 mm。</p>
+</div>
+<div class="card"><h4>5. 發射高度 H（桌面 → 槽口 V 槽底摺線）</h4>
+<button class="g" id="mH">用直尺量高度</button>
+<div class="chips" id="cH"></div><div class="stat" id="sH"></div>
+<p class="note">記得 H 是球心下降量：槽底高度 + r/sin α − r。</p>
+</div>
+<div class="card"><h4>6. 落點原點與判讀方式</h4>
+<label><input type="checkbox" id="plumb" checked> 棉線綁竹筷當鉛垂線，在方格紙上標出槽口正下方的原點 O</label>
+<p class="note">不用鉛垂線、只憑目測對準，原點會有系統性偏差。</p>
+<b>觀察落點：</b><br>
+<label><input type="radio" name="view" value="side" checked> 蹲低、從側面平視</label><br>
+<label><input type="radio" name="view" value="top"> 站著從斜上方看</label>
+</div>
+<div class="card"><h4>7. 釋放方式</h4>
+<label><input type="radio" name="rel" value="gate" checked> 竹筷擋在記號處，抽開竹筷放球</label><br>
+<label><input type="radio" name="rel" value="hand"> 用手指扶著，放開</label>
+<p class="note">手放容易帶一點推力、位置也較不準。</p>
+</div>
+</div>
+</section>
+
+<!-- ============ ③ 發射 ============ -->
+<section id="t3">
+<h2>③ 發射與落點</h2>
+<svg id="sc3" viewBox="0 0 960 440" class="scene"></svg>
+<div class="two" style="margin-top:10px">
+<div class="card">
+<h4>釋放位置</h4>
+<label>沿斜軌距底端 s = <b id="sV">20.0</b> cm（在斜軌上畫記號）</label>
+<input type="range" id="sR" min="3" max="38" step="0.5" value="20">
+<div class="row">
+<button class="b" id="addRow">以此 s 新增一列（並量 h）</button>
+<label>播放速度 <select id="spd"><option value="1">×1 實際</option><option value="0.25" selected>×0.25 慢動作</option><option value="0.08">×0.08 超慢</option></select></label>
+</div>
+<div class="row" style="margin-top:6px">
+<button class="b" id="fire">發射並記錄</button>
+<button class="g" id="fire5">連續發射到滿 5 次</button>
+<button class="g" id="test">試射（不記錄）</button>
+</div>
+<div id="lastMsg" class="stat" style="margin-top:6px"></div>
+</div>
+<div class="card">
+<h4>本次落點</h4>
+<div class="big" id="lastR">—</div>
+<p class="note">R 是從原點 O 沿方格紙量到第一次觸地點（球正下方）的距離，估讀到 0.1 cm。乒乓球落地會彈跳，請以<b>第一次</b>觸地點為準。R 超過 45 cm 時，直尺需要分兩段量。</p>
+<div id="h3info" class="stat"></div>
+</div>
+</div>
+<h3>數據表（可直接修改數字）</h3>
+<div class="tablewrap"><table class="dt" id="dt"></table></div>
+<p class="note">點選一列即可選定，發射時用該列的 s。建議至少 5–6 個不同 h，每個 h 發射 5 次。</p>
+</section>
+
+<section id="t4">
+<h2>④ v₀ 量測：碼錶法 vs 能量法</h2>
+<p class="note">以 ③ 目前組裝（版本相同）的各列為對象。兩種方法求出的 v₀ 都會送到 ⑤ 做迴歸。</p>
+<svg id="sc4" viewBox="0 0 960 440" class="scene"></svg>
+<div class="grid" style="margin-top:10px">
+<div class="card"><h4>A. 碼錶法：v₀ ≈ L / t</h4>
+<label>計時記號 A 到槽口（記號 B）的距離 L ≈ <b id="LV">15</b> cm</label>
+<input type="range" id="LR" min="5" max="18" step="1" value="15">
+<button class="g" id="mL">用直尺量 L</button>
+<div class="chips" id="cL"></div><div class="stat" id="sL"></div>
+<p class="note">記號 B 就是槽口。改變記號位置會清除所有計時數據。L 若大於水平段，A 會停在水平段起點附近。</p>
+<b>計時方式</b><br>
+<label><input type="radio" name="tmode" value="sim" checked> 模擬計時員（含人手反應時間）</label><br>
+<label><input type="radio" name="tmode" value="me"> 我親自按錶（動畫以實際速度播放）</label>
+</div>
+<div class="card"><h4>碼錶</h4>
+<div class="sw" id="swDisp">0.00</div>
+<div class="row"><button class="b" id="swBtn">按錶（空白鍵）</button><span class="note" id="swHint"></span></div>
+<label>計時的列：<select id="rowSel4"></select></label><br>
+<label>模擬計時員模式的播放速度 <select id="spd4"><option value="1" selected>×1 實際</option><option value="0.25">×0.25 慢動作</option></select></label>
+<div class="row" style="margin-top:6px"><button class="b" id="fire4">發射並計時</button><button class="g" id="fire45">連續計時到滿 5 次</button></div>
+<div id="msg4" class="stat" style="margin-top:4px"></div>
+<p class="note">親自按錶：按「發射並計時」後球開始滾，球心通過記號 A 時按一次，通過槽口 B 時再按一次。慢動作只是方便觀看，模擬計時員的碼錶仍以真實時間計。</p>
+</div>
+<div class="card"><h4>B. 能量法：v₀ = √( 2gh / (1+κ) )</h4>
+<p>κ = 2 / (3 sin²α)，α 用 ② 量角器量得張角的一半。</p>
+<div id="kap4" class="stat"></div>
+<p class="note">g 取 9.79 m/s²（臺灣中南部的值）。此法假設沒有能量損失，所以只是 v₀ 的<b>上限</b>估計。</p>
+</div>
+</div>
+<h3>兩法對照表</h3>
+<div class="tablewrap"><table class="dt" id="dt4"></table></div>
+<div class="warnbox" id="cmp4"></div>
+</section>
+
+<section id="t5">
+<h2>⑤ 數據分析</h2>
+<div class="card" id="hc5"></div>
+<h3>1. R–v₀ 關係</h3>
+<div class="row"><label><input type="checkbox" id="showE" checked> 能量法 v₀</label><label><input type="checkbox" id="showS" checked> 碼錶法 v₀</label><label><input type="checkbox" id="showT" checked> 理論線 R = v₀√(2H/g)</label></div>
+<div class="legend" id="lg1"></div>
+<svg id="ch1" viewBox="0 0 640 380" class="chart"></svg>
+<div class="tablewrap"><table class="dt" id="fit1"></table></div>
+<p class="note" id="note1"></p>
+<h3>2. R²–h 關係</h3>
+<div class="legend" id="lg2"></div>
+<svg id="ch2" viewBox="0 0 640 380" class="chart"></svg>
+<div class="tablewrap"><table class="dt" id="fit2"></table></div>
+<p class="note" id="note2"></p>
+<h3>3. 殘差圖（能量法 v₀ 的 R–v₀ 直線擬合）</h3>
+<svg id="ch3" viewBox="0 0 640 240" class="chart"></svg>
+<p class="note" id="note3"></p>
+<p class="note">滑鼠移到資料點上可以看數值。</p>
+</section>
+
+<section id="t6">
+<h2>⑥ 誤差與真值揭曉</h2>
+<p>揭曉前先在 ⑤ 寫下你的結論：R 與 v₀ 是否成正比？斜率和 √(2H/g) 差多少？差異可能來自哪裡？</p>
+<button class="b" id="reveal">揭曉真值</button> <button class="g" id="hideRev" style="display:none">重新隱藏</button>
+<div id="rev" style="display:none">
+<h3>1. 器材參數：你的量測 vs 真值</h3>
+<div class="tablewrap"><table class="dt" id="rv1"></table></div>
+<p class="note">差距 z = (量測平均 − 真值) ÷ 平均值的標準誤。標準誤至少取「讀數精度 ÷ √12」（刻度量化誤差），避免多次讀到同一數字時標準誤變成 0。|z| ≤ 2 算合理，|z| &gt; 3 通常代表系統誤差。</p>
+<h3>2. 斜率：你的迴歸 vs 真值</h3>
+<div class="tablewrap"><table class="dt" id="rv2"></table></div>
+<h3>3. 各效應對 R 的影響（每一欄在前一欄的基礎上多加一個效應，單位 cm）</h3>
+<div class="tablewrap"><table class="dt" id="rv3"></table></div>
+<p class="note">「理想」欄用真實的 H 與 κ、沒有任何損失。模型預測不含隨機誤差；最後三欄和你量到的 R̄ 比較。</p>
+<h3>4. 碼錶法的反應時間</h3>
+<div class="tablewrap"><table class="dt" id="rv4"></table></div>
+<h3>5. 結論</h3>
+<div id="rv5"></div>
+</div>
+</section>
+</main>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ===================== 物理常數與隱藏真值 ===================== */
+const G=9.79;                     // 臺中附近 g (m/s²)
+const RHO=1.20, CD=0.45;          // 空氣密度、阻力係數（Re≈10⁴）；Magnus 升力係數隨自旋參數變化，見 flight()
+const BALL={r:0.0200,m:0.0027};   // 40 mm 乒乓球
+const AREA=Math.PI*BALL.r*BALL.r, VOL=4/3*Math.PI*BALL.r**3;
+const MA=0.5*RHO*VOL;             // 附加質量
+const MG=BALL.m-RHO*VOL;          // 扣除浮力的有效重質量
+const CDF=0.5*RHO*CD*AREA;
+const I_SHELL=2/3*BALL.m*BALL.r*BALL.r;
+const TC=0.0025;   // 紙板厚 2.5 mm
+const LRAMP=0.40;  // 斜軌長 40 cm
+const WALL=0.02;   // 槽壁高
+const SHIM=0.0005; // 摺紙片 0.5 mm
+const D2R=Math.PI/180;
+const FX_ALL={fric:1,trans:1,air:1,buoy:1,drag:1,magnus:1,tilt:1};
+let FX=FX_ALL; // 各效應開關（供 ⑥ 效應分解用；平常全開）
+
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function rnd(a,b){return a+Math.random()*(b-a);}
+function rt(x,step){return Math.round(x/step)*step;}
+function f(x,d){return Number(x).toFixed(d);}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+
+const T={};
+function newTruth(){
+  T.Hb=rnd(0.195,0.245);          // 紙盒頂面高度
+  T.mu=rnd(0.008,0.020);          // 槽面等效滾動阻力係數
+  T.tilt0=rnd(-2.0,2.0)*D2R;      // 桌面＋盒頂造成的水平段初始傾角（正＝往出口向下）
+  T.originPlumb=gauss()*0.08;     // cm
+  T.originNo=(Math.random()<.5?-1:1)*rnd(0.3,1.0);
+  T.LmErr=gauss()*0.001;
+  T.rs=0.18+gauss()*0.02; T.re=0.12+gauss()*0.02; // 模擬計時員：啟動是反應、停止帶預判，平均延遲不同
+  T.foldErr=gauss()*4; T.rampErr=gauss()*0.8; T.LhErr=gauss()*0.15;
+}
+const asm={fold:90,ramp:20,Lh:20,trans:'smooth',shims:0,plumb:true,view:'side',release:'gate',ver:1};
+
+function openDeg(){return clamp(asm.fold+T.foldErr,40,172);}
+function alphaHalf(){return openDeg()/2*D2R;}
+function thetaR(){return (asm.ramp+T.rampErr)*D2R;}
+function LhTrue(){return (asm.Lh+T.LhErr)/100;}
+function tiltR(){return T.tilt0-Math.atan(asm.shims*SHIM/LhTrue());}
+function Hv(){return T.Hb+TC;}
+function reff(){return BALL.r*Math.sin(alphaHalf());}
+function dc(){return BALL.r/Math.sin(alphaHalf());}
+function kappa(){return I_SHELL/(BALL.m*reff()**2);}
+function mRoll(){return BALL.m+(FX.buoy?MA:0)+I_SHELL/reff()**2;}
+
+/* 沿軌道滾動（含坡度、浮力、滾動阻力、空氣阻力），ang 為沿行進方向的下坡角 */
+function roll(v0,L,ang,samples,t0){
+  const mr=mRoll(), drive=(FX.buoy?MG:BALL.m)*G*(Math.sin(ang)-T.mu*FX.fric*Math.cos(ang));
+  let v=v0,x=0,t=0,k=0;const dt=2e-4;
+  while(x<L){
+    const a=(drive-CDF*FX.air*v*v)/mr;
+    v+=a*dt;
+    if(v<=0) return {stopped:true,x,t};
+    x+=v*dt;t+=dt;
+    if(samples&&(++k%10===0)) samples.push([t0+t,Math.min(x,L)]);
+    if(t>15) return {stopped:true,x,t};
+  }
+  if(samples) samples.push([t0+t,L]);
+  return {stopped:false,v,t};
+}
+
+/* 空中飛行：重力（扣浮力）、二次阻力、Magnus（上旋→向下），質量含附加質量 */
+function flight(ve,ph){
+  const mt=BALL.m+(FX.buoy?MA:0), wr=ve/Math.sin(alphaHalf()); // 離槽時自旋 ω·r = v/sinα（上旋）
+  const acc=(vx,vy)=>{const s=Math.hypot(vx,vy),S=wr/s,cl=1/(2+1/S),km=0.5*RHO*cl*AREA; // Sawicki 近似 C_L(S)
+    const cd=CDF*FX.drag,kk=km*FX.magnus,W=(FX.buoy?MG:BALL.m)*G;
+    return [(-cd*s*vx+kk*s*vy)/mt,(-W-cd*s*vy-kk*s*vx)/mt];};
+  let x=0,y=Hv()+dc(),vx=ve*Math.cos(ph),vy=-ve*Math.sin(ph),t=0;const dt=4e-4;
+  const tr=[[0,x,y]];
+  while(y>BALL.r&&t<3){
+    const a1=acc(vx,vy);
+    const b2x=vx+a1[0]*dt/2,b2y=vy+a1[1]*dt/2,a2=acc(b2x,b2y);
+    const b3x=vx+a2[0]*dt/2,b3y=vy+a2[1]*dt/2,a3=acc(b3x,b3y);
+    const b4x=vx+a3[0]*dt,b4y=vy+a3[1]*dt,a4=acc(b4x,b4y);
+    x+=dt/6*(vx+2*b2x+2*b3x+b4x);
+    y+=dt/6*(vy+2*b2y+2*b3y+b4y);
+    vx+=dt/6*(a1[0]+2*a2[0]+2*a3[0]+a4[0]);
+    vy+=dt/6*(a1[1]+2*a2[1]+2*a3[1]+a4[1]);
+    t+=dt;tr.push([t,x,y]);
+  }
+  const p1=tr[tr.length-2],p2=tr[tr.length-1];
+  const fr=(p1[2]-BALL.r)/(p1[2]-p2[2]);
+  const xl=p1[1]+fr*(p2[1]-p1[1]),tl=p1[0]+fr*(p2[0]-p1[0]);
+  tr[tr.length-1]=[tl,xl,BALL.r];
+  return {tr,xl,tl,vx,vy};
+}
+
+/* 一次完整發射 */
+function simulateLaunch(sCm){
+  const th=thetaR(),ph=tiltR(),kap=kappa(),gate=asm.release==='gate';
+  let s=Math.max(0.005,sCm/100+gauss()*(gate?0.0008:0.003));
+  const vp=gate?0:Math.abs(gauss())*0.03;
+  const rs=[];
+  const r1=roll(vp,s,th,rs,0);
+  if(r1.stopped) return {ok:false,why:'球停在斜軌上：坡度太小或釋放點太低，槽面阻力讓球滾不動。'};
+  let v=r1.v;const vBottom=v;
+  if(asm.trans==='kink') v=v*(Math.cos(th)+kap)/(1+kap); else v*=0.997;
+  const vStartH=v,hs=[];
+  const r2=roll(v,LhTrue(),ph,hs,r1.t);
+  if(r2.stopped) return {ok:false,why:'球停在水平段上，沒有滾出槽口。'};
+  const ve=r2.v*(1+gauss()*0.005);
+  const fl=flight(ve,ph);
+  const latStd=0.3+5*clamp((openDeg()-60)/110,0,1)**3;
+  const zl=fl.xl*Math.tan(gauss()*latStd*D2R);
+  const sig=asm.view==='side'?0.35:0.75;
+  const org=asm.plumb?T.originPlumb:T.originNo;
+  const Rread=rt(fl.xl*100-org+gauss()*sig,0.1);
+  return {ok:true,s,vBottom,vStartH,ve,tR:r1.t,tH:r2.t,rs,hs,fl,zl,Rread};
+}
+
+/* 無隨機誤差的確定性發射（⑥ 效應分解用） */
+function detLaunch(sCm,fx){
+  const keep=FX;FX=fx||FX_ALL;
+  try{
+    const th=thetaR(),ph=FX.tilt?tiltR():0,kap=kappa();
+    const r1=roll(0,sCm/100,th,null,0);
+    if(r1.stopped) return {ok:false};
+    let v=r1.v;
+    if(FX.trans){ if(asm.trans==='kink') v=v*(Math.cos(th)+kap)/(1+kap); else v*=0.997; }
+    const r2=roll(v,LhTrue(),ph,null,0);
+    if(r2.stopped) return {ok:false};
+    const fl=flight(r2.v,ph);
+    return {ok:true,ve:r2.v,xl:fl.xl};
+  } finally {FX=keep;}
+}
+/* 由水平段取樣 [t,x] 求球心由 xa 到 xb 的真實時間 */
+function segTime(hs,xa,xb){
+  const tAt=x=>{for(let i=1;i<hs.length;i++){if(hs[i][1]>=x){const a=hs[i-1],b=hs[i];return a[0]+(x-a[1])/((b[1]-a[1])||1e-9)*(b[0]-a[0]);}}return hs[hs.length-1][0];};
+  return tAt(xb)-tAt(xa);
+}
+
+/* ===================== 量測 ===================== */
+const meas={H:[],fold:[],ramp:[],Lh:[],L:[]};
+const measFns={
+  H:()=>rt(Hv()*100+gauss()*0.06,0.05),
+  fold:()=>rt(openDeg()+gauss()*1.0,0.5),
+  ramp:()=>rt(asm.ramp+T.rampErr+gauss()*0.7,0.5),
+  Lh:()=>rt(LhTrue()*100+gauss()*0.05,0.05),
+  L:()=>rt(Ltrue()*100+gauss()*0.05,0.05)
+};
+let Lset=15;
+function Ltrue(){return Math.min(Lset/100+T.LmErr,LhTrue()-0.01);}
+function measH(sCm){return rt(sCm*Math.sin(thetaR())+gauss()*0.06,0.05);}
+function meanStd(a){const n=a.length;if(!n)return null;const m=a.reduce((p,c)=>p+c,0)/n;const s=n>1?Math.sqrt(a.reduce((p,c)=>p+(c-m)**2,0)/(n-1)):0;return {m,s,n};}
+
+/* ===================== 場景繪製 ===================== */
+const SC=700,X0=560,YT=400;
+const px=X=>X0+X*SC, py=Y=>YT-Y*SC;
+function rampVertex(d){const th=thetaR();return [-LhTrue()-d*Math.cos(th),Hv()+d*Math.sin(th)];}
+function rampCenter(d){const th=thetaR(),c=dc(),v=rampVertex(d);return [v[0]+c*Math.sin(th),v[1]+c*Math.cos(th)];}
+function hCenter(X){return [X,Hv()+dc()];}
+function P(p){return px(p[0]).toFixed(1)+' '+py(p[1]).toFixed(1);}
+
+function sceneSVG(o){
+  o=o||{};
+  const th=thetaR(),Lh=LhTrue(),hv=Hv(),bw=Math.max(Lh+0.02,0.22);
+  let g='';
+  g+=`<rect x="0" y="${YT}" width="960" height="40" class="tbl"/>`;
+  g+=`<rect x="${px(0.02)}" y="${YT-3}" width="${0.50*SC}" height="3" class="paper"/>`;
+  for(let c=0;c<=55;c++){const x=px(c/100),L=c%10===0?10:(c%5===0?7:4);
+    g+=`<line x1="${x}" y1="${YT}" x2="${x}" y2="${YT+L}" class="tick"/>`;
+    if(c%10===0) g+=`<text x="${x}" y="${YT+24}" class="tlab">${c}</text>`;}
+  g+=`<text x="${px(0.56)}" y="${YT+24}" class="tlab">cm</text>`;
+  g+=`<rect x="${px(-bw)}" y="${py(T.Hb)}" width="${bw*SC}" height="${T.Hb*SC}" class="boxr"/>`;
+  g+=`<text x="${px(-bw/2)-14}" y="${py(T.Hb/2)}">紙盒</text>`;
+  // 竹筷支架
+  [0.14,0.27,0.39].forEach(d=>{const v=rampVertex(d);const base=v[0]<-bw?0:T.Hb;
+    g+=`<line x1="${px(v[0])}" y1="${py(v[1])+2}" x2="${px(v[0])}" y2="${py(base)}" class="leg"/>`;});
+  // 槽底摺線
+  const R0=rampVertex(LRAMP),J=rampVertex(0),E=[0,hv];
+  let path;
+  if(asm.trans==='smooth'){const a=rampVertex(0.035),b=[-Lh+0.035,hv];path=`M${P(R0)} L${P(a)} Q${P(J)} ${P(b)} L${P(E)}`;}
+  else path=`M${P(R0)} L${P(J)} L${P(E)}`;
+  g+=`<path d="${path}" class="groove"/>`;
+  // 鉛垂線
+  if(asm.plumb){g+=`<line x1="${px(0)}" y1="${py(hv)}" x2="${px(0)}" y2="${YT-4}" class="plumb"/><rect x="${px(0)-2}" y="${YT-18}" width="4" height="14" fill="#b8864b"/>`;}
+  g+=`<text x="${px(0)-4}" y="${YT-8}" style="font-size:12px">O</text>`;
+  // 釋放記號
+  if(o.sMark!=null){const v=rampVertex(o.sMark/100),th2=th;
+    const n=[Math.sin(th2),Math.cos(th2)];
+    g+=`<line x1="${px(v[0])}" y1="${py(v[1])}" x2="${px(v[0]+n[0]*0.05)}" y2="${py(v[1]+n[1]*0.05)}" stroke="var(--acc)" stroke-width="2"/>`;
+    g+=`<text x="${px(v[0]+n[0]*0.055)-10}" y="${py(v[1]+n[1]*0.055)}" style="fill:var(--acc);font-size:12px">s</text>`;}
+  // 計時記號 A、B（B 在槽口）
+  if(o.hm){[-Ltrue(),0].forEach((X,k)=>{g+=`<line x1="${px(X)}" y1="${py(hv)-4}" x2="${px(X)}" y2="${py(hv)-50}" stroke="#e03131" stroke-width="2"/><text x="${px(X)-4}" y="${py(hv)-54}" style="fill:#e03131;font-size:13px">${k?'B':'A'}</text>`;});}
+  // 舊落點
+  (o.marks||[]).forEach(m=>{g+=`<line x1="${px(m.x)}" y1="${YT-7}" x2="${px(m.x)}" y2="${YT+1}" class="${m.cur?'mark':'markold'}"/>`;});
+  // 軌跡
+  if(o.trail&&o.trail.length>1) g+=`<polyline points="${o.trail.map(p=>px(p[0]).toFixed(1)+','+py(p[1]).toFixed(1)).join(' ')}" class="trail"/>`;
+  // 球
+  const bp=o.ball||(o.sMark!=null?rampCenter(o.sMark/100):hCenter(-Lh*0.5));
+  g+=`<circle cx="${px(bp[0])}" cy="${py(bp[1])}" r="${BALL.r*SC}" class="ballc"/>`;
+  // 槽壁（半透明，蓋在球前面）
+  const off=WALL*SC/2;
+  g+=`<g transform="translate(0,${-off})"><path d="${path}" class="wall" style="stroke-width:${WALL*SC}"/></g>`;
+  // 標註
+  g+=`<text x="${px(-Lh/2)-8}" y="${py(hv)+18}" style="font-size:12px">水平段</text>`;
+  g+=`<text x="${px(R0[0])+6}" y="${py(R0[1])-8}" style="font-size:12px">斜軌 θ</text>`;
+  // V 槽截面小圖
+  g+=insetSVG();
+  return g;
+}
+function insetSVG(){
+  const ox=770,oy=14,w=176,h=140,s=1100; // 1 m = 1100 px
+  const a=alphaHalf(),r=BALL.r*s,c=dc()*s;
+  const vx=ox+w/2,vy=oy+h-18;
+  const L=60/Math.cos(a)>150?150:60/Math.cos(Math.min(a,1.4));
+  const lx=vx-Math.sin(a)*90,ly=vy-Math.cos(a)*90,rx=vx+Math.sin(a)*90;
+  const cy=vy-c,re=BALL.r*Math.sin(a)*s;
+  let g=`<rect x="${ox}" y="${oy}" width="${w}" height="${h}" rx="8" fill="var(--card)" stroke="var(--line)"/>`;
+  g+=`<text x="${ox+8}" y="${oy+16}" style="font-size:11px">V 槽截面（實際張角）</text>`;
+  g+=`<clipPath id="ic"><rect x="${ox}" y="${oy}" width="${w}" height="${h}" rx="8"/></clipPath><g clip-path="url(#ic)">`;
+  g+=`<circle cx="${vx}" cy="${cy}" r="${r}" class="ballc" opacity=".85"/>`;
+  g+=`<path d="M${lx} ${ly} L${vx} ${vy} L${rx} ${ly}" class="groove"/>`;
+  g+=`<line x1="${vx-Math.cos(a)*r}" y1="${cy+re}" x2="${vx+Math.cos(a)*r}" y2="${cy+re}" stroke="var(--acc2)" stroke-dasharray="4 2"/>`;
+  g+=`</g>`;
+  return g;
+}
+function drawScene(id,o){document.getElementById(id).innerHTML=sceneSVG(o);}
+
+/* ===================== UI ===================== */
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.opacity=0,2400);}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  refresh();
+});
+
+function bump(){asm.ver++;$('verLab').textContent='#'+asm.ver;renderTable();}
+function chipList(key,unit,dec){
+  const a=meas[key],cId={H:'cH',fold:'cFold',ramp:'cRamp',Lh:'cLh'}[key],sId={H:'sH',fold:'sFold',ramp:'sRamp',Lh:'sLh'}[key];
+  $(cId).innerHTML=a.map(x=>`<span class="chip">${f(x,dec)}</span>`).join('');
+  const st=meanStd(a);
+  $(sId).innerHTML=st?`平均 ${f(st.m,dec+1)} ${unit}`+(st.n>1?`，標準差 ${f(st.s,dec+1)} ${unit}（n=${st.n}）`:''):'';
+}
+function doMeas(key,unit,dec){meas[key].push(measFns[key]());chipList(key,unit,dec);}
+$('mFold').onclick=()=>doMeas('fold','°',1);
+$('mRamp').onclick=()=>doMeas('ramp','°',1);
+$('mLh').onclick=()=>doMeas('Lh','cm',2);
+$('mH').onclick=()=>doMeas('H','cm',2);
+
+$('foldR').oninput=e=>{asm.fold=+e.target.value;$('foldV').textContent=asm.fold;T.foldErr=gauss()*4;meas.fold=[];chipList('fold','°',1);bump();refresh();};
+$('rampR').oninput=e=>{asm.ramp=+e.target.value;$('rampV').textContent=asm.ramp;T.rampErr=gauss()*0.8;meas.ramp=[];chipList('ramp','°',1);bump();refresh();};
+$('LhR').oninput=e=>{asm.Lh=+e.target.value;$('LhV').textContent=asm.Lh;T.LhErr=gauss()*0.15;meas.Lh=[];chipList('Lh','cm',2);$('lvlMsg').textContent='';bump();refresh();};
+document.querySelectorAll('input[name=trans]').forEach(r=>r.onchange=()=>{asm.trans=r.value;bump();refresh();});
+document.querySelectorAll('input[name=view]').forEach(r=>r.onchange=()=>{asm.view=r.value;});
+document.querySelectorAll('input[name=rel]').forEach(r=>r.onchange=()=>{asm.release=r.value;});
+$('plumb').onchange=e=>{asm.plumb=e.target.checked;bump();refresh();};
+
+function shimLabel(){const n=asm.shims;$('shimLab').textContent=n===0?'未墊紙片':(n>0?`出口端墊 ${n} 片`:`入口端墊 ${-n} 片`);}
+function shim(d){asm.shims=d===0?0:asm.shims+d;shimLabel();$('lvlMsg').textContent='';bump();}
+$('shimE').onclick=()=>shim(1);$('shimI').onclick=()=>shim(-1);$('shim0').onclick=()=>shim(0);
+$('lvl').onclick=()=>{
+  const tp=Math.tan(tiltR()),thr=T.mu+0.001;
+  let m;
+  if(Math.abs(tp)<thr) m='<span style="color:var(--ok)">球靜止不動。</span>在紙槽的阻力範圍內看不出傾斜（不代表完全水平）。';
+  else if(tp>0) m='<span style="color:var(--warn)">球自己慢慢滾向出口端。</span>出口端偏低，可在出口端下方墊紙片。';
+  else m='<span style="color:var(--warn)">球往斜軌方向滾回去。</span>出口端偏高，可在入口端下方墊紙片。';
+  $('lvlMsg').innerHTML=m;
+};
+
+/* ---------- ③ 數據 ---------- */
+const rows=[];let selRow=-1;
+function curS(){return +$('sR').value;}
+$('sR').oninput=e=>{$('sV').textContent=f(+e.target.value,1);refresh();};
+$('addRow').onclick=()=>{
+  const s=curS();
+  rows.push({s,h:measH(s),R:[],t:[],tTrue:[],ver:asm.ver});
+  selRow=rows.length-1;renderTable();
+  toast(`已新增 s = ${f(s,1)} cm，量得 h = ${f(rows[selRow].h,2)} cm`);
+};
+function renderTable(){
+  let h='<tr><th></th><th>s (cm)</th><th>h (cm)</th>';
+  for(let i=1;i<=5;i++) h+=`<th>R${i} (cm)</th>`;
+  h+='<th>R̄ (cm)</th><th>標準差 (cm)</th><th>組裝</th><th></th></tr>';
+  rows.forEach((r,i)=>{
+    const st=meanStd(r.R.filter(x=>isFinite(x)));
+    const stale=r.ver!==asm.ver;
+    h+=`<tr class="${i===selRow?'sel':''} ${stale?'stale':''}" data-i="${i}">`;
+    h+=`<td><input type="radio" name="rsel" ${i===selRow?'checked':''} data-i="${i}" style="width:auto"></td>`;
+    h+=`<td>${f(r.s,1)}</td><td><input data-i="${i}" data-k="h" value="${f(r.h,2)}"></td>`;
+    for(let j=0;j<5;j++) h+=`<td><input data-i="${i}" data-k="R" data-j="${j}" value="${r.R[j]!=null&&isFinite(r.R[j])?f(r.R[j],1):''}"></td>`;
+    h+=`<td>${st?f(st.m,2):''}</td><td>${st&&st.n>1?f(st.s,2):''}</td><td>#${r.ver}${stale?'（舊）':''}</td>`;
+    h+=`<td><button class="g" data-del="${i}" style="padding:1px 8px">刪</button></td></tr>`;
+  });
+  if(!rows.length) h+='<tr><td colspan="11" class="note">尚無數據。先設定 s，按「以此 s 新增一列」。</td></tr>';
+  $('dt').innerHTML=h;
+  $('dt').querySelectorAll('input[name=rsel]').forEach(x=>x.onchange=()=>selectRow(+x.dataset.i));
+  $('dt').querySelectorAll('input[data-k]').forEach(x=>x.onchange=()=>{
+    const r=rows[+x.dataset.i],v=parseFloat(x.value);
+    if(x.dataset.k==='h') r.h=isFinite(v)?v:r.h;
+    else {const j=+x.dataset.j;if(x.value.trim()==='') r.R.splice(j,1); else r.R[j]=v;}
+    renderTable();
+  });
+  $('dt').querySelectorAll('button[data-del]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.del;rows.splice(i,1);if(selRow>=rows.length) selRow=rows.length-1;renderTable();refresh();});
+}
+function selectRow(i){selRow=i;const r=rows[i];$('sR').value=r.s;$('sV').textContent=f(r.s,1);renderTable();refresh();}
+
+/* ---------- 動畫 ---------- */
+let busy=false,lastTrail=null,lastLand=null;
+function interp(arr,t,col){ // arr rows [t,...]
+  if(t<=arr[0][0]) return arr[0].slice(1);
+  let lo=0,hi=arr.length-1;
+  if(t>=arr[hi][0]) return arr[hi].slice(1);
+  while(hi-lo>1){const m=(lo+hi)>>1;if(arr[m][0]<=t) lo=m; else hi=m;}
+  const a=arr[lo],b=arr[hi],w=(t-a[0])/(b[0]-a[0]);
+  return a.slice(1).map((v,k)=>v+w*(b[k+1]-v));
+}
+function animate(res,svgId,sCm,spdO,hook){
+  return new Promise(done=>{
+    const spd=spdO||+$('spd').value, s0=res.s, Lh=LhTrue();
+    const rs=[[0,0]].concat(res.rs), hs=[[res.tR,0]].concat(res.hs);
+    const tF=res.tR+res.tH, tL=tF+res.fl.tl;
+    const fl=res.fl.tr.map(p=>[p[0]+tF,p[1],p[2]]);
+    // 彈跳
+    const e=0.80;let bx=res.fl.xl,bvx=res.fl.vx*0.75,bvy=-res.fl.vy*e,bt=tL;const bounces=[];
+    for(let k=0;k<3;k++){const dur=2*bvy/G;bounces.push({t0:bt,x0:bx,vx:bvx,vy:bvy,dur});bx+=bvx*dur;bt+=dur;bvx*=0.8;bvy*=e;}
+    const tEnd=bt+0.1;
+    const trail=[];const marks=svgId==='sc3'?otherMarks():[];
+    let start=null;
+    function frame(ts){
+      if(start===null) start=ts;
+      const t=(ts-start)/1000*spd;
+      let pos;
+      if(t<res.tR){const d=interp(rs,t)[0];pos=rampCenter(Math.max(0,s0-d));}
+      else if(t<tF){const d=interp(hs,t)[0];pos=hCenter(-Lh+d);}
+      else if(t<tL){const q=interp(fl,t);pos=[q[0],q[1]];trail.push(pos);}
+      else{let b=bounces.find(b=>t<b.t0+b.dur);
+        if(b){const u=t-b.t0;pos=[b.x0+b.vx*u,BALL.r+b.vy*u-0.5*G*u*u];}
+        else pos=[bx,BALL.r];}
+      drawScene(svgId,{ball:pos,trail:trail.length?trail:null,marks:marks.concat(t>=tL?[{x:res.fl.xl,cur:true}]:[]),sMark:sCm,hm:svgId==='sc4'});
+      if(hook) hook(t);
+      if(t<tEnd) requestAnimationFrame(frame); else {if(svgId==='sc3'){lastTrail=trail;lastLand=res.fl.xl;}done();}
+    }
+    requestAnimationFrame(frame);
+  });
+}
+function otherMarks(){return (lastLand!=null?[{x:lastLand}]:[]);}
+
+async function fireOnce(record){
+  if(busy) return false;
+  if(record){
+    if(selRow<0){ $('addRow').onclick(); }
+    const r=rows[selRow];
+    if(r.ver!==asm.ver){toast('這一列是舊組裝的數據，請新增一列');return false;}
+    if(r.R.filter(x=>isFinite(x)).length>=5){toast('這一列已滿 5 次，請新增一列');return false;}
+  }
+  const sCm=record?rows[selRow].s:curS();
+  const res=simulateLaunch(sCm);
+  if(!res.ok){$('lastMsg').innerHTML=`<span style="color:var(--warn)">${res.why}</span>`;$('lastR').textContent='—';return false;}
+  busy=true;setBtns();
+  await animate(res,'sc3',sCm);
+  busy=false;setBtns();
+  $('lastR').textContent=`R = ${f(res.Rread,1)} cm`;
+  const side=Math.abs(res.zl*100)>0.05?`；球落在中線${res.zl>0?'左':'右'}側約 ${f(Math.abs(res.zl*100),1)} cm`:'';
+  $('lastMsg').innerHTML=(record?'已記錄。':'試射，不記錄。')+side;
+  if(record){const r=rows[selRow];const j=r.R.findIndex(x=>!isFinite(x));if(j>=0) r.R[j]=res.Rread; else r.R.push(res.Rread);renderTable();}
+  return true;
+}
+function setBtns(){['fire','fire5','test','addRow','fire4','fire45'].forEach(id=>$(id).disabled=busy);}
+$('fire').onclick=()=>fireOnce(true);
+$('test').onclick=()=>fireOnce(false);
+$('fire5').onclick=async()=>{
+  if(selRow<0) $('addRow').onclick();
+  while(rows[selRow]&&rows[selRow].ver===asm.ver&&rows[selRow].R.filter(x=>isFinite(x)).length<5){
+    const ok=await fireOnce(true);if(!ok) break;}
+};
+
+function refresh(){
+  drawScene('sc2',{sMark:null,marks:[]});
+  if(!busy) drawScene('sc3',{sMark:curS(),marks:otherMarks(),trail:lastTrail});
+  const rows3=`斜軌實際以量角器量得為準；目前釋放記號 s = ${f(curS(),1)} cm。`;
+  $('h3info').textContent=rows3;
+  const on=document.querySelector('#nav button.on').dataset.t;
+  if(on==='t4'){render4();if(!busy) drawScene('sc4',{sMark:(sel4>=0&&rows[sel4])?rows[sel4].s:curS(),hm:true});}
+  if(on==='t5') render5();
+  if(on==='t6'&&revealed) render6();
+}
+$('btnNew').onclick=()=>{
+  if(!confirm('換一組新器材會清除所有量測與數據，確定？')) return;
+  newTruth();Object.keys(meas).forEach(k=>meas[k]=[]);chipL();revealed=false;$('rev').style.display='none';$('hideRev').style.display='none';rows.length=0;selRow=-1;lastTrail=null;lastLand=null;
+  asm.shims=0;shimLabel();$('lvlMsg').textContent='';['fold','ramp','Lh','H'].forEach(k=>chipList(k,k==='fold'||k==='ramp'?'°':'cm',k==='fold'||k==='ramp'?1:2));
+  bump();refresh();toast('已換一組新器材');
+};
+
+/* ===================== ④ v₀ 量測 ===================== */
+const R_CM=2.00; // 乒乓球半徑（題目給定 40 mm 球）
+function curRows(){return rows.filter(r=>r.ver===asm.ver);}
+function chipL(){
+  $('cL').innerHTML=meas.L.map(x=>`<span class="chip">${f(x,2)}</span>`).join('');
+  const st=meanStd(meas.L);
+  $('sL').innerHTML=st?`平均 ${f(st.m,3)} cm`+(st.n>1?`，標準差 ${f(st.s,3)} cm（n=${st.n}）`:''):'';
+}
+$('mL').onclick=()=>{meas.L.push(measFns.L());chipL();render4();};
+$('LR').oninput=e=>{$('LV').textContent=e.target.value;};
+$('LR').onchange=e=>{
+  const any=rows.some(r=>r.t.length);
+  if(any&&!confirm('改變記號位置會清除所有計時數據，確定？')){e.target.value=Lset;$('LV').textContent=Lset;return;}
+  Lset=+e.target.value;meas.L=[];chipL();rows.forEach(r=>{r.t=[];r.tTrue=[];});refresh();
+};
+function kapMeas(){const st=meanStd(meas.fold);if(!st)return null;const a=st.m/2*D2R;return {k:2/(3*Math.sin(a)**2),a,st};}
+function vE(r){const k=kapMeas();if(!k)return null;return Math.sqrt(2*G*(r.h/100)/(1+k.k));}
+function Lmeas(){const st=meanStd(meas.L);return st?st.m:null;}
+function vS(r){
+  const L=Lmeas(),st=meanStd(r.t);if(!L||!st||st.m<=0)return null;
+  const v=L/100/st.m;return {v,sv:st.n>1?v*st.s/st.m/Math.sqrt(st.n):null,st};
+}
+
+/* 碼錶 */
+const sw={run:false,t0:0,pend:null};
+function swTick(){if(sw.run){$('swDisp').textContent=f(Math.floor((performance.now()-sw.t0)/10)/100,2);requestAnimationFrame(swTick);}}
+function swPress(){
+  if(!sw.run){sw.run=true;sw.t0=performance.now();swTick();}
+  else{
+    sw.run=false;const t=Math.floor((performance.now()-sw.t0)/10)/100;$('swDisp').textContent=f(t,2);
+    if(sw.pend){const {row,tTrue}=sw.pend;sw.pend=null;$('swHint').textContent='';recordT(row,t,tTrue);}
+  }
+}
+$('swBtn').onclick=swPress;
+document.addEventListener('keydown',e=>{
+  if(e.code!=='Space') return;
+  if(document.querySelector('#nav button.on').dataset.t!=='t4') return;
+  const tg=e.target;if(tg&&(tg.tagName==='SELECT'||(tg.tagName==='INPUT'&&tg.type!=='radio'&&tg.type!=='checkbox'))) return;
+  e.preventDefault();swPress();
+});
+
+let sel4=-1;
+function fillRowSel(){
+  const cr=rows.map((r,i)=>[r,i]).filter(([r])=>r.ver===asm.ver);
+  if(!cr.find(([,i])=>i===sel4)) sel4=cr.length?cr[0][1]:-1;
+  $('rowSel4').innerHTML=cr.map(([r,i])=>`<option value="${i}" ${i===sel4?'selected':''}>s = ${f(r.s,1)} cm（h = ${f(r.h,2)} cm）已計時 ${r.t.length} 次</option>`).join('')||'<option>（請先在 ③ 新增數據列）</option>';
+}
+$('rowSel4').onchange=e=>{sel4=+e.target.value;refresh();};
+function tmode(){return document.querySelector('input[name=tmode]:checked').value;}
+function recordT(i,t,tTrue){
+  const r=rows[i];if(!r)return;
+  if(r.t.length>=5){toast('這一列已有 5 次計時');return;}
+  r.t.push(t);r.tTrue.push(tTrue);$('msg4').innerHTML=`已記錄 t = ${f(t,2)} s`;render4();
+}
+async function fire4(){
+  if(busy) return false;
+  if(sel4<0||!rows[sel4]){toast('請先在 ③ 新增數據列');return false;}
+  const r=rows[sel4];
+  if(r.t.length>=5){toast('這一列已有 5 次計時');return false;}
+  const res=simulateLaunch(r.s);
+  if(!res.ok){$('msg4').innerHTML=`<span style="color:var(--warn)">${res.why}</span>`;return false;}
+  const Lh=LhTrue(),L=Ltrue();
+  const hs=[[0,0]].concat(res.hs.map(q=>[q[0]-res.tR,q[1]]));
+  const tTrue=segTime(hs,Lh-L,Lh);
+  const tA=res.tR+segTime(hs,0,Lh-L),tB=tA+tTrue;
+  const me=tmode()==='me';
+  busy=true;setBtns();sw.run=false;$('swDisp').textContent='0.00';
+  if(me){
+    sw.pend={row:sel4,tTrue};$('swHint').textContent='球心通過 A 按一次，通過 B 再按一次';
+    await animate(res,'sc4',r.s,1,null);
+  }else{
+    const ts=Math.max(0.06,T.rs+gauss()*0.04),te=Math.max(-0.04,T.re+gauss()*0.05);
+    const t1=tA+ts,t2=tB+te,tm=Math.floor((t2-t1)*100)/100;
+    await animate(res,'sc4',r.s,+$('spd4').value,t=>{
+      if(t>=t1&&t<t2) $('swDisp').textContent=f(Math.floor((t-t1)*100)/100,2);
+      else if(t>=t2) $('swDisp').textContent=f(tm,2);
+    });
+    $('swDisp').textContent=f(tm,2);
+    recordT(sel4,tm,tTrue);
+  }
+  busy=false;setBtns();
+  if(me&&sw.pend) $('swHint').textContent=sw.run?'球已飛出，請按錶停止':'尚未開始計時；可再發射一次';
+  return true;
+}
+$('fire4').onclick=()=>fire4();
+$('fire45').onclick=async()=>{
+  if(tmode()==='me'){toast('親自按錶時請一次發射一球');return;}
+  while(sel4>=0&&rows[sel4]&&rows[sel4].t.length<5){const ok=await fire4();if(!ok)break;}
+};
+
+function render4(){
+  fillRowSel();
+  const k=kapMeas();
+  $('kap4').innerHTML=k?`量得張角 2α = ${f(k.st.m,2)}°（n = ${k.st.n}）<br>α = ${f(k.st.m/2,2)}°，κ = 2/(3 sin²α) = <b>${f(k.k,3)}</b><br>v₀ = ${f(Math.sqrt(2*G/(1+k.k)),3)} × √h（h 以 m 為單位）`
+    :'<span style="color:var(--warn)">尚未在 ② 用量角器量 V 槽張角，無法計算 κ。</span>';
+  let h='<tr><th>s (cm)</th><th>h (cm)</th><th>t₁</th><th>t₂</th><th>t₃</th><th>t₄</th><th>t₅</th><th>t̄ (s)</th><th>σ_t (s)</th><th>v₀ 碼錶 (m/s)</th><th>v₀ 能量 (m/s)</th><th>碼錶 ÷ 能量</th></tr>';
+  const cr=curRows();
+  cr.forEach(r=>{
+    const st=meanStd(r.t),vs=vS(r),ve=vE(r);
+    h+=`<tr><td>${f(r.s,1)}</td><td>${f(r.h,2)}</td>`;
+    for(let j=0;j<5;j++) h+=`<td>${r.t[j]!=null?f(r.t[j],2):''}</td>`;
+    h+=`<td>${st?f(st.m,3):''}</td><td>${st&&st.n>1?f(st.s,3):''}</td><td>${vs?f(vs.v,3)+(vs.sv?' ± '+f(vs.sv,3):''):''}</td><td>${ve?f(ve,3):''}</td><td>${vs&&ve?f(vs.v/ve,2):''}</td></tr>`;
+  });
+  if(!cr.length) h+='<tr><td colspan="12" class="note">目前組裝沒有數據列，請先到 ③ 新增。</td></tr>';
+  $('dt4').innerHTML=h;
+  const pairs=cr.map(r=>[vS(r),vE(r)]).filter(p=>p[0]&&p[1]);
+  let m='';
+  if(!Lmeas()) m+='尚未用直尺量 L，碼錶法無法換算速度。';
+  if(pairs.length){
+    const st=meanStd(pairs.map(p=>p[0].v/p[1]));
+    const cv=meanStd(cr.flatMap(r=>{const q=meanStd(r.t);return q&&q.n>1?[q.s/q.m]:[];}));
+    m+=`碼錶法 ÷ 能量法的比值平均 <b>${f(st.m,2)}</b>`+(cv?`；同一列 5 次計時的相對離散約 <b>${f(cv.m*100,0)}%</b>`:'')+'。';
+    m+='<br>想一想：球通過 L 只要零點幾秒，按錶的反應時間卻有 0.1–0.2 s，碼錶法誤差會很大；能量法則完全沒算槽面阻力與過渡段損失。哪一個方法系統性偏高？哪一個比較不穩定？';
+  }
+  $('cmp4').innerHTML=m||'完成張角量測、L 量測與計時後，這裡會出現兩法的比較。';
+}
+
+/* ===================== ⑤ 數據分析 ===================== */
+function fitLin(xs,ys){
+  const n=xs.length;if(n<2)return null;
+  const mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;
+  let sxx=0,sxy=0,syy=0;for(let i=0;i<n;i++){sxx+=(xs[i]-mx)**2;sxy+=(xs[i]-mx)*(ys[i]-my);syy+=(ys[i]-my)**2;}
+  if(sxx===0)return null;
+  const b=sxy/sxx,a=my-b*mx;let ss=0;for(let i=0;i<n;i++)ss+=(ys[i]-a-b*xs[i])**2;
+  const s2=n>2?ss/(n-2):NaN;
+  return {a,b,sb:Math.sqrt(s2/sxx),sa:Math.sqrt(s2*(1/n+mx*mx/sxx)),r2:syy>0?1-ss/syy:1,n};
+}
+function fit0(xs,ys){
+  const n=xs.length;if(n<1)return null;let sxx=0,sxy=0;
+  for(let i=0;i<n;i++){sxx+=xs[i]**2;sxy+=xs[i]*ys[i];}
+  const k=sxy/sxx;let ss=0;for(let i=0;i<n;i++)ss+=(ys[i]-k*xs[i])**2;
+  return {k,sk:n>1?Math.sqrt(ss/(n-1)/sxx):NaN,n};
+}
+function pm(v,s,d){return f(v,d)+(isFinite(s)?' ± '+f(s,d):'');}
+function niceStep(r){const e=Math.pow(10,Math.floor(Math.log10(r/5)));const m=r/5/e;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*e;}
+function niceMax(v){const s=niceStep(v);return Math.ceil(v/s)*s;}
+const C_E='var(--acc)',C_S='var(--acc2)',C_T='var(--ok)';
+function drawChart(id,o){
+  const W=640,H=o.H||380,L=66,R=18,Tp=14,B=48;
+  const x0=o.xmin||0,y0=o.ymin||0,x1=o.xmax,y1=o.ymax;
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R),Y=y=>H-B-(y-y0)/(y1-y0)*(H-Tp-B);
+  let g='';
+  const sx=niceStep(x1-x0),sy=niceStep(y1-y0);
+  for(let v=Math.ceil(x0/sx-1e-9)*sx;v<=x1+1e-9;v+=sx) g+=`<line class="gr" x1="${X(v)}" x2="${X(v)}" y1="${Tp}" y2="${H-B}"/><text x="${X(v)}" y="${H-B+16}" text-anchor="middle" style="fill:var(--mut);font-size:11px">${+v.toFixed(5)}</text>`;
+  for(let v=Math.ceil(y0/sy-1e-9)*sy;v<=y1+1e-9;v+=sy) g+=`<line class="gr" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" style="fill:var(--mut);font-size:11px">${+v.toFixed(5)}</text>`;
+  g+=`<line class="ax" x1="${L}" x2="${L}" y1="${Tp}" y2="${H-B}"/><line class="ax" x1="${L}" x2="${W-R}" y1="${Y(Math.max(y0,Math.min(0,y1)))}" y2="${Y(Math.max(y0,Math.min(0,y1)))}"/>`;
+  g+=`<text x="${(L+W-R)/2}" y="${H-10}" text-anchor="middle">${o.xl}</text>`;
+  g+=`<text transform="translate(16 ${(Tp+H-B)/2}) rotate(-90)" text-anchor="middle">${o.yl}</text>`;
+  g+=`<clipPath id="cp_${id}"><rect x="${L}" y="${Tp}" width="${W-L-R}" height="${H-Tp-B}"/></clipPath><g clip-path="url(#cp_${id})">`;
+  (o.lines||[]).forEach(l=>{const xa=l.from!=null?l.from:x0;g+=`<line x1="${X(xa)}" y1="${Y(l.f(xa))}" x2="${X(x1)}" y2="${Y(l.f(x1))}" stroke="${l.c}" stroke-width="2" ${l.dash?'stroke-dasharray="7 5"':''}/>`;});
+  g+='</g>';
+  (o.series||[]).forEach(se=>se.pts.forEach(p=>{
+    if(p.ey) g+=`<line x1="${X(p.x)}" x2="${X(p.x)}" y1="${Y(p.y-p.ey)}" y2="${Y(p.y+p.ey)}" stroke="${se.c}" stroke-width="1.2"/>`;
+    if(p.ex) g+=`<line x1="${X(p.x-p.ex)}" x2="${X(p.x+p.ex)}" y1="${Y(p.y)}" y2="${Y(p.y)}" stroke="${se.c}" stroke-width="1.2"/>`;
+    const mk=se.sq?`<rect x="${X(p.x)-5}" y="${Y(p.y)-5}" width="10" height="10" rx="2" fill="${se.c}" stroke="var(--card)" stroke-width="2"/>`:`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="5.5" fill="${se.c}" stroke="var(--card)" stroke-width="2"/>`;
+    g+=`<g>${mk}<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="12" fill="transparent"><title>${p.tip}</title></circle></g>`;
+  }));
+  if(o.empty) g+=`<text x="${(L+W-R)/2}" y="${(Tp+H-B)/2}" text-anchor="middle" style="fill:var(--mut)">${o.empty}</text>`;
+  $(id).innerHTML=g;
+}
+function legend(id,items){$(id).innerHTML=items.map(it=>`<span>${it.sq?`<svg width="12" height="12"><rect width="12" height="12" rx="2" fill="${it.c}"/></svg>`:it.line?`<svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="${it.c}" stroke-width="2" ${it.dash?'stroke-dasharray="5 3"':''}/></svg>`:`<svg width="12" height="12"><circle cx="6" cy="6" r="5.5" fill="${it.c}"/></svg>`}${it.t}</span>`).join('');}
+
+function Hcalc(){
+  const Hs=meanStd(meas.H),k=kapMeas();
+  if(!Hs||!k) return null;
+  const Hc=Hs.m+R_CM/Math.sin(k.a)-R_CM;
+  return {Hb:Hs.m,Hc,k,slope:Math.sqrt(2*Hc/100/G)*100};
+}
+function dataPts(){
+  return curRows().map(r=>{const st=meanStd(r.R.filter(x=>isFinite(x)));if(!st)return null;
+    return {r,R:st.m,sR:st.n>1?st.s/Math.sqrt(st.n):0,n:st.n,vE:vE(r),vS:vS(r)};}).filter(Boolean);
+}
+function render5(){
+  const hc=Hcalc();
+  $('hc5').innerHTML=hc?`<b>發射高度</b>：量得槽底高 ${f(hc.Hb,2)} cm；球心離槽時比槽底高 r/sin α = ${f(R_CM/Math.sin(hc.k.a),2)} cm，落地時球心離地 r = ${f(R_CM,2)} cm。<br>球心下降量 <b>H = ${f(hc.Hb,2)} + ${f(R_CM/Math.sin(hc.k.a),2)} − ${f(R_CM,2)} = ${f(hc.Hc,2)} cm</b>，理論斜率 √(2H/g) = <b>${f(hc.slope,2)} cm/(m/s)</b>（飛行時間 ${f(hc.slope/100,4)} s）。`
+    :'<span style="color:var(--warn)">請先在 ② 量槽口高度 H 與 V 槽張角，才能計算理論值。</span>';
+  const P=dataPts();
+  const shE=$('showE').checked,shS=$('showS').checked,shT=$('showT').checked;
+  // ---- 圖 1
+  const pE=P.filter(p=>p.vE!=null),pS=P.filter(p=>p.vS);
+  const vmax=Math.max(0.5,...(shE?pE.map(p=>p.vE):[]),...(shS?pS.map(p=>p.vS.v+(p.vS.sv||0)):[]))*1.1;
+  const Rmax=Math.max(10,...P.map(p=>p.R+p.sR))*1.12;
+  const fE=fitLin(pE.map(p=>p.vE),pE.map(p=>p.R)),fE0=fit0(pE.map(p=>p.vE),pE.map(p=>p.R));
+  const fS=fitLin(pS.map(p=>p.vS.v),pS.map(p=>p.R)),fS0=fit0(pS.map(p=>p.vS.v),pS.map(p=>p.R));
+  const series=[],lines=[],lg=[];
+  if(shE&&pE.length){series.push({c:C_E,pts:pE.map(p=>({x:p.vE,y:p.R,ey:p.sR,tip:`能量法 v₀ = ${f(p.vE,3)} m/s，R̄ = ${f(p.R,2)} cm（h = ${f(p.r.h,2)} cm）`}))});lg.push({c:C_E,t:'能量法 v₀'});
+    if(fE){lines.push({c:C_E,f:x=>fE.a+fE.b*x});lg.push({c:C_E,line:1,t:'能量法擬合 R = a + b v₀'});}}
+  if(shS&&pS.length){series.push({c:C_S,sq:1,pts:pS.map(p=>({x:p.vS.v,y:p.R,ey:p.sR,ex:p.vS.sv||0,tip:`碼錶法 v₀ = ${f(p.vS.v,3)} m/s，R̄ = ${f(p.R,2)} cm（h = ${f(p.r.h,2)} cm）`}))});lg.push({c:C_S,sq:1,t:'碼錶法 v₀'});
+    if(fS){lines.push({c:C_S,f:x=>fS.a+fS.b*x});lg.push({c:C_S,line:1,t:'碼錶法擬合'});}}
+  if(shT&&hc){lines.push({c:C_T,dash:1,f:x=>hc.slope*x});lg.push({c:C_T,line:1,dash:1,t:'理論 R = v₀√(2H/g)'});}
+  legend('lg1',lg);
+  drawChart('ch1',{xl:'v₀ (m/s)',yl:'R̄ (cm)',xmax:niceMax(vmax),ymax:niceMax(Rmax),series,lines,empty:P.length?null:'尚無數據（③ 需先有落點，④ 需有 v₀）'});
+  let t='<tr><th>方法</th><th>過原點斜率 k (cm·s/m)</th><th>一般擬合斜率 b</th><th>截距 a (cm)</th><th>R²</th><th>k 與理論差</th><th>由 k 反推 g = 2H/k² (m/s²)</th></tr>';
+  const row=(nm,F,F0)=>{if(!F0){t+=`<tr><td>${nm}</td><td colspan="6" class="note">數據不足</td></tr>`;return;}
+    t+=`<tr><td>${nm}</td><td>${pm(F0.k,F0.sk,2)}</td><td>${F?pm(F.b,F.sb,2):''}</td><td>${F?pm(F.a,F.sa,2):''}</td><td>${F?f(F.r2,4):''}</td><td>${hc?f((F0.k/hc.slope-1)*100,1)+' %':''}</td><td>${hc?f(2*hc.Hc/100/(F0.k/100)**2,2):''}</td></tr>`;};
+  row('能量法',fE,fE0);row('碼錶法',fS,fS0);
+  $('fit1').innerHTML=t;
+  let n1='';
+  if(fE&&isFinite(fE.sa)) n1+=`能量法擬合截距 a = ${pm(fE.a,fE.sa,2)} cm${Math.abs(fE.a)>2*fE.sa?'，<b>明顯不為零</b>：能量法算出的 v₀ 沒有扣掉槽面阻力的損失，而且損失在低速時占的比例更大，資料點整體右移、截距變負。':'，在誤差內與零相符。'} `;
+  if(fS0&&fE0) n1+=`兩法過原點斜率相差 ${f((fS0.k/fE0.k-1)*100,1)}%。`;
+  n1+=' 由斜率反推 g 是一個很好的自我檢驗：若 v₀ 高估，反推出來的 g 就會偏大。';
+  $('note1').innerHTML=n1;
+  // ---- 圖 2  R²–h
+  const hmax=Math.max(2,...P.map(p=>p.r.h))*1.1,R2max=Math.max(50,...P.map(p=>(p.R+p.sR)**2))*1.1;
+  const F2=fitLin(P.map(p=>p.r.h),P.map(p=>p.R*p.R));
+  const A_th=hc?4*hc.Hc/(1+hc.k.k):null;
+  const lines2=[],lg2=[{c:C_E,t:'量測 R̄²'}];
+  if(F2){lines2.push({c:C_E,f:x=>F2.a+F2.b*x});lg2.push({c:C_E,line:1,t:'擬合 R² = A h + B'});}
+  if(A_th){lines2.push({c:C_T,dash:1,f:x=>A_th*x});lg2.push({c:C_T,line:1,dash:1,t:'理論（無損失）R² = 4Hh/(1+κ)'});}
+  legend('lg2',lg2);
+  drawChart('ch2',{xl:'h (cm)',yl:'R̄² (cm²)',xmax:niceMax(hmax),ymax:niceMax(R2max),lines:lines2,
+    series:[{c:C_E,pts:P.map(p=>({x:p.r.h,y:p.R*p.R,ey:2*p.R*p.sR,tip:`h = ${f(p.r.h,2)} cm，R̄² = ${f(p.R*p.R,1)} cm²`}))}],empty:P.length?null:'尚無數據'});
+  const thm=meanStd(meas.ramp);
+  let t2='<tr><th>斜率 A (cm)</th><th>截距 B (cm²)</th><th>h₀ = −B/A (cm)</th><th>理論斜率 4H/(1+κ)</th><th>A ÷ 理論</th><th>μ（由 A）</th><th>μ（由 h₀）</th></tr>';
+  let muA=null,muH=null;
+  if(F2){
+    const h0=-F2.a/F2.b,ratio=A_th?F2.b/A_th:null;
+    const cot=thm?1/Math.tan(thm.m*D2R):null,Lhm=meanStd(meas.Lh);
+    if(ratio&&cot) muA=(1-ratio)/cot;
+    if(Lhm&&cot&&ratio) muH=h0*ratio/Lhm.m;
+    t2+=`<tr><td>${pm(F2.b,F2.sb,2)}</td><td>${pm(F2.a,F2.sa,1)}</td><td>${f(h0,2)}</td><td>${A_th?f(A_th,2):'—'}</td><td>${ratio?f(ratio,3):'—'}</td><td>${muA!=null?f(muA,4):'—'}</td><td>${muH!=null?f(muH,4):'—'}</td></tr>`;
+  } else t2+='<tr><td colspan="7" class="note">至少需要 2 個不同 h</td></tr>';
+  $('fit2').innerHTML=t2;
+  $('note2').innerHTML=`含槽面等效阻力係數 μ 的能量式：(1+κ)·½v₀² = g[h − μ h cotθ − μ L<sub>h</sub>]，所以 R² = [4H/(1+κ)]·[(1 − μ cotθ) h − μ L<sub>h</sub>]。<br>
+  斜率比理論小的比例 = μ cotθ；截距為負，h₀ = μL<sub>h</sub>/(1 − μ cotθ) 是「球剛好滾到槽口」的門檻高度。兩種方式各估一次 μ，互相比對（需要 ② 量過 θ 與水平段長 L<sub>h</sub>）。`+
+  (muA!=null&&muH!=null?`<br>注意：飛行中的空氣阻力、Magnus 效應也會讓 R² 變小，這部分被算進了「由 A」的 μ，所以它通常比「由 h₀」的 μ 大。`:'');
+  // ---- 圖 3 殘差
+  if(fE&&pE.length>2){
+    const res=pE.map(p=>({x:p.vE,y:p.R-(fE.a+fE.b*p.vE),ey:p.sR,tip:`v₀ = ${f(p.vE,3)} m/s，殘差 ${f(p.R-(fE.a+fE.b*p.vE),2)} cm`}));
+    const ym=Math.max(0.3,...res.map(q=>Math.abs(q.y)+q.ey))*1.2,ys=niceMax(ym);
+    drawChart('ch3',{H:240,xl:'能量法 v₀ (m/s)',yl:'殘差 (cm)',xmin:0,xmax:niceMax(vmax),ymin:-ys,ymax:ys,series:[{c:C_E,pts:res}],lines:[{c:'var(--mut)',f:()=>0}]});
+    $('note3').innerHTML='殘差若隨機散布在 0 上下，代表直線模型足夠；若呈現「中間高、兩端低」的彎曲，代表 R 隨 v₀ 增加得愈來愈慢，這是空氣阻力與 Magnus 效應在高速時較明顯的跡象（也要看誤差棒夠不夠小才能判斷）。';
+  } else {drawChart('ch3',{H:240,xl:'v₀ (m/s)',yl:'殘差 (cm)',xmax:1,ymin:-1,ymax:1,empty:'需要至少 3 個 h 的能量法數據'});$('note3').innerHTML='';}
+}
+['showE','showS','showT'].forEach(id=>$(id).onchange=render5);
+
+/* ===================== ⑥ 真值揭曉 ===================== */
+let revealed=false;
+$('reveal').onclick=()=>{revealed=true;$('rev').style.display='block';$('hideRev').style.display='';render6();};
+$('hideRev').onclick=()=>{revealed=false;$('rev').style.display='none';$('hideRev').style.display='none';};
+function zCls(z){const a=Math.abs(z);return a<=2?'z-ok':a<=3?'z-mid':'z-bad';}
+function zTxt(z){return isFinite(z)?`<span class="${zCls(z)}">${z>=0?'+':''}${f(z,1)}σ</span>`:'—';}
+function semOf(a,step){const st=meanStd(a);if(!st)return null;const q=step/Math.sqrt(12);return {m:st.m,se:Math.max(st.n>1?st.s/Math.sqrt(st.n):0,q),n:st.n};}
+const NOFX={fric:0,trans:0,air:0,buoy:0,drag:0,magnus:0,tilt:0};
+function render6(){
+  const cr=curRows();
+  const kT=kappa(),HcT=(Hv()+dc()-BALL.r)*100,thT=asm.ramp+T.rampErr;
+  // ---- 1 參數
+  let h='<tr><th>項目</th><th>你的量測（平均 ± 標準誤）</th><th>n</th><th>真值</th><th>差距 z</th></tr>';
+  const item=(nm,a,step,tv,d)=>{const s=semOf(a,step);h+=`<tr><td class="l">${nm}</td><td>${s?pm(s.m,s.se,d+1):'<span class="note">未量</span>'}</td><td>${s?s.n:''}</td><td>${f(tv,d+1)}</td><td>${s?zTxt((s.m-tv)/s.se):'—'}</td></tr>`;};
+  item('槽底高度 H_槽 (cm)',meas.H,0.05,Hv()*100,2);
+  item('V 槽張角 2α (°)',meas.fold,0.5,openDeg(),1);
+  item('斜軌傾角 θ (°)',meas.ramp,0.5,thT,1);
+  item('水平段長 L_h (cm)',meas.Lh,0.05,LhTrue()*100,2);
+  item('計時距離 L (cm)',meas.L,0.05,Ltrue()*100,2);
+  const hc=Hcalc();
+  h+=`<tr><td class="l">球心下降量 H (cm)</td><td>${hc?f(hc.Hc,2):'—'}</td><td></td><td>${f(HcT,3)}</td><td></td></tr>`;
+  h+=`<tr><td class="l">κ = I/(m r_eff²)</td><td>${hc?f(hc.k.k,3):'—'}</td><td></td><td>${f(kT,3)}</td><td></td></tr>`;
+  h+=`<tr><th colspan="5">隱藏參數（無法直接量測）</th></tr>`;
+  h+=`<tr><td class="l">槽面等效滾動阻力係數 μ</td><td colspan="2">${(()=>{const e=est5();return e?`由 A：${e.muA!=null?f(e.muA,4):'—'}；由 h₀：${e.muH!=null?f(e.muH,4):'—'}`:'—';})()}</td><td>${f(T.mu,4)}</td><td></td></tr>`;
+  const tilt=tiltR()/D2R;
+  h+=`<tr><td class="l">水平段殘餘傾角（正＝出口端偏低）</td><td colspan="2">墊紙片 ${asm.shims} 片</td><td>${tilt>=0?'+':''}${f(tilt,2)}°</td><td></td></tr>`;
+  const org=asm.plumb?T.originPlumb:T.originNo;
+  h+=`<tr><td class="l">落點原點偏差（讀數 − 真實）</td><td colspan="2">${asm.plumb?'用鉛垂線':'目測，未用鉛垂線'}</td><td>${org<=0?'+':''}${f(-org,2)} cm</td><td></td></tr>`;
+  h+=`<tr><td class="l">模擬計時員平均反應：起跑延遲／停錶延遲</td><td colspan="2"></td><td>${f(T.rs,3)} s／${f(T.re,3)} s</td><td></td></tr>`;
+  $('rv1').innerHTML=h;
+  // ---- 2 斜率
+  const det=cr.map(r=>({r,d:detLaunch(r.s)})).filter(q=>q.d.ok);
+  const slIdeal=Math.sqrt(2*HcT/100/G)*100;
+  const fEff=fit0(det.map(q=>q.d.ve),det.map(q=>q.d.xl*100));
+  const P=dataPts();
+  const pE=P.filter(p=>p.vE!=null),pS=P.filter(p=>p.vS);
+  const fE0=fit0(pE.map(p=>p.vE),pE.map(p=>p.R)),fS0=fit0(pS.map(p=>p.vS.v),pS.map(p=>p.R));
+  let t='<tr><th>量</th><th>你的結果</th><th>真值：理想（真空）</th><th>真值：含空氣效應的有效值</th><th>z（對有效值）</th></tr>';
+  const zz=(F,tv)=>F&&isFinite(F.sk)&&F.sk>0?zTxt((F.k-tv)/F.sk):'—';
+  t+=`<tr><td class="l">R–v₀ 斜率（能量法 v₀）cm/(m/s)</td><td>${fE0?pm(fE0.k,fE0.sk,2):'—'}</td><td>${f(slIdeal,2)}</td><td>${fEff?f(fEff.k,2):'—'}</td><td>${fEff?zz(fE0,fEff.k):'—'}</td></tr>`;
+  t+=`<tr><td class="l">R–v₀ 斜率（碼錶法 v₀）cm/(m/s)</td><td>${fS0?pm(fS0.k,fS0.sk,2):'—'}</td><td>${f(slIdeal,2)}</td><td>${fEff?f(fEff.k,2):'—'}</td><td>${fEff?zz(fS0,fEff.k):'—'}</td></tr>`;
+  const F2=fitLin(P.map(p=>p.r.h),P.map(p=>p.R*p.R));
+  const hT=q=>q.r.s*Math.sin(thT*D2R);
+  const F2t=fitLin(det.map(hT),det.map(q=>(q.d.xl*100)**2));
+  t+=`<tr><td class="l">R²–h 斜率 A (cm)</td><td>${F2?pm(F2.b,F2.sb,2):'—'}</td><td>${f(4*HcT/(1+kT),2)}</td><td>${F2t?f(F2t.b,2):'—'}</td><td>${F2&&F2t&&F2.sb>0?zTxt((F2.b-F2t.b)/F2.sb):'—'}</td></tr>`;
+  t+=`<tr><td class="l">R²–h 門檻 h₀ (cm)</td><td>${F2?f(-F2.a/F2.b,2):'—'}</td><td>0</td><td>${F2t?f(-F2t.a/F2t.b,2):'—'}</td><td></td></tr>`;
+  $('rv2').innerHTML=t;
+  // ---- 3 效應分解
+  const steps=[['理想',{}],['＋槽面阻力',{fric:1}],['＋過渡段',{trans:1}],['＋滾動時空氣阻力',{air:1}],['＋浮力與附加質量',{buoy:1}],['＋飛行空氣阻力',{drag:1}],['＋Magnus',{magnus:1}],['＋出口傾斜',{tilt:1}]];
+  let hd='<tr><th>s (cm)</th>'+steps.map(s=>`<th>${s[0]}</th>`).join('')+'<th>扣原點偏差後的預期讀數</th><th>你的 R̄</th><th>z</th></tr>';
+  let body='';const fxAcc=[];
+  cr.forEach(r=>{
+    let fx={...NOFX},prev=null,cells='';
+    steps.forEach(([nm,add])=>{fx={...fx,...add};const d=detLaunch(r.s,fx);
+      if(!d.ok){cells+='<td>停住</td>';prev=null;return;}
+      const R=d.xl*100;cells+=`<td>${f(R,2)}${prev!=null?`<br><span class="note">${R-prev>=0?'+':''}${f(R-prev,2)}</span>`:''}</td>`;prev=R;});
+    const exp=prev!=null?prev-org:null;
+    const st=semOf(r.R.filter(x=>isFinite(x)),0.1);
+    body+=`<tr><td>${f(r.s,1)}</td>${cells}<td>${exp!=null?f(exp,2):'—'}</td><td>${st?pm(st.m,st.se,2):'—'}</td><td>${st&&exp!=null?zTxt((st.m-exp)/st.se):'—'}</td></tr>`;
+  });
+  $('rv3').innerHTML=hd+(body||'<tr><td colspan="12" class="note">目前組裝沒有數據列</td></tr>');
+  // ---- 4 碼錶
+  let h4='<tr><th>s (cm)</th><th>量得 t̄ (s)</th><th>真實 t (s)</th><th>平均 Δt = t̄ − t</th><th>碼錶 v₀</th><th>真實 L/t（段內平均速度）</th><th>真實離槽速度</th><th>能量法 v₀</th></tr>';
+  const allDt=[];
+  cr.forEach(r=>{
+    const st=meanStd(r.t),tt=meanStd(r.tTrue),d=detLaunch(r.s),vs=vS(r),ve=vE(r);
+    if(st&&tt) r.t.forEach((x,j)=>allDt.push(x-r.tTrue[j]));
+    h4+=`<tr><td>${f(r.s,1)}</td><td>${st?f(st.m,3):'—'}</td><td>${tt?f(tt.m,3):'—'}</td><td>${st&&tt?f(st.m-tt.m,3):'—'}</td><td>${vs?f(vs.v,3):'—'}</td><td>${tt?f(Ltrue()/tt.m,3):'—'}</td><td>${d.ok?f(d.ve,3):'—'}</td><td>${ve?f(ve,3):'—'}</td></tr>`;
+  });
+  $('rv4').innerHTML=h4;
+  // ---- 5 結論
+  const L=[];
+  const rE=cr.map(r=>{const d=detLaunch(r.s),ve=vE(r);return d.ok&&ve?ve/d.ve:null;}).filter(x=>x);
+  if(rE.length) L.push(`能量法 v₀ 平均比真實離槽速度高 <b>${f((meanStd(rE).m-1)*100,1)}%</b>（低速時更多）。原因是槽面阻力${asm.trans==='kink'?'與折角過渡段':''}吃掉的能量沒有算進去，能量法只能當上限。`);
+  if(allDt.length){const q=meanStd(allDt);L.push(`碼錶計時平均偏差 Δt = <b>${f(q.m,3)} s</b>，單次標準差 ${f(q.s,3)} s。按下啟動是對事件「反應」，按下停止則常會「預判」，兩者延遲不同，不會互相抵消；t 只有零點幾秒，所以碼錶法 v₀ 的誤差可達數十個百分比。`);}
+  if(cr.length){const r=cr.reduce((a,b)=>a.s>b.s?a:b);
+    const a=detLaunch(r.s,{...FX_ALL,drag:0,magnus:0,buoy:0,tilt:0}),b=detLaunch(r.s,{...FX_ALL,tilt:0});
+    if(a.ok&&b.ok) L.push(`在最高的釋放點 s = ${f(r.s,1)} cm，浮力、空氣阻力與 Magnus 合計讓 R 改變 <b>${f((b.xl/a.xl-1)*100,2)}%</b>。它們比能量法的誤差小得多，但會讓 R–v₀ 在高速端略微下彎。`);}
+  if(Math.abs(tilt)>0.05){const r=cr[0];if(r){const a=detLaunch(r.s,{...FX_ALL,tilt:0}),b=detLaunch(r.s);if(a.ok&&b.ok)L.push(`水平段殘餘傾角 ${f(tilt,2)}° 讓 s = ${f(r.s,1)} cm 的 R 改變 ${f((b.xl-a.xl)*100,2)} cm。${Math.abs(tilt)>0.3?'放球檢查時球不動，不代表完全水平；紙槽的阻力會掩蓋小角度。':''}`);}}
+  if(hc) L.push(`若把槽底高度 ${f(hc.Hb,2)} cm 直接當 H，理論斜率會${hc.Hb<hc.Hc?'偏小':'偏大'} ${f(Math.abs(Math.sqrt(hc.Hb/hc.Hc)-1)*100,1)}%。這個 V 槽中球心抬高了 ${f(R_CM/Math.sin(hc.k.a)-R_CM,2)} cm。`);
+  if(!asm.plumb) L.push(`沒有用鉛垂線定原點，每個 R 都偏了 ${f(-org,2)} cm。在 R–v₀ 圖上，這會變成一個假的截距。`);
+  $('rv5').innerHTML='<ul>'+L.map(x=>`<li>${x}</li>`).join('')+'</ul>'+'<p class="note">換一組新器材可以再練一次（右上方按鈕）。</p>';
+}
+function est5(){
+  const P=dataPts(),F2=fitLin(P.map(p=>p.r.h),P.map(p=>p.R*p.R)),hc=Hcalc(),thm=meanStd(meas.ramp),Lhm=meanStd(meas.Lh);
+  if(!F2||!hc||!thm) return null;
+  const A_th=4*hc.Hc/(1+hc.k.k),ratio=F2.b/A_th,cot=1/Math.tan(thm.m*D2R),h0=-F2.a/F2.b;
+  return {muA:(1-ratio)/cot,muH:Lhm?h0*ratio/Lhm.m:null};
+}
+
+newTruth();shimLabel();renderTable();refresh();
+</script>
+</body>
+</html>

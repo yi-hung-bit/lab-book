@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>磁鐵斥力虛擬實驗室</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1f2328;--mute:#5d6470;--line:#d9d4c7;--acc:#b5482b;--acc2:#2b6cb0;--ok:#2f7d4f;--warn:#b7791f;--bad:#c53030;--water:#cfe3f5;--water2:#6fa3d6;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;font-size:15px;line-height:1.65}
+header{padding:14px 20px;background:#2a2f36;color:#fff}
+header h1{margin:0;font-size:20px}
+header p{margin:2px 0 0;color:#c9ced6;font-size:13px}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 16px;background:#e9e4d8;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
+nav button{border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:14px;font-family:inherit}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1180px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.col{flex:1 1 340px;min-width:0}
+.col.narrow{flex:0 1 220px}
+h2{font-size:18px;margin:0 0 8px}
+h3{font-size:16px;margin:12px 0 6px}
+.btn{border:1px solid #8a8f99;background:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;margin:2px;font-family:inherit}
+.btn.p{background:var(--acc2);color:#fff;border-color:var(--acc2)}
+.btn.r{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:3px 6px;text-align:center}
+th{background:#f1ede3}
+.note{font-size:13px;color:var(--mute)}
+.msg{padding:6px 10px;border-radius:6px;margin:6px 0;font-size:14px}
+.msg.ok{background:#e6f4ea;color:#1f5f3a}.msg.warn{background:#fdf3dc;color:#7a5410}.msg.bad{background:#fde8e8;color:#8a1f1f}.msg.info{background:#e8f0fb;color:#1e4e8c}
+input[type=number],input[type=text]{width:90px;padding:4px;border:1px solid #aaa;border-radius:4px;font-size:14px;font-family:inherit}
+select{padding:4px;font-size:14px;font-family:inherit}
+.eq{font-family:"Times New Roman","Noto Serif TC",serif;font-size:17px;padding:5px 12px;background:#faf8f2;border-left:3px solid var(--acc);margin:6px 0}
+svg{max-width:100%;height:auto;display:block}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px}
+.step{border-left:3px solid var(--line);padding:4px 0 4px 10px;margin:8px 0}
+.step.done{border-left-color:var(--ok)}
+.pill{display:inline-block;padding:0 8px;border-radius:10px;font-size:12px;background:#eee;margin-left:4px}
+.pill.ok{background:#d7efdf;color:#1f5f3a}.pill.bad{background:#f7d6d6;color:#8a1f1f}
+ul{margin:4px 0;padding-left:22px}
+.hidden{display:none}
+@media (max-width:640px){main{padding:10px}nav{padding:6px}}
+</style>
+</head>
+<body>
+<header>
+<h1>磁鐵斥力與距離的關係 — 虛擬實驗室</h1>
+<p>九十一學年度 高級中學自然學科競賽 台南區複賽 物理實驗試題第一題｜浮體法秤重 × 套杯磁浮 × 對數迴歸</p>
+</header>
+<nav id="nav">
+<button data-t="t1" class="on">① 原理</button>
+<button data-t="t2">② 浮體秤重</button>
+<button data-t="t3">③ 器材組裝</button>
+<button data-t="t4">④ 磁斥量測</button>
+<button data-t="t5">⑤ 作圖迴歸</button>
+<button data-t="t6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ================= ① ================= -->
+<section class="tab on" id="t1">
+<div class="card">
+<h2>題目與限制</h2>
+<p>利用<strong>未知重量</strong>的砝碼 A、B、C（底片盒裝，不可打開），設計實驗測出兩塊相同盤型磁鐵之間斥力隨距離變化的關係。器材只有：盤型磁鐵 2、透明塑膠杯 2、雙面膠、保麗龍、直尺（最小刻度 1 mm）、小刀、自來水、100 mL 量杯、奇異筆、抹布、竹籤。<strong>沒有天平</strong>，所以必須先自己「秤」出砝碼的重量。</p>
+</div>
+<div class="row">
+<div class="col">
+<div class="card">
+<h2>(a) 浮體法秤重</h2>
+<p>物體漂浮時，浮力等於重力：</p>
+<div class="eq">ρ<sub>水</sub> V<sub>排</sub> g = m g　⇒　m = ρ<sub>水</sub> ΔV</div>
+<p>量杯水位上升量 ΔV（mL）乘上水的密度，就是物體質量（g）。但這條式子<strong>成立有兩個前提</strong>：</p>
+<ul>
+<li><strong>物體必須真的浮著</strong>：若平均密度大於水而完全沒入，ΔV 只等於物體體積，與質量無關。底片盒外體積約 40 cm³，若砝碼超過約 40 g 就會沉。</li>
+<li><strong>物體不能觸底</strong>：若水太少，物體會坐在杯底，排開的水不足以支撐它，ΔV 會偏小。</li>
+</ul>
+<p>沉體可以黏上保麗龍，讓整體變成浮體。保麗龍本身也有質量（密度約 0.02 g/cm³），要記得考慮。</p>
+</div>
+</div>
+<div class="col">
+<div class="card">
+<h2>(b) 套杯磁浮</h2>
+<svg viewBox="0 0 360 250" aria-label="套杯磁浮示意圖">
+<line x1="20" y1="232" x2="340" y2="232" stroke="#8a7f6a" stroke-width="3"/>
+<path d="M95,232 L82,92 M175,232 L188,92" stroke="#7a8794" stroke-width="2.5" fill="none"/>
+<line x1="95" y1="232" x2="175" y2="232" stroke="#7a8794" stroke-width="2.5"/>
+<rect x="117" y="214" width="36" height="16" fill="#8a8f99" stroke="#444"/><text x="135" y="226" font-size="10" text-anchor="middle" fill="#fff">N↑</text>
+<g transform="translate(0,-48)">
+<path d="M98,232 L85,92 M172,232 L185,92" stroke="#3b5f86" stroke-width="2.5" fill="none"/>
+<line x1="98" y1="232" x2="172" y2="232" stroke="#3b5f86" stroke-width="2.5"/>
+<rect x="117" y="214" width="36" height="16" fill="#8a8f99" stroke="#444"/><text x="135" y="226" font-size="10" text-anchor="middle" fill="#fff">N↓</text>
+<rect x="112" y="170" width="46" height="44" rx="4" fill="#3a3d42"/><text x="135" y="197" font-size="12" text-anchor="middle" fill="#fff">砝碼</text>
+</g>
+<path d="M218,150 v50" stroke="#c53030" stroke-width="3" marker-end="url(#ar)"/><text x="226" y="178" font-size="12" fill="#c53030">(m磁+m杯+Σm砝)g</text>
+<path d="M218,220 v-40" stroke="#2b6cb0" stroke-width="3" marker-end="url(#ar2)"/><text x="226" y="215" font-size="12" fill="#2b6cb0">磁斥力 F</text>
+<line x1="60" y1="186" x2="60" y2="230" stroke="#555" stroke-dasharray="3 2"/>
+<text x="20" y="212" font-size="12" fill="#333">R</text>
+<line x1="56" y1="186" x2="135" y2="186" stroke="#999" stroke-dasharray="2 3"/><line x1="56" y1="230" x2="135" y2="230" stroke="#999" stroke-dasharray="2 3"/>
+<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#c53030"/></marker><marker id="ar2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#2b6cb0"/></marker></defs>
+</svg>
+<p>兩杯底中央各黏一塊磁鐵，<strong>同極相對</strong>。上杯靠磁斥力浮在下杯中，力平衡為：</p>
+<div class="eq">F(R) = (m<sub>磁</sub> + m<sub>杯</sub> + Σm<sub>砝</sub>) g</div>
+<p>改變上杯內的砝碼組合，用直尺讀上杯杯緣高度，再假設 F = K R<sup>α</sup>，取對數得到：</p>
+<div class="eq">log F = log K + α log R</div>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>參考解沒說清楚的四件事（本模擬會忠實呈現）</h2>
+<ol>
+<li><strong>浮體條件</strong>：參考解直接用 m = ρV<sub>排</sub>，沒有檢查砝碼是否真的浮著。砝碼 A 排水 40 mL，和底片盒體積相當，很可能已經沒入。</li>
+<li><strong>杯重 m<sub>杯</sub></strong>：參考解把上杯當成沒有質量。塑膠杯約數克，F 少了一個常數，log–log 的斜率就會被扭曲（輕載時影響最大）。杯重可以用「浮杯標記法」獨立量測（見 ②）。不要指望用迴歸把它「擬合」出來：磁力曲線本身的彎曲會被誤認成杯重（見 ⑤）。</li>
+<li><strong>R 到底是哪個距離？</strong>兩杯、兩磁鐵若完全相同，「上杯緣高度 − 下杯緣高度」等於<strong>兩磁鐵中心的距離</strong>，不是磁鐵表面的間隙。改用間隙 g = R − t（t 為磁鐵厚度）計算，得到的次方值會不同。黏貼高度的微小差異，以及下杯緣高度那一次讀數的誤差，都會讓所有 R 一起平移。</li>
+<li><strong>次方值不是定值</strong>：有限大小的盤型磁鐵，在 R 遠大於直徑時趨近偶極的 F ∝ R<sup>−4</sup>；近距離時曲線較平緩。實驗求得的 α 只是在這段量測範圍內的「有效斜率」。</li>
+</ol>
+<p class="note">此外，同極相對的磁浮在側向上是不穩定的（Earnshaw 定理），上杯一定會偏向一側、靠在下杯壁上。因此杯壁摩擦與杯身傾斜，正是參考解所說「最大的人為誤差」的物理來源。</p>
+</div>
+<div class="card">
+<h2>操作流程</h2>
+<p>② 用量杯秤 A、B、C 和磁鐵 → ③ 割縫、黏磁鐵、讀下杯緣高度 → ④ 放入 8 種砝碼組合，每種重複放置 5 次讀上杯緣 → ⑤ 作 log F – log R 迴歸，比較忽略杯重、加入自測杯重、自由擬合杯重三種結果 → ⑥ 揭曉隱藏真值，以標準差為單位評估誤差。</p>
+<p class="note">每次開啟頁面，砝碼質量、杯重、磁鐵強度、杯高等都會隨機產生隱藏真值。</p>
+</div>
+</section>
+
+<!-- ================= ② ================= -->
+<section class="tab" id="t2">
+<div class="row">
+<div class="col">
+<div class="card">
+<h2>量杯（100 mL，刻度每 2 mL）</h2>
+<div class="row">
+<div class="col" style="flex:1 1 300px"><div id="cupSvg"></div></div>
+<div class="col narrow"><div class="note" style="text-align:center">水面放大（平視）</div><div id="zoom2"></div></div>
+</div>
+<div id="state2" class="msg info"></div>
+</div>
+</div>
+<div class="col">
+<div class="card">
+<h3>1. 裝水</h3>
+<label>目標水量 <input type="number" id="v0" value="50" min="20" max="90" step="5"> mL</label>
+<button class="btn" id="bFill">倒掉重裝</button>
+<div class="note">倒水會有誤差，請自己讀「初讀」，不要直接假設是 50.0 mL。</div>
+<h3>2. 物體</h3>
+<select id="objSel"><option value="A">砝碼 A</option><option value="B">砝碼 B</option><option value="C">砝碼 C</option><option value="M">磁鐵（一塊）</option></select>
+<button class="btn p" id="bIn">輕放入量杯</button>
+<button class="btn" id="bOut">取出</button>
+<button class="btn" id="bWipe">用抹布擦乾</button>
+<button class="btn" id="bTap">輕敲杯壁（趕氣泡）</button>
+<div id="wetInfo" class="note"></div>
+<h3>3. 保麗龍（用小刀切方塊，雙面膠貼在物體頂部）</h3>
+<label>邊長 <input type="number" id="fs" value="3.0" min="1.0" max="4.0" step="0.1"> cm</label>
+<label>厚度 <input type="number" id="fh" value="1.5" min="0.3" max="4.0" step="0.1"> cm</label><br>
+<button class="btn" id="bFoam">貼到目前所選物體</button>
+<button class="btn" id="bUnfoam">撕下</button>
+<div id="foamInfo" class="note"></div>
+<h3>4. 讀數與記錄</h3>
+<label>讀數 <input type="number" id="rd2" step="0.1"> mL</label>
+<button class="btn" id="bAuto2">自動估讀</button><br>
+<button class="btn" id="bInit">記為初讀（未放物體）</button>
+<button class="btn" id="bFin">記為末讀（物體在杯中）</button>
+<div class="kv" style="margin-top:4px"><span>初讀</span><span id="iv">—</span><span>末讀</span><span id="fv">—</span></div>
+<button class="btn r" id="bAdd2">加入數據表</button>
+<div id="msg2"></div>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>上杯質量 m<sub>杯</sub>：浮杯標記法</h2>
+<p>塑膠杯太大，放不進量杯，但可以讓它浮在<strong>另一個裝了水的塑膠杯</strong>裡：</p>
+<ol>
+<li>另一杯裝水，放入空的上杯（黏磁鐵前），讓它漂浮，用奇異筆在外杯標出水位。</li>
+<li>取出上杯，量杯先裝水並讀初讀，再把水慢慢倒進外杯，直到水位回到標記，讀量杯剩餘水量。</li>
+<li>倒出的水量 = 上杯排開的水量 = m<sub>杯</sub> / ρ<sub>水</sub>。</li>
+</ol>
+<p class="note">外杯水面截面積約 30 cm²，奇異筆線寬約 0.5 mm：標記高 0.5 mm 就對應約 1.5 mL。這個方法的精度遠不如量杯直接讀數，所以要多做幾次取平均。</p>
+<button class="btn p" id="bCup">做一次（自動讀量杯）</button> <button class="btn" id="bCupClr">清除</button>
+<div id="tabCup"></div>
+</div>
+<div class="card">
+<h2>數據記錄（上升水量 ΔV = 末讀 − 初讀）</h2>
+<p class="note">取消勾選「採用」可以剔除可疑數據（例如觸底、完全沒入、沒擦乾）。估計質量 = 平均 ΔV × 1.00 g/mL。</p>
+<div id="tab2"></div>
+</div>
+</section>
+
+<!-- ================= ③ ================= -->
+<section class="tab" id="t3">
+<div class="row">
+<div class="col">
+<div class="card">
+<h2>組裝步驟</h2>
+<div class="step" id="st1"><strong>1. 割縫</strong>：用小刀在兩個杯子側壁各割一條直縫，讓直尺可以插到靠近磁鐵的位置，減少視差。<br><button class="btn" id="bSlit">割縫</button> <span id="slitS"></span></div>
+<div class="step" id="st2"><strong>2. 黏磁鐵</strong>：下杯磁鐵 N 極朝上，用雙面膠黏在杯底中央。上杯磁鐵：
+<select id="pol"><option value="">— 選擇方向 —</option><option value="N">N 極朝下</option><option value="S">S 極朝下</option></select><br>
+<button class="btn" id="bGlueQ">隨手黏在杯底</button>
+<button class="btn" id="bGlueC">先量直徑、用竹籤標出圓心再黏</button> <span id="glueS"></span></div>
+<div class="step" id="st3"><strong>3. 試放上杯</strong>：把上杯套入下杯，確認會浮起來。<br><button class="btn" id="bTry">試放</button> <span id="tryS"></span></div>
+<div class="step" id="st4"><strong>4. 讀下杯緣高度</strong>：直尺立在桌面（零點貼齊桌面），讀下杯杯緣的上緣。<br>
+<label>讀數 <input type="number" id="rd3" step="0.01"> cm</label> <button class="btn" id="bAuto3">自動估讀</button> <button class="btn r" id="bLow">記錄</button> <span id="lowS"></span></div>
+<div id="msg3"></div>
+</div>
+</div>
+<div class="col">
+<div class="card">
+<h2>側視圖</h2>
+<div id="svg3"></div>
+</div>
+<div class="card">
+<h2>直尺放大（下杯緣）</h2>
+<div id="zoom3"></div>
+<p class="note">直尺最小刻度 1 mm，請估讀到 0.1 mm（即 0.01 cm）。</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ================= ④ ================= -->
+<section class="tab" id="t4">
+<div id="pre4" class="msg warn"></div>
+<div class="row">
+<div class="col">
+<div class="card">
+<h2>上杯放入的砝碼</h2>
+<label><input type="checkbox" id="lA"> A</label>
+<label><input type="checkbox" id="lB"> B</label>
+<label><input type="checkbox" id="lC"> C</label>
+<span class="note">（全不勾 = 空杯＋磁鐵）</span><br>
+<button class="btn p" id="bPlace">拿出上杯，再輕放回去</button>
+<button class="btn" id="bTap4">輕敲桌面</button>
+<div id="state4" class="msg info"></div>
+<h3>讀上杯緣高度</h3>
+<label>讀數 <input type="number" id="rd4" step="0.01"> cm</label>
+<button class="btn" id="bAuto4">自動估讀</button>
+<button class="btn r" id="bRec4">記錄這一次</button>
+<div id="msg4"></div>
+<p class="note">參考解建議：每次量測前都要把上杯拿出來再放回去，並用一隻眼睛檢查杯緣是否歪斜。每種組合至少做 5 次。</p>
+</div>
+<div class="card">
+<h2>直尺放大（上杯緣）</h2>
+<div id="zoom4"></div>
+</div>
+</div>
+<div class="col">
+<div class="card">
+<h2>側視圖 <span class="note">（傾斜角放大 5 倍示意）</span></h2>
+<div id="svg4"></div>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>數據表（R = 上杯緣高度 − 下杯緣高度）</h2>
+<div id="tab4"></div>
+</div>
+</section>
+
+<!-- ================= ⑤ ================= -->
+<section class="tab" id="t5">
+<div class="card">
+<h2>輸入質量（由 ② 帶入，可修改）</h2>
+<div class="row">
+<label>m<sub>A</sub> <input type="number" id="mA5" step="0.1"> g</label>
+<label>m<sub>B</sub> <input type="number" id="mB5" step="0.1"> g</label>
+<label>m<sub>C</sub> <input type="number" id="mC5" step="0.1"> g</label>
+<label>m<sub>磁</sub> <input type="number" id="mM5" step="0.1"> g</label>
+<label>m<sub>杯</sub> <input type="number" id="mU5" step="0.1"> g</label>
+<label>磁鐵厚度 t <input type="number" id="tm5" value="0.70" step="0.01"> cm</label>
+</div>
+<button class="btn" id="bLoad5">從 ② 帶入</button>
+<button class="btn r" id="bFit5">更新分析</button>
+<div id="msg5"></div>
+</div>
+<div class="row">
+<div class="col">
+<div class="card">
+<h2>數據整理</h2>
+<div id="tab5"></div>
+</div>
+<div class="card">
+<h2>迴歸結果</h2>
+<div id="res5"></div>
+</div>
+</div>
+<div class="col">
+<div class="card">
+<h2>log F – log R 圖</h2>
+<div id="plot5"></div>
+<p class="note">紅點：參考解的作法 F = m<sub>磁</sub> + Σm<sub>砝</sub>（忽略杯重）。藍點：加入你自測的杯重 m<sub>杯</sub> 後的 F。</p>
+</div>
+<div class="card">
+<h2>局部斜率（相鄰兩點）</h2>
+<div id="loc5"></div>
+<p class="note">若 F = K R<sup>α</sup> 真的成立，局部斜率應該不隨 R 改變。如果 R 越大、斜率越陡，表示次方值不是定值：遠場會往偶極的 −4 靠近。</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ================= ⑥ ================= -->
+<section class="tab" id="t6">
+<div class="card">
+<h2>誤差討論</h2>
+<ol>
+<li><strong>浮體秤重</strong>：水的密度在室溫約 0.997 g/mL，直接以 1.00 計算會偏大約 0.3%。物體沒擦乾、氣泡附著、水太少觸底、物體沒入，都會讓 ΔV 偏離 m/ρ。磁鐵貼的保麗龍本身也有質量。</li>
+<li><strong>杯重</strong>：忽略上杯質量，等於每個 F 都少了同一個常數。輕載時相對誤差最大，會讓 log–log 的斜率失真。</li>
+<li><strong>距離定義</strong>：R（杯緣差）是中心距。用間隙 g = R − t 計算，得到的 α 會明顯較緩。題目沒有規定用哪一種，但報告必須講清楚。</li>
+<li><strong>摩擦與傾斜</strong>：側向不穩定使上杯靠在杯壁上，靜摩擦讓平衡位置落在一個區間內（遲滯）；杯身傾斜則會讓直尺讀到的杯緣高度偏離中心高度。黏貼偏心越大，兩者都越嚴重。</li>
+<li><strong>系統平移</strong>：下杯緣只讀一次，那一次讀數的誤差會讓所有 R 一起平移；兩杯磁鐵的黏貼高度差異也有相同效果。</li>
+<li><strong>模型本身</strong>：盤型磁鐵的斥力不是單一冪次律，α 隨距離改變。</li>
+</ol>
+</div>
+<div class="card">
+<button class="btn r" id="bReveal">揭曉真值</button>
+<button class="btn" id="bNew">重新產生隱藏真值（清除全部數據）</button>
+<div id="rev6"></div>
+</div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const fmt=(x,d=2)=>(x==null||!isFinite(x))?'—':x.toFixed(d);
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+const sdev=a=>{if(a.length<2)return NaN;const m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1));};
+function msg(id,text,cls){$(id).innerHTML=text?`<div class="msg ${cls||'info'}">${text}</div>`:'';}
+
+/* ================= 磁力模型：兩塊同軸均勻磁化圓柱（等效表面電流 → 同軸電流環互感） ================= */
+const MAG={d:2.20,t:0.70}; // cm
+const mu0=4e-7*Math.PI;
+function ellK(k){let a=1,b=Math.sqrt(1-k*k);for(let i=0;i<30;i++){const t=(a+b)/2;b=Math.sqrt(a*b);a=t;}return Math.PI/(2*a);}
+function ellE(k){let a=1,b=Math.sqrt(1-k*k),c=k,s=c*c/2,pw=1;for(let i=0;i<30;i++){const an=(a+b)/2;c=(a-b)/2;b=Math.sqrt(a*b);a=an;pw*=2;s+=pw*c*c/2;}return (1-s)*Math.PI/(2*a);}
+function Mloop(a,z){const k=Math.sqrt(4*a*a/(4*a*a+z*z));return mu0*a*((2/k-k)*ellK(k)-2/k*ellE(k));}
+function dMdz(a,z){const h=1e-7;return (Mloop(a,z+h)-Mloop(a,z-h))/(2*h);}
+const NL=12;
+function forceBr1(Rcm){ // 中心距 Rcm，Br = 1 T 時的斥力（gw）
+  const a=MAG.d/200,t=MAG.t/100,R=Rcm/100,M=1/mu0,I=M*t/NL;let s=0;
+  for(let i=0;i<NL;i++)for(let j=0;j<NL;j++){const zi=-t/2+(i+0.5)*t/NL,zj=R-t/2+(j+0.5)*t/NL;s+=dMdz(a,zj-zi);}
+  return -I*I*s/9.80665*1000;
+}
+const TB={R0:0.75,dR:0.005,n:1051,lnF:[]};
+for(let i=0;i<TB.n;i++)TB.lnF.push(Math.log(forceBr1(TB.R0+i*TB.dR)));
+function F1(R){const x=(R-TB.R0)/TB.dR;if(x<=0)return Math.exp(TB.lnF[0]);if(x>=TB.n-1){const RL=TB.R0+(TB.n-1)*TB.dR;return Math.exp(TB.lnF[TB.n-1])*(RL/R)**4;}const i=Math.floor(x),f=x-i;return Math.exp(TB.lnF[i]*(1-f)+TB.lnF[i+1]*f);}
+function Fmag(R){return T.Br*T.Br*F1(R);}
+function Rof(F){let lo=0.76,hi=12;for(let i=0;i<60;i++){const m=(lo+hi)/2;(Fmag(m)>F)?lo=m:hi=m;}return (lo+hi)/2;}
+function localSlope(R){const h=1e-3;return (Math.log(Fmag(R+h))-Math.log(Fmag(R-h)))/(Math.log(R+h)-Math.log(R-h));}
+
+/* ================= 隱藏真值 ================= */
+let T={};
+function newTruth(){
+  T={mA:rnd(36,43),mB:rnd(28.5,35),mC:rnd(19,25.5),mMag:rnd(12.6,13.4),Br:rnd(0.215,0.255),mCup:rnd(4.0,7.0),
+     hCup:rnd(8.25,8.55),delta:rnd(-0.04,0.04),Vcan:rnd(39.6,40.8),foamRho:rnd(0.016,0.024),rhoW:0.997,cling:rnd(0.3,0.6)};
+}
+
+/* ================= ② 浮體秤重 ================= */
+const CUP2={R:2.30,H:7.6};CUP2.A=Math.PI*CUP2.R**2;
+let S2;
+function resetS2(){S2={Vw:50+gauss()*0.5,inObj:null,wet:{A:false,B:false,C:false,M:false},foam:{A:null,B:null,C:null,M:null},bubble:0,init:null,fin:null,rows:{A:[],B:[],C:[],M:[]},cup:[]};}
+const NAME={A:'砝碼 A',B:'砝碼 B',C:'砝碼 C',M:'磁鐵'};
+function parts(k){
+  const p=[];
+  if(k==='M')p.push({A:Math.PI*(MAG.d/2)**2,h:MAG.t,m:T.mMag,type:'mag',w:MAG.d});
+  else{const h=5.0,A=T.Vcan/h;p.push({A,h,m:T['m'+k],type:'can',w:2*Math.sqrt(A/Math.PI)});}
+  const f=S2.foam[k];if(f)p.push({A:f.s*f.s,h:f.h,m:T.foamRho*f.s*f.s*f.h,type:'foam',w:f.s});
+  let z=0;p.forEach(q=>{q.z=z;z+=q.h;});return p;
+}
+function disp(p,d){let v=0;for(const q of p)v+=q.A*Math.max(0,Math.min(q.h,d-q.z));return v;}
+function solve2(){
+  const k=S2.inObj,Vw=S2.Vw+S2.bubble;
+  if(!k)return{L:Vw/CUP2.A,bottom:0,state:'empty'};
+  const p=parts(k),m=p.reduce((s,q)=>s+q.m,0),Vt=p.reduce((s,q)=>s+q.A*q.h,0),H=p[p.length-1].z+p[p.length-1].h,need=m/T.rhoW;
+  if(need<Vt){
+    let lo=0,hi=H;for(let i=0;i<60;i++){const mid=(lo+hi)/2;(disp(p,mid)<need)?lo=mid:hi=mid;}
+    const d=lo,L=(Vw+need)/CUP2.A;
+    if(L-d>=0.02)return{L,bottom:L-d,state:'float',p,d,H};
+  }
+  let lo=0,hi=30;for(let i=0;i<60;i++){const mid=(lo+hi)/2;(CUP2.A*mid-disp(p,mid)<Vw)?lo=mid:hi=mid;}
+  return{L:lo,bottom:0,state:need>=Vt?'sink':'ground',p,H};
+}
+function current2(){
+  let r=solve2();
+  if(r.L>CUP2.H){const lost=(r.L-CUP2.H)*CUP2.A;S2.Vw-=lost;r=solve2();msg('msg2',`水溢出量杯了！流失約 ${lost.toFixed(1)} mL。請倒掉重裝，或減少初始水量。`,'bad');}
+  return r;
+}
+function cupSvg(r){
+  const px=36,by=300,cx=150,hw=CUP2.R*px,top=by-CUP2.H*px;
+  let s=`<svg viewBox="0 0 320 320">`;
+  const Ly=by-r.L*px;
+  s+=`<path d="M${cx-hw},${Ly-5} Q${cx-hw+6},${Ly} ${cx-hw+16},${Ly} L${cx+hw-16},${Ly} Q${cx+hw-6},${Ly} ${cx+hw},${Ly-5} L${cx+hw},${by} L${cx-hw},${by}Z" fill="var(--water)"/>`;
+  if(r.p){
+    const y0=by-r.bottom*px;
+    for(const q of r.p){
+      const w=q.w*px,h=q.h*px,y=y0-(q.z+q.h)*px,x=cx-w/2;
+      if(q.type==='can')s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#2e3136"/><rect x="${x-2}" y="${y}" width="${w+4}" height="7" rx="2" fill="#6b7078"/><text x="${cx}" y="${y+h/2+4}" font-size="13" text-anchor="middle" fill="#fff">${S2.inObj}</text>`;
+      else if(q.type==='mag')s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#8a8f99" stroke="#444"/>`;
+      else s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fbfbf8" stroke="#b9b5aa"/>`;
+    }
+    if(S2.bubble>0.05){for(let i=0;i<Math.min(8,Math.round(S2.bubble*14));i++){const bx=cx+(i%2?1:-1)*(r.p[0].w*px/2+3),bY=y0-(0.3+i*0.35)*px;if(bY>Ly+3)s+=`<circle cx="${bx}" cy="${bY}" r="2.5" fill="#fff" stroke="#6fa3d6"/>`;}}
+  }
+  s+=`<path d="M${cx-hw},${Ly-5} Q${cx-hw+6},${Ly} ${cx-hw+16},${Ly} L${cx+hw-16},${Ly} Q${cx+hw-6},${Ly} ${cx+hw},${Ly-5} L${cx+hw},${by} L${cx-hw},${by}Z" fill="var(--water2)" opacity="0.22"/>`;
+  s+=`<path d="M${cx-hw-2},${top} V${by+2} H${cx+hw+2} V${top}" fill="none" stroke="#7a8794" stroke-width="3"/>`;
+  s+=`<path d="M${cx+hw+2},${top+15} q38,10 30,60 q-6,40 -30,50" fill="none" stroke="#9aa5b1" stroke-width="5"/>`;
+  for(let v=0;v<=100;v+=2){const y=by-v/CUP2.A*px,L=v%10===0?14:7;s+=`<line x1="${cx-hw}" y1="${y}" x2="${cx-hw+L}" y2="${y}" stroke="#1d4f91" stroke-width="1.2"/>`;if(v%20===0&&v>0)s+=`<text x="${cx-hw+17}" y="${y+4}" font-size="10" fill="#1d4f91">${v}</text>`;}
+  s+=`<line x1="20" y1="${by+2}" x2="300" y2="${by+2}" stroke="#8a7f6a" stroke-width="3"/></svg>`;
+  return s;
+}
+function zoom2Svg(level){
+  const H=300,c=150,k=28,y=v=>c-(v-level)*k;
+  let s=`<svg viewBox="0 0 170 ${H}"><rect x="0" y="0" width="170" height="${H}" fill="#f4f8fc"/>`;
+  s+=`<path d="M8,${y(level+0.7)} Q20,${c} 60,${c} L170,${c} L170,${H} L8,${H}Z" fill="var(--water)"/>`;
+  s+=`<path d="M8,${y(level+0.7)} Q20,${c} 60,${c} L170,${c}" fill="none" stroke="#3a78b8" stroke-width="1.5"/>`;
+  s+=`<rect x="0" y="0" width="8" height="${H}" fill="#9aa5b1"/>`;
+  const lo=Math.floor(level-6),hi=Math.ceil(level+6);
+  for(let v=lo;v<=hi;v++){if(v%2)continue;const yy=y(v),L=v%10===0?40:22;s+=`<line x1="8" y1="${yy}" x2="${8+L}" y2="${yy}" stroke="#1d4f91" stroke-width="1.6"/>`;if(v%10===0)s+=`<text x="54" y="${yy+5}" font-size="15" fill="#1d4f91">${v}</text>`;}
+  s+=`<line x1="120" y1="${c}" x2="168" y2="${c}" stroke="#c53030" stroke-dasharray="3 3"/><text x="124" y="${c-5}" font-size="10" fill="#c53030">眼睛平視</text></svg>`;
+  return s;
+}
+function render2(){
+  const r=current2();S2.cur=r;
+  $('cupSvg').innerHTML=cupSvg(r);
+  $('zoom2').innerHTML=zoom2Svg(r.L*CUP2.A);
+  let st;
+  if(r.state==='empty')st='量杯中沒有物體。';
+  else if(r.state==='float')st=`${NAME[S2.inObj]}在水中<strong>漂浮</strong>，底部離杯底約 ${(r.bottom*10).toFixed(0)} mm；露出水面約 ${((r.H-r.d)*10).toFixed(0)} mm。`;
+  else if(r.state==='ground')st=`${NAME[S2.inObj]}的底部<strong>貼在杯底</strong>上（水不夠深，無法自由漂浮）。`;
+  else st=`${NAME[S2.inObj]}<strong>完全沒入、沉在杯底</strong>（平均密度大於水）。`;
+  $('state2').innerHTML=st;
+  $('iv').textContent=S2.init==null?'—':S2.init.toFixed(1)+' mL';
+  $('fv').textContent=S2.fin==null?'—':S2.fin.toFixed(1)+' mL';
+  const k=$('objSel').value;
+  $('wetInfo').textContent=`${NAME[k]}：${S2.wet[k]?'表面有水（未擦乾）':'乾的'}；目前杯中：${S2.inObj?NAME[S2.inObj]:'無'}`;
+  const f=S2.foam[k];$('foamInfo').textContent=f?`${NAME[k]}已貼保麗龍 ${f.s.toFixed(1)}×${f.s.toFixed(1)}×${f.h.toFixed(1)} cm`:`${NAME[k]}未貼保麗龍`;
+  renderTab2();renderCup();
+}
+function renderTab2(){
+  let h='';
+  for(const k of ['A','B','C','M']){
+    const rows=S2.rows[k];
+    h+=`<h3>${NAME[k]}</h3>`;
+    if(!rows.length){h+='<p class="note">尚無數據</p>';continue;}
+    h+='<table><tr><th>#</th><th>初讀 (mL)</th><th>末讀 (mL)</th><th>ΔV (mL)</th><th>觀察</th><th>保麗龍</th><th>採用</th><th></th></tr>';
+    rows.forEach((r,i)=>{h+=`<tr><td>${i+1}</td><td>${r.i.toFixed(1)}</td><td>${r.f.toFixed(1)}</td><td>${r.d.toFixed(1)}</td><td>${{float:'漂浮',ground:'觸底',sink:'沉沒'}[r.state]}</td><td>${r.foam?'有':'—'}</td><td><input type="checkbox" data-k="${k}" data-i="${i}" class="use2" ${r.use?'checked':''}></td><td><button class="btn del2" data-k="${k}" data-i="${i}">刪</button></td></tr>`;});
+    const u=rows.filter(r=>r.use).map(r=>r.d);
+    h+=`</table><p>採用 ${u.length} 筆：平均 ΔV = <strong>${fmt(u.length?mean(u):NaN,2)}</strong> mL，標準差 ${fmt(sdev(u),2)} mL → 估計質量 ≈ <strong>${fmt(u.length?mean(u):NaN,1)} g</strong>${k==='M'&&rows.some(r=>r.use&&r.foam)?'（含保麗龍）':''}</p>`;
+    if(rows.some(r=>r.use&&r.state!=='float'))h+='<div class="msg warn">採用的數據中有「觸底」或「沉沒」的量測，這些 ΔV 不等於 m/ρ。</div>';
+  }
+  $('tab2').innerHTML=h;
+  document.querySelectorAll('.use2').forEach(c=>c.onchange=()=>{S2.rows[c.dataset.k][+c.dataset.i].use=c.checked;renderTab2();});
+  document.querySelectorAll('.del2').forEach(b=>b.onclick=()=>{S2.rows[b.dataset.k].splice(+b.dataset.i,1);renderTab2();});
+}
+function renderCup(){
+  const r=S2.cup;
+  if(!r.length){$('tabCup').innerHTML='<p class="note">尚無數據</p>';return;}
+  let h='<table><tr><th>#</th><th>量杯初讀 (mL)</th><th>倒水後讀數 (mL)</th><th>倒出水量 (mL)</th></tr>';
+  r.forEach((x,i)=>h+=`<tr><td>${i+1}</td><td>${x.i.toFixed(1)}</td><td>${x.f.toFixed(1)}</td><td>${x.d.toFixed(1)}</td></tr>`);
+  const d=r.map(x=>x.d);
+  h+=`</table><p>平均 ${mean(d).toFixed(2)} mL，標準差 ${fmt(sdev(d),2)} mL → m<sub>杯</sub> ≈ <strong>${mean(d).toFixed(1)} g</strong>（平均值標準誤 ${fmt(sdev(d)/Math.sqrt(d.length),2)} g）</p>`;
+  $('tabCup').innerHTML=h;
+}
+function cupMass(){const d=S2.cup.map(x=>x.d);return d.length?{m:mean(d),se:d.length>1?sdev(d)/Math.sqrt(d.length):NaN,n:d.length}:null;}
+function mass2(k){const u=S2.rows[k].filter(r=>r.use).map(r=>r.d);return u.length?{m:mean(u),se:u.length>1?sdev(u)/Math.sqrt(u.length):NaN,n:u.length}:null;}
+function bind2(){
+  $('bFill').onclick=()=>{if(S2.inObj){msg('msg2','請先取出物體再倒水。','warn');return;}const v=+$('v0').value;if(!(v>=10&&v<=110)){msg('msg2','水量請設在 10–110 mL。','warn');return;}S2.Vw=v+gauss()*0.6;S2.bubble=0;S2.init=null;S2.fin=null;msg('msg2','已重新裝水，請讀初讀。','info');render2();};
+  $('bIn').onclick=()=>{if(S2.inObj){msg('msg2','量杯裡已經有東西了。','warn');return;}const k=$('objSel').value;S2.inObj=k;if(S2.wet[k]){S2.Vw+=T.cling;S2.wet[k]=false;}S2.bubble=rnd(0,0.4)+(S2.foam[k]?rnd(0.1,0.4):0);S2.fin=null;msg('msg2','','');render2();};
+  $('bOut').onclick=()=>{if(!S2.inObj)return;const k=S2.inObj;S2.Vw-=T.cling;S2.wet[k]=true;S2.inObj=null;S2.bubble=0;render2();};
+  $('bWipe').onclick=()=>{const k=$('objSel').value;if(S2.inObj===k){msg('msg2','先取出再擦。','warn');return;}S2.wet[k]=false;render2();};
+  $('bTap').onclick=()=>{S2.bubble*=0.15;render2();};
+  $('bFoam').onclick=()=>{const k=$('objSel').value;if(S2.inObj===k){msg('msg2','先取出再貼。','warn');return;}const s=+$('fs').value,h=+$('fh').value;
+    if(!(s>=1&&h>=0.3)){msg('msg2','尺寸不合理。','warn');return;}
+    if(s*Math.SQRT2>2*CUP2.R-0.2){msg('msg2',`方塊對角線 ${(s*Math.SQRT2).toFixed(1)} cm 大於量杯內徑 ${(2*CUP2.R).toFixed(1)} cm，放不進去。`,'bad');return;}
+    const base=k==='M'?MAG.d:2*Math.sqrt(T.Vcan/5/Math.PI);
+    if(s<base*0.7){msg('msg2','保麗龍比物體頂面小太多，黏不穩。','warn');return;}
+    S2.foam[k]={s,h};msg('msg2',`已將 ${s.toFixed(1)}×${s.toFixed(1)}×${h.toFixed(1)} cm 保麗龍貼在${NAME[k]}頂部。`,'ok');render2();};
+  $('bUnfoam').onclick=()=>{const k=$('objSel').value;if(S2.inObj===k){msg('msg2','先取出再撕。','warn');return;}S2.foam[k]=null;render2();};
+  $('objSel').onchange=render2;
+  $('bCup').onclick=()=>{const Vi=rnd(80,95),pour=T.mCup/T.rhoW+30*(gauss()*0.04-gauss()*0.03);const rd=v=>Math.round((v+gauss()*0.25)*2)/2;const i=rd(Vi),f=rd(Vi-pour);S2.cup.push({i,f,d:i-f});renderCup();};
+  $('bCupClr').onclick=()=>{S2.cup=[];renderCup();};
+  $('bAuto2').onclick=()=>{const v=S2.cur.L*CUP2.A+gauss()*0.25;$('rd2').value=(Math.round(v*2)/2).toFixed(1);};
+  $('bInit').onclick=()=>{if(S2.inObj){msg('msg2','初讀要在未放物體時讀。','warn');return;}const v=parseFloat($('rd2').value);if(!isFinite(v)){msg('msg2','請先輸入讀數。','warn');return;}S2.init=v;render2();};
+  $('bFin').onclick=()=>{if(!S2.inObj){msg('msg2','末讀要在物體放入後讀。','warn');return;}const v=parseFloat($('rd2').value);if(!isFinite(v)){msg('msg2','請先輸入讀數。','warn');return;}S2.fin=v;render2();};
+  $('bAdd2').onclick=()=>{if(S2.init==null||S2.fin==null||!S2.inObj){msg('msg2','需要初讀、末讀，且物體仍在杯中。','warn');return;}
+    const k=S2.inObj;S2.rows[k].push({i:S2.init,f:S2.fin,d:S2.fin-S2.init,state:S2.cur.state,foam:!!S2.foam[k],use:true});S2.init=null;S2.fin=null;msg('msg2',`已記錄到 ${NAME[k]} 的數據表。`,'ok');render2();};
+}
+
+/* ================= ③ 組裝 ================= */
+let S3;
+function resetS3(){S3={slit:false,pol:'',e:null,tried:false,Hlow:null};}
+const CUPG={rb:2.6,rt:3.7,rim:3.7};
+function sideSvg(opt){
+  // opt: {upper:bool, Rc, tilt(deg, real), loads:[], snap:bool}
+  const px=22,by=300,cx=150,X=v=>cx+v*px,Y=v=>by-v*px;
+  const hc=T.hCup;
+  let s=`<svg viewBox="0 0 330 320">`;
+  s+=`<line x1="10" y1="${by+1}" x2="320" y2="${by+1}" stroke="#8a7f6a" stroke-width="3"/>`;
+  // ruler
+  const rx=X(CUPG.rt)+8;
+  s+=`<rect x="${rx}" y="${Y(13)}" width="18" height="${13*px}" fill="#fbf1c7" stroke="#b49a3d"/>`;
+  for(let c=0;c<=13;c++){s+=`<line x1="${rx}" y1="${Y(c)}" x2="${rx+8}" y2="${Y(c)}" stroke="#333"/>`;if(c%2===0)s+=`<text x="${rx+20}" y="${Y(c)+4}" font-size="9" fill="#333">${c}</text>`;}
+  const cup=(b,col)=>`<path d="M${X(-CUPG.rt)},${Y(b+hc)} L${X(-CUPG.rb)},${Y(b)} L${X(CUPG.rb)},${Y(b)} L${X(CUPG.rt)},${Y(b+hc)}" fill="rgba(200,220,240,0.12)" stroke="${col}" stroke-width="2"/>`;
+  s+=cup(0,'#7a8794');
+  const mag=(y0,lab)=>`<rect x="${X(-MAG.d/2)}" y="${Y(y0+MAG.t)}" width="${MAG.d*px}" height="${MAG.t*px}" fill="#8a8f99" stroke="#333"/><text x="${cx}" y="${Y(y0+MAG.t/2)+4}" font-size="10" text-anchor="middle" fill="#fff">${lab}</text>`;
+  if(opt.lower!==false&&S3.pol!==null)s+=mag(0.08,'N↑');
+  if(opt.upper){
+    const yb=opt.Rc-T.delta,ang=-(opt.tilt||0)*5;
+    s+=`<g transform="rotate(${ang} ${cx} ${Y(yb)})">`;
+    s+=cup(yb,'#3b5f86');
+    s+=mag(yb+0.08,opt.pol==='N'?'N↓':'S↓');
+    let off=-((opt.loads||[]).length-1)*0.9;
+    for(const L of opt.loads||[]){s+=`<rect x="${X(off-0.8)}" y="${Y(yb+0.8+5.0)}" width="${1.6*px}" height="${5*px}" rx="2" fill="#2e3136"/><text x="${X(off)}" y="${Y(yb+3.2)}" font-size="11" fill="#fff" text-anchor="middle">${L}</text>`;off+=1.8;}
+    s+=`</g>`;
+  }
+  s+=`</svg>`;return s;
+}
+function rulerZoom(H,label){
+  const W=230,Hh=180,c=90,k=150,y=v=>c-(v-H)*k;
+  let s=`<svg viewBox="0 0 ${W} ${Hh}"><rect width="${W}" height="${Hh}" fill="#f7f7f4"/>`;
+  s+=`<rect x="20" y="0" width="70" height="${Hh}" fill="#fbf1c7" stroke="#b49a3d"/>`;
+  const lo=Math.floor((H-0.7)*10),hi=Math.ceil((H+0.7)*10);
+  for(let m=lo;m<=hi;m++){const yy=y(m/10),L=m%10===0?42:m%5===0?30:18;s+=`<line x1="20" y1="${yy}" x2="${20+L}" y2="${yy}" stroke="#222" stroke-width="1.2"/>`;if(m%10===0)s+=`<text x="66" y="${yy+5}" font-size="15" fill="#222">${m/10}</text>`;}
+  s+=`<rect x="60" y="${y(H)}" width="${W-60}" height="${0.08*k}" fill="${label==='upper'?'#3b5f86':'#7a8794'}" opacity="0.85"/>`;
+  s+=`<text x="${W-6}" y="${y(H)-6}" font-size="11" text-anchor="end" fill="#333">${label==='upper'?'上杯緣':'下杯緣'}（讀上緣）</text></svg>`;
+  return s;
+}
+function render3(){
+  $('slitS').innerHTML=S3.slit?'<span class="pill ok">已割縫</span>':'';
+  $('glueS').innerHTML=S3.e!=null?`<span class="pill ok">已黏貼（上杯 ${S3.pol} 極朝下）</span>`:'';
+  $('st1').classList.toggle('done',S3.slit);$('st2').classList.toggle('done',S3.e!=null);
+  $('st3').classList.toggle('done',S3.tried);$('st4').classList.toggle('done',S3.Hlow!=null);
+  $('lowS').innerHTML=S3.Hlow!=null?`<span class="pill ok">H<sub>下</sub> = ${S3.Hlow.toFixed(2)} cm</span>`:'';
+  let opt={upper:false};
+  if(S3.tried&&S3.e!=null){if(S3.pol==='S')opt={upper:true,Rc:0.95,tilt:2,pol:'S',loads:[]};else opt={upper:true,Rc:Rof(T.mMag+T.mCup),tilt:0.3,pol:'N',loads:[]};}
+  $('svg3').innerHTML=sideSvg(opt);
+  $('zoom3').innerHTML=rulerZoom(T.hCup,'lower');
+}
+function bind3(){
+  $('bSlit').onclick=()=>{S3.slit=true;render3();};
+  const glue=c=>{const p=$('pol').value;if(!p){msg('msg3','請先選上杯磁鐵的方向。','warn');return;}S3.pol=p;S3.e=c?rnd(0.02,0.07):rnd(0.15,0.35);S3.tried=false;msg('msg3',c?'已用竹籤在杯底標出圓心後對準黏貼。':'已直接黏上（目測對中）。','ok');render3();render4();};
+  $('bGlueQ').onclick=()=>glue(false);$('bGlueC').onclick=()=>glue(true);
+  $('bTry').onclick=()=>{if(S3.e==null){msg('msg3','請先黏磁鐵。','warn');return;}S3.tried=true;
+    if(S3.pol==='S')msg('msg3','<strong>啪！</strong>上杯被吸下去卡在下杯裡：N 對 S 是相吸。請改選「N 極朝下」重新黏貼，讓兩磁鐵同極相對。','bad');
+    else msg('msg3','上杯浮起來了，而且會往一側偏、靠在下杯壁上（同極磁浮的側向不穩定）。','ok');render3();render4();};
+  $('bAuto3').onclick=()=>{$('rd3').value=(Math.round((T.hCup+gauss()*0.02)*100)/100).toFixed(2);};
+  $('bLow').onclick=()=>{const v=parseFloat($('rd3').value);if(!isFinite(v)){msg('msg3','請先輸入讀數。','warn');return;}if(Math.abs(v-T.hCup)>0.5){msg('msg3','讀數和放大圖差太多，請再看一次。','warn');return;}S3.Hlow=v;render3();render4();};
+}
+
+/* ================= ④ 磁斥量測 ================= */
+let S4;
+function resetS4(){S4={placed:null,recorded:true,data:{}};}
+const LOADKEYS=['無','A','B','C','A+B','A+C','B+C','A+B+C'];
+function loadList(){return ['A','B','C'].filter(k=>$('l'+k).checked);}
+function loadKey(){const l=loadList();return l.length?l.join('+'):'無';}
+function ready4(){return S3.slit&&S3.e!=null&&S3.pol==='N'&&S3.Hlow!=null;}
+function compute4(){
+  const P=S4.placed,Ft=P.W+P.fs*(2*P.u-1);let R=Rof(Ft);P.jam=false;
+  if(R<0.95){R=0.95;P.jam=true;}
+  P.R=R;P.Hc=R-T.delta+T.hCup;P.Hr=P.Hc+CUPG.rim*Math.sin(P.th*Math.PI/180)*Math.cos(P.phi);
+}
+function place4(){
+  const l=loadList(),W=T.mMag+T.mCup+l.reduce((s,k)=>s+T['m'+k],0);
+  const kap=0.03+0.15*S3.e/0.3+0.02*Math.random();
+  S4.placed={W,fs:0.30*kap*W,u:Math.random(),th:(0.15+1.2*S3.e/0.3)*(0.4+Math.random()),phi:rnd(0,2*Math.PI),key:loadKey(),loads:l};
+  compute4();S4.recorded=false;
+}
+function render4(){
+  const ok=ready4();
+  $('pre4').style.display=ok?'none':'block';
+  $('pre4').innerHTML='請先在 ③ 完成：割縫、同極相對黏貼磁鐵、試放、記錄下杯緣高度。';
+  ['bPlace','bTap4','bAuto4','bRec4'].forEach(id=>$(id).disabled=!ok);
+  const P=S4.placed;
+  if(P&&P.key!==loadKey())$('state4').innerHTML='砝碼組合已改變，請按「拿出上杯，再輕放回去」。';
+  else if(P)$('state4').innerHTML=`上杯內：${P.key==='無'?'無砝碼':'砝碼 '+P.key}。${P.jam?'<strong>杯壁卡住了！</strong>載重太大，兩杯外壁緊貼，這筆不能代表磁力平衡。':'上杯浮著，'+(P.th>1.0?'杯緣看起來<strong>明顯歪斜</strong>。':P.th>0.5?'杯緣略微歪斜。':'杯緣大致水平。')}`;
+  else $('state4').innerHTML='尚未放置上杯。';
+  $('svg4').innerHTML=sideSvg(P&&ok?{upper:true,Rc:P.R,tilt:P.th*Math.cos(P.phi),pol:'N',loads:P.loads}:{upper:false});
+  $('zoom4').innerHTML=P&&ok?rulerZoom(P.Hr,'upper'):'<p class="note">放上上杯後顯示。</p>';
+  renderTab4();
+}
+function renderTab4(){
+  let h='<table><tr><th>上杯內砝碼</th><th>各次 R (cm)</th><th>n</th><th>平均 R̄ (cm)</th><th>標準差 (cm)</th><th></th></tr>';
+  let any=false;
+  for(const k of LOADKEYS){const d=S4.data[k];if(!d||!d.length)continue;any=true;const Rs=d.map(x=>x.R);
+    h+=`<tr><td>${k==='無'?'空杯＋磁鐵':k}</td><td>${Rs.map(x=>x.toFixed(2)).join('、')}</td><td>${Rs.length}</td><td><strong>${mean(Rs).toFixed(3)}</strong></td><td>${fmt(sdev(Rs),3)}</td><td><button class="btn del4" data-k="${k}">刪最後一筆</button></td></tr>`;}
+  h+='</table>';
+  $('tab4').innerHTML=any?h:'<p class="note">尚無數據。</p>';
+  document.querySelectorAll('.del4').forEach(b=>b.onclick=()=>{S4.data[b.dataset.k].pop();renderTab4();});
+}
+function bind4(){
+  ['lA','lB','lC'].forEach(id=>$(id).onchange=render4);
+  $('bPlace').onclick=()=>{place4();msg('msg4','','');render4();};
+  $('bTap4').onclick=()=>{const P=S4.placed;if(!P)return;P.fs*=0.35;P.u=Math.random();P.th*=0.7;compute4();render4();};
+  $('bAuto4').onclick=()=>{const P=S4.placed;if(!P)return;$('rd4').value=(Math.round((P.Hr+gauss()*0.02)*100)/100).toFixed(2);};
+  $('bRec4').onclick=()=>{const P=S4.placed;
+    if(!P||P.key!==loadKey()){msg('msg4','請先依目前的砝碼組合放置上杯。','warn');return;}
+    if(S4.recorded){msg('msg4','這次放置已經記錄過了。請拿出上杯再放回去，取得獨立的一次量測。','warn');return;}
+    const v=parseFloat($('rd4').value);if(!isFinite(v)){msg('msg4','請先輸入讀數。','warn');return;}
+    if(Math.abs(v-P.Hr)>0.5){msg('msg4','讀數和放大圖差太多，請再看一次。','warn');return;}
+    if(P.jam)msg('msg4','已記錄，但這次杯壁卡住，數據不代表磁力平衡。建議刪除。','warn');else msg('msg4','已記錄。','ok');
+    (S4.data[P.key]=S4.data[P.key]||[]).push({H:v,R:v-S3.Hlow});S4.recorded=true;renderTab4();};
+}
+
+/* ================= 迴歸工具 ================= */
+function linfit(x,y){const n=x.length,mx=mean(x),my=mean(y);let sxx=0,sxy=0,syy=0;for(let i=0;i<n;i++){sxx+=(x[i]-mx)**2;sxy+=(x[i]-mx)*(y[i]-my);syy+=(y[i]-my)**2;}
+  const b=sxy/sxx,a=my-b*mx;let sse=0;for(let i=0;i<n;i++)sse+=(y[i]-a-b*x[i])**2;
+  return{b,a,sse,r2:syy>0?1-sse/syy:1,se:n>2?Math.sqrt(sse/(n-2)/sxx):NaN};}
+function fitM0(F,R,lo=0,hi=25,st=0.02){let best=null;for(let m=lo;m<=hi+1e-9;m+=st){const f=linfit(R.map(Math.log),F.map(v=>Math.log(v+m)));if(!best||f.sse<best.f.sse)best={m0:m,f};}return best;}
+function nice(span){const p=Math.pow(10,Math.floor(Math.log10(span))),f=span/p;return (f<1.5?0.2:f<3?0.5:f<7?1:2)*p;}
+function plotXY(cfg){
+  const W=520,H=360,L=60,Rr=16,Tp=16,B=46;
+  let xs=[],ys=[];cfg.series.forEach(s=>s.pts.forEach(p=>{xs.push(p[0]);ys.push(p[1]);}));
+  let x0=cfg.xr?cfg.xr[0]:Math.min(...xs),x1=cfg.xr?cfg.xr[1]:Math.max(...xs),y0=cfg.yr?cfg.yr[0]:Math.min(...ys),y1=cfg.yr?cfg.yr[1]:Math.max(...ys);
+  const px=(x1-x0)||1,py=(y1-y0)||1;if(!cfg.xr){x0-=px*0.08;x1+=px*0.08;}if(!cfg.yr){y0-=py*0.1;y1+=py*0.1;}
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-Rr),Y=y=>H-B-(y-y0)/(y1-y0)*(H-B-Tp);
+  let s=`<svg viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fff"/>`;
+  const sx=nice((x1-x0)/1.0),sy=nice((y1-y0)/1.0);
+  for(let v=Math.ceil(x0/sx)*sx;v<=x1;v+=sx){s+=`<line x1="${X(v)}" y1="${Tp}" x2="${X(v)}" y2="${H-B}" stroke="#eee"/><text x="${X(v)}" y="${H-B+16}" font-size="11" text-anchor="middle" fill="#444">${+v.toFixed(3)}</text>`;}
+  for(let v=Math.ceil(y0/sy)*sy;v<=y1;v+=sy){s+=`<line x1="${L}" y1="${Y(v)}" x2="${W-Rr}" y2="${Y(v)}" stroke="#eee"/><text x="${L-6}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="#444">${+v.toFixed(3)}</text>`;}
+  s+=`<rect x="${L}" y="${Tp}" width="${W-L-Rr}" height="${H-B-Tp}" fill="none" stroke="#999"/>`;
+  s+=`<text x="${(L+W-Rr)/2}" y="${H-8}" font-size="13" text-anchor="middle">${cfg.xlabel}</text><text x="14" y="${(Tp+H-B)/2}" font-size="13" text-anchor="middle" transform="rotate(-90 14 ${(Tp+H-B)/2})">${cfg.ylabel}</text>`;
+  s+=`<defs><clipPath id="cp${cfg.id}"><rect x="${L}" y="${Tp}" width="${W-L-Rr}" height="${H-B-Tp}"/></clipPath></defs><g clip-path="url(#cp${cfg.id})">`;
+  cfg.series.forEach(se=>{
+    if(se.kind==='line')s+=`<polyline points="${se.pts.map(p=>X(p[0])+','+Y(p[1])).join(' ')}" fill="none" stroke="${se.color}" stroke-width="${se.w||1.8}" ${se.dash?'stroke-dasharray="6 4"':''}/>`;
+    else se.pts.forEach(p=>{s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4.5" fill="${se.color}" stroke="#fff"/>`;});
+  });
+  s+='</g>';
+  let ly=Tp+14;cfg.series.forEach(se=>{if(!se.label)return;s+=se.kind==='line'?`<line x1="${W-Rr-190}" y1="${ly-4}" x2="${W-Rr-168}" y2="${ly-4}" stroke="${se.color}" stroke-width="2" ${se.dash?'stroke-dasharray="6 4"':''}/>`:`<circle cx="${W-Rr-179}" cy="${ly-4}" r="4" fill="${se.color}"/>`;s+=`<text x="${W-Rr-162}" y="${ly}" font-size="11">${se.label}</text>`;ly+=16;});
+  return s+'</svg>';
+}
+
+/* ================= ⑤ 分析 ================= */
+let A5=null;
+function load5(){for(const [k,id] of [['A','mA5'],['B','mB5'],['C','mC5'],['M','mM5']]){const r=mass2(k);$(id).value=r?r.m.toFixed(1):'';}const c=cupMass();$('mU5').value=c?c.m.toFixed(1):'';}
+function analyse5(){
+  const m={A:parseFloat($('mA5').value),B:parseFloat($('mB5').value),C:parseFloat($('mC5').value),M:parseFloat($('mM5').value)},t=parseFloat($('tm5').value);
+  if(![m.A,m.B,m.C,m.M].every(isFinite)){msg('msg5','請填入四個質量（可從 ② 帶入）。','warn');A5=null;return null;}
+  const pts=[];
+  for(const k of LOADKEYS){const d=S4.data[k];if(!d||!d.length)continue;const Rs=d.map(x=>x.R);
+    const F=m.M+(k==='無'?0:k.split('+').reduce((s,q)=>s+m[q],0));pts.push({k,F,R:mean(Rs),sd:sdev(Rs),n:Rs.length});}
+  if(pts.length<3){msg('msg5','至少需要 3 種砝碼組合的數據才能迴歸（建議 8 種全做）。','warn');A5=null;return null;}
+  msg('msg5','','');
+  const F=pts.map(p=>p.F),R=pts.map(p=>p.R);
+  const f1=linfit(R.map(Math.log),F.map(Math.log));
+  const b2=fitM0(F,R);
+  const mU=parseFloat($('mU5').value),hasU=isFinite(mU);
+  const fu=hasU?linfit(R.map(Math.log),F.map(v=>Math.log(v+mU))):null;
+  const g=R.map(v=>v-t),mg=hasU?mU:0;
+  const fg=g.every(v=>v>0.02)?linfit(g.map(Math.log),F.map(v=>Math.log(v+mg))):null;
+  const s=[...pts].sort((a,b)=>a.R-b.R);
+  const lo=s[s.length-1],hi=s[0];
+  const two=(Math.log(hi.F)-Math.log(lo.F))/(Math.log(hi.R)-Math.log(lo.R));
+  A5={m,t,pts,f1,b2,fu,mU:hasU?mU:null,fg,two};
+  return A5;
+}
+function render5(){
+  const r=analyse5();
+  if(!r){$('tab5').innerHTML='';$('res5').innerHTML='';$('plot5').innerHTML='';$('loc5').innerHTML='';return;}
+  let h='<table><tr><th>組合</th><th>F（不含杯重）<br>(gw)</th><th>R̄ (cm)</th><th>n</th><th>log F</th><th>log R</th></tr>';
+  r.pts.forEach(p=>h+=`<tr><td>${p.k==='無'?'空杯＋磁鐵':p.k}</td><td>${p.F.toFixed(1)}</td><td>${p.R.toFixed(3)}</td><td>${p.n}</td><td>${Math.log10(p.F).toFixed(4)}</td><td>${Math.log10(p.R).toFixed(4)}</td></tr>`);
+  $('tab5').innerHTML=h+'</table>';
+  const {f1,b2,fu,fg}=r,mU=r.mU,mL=mU!=null?mU:0;
+  let o=`<table><tr><th>方法</th><th>α</th><th>說明</th><th>R²</th></tr>`;
+  o+=`<tr><td>兩端點法（最輕、最重）</td><td>${r.two.toFixed(2)}</td><td>只用 2 點，浪費其餘數據</td><td>—</td></tr>`;
+  o+=`<tr><td>① 參考解：忽略杯重</td><td><strong>${f1.b.toFixed(2)}</strong> ± ${fmt(f1.se,2)}</td><td>F = m<sub>磁</sub> + Σm<sub>砝</sub></td><td>${f1.r2.toFixed(4)}</td></tr>`;
+  o+=fu?`<tr><td>② 加入自測杯重</td><td><strong>${fu.b.toFixed(2)}</strong> ± ${fmt(fu.se,2)}</td><td>F = m<sub>磁</sub> + m<sub>杯</sub> + Σm<sub>砝</sub>，m<sub>杯</sub> = ${mU.toFixed(1)} g</td><td>${fu.r2.toFixed(4)}</td></tr>`:`<tr><td>② 加入自測杯重</td><td colspan="3">請先在 ② 用浮杯標記法量 m<sub>杯</sub>，或直接填入</td></tr>`;
+  o+=`<tr><td>③ 讓 m<sub>杯</sub> 自由擬合（反面示範）</td><td>${b2.f.b.toFixed(2)} ± ${fmt(b2.f.se,2)}</td><td>迴歸得 m̂<sub>杯</sub> = ${b2.m0.toFixed(1)} g</td><td>${b2.f.r2.toFixed(4)}</td></tr>`;
+  if(fg)o+=`<tr><td>④ 改用間隙 g = R − t</td><td>${fg.b.toFixed(2)} ± ${fmt(fg.se,2)}</td><td>t = ${r.t.toFixed(2)} cm${mU!=null?'，含自測 m<sub>杯</sub>':'，未含杯重'}</td><td>${fg.r2.toFixed(4)}</td></tr>`;
+  o+='</table>';
+  o+=`<p class="note"><strong>為什麼 ③ 不可靠？</strong>真實的磁斥力不是單一冪次律：R 越大，曲線越陡。在 F 上加一個常數，正好可以把這種向下彎的曲線「拉直」，所以迴歸會挑出一個過大的 m̂<sub>杯</sub>，讓 R² 看起來更漂亮，α 卻被拉得太平緩。這說明參數必須能和模型的缺陷分得開，否則就要獨立量測。比較 ③ 的 m̂<sub>杯</sub> 和你在 ② 量到的 m<sub>杯</sub> 就知道了。</p>`;
+  o+=`<p class="note"><strong>④ 的意義</strong>：杯緣高度差 R 是兩磁鐵的中心距。同一組數據改用表面間隙計算，α 就完全不同。題目沒有規定距離的定義，報告中必須寫清楚。</p>`;
+  $('res5').innerHTML=o;
+  const lx=r.pts.map(p=>Math.log10(p.R)),xr=[Math.min(...lx)-0.03,Math.max(...lx)+0.03];
+  const line=(a,b)=>[[xr[0],(a+b*xr[0]*Math.LN10)/Math.LN10],[xr[1],(a+b*xr[1]*Math.LN10)/Math.LN10]];
+  const ser=[{kind:'pt',color:'#c53030',label:'F（忽略杯重）',pts:r.pts.map(p=>[Math.log10(p.R),Math.log10(p.F)])},
+    {kind:'line',color:'#c53030',label:`① α = ${f1.b.toFixed(2)}`,pts:line(f1.a,f1.b),dash:true}];
+  if(fu){ser.push({kind:'pt',color:'#2b6cb0',label:`F + m杯 (${mU.toFixed(1)} g)`,pts:r.pts.map(p=>[Math.log10(p.R),Math.log10(p.F+mU)])});ser.push({kind:'line',color:'#2b6cb0',label:`② α = ${fu.b.toFixed(2)}`,pts:line(fu.a,fu.b)});}
+  $('plot5').innerHTML=plotXY({id:5,xlabel:'log₁₀ R (cm)',ylabel:'log₁₀ F (gw)',xr,series:ser});
+  const s=[...r.pts].sort((a,b)=>a.R-b.R);
+  let q=`<table><tr><th>區間 R (cm)</th><th>局部斜率（${mU!=null?'含自測 m<sub>杯</sub>':'未含杯重'}）</th></tr>`;
+  for(let i=0;i<s.length-1;i++){const dR=Math.log(s[i+1].R)-Math.log(s[i].R);const sl=(Math.log(s[i+1].F+mL)-Math.log(s[i].F+mL))/dR;q+=`<tr><td>${s[i].R.toFixed(2)} – ${s[i+1].R.toFixed(2)}</td><td>${Math.abs(dR)<0.03?'<span class="note">兩點太近，誤差放大</span> '+sl.toFixed(2):sl.toFixed(2)}</td></tr>`;}
+  const far=s.length>=4?(Math.log(s[s.length-1].F+mL)-Math.log(s[s.length-3].F+mL))/(Math.log(s[s.length-1].R)-Math.log(s[s.length-3].R)):NaN,near=s.length>=4?(Math.log(s[2].F+mL)-Math.log(s[0].F+mL))/(Math.log(s[2].R)-Math.log(s[0].R)):NaN;
+  q+=`</table><p>較近三點的平均斜率 ≈ <strong>${fmt(near,2)}</strong>，較遠三點的平均斜率 ≈ <strong>${fmt(far,2)}</strong>。</p>`;
+  $('loc5').innerHTML=q;
+}
+function bind5(){$('bLoad5').onclick=()=>{load5();render5();};$('bFit5').onclick=render5;}
+
+/* ================= ⑥ 真值揭曉 ================= */
+function reveal(){
+  let h='<h3>(a) 浮體秤重</h3><table><tr><th>物體</th><th>你的估計（平均 ± 平均值標準誤）</th><th>真值</th><th>差</th><th>差 / 標準誤</th></tr>';
+  for(const k of ['A','B','C','M']){const r=mass2(k),tv=k==='M'?T.mMag:T['m'+k];
+    if(!r){h+=`<tr><td>${NAME[k]}</td><td>—</td><td>${tv.toFixed(2)} g</td><td>—</td><td>—</td></tr>`;continue;}
+    const z=(r.m-tv)/r.se;h+=`<tr><td>${NAME[k]}</td><td>${r.m.toFixed(2)} ± ${fmt(r.se,2)} g（n=${r.n}）</td><td>${tv.toFixed(2)} g</td><td>${(r.m-tv>=0?'+':'')+(r.m-tv).toFixed(2)} g</td><td>${isFinite(z)?z.toFixed(1)+' σ':'—'}</td></tr>`;}
+  h+='</table>';
+  const sinkA=T.mA/T.rhoW>T.Vcan;
+  h+=`<div class="kv" style="margin-top:6px"><span>底片盒外體積</span><span>${T.Vcan.toFixed(1)} cm³ → 質量大於 ${(T.Vcan*T.rhoW).toFixed(1)} g 會沉</span><span>砝碼 A</span><span>${sinkA?'<strong>會沉</strong>，必須加保麗龍才能用浮體法':'可以自行漂浮'}</span>`;
+  const fm=S2.foam.M;h+=`<span>磁鐵上保麗龍</span><span>${fm?(T.foamRho*fm.s*fm.s*fm.h).toFixed(2)+' g（密度 '+T.foamRho.toFixed(3)+' g/cm³）':'未使用'}</span><span>水的密度</span><span>0.997 g/mL（以 1.00 計算，質量偏大約 0.3%）</span></div>`;
+  h+='<p class="note">「差 / 標準誤」若遠大於 2，表示誤差主要不是隨機的，而是系統性的：密度假設、保麗龍質量、氣泡、觸底、沒擦乾等。</p>';
+
+  h+='<h3>(b) 系統參數</h3><div class="kv">';
+  h+=`<span>上杯質量 m<sub>杯</sub></span><span><strong>${T.mCup.toFixed(2)} g</strong>${cupMass()?`；你用浮杯標記法量到 ${cupMass().m.toFixed(2)} ± ${fmt(cupMass().se,2)} g`:''}${A5?`；③ 自由擬合得到 ${A5.b2.m0.toFixed(1)} g（被曲率誤導）`:''}</span>`;
+  h+=`<span>杯高 h<sub>杯</sub></span><span>${T.hCup.toFixed(3)} cm${S3.Hlow!=null?`（你讀到 ${S3.Hlow.toFixed(2)} cm，差 ${(S3.Hlow-T.hCup>=0?'+':'')+(S3.Hlow-T.hCup).toFixed(3)} cm → 所有 R 一起平移）`:''}</span>`;
+  h+=`<span>兩杯磁鐵黏貼高度差 δ</span><span>${(T.delta*10).toFixed(2)} mm（R<sub>量</sub> = 中心距 − δ）</span>`;
+  h+=`<span>磁鐵</span><span>鐵氧體盤，直徑 ${MAG.d.toFixed(2)} cm、厚 ${MAG.t.toFixed(2)} cm，剩磁 B<sub>r</sub> = ${T.Br.toFixed(3)} T</span>`;
+  h+=`<span>黏貼偏心</span><span>${S3.e!=null?(S3.e*10).toFixed(1)+' mm'+(S3.e>0.1?'（偏心大 → 摩擦遲滯與傾斜都大）':''):'—'}</span></div>`;
+
+  if(A5){
+    const R=A5.pts.map(p=>p.R),Rmin=Math.min(...R),Rmax=Math.max(...R);
+    const tF=R.map(Fmag);const ft=linfit(R.map(Math.log),tF.map(Math.log));
+    const ftg=linfit(R.map(v=>Math.log(v-MAG.t)),tF.map(Math.log));
+    h+=`<h3>(c) 次方值 α</h3><p>真實模型在你量到的範圍（R = ${Rmin.toFixed(2)}–${Rmax.toFixed(2)} cm）內的<strong>有效斜率</strong>：以中心距計算 α<sub>真</sub> = <strong>${ft.b.toFixed(2)}</strong>；以間隙計算 α<sub>真,間隙</sub> = ${ftg.b.toFixed(2)}。</p>`;
+    h+='<table><tr><th>你的方法</th><th>α</th><th>對應真值</th><th>差 / 標準誤</th></tr>';
+    const row=(n,f,tv)=>{const z=(f.b-tv)/f.se;return `<tr><td>${n}</td><td>${f.b.toFixed(2)} ± ${fmt(f.se,2)}</td><td>${tv.toFixed(2)}</td><td>${isFinite(z)?z.toFixed(1)+' σ':'—'}</td></tr>`;};
+    h+=row('① 忽略杯重（參考解）',A5.f1,ft.b);
+    if(A5.fu)h+=row('② 加入自測杯重',A5.fu,ft.b);
+    h+=row('③ m杯 自由擬合（反面示範）',A5.b2.f,ft.b);
+    if(A5.fg&&A5.mU!=null)h+=row('④ 間隙定義（含自測杯重）',A5.fg,ftg.b);
+    h+='</table>';
+    h+='<p>真實模型的局部斜率 d ln F / d ln R（中心距）：</p><table><tr>'+[1.0,1.25,1.5,2.0,2.5,3,4,6,10].map(v=>`<th>R=${v}</th>`).join('')+'</tr><tr>'+[1.0,1.25,1.5,2.0,2.5,3,4,6,10].map(v=>`<td>${localSlope(v).toFixed(2)}</td>`).join('')+'</tr></table>';
+    h+='<p class="note">R 越大，斜率越接近偶極的 −4。所以在這個實驗的距離範圍裡，<strong>不存在單一的「正確 α」</strong>；報告中應寫明量測範圍與距離的定義。</p>';
+    const curve=[];for(let lr=Math.log10(0.95);lr<=Math.log10(6);lr+=0.01)curve.push([lr,Math.log10(Fmag(10**lr))]);
+    const R6=6,F6=Fmag(R6),dip=[[Math.log10(2.5),Math.log10(F6*(R6/2.5)**4)],[Math.log10(R6),Math.log10(F6)]];
+    h+=`<div style="max-width:620px">${plotXY({id:6,xlabel:'log₁₀ R (cm)',ylabel:'log₁₀ F (gw)',series:[
+      {kind:'line',color:'#2f7d4f',label:'真實模型 F(R)',pts:curve,w:2.4},
+      {kind:'line',color:'#888',label:'偶極遠場斜率 −4',pts:dip,dash:true},
+      {kind:'pt',color:'#c53030',label:'你的 F（忽略杯重）',pts:A5.pts.map(p=>[Math.log10(p.R),Math.log10(p.F)])},
+      {kind:'pt',color:'#2b6cb0',label:'你的 F + 真實杯重',pts:A5.pts.map(p=>[Math.log10(p.R),Math.log10(p.F+T.mCup)])}]})}</div>`;
+  }else h+='<div class="msg warn">在 ⑤ 完成迴歸後，這裡會顯示 α 的比較。</div>';
+  $('rev6').innerHTML=h;
+}
+function bind6(){
+  $('bReveal').onclick=()=>{if(!A5)analyse5();reveal();};
+  $('bNew').onclick=()=>{if(!confirm('會清除全部數據並重新產生隱藏真值，確定？'))return;init();msg('rev6','已重新產生隱藏真值。','ok');};
+}
+
+/* ================= 初始化 ================= */
+function init(){newTruth();resetS2();resetS3();resetS4();A5=null;
+  ['mA5','mB5','mC5','mM5','mU5','rd2','rd3','rd4'].forEach(id=>$(id).value='');$('pol').value='';['lA','lB','lC'].forEach(id=>$(id).checked=false);
+  ['msg2','msg3','msg4','msg5'].forEach(id=>msg(id,''));
+  render2();render3();render4();render5();$('rev6').innerHTML='';}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.t));
+  if(b.dataset.t==='t5'){if(!$('mA5').value)load5();render5();}
+  if(b.dataset.t==='t4')render4();
+  try{window.scrollTo(0,0);}catch(e){}
+});
+bind2();bind3();bind4();bind5();bind6();init();
+</script>
+</body>
+</html>

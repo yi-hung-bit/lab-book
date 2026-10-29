@@ -1,5 +1,5 @@
 // 實驗培訓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v3";
+const VERSION="v4";
 const CACHE="lab-book-"+VERSION;
 const FILES=[
  "./",
@@ -9,6 +9,10 @@ const FILES=[
  "icons/icon-512.png",
  "icons/apple-touch-icon.png",
  "labs/basic-leastsq.html",
+ "labs/mech-atmosphere.html",
+ "labs/mech-magnet.html",
+ "labs/mech-projectile.html",
+ "labs/mech-volume.html",
  "labs/basic-uncertainty.html",
  "labs/int-104n2.html",
  "labs/int-106final.html",
