@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>塑膠片焦距虛擬實驗室</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1f2933; --muted:#5f6b7a; --line:#d8dde3;
+  --accent:#1f6feb; --accent2:#c2410c; --ok:#15803d; --warn:#b45309; --soft:#eef3fb;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;line-height:1.6}
+header{background:#18324f;color:#fff;padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+header h1{margin:0;font-size:1.2rem}
+header .sub{font-size:.88rem;opacity:.85}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#e3e8ef;position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.92rem}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+main{max-width:1180px;margin:0 auto;padding:14px 16px 60px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.card h2{margin:0 0 6px;font-size:1.12rem}
+.card h3{margin:10px 0 4px;font-size:1rem}
+.row{display:flex;flex-wrap:wrap;gap:14px}
+.col{flex:1 1 360px;min-width:0}
+.ctl{display:grid;grid-template-columns:150px 1fr 84px;align-items:center;gap:6px;margin:4px 0;font-size:.92rem}
+.ctl input[type=range]{width:100%}
+.ctl output{font-variant-numeric:tabular-nums;text-align:right}
+button{font-family:inherit}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.92rem;margin:3px 4px 3px 0}
+.btn.ghost{background:#fff;color:var(--accent)}
+.btn.warn{background:#fff;color:var(--accent2);border-color:var(--accent2)}
+.btn.big{font-size:1rem;padding:9px 18px}
+svg{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:8px}
+.note{font-size:.88rem;color:var(--muted)}
+.hint{background:var(--soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;font-size:.92rem;margin:8px 0}
+.caution{background:#fff7ed;border-left:4px solid var(--warn);padding:8px 12px;border-radius:6px;font-size:.92rem;margin:8px 0}
+.good{background:#f0fdf4;border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:.92rem;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#f0f3f7}
+td input{width:78px;text-align:center;border:1px solid #cfd6de;border-radius:4px;padding:2px}
+textarea{width:100%;min-height:70px;font-family:inherit;font-size:.92rem;border:1px solid var(--line);border-radius:6px;padding:6px}
+select{font-family:inherit;font-size:.92rem;padding:4px 6px;border:1px solid var(--line);border-radius:6px}
+details{margin:8px 0}
+summary{cursor:pointer;color:var(--accent);font-weight:600}
+.bigv{font-size:1.05rem;font-weight:600}
+.mono{font-variant-numeric:tabular-nums}
+.eq{font-family:"Times New Roman",serif;font-style:italic;font-size:1.05rem}
+.hidebox{display:none}
+@media (max-width:640px){.ctl{grid-template-columns:110px 1fr 70px}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>九十四學年度 屏東區複賽 物理實驗第二題：塑膠片的焦距</h1>
+    <div class="sub">虛擬實驗室｜六個分頁完整版</div>
+  </div>
+  <button class="btn warn" id="btnNew" style="background:#fff">更換塑膠片（重新抽樣）</button>
+</header>
+<nav id="nav">
+  <button data-t="t1" class="on">① 透鏡種類與鏡心</button>
+  <button data-t="t2">② 找出鏡心</button>
+  <button data-t="t3">③ 方法一：雷射光路法</button>
+  <button data-t="t4">④ 方法二：放大率法</button>
+  <button data-t="t5">⑤ 方法三：成像法</button>
+  <button data-t="t6">⑥ 比較與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ ① ============ -->
+<section class="tab on" id="t1">
+  <div class="card">
+    <h2>題目 1：塑膠片的功用與何種透鏡相同？</h2>
+    <p>把塑膠片拿在方格紙上方，改變塑膠片與紙的距離 <span class="eq">p</span>，由正上方觀察片內方格的大小與方向。</p>
+    <div class="row">
+      <div class="col">
+        <svg id="v1" viewBox="0 0 640 420"></svg>
+        <div class="note">外框為塑膠片（7.80 cm × 4.20 cm）。片外的方格是直接看到的紙面。</div>
+      </div>
+      <div class="col" style="flex:0 1 380px">
+        <div class="ctl"><label>片到紙距離 p</label><input type="range" id="p1" min="0.5" max="40" step="0.1" value="4"><output id="p1o"></output></div>
+        <div class="ctl"><label>眼睛到片高度 H</label><input type="range" id="H1" min="15" max="60" step="0.5" value="30"><output id="H1o"></output></div>
+        <div class="hint">試著從很近慢慢拉遠：像的大小怎麼變？什麼時候變得看不清楚？再拉遠後方向有沒有改變？</div>
+        <div id="obs1" class="note"></div>
+        <h3>你的結論與理由</h3>
+        <textarea placeholder="例如：近距離時看到……的像，因此……"></textarea>
+        <details><summary>參考說明</summary>
+          <p>近距離時片內出現<b>正立、放大的虛像</b>；p 越接近某個特定距離，像放大得越厲害、越難看清楚；超過之後變成<b>倒立</b>的像。只有會聚透鏡（凸透鏡）才有這種行為：凹透鏡在任何距離都只給正立縮小的虛像。所以塑膠片的功用與<b>凸透鏡</b>相同，而那個特定距離就是它的焦距 f。</p>
+          <p>這類薄片是<b>菲涅耳透鏡</b>：把凸透鏡的曲面切成許多同心環狀斜面壓在平板上，保留折射角度而去掉厚度。本模擬把每個環帶當成薄透鏡，越靠邊緣的環帶焦距略短（球面像差），溝紋散射則使高倍率時影像偏霧。</p>
+        </details>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>題目 2：何謂透鏡之鏡心？</h2>
+    <textarea placeholder="寫下你的定義……"></textarea>
+    <details><summary>參考說明</summary>
+      <p><b>鏡心（光心）</b>是透鏡主軸上的一點，通過它的光線出射後方向不變。在鏡心附近，透鏡兩側表面互相平行，作用像一片薄平板，所以光線只有極小的側移。對薄透鏡而言側移可忽略，通過鏡心的光線視為直線前進。</p>
+      <p>鏡心<b>不一定</b>在塑膠片的幾何中心，要靠實驗找出來（分頁 ②）。</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============ ② ============ -->
+<section class="tab" id="t2">
+  <div class="card">
+    <h2>題目 2：以十字線找出塑膠片的鏡心</h2>
+    <p>塑膠片水平固定在支架橫桿上，下方白紙畫兩條相交於 O 點的直線。由正上方透過塑膠片看紙：片內的線（像）與片外的線（實物）一般會錯開。平移白紙，直到<b>兩條線都在片內外接成一直線</b>，此時 O 點就在鏡心正下方。</p>
+    <div class="row">
+      <div class="col">
+        <svg id="v2" viewBox="0 0 640 420"></svg>
+        <div class="note">紅、藍兩線在白紙上交於 O。畫面以塑膠片幾何中心為中心。</div>
+      </div>
+      <div class="col" style="flex:0 1 400px">
+        <h3>移動白紙</h3>
+        <div class="ctl"><label>白紙 左右</label><input type="range" id="ox" min="-0.8" max="0.8" step="0.002" value="0.35"><output id="oxo"></output></div>
+        <div class="ctl"><label>白紙 前後</label><input type="range" id="oy" min="-0.8" max="0.8" step="0.002" value="-0.3"><output id="oyo"></output></div>
+        <div>
+          <button class="btn ghost" data-n="x,-0.02">← 0.2 mm</button><button class="btn ghost" data-n="x,0.02">0.2 mm →</button>
+          <button class="btn ghost" data-n="y,0.02">↑ 0.2 mm</button><button class="btn ghost" data-n="y,-0.02">↓ 0.2 mm</button>
+        </div>
+        <h3>裝置與眼睛</h3>
+        <div class="ctl"><label>片到紙距離 p</label><input type="range" id="p2" min="0.5" max="8" step="0.1" value="4"><output id="p2o"></output></div>
+        <div class="ctl"><label>眼睛高度 H</label><input type="range" id="H2" min="15" max="60" step="0.5" value="25"><output id="H2o"></output></div>
+        <div class="ctl"><label>眼睛左右位置</label><input type="range" id="xe2" min="-3" max="3" step="0.05" value="0"><output id="xe2o"></output></div>
+        <div class="ctl"><label>眼睛前後位置</label><input type="range" id="ye2" min="-3" max="3" step="0.05" value="0"><output id="ye2o"></output></div>
+        <div class="ctl"><label>畫面放大</label><input type="range" id="z2" min="40" max="260" step="5" value="80"><output id="z2o"></output></div>
+        <div class="note">眼睛位置是相對塑膠片幾何中心。實際操作時很難把眼睛精準擺在鏡心正上方，初始值已帶有隨機偏差。</div>
+        <button class="btn" id="mark2">標記交點並以直尺量測</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>鏡心位置紀錄</h2>
+    <p class="note">r：標記點到右側短邊的距離；s：標記點到下側長邊的距離（直尺最小刻度 1 mm，估讀到 0.05 cm）。</p>
+    <table><thead><tr><th>#</th><th>p (cm)</th><th>r (cm)</th><th>s (cm)</th><th></th></tr></thead><tbody id="tb2"></tbody></table>
+    <p class="bigv mono" id="sum2"></p>
+    <div class="caution">改變眼睛位置與 p 各做幾次，比較結果的分散程度。想一想：p 大一點還是小一點比較不怕眼睛擺偏？</div>
+    <details><summary>視差分析（做完再看）</summary>
+      <p>設眼睛在鏡心側方 <span class="eq">x</span><sub>e</sub>（相對鏡心）、高度 <span class="eq">H</span>，紙距 <span class="eq">p</span>。片內外直線重合的條件推得：找到的 O 點偏離鏡心</p>
+      <p class="eq" style="text-align:center">Δx = − x<sub>e</sub> · p / H</p>
+      <p>所以要讓 <b>p 小、H 大</b>，並盡量使眼睛在鏡心正上方。例如 x<sub>e</sub> = 2 cm、H = 30 cm、p = 5 cm 時，偏差約 3 mm，這已經比直尺的讀數誤差大很多。</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============ ③ ============ -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>方法一：雷射光路法</h2>
+    <p>雷射筆鉛直向下（平行主軸），光束對準塑膠片短邊中點 D，讓光束<b>一半穿過塑膠片、一半直接落下</b>。穿過的一半被偏折，在方格紙上形成光點 B；沒穿過的一半落在 A。由相似三角形，兩光點距離</p>
+    <p class="eq" style="text-align:center">d = r · p / f　⇒　p = (f / r) · d</p>
+    <p>以 p 對 d 作圖，斜率 β = f / r，故 f = β r。其中 r 是鏡心到短邊的距離（取自分頁 ②）。</p>
+    <div class="row">
+      <div class="col">
+        <svg id="side3" viewBox="0 0 520 420"></svg>
+        <div class="note">側視圖（水平與鉛直同比例）。</div>
+      </div>
+      <div class="col">
+        <svg id="top3" viewBox="0 0 520 420"></svg>
+        <div class="note">方格紙俯視圖（自動縮放以同時看見兩光點）。虛線為塑膠片在紙上的鉛直投影。</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="ctl"><label>片到紙距離 p</label><input type="range" id="p3" min="2" max="40" step="0.1" value="8"><output id="p3o"></output></div>
+        <div class="ctl"><label>雷射 左右位置</label><input type="range" id="lx3" min="3.6" max="4.2" step="0.005" value="3.95"><output id="lx3o"></output></div>
+        <div class="ctl"><label>雷射 前後位置</label><input type="range" id="ly3" min="-1" max="1" step="0.01" value="0.15"><output id="ly3o"></output></div>
+        <div class="note">雷射位置以塑膠片幾何中心為原點，右側短邊在 x = 3.90 cm。光束直徑約 1.5 mm。</div>
+        <div id="state3" class="note"></div>
+      </div>
+      <div class="col">
+        <div style="margin:4px 0"><label>鏡心到短邊距離 r = </label><input type="number" id="r3" step="0.01" value="3.90" style="width:90px"> <span class="note" id="r3src">cm（預設為幾何值；可按下方帶入分頁 ② 平均）</span></div>
+        <button class="btn ghost" id="useR">帶入分頁 ② 的 r 平均</button>
+        <button class="btn" id="rec3">以直尺量 p 與 d 並記錄</button>
+        <div class="hint">建議取 6 個以上的 p，範圍涵蓋 p &lt; f 與 p &gt; f（光點 B 越過 A 的另一側時）。同一 p 可重複量測。</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>數據與迴歸</h2>
+    <div class="row">
+      <div class="col" style="flex:0 1 420px">
+        <table><thead><tr><th>#</th><th>p (cm)</th><th>d (cm)</th><th>p / d</th><th></th></tr></thead><tbody id="tb3"></tbody></table>
+        <button class="btn ghost" id="add3">＋ 手動新增一列</button>
+        <button class="btn warn" id="clr3">清除全部</button>
+      </div>
+      <div class="col">
+        <svg id="plot3" viewBox="0 0 520 340"></svg>
+        <div id="fit3" class="mono"></div>
+      </div>
+    </div>
+    <details><summary>為什麼用迴歸而不用逐點 f = r·p/d 取平均？</summary>
+      <p>逐點計算時，d 小的點（p 小）相對誤差大，卻和其他點同權重平均。最小平方迴歸讓大範圍的點共同決定斜率，也能從殘差看出系統偏差。表中 p/d 欄可以讓你比較兩種做法。</p>
+      <p>注意：光點 A 與 B 分別來自光束的兩半，兩半的中心本來就相距約 0.6 mm，所以 p–d 直線會有一個微小截距；邊緣環帶的焦距也比近軸焦距略短（球面像差）。這兩項都會在分頁 ⑥ 與真值對照時看得出來。</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============ ④ ============ -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>方法二：放大率法（虛像放大率）</h2>
+    <p>塑膠片離方格紙 <span class="eq">p</span>，由上方觀察：片內是放大的虛像，片外是紙面本身。若片內一格的視大小相當於片外 <span class="eq">k</span> 格，則</p>
+    <p class="eq" style="text-align:center">1 / k = 1 − u / f　，　u = pH / (p + H)</p>
+    <p>以 1/k 對 u 作圖是一條直線，斜率 = −1/f，截距應為 1。其中 H 是眼睛到塑膠片的高度。若把眼睛當成在無窮遠（u ≈ p），就回到課本的 k = f /( f − p)。</p>
+    <div class="row">
+      <div class="col">
+        <svg id="v4" viewBox="0 0 640 420"></svg>
+        <div class="note">紅色參考線的間隔 = 片外方格間隔 × k。調整 k 與相位，使紅線疊在片內的方格線上。</div>
+      </div>
+      <div class="col" style="flex:0 1 380px">
+        <div class="ctl"><label>片到紙距離 p</label><input type="range" id="p4" min="1" max="10" step="0.05" value="4"><output id="p4o"></output></div>
+        <div class="ctl"><label>眼睛高度 H</label><input type="range" id="H4" min="20" max="60" step="0.5" value="30"><output id="H4o"></output></div>
+        <div class="ctl"><label>參考線倍率 k</label><input type="range" id="k4" min="1" max="7" step="0.01" value="1.5"><output id="k4o"></output></div>
+        <div class="ctl"><label>參考線相位</label><input type="range" id="ph4" min="-0.5" max="0.5" step="0.01" value="0"><output id="ph4o"></output></div>
+        <div class="ctl"><label>畫面放大</label><input type="range" id="z4" min="40" max="140" step="5" value="70"><output id="z4o"></output></div>
+        <div id="st4" class="note"></div>
+        <button class="btn" id="rec4">記錄這組 (p, H, k)</button>
+        <div class="hint">建議取 6 組以上的 p。p 越大放大率越高，但影像也越霧，對齊會變難──這正是真實菲涅耳片的限制。</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>數據與迴歸</h2>
+    <div class="row">
+      <div class="col" style="flex:0 1 460px">
+        <table><thead><tr><th>#</th><th>p (cm)</th><th>H (cm)</th><th>k</th><th>1/k</th><th>u (cm)</th><th></th></tr></thead><tbody id="tb4"></tbody></table>
+        <button class="btn ghost" id="add4">＋ 手動新增一列</button>
+        <button class="btn warn" id="clr4">清除全部</button>
+      </div>
+      <div class="col">
+        <svg id="plot4" viewBox="0 0 520 340"></svg>
+        <div id="fit4" class="mono"></div>
+      </div>
+    </div>
+    <details><summary>1/k = 1 − u/f 的推導</summary>
+      <p>眼睛在鏡片上方 H、橫向位置 x<sub>e</sub>；視線經鏡片上一點 L 後偏折，落在紙面上的位置為</p>
+      <p style="text-align:center" class="eq">X = L (1 + p/H − p/f) − p x<sub>e</sub>/H + p x<sub>c</sub>/f</p>
+      <p>沒有鏡片時則是 X = L(1 + p/H) − p x<sub>e</sub>/H。所以紙面上單位長度在視野中的寬度，片內是片外的 A / B 倍，其中 A = 1 + p/H、B = A − p/f。令 k = A/B 即得 1/k = 1 − (p/A)/f = 1 − u/f。</p>
+      <p>把橫軸畫成 p（等於假設眼睛在無窮遠）會<b>高估</b> f。因為 u = p/(1+p/H) 恆小於 p，而且兩者不成正比：同樣的 1/k 落在更右邊的位置，擬合出來的斜率變小，f = −1/斜率 就變大。以 H = 30 cm、p = 2–9 cm 為例，f 會高估三成以上，而且截距也會偏離 1。這是本方法最大的誤差來源，眼睛越低（H 越小）錯得越多。</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============ ⑤ ============ -->
+<section class="tab" id="t5">
+  <div class="card">
+    <h2>方法三：成像法（遠處光源的實像）</h2>
+    <p>把塑膠片水平夾在支架上、方格紙放在桌面當屏幕，讓天花板日光燈（或窗外景物）的光穿過塑膠片。上下移動塑膠片，直到紙上出現<b>最清晰的倒立實像</b>，此時片到紙的距離就是像距 <span class="eq">q</span>。由成像公式</p>
+    <p class="eq" style="text-align:center">1/f = 1/D + 1/q　⇒　f = qD / (q + D)</p>
+    <p>若把光源當成無窮遠（f ≈ q）會高估焦距，高估的比例約為 f/D。</p>
+    <div class="row">
+      <div class="col">
+        <svg id="side5" viewBox="0 0 400 420"></svg>
+        <div class="note">側視圖（高度方向已壓縮）。</div>
+      </div>
+      <div class="col" style="flex:2 1 460px">
+        <svg id="scr5" viewBox="0 0 640 420"></svg>
+        <div class="note">方格紙上看到的像。</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="ctl"><label>光源</label><select id="src5"><option value="lamp">天花板日光燈</option><option value="win">窗外景物</option></select><output id="src5o"></output></div>
+        <div class="ctl"><label>片到紙距離 q</label><input type="range" id="q5" min="6" max="30" step="0.05" value="12"><output id="q5o"></output></div>
+        <div class="ctl"><label>畫面放大</label><input type="range" id="z5" min="14" max="60" step="2" value="30"><output id="z5o"></output></div>
+        <button class="btn" id="rec5">記錄目前的 q（判定為最清晰）</button>
+        <div id="st5" class="note"></div>
+      </div>
+      <div class="col">
+        <div id="dinfo5" class="hint"></div>
+        <div class="caution">同一個光源至少重複 4 次，每次先把片移開再重新對焦，才能估計判讀誤差。兩種光源都做，才能看出物距修正的效果。</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>數據與計算</h2>
+    <div class="row">
+      <div class="col" style="flex:0 1 420px">
+        <table><thead><tr><th>#</th><th>光源</th><th>q (cm)</th><th></th></tr></thead><tbody id="tb5"></tbody></table>
+        <button class="btn warn" id="clr5">清除全部</button>
+      </div>
+      <div class="col"><div id="fit5" class="mono"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ⑥ ============ -->
+<section class="tab" id="t6">
+  <div class="card">
+    <h2>三種方法的比較</h2>
+    <div id="cmp6"></div>
+    <svg id="bar6" viewBox="0 0 640 260"></svg>
+    <div class="note">橫軸為焦距 (cm)；橫棒為各方法的 ±1 標準差。按下方按鈕才會畫出真值線。</div>
+  </div>
+  <div class="card">
+    <h2>真值揭曉</h2>
+    <p class="note">先把三個方法都做完、填好自己的結論，再按下面的按鈕。</p>
+    <textarea id="guess6" placeholder="在揭曉之前，寫下你認為哪個方法最準、為什麼，以及你估計的 f = ______ cm"></textarea>
+    <button class="btn big" id="reveal6">揭曉這片塑膠片的真值</button>
+    <div id="truth6" class="hidebox"></div>
+  </div>
+  <div class="card">
+    <h2>誤差來源整理</h2>
+    <details open><summary>三個方法各自的系統誤差</summary>
+      <ul>
+        <li><b>方法一（雷射光路）</b>：只用到短邊附近那一圈環帶，量到的是「邊緣焦距」，比近軸焦距短；光束兩半的中心相距約 0.6 mm，使 p–d 直線出現小截距；r 若取自分頁 ②，眼睛視差造成的偏差會直接按比例傳進 f。</li>
+        <li><b>方法二（放大率）</b>：眼睛不在無窮遠。用 p 當橫軸會明顯<b>高估</b> f（H = 30 cm 時可高估三成以上），用 u = pH/(p+H) 才正確；截距是否等於 1 就是檢查橫軸有沒有選對的指標。溝紋散射使高倍率時對齊變難，屬於隨機誤差。</li>
+        <li><b>方法三（成像）</b>：光源不在無窮遠。直接取 f ≈ q 會高估約 f/D：日光燈 D ≈ 2.5 m 時高估約 6%，窗外景物 D ≈ 20 m 時只高估約 0.8%。D 本身的量測誤差也會傳進 f。</li>
+        <li><b>三者共同</b>：菲涅耳片各環帶焦距不同（球面像差），三個方法取樣的環帶不一樣，本來就不會得到同一個 f。這不是誰做錯了，而是「焦距」對這種片子本來就有 1% 上下的內在分散。</li>
+      </ul>
+    </details>
+    <details><summary>如何降低誤差</summary>
+      <ul>
+        <li>方法一：把 p 的範圍拉大到 5–35 cm，讓斜率由大範圍決定；雷射務必鉛直（可用鉛錘線檢查）。</li>
+        <li>方法二：把眼睛墊高（H 越大，p 與 u 差距越小），或乾脆用 u 當橫軸。</li>
+        <li>方法三：改用窗外遠景，並把 D 量準；或同時用兩種光源，檢查修正後的 f 是否一致。</li>
+        <li>三個方法的 f 若落在 ±2 個標準差內互相重疊，才算彼此印證。</li>
+      </ul>
+    </details>
+  </div>
+</section>
+
+</main>
+<script>
+"use strict";
+// ================== 幾何與隱藏真值 ==================
+const SW = 7.80, SH = 4.20;          // 塑膠片 長邊、短邊 (cm)
+const EX = SW/2, EY = SH/2;
+let T = null;                        // 隱藏真值
+let SRC = null;                      // 光源真值
+function gauss(){ let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+const rnd = (x,s)=>Math.round(x/s)*s;
+const fx = (x,n=2)=>Number(x).toFixed(n);
+const $ = id=>document.getElementById(id);
+
+function newTruth(){
+  const f0 = 12 + Math.random()*10;                              // 近軸焦距 12–22 cm
+  const m = Math.random()*0.30, a = Math.random()*2*Math.PI;     // 鏡心偏移 0–3 mm
+  T = { f0, cx:m*Math.cos(a), cy:m*Math.sin(a), sig:0.10+Math.random()*0.15 };
+  const Dt = 230 + Math.random()*60;                             // 日光燈真實距離
+  SRC = { Dt, Dm: rnd(Dt + gauss()*4, 1), Wt: 1500 + Math.random()*1000 };
+}
+// 環帶焦距：離軸 h 越大焦距越短（球面像差）
+function fh(h){ return T.f0/(1 + T.sig*(h/T.f0)*(h/T.f0)); }
+// 各種加權下的等效焦距
+function fEff(w){
+  let s=0,n=0;
+  for(let i=-6;i<=6;i++)for(let j=-4;j<=4;j++){
+    const hx=i/6*EX-T.cx, hy=j/4*EY-T.cy, h=Math.hypot(hx,hy);
+    const ww = w==='h2'? h*h : 1;
+    s += ww/fh(h); n += ww;
+  }
+  return n/s;
+}
+
+// ================== 分頁切換 ==================
+let cur='t1';
+$('nav').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.t));
+  cur=b.dataset.t; drawCur();
+});
+function drawCur(){
+  if(cur==='t1')draw1(); else if(cur==='t2')draw2(); else if(cur==='t3')draw3();
+  else if(cur==='t4')draw4(); else if(cur==='t5')draw5(); else if(cur==='t6')draw6();
+}
+
+// ================== 紙面內容（以線段描述，單位 cm）==================
+function gridSegs(x0,x1,y0,y1,ppc){
+  if(x0>x1){const t=x0;x0=x1;x1=t;} if(y0>y1){const t=y0;y0=y1;y1=t;}
+  const segs=[];
+  const layers=[[0.1,'#e8c9a8',0.7],[0.5,'#dca77a',1.0],[1,'#c9824a',1.3]];
+  for(const L of layers){
+    const st=L[0];
+    if(st*ppc<4) continue;
+    const i0=Math.ceil(x0/st), i1=Math.floor(x1/st), j0=Math.ceil(y0/st), j1=Math.floor(y1/st);
+    if((i1-i0)+(j1-j0) > 300) continue;
+    for(let i=i0;i<=i1;i++) segs.push({a:[i*st,y0],b:[i*st,y1],c:L[1],w:L[2]});
+    for(let j=j0;j<=j1;j++) segs.push({a:[x0,j*st],b:[x1,j*st],c:L[1],w:L[2]});
+  }
+  return segs;
+}
+function lineSegs(Ox,Oy){
+  return function(x0,x1,y0,y1,ppc){
+    const segs=[], L=80;
+    const set=[[35,'#c0392b'],[118,'#1f5fa8']];
+    for(const q of set){
+      const a=q[0]*Math.PI/180, dx=Math.cos(a)*L, dy=Math.sin(a)*L;
+      segs.push({a:[Ox-dx,Oy-dy],b:[Ox+dx,Oy+dy],c:q[1],w:1.8});
+    }
+    return segs;
+  };
+}
+
+// ================== 精確光線映射 ==================
+// 鏡平面上一點 L → 紙面落點 X（眼睛在 (xe,ye) 高 H，紙在鏡下方 p）
+function mapLX(Lx,Ly,p,H,xe,ye){
+  const hx=Lx-T.cx, hy=Ly-T.cy, f=fh(Math.hypot(hx,hy));
+  return [ Lx + p*((Lx-xe)/H - hx/f), Ly + p*((Ly-ye)/H - hy/f) ];
+}
+// 紙面點 X → 鏡平面點 L（以仿射近似迭代）
+function invMap(X,Y,p,H,xe,ye,B,tx,ty){
+  let Lx=(X+tx)/B, Ly=(Y+ty)/B;
+  for(let i=0;i<6;i++){
+    const m=mapLX(Lx,Ly,p,H,xe,ye);
+    const ex=(X-m[0])/B, ey=(Y-m[1])/B;
+    Lx+=ex; Ly+=ey;
+    if(Math.abs(ex)+Math.abs(ey)<1e-5) break;
+    if(!isFinite(Lx)||!isFinite(Ly)) return [0,0];
+  }
+  return [Lx,Ly];
+}
+
+// ================== 透過塑膠片的俯視畫面 ==================
+function lensView(svg,o){
+  const Wv=640, Hv=420, cx0=Wv/2, cy0=Hv/2, z=o.zoom;
+  const f=T.f0, p=o.p, H=o.H, xe=o.xe, ye=o.ye;
+  const A=1+p/H; let B=A-p/f; if(Math.abs(B)<0.02) B=B<0?-0.02:0.02;
+  const kx=p*xe/H, ky=p*ye/H;
+  const tx=kx-p*T.cx/f, ty=ky-p*T.cy/f;
+  const vt='translate('+cx0+','+cy0+') scale('+z+','+(-z)+')';
+  // ---- 片外（無鏡片，嚴格仿射）----
+  const Lx0=-cx0/z, Lx1=cx0/z, Ly0=-cy0/z, Ly1=cy0/z;
+  const oSegs=o.content(A*Lx0-kx, A*Lx1-kx, A*Ly0-ky, A*Ly1-ky, z/A);
+  let out='';
+  for(const s of oSegs){
+    const ax=(s.a[0]+kx)/A, ay=(s.a[1]+ky)/A, bx=(s.b[0]+kx)/A, by=(s.b[1]+ky)/A;
+    out+='<line x1="'+ax.toFixed(4)+'" y1="'+ay.toFixed(4)+'" x2="'+bx.toFixed(4)+'" y2="'+by.toFixed(4)+'" stroke="'+s.c+'" stroke-width="'+s.w+'" vector-effect="non-scaling-stroke"/>';
+  }
+  // ---- 片內（逐點精確映射）----
+  const corners=[[-EX,-EY],[EX,-EY],[EX,EY],[-EX,EY],[0,0]].map(c=>mapLX(c[0],c[1],p,H,xe,ye));
+  const px0=Math.min.apply(null,corners.map(c=>c[0])), px1=Math.max.apply(null,corners.map(c=>c[0]));
+  const py0=Math.min.apply(null,corners.map(c=>c[1])), py1=Math.max.apply(null,corners.map(c=>c[1]));
+  const iSegs=o.content(px0,px1,py0,py1,z/Math.abs(B));
+  const N=8;
+  let inn='';
+  for(const s of iSegs){
+    let d='';
+    for(let i=0;i<=N;i++){
+      const t=i/N, X=s.a[0]+(s.b[0]-s.a[0])*t, Y=s.a[1]+(s.b[1]-s.a[1])*t;
+      const L=invMap(X,Y,p,H,xe,ye,B,tx,ty);
+      const Lx=Math.max(-3*EX,Math.min(3*EX,L[0])), Ly=Math.max(-3*EY,Math.min(3*EY,L[1]));
+      d+=(i?'L':'M')+Lx.toFixed(4)+' '+Ly.toFixed(4);
+    }
+    inn+='<path d="'+d+'" fill="none" stroke="'+s.c+'" stroke-width="'+s.w+'" vector-effect="non-scaling-stroke"/>';
+  }
+  // ---- 溝紋散射造成的霧化：與放大率成正比 ----
+  const mag=Math.abs(A/B);
+  let blur=Math.min(9, 0.012*Math.max(1,mag)*z);
+  if(blur<0.6) blur=0;
+  // ---- 參考線 ----
+  let ovl='';
+  if(o.overlay){
+    const sp=o.overlay.k/A, n=Math.ceil(EX/sp)+1;
+    for(let j=-n;j<=n;j++){
+      const L=(j+o.overlay.ph)*sp;
+      if(Math.abs(L)<=EX) ovl+='<line x1="'+L.toFixed(4)+'" y1="'+(-EY)+'" x2="'+L.toFixed(4)+'" y2="'+EY+'" stroke="#e11d48" stroke-width="1.1" vector-effect="non-scaling-stroke" opacity="0.8"/>';
+    }
+  }
+  const rx=cx0-EX*z, ry=cy0-EY*z, rw=2*EX*z, rh=2*EY*z;
+  svg.innerHTML =
+    '<defs><clipPath id="'+svg.id+'c"><rect x="'+rx+'" y="'+ry+'" width="'+rw+'" height="'+rh+'" rx="3"/></clipPath>'+
+    '<filter id="'+svg.id+'b" x="-12%" y="-12%" width="124%" height="124%"><feGaussianBlur stdDeviation="'+blur+'"/></filter></defs>'+
+    '<rect x="0" y="0" width="'+Wv+'" height="'+Hv+'" fill="#fffdf6"/>'+
+    '<g transform="'+vt+'">'+out+'</g>'+
+    '<g clip-path="url(#'+svg.id+'c)">'+
+      '<rect x="'+rx+'" y="'+ry+'" width="'+rw+'" height="'+rh+'" fill="#fffdf6"/>'+
+      '<g '+(blur?'filter="url(#'+svg.id+'b)"':'')+'><g transform="'+vt+'">'+inn+'</g></g>'+
+      '<rect x="'+rx+'" y="'+ry+'" width="'+rw+'" height="'+rh+'" fill="#9cc3e6" fill-opacity="0.07"/>'+
+      '<path d="M'+(rx+8)+' '+(ry+6)+' l40 0 l-30 '+(rh-12)+' l-10 0z" fill="#fff" fill-opacity="0.22"/>'+
+      '<g transform="'+vt+'">'+ovl+'</g>'+
+    '</g>'+
+    '<rect x="'+rx+'" y="'+ry+'" width="'+rw+'" height="'+rh+'" rx="3" fill="none" stroke="#3b6ea5" stroke-width="2"/>';
+  return {A:A,B:B,blur:blur,mag:A/B};
+}
+
+// ================== ① ==================
+function draw1(){
+  const p=+$('p1').value, H=+$('H1').value;
+  $('p1o').textContent=fx(p,1)+' cm'; $('H1o').textContent=fx(H,1)+' cm';
+  const r=lensView($('v1'),{p:p,H:H,xe:0,ye:0,zoom:38,content:gridSegs});
+  const m=r.mag;
+  let t;
+  if(Math.abs(m)>9) t='片內的像被放大到只剩幾條線，而且很霧（p 接近焦距）。';
+  else if(m>1.03) t='片內方格：正立，看起來比片外大 '+fx(m,2)+' 倍。';
+  else if(m<-0.03) t='片內方格：倒立，視大小為片外的 '+fx(Math.abs(m),2)+' 倍。';
+  else t='片內外方格大小差不多。';
+  $('obs1').innerHTML='<b>觀察：</b>'+t;
+}
+['p1','H1'].forEach(id=>$(id).addEventListener('input',draw1));
+
+// ================== ② ==================
+const rec2=[];
+function draw2(){
+  const Ox=+$('ox').value, Oy=+$('oy').value, p=+$('p2').value, H=+$('H2').value;
+  const xe=+$('xe2').value, ye=+$('ye2').value, z=+$('z2').value;
+  $('oxo').textContent=fx(Ox*10,2)+' mm'; $('oyo').textContent=fx(Oy*10,2)+' mm';
+  $('p2o').textContent=fx(p,1)+' cm'; $('H2o').textContent=fx(H,1)+' cm';
+  $('xe2o').textContent=fx(xe,2)+' cm'; $('ye2o').textContent=fx(ye,2)+' cm'; $('z2o').textContent=z+'×';
+  lensView($('v2'),{p:p,H:H,xe:xe,ye:ye,zoom:z,content:lineSegs(Ox,Oy)});
+}
+['ox','oy','p2','H2','xe2','ye2','z2'].forEach(id=>$(id).addEventListener('input',draw2));
+document.querySelectorAll('[data-n]').forEach(b=>b.addEventListener('click',()=>{
+  const parts=b.dataset.n.split(','), el=$(parts[0]==='x'?'ox':'oy');
+  el.value=(+el.value + parseFloat(parts[1])).toFixed(3); draw2();
+}));
+$('mark2').addEventListener('click',()=>{
+  const Ox=+$('ox').value, Oy=+$('oy').value;
+  const mx=Ox+gauss()*0.01, my=Oy+gauss()*0.01;   // 筆尖標記誤差
+  rec2.push({p:+$('p2').value, r:rnd(EX-mx+gauss()*0.02,0.05), s:rnd(my+EY+gauss()*0.02,0.05)});
+  table2();
+});
+function table2(){
+  $('tb2').innerHTML=rec2.map((d,i)=>'<tr><td>'+(i+1)+'</td><td>'+fx(d.p,1)+'</td><td>'+fx(d.r)+'</td><td>'+fx(d.s)+'</td><td><button class="btn warn" data-d2="'+i+'">刪除</button></td></tr>').join('');
+  $('tb2').querySelectorAll('[data-d2]').forEach(b=>b.onclick=()=>{rec2.splice(+b.dataset.d2,1);table2();});
+  const st=stats(rec2.map(d=>d.r)), ss=stats(rec2.map(d=>d.s));
+  $('sum2').textContent=rec2.length?('r̄ = '+fx(st.m,3)+' ± '+fx(st.se,3)+' cm　　s̄ = '+fx(ss.m,3)+' ± '+fx(ss.se,3)+' cm（平均 ± 標準誤差，n = '+rec2.length+'）'):'尚無紀錄';
+}
+function stats(a){
+  const n=a.length; if(!n) return {m:NaN,sd:NaN,se:NaN,n:0};
+  const m=a.reduce((x,y)=>x+y,0)/n;
+  const sd=n>1?Math.sqrt(a.reduce((x,y)=>x+(y-m)*(y-m),0)/(n-1)):0.03;
+  return {m:m,sd:sd,se:n>1?sd/Math.sqrt(n):0.03,n:n};
+}
+
+// ================== ③ 雷射光路 ==================
+const BEAM_R=0.075;
+const beamS=[]; (function(){const N=14;for(let i=-N;i<=N;i++)for(let j=-N;j<=N;j++){const x=i/N*BEAM_R,y=j/N*BEAM_R;if(x*x+y*y<=BEAM_R*BEAM_R)beamS.push([x,y]);}})();
+function spots(lx,ly,p){
+  const A=[],Bp=[];
+  for(const q of beamS){
+    const x=lx+q[0], y=ly+q[1];
+    if(Math.abs(x)<EX&&Math.abs(y)<EY){
+      const hx=x-T.cx, hy=y-T.cy, f=fh(Math.hypot(hx,hy));
+      Bp.push([x-hx*p/f, y-hy*p/f]);
+    } else A.push([x,y]);
+  }
+  const cen=a=>a.length?[a.reduce((s,q)=>s+q[0],0)/a.length, a.reduce((s,q)=>s+q[1],0)/a.length]:null;
+  return {A:A,B:Bp,cA:cen(A),cB:cen(Bp),fA:A.length/beamS.length,fB:Bp.length/beamS.length};
+}
+function gridStr(x0,x1,y0,y1,ppc){
+  let s='';
+  for(const g of gridSegs(x0,x1,y0,y1,ppc))
+    s+='<line x1="'+g.a[0].toFixed(3)+'" y1="'+g.a[1].toFixed(3)+'" x2="'+g.b[0].toFixed(3)+'" y2="'+g.b[1].toFixed(3)+'" stroke="'+g.c+'" stroke-width="'+g.w+'" vector-effect="non-scaling-stroke"/>';
+  return s;
+}
+function draw3(){
+  const p=+$('p3').value, lx=+$('lx3').value, ly=+$('ly3').value;
+  $('p3o').textContent=fx(p,1)+' cm'; $('lx3o').textContent=fx(lx,3)+' cm'; $('ly3o').textContent=fx(ly,2)+' cm';
+  const S=spots(lx,ly,p);
+  const k=8.2, gx=300, gy=395, X=x=>gx+x*k, Y=h=>gy-h*k, top=p+6;
+  let s='<rect x="0" y="'+gy+'" width="520" height="25" fill="#e9e3d6"/>'+
+    '<rect x="'+X(-24)+'" y="'+(gy-4)+'" width="'+(34*k)+'" height="4" fill="#c9b99a"/>'+
+    '<rect x="'+X(-24)+'" y="'+Y(46)+'" width="6" height="'+(46*k)+'" fill="#666"/>'+
+    '<rect x="'+X(-24)+'" y="'+(Y(p)-3)+'" width="'+((24-EX)*k+6)+'" height="5" fill="#888"/>'+
+    '<rect x="'+X(-EX)+'" y="'+(Y(p)-2)+'" width="'+(SW*k)+'" height="3" fill="#7fb2e0" stroke="#3b6ea5"/>'+
+    '<rect x="'+(X(lx)-5)+'" y="'+(Y(top)-30)+'" width="10" height="30" fill="#333" rx="2"/>';
+  if(S.cA) s+='<line x1="'+X(lx)+'" y1="'+Y(top)+'" x2="'+X(S.cA[0])+'" y2="'+gy+'" stroke="#e11" stroke-width="1.3"/>';
+  if(S.cB) s+='<line x1="'+X(lx)+'" y1="'+Y(top)+'" x2="'+X(lx)+'" y2="'+Y(p)+'" stroke="#e11" stroke-width="1.3"/>'+
+    '<line x1="'+X(lx)+'" y1="'+Y(p)+'" x2="'+X(S.cB[0])+'" y2="'+gy+'" stroke="#e11" stroke-width="1.3"/>';
+  s+='<line x1="'+X(EX+2.5)+'" y1="'+Y(p)+'" x2="'+X(EX+2.5)+'" y2="'+gy+'" stroke="#999" stroke-dasharray="4 3"/>'+
+    '<text x="'+X(EX+3)+'" y="'+((Y(p)+gy)/2)+'" font-size="13" fill="#555">p</text>'+
+    (S.cA?'<text x="'+(X(S.cA[0])+4)+'" y="'+(gy+16)+'" font-size="12">A</text>':'')+
+    (S.cB?'<text x="'+(X(S.cB[0])-12)+'" y="'+(gy+16)+'" font-size="12">B</text>':'')+
+    '<text x="'+(X(lx)+8)+'" y="'+(Y(top)-16)+'" font-size="12" fill="#333">雷射</text>';
+  $('side3').innerHTML=s;
+  const pts=[[lx,ly]]; if(S.cB)pts.push(S.cB); if(S.cA)pts.push(S.cA);
+  let x0=Math.min.apply(null,pts.map(q=>q[0]))-0.8, x1=Math.max.apply(null,pts.map(q=>q[0]))+0.8;
+  let y0=Math.min.apply(null,pts.map(q=>q[1]))-0.8, y1=Math.max.apply(null,pts.map(q=>q[1]))+0.8;
+  const z=Math.min(520/(x1-x0),420/(y1-y0),600), mx=(x0+x1)/2, my=(y0+y1)/2;
+  const vt='translate(260,210) scale('+z+','+(-z)+') translate('+(-mx)+','+(-my)+')';
+  let t='<g transform="'+vt+'"><rect x="'+(mx-270/z)+'" y="'+(my-220/z)+'" width="'+(540/z)+'" height="'+(440/z)+'" fill="#fffdf6"/>'+
+    gridStr(mx-260/z,mx+260/z,my-210/z,my+210/z,z)+
+    '<rect x="'+(-EX)+'" y="'+(-EY)+'" width="'+SW+'" height="'+SH+'" fill="none" stroke="#3b6ea5" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>';
+  const rB=S.B.length? Math.max(0.012, 1.2*BEAM_R*Math.abs(1-p/T.f0)/14) : 0;
+  for(const q of S.A) t+='<circle cx="'+q[0].toFixed(3)+'" cy="'+q[1].toFixed(3)+'" r="'+(BEAM_R/12)+'" fill="#ff1a1a" fill-opacity="0.35"/>';
+  for(const q of S.B) t+='<circle cx="'+q[0].toFixed(3)+'" cy="'+q[1].toFixed(3)+'" r="'+rB.toFixed(4)+'" fill="#ff1a1a" fill-opacity="0.3"/>';
+  $('top3').innerHTML=t+'</g>';
+  let st='光束穿過塑膠片的比例：'+fx(S.fB*100,0)+'%　直接落下：'+fx(S.fA*100,0)+'%';
+  if(S.fA<0.15||S.fB<0.15) st+='　<b style="color:#b45309">其中一個光點太暗，請把雷射對準短邊。</b>';
+  $('state3').innerHTML=st;
+}
+['p3','lx3','ly3'].forEach(id=>$(id).addEventListener('input',draw3));
+const rec3=[];
+$('rec3').addEventListener('click',()=>{
+  const p=+$('p3').value, S=spots(+$('lx3').value,+$('ly3').value,p);
+  if(S.fA<0.15||S.fB<0.15){ alert('有一個光點太暗無法判讀，請調整雷射位置使光束約一半穿過塑膠片。'); return; }
+  const d=Math.hypot(S.cA[0]-S.cB[0],S.cA[1]-S.cB[1]);
+  const spread=0.3*BEAM_R*Math.abs(1-p/T.f0);
+  rec3.push({p:rnd(p+gauss()*0.03,0.05), d:rnd(d+gauss()*Math.hypot(0.02,spread),0.05)});
+  table3();
+});
+$('add3').addEventListener('click',()=>{rec3.push({p:NaN,d:NaN});table3();});
+$('clr3').addEventListener('click',()=>{if(confirm('確定清除全部數據？')){rec3.length=0;table3();}});
+$('useR').addEventListener('click',()=>{
+  if(!rec2.length){alert('分頁 ② 尚無鏡心紀錄。');return;}
+  const st=stats(rec2.map(d=>d.r)); $('r3').value=st.m.toFixed(3);
+  $('r3src').textContent='cm（分頁 ② 平均，標準誤差 '+fx(st.se,3)+' cm）'; fit3();
+});
+$('r3').addEventListener('input',fit3);
+function table3(){
+  $('tb3').innerHTML=rec3.map((d,i)=>'<tr><td>'+(i+1)+'</td>'+
+    '<td><input type="number" step="0.05" data-i="'+i+'" data-k="p" value="'+(isNaN(d.p)?'':fx(d.p))+'"></td>'+
+    '<td><input type="number" step="0.05" data-i="'+i+'" data-k="d" value="'+(isNaN(d.d)?'':fx(d.d))+'"></td>'+
+    '<td>'+(d.p>0&&d.d>0?fx(d.p/d.d,3):'')+'</td><td><button class="btn warn" data-d3="'+i+'">刪</button></td></tr>').join('');
+  $('tb3').querySelectorAll('input').forEach(el=>el.addEventListener('change',()=>{rec3[+el.dataset.i][el.dataset.k]=parseFloat(el.value);table3();}));
+  $('tb3').querySelectorAll('[data-d3]').forEach(b=>b.onclick=()=>{rec3.splice(+b.dataset.d3,1);table3();});
+  fit3();
+}
+// ================== 最小平方 ==================
+function linfit(xs,ys){
+  const n=xs.length, o={n:n};
+  const sxx=xs.reduce((s,x)=>s+x*x,0), sxy=xs.reduce((s,x,i)=>s+x*ys[i],0);
+  o.b0=sxy/sxx;
+  const r0=ys.reduce((s,y,i)=>s+(y-o.b0*xs[i])*(y-o.b0*xs[i]),0);
+  o.sb0=n>1?Math.sqrt(r0/(n-1)/sxx):NaN;
+  const mx=xs.reduce((a,b)=>a+b,0)/n, my=ys.reduce((a,b)=>a+b,0)/n;
+  const Sxx=xs.reduce((s,x)=>s+(x-mx)*(x-mx),0), Sxy=xs.reduce((s,x,i)=>s+(x-mx)*(ys[i]-my),0), Syy=ys.reduce((s,y)=>s+(y-my)*(y-my),0);
+  o.b=Sxy/Sxx; o.a=my-o.b*mx;
+  const r1=ys.reduce((s,y,i)=>s+(y-o.a-o.b*xs[i])*(y-o.a-o.b*xs[i]),0);
+  o.sb=n>2?Math.sqrt(r1/(n-2)/Sxx):NaN; o.sa=n>2?Math.sqrt(r1/(n-2)*(1/n+mx*mx/Sxx)):NaN;
+  o.R2=Sxy*Sxy/(Sxx*Syy);
+  return o;
+}
+const RES={};
+function fit3(){
+  const v=rec3.filter(d=>d.p>0&&d.d>0), xs=v.map(d=>d.d), ys=v.map(d=>d.p);
+  const r=parseFloat($('r3').value);
+  let rse=0.03;
+  if(rec2.length>1 && $('r3src').textContent.indexOf('分頁')>=0) rse=stats(rec2.map(d=>d.r)).se;
+  let F=null, html='';
+  if(v.length>=2){
+    F=linfit(xs,ys);
+    const f=F.b0*r, sf=Math.hypot(r*F.sb0, F.b0*rse);
+    RES.m1={f:f,sf:sf,n:v.length};
+    html='<p><b>過原點迴歸</b> p = β d：β = '+fx(F.b0,3)+' ± '+fx(F.sb0,3)+'</p>'+
+      '<p class="bigv">f = β r = '+fx(F.b0,3)+' × '+fx(r,3)+' = '+fx(f,2)+' ± '+fx(sf,2)+' cm</p>';
+    if(v.length>=3) html+='<p class="note">一般直線 p = a + b d：b = '+fx(F.b,3)+' ± '+fx(F.sb,3)+'，截距 a = '+fx(F.a,2)+' ± '+fx(F.sa,2)+' cm，R² = '+fx(F.R2,4)+'。截距與 0 相差超過 2 個標準差時，代表有系統偏差。</p>';
+    const pd=stats(v.map(d=>d.p/d.d));
+    html+='<p class="note">對照：逐點 p/d 平均 = '+fx(pd.m,3)+' ± '+fx(pd.se,3)+'，對應 f = '+fx(pd.m*r,2)+' cm。</p>';
+  } else { delete RES.m1; html='<p class="note">至少需要 2 筆數據。</p>'; }
+  $('fit3').innerHTML=html;
+  plotXY($('plot3'), [{xs:xs,ys:ys}], F?[{a:0,b:F.b0,c:'#1f6feb',label:'過原點'}].concat(v.length>=3?[{a:F.a,b:F.b,c:'#c2410c',dash:'5 4',label:'一般直線'}]:[]):[], 'd (cm)','p (cm)');
+}
+
+// ================== ④ 放大率法 ==================
+const rec4=[];
+function draw4(){
+  const p=+$('p4').value, H=+$('H4').value, k=+$('k4').value, ph=+$('ph4').value, z=+$('z4').value;
+  $('p4o').textContent=fx(p,2)+' cm'; $('H4o').textContent=fx(H,1)+' cm';
+  $('k4o').textContent=fx(k,2)+'×'; $('ph4o').textContent=fx(ph,2); $('z4o').textContent=z+'×';
+  const r=lensView($('v4'),{p:p,H:H,xe:0,ye:0,zoom:z,content:gridSegs,overlay:{k:k,ph:ph}});
+  let t='紅線間隔 = 片外方格的 '+fx(k,2)+' 倍。調到紅線與片內方格線重合，再按記錄。';
+  if(r.blur>4) t='<b style="color:#b45309">影像很霧（放大率太高），對齊誤差會變大；可把 p 調小。</b>';
+  $('st4').innerHTML=t;
+}
+['p4','H4','k4','ph4','z4'].forEach(id=>$(id).addEventListener('input',draw4));
+$('rec4').addEventListener('click',()=>{
+  const p=+$('p4').value, H=+$('H4').value, k=+$('k4').value;
+  rec4.push({p:rnd(p+gauss()*0.03,0.05), H:H, k:Math.round(k*(1+gauss()*0.006)*100)/100});
+  table4();
+});
+$('add4').addEventListener('click',()=>{rec4.push({p:NaN,H:+$('H4').value,k:NaN});table4();});
+$('clr4').addEventListener('click',()=>{if(confirm('確定清除全部數據？')){rec4.length=0;table4();}});
+function table4(){
+  $('tb4').innerHTML=rec4.map((d,i)=>{
+    const u=(d.p>0&&d.H>0)?d.p*d.H/(d.p+d.H):NaN;
+    return '<tr><td>'+(i+1)+'</td>'+
+      '<td><input type="number" step="0.05" data-i="'+i+'" data-k="p" value="'+(isNaN(d.p)?'':fx(d.p))+'"></td>'+
+      '<td><input type="number" step="0.5" data-i="'+i+'" data-k="H" value="'+(isNaN(d.H)?'':fx(d.H,1))+'"></td>'+
+      '<td><input type="number" step="0.01" data-i="'+i+'" data-k="k" value="'+(isNaN(d.k)?'':fx(d.k))+'"></td>'+
+      '<td>'+(d.k>0?fx(1/d.k,4):'')+'</td><td>'+(isNaN(u)?'':fx(u,3))+'</td>'+
+      '<td><button class="btn warn" data-d4="'+i+'">刪</button></td></tr>';
+  }).join('');
+  $('tb4').querySelectorAll('input').forEach(el=>el.addEventListener('change',()=>{rec4[+el.dataset.i][el.dataset.k]=parseFloat(el.value);table4();}));
+  $('tb4').querySelectorAll('[data-d4]').forEach(b=>b.onclick=()=>{rec4.splice(+b.dataset.d4,1);table4();});
+  fit4();
+}
+function fit4(){
+  const v=rec4.filter(d=>d.p>0&&d.k>0&&d.H>0);
+  let html='';
+  if(v.length>=3){
+    const ys=v.map(d=>1/d.k);
+    const xu=v.map(d=>d.p*d.H/(d.p+d.H)), xp=v.map(d=>d.p);
+    const Fu=linfit(xu,ys), Fp=linfit(xp,ys);
+    const fu=-1/Fu.b, sfu=Math.abs(Fu.sb/(Fu.b*Fu.b));
+    const fp=-1/Fp.b, sfp=Math.abs(Fp.sb/(Fp.b*Fp.b));
+    RES.m2={f:fu,sf:sfu,n:v.length}; RES.m2p={f:fp,sf:sfp};
+    html='<p class="bigv">以 u = pH/(p+H) 為橫軸：f = '+fx(fu,2)+' ± '+fx(sfu,2)+' cm</p>'+
+      '<p class="note">斜率 = '+fx(Fu.b,4)+' ± '+fx(Fu.sb,4)+'，截距 = '+fx(Fu.a,4)+' ± '+fx(Fu.sa,4)+'（理論值 1），R² = '+fx(Fu.R2,4)+'</p>'+
+      '<p>以 p 為橫軸（假設眼睛在無窮遠）：f = '+fx(fp,2)+' ± '+fx(sfp,2)+' cm，截距 = '+fx(Fp.a,4)+'</p>'+
+      '<p class="note">兩者相差 '+fx((fp/fu-1)*100,1)+' %。截距偏離 1 就是在提醒你橫軸選錯了。</p>';
+    plotXY($('plot4'), [{xs:xu,ys:ys,c:'#123'},{xs:xp,ys:ys,c:'#c2410c',r:3}],
+      [{a:Fu.a,b:Fu.b,c:'#1f6feb',label:'對 u'},{a:Fp.a,b:Fp.b,c:'#c2410c',dash:'5 4',label:'對 p'}],
+      'u 或 p (cm)','1 / k', {y0:0,y1:1.05});
+  } else {
+    delete RES.m2; delete RES.m2p;
+    html='<p class="note">至少需要 3 筆數據。</p>';
+    plotXY($('plot4'),[{xs:[],ys:[]}],[],'u 或 p (cm)','1 / k',{y0:0,y1:1.05});
+  }
+  $('fit4').innerHTML=html;
+}
+
+// ================== ⑤ 成像法 ==================
+const rec5=[];
+const TUBE_L=120, TUBE_W=2.6;   // 日光燈管
+function blurR(q,D){            // 像平面上的模糊半徑 (cm)
+  let s=0,n=0;
+  for(let i=-6;i<=6;i++)for(let j=-4;j<=4;j++){
+    const hx=i/6*EX-T.cx, hy=j/4*EY-T.cy, h=Math.hypot(hx,hy);
+    if(h<0.15) continue;
+    const f=fh(h), qh=1/(1/f-1/D);
+    const e=h*(1-q/qh); s+=e*e; n++;
+  }
+  return Math.sqrt(s/n+0.02*0.02);   // 加上溝紋散射的底線
+}
+function bestQ(D){
+  let lo=3, hi=40, q=0;
+  for(let it=0;it<60;it++){
+    const a=lo+(hi-lo)/3, b=hi-(hi-lo)/3;
+    if(blurR(a,D)<blurR(b,D)) hi=b; else lo=a;
+  }
+  q=(lo+hi)/2; return q;
+}
+function draw5(){
+  const src=$('src5').value, q=+$('q5').value, z=+$('z5').value;
+  const D = src==='lamp'? SRC.Dt : SRC.Wt;
+  $('q5o').textContent=fx(q,2)+' cm'; $('z5o').textContent=z+'×'; $('src5o').textContent='';
+  $('dinfo5').innerHTML = src==='lamp'
+    ? '天花板日光燈：燈管長約 120 cm、直徑約 2.6 cm。你用兩支 30 cm 長尺接續量得燈到紙面的距離 <b>D = '+SRC.Dm+' ± 5 cm</b>。'
+    : '窗外景物：距離約 20 m（無法精確量測，計算時取 D ≈ 2000 cm）。景物本身的尺度很大，成像很小。';
+  const rho=blurR(q,D), m=q/D;
+  // ---- 側視 ----
+  let s='<rect x="0" y="0" width="400" height="420" fill="#f7f9fb"/>'+
+    '<rect x="0" y="360" width="400" height="60" fill="#e9e3d6"/>'+
+    '<rect x="40" y="356" width="330" height="6" fill="#fffdf6" stroke="#c9824a"/>'+
+    '<text x="46" y="378" font-size="12" fill="#555">方格紙（屏幕）</text>'+
+    '<rect x="60" y="30" width="30" height="330" fill="#777"/>';
+  const yq=356-q*8;
+  s+='<rect x="90" y="'+(yq-4)+'" width="60" height="8" fill="#999"/>'+
+     '<rect x="150" y="'+(yq-2)+'" width="150" height="4" fill="#7fb2e0" stroke="#3b6ea5"/>'+
+     '<text x="305" y="'+(yq+4)+'" font-size="12" fill="#3b6ea5">塑膠片</text>'+
+     '<line x1="225" y1="'+yq+'" x2="225" y2="356" stroke="#999" stroke-dasharray="4 3"/>'+
+     '<text x="230" y="'+((yq+356)/2)+'" font-size="13" fill="#555">q = '+fx(q,2)+' cm</text>';
+  if(src==='lamp'){
+    s+='<rect x="120" y="18" width="210" height="14" rx="7" fill="#eaf4ff" stroke="#9cc3e6"/>'+
+       '<text x="120" y="48" font-size="12" fill="#555">日光燈（D ≈ '+fx(SRC.Dm/100,2)+' m，圖中未按比例）</text>';
+    for(let i=0;i<5;i++) s+='<line x1="'+(140+i*45)+'" y1="34" x2="'+(200+i*8)+'" y2="'+(yq-6)+'" stroke="#cfe3f7" stroke-width="1"/>';
+  } else {
+    s+='<rect x="300" y="14" width="90" height="120" fill="#dceaf7" stroke="#8fa6b8"/>'+
+       '<line x1="345" y1="14" x2="345" y2="134" stroke="#8fa6b8"/><line x1="300" y1="74" x2="390" y2="74" stroke="#8fa6b8"/>'+
+       '<text x="286" y="150" font-size="12" fill="#555">窗（D ≈ 20 m）</text>';
+  }
+  $('side5').innerHTML=s;
+  // ---- 紙上的像 ----
+  const cx0=320, cy0=210;
+  const bl=Math.max(0.15, rho*z*0.6);
+  let t='<rect x="0" y="0" width="640" height="420" fill="#fffdf6"/>'+
+    '<g transform="translate('+cx0+','+cy0+') scale('+z+','+(-z)+')">'+
+    gridStr(-cx0/z, cx0/z, -cy0/z, cy0/z, z)+'</g>'+
+    '<defs><filter id="bf5" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="'+fx(bl,2)+'"/></filter></defs>'+
+    '<g filter="url(#bf5)" transform="translate('+cx0+','+cy0+')">';
+  const op=Math.max(0.25, Math.min(0.95, 0.9/(1+Math.pow(rho/0.12,1.4))));
+  if(src==='lamp'){
+    const Lp=TUBE_L*m*z, Wp=TUBE_W*m*z;
+    t+='<rect x="'+(-Lp/2)+'" y="'+(-Wp/2)+'" width="'+Lp+'" height="'+Wp+'" rx="'+(Wp/2)+'" fill="#ffffff" opacity="'+fx(op,2)+'"/>'+
+       '<rect x="'+(-Lp/2)+'" y="'+(-Wp/2)+'" width="'+Lp+'" height="'+Wp+'" rx="'+(Wp/2)+'" fill="#eaf6ff" opacity="'+fx(op*0.8,2)+'"/>';
+  } else {
+    const S0=200*m*z;   // 窗寬 200 cm 的像
+    t+='<g transform="rotate(180) scale('+(S0/200)+')">'+
+       '<rect x="-100" y="-70" width="200" height="140" fill="#cfe4f5" opacity="'+fx(op,2)+'"/>'+
+       '<rect x="-100" y="20" width="200" height="50" fill="#9db98f" opacity="'+fx(op,2)+'"/>'+
+       '<rect x="30" y="-40" width="45" height="60" fill="#b6a58f" opacity="'+fx(op,2)+'"/>'+
+       '<circle cx="-45" cy="-5" r="26" fill="#6f8f5f" opacity="'+fx(op,2)+'"/>'+
+       '<rect x="-49" y="10" width="8" height="30" fill="#7a6248" opacity="'+fx(op,2)+'"/>'+
+       '<rect x="-6" y="-70" width="12" height="140" fill="#5a6470" opacity="'+fx(op,2)+'"/>'+
+       '<rect x="-100" y="-6" width="200" height="12" fill="#5a6470" opacity="'+fx(op,2)+'"/></g>';
+  }
+  t+='</g>';
+  $('scr5').innerHTML=t;
+  $('st5').innerHTML='上下移動塑膠片，找出像最銳利的那個位置再記錄。像的清晰度只能用眼睛判斷，模擬不會告訴你答案。';
+}
+['q5','z5'].forEach(id=>$(id).addEventListener('input',draw5));
+$('src5').addEventListener('change',()=>{
+  $('z5').value = $('src5').value==='lamp'? 30 : 60;   // 窗外的像小得多，預設放大一些
+  draw5();
+});
+$('rec5').addEventListener('click',()=>{
+  const src=$('src5').value;
+  rec5.push({src:src, q:rnd(+$('q5').value + gauss()*0.04, 0.05)});
+  table5();
+});
+$('clr5').addEventListener('click',()=>{if(confirm('確定清除全部數據？')){rec5.length=0;table5();}});
+function table5(){
+  $('tb5').innerHTML=rec5.map((d,i)=>'<tr><td>'+(i+1)+'</td><td>'+(d.src==='lamp'?'日光燈':'窗外')+'</td><td>'+fx(d.q)+'</td><td><button class="btn warn" data-d5="'+i+'">刪</button></td></tr>').join('');
+  $('tb5').querySelectorAll('[data-d5]').forEach(b=>b.onclick=()=>{rec5.splice(+b.dataset.d5,1);table5();});
+  fit5();
+}
+function fit5(){
+  let html='';
+  const L=rec5.filter(d=>d.src==='lamp').map(d=>d.q), W=rec5.filter(d=>d.src==='win').map(d=>d.q);
+  delete RES.m3;
+  if(L.length){
+    const st=stats(L), D=SRC.Dm, sD=5;
+    const f=st.m*D/(st.m+D);
+    const sf=Math.hypot( (D/(st.m+D))*(D/(st.m+D))*st.se, (st.m/(st.m+D))*(st.m/(st.m+D))*sD );
+    html+='<h3>日光燈（D = '+D+' ± 5 cm）</h3>'+
+      '<p>q̄ = '+fx(st.m)+' ± '+fx(st.se)+' cm（n = '+st.n+'）</p>'+
+      '<p class="note">不修正物距：f ≈ q̄ = '+fx(st.m)+' cm</p>'+
+      '<p class="bigv">修正後：f = q̄D/(q̄+D) = '+fx(f,2)+' ± '+fx(sf,2)+' cm　（差 '+fx((st.m/f-1)*100,1)+' %）</p>';
+    RES.m3={f:f,sf:sf,n:st.n,src:'日光燈'};
+  }
+  if(W.length){
+    const st=stats(W), D=2000, sD=500;
+    const f=st.m*D/(st.m+D);
+    const sf=Math.hypot( (D/(st.m+D))*(D/(st.m+D))*st.se, (st.m/(st.m+D))*(st.m/(st.m+D))*sD );
+    html+='<h3>窗外景物（D ≈ 2000 cm）</h3>'+
+      '<p>q̄ = '+fx(st.m)+' ± '+fx(st.se)+' cm（n = '+st.n+'）</p>'+
+      '<p class="bigv">修正後：f = '+fx(f,2)+' ± '+fx(sf,2)+' cm　（不修正為 '+fx(st.m)+' cm，只差 '+fx((st.m/f-1)*100,1)+' %）</p>';
+    if(!RES.m3 || st.n>=RES.m3.n) RES.m3={f:f,sf:sf,n:st.n,src:'窗外景物'};
+  }
+  if(L.length&&W.length){
+    html+='<div class="good">兩種光源修正後的 f 若在 ±2 標準差內重合，代表物距修正是對的。</div>';
+  }
+  if(!html) html='<p class="note">尚無紀錄。</p>';
+  $('fit5').innerHTML=html;
+}
+
+// ================== 通用繪圖 ==================
+function plotXY(svg,series,lines,xl,yl,opt){
+  opt=opt||{};
+  const W=520,H=340,L=58,R=18,Tp=18,Bt=46;
+  let allx=[], ally=[];
+  series.forEach(s=>{allx=allx.concat(s.xs); ally=ally.concat(s.ys);});
+  const xm=Math.max(1,Math.max.apply(null,allx.concat([0])))*1.1;
+  const ym=opt.y1!==undefined?opt.y1:Math.max(1,Math.max.apply(null,ally.concat([0])))*1.1;
+  const y0=opt.y0!==undefined?opt.y0:0;
+  const X=x=>L+x/xm*(W-L-R), Y=y=>H-Bt-(y-y0)/(ym-y0)*(H-Tp-Bt);
+  const tick=m=>{const r=m/5,pw=Math.pow(10,Math.floor(Math.log10(r)));const u=[1,2,5,10].find(k=>k*pw>=r)*pw;return u;};
+  let s='<rect width="'+W+'" height="'+H+'" fill="#fff"/>';
+  const tx=tick(xm), ty=tick(ym-y0);
+  for(let x=0;x<=xm;x+=tx) s+='<line x1="'+X(x)+'" y1="'+Tp+'" x2="'+X(x)+'" y2="'+(H-Bt)+'" stroke="#eee"/><text x="'+X(x)+'" y="'+(H-Bt+16)+'" font-size="11" text-anchor="middle">'+(+x.toFixed(2))+'</text>';
+  for(let y=y0;y<=ym+1e-9;y+=ty) s+='<line x1="'+L+'" y1="'+Y(y)+'" x2="'+(W-R)+'" y2="'+Y(y)+'" stroke="#eee"/><text x="'+(L-6)+'" y="'+(Y(y)+4)+'" font-size="11" text-anchor="end">'+(+y.toFixed(2))+'</text>';
+  s+='<line x1="'+L+'" y1="'+(H-Bt)+'" x2="'+(W-R)+'" y2="'+(H-Bt)+'" stroke="#333"/><line x1="'+L+'" y1="'+Tp+'" x2="'+L+'" y2="'+(H-Bt)+'" stroke="#333"/>'+
+    '<text x="'+((L+W-R)/2)+'" y="'+(H-8)+'" font-size="13" text-anchor="middle">'+xl+'</text>'+
+    '<text x="14" y="'+((Tp+H-Bt)/2)+'" font-size="13" text-anchor="middle" transform="rotate(-90 14 '+((Tp+H-Bt)/2)+')">'+yl+'</text>';
+  lines.forEach((ln,i)=>{
+    const ya=ln.a+ln.b*0, yb=ln.a+ln.b*xm;
+    s+='<line x1="'+X(0)+'" y1="'+Y(ya)+'" x2="'+X(xm)+'" y2="'+Y(yb)+'" stroke="'+ln.c+'" stroke-width="'+(ln.dash?1.3:2)+'"'+(ln.dash?' stroke-dasharray="'+ln.dash+'"':'')+'/>'+
+      '<text x="'+(W-R-4)+'" y="'+(Tp+14+i*14)+'" font-size="11" text-anchor="end" fill="'+ln.c+'">'+(ln.label||'')+'</text>';
+  });
+  series.forEach(se=>{
+    se.xs.forEach((x,i)=>{ s+='<circle cx="'+X(x)+'" cy="'+Y(se.ys[i])+'" r="'+(se.r||4)+'" fill="'+(se.c||'#123')+'"/>'; });
+  });
+  svg.innerHTML=s;
+}
+
+// ================== ⑥ ==================
+let revealed=false;
+function draw6(){
+  const rows=[];
+  if(RES.m1) rows.push({n:'方法一 雷射光路法', f:RES.m1.f, sf:RES.m1.sf, c:'#1f6feb', note:'取樣環帶：短邊附近 (h ≈ r)'});
+  if(RES.m2) rows.push({n:'方法二 放大率法（對 u）', f:RES.m2.f, sf:RES.m2.sf, c:'#15803d', note:'取樣環帶：整片平均'});
+  if(RES.m2p) rows.push({n:'方法二（誤用 p 為橫軸）', f:RES.m2p.f, sf:RES.m2p.sf, c:'#9ca3af', note:'示範系統誤差'});
+  if(RES.m3) rows.push({n:'方法三 成像法（'+RES.m3.src+'）', f:RES.m3.f, sf:RES.m3.sf, c:'#c2410c', note:'取樣環帶：整片，以 h² 加權'});
+  let h='';
+  if(!rows.length) h='<p class="note">還沒有任何一個方法的結果。請先完成分頁 ③–⑤。</p>';
+  else{
+    h='<table><thead><tr><th>方法</th><th>f (cm)</th><th>標準差</th><th>相對誤差</th><th>備註</th></tr></thead><tbody>'+
+      rows.map(r=>'<tr><td style="text-align:left">'+r.n+'</td><td class="mono">'+fx(r.f,2)+'</td><td class="mono">± '+fx(r.sf,2)+'</td><td class="mono">'+fx(r.sf/r.f*100,1)+' %</td><td style="text-align:left" class="note">'+r.note+'</td></tr>').join('')+'</tbody></table>';
+    if(rows.length>=2){
+      const a=rows[0], b=rows[rows.length-1];
+      const z=Math.abs(a.f-b.f)/Math.hypot(a.sf,b.sf);
+      h+='<p class="note">最上與最下兩列相差 '+fx(z,1)+' 個標準差。</p>';
+    }
+  }
+  $('cmp6').innerHTML=h;
+  // 橫棒圖
+  const vals=rows.map(r=>r.f).concat(revealed?[T.f0]:[]);
+  if(!vals.length){ $('bar6').innerHTML='<rect width="640" height="260" fill="#fff"/>'; return; }
+  let lo=Math.min.apply(null,vals)-1.2, hi=Math.max.apply(null,vals)+1.2;
+  const Xp=v=>60+(v-lo)/(hi-lo)*550;
+  let s='<rect width="640" height="260" fill="#fff"/>';
+  const step=(hi-lo)/6;
+  for(let i=0;i<=6;i++){ const v=lo+i*step; s+='<line x1="'+Xp(v)+'" y1="20" x2="'+Xp(v)+'" y2="215" stroke="#eee"/><text x="'+Xp(v)+'" y="233" font-size="11" text-anchor="middle">'+fx(v,1)+'</text>'; }
+  rows.forEach((r,i)=>{
+    const y=40+i*40;
+    s+='<line x1="'+Xp(r.f-r.sf)+'" y1="'+y+'" x2="'+Xp(r.f+r.sf)+'" y2="'+y+'" stroke="'+r.c+'" stroke-width="3"/>'+
+       '<circle cx="'+Xp(r.f)+'" cy="'+y+'" r="5" fill="'+r.c+'"/>'+
+       '<text x="8" y="'+(y-8)+'" font-size="11" fill="'+r.c+'">'+r.n+'</text>';
+  });
+  if(revealed){
+    s+='<line x1="'+Xp(T.f0)+'" y1="20" x2="'+Xp(T.f0)+'" y2="215" stroke="#111" stroke-width="2"/>'+
+       '<text x="'+(Xp(T.f0)+5)+'" y="32" font-size="12">真值 f₀ = '+fx(T.f0,2)+'</text>';
+    const fr=fh(EX-T.cx), fa=fEff('area'), fh2=fEff('h2');
+    [[fr,'邊緣 f(r)','#1f6feb'],[fa,'全片平均','#15803d'],[fh2,'h² 加權','#c2410c']].forEach((q,i)=>{
+      s+='<line x1="'+Xp(q[0])+'" y1="20" x2="'+Xp(q[0])+'" y2="215" stroke="'+q[2]+'" stroke-width="1" stroke-dasharray="4 3"/>'+
+         '<text x="'+(Xp(q[0])+4)+'" y="'+(200-i*14)+'" font-size="10" fill="'+q[2]+'">'+q[1]+'</text>';
+    });
+  }
+  s+='<text x="'+320+'" y="252" font-size="12" text-anchor="middle">f (cm)</text>';
+  $('bar6').innerHTML=s;
+}
+$('reveal6').addEventListener('click',()=>{
+  revealed=true;
+  const fr=fh(EX-T.cx), fa=fEff('area'), fh2=fEff('h2');
+  let h='<div class="good"><h3>這片塑膠片的真值</h3>'+
+    '<table><tbody>'+
+    '<tr><td style="text-align:left">近軸焦距 f₀</td><td class="mono">'+fx(T.f0,3)+' cm</td></tr>'+
+    '<tr><td style="text-align:left">鏡心相對幾何中心</td><td class="mono">Δx = '+fx(T.cx*10,2)+' mm，Δy = '+fx(T.cy*10,2)+' mm</td></tr>'+
+    '<tr><td style="text-align:left">鏡心到右短邊 r（真值）</td><td class="mono">'+fx(EX-T.cx,3)+' cm</td></tr>'+
+    '<tr><td style="text-align:left">鏡心到下長邊 s（真值）</td><td class="mono">'+fx(EY+T.cy,3)+' cm</td></tr>'+
+    '<tr><td style="text-align:left">球面像差係數 σ</td><td class="mono">'+fx(T.sig,3)+'　（f(h) = f₀ /(1 + σ (h/f₀)²)）</td></tr>'+
+    '<tr><td style="text-align:left">短邊環帶焦距 f(r)</td><td class="mono">'+fx(fr,3)+' cm（比 f₀ 短 '+fx((1-fr/T.f0)*100,2)+' %）</td></tr>'+
+    '<tr><td style="text-align:left">全片平均焦距</td><td class="mono">'+fx(fa,3)+' cm</td></tr>'+
+    '<tr><td style="text-align:left">h² 加權焦距（成像法有效值）</td><td class="mono">'+fx(fh2,3)+' cm</td></tr>'+
+    '<tr><td style="text-align:left">日光燈真實距離 D</td><td class="mono">'+fx(SRC.Dt,1)+' cm（你量到 '+SRC.Dm+' cm）</td></tr>'+
+    '<tr><td style="text-align:left">窗外景物真實距離</td><td class="mono">'+fx(SRC.Wt/100,1)+' m（計算時取 20 m）</td></tr>'+
+    '</tbody></table></div>';
+  const cmp=[];
+  if(RES.m1) cmp.push(['方法一 雷射光路法',RES.m1,fr,'應與 f(r) 比較']);
+  if(RES.m2) cmp.push(['方法二 放大率法（對 u）',RES.m2,fa,'應與全片平均比較']);
+  if(RES.m2p) cmp.push(['方法二（誤用 p）',RES.m2p,fa,'系統性低估']);
+  if(RES.m3) cmp.push(['方法三 成像法',RES.m3,fh2,'應與 h² 加權值比較']);
+  if(cmp.length){
+    h+='<h3>你的結果與真值的差距</h3><table><thead><tr><th>方法</th><th>你的 f</th><th>對應真值</th><th>差距</th><th>幾個標準差</th></tr></thead><tbody>'+
+      cmp.map(c=>{
+        const dv=c[1].f-c[2], sg=Math.abs(dv)/c[1].sf;
+        return '<tr><td style="text-align:left">'+c[0]+'</td><td class="mono">'+fx(c[1].f,2)+' ± '+fx(c[1].sf,2)+'</td><td class="mono">'+fx(c[2],3)+'</td><td class="mono">'+(dv>0?'+':'')+fx(dv,2)+' cm（'+fx(dv/c[2]*100,1)+' %）</td><td class="mono'+(sg>3?'" style="color:#c2410c"':'"')+'>'+fx(sg,1)+' σ</td></tr>';
+      }).join('')+'</tbody></table>'+
+      '<p class="note">差距若遠大於 3 個標準差，代表還有沒被算進去的系統誤差，而不是運氣不好。回到上面的「誤差來源整理」逐項檢查。</p>'+
+      '<p class="note">方法一即使操作得很好，通常仍會比 f(r) 再低約 1 %：穿過塑膠片那半道光束的中心比短邊再往內約 0.3 mm（有效的 r 變小），而強迫迴歸線過原點又把光束兩半中心相距 0.6 mm 造成的截距吸收進斜率。把一般直線迴歸的截距一起看，就能發現這件事。</p>';
+  }
+  const t6=$('truth6'); t6.innerHTML=h; t6.style.display='block';
+  draw6();
+});
+
+// ================== 初始化 ==================
+function resetAll(){
+  newTruth();
+  const ex=(Math.random()*2-1)*1.2, ey=(Math.random()*2-1)*1.2;
+  $('xe2').value=ex.toFixed(2); $('ye2').value=ey.toFixed(2);
+  rec2.length=0; rec3.length=0; rec4.length=0; rec5.length=0;
+  for(const k in RES) delete RES[k];
+  $('r3').value='3.90';
+  $('r3src').textContent='cm（預設為幾何值；可按下方帶入分頁 ② 平均）';
+  revealed=false; $('truth6').style.display='none'; $('truth6').innerHTML='';
+  const g=$('guess6'); if(g) g.value='';
+  table2(); table3(); table4(); table5();
+  draw1(); draw2(); draw3(); draw4(); draw5(); draw6();
+}
+$('btnNew').addEventListener('click',()=>{ if(confirm('更換塑膠片會清除所有紀錄並重新抽樣隱藏真值，確定？')) resetAll(); });
+resetAll();
+</script>
+</body>
+</html>

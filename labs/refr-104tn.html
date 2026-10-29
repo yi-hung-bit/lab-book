@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>折射率虛擬實驗室</title>
+<style>
+:root{
+  --bg:#F2F6F6; --surface:#FFFFFF; --surface2:#E9F0F0; --ink:#1B2733; --muted:#56666E; --line:#D3DEDE;
+  --grid:#D7E8EA; --grid-mid:#B9D6DA; --grid-strong:#8FBEC5;
+  --accent:#1F7A8C; --accent-ink:#FFFFFF; --acrylic:rgba(31,122,140,.16); --acrylic-edge:#1F7A8C;
+  --pin:#D2A85E; --pin-dark:#8E6B2E; --pencil:#4A5560; --ray:#C2410C; --clay:#A0694A;
+  --ok:#2E7D32; --warn:#B45309; --bad:#B42318;
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1719; --surface:#152125; --surface2:#1B2A2F; --ink:#E2ECEE; --muted:#93A7AD; --line:#27393E;
+    --grid:#1B2C31; --grid-mid:#24404A; --grid-strong:#2F5A64;
+    --accent:#53C1D2; --accent-ink:#0B1416; --acrylic:rgba(83,193,210,.18); --acrylic-edge:#53C1D2;
+    --pin:#E0BE7C; --pin-dark:#B08A45; --pencil:#AFBBC2; --ray:#F08A5D; --clay:#C58B69;
+    --ok:#6CC070; --warn:#E3A13B; --bad:#F07A6E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1719; --surface:#152125; --surface2:#1B2A2F; --ink:#E2ECEE; --muted:#93A7AD; --line:#27393E;
+  --grid:#1B2C31; --grid-mid:#24404A; --grid-strong:#2F5A64;
+  --accent:#53C1D2; --accent-ink:#0B1416; --acrylic:rgba(83,193,210,.18); --acrylic-edge:#53C1D2;
+  --pin:#E0BE7C; --pin-dark:#B08A45; --pencil:#AFBBC2; --ray:#F08A5D; --clay:#C58B69;
+  --ok:#6CC070; --warn:#E3A13B; --bad:#F07A6E;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top{padding-block:28px 12px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h1{font-family:var(--serif);font-size:30px;line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--serif);font-size:21px;margin:0 0 8px;text-wrap:balance}
+h3{font-size:15px;margin:0 0 6px;font-weight:700}
+p{margin:0 0 10px;max-width:68ch}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:20px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:6px}
+nav.tabs button{flex:0 0 auto;border:0;background:none;color:var(--muted);font:inherit;font-size:14px;padding:10px 14px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
+nav.tabs button .lock{font-size:11px;color:var(--warn);margin-left:4px}
+nav.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:7px;padding:7px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.btn.small{padding:4px 9px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+label.ctl{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+select{font:inherit;font-size:14px;padding:6px 8px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.svgbox{overflow-x:auto;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.svgbox svg{display:block;width:100%;height:auto;min-width:320px}
+.readout{font-family:var(--mono);font-size:13px;background:var(--surface2);border-radius:7px;padding:10px 12px;line-height:1.8;font-variant-numeric:tabular-nums}
+.note{font-size:13px;color:var(--muted);border-left:3px solid var(--grid-strong);padding:2px 0 2px 10px}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--surface2);border:1px solid var(--line)}
+.tag.ok{color:var(--ok);border-color:currentColor}
+.tag.warn{color:var(--warn);border-color:currentColor}
+.tblwrap{overflow-x:auto}
+table.data{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+table.data th,table.data td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:center;white-space:nowrap}
+table.data th{font-weight:600;color:var(--muted);font-size:12px}
+table.data input{width:64px;font-family:var(--mono);font-size:13px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);padding:3px 4px;text-align:right}
+table.data td.calc{font-family:var(--mono)}
+.theory{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.eq{font-family:var(--mono);background:var(--surface2);padding:8px 12px;border-radius:7px;display:inline-block;margin:4px 0 10px}
+.plan li{margin-bottom:6px}
+.hidden{display:none}
+.kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 5px}
+svg text{font-family:var(--sans)}
+.sv-grid1{stroke:var(--grid);stroke-width:.5}
+.sv-grid5{stroke:var(--grid-mid);stroke-width:.7}
+.sv-grid10{stroke:var(--grid-strong);stroke-width:1}
+.sv-block{fill:var(--acrylic);stroke:var(--acrylic-edge);stroke-width:1.5}
+.sv-pencil{stroke:var(--pencil);stroke-width:1;fill:none}
+.sv-dash{stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3;fill:none}
+.sv-ray{stroke:var(--ray);stroke-width:1.6;fill:none}
+.sv-pin{fill:var(--pin);stroke:var(--pin-dark);stroke-width:1}
+.sv-sel{fill:none;stroke:var(--accent);stroke-width:2}
+.sv-lbl{fill:var(--ink);font-size:12px}
+.sv-mut{fill:var(--muted);font-size:11px}
+.sv-axis{stroke:var(--muted);stroke-width:1}
+.sv-pt{fill:var(--accent)}
+.sv-fit1{stroke:var(--accent);stroke-width:1.8}
+.sv-fit2{stroke:var(--ray);stroke-width:1.5;stroke-dasharray:6 4}
+.sv-bg{fill:var(--surface)}
+.sv-view{fill:var(--surface2)}
+.sv-clay{fill:var(--clay)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div>
+    <div class="eyebrow">104 學年度　臺灣省第 6 區（臺南區）複賽　物理實驗第一題</div>
+    <h1>折射率虛擬實驗室</h1>
+    <div class="muted" style="font-size:14px">待測物 A：透明壓克力　待測物 B：礦泉水瓶內的液體　—　器材限牙籤、保麗龍、燒杯、量筒、尺、量角器、方格紙、油黏土</div>
+  </div>
+  <div class="row">
+    <span class="tag" id="setTag">待測物組別 #1</span>
+    <button class="btn small" id="btnNewSet" type="button">換一組待測物</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" id="tabs">
+  <button role="tab" data-tab="t1" aria-selected="true">① 原理與設計</button>
+  <button role="tab" data-tab="t2" aria-selected="false">② 壓克力：插針法</button>
+  <button role="tab" data-tab="t3" aria-selected="false">③ 壓克力：視差法視深</button>
+  <button role="tab" data-tab="t4" aria-selected="false">④ 液體：量筒視深</button>
+  <button role="tab" data-tab="t5" aria-selected="false">⑤ 液體：燒杯柱面透鏡</button>
+  <button role="tab" data-tab="t6" aria-selected="false">⑥ 綜合與真值揭曉</button>
+</nav>
+
+<!-- ============ TAB 1 ============ -->
+<section id="t1" class="tabpanel">
+  <div class="stack">
+    <div class="panel">
+      <h2>題目只給一句話：「利用下列器材設計實驗，測量待測物之折射率」</h2>
+      <p>沒有雷射、沒有光源，能用的「光線」只有眼睛的視線。牙籤插在保麗龍上當作標記點，方格紙當作座標，量角器與尺讀數。本實驗室依此設計四種方法，兩種待測物各用兩法交叉驗證：</p>
+      <div class="tblwrap"><table class="data" style="text-align:left">
+        <thead><tr><th>待測物</th><th>方法</th><th>量什麼</th><th>求 n 的關係</th><th>分頁</th></tr></thead>
+        <tbody>
+          <tr><td>A 壓克力</td><td>插針法（主）</td><td>入射角 i、折射角 r</td><td class="mono">sin i = n · sin r</td><td>②</td></tr>
+          <tr><td>A 壓克力</td><td>視差法視深（對照）</td><td>實際厚度 D、視深 h′</td><td class="mono">D = n · h′</td><td>③</td></tr>
+          <tr><td>B 液體</td><td>量筒視深（主）</td><td>液深 h、視深 h′（多組液深）</td><td class="mono">h = n · h′</td><td>④</td></tr>
+          <tr><td>B 液體</td><td>燒杯柱面透鏡（對照）</td><td>燒杯半徑 R、焦線距離 f</td><td class="mono">n = 2f ⁄ (2f − R)</td><td>⑤</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="theory">
+      <div class="panel">
+        <h3>插針法：用視線代替光線</h3>
+        <svg viewBox="0 0 340 250" role="img" aria-label="插針法光路示意">
+          <rect class="sv-bg" x="0" y="0" width="340" height="250"/>
+          <rect class="sv-block" x="40" y="95" width="260" height="70"/>
+          <line class="sv-dash" x1="120" y1="40" x2="120" y2="225"/>
+          <line class="sv-pencil" x1="60" y1="215" x2="120" y2="165" style="stroke:var(--ray)"/>
+          <line class="sv-ray" x1="120" y1="165" x2="157" y2="95"/>
+          <line class="sv-pencil" x1="157" y1="95" x2="217" y2="45" style="stroke:var(--ray)"/>
+          <circle class="sv-pin" cx="72" cy="205" r="4"/><circle class="sv-pin" cx="100" cy="182" r="4"/>
+          <circle class="sv-pin" cx="175" cy="80" r="4"/><circle class="sv-pin" cx="205" cy="55" r="4"/>
+          <text class="sv-lbl" x="56" y="228">P₁</text><text class="sv-lbl" x="84" y="200">P₂</text>
+          <text class="sv-lbl" x="183" y="84">P₃</text><text class="sv-lbl" x="213" y="58">P₄</text>
+          <text class="sv-lbl" x="126" y="180">O</text><text class="sv-lbl" x="160" y="112">Q</text>
+          <text class="sv-mut" x="96" y="150">i</text><text class="sv-mut" x="126" y="128">r</text>
+          <text class="sv-mut" x="232" y="135">壓克力 A</text>
+          <text class="sv-mut" x="228" y="30">眼睛沿 P₄→P₃ 看</text>
+        </svg>
+        <p>在方格紙上描出壓克力輪廓，於入射面上取點 O、畫法線，以量角器畫入射線並插 P₁、P₂。從對面透過壓克力看，移動 P₃、P₄ 直到它們把 P₁、P₂ 的「像」完全遮住。拿開壓克力，連 P₃P₄ 交出射面於 Q，OQ 就是壓克力內的光線。</p>
+        <div class="eq">sin i = n · sin r　→　以 sin i 對 sin r 作圖，斜率 = n</div>
+        <p class="note">角度可用量角器讀（0.5° 級），也可用方格紙座標 Δx、Δy 算正弦（0.1 mm 估讀級）；兩者並列比較。</p>
+      </div>
+
+      <div class="panel">
+        <h3>視深與視差法</h3>
+        <svg viewBox="0 0 340 250" role="img" aria-label="視深與視差法示意">
+          <rect class="sv-bg" x="0" y="0" width="340" height="250"/>
+          <rect class="sv-block" x="110" y="120" width="190" height="60"/>
+          <line class="sv-dash" x1="30" y1="160" x2="320" y2="160"/>
+          <rect x="302" y="128" width="5" height="50" class="sv-pin"/>
+          <text class="sv-lbl" x="296" y="200">O（剪短）</text>
+          <ellipse class="sv-clay" cx="178" cy="117" rx="12" ry="5"/>
+          <rect x="175" y="50" width="6" height="66" class="sv-pin"/>
+          <text class="sv-lbl" x="186" y="62">S（插在油黏土上）</text>
+          <circle cx="40" cy="152" r="7" fill="none" stroke="var(--ink)"/><circle cx="42" cy="152" r="2.5" fill="var(--ink)"/>
+          <line class="sv-pencil" x1="110" y1="214" x2="300" y2="214"/>
+          <line class="sv-pencil" x1="110" y1="208" x2="110" y2="220"/><line class="sv-pencil" x1="300" y1="208" x2="300" y2="220"/>
+          <text class="sv-mut" x="196" y="236">D（實際長度）</text>
+          <line class="sv-pencil" x1="110" y1="96" x2="178" y2="96" style="stroke:var(--ray)"/>
+          <text class="sv-mut" x="120" y="90" style="fill:var(--ray)">h′（視深）</text>
+        </svg>
+        <p>從近端面看遠端面後方的牙籤 O，它的像看起來比較近。另一支牙籤 S 用油黏土立在壓克力頂面上，前後移動；當眼睛左右晃動時 S 與 O 的像「不再相對移動」（無視差），S 就在像的位置。</p>
+        <div class="eq">近軸：h′ = D ⁄ n　→　以 D 對 h′ 作圖，斜率 = n</div>
+        <p class="note">壓克力只有一塊，但它有厚、寬、長三個方向，可得三個不同 D，一樣能做迴歸。厚度方向 D 最小，相對誤差最大——這正是③要讓學生親身體驗的。</p>
+      </div>
+
+      <div class="panel">
+        <h3>液體 B：兩個互相對照的方法</h3>
+        <p><b>量筒視深：</b>紙上畫的十字記號貼在量筒內壁底邊，由管壁正上方俯視；另一支牙籤貼在直立的尺上、緊靠量筒外壁，以視差法找出像的深度。改變倒入的液量，得多組 (h, h′)，以 h 對 h′ 迴歸。</p>
+        <p><b>燒杯柱面透鏡：</b>裝滿液體的圓柱形燒杯是一個柱面透鏡。改變牙籤 O 的物距 u，以視差法找實像位置 v（都由中心量起），1⁄v 對 1⁄u 迴歸求焦距 f；薄壁近似下</p>
+        <div class="eq">f = nR ⁄ 2(n − 1)　⇔　n = 2f ⁄ (2f − R)</div>
+        <p class="note">玻璃壁厚、燒杯並非完美圓柱、以及近軸條件，都會讓這個方法系統性偏離，適合當作與量筒法比較的討論素材。</p>
+      </div>
+
+      <div class="panel">
+        <h3>為什麼一定要迴歸</h3>
+        <p>單點算 n = sin i ⁄ sin r 時，每一點的讀數誤差都直接進入結果；小角度時 sin r 很小，相對誤差被放大。把多組數據作圖，以最小平方法求斜率，可以：</p>
+        <ul class="plan">
+          <li>把隨機誤差平均掉，並給出斜率的標準誤差；</li>
+          <li>透過「含截距」迴歸檢查系統誤差——例如描線偏移、O 點定錯，會讓截距明顯不為零；</li>
+          <li>看出哪一點是離群值（插斜的牙籤、看錯的像）。</li>
+        </ul>
+        <p class="note">題目說明「不必考慮誤差傳遞」，但本實驗室仍計算斜率標準誤差，⑥ 將以「偏離真值幾個標準差」評估結果。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section id="t2" class="tabpanel hidden">
+  <div class="grid2">
+    <div class="stack">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">方格紙俯視圖</h2>
+          <span class="muted" style="font-size:12px">拖曳 P₃、P₄（或選取後用方向鍵微調）</span>
+        </div>
+        <div class="svgbox" style="margin-top:8px"><svg id="sv2" role="img" aria-label="插針法方格紙俯視圖"></svg></div>
+      </div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">眼睛看到的（沿 P₄ → P₃ 方向）</h2>
+          <label class="ctl" style="flex-direction:row;align-items:center;gap:6px">放大
+            <input type="range" id="zoom2" min="2" max="14" step="1" value="6" style="width:110px"></label>
+        </div>
+        <div class="svgbox" style="margin-top:8px"><svg id="view2" viewBox="0 0 600 230" role="img" aria-label="沿視線看到的牙籤"></svg></div>
+        <p class="note" style="margin-top:8px" id="viewHint2">上半部是越過壓克力頂面直接看到的牙籤，下半部（青色帶）是透過壓克力看到的像。調整 P₃、P₄，讓 P₁、P₂ 的<b>像</b>與 P₃、P₄ 排成一直線。</p>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="panel stack">
+        <h3>步驟 1　以量角器畫入射線、插 P₁、P₂</h3>
+        <label class="ctl">入射角 i（量角器，最小刻度 1°）：<span class="mono" id="iVal2" style="color:var(--ink);font-size:15px">30°</span>
+          <input type="range" id="i2" min="10" max="70" step="1" value="30"></label>
+        <div class="row"><button class="btn primary" id="btnPlace2" type="button">換新方格紙區、插 P₁、P₂</button></div>
+        <h3>步驟 2　插 P₃、P₄，對準像</h3>
+        <div class="row">
+          <span class="muted" style="font-size:13px">選取：</span>
+          <button class="btn small" id="selP3" type="button">P₃</button>
+          <button class="btn small" id="selP4" type="button">P₄</button>
+          <span style="width:8px"></span>
+          <button class="btn small" data-nudge="-1,0" type="button" aria-label="左移">←</button>
+          <button class="btn small" data-nudge="1,0" type="button" aria-label="右移">→</button>
+          <button class="btn small" data-nudge="0,1" type="button" aria-label="遠離壓克力">↑</button>
+          <button class="btn small" data-nudge="0,-1" type="button" aria-label="靠近壓克力">↓</button>
+          <span class="muted" style="font-size:12px">每步 0.5 mm</span>
+        </div>
+        <h3>步驟 3　拿開壓克力，描線量測</h3>
+        <div class="row"><button class="btn primary" id="btnTrace2" type="button">拿開壓克力並描線</button>
+          <button class="btn" id="btnRecord2" type="button" disabled>寫入數據表</button></div>
+        <div class="readout" id="read2">尚未描線。</div>
+        <p class="note">量角器讀到 0.5°；方格紙座標估讀到 0.1 mm。描線以鉛筆沿壓克力外緣畫，線條本身有寬度，會使描出的面略微外移；牙籤也可能插得不完全垂直——這些都會出現在你的數據裡。</p>
+      </div>
+
+      <div class="panel stack">
+        <div class="row" style="justify-content:space-between"><h3 style="margin:0">數據表</h3>
+          <button class="btn small" id="btnClear2" type="button">清空</button></div>
+        <div class="tblwrap"><table class="data" id="tbl2"></table></div>
+        <p class="note">讀數欄可直接修改（例如你認為某筆看錯了）；sin 與 n 會即時重算。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">sin i – sin r 迴歸</h2>
+      <label class="ctl" style="flex-direction:row;align-items:center;gap:8px">讀數來源
+        <select id="src2"><option value="C">方格紙座標（Δx, Δy）</option><option value="P">量角器（i, r）</option></select></label>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <div class="svgbox"><svg id="plot2" viewBox="0 0 520 360" role="img" aria-label="sin i 對 sin r 圖"></svg></div>
+      <div class="stack"><div class="readout" id="fit2">至少需要 3 筆數據。</div>
+        <p class="note">實線：過原點迴歸 sin i = n·sin r。虛線：含截距迴歸。若截距明顯不為零（超過約 2 倍標準誤差），代表有系統誤差，例如 O 點位置或描線偏移。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section id="t3" class="tabpanel hidden">
+  <div class="grid2">
+    <div class="stack">
+      <div class="panel">
+        <h2>側視裝置圖</h2>
+        <div class="svgbox"><svg id="sv3" viewBox="0 0 600 260" role="img" aria-label="視差法側視裝置圖"></svg></div>
+      </div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">眼睛看到的（壓克力頂緣附近）</h2>
+          <label class="ctl" style="flex-direction:row;align-items:center;gap:6px">放大
+            <input type="range" id="zoom3" min="4" max="30" step="1" value="12" style="width:110px"></label>
+        </div>
+        <div class="svgbox" style="margin-top:8px"><svg id="view3" viewBox="0 0 600 230" role="img" aria-label="視差觀察畫面"></svg></div>
+        <label class="ctl" style="margin-top:10px">眼睛左右位置（晃動頭部）
+          <input type="range" id="eye3" min="-2" max="2" step="0.05" value="0"></label>
+        <div class="row" style="margin-top:6px"><button class="btn small" id="btnSway3" type="button">自動左右晃動</button>
+          <span class="muted" style="font-size:12px">無視差：晃動時上下兩段牙籤始終對齊</span></div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="panel stack">
+        <h3>步驟 1　選擇觀察方向並量實際長度 D</h3>
+        <label class="ctl">視線穿過壓克力的方向
+          <select id="dir3">
+            <option value="L">長邊方向（平放）</option>
+            <option value="W">寬邊方向（平放）</option>
+            <option value="T">厚度方向（用油黏土立起）</option>
+          </select></label>
+        <div class="row"><button class="btn" id="btnMeasD3" type="button">用 30 cm 直尺量 D</button><span class="mono" id="Dread3">D = —</span></div>
+        <h3>步驟 2　前後移動 S，找無視差位置</h3>
+        <label class="ctl">S 在壓克力頂面上的位置（由近端面算起，實驗中看不到數值）
+          <input type="range" id="s3" min="0" max="10" step="0.01" value="5"></label>
+        <div class="row">
+          <button class="btn small" data-s3="-0.1" type="button">−1 mm</button>
+          <button class="btn small" data-s3="-0.02" type="button">−0.2 mm</button>
+          <button class="btn small" data-s3="0.02" type="button">+0.2 mm</button>
+          <button class="btn small" data-s3="0.1" type="button">+1 mm</button>
+        </div>
+        <h3>步驟 3　量 h′ 並記錄</h3>
+        <div class="row"><button class="btn primary" id="btnRec3" type="button">用直尺量 S 到近端面距離並記錄</button></div>
+        <div class="readout" id="read3">尚未記錄。</div>
+      </div>
+
+      <div class="panel stack">
+        <div class="row" style="justify-content:space-between"><h3 style="margin:0">數據表</h3>
+          <button class="btn small" id="btnClear3" type="button">清空</button></div>
+        <div class="tblwrap"><table class="data" id="tbl3"></table></div>
+        <p class="note">每個方向建議重複 2–3 次（每次重新移動 S）。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px">
+    <h2>D – h′ 迴歸</h2>
+    <div class="grid2" style="margin-top:10px">
+      <div class="svgbox"><svg id="plot3" viewBox="0 0 520 360" role="img" aria-label="D 對 h′ 圖"></svg></div>
+      <div class="stack"><div class="readout" id="fit3">至少需要 3 筆數據，且涵蓋 2 個以上方向。</div>
+        <p class="note">厚度方向的 h′ 只有 1 cm 上下，1 mm 的判斷誤差就是約 10% 的 n 誤差；長邊方向同樣的判斷誤差只造成約 1.5%。迴歸自然會讓長 D 的點主導斜率。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 4 ============ -->
+<section id="t4" class="tabpanel hidden">
+  <div class="grid2">
+    <div class="stack">
+      <div class="panel">
+        <h2>側視裝置圖</h2>
+        <div class="svgbox"><svg id="sv4" viewBox="0 0 600 330" role="img" aria-label="量筒視深法側視裝置圖"></svg></div>
+        <p class="note" style="margin-top:8px">記號（紙上畫十字）貼在量筒內壁底邊，眼睛在管壁正上方往下看，視線幾乎垂直液面（近軸）。另一支牙籤用膠帶水平貼在直立的 100 cm 尺上，尖端緊靠量筒外壁；上下移動尺上的牙籤，找無視差位置。</p>
+      </div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">眼睛看到的（俯視，注視記號的像）</h2>
+          <label class="ctl" style="flex-direction:row;align-items:center;gap:6px">放大
+            <input type="range" id="zoom4" min="5" max="25" step="1" value="10" style="width:110px"></label>
+        </div>
+        <div class="svgbox" style="margin-top:8px"><svg id="view4" viewBox="0 0 600 230" role="img" aria-label="俯視視差觀察畫面"></svg></div>
+        <label class="ctl" style="margin-top:10px">眼睛左右位置（晃動頭部）
+          <input type="range" id="eye4" min="-3" max="3" step="0.05" value="0"></label>
+        <div class="row" style="margin-top:6px"><button class="btn small" id="btnSway4" type="button">自動左右晃動</button>
+          <span class="muted" style="font-size:12px">無視差：晃動時牙籤尖與十字的間距不變</span></div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="panel stack">
+        <h3>步驟 1　選擇記號位置、倒入液體</h3>
+        <label class="ctl">記號位置
+          <select id="mode4">
+            <option value="in">量筒內底（記號直接泡在液體中）</option>
+            <option value="under">量筒外底下方（隔著玻璃底座）</option>
+          </select></label>
+        <label class="ctl">倒液至刻度：<span class="mono" id="Vval4" style="color:var(--ink);font-size:15px">100 mL</span>
+          <input type="range" id="V4" min="30" max="240" step="10" value="100"></label>
+        <div class="row"><button class="btn primary" id="btnPour4" type="button">倒液（或倒回瓶中調整）</button>
+          <button class="btn" id="btnMeasH4" type="button">用直尺量液深 h</button></div>
+        <div class="mono" id="hRead4" style="font-size:13px">h = —</div>
+        <h3>步驟 2　上下移動牙籤，找無視差位置</h3>
+        <label class="ctl">牙籤尖在液面下方的深度（實驗中看不到數值）
+          <input type="range" id="z4" min="-1" max="25" step="0.01" value="3"></label>
+        <div class="row">
+          <button class="btn small" data-z4="-0.1" type="button">上 1 mm</button>
+          <button class="btn small" data-z4="-0.02" type="button">上 0.2 mm</button>
+          <button class="btn small" data-z4="0.02" type="button">下 0.2 mm</button>
+          <button class="btn small" data-z4="0.1" type="button">下 1 mm</button>
+        </div>
+        <h3>步驟 3　讀液面與牙籤高度，求 h′ 並記錄</h3>
+        <div class="row"><button class="btn primary" id="btnRec4" type="button">讀尺上的液面與牙籤高度並記錄</button></div>
+        <div class="readout" id="read4">尚未記錄。</div>
+        <p class="note">液面有彎月面，讀液面高度的不確定度比讀牙籤大。</p>
+      </div>
+      <div class="panel stack">
+        <div class="row" style="justify-content:space-between"><h3 style="margin:0">數據表</h3>
+          <button class="btn small" id="btnClear4" type="button">清空</button></div>
+        <div class="tblwrap"><table class="data" id="tbl4"></table></div>
+        <p class="note">建議液量 30–240 mL 取 6 組以上。兩種記號位置的數據請分開做（換位置時清空，或比較兩者的截距）。</p>
+      </div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:20px">
+    <h2>h – h′ 迴歸</h2>
+    <div class="grid2" style="margin-top:10px">
+      <div class="svgbox"><svg id="plot4" viewBox="0 0 520 360" role="img" aria-label="h 對 h′ 圖"></svg></div>
+      <div class="stack"><div class="readout" id="fit4">至少需要 3 筆數據。</div>
+        <p class="note">記號在內底：h = n·h′，截距應為 0。記號在外底下方：h′ = h⁄n + b⁄n<sub>玻璃</sub>，所以 h = n·h′ − n·b⁄n<sub>玻璃</sub>，截距為負、斜率仍是 n。這正是「用斜率而不用單點比值」的理由：單點 h⁄h′ 會被玻璃底座系統性拉低。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 5 ============ -->
+<section id="t5" class="tabpanel hidden">
+  <div class="grid2">
+    <div class="stack">
+      <div class="panel">
+        <h2>俯視裝置圖</h2>
+        <div class="svgbox"><svg id="sv5" viewBox="0 0 600 230" role="img" aria-label="燒杯柱面透鏡俯視裝置圖"></svg></div>
+        <p class="note" style="margin-top:8px">1000 mL 燒杯裝滿液體 B，放在 100 cm 尺旁。物 O（牙籤，用油黏土墊高）放在燒杯一側；另一側移動牙籤 S，找 O 經燒杯所成實像的位置。u、v 都由燒杯中心量起。</p>
+      </div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">眼睛看到的（注視 O 的像）</h2>
+          <label class="ctl" style="flex-direction:row;align-items:center;gap:6px">放大
+            <input type="range" id="zoom5" min="4" max="24" step="1" value="12" style="width:110px"></label>
+        </div>
+        <div class="svgbox" style="margin-top:8px"><svg id="view5" viewBox="0 0 600 230" role="img" aria-label="柱面透鏡成像視差觀察畫面"></svg></div>
+        <label class="ctl" style="margin-top:10px">眼睛左右位置（晃動頭部）
+          <input type="range" id="eye5" min="-2.5" max="2.5" step="0.05" value="0"></label>
+        <div class="row" style="margin-top:6px"><button class="btn small" id="btnSway5" type="button">自動左右晃動</button>
+          <span class="muted" style="font-size:12px">無視差：晃動時上方的像與下方的 S 始終對齊</span></div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="panel stack">
+        <h3>步驟 1　量燒杯外徑</h3>
+        <div class="row"><button class="btn" id="btnMeasD5" type="button">用 30 cm 直尺量外徑</button><span class="mono" id="Dread5">外徑 = —</span></div>
+        <h3>步驟 2　放置物 O</h3>
+        <label class="ctl">物距 u（由燒杯中心算起）：<span class="mono" id="uVal5" style="color:var(--ink);font-size:15px">40.0 cm</span>
+          <input type="range" id="u5" min="12" max="90" step="0.5" value="40"></label>
+        <div class="row"><button class="btn primary" id="btnPlace5" type="button">把 O 插在這個位置</button></div>
+        <h3>步驟 3　在另一側移動 S，找實像</h3>
+        <label class="ctl">S 的位置（實驗中看不到數值）
+          <input type="range" id="s5" min="6" max="70" step="0.02" value="20"></label>
+        <div class="row">
+          <button class="btn small" data-s5="-0.5" type="button">−5 mm</button>
+          <button class="btn small" data-s5="-0.1" type="button">−1 mm</button>
+          <button class="btn small" data-s5="0.1" type="button">+1 mm</button>
+          <button class="btn small" data-s5="0.5" type="button">+5 mm</button>
+        </div>
+        <h3>步驟 4　量 u、v 並記錄</h3>
+        <div class="row"><button class="btn primary" id="btnRec5" type="button">用 100 cm 尺量 u、v 並記錄</button></div>
+        <div class="readout" id="read5">尚未記錄。</div>
+      </div>
+      <div class="panel stack">
+        <div class="row" style="justify-content:space-between"><h3 style="margin:0">數據表</h3>
+          <button class="btn small" id="btnClear5" type="button">清空</button></div>
+        <div class="tblwrap"><table class="data" id="tbl5"></table></div>
+        <p class="note">u 太小（小於焦距）時成虛像，在另一側找不到。建議 u 從約 15 cm 到 90 cm 取 6 組以上。</p>
+      </div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:20px">
+    <h2>1⁄v – 1⁄u 迴歸</h2>
+    <div class="grid2" style="margin-top:10px">
+      <div class="svgbox"><svg id="plot5" viewBox="0 0 520 360" role="img" aria-label="1/v 對 1/u 圖"></svg></div>
+      <div class="stack"><div class="readout" id="fit5">至少需要 3 筆數據，並先量外徑。</div>
+        <p class="note">實心圓柱透鏡的主平面都通過中心軸，所以 u、v 由中心量起時成像公式 1⁄u + 1⁄v = 1⁄f 成立：1⁄v 對 1⁄u 的斜率應為 −1，截距 = 1⁄f。再由 n = 2f ⁄ (2f − R) 求 n。這個公式把燒杯當成「整根都是液體」的圓柱，玻璃壁的影響留到 ⑥ 討論。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 6 ============ -->
+<section id="t6" class="tabpanel hidden">
+  <div class="stack">
+    <div class="panel">
+      <h2>四種方法的結果</h2>
+      <p class="muted">由 ②–⑤ 的數據即時計算。沒有做的方法會顯示「—」。</p>
+      <div class="tblwrap"><table class="data" id="tbl6"></table></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn primary" id="btnReveal6" type="button">揭曉本組真值</button>
+        <span class="muted" style="font-size:13px">建議先寫好自己的結論再揭曉。揭曉後仍可繼續做實驗。</span>
+      </div>
+    </div>
+    <div class="panel hidden" id="truth6"></div>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const DEG=Math.PI/180;
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const rnd2=(x,s)=>Math.round(x/s)*s;
+const fx=(x,d)=>Number.isFinite(x)?x.toFixed(d):'—';
+const V=(x,y)=>({x,y});
+const add=(a,b)=>V(a.x+b.x,a.y+b.y), sub=(a,b)=>V(a.x-b.x,a.y-b.y), mul=(a,k)=>V(a.x*k,a.y*k);
+const dot=(a,b)=>a.x*b.x+a.y*b.y, cross=(a,b)=>a.x*b.y-a.y*b.x, len=a=>Math.hypot(a.x,a.y);
+const norm=a=>{const l=len(a);return V(a.x/l,a.y/l);};
+
+/* ---------------- hidden truth ---------------- */
+let H, setNo=0;
+function newTruth(){
+  setNo++;
+  H={nA:rnd(1.480,1.500), nB:rnd(1.33,1.45),
+     T:rnd(1.40,1.80), W0:rnd(5.85,6.15), L:rnd(9.85,10.15),
+     wedge:rnd(-0.4,0.4)*DEG, d1:rnd(0.01,0.04), d2:rnd(0.01,0.04),
+     // 250 mL graduated cylinder
+     Rin:rnd(1.84,1.90), base:rnd(0.9,1.4), ngC:rnd(1.47,1.52), cylWall:0.15, cylDepth:25.0,
+     // 1000 mL beaker
+     Rb:rnd(5.15,5.35), tb:rnd(0.16,0.24), ngB:rnd(1.470,1.480)};
+  H.W1=H.W0+H.L*Math.tan(H.wedge);
+  H.Wc=(H.W0+H.W1)/2;
+  H.fB=beakerFocal(H.nB);
+  window.__labTruth=undefined; // truth stays hidden until tab ⑥
+  $('#setTag').textContent='待測物組別 #'+setNo;
+}
+/* paraxial focal length of the liquid-filled beaker (concentric glass shell + liquid core),
+   measured from the axis of the cylinder (principal planes of a concentric system lie on the axis) */
+function circleHit(P,d,R,far){const b=dot(P,d),c=dot(P,P)-R*R,disc=b*b-c;if(disc<0)return null;const s=far?(-b+Math.sqrt(disc)):(-b-Math.sqrt(disc));return s>1e-9?add(P,mul(d,s)):null;}
+function beakerTrace(y,nL){
+  const Ro=H.Rb, Ri=H.Rb-H.tb, ng=H.ngB;
+  let P=V(-50,y), d=V(1,0);
+  const steps=[[Ro,false,1,ng,1],[Ri,false,ng,nL,1],[Ri,true,nL,ng,-1],[Ro,true,ng,1,-1]];
+  for(const [R,far,n1,n2,sgn] of steps){
+    const Q=circleHit(P,d,R,far); if(!Q)return null;
+    let nr=norm(Q); if(sgn>0) nr=nr; // outward normal
+    const nrm=dot(nr,d)<0?nr:mul(nr,-1); // normal facing incoming ray
+    const d2=refract(d,nrm,n1,n2); if(!d2)return null; P=Q; d=d2;
+  }
+  return {P,d};
+}
+function beakerFocal(nL){const y=0.002*H.Rb;const r=beakerTrace(y,nL);if(!r||r.d.y>=0)return Infinity;return r.P.x+(-r.P.y/r.d.y)*r.d.x;}
+const exitN=()=>norm(V(-(H.W1-H.W0),H.L));
+const exitY=x=>H.W0+x*Math.tan(H.wedge);
+
+/* ---------------- optics ---------------- */
+function refract(d,nr,n1,n2){const c=-dot(nr,d);const e=n1/n2;const k=1-e*e*(1-c*c);if(k<0)return null;return norm(add(mul(d,e),mul(nr,e*c-Math.sqrt(k))));}
+function trace(P,d,n){
+  if(d.y<=1e-9)return null;
+  const t=(0-P.y)/d.y; if(t<=0)return null;
+  const A=V(P.x+t*d.x,0); if(A.x<0||A.x>H.L)return null;
+  const d1=refract(d,V(0,-1),1,n); if(!d1)return null;
+  const nf=exitN(); const den=dot(d1,nf); if(den<=0)return null;
+  const s=dot(sub(V(0,H.W0),A),nf)/den; const B=add(A,mul(d1,s));
+  if(B.x<0||B.x>H.L)return null;
+  const d2=refract(d1,mul(nf,-1),n,1); if(!d2)return null;
+  return {A,B,d1,d2};
+}
+// find the ray from P (behind block) that, after the block, passes through eye E
+function solveThrough(P,E,n){
+  const phi0=Math.atan2(E.y-P.y,E.x-P.x);
+  const f=ph=>{const r=trace(P,V(Math.cos(ph),Math.sin(ph)),n);if(!r)return null;const w=sub(E,r.B);if(dot(r.d2,w)<=0)return null;return {v:cross(r.d2,w),r};};
+  let prev=null; const N=180;
+  for(let j=0;j<=N;j++){
+    const ph=phi0-0.8+1.6*j/N; const cur=f(ph);
+    if(prev&&cur&&prev.val&&Math.sign(cur.v)!==Math.sign(prev.val.v)){
+      let lo=prev.ph,hi=ph,flo=prev.val.v,res=cur;
+      for(let k=0;k<50;k++){const m=(lo+hi)/2;const fm=f(m);if(!fm)return null;res=fm;if(Math.sign(fm.v)===Math.sign(flo)){lo=m;flo=fm.v;}else hi=m;}
+      return res.r;
+    }
+    prev={ph,val:cur};
+  }
+  return null;
+}
+
+/* ---------------- regression ---------------- */
+function fitOrigin(pts){const n=pts.length;if(n<2)return null;let sxy=0,sxx=0;pts.forEach(p=>{sxy+=p.x*p.y;sxx+=p.x*p.x;});const b=sxy/sxx;let ss=0;pts.forEach(p=>{ss+=(p.y-b*p.x)**2;});return {b,se:Math.sqrt(ss/(n-1)/sxx)};}
+function fitLine(pts){const n=pts.length;if(n<3)return null;let mx=0,my=0;pts.forEach(p=>{mx+=p.x;my+=p.y;});mx/=n;my/=n;let sxx=0,sxy=0;pts.forEach(p=>{sxx+=(p.x-mx)**2;sxy+=(p.x-mx)*(p.y-my);});if(sxx<=0)return null;const b=sxy/sxx,a=my-b*mx;let ss=0;pts.forEach(p=>{ss+=(p.y-a-b*p.x)**2;});const s2=ss/(n-2);return {a,b,seb:Math.sqrt(s2/sxx),sea:Math.sqrt(s2*(1/n+mx*mx/sxx)),r2:1-ss/(pts.reduce((q,p)=>q+(p.y-my)**2,0)||1)};}
+function meanSd(a){const n=a.length;if(!n)return null;const m=a.reduce((s,x)=>s+x,0)/n;const sd=n>1?Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(n-1)):NaN;return {m,sd,n};}
+function niceStep(range,count){const raw=range/count;const p=Math.pow(10,Math.floor(Math.log10(raw)));const f=raw/p;return (f<1.5?1:f<3?2:f<7?5:10)*p;}
+function plotXY(svg,pts,fo,fl,xlab,ylab,opt){
+  opt=opt||{};
+  const W=520,Hh=360,ml=62,mr=18,mt=16,mb=52;
+  const xmax=Math.max(...pts.map(p=>p.x),0.1)*1.12, ymax=Math.max(...pts.map(p=>p.y),opt.ymax||0,0.1)*1.12;
+  const sx=niceStep(xmax,6), sy=niceStep(ymax,6);
+  const X=x=>ml+(x/xmax)*(W-ml-mr), Y=y=>Hh-mb-(y/ymax)*(Hh-mt-mb);
+  let g=`<rect class="sv-bg" width="${W}" height="${Hh}"/>`;
+  for(let x=0;x<=xmax+1e-9;x+=sx){g+=`<line x1="${X(x)}" y1="${Y(0)}" x2="${X(x)}" y2="${Y(ymax)}" class="sv-grid1"/><text class="sv-mut" x="${X(x)}" y="${Y(0)+17}" text-anchor="middle">${+x.toFixed(4)}</text>`;}
+  for(let y=0;y<=ymax+1e-9;y+=sy){g+=`<line x1="${X(0)}" y1="${Y(y)}" x2="${X(xmax)}" y2="${Y(y)}" class="sv-grid1"/><text class="sv-mut" x="${X(0)-7}" y="${Y(y)+4}" text-anchor="end">${+y.toFixed(4)}</text>`;}
+  g+=`<line class="sv-axis" x1="${X(0)}" y1="${Y(0)}" x2="${X(xmax)}" y2="${Y(0)}"/><line class="sv-axis" x1="${X(0)}" y1="${Y(0)}" x2="${X(0)}" y2="${Y(ymax)}"/>`;
+  g+=`<text class="sv-lbl" x="${(X(0)+X(xmax))/2}" y="${Hh-12}" text-anchor="middle">${xlab}</text>`;
+  g+=`<text class="sv-lbl" transform="translate(16 ${(Y(0)+Y(ymax))/2}) rotate(-90)" text-anchor="middle">${ylab}</text>`;
+  const clipLine=(a,b,cls)=>{let lo=0,hi=xmax;
+    if(Math.abs(b)<1e-12){if(a<0||a>ymax)return '';}
+    else{const xa=(0-a)/b,xb=(ymax-a)/b;lo=Math.max(lo,Math.min(xa,xb));hi=Math.min(hi,Math.max(xa,xb));}
+    if(hi<=lo)return '';
+    return `<line class="${cls}" x1="${X(lo)}" y1="${Y(a+b*lo)}" x2="${X(hi)}" y2="${Y(a+b*hi)}"/>`;};
+  if(fo)g+=clipLine(0,fo.b,'sv-fit1');
+  if(fl)g+=clipLine(fl.a,fl.b,'sv-fit2');
+  (opt.lines||[]).forEach(l=>{g+=clipLine(l.a,l.b,l.cls);});
+  pts.forEach(p=>{g+=`<circle class="sv-pt" cx="${X(p.x)}" cy="${Y(p.y)}" r="4.5"/>`;});
+  svg.innerHTML=g;
+}
+
+/* ================= TAB 2 : pin method ================= */
+const S2={i:30,P:[],sel:2,traced:null,history:[],rows:[],zoom:6};
+const XO=3.0, SC=32, XMIN=-3.5, XMAX=16;
+let YMIN=-7, YMAX=13;
+const toX=x=>(x-XMIN)*SC, toY=y=>(YMAX-y)*SC;
+function mkPin(b){return {b, t:V(gauss()*0.025,gauss()*0.025)};}
+const vis=p=>add(p.b,p.t);
+function place2(){
+  if(S2.traced)S2.history.push(S2.traced);
+  if(S2.history.length>4)S2.history.shift();
+  S2.traced=null;
+  const ia=(S2.i+gauss()*0.2)*DEG;
+  const O=V(XO,-H.d1); const dir=V(-Math.sin(ia),-Math.cos(ia));
+  const P1=add(add(O,mul(dir,5.0)),V(gauss()*0.03,gauss()*0.03));
+  const P2=add(add(O,mul(dir,2.0)),V(gauss()*0.03,gauss()*0.03));
+  // student's first guess: straight continuation, not yet corrected for refraction
+  let x3=XO+H.Wc*Math.tan(S2.i*DEG)*0.75+0.6; x3=Math.min(x3,14.5);
+  const P3=V(rnd2(x3,0.05),rnd2(exitY(x3)+1.5,0.05));
+  const P4=V(rnd2(Math.min(x3+2.5*Math.tan(S2.i*DEG)*0.6,15.3),0.05),rnd2(exitY(x3)+4.5,0.05));
+  S2.P=[mkPin(P1),mkPin(P2),mkPin(P3),mkPin(P4)];
+  S2.sel=2; $('#btnRecord2').disabled=true;
+  $('#read2').textContent='P₁、P₂ 已插好。透過壓克力觀察並調整 P₃、P₄。';
+  render2();
+}
+function sight2(){
+  const P3=vis(S2.P[2]),P4=vis(S2.P[3]);
+  const du=sub(P4,P3); if(len(du)<0.4)return null;
+  const u=norm(du); const E=add(P4,mul(u,25)); const axis=mul(u,-1);
+  const ang=v=>Math.atan2(cross(axis,v),dot(axis,v));
+  const objs=[];
+  for(let k=0;k<2;k++){
+    const P=vis(S2.P[k]);
+    const direct={a:ang(norm(sub(P,E))),d:len(sub(P,E))};
+    const r=solveThrough(P,E,H.nA);
+    const img=r?{a:ang(mul(r.d2,-1)),d:len(sub(r.A,P))*1+len(sub(r.B,r.A))/H.nA+len(sub(E,r.B))}:null;
+    objs.push({k,direct,img});
+  }
+  return {E,u,objs,d3:len(sub(P3,E)),d4:len(sub(P4,E))};
+}
+function pinBar(cx,y1,y2,w,shade){return `<rect x="${cx-w/2}" y="${y1}" width="${w}" height="${y2-y1}" rx="${Math.min(w/2,3)}" fill="var(--pin)" stroke="var(--pin-dark)" stroke-width="1" ${shade?'opacity=".92"':''}/>`;}
+function renderView2(sg){
+  const svg=$('#view2'); const k=S2.zoom*1000; const cx=300;
+  let g=`<rect class="sv-view" width="600" height="230"/>`;
+  const top=18, edge=128, bot=212;
+  if(!sg){g+=`<text class="sv-lbl" x="300" y="120" text-anchor="middle">P₃ 與 P₄ 太近，無法定出視線方向</text>`;svg.innerHTML=g;return;}
+  const wpx=d=>Math.max(2,0.2/d*k);
+  // far objects: P1 then P2 (direct upper parts)
+  for(const o of sg.objs){g+=pinBar(cx-o.direct.a*k,top,edge,wpx(o.direct.d),true);}
+  g+=`<rect x="0" y="${edge}" width="600" height="${bot-edge}" fill="var(--acrylic)"/>`;
+  g+=`<line x1="0" y1="${edge}" x2="600" y2="${edge}" stroke="var(--acrylic-edge)" stroke-width="1.5"/>`;
+  let miss=false;
+  const off=[];
+  for(const o of sg.objs){if(o.img){const x=cx-o.img.a*k;g+=`<g opacity=".88">${pinBar(x,edge+2,bot,wpx(o.img.d))}</g>`;if(x<-5||x>605)off.push({x,name:o.k?'P₂':'P₁'});}else miss=true;}
+  off.forEach((o,j)=>{const L=o.x<0;const y=edge+30+j*22;g+=`<text x="${L?10:590}" y="${y}" text-anchor="${L?'start':'end'}" style="fill:var(--warn);font-size:13px;font-weight:700">${L?'◀ ':''}${o.name} 的像在視野外${L?'':' ▶'}</text>`;});
+  g+=pinBar(cx,top,bot+14,wpx(sg.d3));
+  g+=pinBar(cx,top,bot+14,wpx(sg.d4));
+  g+=`<text class="sv-mut" x="8" y="${edge-6}">直接看（壓克力頂面以上）</text><text class="sv-mut" x="8" y="${bot-6}">透過壓克力看到的像</text>`;
+  svg.innerHTML=g;
+  $('#viewHint2').innerHTML=miss?'<b style="color:var(--warn)">視線沒有穿過壓克力：</b>至少一支牙籤的像看不到。把 P₃、P₄ 往出射光大致的方向移動。':'上半部是越過壓克力頂面直接看到的牙籤，下半部（青色帶）是透過壓克力看到的像。調整 P₃、P₄，讓 P₁、P₂ 的<b>像</b>與 P₃、P₄ 排成一直線。';
+}
+function render2(){
+  YMIN=-7; YMAX=Math.max(H.W0,H.W1)+7.5;
+  const svg=$('#sv2'); const Wd=(XMAX-XMIN)*SC, Hd=(YMAX-YMIN)*SC;
+  svg.setAttribute('viewBox',`0 0 ${Wd} ${Hd}`);
+  const ox=toX(0), oy=toY(0);
+  let g=`<defs>
+   <pattern id="gp1" width="${SC/10}" height="${SC/10}" patternUnits="userSpaceOnUse" x="${ox}" y="${oy}"><path d="M ${SC/10} 0 L 0 0 0 ${SC/10}" class="sv-grid1" fill="none"/></pattern>
+   <pattern id="gp10" width="${SC}" height="${SC}" patternUnits="userSpaceOnUse" x="${ox}" y="${oy}"><rect width="${SC}" height="${SC}" fill="url(#gp1)"/><path d="M ${SC/2} 0 V ${SC} M 0 ${SC/2} H ${SC}" class="sv-grid5" fill="none"/><path d="M ${SC} 0 L 0 0 0 ${SC}" class="sv-grid10" fill="none"/></pattern></defs>
+   <rect class="sv-bg" width="${Wd}" height="${Hd}"/><rect width="${Wd}" height="${Hd}" fill="url(#gp10)"/>`;
+  const nf=exitN();
+  // older trials, faint
+  for(const h of S2.history){g+=`<g opacity=".28">${traceLines(h)}</g>`;}
+  // traced outline (pencil), offset outward from real faces
+  const e0=add(V(0,H.W0),mul(nf,H.d2)), e1=add(V(H.L,H.W1),mul(nf,H.d2));
+  g+=`<polygon class="sv-pencil" points="${toX(-H.d1)},${toY(-H.d1)} ${toX(H.L+H.d1)},${toY(-H.d1)} ${toX(e1.x+H.d1)},${toY(e1.y)} ${toX(e0.x-H.d1)},${toY(e0.y)}"/>`;
+  // normal and incident construction line
+  const O=V(XO,-H.d1);
+  g+=`<line class="sv-dash" x1="${toX(XO)}" y1="${toY(-6.5)}" x2="${toX(XO)}" y2="${toY(H.W0+1)}"/>`;
+  const ia=S2.i*DEG;
+  g+=`<line class="sv-pencil" x1="${toX(O.x)}" y1="${toY(O.y)}" x2="${toX(O.x-6.2*Math.sin(ia))}" y2="${toY(O.y-6.2*Math.cos(ia))}" opacity=".7"/>`;
+  g+=`<circle cx="${toX(O.x)}" cy="${toY(O.y)}" r="2.5" fill="var(--ink)"/><text class="sv-lbl" x="${toX(O.x)+6}" y="${toY(O.y)+15}">O</text>`;
+  if(S2.traced){g+=traceLines(S2.traced,true);}
+  else{g+=`<polygon class="sv-block" points="${toX(0)},${toY(0)} ${toX(H.L)},${toY(0)} ${toX(H.L)},${toY(H.W1)} ${toX(0)},${toY(H.W0)}"/>
+    <text class="sv-mut" x="${toX(H.L-0.2)}" y="${toY(H.W0/2)}" text-anchor="end">壓克力 A</text>`;}
+  // pins
+  const names=['P₁','P₂','P₃','P₄'];
+  S2.P.forEach((p,k)=>{const c=p.b;
+    g+=`<circle class="sv-pin" cx="${toX(c.x)}" cy="${toY(c.y)}" r="${0.1*SC}" data-pin="${k}" style="${k>=2?'cursor:grab':''}"/>`;
+    if(k>=2)g+=`<circle cx="${toX(c.x)}" cy="${toY(c.y)}" r="14" fill="transparent" data-pin="${k}" style="cursor:grab"/>`;
+    if(k===S2.sel)g+=`<circle class="sv-sel" cx="${toX(c.x)}" cy="${toY(c.y)}" r="9"/>`;
+    g+=`<text class="sv-lbl" x="${toX(c.x)+9}" y="${toY(c.y)-7}">${names[k]}</text>`;});
+  // scale bar
+  g+=`<line x1="${toX(12)}" y1="${toY(-6.3)}" x2="${toX(14)}" y2="${toY(-6.3)}" stroke="var(--ink)" stroke-width="2"/><text class="sv-mut" x="${toX(13)}" y="${toY(-6.3)-6}" text-anchor="middle">2 cm</text>`;
+  svg.innerHTML=g;
+  $('#selP3').classList.toggle('primary',S2.sel===2);$('#selP4').classList.toggle('primary',S2.sel===3);
+  renderView2(S2.traced?null:sight2());
+  if(S2.traced){$('#view2').innerHTML=`<rect class="sv-view" width="600" height="230"/><text class="sv-lbl" x="300" y="120" text-anchor="middle">壓克力已拿開，改為在紙上描線量測</text>`;}
+}
+function traceLines(t,labels){
+  const {P1,P2,P3,P4,Op,Q}=t; let g='';
+  const ext=(a,b,c)=>`<line class="sv-pencil" x1="${toX(a.x)}" y1="${toY(a.y)}" x2="${toX(c.x)}" y2="${toY(c.y)}"/>`;
+  g+=ext(P1,P2,Op); g+=ext(P4,P3,Q);
+  g+=`<line class="sv-ray" x1="${toX(Op.x)}" y1="${toY(Op.y)}" x2="${toX(Q.x)}" y2="${toY(Q.y)}"/>`;
+  if(labels){
+    g+=`<line class="sv-dash" x1="${toX(Q.x)}" y1="${toY(Q.y-1.2)}" x2="${toX(Q.x)}" y2="${toY(Q.y+1.8)}"/>`;
+    g+=`<circle cx="${toX(Q.x)}" cy="${toY(Q.y)}" r="2.5" fill="var(--ray)"/><text class="sv-lbl" x="${toX(Q.x)+6}" y="${toY(Q.y)+15}" style="fill:var(--ray)">Q</text>`;
+    // coordinate helper lines for Δx, Δy
+    g+=`<path d="M ${toX(P1.x)} ${toY(P1.y)} H ${toX(Op.x)}" class="sv-dash" style="stroke:var(--accent)"/>`;
+    g+=`<path d="M ${toX(Q.x)} ${toY(Q.y)} V ${toY(Op.y)} H ${toX(Op.x)}" class="sv-dash" style="stroke:var(--accent)"/>`;
+  }
+  return g;
+}
+// geometric construction on the traced outline (what the student draws after removing the block)
+function construct(P1,P2,P3,P4){
+  const dIn=norm(sub(P2,P1)); const t=(-H.d1-P1.y)/dIn.y; const Op=add(P1,mul(dIn,t));
+  const nf=exitN(); const E0t=add(V(0,H.W0),mul(nf,H.d2));
+  const dOut=norm(sub(P4,P3)); const den=dot(dOut,nf);
+  if(Math.abs(den)<1e-6)return null;
+  const s=dot(sub(E0t,P3),nf)/den; const Q=add(P3,mul(dOut,s));
+  const rv=sub(Q,Op);
+  return {Op,Q,iG:Math.atan2(dIn.x,dIn.y)/DEG,rG:Math.atan2(rv.x,rv.y)/DEG,dev:(Math.atan2(dOut.x,dOut.y)-Math.atan2(dIn.x,dIn.y))/DEG};
+}
+// n a perfectly careful student would get at incidence i (no reading noise, perfect alignment) — isolates the tracing-offset bias
+function idealTracedN(iDeg){
+  const ia=iDeg*DEG,O=V(XO,-H.d1),dir=V(-Math.sin(ia),-Math.cos(ia));
+  const P1=add(O,mul(dir,5)),P2=add(O,mul(dir,2));const r=trace(P1,norm(sub(P2,P1)),H.nA);if(!r)return NaN;
+  const c=construct(P1,P2,add(r.B,mul(r.d2,2)),add(r.B,mul(r.d2,5)));
+  return Math.sin(c.iG*DEG)/Math.sin(c.rG*DEG);
+}
+function doTrace2(){
+  const P1=S2.P[0].b,P2=S2.P[1].b,P3=S2.P[2].b,P4=S2.P[3].b;
+  if(len(sub(P4,P3))<0.4){$('#read2').textContent='P₃、P₄ 太近，無法連線。';return;}
+  const c=construct(P1,P2,P3,P4);
+  if(!c){$('#read2').textContent='P₃P₄ 連線與出射面平行，無法求交點。';return;}
+  const {Op,Q,iG,rG,dev}=c;
+  const rd={iP:rnd2(iG+gauss()*0.25,0.5), rP:rnd2(rG+gauss()*0.25,0.5), dev:rnd2(dev+gauss()*0.25,0.5),
+    dx1:rnd2(Op.x-P1.x+gauss()*0.02,0.01), dy1:rnd2(Op.y-P1.y+gauss()*0.02,0.01),
+    dx2:rnd2(Q.x-Op.x+gauss()*0.02,0.01), dy2:rnd2(Q.y-Op.y+gauss()*0.02,0.01)};
+  S2.traced={P1,P2,P3,P4,Op,Q,rd};
+  $('#read2').innerHTML=`量角器：i = ${fx(rd.iP,1)}°　r = ${fx(rd.rP,1)}°<br>入射線與出射線夾角 = ${fx(Math.abs(rd.dev),1)}°<br>方格紙：P₁→O′　Δx = ${fx(rd.dx1,2)} cm，Δy = ${fx(rd.dy1,2)} cm<br>　　　　O′→Q　Δx = ${fx(rd.dx2,2)} cm，Δy = ${fx(rd.dy2,2)} cm`;
+  $('#btnRecord2').disabled=false;
+  render2();
+}
+function sinFrom(dx,dy){return dx/Math.hypot(dx,dy);}
+function renderTbl2(){
+  const t=$('#tbl2');
+  let h=`<thead><tr><th>#</th><th>i (°)</th><th>r (°)</th><th>n<sub>量角器</sub></th><th>Δx₁</th><th>Δy₁</th><th>Δx₂</th><th>Δy₂</th><th>sin i</th><th>sin r</th><th>n<sub>座標</sub></th><th></th></tr></thead><tbody>`;
+  S2.rows.forEach((r,j)=>{
+    const nP=Math.sin(r.iP*DEG)/Math.sin(r.rP*DEG), si=sinFrom(r.dx1,r.dy1), sr=sinFrom(r.dx2,r.dy2);
+    const inp=(f,d)=>`<input type="text" inputmode="decimal" data-r="${j}" data-f="${f}" value="${fx(r[f],d)}">`;
+    h+=`<tr><td>${j+1}</td><td>${inp('iP',1)}</td><td>${inp('rP',1)}</td><td class="calc">${fx(nP,3)}</td><td>${inp('dx1',2)}</td><td>${inp('dy1',2)}</td><td>${inp('dx2',2)}</td><td>${inp('dy2',2)}</td><td class="calc">${fx(si,4)}</td><td class="calc">${fx(sr,4)}</td><td class="calc">${fx(si/sr,3)}</td><td><button class="btn small" data-del="${j}" type="button" aria-label="刪除第${j+1}筆">×</button></td></tr>`;});
+  if(!S2.rows.length)h+=`<tr><td colspan="12" class="muted">尚無數據。建議入射角 10°–70° 取 6 組以上。</td></tr>`;
+  t.innerHTML=h+'</tbody>'; fit2();
+}
+function fit2(){
+  const src=$('#src2').value;
+  const pts=S2.rows.map(r=>src==='P'?V(Math.sin(r.rP*DEG),Math.sin(r.iP*DEG)):V(sinFrom(r.dx2,r.dy2),sinFrom(r.dx1,r.dy1))).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>0);
+  const fo=pts.length>=2?fitOrigin(pts):null, fl=pts.length>=3?fitLine(pts):null;
+  plotXY($('#plot2'),pts,fo,fl,'sin r','sin i');
+  if(pts.length<3){$('#fit2').textContent='至少需要 3 筆數據。';return;}
+  const ms=meanSd(pts.map(p=>p.y/p.x));
+  const sig=fl?Math.abs(fl.a)/fl.sea:0;
+  $('#fit2').innerHTML=`過原點迴歸：n = ${fx(fo.b,4)} ± ${fx(fo.se,4)}<br>含截距迴歸：斜率 = ${fx(fl.b,4)} ± ${fx(fl.seb,4)}<br>　　　　　截距 = ${fx(fl.a,4)} ± ${fx(fl.sea,4)}　<span class="tag ${sig>2?'warn':'ok'}">${sig>2?'截距顯著≠0':'截距與 0 相容'}</span><br>　　　　　R² = ${fx(fl.r2,5)}<br>逐點平均：n = ${fx(ms.m,4)}（標準差 ${fx(ms.sd,4)}，N = ${ms.n}）`;
+}
+
+/* drag */
+(function(){
+  const svg=$('#sv2'); let drag=null;
+  const pt=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(svg.getScreenCTM().inverse());return V(q.x/SC+XMIN,YMAX-q.y/SC);};
+  svg.addEventListener('pointerdown',e=>{const k=e.target.getAttribute&&e.target.getAttribute('data-pin');if(k===null||+k<2||S2.traced)return;drag=+k;S2.sel=drag;svg.setPointerCapture(e.pointerId);e.preventDefault();render2();});
+  svg.addEventListener('pointermove',e=>{if(drag===null)return;const c=pt(e);movePin(drag,c);});
+  const end=()=>{drag=null;}; svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
+})();
+function movePin(k,c){
+  let x=Math.max(XMIN+0.3,Math.min(XMAX-0.3,c.x));
+  let y=Math.max(exitY(x)+0.35,Math.min(YMAX-0.3,c.y));
+  S2.P[k].b=V(rnd2(x,0.05),rnd2(y,0.05));
+  render2();
+}
+
+/* ================= TAB 3 : parallax apparent depth ================= */
+const S3={dir:'L',s:5,e:0,sway:false,zoom:12,Dread:null,cS:0,rows:[],t0:0};
+const Dtrue=d=>d==='T'?H.T:d==='W'?H.Wc:H.L;
+const dirName={L:'長邊',W:'寬邊',T:'厚度'};
+function setDir3(d){
+  S3.dir=d; const D=Dtrue(d);
+  const sl=$('#s3'); sl.max=(D).toFixed(2); S3.s=rnd2(D*rnd(0.35,0.9),0.01); sl.value=S3.s;
+  S3.cS=gauss()*0.02; S3.Dread=null; $('#Dread3').textContent='D = —';
+  render3();
+}
+function render3(){
+  const D=Dtrue(S3.dir), n=H.nA, hp=D/n;
+  // side schematic
+  const sc=Math.min(36,420/Math.max(D,1)); const x0=140, base=205;
+  const hgt=(S3.dir==='T'?H.Wc:H.T); const hs=Math.min(hgt*sc,150);
+  let g=`<rect class="sv-bg" width="600" height="260"/>`;
+  g+=`<rect x="0" y="${base}" width="600" height="55" fill="var(--surface2)"/><text class="sv-mut" x="10" y="${base+45}">保麗龍板</text>`;
+  g+=`<rect class="sv-block" x="${x0}" y="${base-hs}" width="${D*sc}" height="${hs}"/>`;
+  if(S3.dir==='T'){g+=`<ellipse class="sv-clay" cx="${x0-6}" cy="${base-5}" rx="10" ry="6"/><ellipse class="sv-clay" cx="${x0+D*sc+6}" cy="${base-5}" rx="10" ry="6"/>`;}
+  const oTop=base-hs+6; const ox=x0+D*sc+4;
+  g+=`<rect x="${ox}" y="${oTop}" width="5" height="${base-oTop}" class="sv-pin"/><text class="sv-lbl" x="${ox+9}" y="${oTop+12}">O</text>`;
+  const sx=x0+S3.s*sc;
+  g+=`<ellipse class="sv-clay" cx="${sx}" cy="${base-hs-3}" rx="9" ry="4"/><rect x="${sx-3}" y="${base-hs-70}" width="6" height="67" class="sv-pin"/><text class="sv-lbl" x="${sx+8}" y="${base-hs-58}">S</text>`;
+  const ey=base-hs+2+(S3.e*6);
+  g+=`<circle cx="42" cy="${ey}" r="9" fill="none" stroke="var(--ink)"/><circle cx="46" cy="${ey}" r="3" fill="var(--ink)"/>`;
+  g+=`<line class="sv-dash" x1="52" y1="${ey}" x2="${ox}" y2="${oTop+14}"/>`;
+  g+=`<text class="sv-mut" x="${x0+D*sc/2}" y="${base-hs/2+4}" text-anchor="middle">壓克力（${dirName[S3.dir]}方向）</text>`;
+  g+=`<text class="sv-mut" x="16" y="${ey-16}">眼睛</text>`;
+  $('#sv3').innerHTML=g;
+  // parallax view
+  const Vd=25; const k=S3.zoom*1000; const cx=300, edge=128;
+  const aO=(0-S3.e)/(Vd+hp), aS=(S3.cS-S3.e)/(Vd+S3.s);
+  const wO=0.2/(Vd+hp)*k, wS=0.2/(Vd+S3.s)*k;
+  let v=`<rect class="sv-view" width="600" height="230"/>`;
+  v+=`<rect x="0" y="${edge}" width="600" height="102" fill="var(--acrylic)"/><line x1="0" y1="${edge}" x2="600" y2="${edge}" stroke="var(--acrylic-edge)" stroke-width="1.5"/>`;
+  v+=`<rect x="${cx+aO*k-wO/2}" y="${edge+10}" width="${wO}" height="${230-edge-10}" fill="var(--pin)" stroke="var(--pin-dark)" opacity=".9"/>`;
+  v+=`<ellipse class="sv-clay" cx="${cx+aS*k}" cy="${edge-2}" rx="${Math.max(wS*0.9,10)}" ry="6"/>`;
+  v+=`<rect x="${cx+aS*k-wS/2}" y="14" width="${wS}" height="${edge-20}" fill="var(--pin)" stroke="var(--pin-dark)"/>`;
+  v+=`<text class="sv-mut" x="8" y="${edge-8}">S（直接看）</text><text class="sv-mut" x="8" y="${edge+22}">O 的像（透過壓克力）</text>`;
+  $('#view3').innerHTML=v;
+}
+function renderTbl3(){
+  const t=$('#tbl3');
+  let h=`<thead><tr><th>#</th><th>方向</th><th>D (cm)</th><th>h′ (cm)</th><th>n = D⁄h′</th><th></th></tr></thead><tbody>`;
+  S3.rows.forEach((r,j)=>{const inp=(f)=>`<input type="text" inputmode="decimal" data-r3="${j}" data-f="${f}" value="${fx(r[f],2)}">`;
+    h+=`<tr><td>${j+1}</td><td>${dirName[r.dir]}</td><td>${inp('D')}</td><td>${inp('hp')}</td><td class="calc">${fx(r.D/r.hp,3)}</td><td><button class="btn small" data-del3="${j}" type="button" aria-label="刪除第${j+1}筆">×</button></td></tr>`;});
+  if(!S3.rows.length)h+=`<tr><td colspan="6" class="muted">尚無數據。</td></tr>`;
+  t.innerHTML=h+'</tbody>'; fit3();
+}
+function fit3(){
+  const pts=S3.rows.map(r=>V(r.hp,r.D)).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>0);
+  const dirs=new Set(S3.rows.map(r=>r.dir));
+  const fo=pts.length>=2?fitOrigin(pts):null, fl=(pts.length>=3&&dirs.size>=2)?fitLine(pts):null;
+  plotXY($('#plot3'),pts,fo,fl,'h′（cm）','D（cm）');
+  if(pts.length<3||dirs.size<2){$('#fit3').textContent='至少需要 3 筆數據，且涵蓋 2 個以上方向。';return;}
+  const per={};S3.rows.forEach(r=>{(per[r.dir]=per[r.dir]||[]).push(r.D/r.hp);});
+  let s=`過原點迴歸：n = ${fx(fo.b,4)} ± ${fx(fo.se,4)}<br>`;
+  if(fl){const sig=Math.abs(fl.a)/fl.sea;s+=`含截距迴歸：斜率 = ${fx(fl.b,4)} ± ${fx(fl.seb,4)}<br>　　　　　截距 = ${fx(fl.a,3)} ± ${fx(fl.sea,3)} cm　<span class="tag ${sig>2?'warn':'ok'}">${sig>2?'截距顯著≠0':'截距與 0 相容'}</span><br>`;}
+  s+='各方向逐點平均：<br>';
+  ['L','W','T'].forEach(d=>{if(per[d]){const m=meanSd(per[d]);s+=`　${dirName[d]}：n = ${fx(m.m,3)}${m.n>1?'（標準差 '+fx(m.sd,3)+'）':''}，N = ${m.n}<br>`;}});
+  $('#fit3').innerHTML=s;
+}
+let raf3=null;
+function swayLoop(ts){if(!S3.sway){raf3=null;return;}S3.e=1.8*Math.sin(ts/650);$('#eye3').value=S3.e.toFixed(2);render3();raf3=requestAnimationFrame(swayLoop);}
+
+/* ================= TAB 4 : graduated cylinder apparent depth ================= */
+const S4={mode:'in',Vset:100,Vact:null,h:null,z:3,e:0,sway:false,zoom:10,hRead:null,rows:[]};
+const hp4=()=>S4.h/H.nB+(S4.mode==='under'?H.base/H.ngC:0);
+const Ve4=()=>(H.cylDepth-S4.h)+10; // eye ~10 cm above the rim, over the wall
+function pour4(){
+  S4.Vact=S4.Vset+gauss()*1.0; S4.h=S4.Vact/(Math.PI*H.Rin*H.Rin); S4.hRead=null;
+  const zmax=S4.h+(S4.mode==='under'?H.base:0)+2;
+  $('#z4').max=zmax.toFixed(2);
+  S4.z=rnd2(S4.h*rnd(0.35,0.95),0.01); $('#z4').value=S4.z;
+  $('#hRead4').textContent='h = —（倒液後請重新量）';
+  render4();
+}
+function render4(){
+  if(S4.h===null)return;
+  const sc=10.5, floor=318, cx=230;
+  const Ro=H.Rin+H.cylWall;
+  const bTop=floor-H.base*sc, rim=bTop-H.cylDepth*sc, surf=bTop-S4.h*sc;
+  const xi=H.Rin*sc, xo=Ro*sc;
+  let g=`<rect class="sv-bg" width="600" height="330"/>`;
+  g+=`<rect x="0" y="${floor}" width="600" height="12" fill="var(--surface2)"/>`;
+  // glass base and walls
+  g+=`<rect x="${cx-xo-8}" y="${bTop}" width="${2*xo+16}" height="${floor-bTop}" fill="var(--acrylic)" stroke="var(--acrylic-edge)"/>`;
+  g+=`<rect x="${cx-xi}" y="${surf}" width="${2*xi}" height="${bTop-surf}" fill="var(--acrylic)"/>`;
+  g+=`<line x1="${cx-xi}" y1="${surf}" x2="${cx+xi}" y2="${surf}" stroke="var(--acrylic-edge)" stroke-width="1.5"/>`;
+  g+=`<path d="M ${cx-xi} ${rim} V ${bTop} M ${cx+xi} ${rim} V ${bTop}" stroke="var(--acrylic-edge)" stroke-width="1.2" fill="none"/>`;
+  g+=`<path d="M ${cx-xo} ${rim} V ${bTop} M ${cx+xo} ${rim} V ${bTop}" stroke="var(--acrylic-edge)" stroke-width="1.2" fill="none"/>`;
+  // mark
+  const my=S4.mode==='in'?bTop-2:floor-2;
+  g+=`<rect x="${cx+xi-9}" y="${my-2}" width="8" height="3" fill="var(--ink)"/>`;
+  g+=`<text class="sv-mut" x="${cx-xo-12}" y="${my}" text-anchor="end">記號</text>`;
+  // ruler + taped toothpick
+  const rx=cx+xo+34;
+  g+=`<rect x="${rx}" y="${floor-300}" width="14" height="300" fill="var(--surface2)" stroke="var(--line)"/>`;
+  for(let c=0;c<=28;c++){const y=floor-c*sc;g+=`<line x1="${rx}" y1="${y}" x2="${rx+(c%5?5:9)}" y2="${y}" stroke="var(--muted)" stroke-width="1"/>`;if(c%5===0)g+=`<text class="sv-mut" x="${rx+18}" y="${y+4}">${c}</text>`;}
+  const ty=surf+S4.z*sc;
+  g+=`<rect x="${cx+xo+1}" y="${ty-1.5}" width="${rx-cx-xo-1}" height="3" fill="var(--pin)" stroke="var(--pin-dark)" stroke-width=".6"/>`;
+  g+=`<rect x="${rx-3}" y="${ty-4}" width="10" height="8" fill="var(--grid-mid)" opacity=".7"/>`;
+  // eye
+  const ey=rim-10*sc*0.35, ex=cx+xi+S4.e*sc;
+  g+=`<circle cx="${ex}" cy="${ey}" r="8" fill="none" stroke="var(--ink)"/><circle cx="${ex}" cy="${ey+3}" r="2.6" fill="var(--ink)"/>`;
+  g+=`<line class="sv-dash" x1="${ex}" y1="${ey+8}" x2="${cx+xi-5}" y2="${my-3}"/>`;
+  g+=`<text class="sv-mut" x="${ex+14}" y="${ey+4}">眼睛（實際在管口上方約 10 cm）</text>`;
+  g+=`<text class="sv-mut" x="${cx-xo-12}" y="${surf+4}" text-anchor="end">液面</text>`;
+  g+=`<text class="sv-mut" x="${rx+40}" y="${floor-120}">100 cm 尺（直立）</text>`;
+  $('#sv4').innerHTML=g;
+  // view (fixated on the image of the mark)
+  const k=S4.zoom*1000, Ve=Ve4(), hp=hp4();
+  const xM=-0.2, xT=H.cylWall+0.05;
+  const aI=(xM-S4.e)/(Ve+hp), aT=(xT-S4.e)/(Ve+S4.z);
+  const X0=200, Y0=115, xt=X0+(aT-aI)*k;
+  const arm=0.15/(Ve+hp)*k, wT=0.2/(Ve+S4.z)*k, tipLen=0.5/(Ve+S4.z)*k;
+  let v=`<rect class="sv-view" width="600" height="230"/>`;
+  v+=`<rect x="${X0-arm*1.8}" y="${Y0-arm*1.8}" width="${arm*3.6}" height="${arm*3.6}" fill="var(--surface)" opacity=".85"/>`;
+  v+=`<path d="M ${X0-arm} ${Y0} H ${X0+arm} M ${X0} ${Y0-arm} V ${Y0+arm}" stroke="var(--ink)" stroke-width="${Math.max(1.5,arm*0.12)}"/>`;
+  if(xt<640){
+    v+=`<path d="M ${xt} ${Y0} L ${xt+tipLen} ${Y0-wT/2} H 620 V ${Y0+wT/2} H ${xt+tipLen} Z" fill="var(--pin)" stroke="var(--pin-dark)"/>`;
+  } else v+=`<text x="590" y="${Y0-40}" text-anchor="end" style="fill:var(--warn);font-size:13px;font-weight:700">牙籤尖在視野外 ▶</text>`;
+  v+=`<text class="sv-mut" x="10" y="20">記號的像（透過液體）</text><text class="sv-mut" x="590" y="20" text-anchor="end">量筒外的牙籤尖（直接看）</text>`;
+  $('#view4').innerHTML=v;
+}
+function renderTbl4(){
+  const t=$('#tbl4');
+  let h=`<thead><tr><th>#</th><th>記號</th><th>液量 (mL)</th><th>h (cm)</th><th>h′ (cm)</th><th>h⁄h′</th><th></th></tr></thead><tbody>`;
+  S4.rows.forEach((r,j)=>{const inp=f=>`<input type="text" inputmode="decimal" data-r4="${j}" data-f="${f}" value="${fx(r[f],2)}">`;
+    h+=`<tr><td>${j+1}</td><td>${r.mode==='in'?'內底':'外底下'}</td><td>${r.V}</td><td>${inp('h')}</td><td>${inp('hp')}</td><td class="calc">${fx(r.h/r.hp,3)}</td><td><button class="btn small" data-del4="${j}" type="button" aria-label="刪除第${j+1}筆">×</button></td></tr>`;});
+  if(!S4.rows.length)h+=`<tr><td colspan="7" class="muted">尚無數據。</td></tr>`;
+  t.innerHTML=h+'</tbody>'; fit4();
+}
+function rows4(){const m=$('#mode4').value;return S4.rows.filter(r=>r.mode===m);}
+function fit4(){
+  const rs=rows4(); const pts=rs.map(r=>V(r.hp,r.h)).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>0);
+  const fo=pts.length>=2?fitOrigin(pts):null, fl=pts.length>=3?fitLine(pts):null;
+  plotXY($('#plot4'),pts,fo,fl,'h′（cm）','h（cm）');
+  const other=S4.rows.length-rs.length;
+  if(pts.length<3){$('#fit4').textContent='目前記號位置的數據至少需要 3 筆。'+(other?`（另有 ${other} 筆屬於另一種記號位置，未納入）`:'');return;}
+  const sig=Math.abs(fl.a)/fl.sea; const ms=meanSd(pts.map(p=>p.y/p.x));
+  $('#fit4').innerHTML=`記號位置：${$('#mode4').value==='in'?'量筒內底':'量筒外底下方'}（N = ${pts.length}）<br>含截距迴歸：n = 斜率 = ${fx(fl.b,4)} ± ${fx(fl.seb,4)}<br>　　　　　截距 = ${fx(fl.a,3)} ± ${fx(fl.sea,3)} cm　<span class="tag ${sig>2?'warn':'ok'}">${sig>2?'截距顯著≠0':'截距與 0 相容'}</span><br>過原點迴歸：n = ${fx(fo.b,4)} ± ${fx(fo.se,4)}<br>逐點平均 h⁄h′ = ${fx(ms.m,4)}（標準差 ${fx(ms.sd,4)}）${other?`<br><span class="muted">另有 ${other} 筆屬於另一種記號位置，未納入</span>`:''}`;
+}
+let raf4=null;
+function swayLoop4(ts){if(!S4.sway){raf4=null;return;}S4.e=2.6*Math.sin(ts/650);$('#eye4').value=S4.e.toFixed(2);render4();raf4=requestAnimationFrame(swayLoop4);}
+
+/* ================= TAB 5 : beaker as a cylindrical lens ================= */
+const S5={uSet:40,uAct:null,s:20,e:0,sway:false,zoom:12,Dread:null,rows:[],cS:0};
+const v5=()=>{const f=H.fB;if(!(S5.uAct>f*1.002))return null;return 1/(1/f-1/S5.uAct);};
+function place5(){
+  S5.uAct=S5.uSet+gauss()*0.03; S5.cS=gauss()*0.02;
+  S5.s=rnd2(rnd(H.Rb+3,40),0.02); $('#s5').min=(H.Rb+0.6).toFixed(1); $('#s5').value=S5.s;
+  render5();
+}
+function render5(){
+  if(S5.uAct===null)return;
+  const v=v5(); const xE=S5.s+25;
+  const xmin=-(S5.uAct+4), xmax=xE+6; const sc=560/(xmax-xmin); const X=x=>20+(x-xmin)*sc, cy=110;
+  let g=`<rect class="sv-bg" width="600" height="230"/>`;
+  g+=`<line class="sv-dash" x1="10" y1="${cy}" x2="590" y2="${cy}"/>`;
+  g+=`<circle cx="${X(0)}" cy="${cy}" r="${H.Rb*sc}" fill="var(--acrylic)" stroke="var(--acrylic-edge)" stroke-width="2"/>`;
+  g+=`<text class="sv-mut" x="${X(0)}" y="${cy+H.Rb*sc+16}" text-anchor="middle">燒杯（液體 B）</text>`;
+  g+=`<ellipse class="sv-clay" cx="${X(-S5.uAct)}" cy="${cy}" rx="7" ry="5"/><circle class="sv-pin" cx="${X(-S5.uAct)}" cy="${cy}" r="3.5"/><text class="sv-lbl" x="${X(-S5.uAct)}" y="${cy-12}" text-anchor="middle">O</text>`;
+  g+=`<circle class="sv-pin" cx="${X(S5.s)}" cy="${cy}" r="3.5"/><text class="sv-lbl" x="${X(S5.s)}" y="${cy-12}" text-anchor="middle">S</text>`;
+  const ey=cy+S5.e*sc;
+  g+=`<circle cx="${X(xE)}" cy="${ey}" r="8" fill="none" stroke="var(--ink)"/><circle cx="${X(xE)-3}" cy="${ey}" r="2.6" fill="var(--ink)"/><text class="sv-mut" x="${X(xE)}" y="${ey-14}" text-anchor="middle">眼</text>`;
+  // 100 cm ruler along the bench
+  const ry=196; g+=`<rect x="${X(xmin)}" y="${ry}" width="${(xmax-xmin)*sc}" height="14" fill="var(--surface2)" stroke="var(--line)"/>`;
+  for(let c=Math.ceil(xmin/5)*5;c<=xmax;c+=5){g+=`<line x1="${X(c)}" y1="${ry}" x2="${X(c)}" y2="${ry+(c%10?5:9)}" stroke="var(--muted)"/>`;}
+  g+=`<text class="sv-mut" x="${X(xmin)+4}" y="${ry-4}">100 cm 尺（每格 5 cm）</text>`;
+  $('#sv5').innerHTML=g;
+  // view, fixated on the image
+  const k=S5.zoom*1000; const cx=300, edge=118;
+  let vv=`<rect class="sv-view" width="600" height="230"/><defs><filter id="blur5"><feGaussianBlur stdDeviation="1.6"/></filter></defs>`;
+  if(v===null){vv+=`<text class="sv-lbl" x="300" y="110" text-anchor="middle">在這一側找不到 O 的實像</text><text class="sv-mut" x="300" y="132" text-anchor="middle">（O 可能離燒杯太近，只成虛像）</text>`;$('#view5').innerHTML=vv;return;}
+  if(xE-v<4){vv+=`<text class="sv-lbl" x="300" y="110" text-anchor="middle">像在 S 後方很遠處，眼睛太近看不清楚</text><text class="sv-mut" x="300" y="132" text-anchor="middle">把 S 往遠離燒杯的方向移動</text>`;$('#view5').innerHTML=vv;return;}
+  const rel=(S5.cS-S5.e)/(xE-S5.s)-(0-S5.e)/(xE-v);
+  const wI=Math.max(3,0.2*(v/S5.uAct)/(xE-v)*k), wS=0.2/(xE-S5.s)*k;
+  vv+=`<rect x="0" y="14" width="600" height="${edge-14}" fill="var(--acrylic)"/>`;
+  vv+=`<rect x="${cx-wI/2}" y="20" width="${wI}" height="${edge-22}" fill="var(--pin)" stroke="var(--pin-dark)" filter="url(#blur5)"/>`;
+  const xs=cx+rel*k;
+  vv+=`<rect x="${xs-wS/2}" y="${edge+4}" width="${wS}" height="${226-edge}" fill="var(--pin)" stroke="var(--pin-dark)"/>`;
+  if(xs<-20||xs>620)vv+=`<text x="${xs<0?10:590}" y="${edge+40}" text-anchor="${xs<0?'start':'end'}" style="fill:var(--warn);font-size:13px;font-weight:700">${xs<0?'◀ ':''}S 在視野外${xs<0?'':' ▶'}</text>`;
+  vv+=`<text class="sv-mut" x="8" y="30">O 的實像（透過燒杯）</text><text class="sv-mut" x="8" y="${edge+20}">S（直接看）</text>`;
+  $('#view5').innerHTML=vv;
+}
+function renderTbl5(){
+  const t=$('#tbl5'); const R=S5.Dread?S5.Dread/2:NaN;
+  let h=`<thead><tr><th>#</th><th>u (cm)</th><th>v (cm)</th><th>1⁄u (cm⁻¹)</th><th>1⁄v (cm⁻¹)</th><th>f = uv⁄(u+v)</th><th>n</th><th></th></tr></thead><tbody>`;
+  S5.rows.forEach((r,j)=>{const inp=f=>`<input type="text" inputmode="decimal" data-r5="${j}" data-f="${f}" value="${fx(r[f],2)}">`;const f=r.u*r.v/(r.u+r.v);
+    h+=`<tr><td>${j+1}</td><td>${inp('u')}</td><td>${inp('v')}</td><td class="calc">${fx(1/r.u,5)}</td><td class="calc">${fx(1/r.v,5)}</td><td class="calc">${fx(f,2)}</td><td class="calc">${fx(2*f/(2*f-R),3)}</td><td><button class="btn small" data-del5="${j}" type="button" aria-label="刪除第${j+1}筆">×</button></td></tr>`;});
+  if(!S5.rows.length)h+=`<tr><td colspan="8" class="muted">尚無數據。</td></tr>`;
+  t.innerHTML=h+'</tbody>'; fit5();
+}
+function res5(){
+  const pts=S5.rows.filter(r=>r.u>0&&r.v>0).map(r=>V(1/r.u,1/r.v));
+  if(pts.length<3||!S5.Dread)return null;
+  const R=S5.Dread/2; const ms=meanSd(pts.map(p=>p.x+p.y));
+  const f=1/ms.m, sef=ms.sd/Math.sqrt(ms.n)/ms.m/ms.m;
+  const n=2*f/(2*f-R), sen=2*R/((2*f-R)**2)*sef;
+  const fl=fitLine(pts); let nFree=NaN,fFree=NaN;
+  if(fl&&fl.a>0){fFree=1/fl.a;nFree=2*fFree/(2*fFree-R);}
+  return {pts,R,f,sef,n,se:sen,fl,fFree,nFree,N:pts.length};
+}
+function fit5(){
+  const r=res5(); const pts=S5.rows.filter(q=>q.u>0&&q.v>0).map(q=>V(1/q.u,1/q.v));
+  const lines=[]; if(r){lines.push({a:1/r.f,b:-1,cls:'sv-fit1'});}
+  plotXY($('#plot5'),pts,null,r&&r.fl?r.fl:null,'1⁄u（cm⁻¹）','1⁄v（cm⁻¹）',{lines,ymax:r?1/r.f:0});
+  if(!r){$('#fit5').textContent=S5.Dread?'至少需要 3 筆數據。':'至少需要 3 筆數據，並先量外徑。';return;}
+  const sl=r.fl?Math.abs(r.fl.b+1)/r.fl.seb:0;
+  $('#fit5').innerHTML=`R = 外徑⁄2 = ${fx(r.R,2)} cm<br>固定斜率 −1：1⁄f = ${fx(1/r.f,5)} cm⁻¹ → f = ${fx(r.f,2)} ± ${fx(r.sef,2)} cm<br>　　　　　　n = 2f⁄(2f−R) = ${fx(r.n,4)} ± ${fx(r.se,4)}<br>`+
+   (r.fl?`自由迴歸：斜率 = ${fx(r.fl.b,3)} ± ${fx(r.fl.seb,3)}　<span class="tag ${sl>2?'warn':'ok'}">${sl>2?'斜率與 −1 不相容':'斜率與 −1 相容'}</span><br>　　　　　截距 1⁄f = ${fx(r.fl.a,5)} → f = ${fx(r.fFree,2)} cm，n = ${fx(r.nFree,4)}`:'');
+}
+let raf5=null;
+function swayLoop5(ts){if(!S5.sway){raf5=null;return;}S5.e=2.0*Math.sin(ts/650);$('#eye5').value=S5.e.toFixed(2);render5();raf5=requestAnimationFrame(swayLoop5);}
+
+/* ================= TAB 6 : summary and reveal ================= */
+let revealed=false;
+function res2(){const src=$('#src2').value;const pts=S2.rows.map(r=>src==='P'?V(Math.sin(r.rP*DEG),Math.sin(r.iP*DEG)):V(sinFrom(r.dx2,r.dy2),sinFrom(r.dx1,r.dy1))).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>0);if(pts.length<3)return null;const fo=fitOrigin(pts);return {n:fo.b,se:fo.se,N:pts.length,src};}
+function res3(){const pts=S3.rows.map(r=>V(r.hp,r.D)).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>0);const dirs=new Set(S3.rows.map(r=>r.dir));if(pts.length<3||dirs.size<2)return null;const fo=fitOrigin(pts);return {n:fo.b,se:fo.se,N:pts.length};}
+function res4(){const pts=rows4().map(r=>V(r.hp,r.h)).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>0);if(pts.length<3)return null;const fl=fitLine(pts);return {n:fl.b,se:fl.seb,N:pts.length,a:fl.a,sea:fl.sea};}
+function wmean(list){const ok=list.filter(r=>r&&r.se>0);if(ok.length<2)return null;let sw=0,swx=0;ok.forEach(r=>{const w=1/r.se/r.se;sw+=w;swx+=w*r.n;});return {n:swx/sw,se:Math.sqrt(1/sw)};}
+function render6(){
+  const r2=res2(),r3=res3(),r4=res4(),r5=res5();
+  const rowsA=[['A 壓克力','② 插針法（'+($('#src2').value==='P'?'量角器':'方格紙座標')+'，過原點）',r2],['A 壓克力','③ 視差法視深（過原點）',r3]];
+  const rowsB=[['B 液體','④ 量筒視深（含截距，斜率）',r4],['B 液體','⑤ 燒杯柱面透鏡（斜率固定 −1）',r5]];
+  const wA=wmean([r2,r3]), wB=wmean([r4,r5]);
+  const head=`<thead><tr><th>待測物</th><th>方法</th><th>N</th><th>n</th><th>標準誤差 σ</th>${revealed?'<th>真值</th><th>偏差</th><th>偏差 ⁄ σ</th><th>判定</th>':''}</tr></thead>`;
+  const line=(obj,name,r,truth,bold)=>{
+    let s=`<tr${bold?' style="font-weight:700"':''}><td style="text-align:left">${obj}</td><td style="text-align:left">${name}</td><td>${r&&r.N?r.N:(r?'—':'')}</td><td class="calc">${r?fx(r.n,4):'—'}</td><td class="calc">${r?fx(r.se,4):'—'}</td>`;
+    if(revealed){if(r&&r.se>0){const d=r.n-truth,z=d/r.se;const cls=Math.abs(z)<2?'ok':Math.abs(z)<3?'warn':'';s+=`<td class="calc">${fx(truth,4)}</td><td class="calc">${d>=0?'+':''}${fx(d,4)}</td><td class="calc">${fx(z,1)}</td><td><span class="tag ${cls}" ${cls?'':'style="color:var(--bad);border-color:currentColor"'}>${Math.abs(z)<2?'相容':Math.abs(z)<3?'邊緣':'有系統誤差'}</span></td>`;}else s+='<td></td><td></td><td></td><td></td>';}
+    return s+'</tr>';};
+  let b='<tbody>';
+  rowsA.forEach(r=>b+=line(r[0],r[1],r[2],H.nA));
+  if(wA)b+=line('A 壓克力','加權平均（1⁄σ² 權重）',wA,H.nA,true);
+  rowsB.forEach(r=>b+=line(r[0],r[1],r[2],H.nB));
+  if(wB)b+=line('B 液體','加權平均（1⁄σ² 權重）',wB,H.nB,true);
+  $('#tbl6').innerHTML=head+b+'</tbody>';
+  if(revealed)renderTruth6();
+}
+function renderTruth6(){
+  const iList=[20,40,60,70].map(i=>`${i}° → ${fx(idealTracedN(i),4)}`).join('，');
+  const nThinO=2*H.fB/(2*H.fB-H.Rb), Ri=H.Rb-H.tb, nThinI=2*H.fB/(2*H.fB-Ri);
+  const f0=H.nB*H.Rb/(2*(H.nB-1));
+  const inter=-H.nB*H.base/H.ngC;
+  $('#truth6').innerHTML=`<h2>本組隱藏真值</h2>
+  <div class="theory">
+   <div class="readout">壓克力 A：n<sub>A</sub> = ${fx(H.nA,4)}<br>液體 B：n<sub>B</sub> = ${fx(H.nB,4)}</div>
+   <div class="readout">壓克力尺寸：長 ${fx(H.L,2)}、寬 ${fx(H.Wc,2)}、厚 ${fx(H.T,2)} cm<br>兩長邊不平行（楔角）：${fx(Math.abs(H.wedge)/DEG,2)}°<br>描線外移：入射面 ${fx(H.d1*10,2)} mm、出射面 ${fx(H.d2*10,2)} mm</div>
+   <div class="readout">量筒：內半徑 ${fx(H.Rin,3)} cm，玻璃底厚 b = ${fx(H.base,2)} cm，n<sub>玻璃</sub> = ${fx(H.ngC,3)}<br>燒杯：外半徑 ${fx(H.Rb,3)} cm，壁厚 ${fx(H.tb*10,1)} mm，n<sub>玻璃</sub> = ${fx(H.ngB,3)}<br>燒杯實際近軸焦距 f = ${fx(H.fB,3)} cm</div>
+  </div>
+  <h3 style="margin-top:16px">系統誤差逐項檢討</h3>
+  <ul class="plan">
+   <li><b>② 描線外移：</b>假設完全對準、讀數毫無誤差，只因描出的邊界比真實表面外移，由描線求得的 n 為：${iList}（真值 ${fx(H.nA,4)}）。偏移使壓克力「看起來較寬」，折射線 OQ 的斜率被低估，入射角越大偏差越大，所以 sin i–sin r 圖在大角度端會略向下彎。</li>
+   <li><b>② 楔角：</b>兩長邊不平行時，入射線與出射線不再平行（夾角約為 (n−1) × 楔角 ≈ ${fx((H.nA-1)*Math.abs(H.wedge)/DEG,2)}°）。因為折射角是用「描出的出射面」與 O 點連線求得，n 的計算不受影響；但若有人用「出射線平行入射線」來偷畫光線就會出錯。</li>
+   <li><b>③ 視差法：</b>近軸公式 h′ = D⁄n 在視線接近垂直時成立；判斷無視差的誤差約 0.2–0.5 mm，對厚度方向（D ≈ ${fx(H.T,1)} cm）造成的 n 相對誤差約為長邊方向的 ${fx(H.L/H.T,1)} 倍。</li>
+   <li><b>④ 玻璃底座：</b>記號放在外底下方時，h = n h′ − n b⁄n<sub>玻璃</sub>，預期截距 = ${fx(inter,3)} cm；斜率仍是 n。逐點 h⁄h′ 則會系統性偏小。</li>
+   <li><b>⑤ 薄壁近似：</b>把燒杯當成實心液體圓柱，理想焦距 nR⁄2(n−1) = ${fx(f0,3)} cm；實際含玻璃壁的焦距為 ${fx(H.fB,3)} cm。即使 f 量得完全準確，代入 n = 2f⁄(2f−R) 時：用外半徑得 n = ${fx(nThinO,4)}，用內半徑得 n = ${fx(nThinI,4)}（真值 ${fx(H.nB,4)}）。這就是此方法的系統誤差下限。</li>
+  </ul>
+  <p class="note">判定標準：偏差 ⁄ σ 的絕對值小於 2 視為與真值相容，2–3 為邊緣，大於 3 表示存在未納入 σ 的系統誤差。注意 σ 只反映數據的離散程度，無法涵蓋上面列出的系統誤差。</p>`;
+}
+
+/* in-page two-click confirmation (embedded iframes may block confirm()) */
+function twice(sel,msg){const b=$(sel);if(b.dataset.armed==='1'){clearTimeout(+b.dataset.tm);b.dataset.armed='';b.textContent=b.dataset.orig;return true;}
+  b.dataset.armed='1';b.dataset.orig=b.textContent;b.textContent=msg||'再按一次確認清空';
+  b.dataset.tm=setTimeout(()=>{b.dataset.armed='';b.textContent=b.dataset.orig;},3000);return false;}
+/* ================= wiring ================= */
+/* tab 4 */
+$('#mode4').addEventListener('change',e=>{S4.mode=e.target.value;$('#z4').max=(S4.h+(S4.mode==='under'?H.base:0)+2).toFixed(2);render4();fit4();});
+$('#V4').addEventListener('input',e=>{S4.Vset=+e.target.value;$('#Vval4').textContent=S4.Vset+' mL';});
+$('#btnPour4').addEventListener('click',()=>{pour4();$('#read4').textContent='已倒液至 '+S4.Vset+' mL 刻度。量液深 h，再找無視差位置。';});
+$('#btnMeasH4').addEventListener('click',()=>{S4.hRead=rnd2(S4.h+gauss()*0.04,0.01);$('#hRead4').textContent='h = '+fx(S4.hRead,2)+' cm（尺上液面讀數減內底讀數）';});
+$('#z4').addEventListener('input',e=>{S4.z=+e.target.value;render4();});
+document.querySelectorAll('[data-z4]').forEach(b=>b.addEventListener('click',()=>{S4.z=Math.max(-1,Math.min(+$('#z4').max,S4.z+ +b.dataset.z4));$('#z4').value=S4.z;render4();}));
+$('#eye4').addEventListener('input',e=>{S4.e=+e.target.value;render4();});
+$('#zoom4').addEventListener('input',e=>{S4.zoom=+e.target.value;render4();});
+$('#btnSway4').addEventListener('click',()=>{S4.sway=!S4.sway;$('#btnSway4').textContent=S4.sway?'停止晃動':'自動左右晃動';if(S4.sway&&!raf4)raf4=requestAnimationFrame(swayLoop4);});
+$('#btnRec4').addEventListener('click',()=>{
+  if(S4.hRead===null){$('#read4').innerHTML='<b style="color:var(--warn)">請先量液深 h。</b>';return;}
+  const ysR=rnd2((H.base+S4.h)+gauss()*0.04,0.01), ytR=rnd2((H.base+S4.h)-S4.z+gauss()*0.02,0.01);
+  const hp=+(ysR-ytR).toFixed(2);
+  S4.rows.push({mode:S4.mode,V:S4.Vset,h:S4.hRead,hp});
+  $('#read4').innerHTML=`液面讀數 ${fx(ysR,2)} cm，牙籤讀數 ${fx(ytR,2)} cm → h′ = ${fx(hp,2)} cm<br>h = ${fx(S4.hRead,2)} cm → h⁄h′ = ${fx(S4.hRead/hp,3)}<br>換一個液量後按「倒液」繼續。`;
+  S4.z=rnd2(S4.h*rnd(0.35,0.95),0.01);$('#z4').value=S4.z;render4();renderTbl4();
+});
+$('#btnClear4').addEventListener('click',()=>{if(S4.rows.length&&!twice('#btnClear4'))return;S4.rows=[];renderTbl4();});
+$('#tbl4').addEventListener('change',e=>{const r=e.target.dataset.r4;if(r===undefined)return;S4.rows[+r][e.target.dataset.f]=parseFloat(e.target.value);renderTbl4();});
+$('#tbl4').addEventListener('click',e=>{const d=e.target.dataset.del4;if(d===undefined)return;S4.rows.splice(+d,1);renderTbl4();});
+/* tab 5 */
+$('#btnMeasD5').addEventListener('click',()=>{S5.Dread=rnd2(2*H.Rb+gauss()*0.03,0.01);$('#Dread5').textContent='外徑 = '+fx(S5.Dread,2)+' cm';renderTbl5();});
+$('#u5').addEventListener('input',e=>{S5.uSet=+e.target.value;$('#uVal5').textContent=S5.uSet.toFixed(1)+' cm';});
+$('#btnPlace5').addEventListener('click',()=>{place5();$('#read5').textContent='O 已放好。在燒杯另一側移動 S 找實像。';});
+$('#s5').addEventListener('input',e=>{S5.s=+e.target.value;render5();});
+document.querySelectorAll('[data-s5]').forEach(b=>b.addEventListener('click',()=>{S5.s=Math.max(+$('#s5').min,Math.min(70,S5.s+ +b.dataset.s5));$('#s5').value=S5.s;render5();}));
+$('#eye5').addEventListener('input',e=>{S5.e=+e.target.value;render5();});
+$('#zoom5').addEventListener('input',e=>{S5.zoom=+e.target.value;render5();});
+$('#btnSway5').addEventListener('click',()=>{S5.sway=!S5.sway;$('#btnSway5').textContent=S5.sway?'停止晃動':'自動左右晃動';if(S5.sway&&!raf5)raf5=requestAnimationFrame(swayLoop5);});
+$('#btnRec5').addEventListener('click',()=>{
+  if(!S5.Dread){$('#read5').innerHTML='<b style="color:var(--warn)">請先量燒杯外徑（要用它找中心）。</b>';return;}
+  const u=rnd2(S5.uAct+gauss()*0.08,0.01), v=rnd2(S5.s+gauss()*0.08,0.01);
+  S5.rows.push({u,v});
+  $('#read5').innerHTML=`u = ${fx(u,2)} cm，v = ${fx(v,2)} cm → f = uv⁄(u+v) = ${fx(u*v/(u+v),2)} cm<br>改變 u 後按「把 O 插在這個位置」繼續。`;
+  renderTbl5();
+});
+$('#btnClear5').addEventListener('click',()=>{if(S5.rows.length&&!twice('#btnClear5'))return;S5.rows=[];renderTbl5();});
+$('#tbl5').addEventListener('change',e=>{const r=e.target.dataset.r5;if(r===undefined)return;S5.rows[+r][e.target.dataset.f]=parseFloat(e.target.value);renderTbl5();});
+$('#tbl5').addEventListener('click',e=>{const d=e.target.dataset.del5;if(d===undefined)return;S5.rows.splice(+d,1);renderTbl5();});
+/* tab 6 */
+$('#btnReveal6').addEventListener('click',()=>{revealed=true;$('#truth6').classList.remove('hidden');$('#btnReveal6').disabled=true;render6();});
+
+document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected',x===b?'true':'false'));
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.toggle('hidden',p.id!==b.dataset.tab));
+  if(b.dataset.tab==='t6')render6();
+}));
+$('#i2').addEventListener('input',e=>{S2.i=+e.target.value;$('#iVal2').textContent=S2.i+'°';});
+$('#btnPlace2').addEventListener('click',place2);
+$('#selP3').addEventListener('click',()=>{S2.sel=2;render2();});
+$('#selP4').addEventListener('click',()=>{S2.sel=3;render2();});
+document.querySelectorAll('[data-nudge]').forEach(b=>b.addEventListener('click',()=>{if(S2.traced)return;const [dx,dy]=b.dataset.nudge.split(',').map(Number);const p=S2.P[S2.sel].b;movePin(S2.sel,V(p.x+dx*0.05,p.y+dy*0.05));}));
+$('#zoom2').addEventListener('input',e=>{S2.zoom=+e.target.value;render2();});
+$('#btnTrace2').addEventListener('click',doTrace2);
+$('#btnRecord2').addEventListener('click',()=>{if(!S2.traced)return;S2.rows.push({...S2.traced.rd});$('#btnRecord2').disabled=true;renderTbl2();$('#read2').innerHTML+='<br><b style="color:var(--ok)">已寫入第 '+S2.rows.length+' 筆。</b>改變入射角後按「換新方格紙區、插 P₁、P₂」。';});
+$('#btnClear2').addEventListener('click',()=>{if(S2.rows.length&&!twice('#btnClear2'))return;S2.rows=[];renderTbl2();});
+$('#tbl2').addEventListener('change',e=>{const r=e.target.dataset.r;if(r===undefined)return;S2.rows[+r][e.target.dataset.f]=parseFloat(e.target.value);renderTbl2();});
+$('#tbl2').addEventListener('click',e=>{const d=e.target.dataset.del;if(d===undefined)return;S2.rows.splice(+d,1);renderTbl2();});
+$('#src2').addEventListener('change',fit2);
+document.addEventListener('keydown',e=>{
+  if($('#t2').classList.contains('hidden')||S2.traced)return;
+  if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName))return;
+  const m={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key]; if(!m)return;
+  e.preventDefault();const p=S2.P[S2.sel].b;movePin(S2.sel,V(p.x+m[0]*0.05,p.y+m[1]*0.05));
+});
+
+$('#dir3').addEventListener('change',e=>setDir3(e.target.value));
+$('#s3').addEventListener('input',e=>{S3.s=+e.target.value;render3();});
+document.querySelectorAll('[data-s3]').forEach(b=>b.addEventListener('click',()=>{const D=Dtrue(S3.dir);S3.s=Math.max(0,Math.min(D,S3.s+ +b.dataset.s3));$('#s3').value=S3.s;render3();}));
+$('#eye3').addEventListener('input',e=>{S3.e=+e.target.value;render3();});
+$('#zoom3').addEventListener('input',e=>{S3.zoom=+e.target.value;render3();});
+$('#btnSway3').addEventListener('click',()=>{S3.sway=!S3.sway;$('#btnSway3').textContent=S3.sway?'停止晃動':'自動左右晃動';if(S3.sway&&!raf3)raf3=requestAnimationFrame(swayLoop);});
+$('#btnMeasD3').addEventListener('click',()=>{S3.Dread=rnd2(Dtrue(S3.dir)+gauss()*0.02,0.01);$('#Dread3').textContent='D = '+fx(S3.Dread,2)+' cm';});
+$('#btnRec3').addEventListener('click',()=>{
+  if(S3.Dread===null){$('#read3').innerHTML='<b style="color:var(--warn)">請先量 D。</b>';return;}
+  const hp=rnd2(S3.s+gauss()*0.03,0.01);
+  S3.rows.push({dir:S3.dir,D:S3.Dread,hp});
+  $('#read3').innerHTML=`${dirName[S3.dir]}方向：D = ${fx(S3.Dread,2)} cm，h′ = ${fx(hp,2)} cm → n = ${fx(S3.Dread/hp,3)}<br>重做一次：把 S 移開後重新尋找無視差位置。`;
+  S3.s=rnd2(Dtrue(S3.dir)*rnd(0.3,0.95),0.01);$('#s3').value=S3.s;S3.cS=gauss()*0.02;
+  renderTbl3();render3();
+});
+$('#btnClear3').addEventListener('click',()=>{if(S3.rows.length&&!twice('#btnClear3'))return;S3.rows=[];renderTbl3();});
+$('#tbl3').addEventListener('change',e=>{const r=e.target.dataset.r3;if(r===undefined)return;S3.rows[+r][e.target.dataset.f]=parseFloat(e.target.value);renderTbl3();});
+$('#tbl3').addEventListener('click',e=>{const d=e.target.dataset.del3;if(d===undefined)return;S3.rows.splice(+d,1);renderTbl3();});
+
+$('#btnNewSet').addEventListener('click',()=>{
+  if((S2.rows.length||S3.rows.length||S4.rows.length||S5.rows.length)&&!twice('#btnNewSet','再按一次：清空所有數據並換組'))return;
+  newTruth(); S2.rows=[];S2.history=[];S2.traced=null;S3.rows=[];
+  place2(); renderTbl2(); setDir3($('#dir3').value); renderTbl3();
+  S4.rows=[];S5.rows=[];S5.Dread=null;$('#Dread5').textContent='外徑 = —';pour4();renderTbl4();place5();renderTbl5();
+  revealed=false;$('#truth6').classList.add('hidden');$('#btnReveal6').disabled=false;render6();
+});
+
+newTruth(); place2(); renderTbl2(); setDir3('L'); renderTbl3(); pour4(); renderTbl4(); place5(); renderTbl5(); render6();
+})();
+</script>
+
+</body>
+</html>

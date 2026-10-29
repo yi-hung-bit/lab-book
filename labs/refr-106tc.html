@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>物體折射率測定．模擬實驗室</title>
+<style>
+  :root{
+    --bg: #14181d;
+    --panel: #1c2229;
+    --panel-2: #222a33;
+    --line: #33404c;
+    --text: #e9e6de;
+    --muted: #93a1ad;
+    --amber: #ffb454;
+    --amber-dim: #7a5c2c;
+    --teal: #5fd0c0;
+    --teal-dim: rgba(95,208,192,0.18);
+    --red: #e2634f;
+    --green: #7fd08a;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Noto Sans Mono TC", monospace;
+    --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+    --sans: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  .wrap{max-width:960px;margin:0 auto;padding:22px 16px 60px;}
+  header{margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:14px;}
+  header h1{font-family:var(--serif);font-size:1.5rem;font-weight:700;margin:0 0 4px;letter-spacing:0.02em;}
+  header p{margin:0;color:var(--muted);font-size:0.88rem;}
+  .setup-line{font-family:var(--mono);font-size:0.8rem;color:var(--teal);margin-top:8px;}
+
+  .tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--panel-2);border-radius:8px;padding:3px;}
+  .tab-btn{flex:1;padding:10px 12px;background:transparent;border:none;color:var(--muted);font-size:0.92rem;
+    font-weight:600;border-radius:6px;cursor:pointer;font-family:var(--sans);transition:background .15s,color .15s;}
+  .tab-btn.active{background:var(--amber);color:#221805;}
+
+  section.panel{display:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;}
+  section.panel.active{display:block;}
+
+  .grid2{display:grid;grid-template-columns:1fr 300px;gap:18px;}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+
+  canvas{width:100%;height:auto;background:#0f1318;border:1px solid var(--line);border-radius:8px;display:block;}
+
+  .ctrl-box{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px;}
+  .ctrl-row{margin-bottom:12px;}
+  .ctrl-row:last-child{margin-bottom:0;}
+  .ctrl-row label{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--muted);margin-bottom:4px;}
+  .ctrl-row label b{color:var(--amber);font-family:var(--mono);font-weight:600;}
+  input[type=range]{width:100%;accent-color:var(--amber);}
+  .btn{background:var(--amber);color:#221805;border:none;padding:9px 14px;border-radius:6px;font-weight:700;
+    cursor:pointer;font-size:0.85rem;font-family:var(--sans);}
+  .btn:disabled{background:#4a4536;color:#8a8578;cursor:not-allowed;}
+  .btn.secondary{background:transparent;border:1px solid var(--line);color:var(--text);}
+  .btn.danger{background:transparent;border:1px solid var(--red);color:var(--red);}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+  .formula-box{margin-top:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+    padding:14px;font-family:var(--mono);font-size:0.82rem;line-height:1.9;color:var(--text);}
+  .formula-box .hl{color:var(--amber);}
+  .formula-box .hl2{color:var(--teal);}
+
+  .note{font-size:0.8rem;color:var(--muted);margin-top:10px;line-height:1.6;}
+
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-family:var(--mono);font-size:0.82rem;}
+  th,td{text-align:center;padding:6px 4px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:600;}
+  td button{background:none;border:none;color:var(--red);cursor:pointer;font-size:0.85rem;}
+
+  .status-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.78rem;font-weight:700;font-family:var(--mono);}
+  .status-blur{background:rgba(226,99,79,0.18);color:var(--red);}
+  .status-mid{background:rgba(255,180,84,0.18);color:var(--amber);}
+  .status-sharp{background:rgba(127,208,138,0.18);color:var(--green);}
+
+  .result-box{margin-top:14px;background:var(--panel-2);border:1px solid var(--teal-dim);border-radius:8px;padding:14px;}
+  .result-box .n-value{font-family:var(--mono);font-size:1.6rem;color:var(--teal);font-weight:700;}
+
+  h3{font-family:var(--serif);font-size:1.05rem;margin:0 0 10px;color:var(--text);}
+  .block-count{font-family:var(--mono);font-size:1.1rem;color:var(--amber);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>物體折射率測定 — 模擬實驗室</h1>
+    <p>凸透鏡成像 × 透明待測物折射率量測，改編自 106 臺中區學科能力競賽物理實驗題</p>
+    <div class="setup-line">固定條件：物距 p = 40 cm，凸透鏡焦距 f = 15 cm　⇒　空氣中像距 q = 24 cm（不變）</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="principle">① 原理動畫</button>
+    <button class="tab-btn" data-tab="lab">② 虛擬實驗室</button>
+  </div>
+
+  <!-- ===================== 原理動畫 ===================== -->
+  <section class="panel active" id="panel-principle">
+    <div class="grid2">
+      <div>
+        <canvas id="princCanvas" width="700" height="330"></canvas>
+        <div class="formula-box">
+          光線於待測物表面折射（近軸近似）：<br>
+          s<sub>1</sub> = q − ℓ = <span class="hl" id="f-s1">--</span> cm　（若無待測物，光線會在此處之後 s₁ 處會聚於軸上）<br>
+          s<sub>2</sub> = n × s<sub>1</sub> = <span class="hl2" id="f-n">--</span> × <span class="hl" id="f-s1b">--</span> = <span class="hl2" id="f-s2">--</span> cm　（實際會聚點，因折射而後移）<br>
+          q<sub>1</sub> = ℓ + s<sub>2</sub> = <span class="hl" id="f-q1">--</span> cm　（實際成像與透鏡的距離）<br>
+          θ₁ ≈ <span id="f-t1">--</span>°　　θ₂ ≈ <span id="f-t2">--</span>°　　（θ₁ ≈ n·θ₂，符合 Snell 定律近軸近似）
+        </div>
+      </div>
+      <div>
+        <div class="ctrl-box">
+          <div class="ctrl-row">
+            <label>待測物折射率 n <b id="nVal">1.50</b></label>
+            <input type="range" id="nSlider" min="1.00" max="1.90" step="0.01" value="1.50">
+          </div>
+          <div class="ctrl-row">
+            <label>透鏡到待測物表面距離 ℓ <b id="lVal">12.0</b> cm</label>
+            <input type="range" id="lSlider" min="1" max="23" step="0.1" value="12">
+          </div>
+          <div class="btn-row">
+            <button class="btn secondary" id="playBtn">▶ 自動掃描 n</button>
+          </div>
+        </div>
+        <div class="note">
+          虛線：若沒有待測物，光線會直接會聚在 q = 24 cm 處。<br><br>
+          實線：加入折射率 n 的待測物後，光線在表面（藍綠色區塊前緣）折射，因為 n<sub>solid</sub> &gt; n<sub>air</sub>，光線偏向軸方向（θ 變小），需要走更長距離才會聚，因此實際成像點 q₁ 比 q 更深。<br><br>
+          拖曳滑桿觀察：n 越大、或表面越靠近透鏡（ℓ 越小 ⇒ s₁ 越大），成像點後移的量越明顯。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 虛擬實驗室 ===================== -->
+  <section class="panel" id="panel-lab">
+    <p class="note" style="margin-top:0">
+      任務：這塊透明壓克力塊的折射率 <b>未知</b>。請利用下方裝置，改變待測物厚度並重新對焦，記錄多組 (S, ℓ) 數據，
+      再用線性迴歸求出折射率。裝置沿用原理：ℓ = q − S / n，斜率大小 = n<sub>air</sub> / n<sub>solid</sub>。
+    </p>
+    <div class="grid2">
+      <div>
+        <canvas id="labCanvas" width="700" height="240"></canvas>
+
+        <div class="ctrl-box">
+          <div class="ctrl-row">
+            <label>待測物塊數 <span class="block-count" id="blockCount">0</span> 塊　（每塊 1.20 cm，共 <span id="totalS">0.00</span> cm）</label>
+            <div class="btn-row">
+              <button class="btn secondary" id="addBlock">＋ 加一塊壓克力</button>
+              <button class="btn secondary" id="removeBlock">－ 移除一塊</button>
+            </div>
+          </div>
+          <div class="ctrl-row">
+            <label>調整透鏡位置（透鏡到待測物表面距離 ℓ） <b id="labLVal">--</b> cm</label>
+            <input type="range" id="labLSlider" min="14" max="25" step="0.02" value="24">
+          </div>
+          <div class="ctrl-row" style="display:flex;align-items:center;justify-content:space-between;">
+            <span class="status-pill status-blur" id="focusStatus">模糊</span>
+            <button class="btn" id="recordBtn" disabled>📏 記錄這筆數據</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="ctrl-box">
+          <h3 style="margin-top:0">實驗數據</h3>
+          <table id="dataTable">
+            <thead><tr><th>#</th><th>S (cm)</th><th>ℓ (cm)</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="btn-row">
+            <button class="btn secondary" id="clearData">清除全部數據</button>
+          </div>
+        </div>
+
+        <div class="result-box" id="resultBox" style="display:none;">
+          <h3 style="margin-top:0">線性迴歸結果</h3>
+          <div style="font-family:var(--mono);font-size:0.85rem;line-height:1.8;">
+            斜率 a = <span id="regA">--</span>　　截距 b = <span id="regB">--</span>　　R² = <span id="regR2">--</span><br>
+            n<sub>solid</sub> = 1 / |a| = <span class="n-value" id="regN">--</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn secondary" id="revealBtn">🔍 公布真實折射率</button>
+          <button class="btn danger" id="newMaterial">🔄 換一份未知材質</button>
+        </div>
+        <div class="note" id="revealNote"></div>
+      </div>
+    </div>
+
+    <canvas id="regCanvas" width="900" height="260" style="margin-top:14px;"></canvas>
+  </section>
+</div>
+
+<script>
+/* ============ 共用常數 ============ */
+const P = 40, F = 15;
+const Q = 1 / (1/F - 1/P); // 24 cm 固定像距（空氣中）
+
+/* ============ Tab 切換 ============ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ================================================================
+   ① 原理動畫
+   ================================================================ */
+const pc = document.getElementById('princCanvas');
+const pctx = pc.getContext('2d');
+const lSlider = document.getElementById('lSlider');
+
+let princN = 1.50, princL = 12;
+let scanning = false, scanDir = 1;
+
+function drawPrinciple(){
+  const W = pc.width, H = pc.height;
+  pctx.clearRect(0,0,W,H);
+  const scale = 7.2;           // px per cm
+  const x0 = 300;              // 透鏡在畫布上的 x 座標 (px)
+  const cy = H/2;
+  const Hh = 6;                 // 透鏡孔徑半高 (cm)，僅供繪圖用
+
+  const s1 = Q - princL;
+  const s2 = princN * s1;
+  const q1 = princL + s2;
+  const t1 = Math.atan(Hh/Q) * 180/Math.PI;
+  const t2 = Math.atan(Hh/(princN*Q)) * 180/Math.PI;
+
+  const X = cm => x0 + cm*scale;
+  const Y = cm => cy - cm*scale;
+
+  // 光軸
+  pctx.strokeStyle = '#33404c'; pctx.lineWidth = 1;
+  pctx.beginPath(); pctx.moveTo(10,cy); pctx.lineTo(W-10,cy); pctx.stroke();
+
+  // 待測物色塊
+  const yInt = Hh*(s1/Q);
+  const blockTopHalf = Hh*1.6;
+  pctx.fillStyle = 'rgba(95,208,192,0.16)';
+  pctx.fillRect(X(princL), Y(blockTopHalf), X(q1+3)-X(princL), blockTopHalf*2*scale);
+  pctx.strokeStyle = 'rgba(95,208,192,0.5)'; pctx.lineWidth=1.2;
+  pctx.strokeRect(X(princL), Y(blockTopHalf), X(q1+3)-X(princL), blockTopHalf*2*scale);
+  pctx.fillStyle = '#5fd0c0'; pctx.font='11px sans-serif'; pctx.textAlign='left';
+  pctx.fillText('透明待測物 n = '+princN.toFixed(2), X(princL)+6, Y(blockTopHalf)+14);
+
+  // 點光源
+  pctx.fillStyle = '#ffb454';
+  pctx.beginPath(); pctx.arc(X(-P), cy, 4, 0, 7); pctx.fill();
+  pctx.fillStyle = '#93a1ad'; pctx.font='11px sans-serif'; pctx.textAlign='center';
+  pctx.fillText('物體 (p='+P+')', X(-P), cy+22);
+
+  // 透鏡符號
+  pctx.strokeStyle = '#e9e6de'; pctx.lineWidth = 2.4;
+  pctx.beginPath();
+  pctx.moveTo(X(0), Y(Hh*1.5)); pctx.lineTo(X(0), Y(-Hh*1.5));
+  pctx.stroke();
+  // 箭頭
+  drawArrowHead(X(0), Y(Hh*1.5), 0, -1, '#e9e6de');
+  drawArrowHead(X(0), Y(-Hh*1.5), 0, 1, '#e9e6de');
+  pctx.fillStyle='#93a1ad'; pctx.fillText('凸透鏡', X(0), Y(Hh*1.5)-8);
+
+  // 無待測物：虛線到 (Q,0)
+  pctx.setLineDash([4,4]);
+  pctx.strokeStyle = '#93a1ad'; pctx.lineWidth=1;
+  [1,-1].forEach(sign=>{
+    pctx.beginPath();
+    pctx.moveTo(X(0), Y(sign*Hh));
+    pctx.lineTo(X(Q), cy);
+    pctx.stroke();
+  });
+  pctx.setLineDash([]);
+  pctx.fillStyle = '#93a1ad';
+  pctx.beginPath(); pctx.arc(X(Q), cy, 3, 0, 7); pctx.fill();
+  pctx.fillText('q='+Q.toFixed(0)+' (無待測物)', X(Q), cy-10);
+
+  // 實際光線（含折射）
+  [1,-1].forEach(sign=>{
+    pctx.strokeStyle = '#ffb454'; pctx.lineWidth = 1.6;
+    pctx.beginPath();
+    pctx.moveTo(X(-P), cy);
+    pctx.lineTo(X(0), Y(sign*Hh));
+    pctx.lineTo(X(princL), Y(sign*yInt));
+    pctx.lineTo(X(q1), cy);
+    pctx.stroke();
+  });
+
+  // 折射點角度弧線 (僅上方)
+  drawAngleArc(X(princL), Y(yInt), X(0)-X(princL), Y(Hh)-Y(yInt), 0, -1, '#ffb454', 't1='+t1.toFixed(1)+'°');
+  drawAngleArc(X(princL), Y(yInt), X(q1)-X(princL), cy-Y(yInt), 0, -1, '#5fd0c0', "t2="+t2.toFixed(1)+'°');
+
+  // 實際成像點
+  pctx.fillStyle = '#ff6b57';
+  pctx.beginPath(); pctx.arc(X(q1), cy, 4, 0, 7); pctx.fill();
+  pctx.fillStyle = '#ff9f8a';
+  pctx.fillText('實際像 q1='+q1.toFixed(1), X(q1), cy+20);
+
+  // 更新文字
+  document.getElementById('f-s1').textContent = s1.toFixed(2);
+  document.getElementById('f-s1b').textContent = s1.toFixed(2);
+  document.getElementById('f-n').textContent = princN.toFixed(2);
+  document.getElementById('f-s2').textContent = s2.toFixed(2);
+  document.getElementById('f-q1').textContent = q1.toFixed(2);
+  document.getElementById('f-t1').textContent = t1.toFixed(1);
+  document.getElementById('f-t2').textContent = t2.toFixed(1);
+}
+
+function drawArrowHead(x,y,dx,dy,color){
+  pctx.fillStyle = color;
+  pctx.beginPath();
+  pctx.moveTo(x,y);
+  pctx.lineTo(x-4+dy*4, y-4-dx*4);
+  pctx.lineTo(x+4+dy*4, y-4+dx*4);
+  pctx.closePath(); pctx.fill();
+}
+function drawAngleArc(px,py,vx1,vy1,vx2,vy2,color,label){
+  const a1 = Math.atan2(vy1,vx1);
+  pctx.strokeStyle=color; pctx.lineWidth=1;
+  pctx.beginPath(); pctx.arc(px,py,16,Math.min(a1,Math.PI), Math.max(a1,Math.PI)); pctx.stroke();
+}
+
+document.getElementById('nSlider').addEventListener('input', e=>{
+  princN = parseFloat(e.target.value);
+  document.getElementById('nVal').textContent = princN.toFixed(2);
+  drawPrinciple();
+});
+lSlider.addEventListener('input', e=>{
+  princL = parseFloat(e.target.value);
+  document.getElementById('lVal').textContent = princL.toFixed(1);
+  drawPrinciple();
+});
+document.getElementById('playBtn').addEventListener('click', e=>{
+  scanning = !scanning;
+  e.target.textContent = scanning ? '⏸ 暫停' : '▶ 自動掃描 n';
+  if(scanning) requestAnimationFrame(scanStep);
+});
+function scanStep(){
+  if(!scanning) return;
+  princN += 0.006*scanDir;
+  if(princN>1.90){princN=1.90; scanDir=-1;}
+  if(princN<1.00){princN=1.00; scanDir=1;}
+  document.getElementById('nSlider').value = princN.toFixed(2);
+  document.getElementById('nVal').textContent = princN.toFixed(2);
+  drawPrinciple();
+  requestAnimationFrame(scanStep);
+}
+drawPrinciple();
+
+/* ================================================================
+   ② 虛擬實驗室
+   ================================================================ */
+const BLOCK_T = 1.20;
+const MAX_BLOCKS = 7;
+let trueN = +(1.30 + Math.random()*0.35).toFixed(2);
+let blocks = 0;
+let labL = Q;
+let dataset = []; // {s, l}
+
+const lc = document.getElementById('labCanvas');
+const lctx = lc.getContext('2d');
+const rc = document.getElementById('regCanvas');
+const rctx = rc.getContext('2d');
+
+function trueLFocus(S){ return Q - S/trueN; }
+
+function drawLab(){
+  const W=lc.width, H=lc.height;
+  lctx.clearRect(0,0,W,H);
+  const scale = 16;
+  const xScreen = 640;
+  const S = blocks*BLOCK_T;
+  const xFront = xScreen - S*scale;
+  const xLens = xFront - labL*scale;
+  const cy = H/2;
+  const blockHalfH = 55;
+
+  // 光軸
+  lctx.strokeStyle='#33404c'; lctx.lineWidth=1;
+  lctx.beginPath(); lctx.moveTo(20,cy); lctx.lineTo(W-20,cy); lctx.stroke();
+
+  // 螢幕
+  lctx.fillStyle = '#e9e6de';
+  lctx.fillRect(xScreen-3, cy-70, 6, 140);
+  lctx.fillStyle='#93a1ad'; lctx.font='11px sans-serif'; lctx.textAlign='center';
+  lctx.fillText('屏幕（固定）', xScreen, cy-80);
+
+  // 待測物塊
+  if(blocks>0){
+    lctx.fillStyle='rgba(95,208,192,0.20)';
+    lctx.strokeStyle='rgba(95,208,192,0.55)';
+    lctx.fillRect(xFront, cy-blockHalfH, xScreen-xFront, blockHalfH*2);
+    lctx.strokeRect(xFront, cy-blockHalfH, xScreen-xFront, blockHalfH*2);
+    for(let i=1;i<blocks;i++){
+      const x = xScreen - i*BLOCK_T*scale;
+      lctx.strokeStyle='rgba(95,208,192,0.3)';
+      lctx.beginPath(); lctx.moveTo(x,cy-blockHalfH); lctx.lineTo(x,cy+blockHalfH); lctx.stroke();
+    }
+  }
+
+  // 光源（示意，不按比例）
+  const xSource = Math.max(30, xLens-70);
+  lctx.strokeStyle='#4a5560'; lctx.setLineDash([3,3]);
+  lctx.beginPath(); lctx.moveTo(xSource,cy); lctx.lineTo(xLens,cy); lctx.stroke();
+  lctx.setLineDash([]);
+  lctx.fillStyle='#ffb454';
+  lctx.beginPath(); lctx.arc(xSource,cy,4,0,7); lctx.fill();
+  lctx.fillStyle='#93a1ad'; lctx.fillText('光源＋鐵棒A (p固定)', xSource, cy+20);
+
+  // 透鏡
+  lctx.strokeStyle='#e9e6de'; lctx.lineWidth=2.4;
+  lctx.beginPath(); lctx.moveTo(xLens,cy-45); lctx.lineTo(xLens,cy+45); lctx.stroke();
+  lctx.fillStyle='#e9e6de'; lctx.fillText('凸透鏡', xLens, cy-52);
+
+  // 待測物前緣到透鏡的標註
+  lctx.strokeStyle='#ffb454'; lctx.lineWidth=1;
+  lctx.beginPath(); lctx.moveTo(xLens,cy+60); lctx.lineTo(xFront,cy+60); lctx.stroke();
+  lctx.fillStyle='#ffb454'; lctx.fillText('ℓ = '+labL.toFixed(2)+' cm', (xLens+xFront)/2, cy+72);
+
+  if(blocks>0){
+    lctx.strokeStyle='#5fd0c0';
+    lctx.beginPath(); lctx.moveTo(xFront,cy-blockHalfH-8); lctx.lineTo(xScreen,cy-blockHalfH-8); lctx.stroke();
+    lctx.fillStyle='#5fd0c0'; lctx.fillText('S = '+S.toFixed(2)+' cm', (xFront+xScreen)/2, cy-blockHalfH-14);
+  }
+
+  // 對焦品質指示（模糊圓點）
+  const dl = labL - trueLFocus(S);
+  const blur = Math.min(18, Math.abs(dl)*10);
+  lctx.filter = 'blur('+blur.toFixed(1)+'px)';
+  lctx.fillStyle = '#ff6b57';
+  lctx.beginPath(); lctx.arc(xScreen+22, cy, 5, 0, 7); lctx.fill();
+  lctx.filter = 'none';
+
+  updateFocusStatus(dl);
+}
+
+function updateFocusStatus(dl){
+  const ad = Math.abs(dl);
+  const pill = document.getElementById('focusStatus');
+  const btn = document.getElementById('recordBtn');
+  if(ad < 0.15){
+    pill.textContent='清晰！'; pill.className='status-pill status-sharp'; btn.disabled=false;
+  } else if(ad < 0.5){
+    pill.textContent='稍微模糊'; pill.className='status-pill status-mid'; btn.disabled=true;
+  } else {
+    pill.textContent='模糊'; pill.className='status-pill status-blur'; btn.disabled=true;
+  }
+}
+
+function refreshLabUI(){
+  document.getElementById('blockCount').textContent = blocks;
+  document.getElementById('totalS').textContent = (blocks*BLOCK_T).toFixed(2);
+  document.getElementById('labLVal').textContent = labL.toFixed(2);
+  drawLab();
+}
+
+document.getElementById('addBlock').addEventListener('click', ()=>{
+  if(blocks<MAX_BLOCKS){ blocks++; refreshLabUI(); }
+});
+document.getElementById('removeBlock').addEventListener('click', ()=>{
+  if(blocks>0){ blocks--; refreshLabUI(); }
+});
+document.getElementById('labLSlider').addEventListener('input', e=>{
+  labL = parseFloat(e.target.value);
+  refreshLabUI();
+});
+
+document.getElementById('recordBtn').addEventListener('click', ()=>{
+  const S = +(blocks*BLOCK_T).toFixed(2);
+  const Lrec = Math.round(labL/0.05)*0.05;
+  dataset.push({s:S, l:Lrec});
+  renderTable();
+  runRegression();
+});
+
+document.getElementById('clearData').addEventListener('click', ()=>{
+  dataset = [];
+  renderTable();
+  document.getElementById('resultBox').style.display='none';
+  drawRegChart();
+});
+
+document.getElementById('newMaterial').addEventListener('click', ()=>{
+  trueN = +(1.30 + Math.random()*0.35).toFixed(2);
+  blocks = 0; labL = Q;
+  document.getElementById('labLSlider').value = Q;
+  dataset = [];
+  renderTable();
+  document.getElementById('resultBox').style.display='none';
+  document.getElementById('revealNote').textContent='';
+  refreshLabUI();
+  drawRegChart();
+});
+
+document.getElementById('revealBtn').addEventListener('click', ()=>{
+  let msg = '真實折射率 n = '+trueN.toFixed(2)+'。';
+  if(dataset.length>=2){
+    const fit = computeFit();
+    if(fit){
+      const err = Math.abs(fit.n-trueN)/trueN*100;
+      msg += '　你的迴歸結果 n = '+fit.n.toFixed(3)+'，誤差 '+err.toFixed(1)+'%。';
+    }
+  }
+  document.getElementById('revealNote').textContent = msg;
+});
+
+function renderTable(){
+  const tbody = document.querySelector('#dataTable tbody');
+  tbody.innerHTML = '';
+  dataset.forEach((d,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+(i+1)+'</td><td>'+d.s.toFixed(2)+'</td><td>'+d.l.toFixed(2)+'</td>'
+      + '<td><button data-i="'+i+'">✕</button></td>';
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      dataset.splice(+b.dataset.i,1);
+      renderTable();
+      runRegression();
+    });
+  });
+}
+
+function computeFit(){
+  const n = dataset.length;
+  if(n<2) return null;
+  const xs = dataset.map(d=>d.s), ys = dataset.map(d=>d.l);
+  const sumX = xs.reduce((a,b)=>a+b,0);
+  const sumY = ys.reduce((a,b)=>a+b,0);
+  const sumXY = xs.reduce((a,x,i)=>a+x*ys[i],0);
+  const sumX2 = xs.reduce((a,x)=>a+x*x,0);
+  const denom = n*sumX2 - sumX*sumX;
+  if(Math.abs(denom) < 1e-9) return null;
+  const a = (n*sumXY - sumX*sumY)/denom;
+  const b = (sumX2*sumY - sumX*sumXY)/denom;
+  // R^2
+  const meanY = sumY/n;
+  let ssTot=0, ssRes=0;
+  xs.forEach((x,i)=>{
+    const yPred = a*x+b;
+    ssTot += (ys[i]-meanY)**2;
+    ssRes += (ys[i]-yPred)**2;
+  });
+  const r2 = ssTot>1e-9 ? (1 - ssRes/ssTot) : 1;
+  const nSolid = Math.abs(a) > 1e-6 ? 1/Math.abs(a) : NaN;
+  return {a,b,r2,n:nSolid};
+}
+
+function runRegression(){
+  const fit = computeFit();
+  const box = document.getElementById('resultBox');
+  if(!fit || dataset.length<3){
+    box.style.display='none';
+  } else {
+    box.style.display='block';
+    document.getElementById('regA').textContent = fit.a.toFixed(4);
+    document.getElementById('regB').textContent = fit.b.toFixed(3);
+    document.getElementById('regR2').textContent = fit.r2.toFixed(4);
+    document.getElementById('regN').textContent = isNaN(fit.n) ? '--' : fit.n.toFixed(3);
+  }
+  drawRegChart();
+}
+
+function drawRegChart(){
+  const W=rc.width, H=rc.height;
+  rctx.clearRect(0,0,W,H);
+  const padL=55, padR=25, padT=20, padB=40;
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+
+  rctx.strokeStyle='#33404c'; rctx.lineWidth=1;
+  rctx.beginPath(); rctx.moveTo(padL,padT); rctx.lineTo(padL,H-padB); rctx.lineTo(W-padR,H-padB); rctx.stroke();
+  rctx.fillStyle='#93a1ad'; rctx.font='11px sans-serif'; rctx.textAlign='center';
+  rctx.fillText('待測物厚度 S (cm)', W/2, H-8);
+  rctx.save(); rctx.translate(16,H/2); rctx.rotate(-Math.PI/2);
+  rctx.fillText('透鏡到表面距離 ℓ (cm)',0,0); rctx.restore();
+
+  if(dataset.length===0){
+    rctx.fillStyle='#4a5560'; rctx.textAlign='center';
+    rctx.fillText('尚無數據 — 到左方調整待測物厚度並對焦後記錄', W/2, H/2);
+    return;
+  }
+
+  const xs = dataset.map(d=>d.s), ys = dataset.map(d=>d.l);
+  const xMax = Math.max(8.4, ...xs)*1.15;
+  const yMin = Math.min(15, ...ys)-0.5, yMax = Math.max(24.5, ...ys)+0.5;
+
+  const X = s => padL + (s/xMax)*plotW;
+  const Y = l => H-padB - ((l-yMin)/(yMax-yMin))*plotH;
+
+  // 刻度
+  rctx.fillStyle='#617180'; rctx.font='10px monospace';
+  for(let s=0;s<=xMax;s+=2){
+    rctx.fillText(s.toFixed(0), X(s), H-padB+14);
+  }
+  for(let l=Math.ceil(yMin);l<=yMax;l+=1){
+    rctx.textAlign='right';
+    rctx.fillText(l.toFixed(0), padL-8, Y(l)+3);
+  }
+  rctx.textAlign='center';
+
+  // 迴歸線
+  const fit = computeFit();
+  if(fit){
+    rctx.strokeStyle='#ffb454'; rctx.lineWidth=1.6;
+    rctx.beginPath();
+    rctx.moveTo(X(0), Y(fit.a*0+fit.b));
+    rctx.lineTo(X(xMax), Y(fit.a*xMax+fit.b));
+    rctx.stroke();
+  }
+
+  // 資料點
+  dataset.forEach(d=>{
+    rctx.fillStyle='#5fd0c0';
+    rctx.beginPath(); rctx.arc(X(d.s), Y(d.l), 4, 0, 7); rctx.fill();
+  });
+}
+
+refreshLabUI();
+drawRegChart();
+</script>
+</body>
+</html>

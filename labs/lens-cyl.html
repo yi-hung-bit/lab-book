@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>圓形透鏡等效焦距虛擬實驗室</title>
+<style>
+:root{
+  --bg:#f4f6f9; --card:#ffffff; --ink:#1f2933; --muted:#5f6b7a; --line:#d5dbe3;
+  --accent:#1f6fb2; --accent2:#0e8a6a; --warn:#b54708; --bad:#b42318; --good:#067647;
+  --glow:#3ddc6f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;line-height:1.6;font-size:15px}
+header{background:#12324f;color:#fff;padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+header h1{font-size:19px;margin:0;font-weight:600}
+header .sub{font-size:13px;opacity:.8}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 16px 0;background:#e3e8ef;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);border-bottom:none;background:#eef1f5;padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:14px;color:var(--ink)}
+nav button.on{background:var(--card);font-weight:600;color:var(--accent)}
+main{max-width:1180px;margin:0 auto;padding:16px}
+section.tab{display:none}
+section.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 8px;color:#12324f}
+.card h3{font-size:15px;margin:12px 0 6px;color:#12324f}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.col{flex:1 1 320px;min-width:0}
+.eq{background:#f5f8fc;border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:16px;overflow-x:auto}
+.note{font-size:13px;color:var(--muted)}
+.warnbox{background:#fff6ed;border:1px solid #f9dbaf;color:#7a2e0e;border-radius:8px;padding:8px 12px;font-size:13.5px;margin:8px 0}
+.okbox{background:#ecfdf3;border:1px solid #abefc6;color:#05603a;border-radius:8px;padding:8px 12px;font-size:13.5px;margin:8px 0}
+.infobox{background:#eff8ff;border:1px solid #b2ddff;color:#194185;border-radius:8px;padding:8px 12px;font-size:13.5px;margin:8px 0}
+button.b{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:7px 13px;cursor:pointer;font-size:14px;margin:2px}
+button.b.g{background:var(--accent2)}
+button.b.o{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+button.b.r{background:var(--bad)}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+button.s{border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:13px;margin:1px}
+input[type=number],input[type=text],select{font-size:14px;padding:4px 6px;border:1px solid #b8c2cf;border-radius:6px;width:92px}
+input[type=range]{width:100%}
+label{font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#eef2f7;font-weight:600}
+td input{width:76px}
+.scroll{overflow-x:auto}
+svg{max-width:100%;height:auto;display:block}
+.pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12.5px;border:1px solid var(--line);background:#f8fafc;margin:1px 2px}
+.pill.ok{background:#ecfdf3;border-color:#abefc6;color:#05603a}
+.pill.no{background:#fef3f2;border-color:#fecdca;color:#912018}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px}
+.kv b{font-weight:600}
+canvas{max-width:100%;display:block;border-radius:6px}
+.hidden{display:none}
+.big{font-size:18px;font-weight:600}
+.legend span{display:inline-block;margin-right:12px;font-size:13px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.zoomwrap{display:flex;flex-wrap:wrap;gap:12px}
+.zoomwrap > div{flex:1 1 300px;min-width:0}
+textarea{width:100%;min-height:70px;font-size:14px;border:1px solid #b8c2cf;border-radius:6px;padding:6px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>圓形透鏡的等效焦距 ─ 虛擬實驗室</h1>
+    <div class="sub">103 學年度 新竹區 高級中學學科能力競賽 物理實驗試題（折射）</div>
+  </div>
+  <div><button class="b o" style="background:#fff" onclick="newExperiment(true)">🎲 新實驗（重新隨機真值）</button></div>
+</header>
+<nav id="nav">
+  <button data-t="t1" class="on">① 原理推導</button>
+  <button data-t="t2">② 器材準備</button>
+  <button data-t="t3">③ 成像量測</button>
+  <button data-t="t4">④ 數據迴歸</button>
+  <button data-t="t5">⑤ 與理論比較</button>
+  <button data-t="t6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ================= TAB 1 ================= -->
+<section class="tab on" id="t1">
+  <div class="card">
+    <h2>題目一：圓形透鏡的等效焦距與入射方向角 φ</h2>
+    <p>在光軸上的物點（物距 x<sub>o</sub>）發出的光，經圓柱形透鏡兩次折射後回到光軸成像（像距 x<sub>i</sub>）。圓柱透鏡的兩個主平面都在<b>圓心</b>，所以本實驗的 x<sub>o</sub>、x<sub>i</sub>、f 一律<b>由圓心量起</b>，成像公式寫成</p>
+    <div class="eq">1/x<sub>o</sub> + 1/x<sub>i</sub> = 1/f　　⇒　f = x<sub>o</sub>x<sub>i</sub> / (x<sub>o</sub> + x<sub>i</sub>)</div>
+    <p>φ 是入射點的<b>方向角</b>：入射點半徑與光軸（物方）的夾角。光線在入射點的入射角 θ<sub>i</sub>、折射角 θ<sub>r</sub> 滿足 sin θ<sub>i</sub> = n sin θ<sub>r</sub>。</p>
+  </div>
+
+  <div class="row">
+    <div class="col card" style="flex:1.4 1 460px">
+      <h3>互動光路</h3>
+      <div style="margin-bottom:6px">
+        <label><input type="radio" name="m1" value="1" checked> (1) 平行光入射 θ<sub>i</sub> = φ</label>
+        <label><input type="radio" name="m1" value="2"> (2) 對稱光路 θ<sub>r</sub> = φ</label>
+        <label><input type="radio" name="m1" value="3"> (3) 有限物距（實驗情形）</label>
+      </div>
+      <svg id="svg1" viewBox="0 0 680 380"></svg>
+      <div class="row" style="gap:10px;margin-top:6px">
+        <div class="col" style="flex:1 1 200px">方向角 φ = <b id="phi1v">30</b>°<input type="range" id="phi1" min="2" max="70" step="1" value="30"></div>
+        <div class="col" style="flex:1 1 200px" id="xo1box">物距 x<sub>o</sub> = <b id="xo1v">5.0</b> R<input type="range" id="xo1" min="2.4" max="20" step="0.1" value="5"></div>
+        <div class="col" style="flex:0 1 140px">折射率 n <input type="number" id="n1" value="1.33" step="0.01" min="1.05" max="1.8"></div>
+      </div>
+      <label><input type="checkbox" id="fan1"> 顯示整排平行光（看球面像差／焦散線）</label>
+    </div>
+    <div class="col card">
+      <h3>計算結果</h3>
+      <div id="out1" class="kv"></div>
+      <div id="warn1"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col card">
+      <h3>(1) 入射光平行光軸：θ<sub>i</sub> = φ</h3>
+      <ol style="padding-left:20px;margin:4px 0">
+        <li>Snell 定律：sin φ = n sin θ<sub>r</sub></li>
+        <li>入射點偏折 (φ − θ<sub>r</sub>)；罐內弦與兩端半徑夾角相同（等腰三角形），出射點再偏折 (φ − θ<sub>r</sub>)，總偏向角 δ = 2(φ − θ<sub>r</sub>)。</li>
+        <li>出射光與出射點法線夾角也是 φ，所以出射光到圓心的垂直距離仍是 R sin φ。出射光與光軸夾角 δ，交光軸處到圓心的距離為</li>
+      </ol>
+      <div class="eq">f = R sin φ / sin[2(φ − θ<sub>r</sub>)]，　θ<sub>r</sub> = sin⁻¹(sin φ / n)</div>
+      <p>近軸極限 φ → 0：f → nR / [2(n − 1)]，n = 1.33 時 f ≈ 2.02 R。φ 越大 f 越短 ─ 這就是<b>球面（柱面）像差</b>。</p>
+    </div>
+    <div class="col card">
+      <h3>(2) 罐內光線平行光軸：θ<sub>r</sub> = φ</h3>
+      <ol style="padding-left:20px;margin:4px 0">
+        <li>弦與入射點半徑夾 θ<sub>r</sub>，半徑與光軸夾 φ；θ<sub>r</sub> = φ 表示罐內光線平行光軸，光路左右鏡像對稱 ⇒ <b>x<sub>o</sub> = x<sub>i</sub></b>。</li>
+        <li>sin θ<sub>i</sub> = n sin φ；入射光與光軸夾角 α = θ<sub>i</sub> − φ；由正弦定律，物點到圓心距離 x<sub>o</sub> = R sin θ<sub>i</sub> / sin(θ<sub>i</sub> − φ)。</li>
+        <li>代入 1/x<sub>o</sub> + 1/x<sub>i</sub> = 1/f 且 x<sub>o</sub> = x<sub>i</sub>：</li>
+      </ol>
+      <div class="eq">f = x<sub>o</sub>/2 = nR sin φ / [2 sin(θ<sub>i</sub> − φ)]，　θ<sub>i</sub> = sin⁻¹(n sin φ)</div>
+      <p>須 n sin φ &lt; 1（n = 1.33 時 φ &lt; 48.8°）。近軸極限同樣趨近 nR/[2(n − 1)]。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>兩種條件的比較（單位 R）</h3>
+    <div class="scroll"><table id="tab1tbl"></table></div>
+    <div class="infobox"><b>實驗上的關鍵：</b>(1) 假設平行光（x<sub>o</sub> → ∞），但實驗桌上的螢光棒只在幾十公分外，同一個 φ 量到的 f 會隨 x<sub>o</sub> 改變，而且比 (1) 的預測<b>偏短</b>。把每個 φ 在不同物距量到的 f 對 R/x<sub>o</sub> 作圖，近似為直線，外插到 R/x<sub>o</sub> → 0 就得到平行光的 f<sub>∞</sub>，才能公平地和 (1) 比較（見第 ④、⑤ 頁）。</div>
+  </div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section class="tab" id="t2">
+  <div class="card">
+    <h2>器材準備</h2>
+    <p class="note">器材：螢光棒 ×3、塑膠空罐、白色紙板、黑紙、量角器、紙箱、封箱膠帶、膠帶、剪刀、30 cm 直尺、米尺、碼錶、燒杯。所有讀數請<b>自己從放大圖讀出</b>（估讀到 0.01 cm 或 0.05 cm），模擬器只記錄你輸入的數字。</p>
+    <div id="checklist"></div>
+  </div>
+
+  <div class="card">
+    <h2>步驟 A　量罐子半徑 R（R 是 x<sub>o</sub>、x<sub>i</sub>、f 的長度單位）</h2>
+    <div class="row">
+      <div class="col">
+        <h3>方法一：30 cm 直尺橫跨罐口量直徑</h3>
+        <p class="note">每次「重新放置」直尺，尺不一定剛好通過圓心。讀左右兩側外緣。</p>
+        <button class="b" onclick="placeDiaRuler()">放上直尺（重新放置）</button>
+        <div class="zoomwrap" id="diaZoom"></div>
+        <div id="diaInput" class="hidden" style="margin-top:6px">
+          左緣讀數 <input type="number" id="diaL" step="0.01"> cm　右緣讀數 <input type="number" id="diaR" step="0.01"> cm
+          <button class="b g" onclick="recordDia()">記錄</button>
+        </div>
+        <div id="diaList" style="margin-top:6px"></div>
+      </div>
+      <div class="col">
+        <h3>方法二：紙條繞罐一圈量圓周長</h3>
+        <p class="note">剪一條紙條緊繞罐身一圈，在重疊處畫記號，攤開放在米尺上讀兩記號位置。</p>
+        <button class="b" onclick="placeStrip()">繞紙條並攤在米尺上</button>
+        <div class="zoomwrap" id="circZoom"></div>
+        <div id="circInput" class="hidden" style="margin-top:6px">
+          記號 1 <input type="number" id="cA" step="0.01"> cm　記號 2 <input type="number" id="cB" step="0.01"> cm
+          <button class="b g" onclick="recordCirc()">記錄</button>
+        </div>
+        <div id="circList" style="margin-top:6px"></div>
+      </div>
+    </div>
+    <h3>選定 R</h3>
+    <div id="Rchoose"></div>
+  </div>
+
+  <div class="card">
+    <h2>步驟 B　裝水、定位罐心</h2>
+    <div class="row">
+      <div class="col">
+        <button class="b" id="btnFill" onclick="fillWater()">用燒杯把罐子裝滿水</button>
+        <span id="fillState" class="pill no">空罐</span>
+        <p class="note">罐子立在米尺旁，罐軸垂直桌面。米尺沿光軸放置，螢光棒、罐心、白紙板都在米尺這條線上。</p>
+        <button class="b" onclick="showCanEdges()">用三角板把罐子兩側切線投影到米尺</button>
+      </div>
+      <div class="col">
+        <div class="zoomwrap" id="edgeZoom"></div>
+        <div id="edgeInput" class="hidden" style="margin-top:6px">
+          左側切線 <input type="number" id="eL" step="0.01"> cm　右側切線 <input type="number" id="eR" step="0.01"> cm
+          <button class="b g" onclick="recordEdge()">記錄</button>
+        </div>
+        <div id="edgeList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>步驟 C　黑紙遮罩：上下對稱的 10° 透光窗</h2>
+    <div class="row">
+      <div class="col">
+        <p>黑紙包住罐子<b>朝向螢光棒的一側</b>，用量角器在罐頂標出方向角，於 +φ 與 −φ 各剪一個寬 10° 的窗（φ ± 5°）。光只能從這兩個窗進入罐子。</p>
+        <p class="note">量角器最小刻度 1°，對準罐心與光軸還有誤差，實際剪出的窗中心會偏離標示值一點點（真值在第 ⑥ 頁揭曉）。至少做四個角度。</p>
+        φ = <select id="cutPhi"></select>°
+        <button class="b" onclick="cutMask()">剪窗並包上罐子</button>
+        <div id="maskList" style="margin-top:8px"></div>
+      </div>
+      <div class="col"><svg id="maskSvg" viewBox="0 0 360 300"></svg></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>步驟 D　暗室：螢光棒與紙箱</h2>
+    <div class="row">
+      <div class="col">
+        <button class="b" onclick="snapStick()">折亮一支新螢光棒</button>
+        <span id="stickState" class="pill no">未點亮</span>
+        <p class="note">螢光棒直徑 0.60 cm，立在光軸上當作「線物體」，平行罐軸。亮度會隨時間慢慢衰減（約 25 分鐘降到一半左右），共三支。</p>
+      </div>
+      <div class="col">
+        <label><input type="checkbox" id="boxChk" onchange="S.box=this.checked;refreshAll()"> 用紙箱與封箱膠帶罩住整個光路（遮擋室內光）</label>
+        <p class="note">不罩紙箱時，室內光會把白紙板上的暗淡亮線洗掉。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>成像量測</h2>
+    <div id="status3"></div>
+    <div class="row" style="align-items:center">
+      <div>遮罩：<select id="maskSel3" style="width:auto" onchange="S.activeMask=+this.value;refreshAll()"></select></div>
+      <label><input type="checkbox" id="rays3" onchange="drawTop()"> 顯示光線（示意，暗箱中實際看不到）</label>
+      <label><input type="checkbox" id="prof3" onchange="drawScreen()"> 顯示亮度剖面（輔助）</label>
+    </div>
+  </div>
+  <div class="card">
+    <h3>俯視圖（米尺 0–100 cm）</h3>
+    <svg id="topSvg" viewBox="0 0 960 250"></svg>
+    <div class="row">
+      <div class="col">
+        <b>螢光棒位置</b>
+        <input type="range" id="srcR" step="0.01">
+        <button class="s" onclick="nudge('src',-1)">−1</button><button class="s" onclick="nudge('src',-0.1)">−0.1</button><button class="s" onclick="nudge('src',0.1)">+0.1</button><button class="s" onclick="nudge('src',1)">+1</button>
+      </div>
+      <div class="col">
+        <b>白紙板位置</b>
+        <input type="range" id="scrR" step="0.01">
+        <button class="s" onclick="nudge('scr',-1)">−1</button><button class="s" onclick="nudge('scr',-0.1)">−0.1</button><button class="s" onclick="nudge('scr',-0.02)">−0.02</button><button class="s" onclick="nudge('scr',0.02)">+0.02</button><button class="s" onclick="nudge('scr',0.1)">+0.1</button><button class="s" onclick="nudge('scr',1)">+1</button>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col card" style="flex:1.3 1 420px">
+      <h3>白紙板上看到的景象（面向紙板）</h3>
+      <canvas id="scrCan" width="640" height="220"></canvas>
+      <canvas id="profCan" width="640" height="110" class="hidden" style="margin-top:4px"></canvas>
+      <p class="note">鉛筆細線標出光軸位置。兩個窗各產生一條亮線；移動白紙板，找出<b>兩條亮線合而為一、最細最亮</b>的位置，那就是這個 φ 的像。</p>
+      <p class="note">φ 小（≈10°）時兩條線靠得很近、景深很長，前後移動 1–2 cm 都像「一條線」，請找邊緣最銳利處並多讀幾次；φ 大時緊貼罐後會有一條細亮線，那不是像，只是剛出罐的光束。</p>
+    </div>
+    <div class="col card">
+      <h3>讀數（從放大圖讀）</h3>
+      <div class="zoomwrap" id="posZoom"></div>
+      <div style="margin-top:8px">
+        螢光棒中心 <input type="number" id="rdS" step="0.01"> cm<br>
+        白紙板前表面 <input type="number" id="rdR" step="0.01"> cm<br>
+        <button class="b g" onclick="recordRow()" style="margin-top:6px">記錄這一筆</button>
+      </div>
+      <div id="rec3msg"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>數據表（可直接修改讀數；x<sub>o</sub> = 罐心 − 螢光棒，x<sub>i</sub> = 白紙板 − 罐心）</h3>
+    <div class="scroll"><table id="dataTbl"></table></div>
+    <p class="note">建議：每個 φ 至少量 4 個物距（例如 x<sub>o</sub> ≈ 3R、4R、6R、9R），物距太近時像會跑到米尺外或無法成實像。</p>
+  </div>
+</section>
+
+<!-- ================= TAB 4 ================= -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>數據迴歸：f 對 R/x<sub>o</sub></h2>
+    <p>對每個 φ，以 u = R/x<sub>o</sub> 為橫軸、f/R 為縱軸作最小平方直線 f = f<sub>∞</sub> + k·u。截距 f<sub>∞</sub> 就是物體在無窮遠（平行光）時的等效焦距。旁邊並列「直接平均」的結果作對照。</p>
+    <svg id="regSvg" viewBox="0 0 760 420"></svg>
+    <div class="legend" id="regLegend"></div>
+  </div>
+  <div class="card">
+    <div class="scroll"><table id="regTbl"></table></div>
+    <p class="note">σ 為迴歸標準誤差（需同一 φ 至少 3 個不同物距）。R² 越接近 1 表示直線模型越適用。</p>
+  </div>
+  <div class="card">
+    <h3>等效焦距與入射方向角 φ 的關係</h3>
+    <svg id="fphiSvg" viewBox="0 0 760 400"></svg>
+    <div class="legend"><span><i style="background:#1f6fb2"></i>f<sub>∞</sub>（迴歸外插，含誤差槓）</span><span><i style="background:#e8a33d"></i>直接平均 f̄</span></div>
+  </div>
+</section>
+
+<!-- ================= TAB 5 ================= -->
+<section class="tab" id="t5">
+  <div class="card">
+    <h2>題目三：與第一題 (1) 的理論值比較</h2>
+    理論計算用的折射率 n = <input type="number" id="n5" value="1.33" step="0.001" onchange="drawT5()">（題目提示水的 n = 1.33）
+    <svg id="cmpSvg" viewBox="0 0 760 420" style="margin-top:8px"></svg>
+    <div class="legend"><span><i style="background:#333"></i>(1) 理論 f(φ)</span><span><i style="background:#999"></i>近軸值 nR/2(n−1)</span><span><i style="background:#8e44ad"></i>(2) 對稱光路 f(φ)</span><span><i style="background:#1f6fb2"></i>實驗 f<sub>∞</sub></span><span><i style="background:#e8a33d"></i>實驗 f̄（直接平均）</span></div>
+  </div>
+  <div class="card">
+    <div class="scroll"><table id="cmpTbl"></table></div>
+    <p class="note">z = (實驗 − 理論)/σ。|z| &lt; 2 表示在統計誤差內一致；f̄ 通常系統性偏低，因為它把有限物距的結果當成平行光。</p>
+  </div>
+  <div class="card">
+    <h3>第一題 (2) 的檢驗：x<sub>o</sub> ≈ x<sub>i</sub> 的數據</h3>
+    <div id="sym5"></div>
+  </div>
+  <div class="card">
+    <h3>你的討論</h3>
+    <textarea placeholder="例：比較 f∞ 與 (1) 的差異、f̄ 為什麼偏低、φ 大時誤差為什麼變大……"></textarea>
+  </div>
+</section>
+
+<!-- ================= TAB 6 ================= -->
+<section class="tab" id="t6">
+  <div class="card">
+    <h2>誤差分析</h2>
+    <div id="errBudget"></div>
+  </div>
+  <div class="card">
+    <h2>真值揭曉</h2>
+    <p class="note">揭曉後仍可繼續量測；若要重新挑戰，按上方「新實驗」。</p>
+    <button class="b r" onclick="reveal()">揭曉隱藏真值</button>
+    <div id="revealBox" class="hidden"></div>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+/* ================= constants & helpers ================= */
+const N_W = 1.333;        // true refractive index of water (~20 °C, visible)
+const WALL = 0.025;       // can wall thickness (cm)
+const STICK_D = 0.60;     // glow stick diameter (cm)
+const CARD_HALF = 10;     // white card half-width (cm)
+const $ = id => document.getElementById(id);
+const deg = Math.PI/180;
+function gauss(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function fmt(x,d=2){return (x===null||x===undefined||!isFinite(x))?'—':x.toFixed(d);}
+function mean(a){return a.reduce((s,x)=>s+x,0)/a.length;}
+function sd(a){if(a.length<2)return NaN;const m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1));}
+const COLORS=['#1f6fb2','#d9480f','#0e8a6a','#8e44ad','#c2255c','#5c940d','#1098ad','#7048e8','#e67700','#495057'];
+
+/* ================= optics core ================= */
+function refract(dx,dy,nx,ny,eta){ // n points toward incident side
+  const ci=-(dx*nx+dy*ny); const k=1-eta*eta*(1-ci*ci); if(k<0) return null;
+  const ct=Math.sqrt(k); const a=eta*ci-ct; return [eta*dx+a*nx, eta*dy+a*ny, ci, ct];
+}
+function fresT(n1,n2,ci,ct){const rs=(n1*ci-n2*ct)/(n1*ci+n2*ct), rp=(n2*ci-n1*ct)/(n2*ci+n1*ct);return 1-(rs*rs+rp*rp)/2;}
+// ray from (sx,sy) along unit (dx,dy) through cylinder radius R centered at origin, index n
+function traceRay(sx,sy,dx,dy,R,n){
+  const b=sx*dx+sy*dy, c=sx*sx+sy*sy-R*R, disc=b*b-c;
+  if(disc<=0) return null;
+  const t=-b-Math.sqrt(disc); if(t<=1e-9) return null;
+  const px=sx+t*dx, py=sy+t*dy;
+  const r1=refract(dx,dy,px/R,py/R,1/n); if(!r1) return null;
+  const [ux,uy,ci1,ct1]=r1;
+  const t2=-2*(px*ux+py*uy); const qx=px+t2*ux, qy=py+t2*uy;
+  const r2=refract(ux,uy,-qx/R,-qy/R,n); if(!r2) return null;
+  const [vx,vy,ci2,ct2]=r2;
+  return {px,py,qx,qy,vx,vy,ci:ci1,T:fresT(1,n,ci1,ct1)*fresT(n,1,ci2,ct2)};
+}
+// theory (R = 1)
+function f1(phi,n){const tr=Math.asin(Math.sin(phi)/n);return Math.sin(phi)/Math.sin(2*(phi-tr));}
+function f2(phi,n){const s=n*Math.sin(phi); if(s>=1) return NaN; const ti=Math.asin(s); return Math.sin(ti)/Math.sin(ti-phi)/2;}
+// exact axis crossing (from centre) for axial point object at xo, ray entering at direction angle phi (radians, sign = side)
+function xiExact(xo,phi,R,n){
+  const px=-R*Math.cos(phi), py=R*Math.sin(phi);
+  let dx=px+xo, dy=py; const L=Math.hypot(dx,dy); dx/=L; dy/=L;
+  if(dx*px/R+dy*py/R>=0) return NaN;
+  const r=traceRay(-xo,0,dx,dy,R,n); if(!r) return NaN;
+  if(r.vy===0||Math.sign(r.vy)===Math.sign(r.qy)) return NaN;
+  return r.qx - r.qy*r.vx/r.vy;
+}
+function fExact(xo,phi,R,n){const xi=xiExact(xo,phi,R,n); if(!(xi>0)) return NaN; return xo*xi/(xo+xi);}
+
+/* ================= state ================= */
+let S;
+function newExperiment(ask){
+  if(ask && !confirm('重新隨機所有隱藏真值並清除所有數據？')) return;
+  S={
+    Rt: 3.00+Math.random()*1.00,         // true inner (water) radius, cm
+    ct: 55.5+Math.random()*5,            // true can-centre reading on metre stick
+    ysrc: gauss()*0.06,                  // tiny lateral offset of glow stick
+    dia:[], circ:[], Rsel:null, Rmethod:null,
+    edges:[], cm:null,
+    water:false, box:false,
+    masks:[], activeMask:-1,
+    stick:{n:0,t:0},
+    src:null, scr:null,
+    rows:[], revealed:false,
+    diaCur:null, circCur:null, edgeCur:null, rowId:1
+  };
+  S.Ro = S.Rt+WALL;
+  S.src = S.ct - 5*S.Rt; S.scr = S.ct + 5*S.Rt;
+  $('boxChk').checked=false;
+  ['diaZoom','circZoom','edgeZoom'].forEach(i=>$(i).innerHTML='');
+  ['diaInput','circInput','edgeInput'].forEach(i=>$(i).classList.add('hidden'));
+  $('revealBox').classList.add('hidden');
+  setupSliders();
+  refreshAll();
+}
+
+/* ================= tabs ================= */
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  refreshAll();
+});
+
+/* ================= SVG helpers ================= */
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!==undefined)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function arcPath(cx,cy,r,a1,a2){ // angles in radians, SVG y down, a measured CCW visually
+  const x1=cx+r*Math.cos(a1), y1=cy-r*Math.sin(a1), x2=cx+r*Math.cos(a2), y2=cy-r*Math.sin(a2);
+  const large=Math.abs(a2-a1)>Math.PI?1:0, sweep=a2>a1?0:1;
+  return `M${x1},${y1} A${r},${r} 0 ${large} ${sweep} ${x2},${y2}`;
+}
+
+/* ================= TAB 1 ================= */
+function drawT1(){
+  const svg=$('svg1'); svg.innerHTML='';
+  const mode=+document.querySelector('input[name=m1]:checked').value;
+  const phi=+$('phi1').value*deg, n=+$('n1').value||1.33, xoR=+$('xo1').value;
+  $('phi1v').textContent=$('phi1').value; $('xo1v').textContent=xoR.toFixed(1);
+  $('xo1box').style.opacity = mode===3?1:0.35;
+  const out=[], warn=[];
+  // world coordinates in units of R; choose scale
+  let xl=-3.2, xr=2.6;
+  let xo2=NaN;
+  if(mode===2){xo2=2*f2(phi,n); if(isFinite(xo2)){xl=-Math.min(xo2,6)-0.3; xr=Math.min(xo2,6)+0.3;}}
+  if(mode===3){xl=-Math.min(xoR,7)-0.3; const xi=xiExact(xoR,phi,1,n); xr=isFinite(xi)&&xi>0?Math.min(xi,7)+0.4:4;}
+  const W=680,H=380, sc=Math.min(120,(W-40)/(xr-xl),(H-60)/2.6);
+  const cx=20+(-xl)*sc, cy=H/2+10;
+  const X=x=>cx+x*sc, Y=y=>cy-y*sc;
+  el('line',{x1:0,y1:cy,x2:W,y2:cy,stroke:'#888','stroke-dasharray':'6 4'},svg);
+  el('text',{x:6,y:cy-6,'font-size':12,fill:'#666'},svg,'光軸');
+  el('circle',{cx:cx,cy:cy,r:sc,fill:'#dbeeff',stroke:'#1f6fb2','stroke-width':2},svg);
+  el('circle',{cx:cx,cy:cy,r:2.5,fill:'#1f6fb2'},svg);
+  const ray=(pts,col,w=2,dash)=>el('polyline',{points:pts.map(p=>X(p[0])+','+Y(p[1])).join(' '),fill:'none',stroke:col,'stroke-width':w,'stroke-dasharray':dash||''},svg);
+  const txt=(x,y,s,col='#222',size=14)=>el('text',{x:X(x),y:Y(y),'font-size':size,fill:col,'text-anchor':'middle','font-style':'italic'},svg,s);
+
+  if(mode===1){
+    if($('fan1').checked){
+      for(let k=1;k<=18;k++){const h=k/19; const r=traceRay(xl,h,1,0,1,n); if(!r)continue; const t=( -r.qy/r.vy); const tt=t>0?Math.min(t,8):3; ray([[xl,h],[r.px,r.py],[r.qx,r.qy],[r.qx+tt*r.vx,r.qy+tt*r.vy]],'rgba(214,72,15,.35)',1);}
+    }
+    const h=Math.sin(phi); const r=traceRay(xl,h,1,0,1,n);
+    const f=f1(phi,n);
+    ray([[xl,h],[r.px,r.py]],'#d9480f',2.5); ray([[r.px,r.py],[r.qx,r.qy]],'#d9480f',2.5);
+    ray([[r.qx,r.qy],[f,0]],'#d9480f',2.5);
+    // normals
+    ray([[r.px*1.6,r.py*1.6],[0,0]],'#555',1,'4 3'); ray([[0,0],[r.qx*1.6,r.qy*1.6]],'#555',1,'4 3');
+    // phi arc at centre
+    el('path',{d:arcPath(cx,cy,sc*0.35,Math.PI-phi,Math.PI),fill:'none',stroke:'#0e8a6a','stroke-width':1.5},svg);
+    txt(-0.5*Math.cos(phi/2),0.5*Math.sin(phi/2)*0.9+0.03,'φ','#0e8a6a');
+    txt(r.px-0.35,r.py+0.28,'θi'); txt(r.px+0.32,r.py-0.02,'θr');
+    txt(r.qx+0.25,r.qy+0.25,'θi');
+    el('line',{x1:X(0),y1:cy+22,x2:X(f),y2:cy+22,stroke:'#12324f','marker-end':''},svg);
+    txt(f/2,-0.22,'f = '+f.toFixed(3)+' R','#12324f',13);
+    const tr=Math.asin(Math.sin(phi)/n);
+    out.push(['θi = φ',(phi/deg).toFixed(1)+'°'],['θr',(tr/deg).toFixed(2)+'°'],['偏向角 δ = 2(φ−θr)',(2*(phi-tr)/deg).toFixed(2)+'°'],['f / R（公式 1）',f.toFixed(4)],['近軸值 n/2(n−1)',(n/(2*(n-1))).toFixed(4)],['與近軸值差',((f/(n/(2*(n-1)))-1)*100).toFixed(1)+' %']);
+  } else if(mode===2){
+    const s=n*Math.sin(phi);
+    if(s>=1){warn.push('n sin φ ≥ 1：θr 不可能等於 φ（φ 必須小於 '+(Math.asin(1/n)/deg).toFixed(1)+'°）。');}
+    else{
+      const ti=Math.asin(s), xo=Math.sin(ti)/Math.sin(ti-phi), f=xo/2;
+      const P=[-Math.cos(phi),Math.sin(phi)], Q=[Math.cos(phi),Math.sin(phi)];
+      const xo_draw=Math.min(xo,6.2);
+      ray([[-xo,0],P],'#8e44ad',2.5); ray([P,Q],'#8e44ad',2.5); ray([Q,[xo,0]],'#8e44ad',2.5);
+      ray([[P[0]*1.6,P[1]*1.6],[0,0]],'#555',1,'4 3'); ray([[0,0],[Q[0]*1.6,Q[1]*1.6]],'#555',1,'4 3');
+      el('path',{d:arcPath(cx,cy,sc*0.35,Math.PI-phi,Math.PI),fill:'none',stroke:'#0e8a6a','stroke-width':1.5},svg);
+      txt(-0.5*Math.cos(phi/2),0.5*Math.sin(phi/2)*0.9+0.03,'φ','#0e8a6a');
+      txt(P[0]-0.3,P[1]+0.3,'θi'); txt(P[0]+0.35,P[1]-0.12,'θr');
+      el('circle',{cx:X(-xo),cy:cy,r:4,fill:'#3ddc6f',stroke:'#222'},svg);
+      el('circle',{cx:X(xo),cy:cy,r:4,fill:'#fff',stroke:'#8e44ad','stroke-width':2},svg);
+      txt(-xo/2,-0.25,'xo = '+xo.toFixed(3)+' R','#12324f',13); txt(xo/2,-0.25,'xi = xo','#12324f',13);
+      if(xo>xo_draw) warn.push('物點太遠，圖已超出範圍。');
+      out.push(['θr = φ',(phi/deg).toFixed(1)+'°'],['θi = sin⁻¹(n sin φ)',(ti/deg).toFixed(2)+'°'],['xo = xi',xo.toFixed(4)+' R'],['f = xo/2（公式 2）',f.toFixed(4)+' R'],['同 φ 的公式 (1)',f1(phi,n).toFixed(4)+' R']);
+    }
+  } else {
+    // finite object, window phi ±5°
+    const S0=[-xoR,0];
+    for(const sgn of [1,-1]){
+      for(let k=-2;k<=2;k++){
+        const ps=(phi/deg+2.5*k)*deg; const P=[-Math.cos(ps),sgn*Math.sin(ps)];
+        let dx=P[0]-S0[0],dy=P[1]-S0[1]; const L=Math.hypot(dx,dy); dx/=L;dy/=L;
+        const r=traceRay(S0[0],S0[1],dx,dy,1,n); if(!r) continue;
+        const tt=Math.min(9,(xr+0.5-r.qx)/Math.max(r.vx,1e-3));
+        ray([S0,[r.px,r.py],[r.qx,r.qy],[r.qx+tt*r.vx,r.qy+tt*r.vy]], k===0?'#d9480f':'rgba(217,72,15,.45)', k===0?2.4:1.2);
+      }
+      // window arc
+      el('path',{d:arcPath(cx,cy,sc,Math.PI-sgn*(phi+5*deg),Math.PI-sgn*(phi-5*deg)),fill:'none',stroke:'#f5c400','stroke-width':6,opacity:.8},svg);
+    }
+    el('circle',{cx:X(-xoR),cy:cy,r:4,fill:'#3ddc6f',stroke:'#222'},svg);
+    const xi=xiExact(xoR,phi,1,n), f=xoR*xi/(xoR+xi);
+    if(xi>0){el('circle',{cx:X(xi),cy:cy,r:4,fill:'#fff',stroke:'#d9480f','stroke-width':2},svg);}
+    else warn.push('此物距下沒有實像（xo 太小）。');
+    const xa=xiExact(xoR,phi-5*deg,1,n), xb=xiExact(xoR,phi+5*deg,1,n);
+    out.push(['xo',xoR.toFixed(2)+' R'],['xi（窗中心光線）',fmt(xi,3)+' R'],['f = xo·xi/(xo+xi)',fmt(f,4)+' R'],['公式 (1)（平行光）',f1(phi,n).toFixed(4)+' R'],['f 比 (1) 短',fmt((1-f/f1(phi,n))*100,1)+' %'],['窗內 φ±5° 的 xi 範圍',fmt(xb,2)+' ~ '+fmt(xa,2)+' R']);
+  }
+  $('out1').innerHTML=out.map(r=>`<span>${r[0]}</span><b>${r[1]}</b>`).join('');
+  $('warn1').innerHTML=warn.map(w=>`<div class="warnbox">${w}</div>`).join('');
+  // table
+  const n0=n; let h='<tr><th>φ (°)</th>'; const phs=[5,10,15,20,25,30,35,40,45,50,55,60,65,70];
+  phs.forEach(p=>h+=`<th>${p}</th>`); h+='</tr><tr><th>(1) f/R 平行光</th>';
+  phs.forEach(p=>h+=`<td>${f1(p*deg,n0).toFixed(3)}</td>`); h+='</tr><tr><th>(2) f/R 對稱</th>';
+  phs.forEach(p=>h+=`<td>${fmt(f2(p*deg,n0),3)}</td>`); h+='</tr><tr><th>(2) 所需 xo/R</th>';
+  phs.forEach(p=>h+=`<td>${fmt(2*f2(p*deg,n0),2)}</td>`); h+='</tr>';
+  $('tab1tbl').innerHTML=h;
+}
+['phi1','xo1','n1','fan1'].forEach(i=>$(i).addEventListener('input',drawT1));
+document.querySelectorAll('input[name=m1]').forEach(r=>r.addEventListener('change',drawT1));
+
+/* ================= zoom ruler ================= */
+// o: {lo,hi, kind:'meter'|'ruler30', marks:[...], title}
+function zoomRuler(o){
+  const W=460,H=170, ppc=W/(o.hi-o.lo), X=r=>(r-o.lo)*ppc, top=104;
+  const svg=document.createElementNS(NS,'svg'); svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  el('rect',{x:0,y:0,width:W,height:H,fill:'#fafbfc'},svg);
+  const defs=el('defs',{},svg); const cid='c'+Math.random().toString(36).slice(2);
+  const cp=el('clipPath',{id:cid},defs); el('rect',{x:0,y:0,width:W,height:H},cp);
+  const g=el('g',{'clip-path':`url(#${cid})`},svg);
+  const ruler=()=>{
+    el('rect',{x:0,y:top,width:W,height:52,fill:o.kind==='ruler30'?'rgba(235,245,255,.82)':'rgba(246,226,170,.92)',stroke:'#8a6d1f'},g);
+    const r0=Math.ceil(o.lo*10)/10;
+    for(let r=r0;r<=o.hi+1e-9;r+=0.1){const rr=Math.round(r*10);const x=X(rr/10);const L=rr%10===0?24:(rr%5===0?16:9);
+      el('line',{x1:x,y1:top,x2:x,y2:top+L,stroke:'#222','stroke-width':rr%10===0?1.3:0.8},g);
+      if(rr%10===0) el('text',{x:x,y:top+40,'font-size':13,'text-anchor':'middle',fill:'#222'},g,String(rr/10));}
+  };
+  const marks=o.marks||[];
+  // objects drawn under the ruler first (can), then ruler, then objects above
+  marks.filter(m=>m.kind==='can').forEach(m=>{
+    const cyp=top+m.off*ppc; // centre offset below ruler edge
+    el('circle',{cx:X(m.cx),cy:cyp,r:m.R*ppc,fill:m.water?'#cfe8ff':'#eceff3',stroke:'#667',"stroke-width":Math.max(1.5,WALL*ppc)},g);
+  });
+  ruler();
+  marks.forEach(m=>{
+    if(m.kind==='canSide'){ // can beside the stick (above), with set-square tangent guide
+      // can outline seen from above; its extreme left/right point lies ~0.45 cm above the stick edge
+      const cyc=40, gg=el('g',{},g); const cpid='k'+Math.random().toString(36).slice(2);
+      const cpp=el('clipPath',{id:cpid},defs); el('rect',{x:0,y:0,width:W,height:top},cpp);
+      el('circle',{cx:X(m.cx),cy:cyc,r:m.R*ppc,fill:m.water?'#cfe8ff':'#eceff3',stroke:'#667','stroke-width':1.6,'clip-path':`url(#${cpid})`},gg);
+      el('line',{x1:X(m.tan),y1:10,x2:X(m.tan),y2:top+8,stroke:'#b42318','stroke-width':1,'stroke-dasharray':'5 3'},g);
+    } else if(m.kind==='stick'){
+      el('circle',{cx:X(m.x),cy:top-3-STICK_D/2*ppc,r:STICK_D/2*ppc,fill:'#3ddc6f',stroke:'#1b7a3a','stroke-width':1.5},g);
+    } else if(m.kind==='card'){
+      el('rect',{x:X(m.x),y:6,width:0.12*ppc,height:top-8,fill:'#fff',stroke:'#444'},g);
+    } else if(m.kind==='strip'){
+      el('rect',{x:X(m.a),y:top-30,width:(m.b-m.a)*ppc,height:28,fill:'#fff',stroke:'#aaa'},g);
+    } else if(m.kind==='pen'){
+      el('rect',{x:X(m.x)-0.02*ppc,y:top-30,width:0.04*ppc,height:32,fill:'#1d3a8a'},g);
+    }
+  });
+  if(o.title) el('text',{x:6,y:16,'font-size':13,fill:'#444'},svg,o.title);
+  return svg;
+}
+function zoomLo(x,span=3.2){return x-span*(0.3+0.4*Math.random());}
+
+/* ================= TAB 2 ================= */
+function placeDiaRuler(){
+  const off=Math.abs(gauss()*0.12); // ruler edge misses the centre by off (cm)
+  const half=Math.sqrt(S.Ro*S.Ro-off*off);
+  const L0=1.5+Math.random()*3, cx=L0+half;
+  S.diaCur={L:L0, R:cx+half, cx, off};
+  const box=$('diaZoom'); box.innerHTML='';
+  const a=document.createElement('div'), b=document.createElement('div');
+  let lo=zoomLo(L0); a.appendChild(zoomRuler({lo,hi:lo+3.2,kind:'ruler30',marks:[{kind:'can',cx,R:S.Ro,off,water:S.water}],title:'左緣（30 cm 直尺）'}));
+  lo=zoomLo(cx+half); b.appendChild(zoomRuler({lo,hi:lo+3.2,kind:'ruler30',marks:[{kind:'can',cx,R:S.Ro,off,water:S.water}],title:'右緣'}));
+  box.append(a,b); $('diaInput').classList.remove('hidden'); $('diaL').value='';$('diaR').value='';
+}
+function recordDia(){
+  const L=parseFloat($('diaL').value), R=parseFloat($('diaR').value);
+  if(!isFinite(L)||!isFinite(R)||R<=L){alert('請輸入兩側讀數（右 > 左）');return;}
+  S.dia.push({L,R,D:R-L,tru:S.diaCur}); $('diaInput').classList.add('hidden'); $('diaZoom').innerHTML='';
+  refreshAll();
+}
+function placeStrip(){
+  const tilt=Math.abs(gauss()*1.5)*deg;
+  const C=2*Math.PI*(S.Ro+0.005)/Math.cos(tilt);
+  const a=3+Math.random()*12, pa=a+gauss()*0.015, pb=a+C+gauss()*0.02;
+  S.circCur={a:pa,b:pb,C:pb-pa,tilt};
+  const box=$('circZoom'); box.innerHTML='';
+  const d1=document.createElement('div'), d2=document.createElement('div');
+  let lo=zoomLo(pa); d1.appendChild(zoomRuler({lo,hi:lo+3.2,kind:'meter',marks:[{kind:'strip',a:a-2,b:a+C+2},{kind:'pen',x:pa}],title:'記號 1（米尺）'}));
+  lo=zoomLo(pb); d2.appendChild(zoomRuler({lo,hi:lo+3.2,kind:'meter',marks:[{kind:'strip',a:a-2,b:a+C+2},{kind:'pen',x:pb}],title:'記號 2'}));
+  box.append(d1,d2); $('circInput').classList.remove('hidden'); $('cA').value='';$('cB').value='';
+}
+function recordCirc(){
+  const A=parseFloat($('cA').value), B=parseFloat($('cB').value);
+  if(!isFinite(A)||!isFinite(B)||B<=A){alert('請輸入兩記號讀數（記號 2 > 記號 1）');return;}
+  S.circ.push({A,B,C:B-A,tru:S.circCur}); $('circInput').classList.add('hidden'); $('circZoom').innerHTML='';
+  refreshAll();
+}
+function Rstats(){
+  const out={};
+  if(S.dia.length){const v=S.dia.map(d=>d.D/2); out.dia={m:mean(v),s:sd(v),n:v.length};}
+  if(S.circ.length){const v=S.circ.map(d=>d.C/(2*Math.PI)); out.circ={m:mean(v),s:sd(v),n:v.length};}
+  return out;
+}
+function chooseR(method){
+  const st=Rstats(); if(!st[method]) return;
+  S.Rmethod=method; S.Rsel=st[method].m;
+  S.Rsig = isFinite(st[method].s)? st[method].s/Math.sqrt(st[method].n) : (method==='dia'?0.035:0.005);
+  refreshAll();
+}
+function renderT2(){
+  // lists
+  $('diaList').innerHTML = S.dia.length? '<table><tr><th>#</th><th>左</th><th>右</th><th>D (cm)</th><th>R = D/2</th></tr>'+S.dia.map((d,i)=>`<tr><td>${i+1}</td><td>${d.L.toFixed(2)}</td><td>${d.R.toFixed(2)}</td><td>${d.D.toFixed(2)}</td><td>${(d.D/2).toFixed(3)}</td></tr>`).join('')+'</table>':'';
+  $('circList').innerHTML = S.circ.length? '<table><tr><th>#</th><th>記號1</th><th>記號2</th><th>C (cm)</th><th>R = C/2π</th></tr>'+S.circ.map((d,i)=>`<tr><td>${i+1}</td><td>${d.A.toFixed(2)}</td><td>${d.B.toFixed(2)}</td><td>${d.C.toFixed(2)}</td><td>${(d.C/2/Math.PI).toFixed(3)}</td></tr>`).join('')+'</table>':'';
+  const st=Rstats(); let h='';
+  for(const [k,name] of [['dia','直徑法'],['circ','圓周法']]){
+    if(!st[k]) continue; const s=st[k]; const sm=isFinite(s.s)?s.s/Math.sqrt(s.n):NaN;
+    h+=`<div style="margin:4px 0"><label><input type="radio" name="rsel" ${S.Rmethod===k?'checked':''} onchange="chooseR('${k}')"> ${name}：R = ${s.m.toFixed(3)} cm　(n = ${s.n}，標準差 ${fmt(s.s,3)}，平均值標準誤 ${fmt(sm,3)} cm)</label></div>`;
+  }
+  if(!h) h='<p class="note">先用任一方法量幾次（建議各 3 次以上），再選定一個 R。</p>';
+  if(S.Rsel) h+=`<div class="okbox">目前使用 R = <b>${S.Rsel.toFixed(3)} ± ${S.Rsig.toFixed(3)} cm</b>（${S.Rmethod==='dia'?'直徑法':'圓周法'}）</div>`;
+  if(S.Rsel && st.dia && st.circ && Math.abs(st.dia.m-st.circ.m)>0.02) h+='<div class="note">兩種方法差了 '+(Math.abs(st.dia.m-st.circ.m)*10).toFixed(2)+' mm ─ 想一想：直尺沒通過圓心會讓直徑偏大還是偏小？紙條繞歪了呢？</div>';
+  $('Rchoose').innerHTML=h;
+  // fill
+  $('fillState').className='pill '+(S.water?'ok':'no'); $('fillState').textContent=S.water?'已裝滿水':'空罐';
+  $('btnFill').disabled=S.water;
+  $('edgeList').innerHTML = S.edges.length? '<table><tr><th>#</th><th>左切線</th><th>右切線</th><th>罐心</th></tr>'+S.edges.map((e,i)=>`<tr><td>${i+1}</td><td>${e.L.toFixed(2)}</td><td>${e.R.toFixed(2)}</td><td>${((e.L+e.R)/2).toFixed(3)}</td></tr>`).join('')+`</table><div class="okbox">罐心位置（平均）c = <b>${S.cm.toFixed(3)} cm</b></div>`:'';
+  // mask
+  const sel=$('cutPhi'); if(!sel.options.length){for(let p=10;p<=70;p+=5){const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);} sel.value=20;}
+  $('maskList').innerHTML = S.masks.length? '已剪好的遮罩：'+S.masks.map((m,i)=>`<span class="pill ${i===S.activeMask?'ok':''}" style="cursor:pointer" onclick="S.activeMask=${i};refreshAll()">φ = ${m.phi}°${i===S.activeMask?'（使用中）':''}</span>`).join(''):'<span class="note">尚未剪任何遮罩。</span>';
+  drawMaskSvg();
+  // stick
+  const b=stickBrightness();
+  $('stickState').className='pill '+(S.stick.n?'ok':'no');
+  $('stickState').textContent=S.stick.n?`第 ${S.stick.n} 支，亮度 ${(b*100).toFixed(0)}%`:'未點亮';
+  $('boxChk').checked=S.box;
+  // checklist
+  const it=[['R',!!S.Rsel,'選定罐半徑 R'],['w',S.water,'罐子裝水'],['c',S.cm!==null,'罐心在米尺上的位置'],['m',S.masks.length>0,'黑紙遮罩'],['s',S.stick.n>0,'點亮螢光棒'],['b',S.box,'罩上紙箱']];
+  $('checklist').innerHTML=it.map(x=>`<span class="pill ${x[1]?'ok':'no'}">${x[1]?'✔':'✘'} ${x[2]}</span>`).join('');
+}
+function fillWater(){S.water=true; refreshAll();}
+function showCanEdges(){
+  const eL=S.ct-S.Ro+gauss()*0.03, eR=S.ct+S.Ro+gauss()*0.03;
+  S.edgeCur={L:eL,R:eR};
+  const box=$('edgeZoom'); box.innerHTML='';
+  const d1=document.createElement('div'), d2=document.createElement('div');
+  let lo=zoomLo(eL); d1.appendChild(zoomRuler({lo,hi:lo+3.2,kind:'meter',marks:[{kind:'canSide',cx:S.ct,R:S.Ro,tan:eL,water:S.water}],title:'左側切線（紅虛線為三角板邊）'}));
+  lo=zoomLo(eR); d2.appendChild(zoomRuler({lo,hi:lo+3.2,kind:'meter',marks:[{kind:'canSide',cx:S.ct,R:S.Ro,tan:eR,water:S.water}],title:'右側切線'}));
+  box.append(d1,d2); $('edgeInput').classList.remove('hidden'); $('eL').value='';$('eR').value='';
+}
+function recordEdge(){
+  const L=parseFloat($('eL').value), R=parseFloat($('eR').value);
+  if(!isFinite(L)||!isFinite(R)||R<=L){alert('請輸入兩側讀數');return;}
+  S.edges.push({L,R,tru:S.edgeCur}); S.cm=mean(S.edges.map(e=>(e.L+e.R)/2));
+  $('edgeInput').classList.add('hidden'); $('edgeZoom').innerHTML=''; refreshAll();
+}
+function cutMask(){
+  const phi=+$('cutPhi').value;
+  const m={phi, top:phi+gauss()*0.6, bot:phi+gauss()*0.6, wt:10+gauss()*0.4, wb:10+gauss()*0.4};
+  S.masks.push(m); S.activeMask=S.masks.length-1; refreshAll();
+}
+function drawMaskSvg(){
+  const svg=$('maskSvg'); svg.innerHTML='';
+  const cx=200, cy=150, r=100;
+  el('line',{x1:0,y1:cy,x2:360,y2:cy,stroke:'#999','stroke-dasharray':'5 4'},svg);
+  el('text',{x:4,y:cy+18,'font-size':12,fill:'#666'},svg,'← 螢光棒方向');
+  el('circle',{cx,cy,r,fill:S.water?'#cfe8ff':'#eceff3',stroke:'#667'},svg);
+  // protractor ticks
+  for(let a=0;a<=90;a+=10){for(const s of [1,-1]){const t=Math.PI-s*a*deg; el('line',{x1:cx+(r+4)*Math.cos(t),y1:cy-(r+4)*Math.sin(t),x2:cx+(r+12)*Math.cos(t),y2:cy-(r+12)*Math.sin(t),stroke:'#999'},svg); if(s===1) el('text',{x:cx+(r+24)*Math.cos(t),y:cy-(r+24)*Math.sin(t)+4,'font-size':10,'text-anchor':'middle',fill:'#777'},svg,a);}}
+  const m=S.masks[S.activeMask];
+  if(!m){el('text',{x:cx,y:cy+4,'font-size':13,'text-anchor':'middle',fill:'#777'},svg,'尚無遮罩');return;}
+  // black paper covers front half (90°..270° i.e. object side) except windows
+  const segs=[]; // in "direction angle" psi from -x axis, signed: + top
+  const wins=[[m.top-m.wt/2,m.top+m.wt/2],[-(m.bot+m.wb/2),-(m.bot-m.wb/2)]].sort((a,b)=>a[0]-b[0]);
+  let cur=-95; for(const w of wins){segs.push([cur,w[0]]);cur=w[1];} segs.push([cur,95]);
+  segs.forEach(sg=>{ if(sg[1]<=sg[0])return; el('path',{d:arcPath(cx,cy,r+1,Math.PI-sg[0]*deg,Math.PI-sg[1]*deg),fill:'none',stroke:'#111','stroke-width':7},svg);});
+  wins.forEach(w=>el('path',{d:arcPath(cx,cy,r+1,Math.PI-w[0]*deg,Math.PI-w[1]*deg),fill:'none',stroke:'#f5c400','stroke-width':3},svg));
+  for(const s of [1,-1]){const t=Math.PI-s*m.phi*deg; el('line',{x1:cx,y1:cy,x2:cx+r*Math.cos(t),y2:cy-r*Math.sin(t),stroke:'#0e8a6a','stroke-dasharray':'3 3'},svg);}
+  el('text',{x:cx,y:cy+r+40,'font-size':13,'text-anchor':'middle',fill:'#222'},svg,`標示 φ = ±${m.phi}°，窗寬 10°（黃色）`);
+}
+function snapStick(){
+  if(S.stick.n>=3){alert('三支螢光棒都用完了！');return;}
+  S.stick.n++; S.stick.t=Date.now(); refreshAll();
+}
+function stickBrightness(){ if(!S.stick.n) return 0; const t=(Date.now()-S.stick.t)/1000; return 0.3+0.7*Math.exp(-t/2400); }
+
+/* ================= TAB 3: optics on the bench ================= */
+function curMask(){return S.masks[S.activeMask]||null;}
+function limits(){return {sMin:1, sMax:S.ct-S.Ro-STICK_D/2-0.05, rMin:S.ct+S.Ro+0.15, rMax:99.8};}
+function setupSliders(){
+  const L=limits();
+  const a=$('srcR'), b=$('scrR');
+  a.min=L.sMin; a.max=L.sMax; b.min=L.rMin; b.max=L.rMax;
+  S.src=Math.min(Math.max(S.src,L.sMin),L.sMax); S.scr=Math.min(Math.max(S.scr,L.rMin),L.rMax);
+  a.value=S.src; b.value=S.scr;
+}
+$('srcR').addEventListener('input',e=>{S.src=+e.target.value; bench();});
+$('scrR').addEventListener('input',e=>{S.scr=+e.target.value; bench();});
+function nudge(w,d){const L=limits(); if(w==='src'){S.src=Math.min(Math.max(S.src+d,L.sMin),L.sMax);$('srcR').value=S.src;} else {S.scr=Math.min(Math.max(S.scr+d,L.rMin),L.rMax);$('scrR').value=S.scr;} bench();}
+
+// screen irradiance profile, y in [-CARD_HALF, CARD_HALF]
+const NB=640;
+function screenProfile(){
+  const xo=S.ct-S.src, X=S.scr-S.ct, R=S.Rt, n=S.water?N_W:1.0, m=curMask();
+  const I=new Float64Array(NB); const dy=2*CARD_HALF/NB;
+  const NP=31; const pts=[]; let wsum=0;
+  for(let k=0;k<NP;k++){const u=-1+(2*k+1)/NP; const w=Math.sqrt(1-u*u); pts.push([u*STICK_D/2+S.ysrc,w]); wsum+=w;}
+  pts.forEach(p=>p[1]/=wsum);
+  const deposit=(y,w)=>{const f=(y+CARD_HALF)/dy-0.5; const i=Math.floor(f); const t=f-i; if(i>=0&&i<NB)I[i]+=w*(1-t)/dy; if(i+1>=0&&i+1<NB)I[i+1]+=w*t/dy;};
+  // light through windows
+  const wins = m? [[1,m.top,m.wt],[-1,m.bot,m.wb]] : [];
+  const M=220;
+  for(const [sg,pc,w] of wins){
+    const dpsi=w/M*deg;
+    for(let j=0;j<M;j++){
+      const psi=(pc-w/2+(j+0.5)*w/M)*deg;
+      const px=-R*Math.cos(psi), py=sg*R*Math.sin(psi);
+      for(const [yo,wt] of pts){
+        let dx=px+xo, dyy=py-yo; const L=Math.hypot(dx,dyy); dx/=L; dyy/=L;
+        const cosi=-(dx*px+dyy*py)/R; if(cosi<=0) continue;
+        const r=traceRay(-xo,yo,dx,dyy,R,n); if(!r) continue;
+        if(r.vx<=1e-6) continue;
+        const y=r.qy+(X-r.qx)*r.vy/r.vx;
+        deposit(y, wt*r.T*R*dpsi*cosi/L);
+      }
+    }
+  }
+  // direct light passing beside the can (black paper blocks everything that touches the can's front)
+  const Rb=S.Ro+0.02;
+  for(let i=0;i<NB;i++){
+    const y=-CARD_HALF+(i+0.5)*dy; let s=0;
+    for(const [yo,wt] of pts){
+      const ddx=X+xo, ddy=y-yo, L=Math.hypot(ddx,ddy);
+      const dist=Math.abs(xo*ddy - (-yo)*ddx)/L; // distance of line from origin: |(S)x(d)|
+      const cr=Math.abs((-xo)*ddy - yo*ddx)/L;
+      if(cr<Rb) continue;
+      s+=wt*(ddx/L)/L;
+    }
+    I[i]+=s;
+  }
+  // blur (screen diffusion + eye), sigma 0.035 cm
+  const sig=0.035/dy, K=Math.ceil(3*sig), ker=[]; let ks=0;
+  for(let k=-K;k<=K;k++){const v=Math.exp(-k*k/(2*sig*sig)); ker.push(v); ks+=v;}
+  const B=new Float64Array(NB);
+  for(let i=0;i<NB;i++){let s=0; for(let k=-K;k<=K;k++){const j=i+k; if(j>=0&&j<NB) s+=I[j]*ker[k+K];} B[i]=s/ks;}
+  const Iref=1/(xo+X);
+  return {B,Iref};
+}
+function drawScreen(){
+  const cv=$('scrCan'), ctx=cv.getContext('2d'); const W=cv.width,H=cv.height;
+  const bright=stickBrightness();
+  if(!S.stick.n){ctx.fillStyle=S.box?'#15161a':'#d9d6cc';ctx.fillRect(0,0,W,H);ctx.fillStyle=S.box?'#888':'#555';ctx.font='16px sans-serif';ctx.fillText('螢光棒還沒點亮',W/2-60,H/2);$('profCan').classList.add('hidden');return;}
+  const {B,Iref}=screenProfile();
+  const amb=S.box?0.03:6.0;
+  const img=ctx.createImageData(W,H);
+  // dark box: dim card lit by green glow; open room: bright grey card, glow washed out
+  const base=S.box?[20,21,24]:[196,194,186], span=S.box?[150,234,160]:[40,60,40];
+  for(let x=0;x<W;x++){
+    const i=Math.floor(x/W*NB); const I=B[i]*bright/Iref + amb;
+    const v=1-Math.exp(-I/3.0);
+    for(let y=0;y<H;y++){
+      const vf=v*(0.82+0.18*Math.sin(Math.PI*(y+0.5)/H)); const k=(y*W+x)*4;
+      const vv=S.box?vf:vf*0.15;
+      img.data[k]=Math.min(255,base[0]+vv*span[0]);
+      img.data[k+1]=Math.min(255,base[1]+vv*span[1]);
+      img.data[k+2]=Math.min(255,base[2]+vv*span[2]);
+      img.data[k+3]=255;
+    }
+  }
+  ctx.putImageData(img,0,0);
+  // pencil axis line & scale
+  ctx.strokeStyle=S.box?'rgba(160,160,160,.55)':'rgba(60,60,60,.6)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(W/2+0.5,0); ctx.lineTo(W/2+0.5,12); ctx.moveTo(W/2+0.5,H-12); ctx.lineTo(W/2+0.5,H); ctx.stroke();
+  if(!S.box){ctx.fillStyle='#7a2e0e';ctx.font='14px sans-serif';ctx.fillText('室內光太亮，亮線幾乎看不見 ─ 請罩上紙箱',W/2-150,24);}
+  const pc=$('profCan');
+  if($('prof3').checked){
+    pc.classList.remove('hidden'); const c2=pc.getContext('2d'); c2.fillStyle='#fff'; c2.fillRect(0,0,pc.width,pc.height);
+    let mx=0; for(const v of B) mx=Math.max(mx,v/Iref);
+    c2.strokeStyle='#1b7a3a'; c2.beginPath();
+    for(let x=0;x<pc.width;x++){const v=B[Math.floor(x/pc.width*NB)]/Iref; const y=pc.height-4-(pc.height-14)*v/mx; x?c2.lineTo(x,y):c2.moveTo(x,y);} c2.stroke();
+    c2.strokeStyle='#bbb'; c2.beginPath(); c2.moveTo(pc.width/2,0); c2.lineTo(pc.width/2,pc.height); c2.stroke();
+    c2.fillStyle='#555'; c2.font='11px sans-serif'; c2.fillText('亮度剖面（橫軸 ±10 cm，縱軸自動縮放）',6,12);
+  } else pc.classList.add('hidden');
+}
+function drawTop(){
+  const svg=$('topSvg'); svg.innerHTML='';
+  const W=960,H=250, ppc=9.2, X=r=>20+r*ppc, cy=125, Y=y=>cy-y*ppc;
+  el('rect',{x:0,y:0,width:W,height:H,fill:S.box?'#2a2b30':'#f7f5ef'},svg);
+  // metre stick
+  el('rect',{x:X(0),y:cy+14*0+100,width:100*ppc,height:18,fill:'#f2dc9b',stroke:'#8a6d1f'},svg);
+  for(let c=0;c<=100;c++){const x=X(c); const L=c%10===0?12:(c%5===0?8:4); el('line',{x1:x,y1:225,x2:x,y2:225+L,stroke:'#333','stroke-width':0.8},svg);}
+  for(let c=0;c<=100;c+=10) el('text',{x:X(c),y:221,'font-size':10,'text-anchor':'middle',fill:S.box?'#ddd':'#333'},svg,c);
+  el('line',{x1:X(0),y1:cy,x2:X(100),y2:cy,stroke:S.box?'#555':'#bbb','stroke-dasharray':'4 4'},svg);
+  // can
+  el('circle',{cx:X(S.ct),cy:cy,r:S.Ro*ppc,fill:S.water?'#cfe8ff':'#eceff3',stroke:'#667','stroke-width':1.5},svg);
+  const m=curMask();
+  if(m){
+    const R=S.Ro*ppc+1.5, cx=X(S.ct);
+    const wins=[[m.top-m.wt/2,m.top+m.wt/2],[-(m.bot+m.wb/2),-(m.bot-m.wb/2)]].sort((a,b)=>a[0]-b[0]);
+    let cur=-95; const segs=[]; for(const w of wins){segs.push([cur,w[0]]);cur=w[1];} segs.push([cur,95]);
+    segs.forEach(sg=>el('path',{d:arcPath(cx,cy,R,Math.PI-sg[0]*deg,Math.PI-sg[1]*deg),fill:'none',stroke:'#000','stroke-width':3},svg));
+  }
+  // rays
+  if($('rays3').checked && S.stick.n && m){
+    const xo=S.ct-S.src, Xs=S.scr-S.ct, n=S.water?N_W:1;
+    for(const [sg,pc,w] of [[1,m.top,m.wt],[-1,m.bot,m.wb]]){
+      for(let k=0;k<5;k++){const psi=(pc-w/2+(k+0.5)*w/5)*deg; const px=-S.Rt*Math.cos(psi), py=sg*S.Rt*Math.sin(psi);
+        let dx=px+xo, dy=py; const L=Math.hypot(dx,dy); dx/=L; dy/=L; const r=traceRay(-xo,0,dx,dy,S.Rt,n); if(!r||r.vx<=0) continue;
+        const t=(Xs-r.qx)/r.vx; const pts=[[-xo,0],[r.px,r.py],[r.qx,r.qy],[Xs,r.qy+t*r.vy]];
+        el('polyline',{points:pts.map(p=>X(S.ct+p[0])+','+Y(p[1])).join(' '),fill:'none',stroke:'rgba(90,240,130,.7)','stroke-width':1},svg);}
+    }
+  }
+  // stick
+  el('circle',{cx:X(S.src),cy:Y(S.ysrc),r:STICK_D/2*ppc+1,fill:S.stick.n?'#3ddc6f':'#9aa',stroke:'#1b7a3a'},svg);
+  el('text',{x:X(S.src),y:cy-14,'font-size':11,'text-anchor':'middle',fill:S.box?'#cfc':'#1b7a3a'},svg,'螢光棒');
+  // card
+  el('rect',{x:X(S.scr),y:Y(CARD_HALF),width:3,height:2*CARD_HALF*ppc,fill:'#fff',stroke:'#444'},svg);
+  el('text',{x:X(S.scr)+6,y:Y(CARD_HALF)+10,'font-size':11,fill:S.box?'#ddd':'#333'},svg,'白紙板');
+  if(S.box) el('text',{x:10,y:16,'font-size':12,fill:'#bbb'},svg,'紙箱已罩上（俯視圖為示意）');
+}
+function drawPosZoom(){
+  const box=$('posZoom'); box.innerHTML='';
+  const d1=document.createElement('div'), d2=document.createElement('div');
+  const lo1=Math.floor((S.src-1.6)*5)/5, lo2=Math.floor((S.scr-1.6)*5)/5;
+  d1.appendChild(zoomRuler({lo:lo1,hi:lo1+3.2,kind:'meter',marks:[{kind:'stick',x:S.src}],title:'螢光棒（讀中心）'}));
+  d2.appendChild(zoomRuler({lo:lo2,hi:lo2+3.2,kind:'meter',marks:[{kind:'card',x:S.scr}],title:'白紙板（讀前表面＝左緣）'}));
+  box.append(d1,d2);
+}
+function status3(){
+  const it=[[!!S.Rsel,'R 已選定'],[S.cm!==null,'罐心已定位'],[S.water,'已裝水'],[!!curMask(),'遮罩'],[S.stick.n>0,'螢光棒'],[S.box,'紙箱']];
+  $('status3').innerHTML=it.map(x=>`<span class="pill ${x[0]?'ok':'no'}">${x[0]?'✔':'✘'} ${x[1]}</span>`).join('')+(it.every(x=>x[0])?'':' <span class="note">（未完成的項目請到第 ② 頁）</span>');
+  const sel=$('maskSel3'); sel.innerHTML=S.masks.length?S.masks.map((m,i)=>`<option value="${i}">φ = ${m.phi}°</option>`).join(''):'<option value="-1">（尚無遮罩）</option>';
+  if(S.activeMask>=0) sel.value=S.activeMask;
+}
+let benchTimer=null;
+function bench(){ drawTop(); drawPosZoom(); if(benchTimer) cancelAnimationFrame(benchTimer); benchTimer=requestAnimationFrame(drawScreen); }
+function recordRow(){
+  const msg=$('rec3msg');
+  if(!S.Rsel||S.cm===null){msg.innerHTML='<div class="warnbox">請先在第 ② 頁量好 R 與罐心位置。</div>';return;}
+  const m=curMask(); if(!m){msg.innerHTML='<div class="warnbox">請先剪一個遮罩。</div>';return;}
+  if(!S.water||!S.stick.n){msg.innerHTML='<div class="warnbox">罐子要裝水、螢光棒要點亮。</div>';return;}
+  const s=parseFloat($('rdS').value), r=parseFloat($('rdR').value);
+  if(!isFinite(s)||!isFinite(r)){msg.innerHTML='<div class="warnbox">請輸入兩個讀數。</div>';return;}
+  if(Math.abs(s-S.src)>1.5||Math.abs(r-S.scr)>1.5){if(!confirm('讀數與放大圖上的位置差很多，確定要記錄嗎？'))return;}
+  S.rows.push({id:S.rowId++, mask:S.activeMask, phi:m.phi, s, r, sT:S.src, rT:S.scr});
+  msg.innerHTML='<div class="okbox">已記錄第 '+S.rows.length+' 筆。</div>';
+  $('rdS').value=''; $('rdR').value='';
+  renderTable();
+}
+function rowCalc(row){
+  const xo=S.cm-row.s, xi=row.r-S.cm, R=S.Rsel;
+  const f=xo*xi/(xo+xi);
+  return {xo,xi,xoR:xo/R,xiR:xi/R,fR:f/R,u:R/xo};
+}
+function renderTable(){
+  let h='<tr><th>#</th><th>φ (°)</th><th>螢光棒讀數 (cm)</th><th>白紙板讀數 (cm)</th><th>x<sub>o</sub> (cm)</th><th>x<sub>i</sub> (cm)</th><th>x<sub>o</sub>/R</th><th>x<sub>i</sub>/R</th><th>f/R</th><th>R/x<sub>o</sub></th><th></th></tr>';
+  S.rows.forEach((row,i)=>{const c=S.Rsel&&S.cm!==null?rowCalc(row):null;
+    h+=`<tr><td>${i+1}</td><td>${row.phi}</td><td><input type="number" step="0.01" value="${row.s}" onchange="editRow(${row.id},'s',this.value)"></td><td><input type="number" step="0.01" value="${row.r}" onchange="editRow(${row.id},'r',this.value)"></td>`+
+    (c?`<td>${c.xo.toFixed(2)}</td><td>${c.xi.toFixed(2)}</td><td>${c.xoR.toFixed(3)}</td><td>${c.xiR.toFixed(3)}</td><td><b>${c.fR.toFixed(3)}</b></td><td>${c.u.toFixed(4)}</td>`:'<td colspan="6">—</td>')+
+    `<td><button class="s" onclick="delRow(${row.id})">刪除</button></td></tr>`;});
+  if(!S.rows.length) h+='<tr><td colspan="11" class="note">尚無數據</td></tr>';
+  $('dataTbl').innerHTML=h;
+}
+function editRow(id,k,v){const r=S.rows.find(x=>x.id===id); const x=parseFloat(v); if(r&&isFinite(x)){r[k]=x;} renderTable();}
+function delRow(id){S.rows=S.rows.filter(x=>x.id!==id); renderTable();}
+
+/* ================= regression ================= */
+function linreg(xs,ys){
+  const n=xs.length; if(n<2) return null;
+  const mx=mean(xs), my=mean(ys); let sxx=0,sxy=0,syy=0;
+  for(let i=0;i<n;i++){sxx+=(xs[i]-mx)**2; sxy+=(xs[i]-mx)*(ys[i]-my); syy+=(ys[i]-my)**2;}
+  if(sxx<1e-12) return null;
+  const b=sxy/sxx, a=my-b*mx; let sse=0; for(let i=0;i<n;i++) sse+=(ys[i]-a-b*xs[i])**2;
+  const s=n>2?Math.sqrt(sse/(n-2)):NaN;
+  return {a,b,sa:s*Math.sqrt(1/n+mx*mx/sxx), sb:s/Math.sqrt(sxx), r2:syy>0?1-sse/syy:1, n, s};
+}
+function groups(){
+  const g={}; if(!S.Rsel||S.cm===null) return [];
+  S.rows.forEach(r=>{const c=rowCalc(r); if(!(c.xi>0&&c.xo>0)) return; (g[r.mask]=g[r.mask]||{mask:r.mask,phi:r.phi,pts:[],rows:[]}).pts.push([c.u,c.fR]); g[r.mask].rows.push(r);});
+  const arr=Object.values(g).sort((a,b)=>a.phi-b.phi||a.mask-b.mask);
+  arr.forEach(G=>{G.reg=linreg(G.pts.map(p=>p[0]),G.pts.map(p=>p[1])); const fs=G.pts.map(p=>p[1]); G.avg=mean(fs); G.avgS=fs.length>1?sd(fs)/Math.sqrt(fs.length):NaN;
+    // total uncertainty of f_inf including R scale uncertainty
+    if(G.reg && isFinite(G.reg.sa)) G.finfS=Math.hypot(G.reg.sa, G.reg.a*S.Rsig/S.Rsel); else G.finfS=NaN;});
+  // label duplicates
+  const cnt={}; arr.forEach(G=>{cnt[G.phi]=(cnt[G.phi]||0)+1;}); const seen={};
+  arr.forEach(G=>{seen[G.phi]=(seen[G.phi]||0)+1; G.label=cnt[G.phi]>1?`${G.phi}°（遮罩${seen[G.phi]}）`:`${G.phi}°`;});
+  return arr;
+}
+
+/* ================= generic plot ================= */
+function niceTicks(lo,hi,n=6){const span=hi-lo; const step0=span/n; const mag=Math.pow(10,Math.floor(Math.log10(step0))); const st=[1,2,2.5,5,10].map(k=>k*mag).find(s=>s>=step0); const t=[]; for(let v=Math.ceil(lo/st)*st; v<=hi+1e-9; v+=st) t.push(+v.toFixed(10)); return {t,st};}
+function plot(svg,o){
+  svg.innerHTML=''; const vb=svg.viewBox.baseVal; const W=vb.width,H=vb.height;
+  const L=64,Rm=18,T=18,B=52; const pw=W-L-Rm, ph=H-T-B;
+  const X=x=>L+(x-o.xmin)/(o.xmax-o.xmin)*pw, Y=y=>T+ph-(y-o.ymin)/(o.ymax-o.ymin)*ph;
+  el('rect',{x:L,y:T,width:pw,height:ph,fill:'#fff',stroke:'#99a'},svg);
+  const tx=niceTicks(o.xmin,o.xmax), ty=niceTicks(o.ymin,o.ymax);
+  const decs=st=>{let d=0;while(d<6&&Math.abs(Math.round(st*10**d)-st*10**d)>1e-6)d++;return d;};
+  const dx=decs(tx.st), dy=decs(ty.st);
+  tx.t.forEach(v=>{el('line',{x1:X(v),y1:T,x2:X(v),y2:T+ph,stroke:'#eef0f3'},svg); el('text',{x:X(v),y:T+ph+16,'font-size':12,'text-anchor':'middle',fill:'#333'},svg,v.toFixed(dx));});
+  ty.t.forEach(v=>{el('line',{x1:L,y1:Y(v),x2:L+pw,y2:Y(v),stroke:'#eef0f3'},svg); el('text',{x:L-6,y:Y(v)+4,'font-size':12,'text-anchor':'end',fill:'#333'},svg,v.toFixed(dy));});
+  el('text',{x:L+pw/2,y:H-10,'font-size':14,'text-anchor':'middle',fill:'#12324f'},svg,o.xlabel);
+  el('text',{x:16,y:T+ph/2,'font-size':14,'text-anchor':'middle',fill:'#12324f',transform:`rotate(-90 16 ${T+ph/2})`},svg,o.ylabel);
+  const cp='p'+Math.random().toString(36).slice(2); const d=el('defs',{},svg); const c=el('clipPath',{id:cp},d); el('rect',{x:L,y:T,width:pw,height:ph},c);
+  const g=el('g',{'clip-path':`url(#${cp})`},svg);
+  (o.series||[]).forEach(s=>{
+    if(s.type==='line'){el('polyline',{points:s.pts.filter(p=>isFinite(p[1])).map(p=>X(p[0])+','+Y(p[1])).join(' '),fill:'none',stroke:s.color,'stroke-width':s.w||2,'stroke-dasharray':s.dash||''},g);}
+    else{s.pts.forEach(p=>{ if(!isFinite(p[1])) return;
+      if(p[2]&&isFinite(p[2])){el('line',{x1:X(p[0]),y1:Y(p[1]-p[2]),x2:X(p[0]),y2:Y(p[1]+p[2]),stroke:s.color,'stroke-width':1.5},g); [p[1]-p[2],p[1]+p[2]].forEach(yy=>el('line',{x1:X(p[0])-4,y1:Y(yy),x2:X(p[0])+4,y2:Y(yy),stroke:s.color,'stroke-width':1.5},g));}
+      if(s.marker==='sq') el('rect',{x:X(p[0])-4.5,y:Y(p[1])-4.5,width:9,height:9,fill:s.fill||s.color,stroke:s.color,'stroke-width':1.5},g);
+      else if(s.marker==='x'){el('path',{d:`M${X(p[0])-5},${Y(p[1])-5}L${X(p[0])+5},${Y(p[1])+5}M${X(p[0])-5},${Y(p[1])+5}L${X(p[0])+5},${Y(p[1])-5}`,stroke:s.color,'stroke-width':2},g);}
+      else el('circle',{cx:X(p[0]),cy:Y(p[1]),r:s.r||4.5,fill:s.fill||s.color,stroke:s.color,'stroke-width':1.5},g);});}
+  });
+  return {X,Y};
+}
+
+/* ================= TAB 4 ================= */
+function renderT4(){
+  const G=groups();
+  const svg=$('regSvg');
+  if(!G.length){svg.innerHTML=''; el('text',{x:380,y:210,'text-anchor':'middle','font-size':15,fill:'#777'},svg,'尚無可用數據（需先選定 R、定位罐心並記錄數據）'); $('regTbl').innerHTML=''; $('regLegend').innerHTML=''; $('fphiSvg').innerHTML=''; return;}
+  let umax=0.05, ymin=Infinity, ymax=-Infinity;
+  G.forEach(g=>g.pts.forEach(p=>{umax=Math.max(umax,p[0]); ymin=Math.min(ymin,p[1]); ymax=Math.max(ymax,p[1]);}));
+  G.forEach(g=>{if(g.reg){ymin=Math.min(ymin,g.reg.a); ymax=Math.max(ymax,g.reg.a);}});
+  const pad=(ymax-ymin)*0.12+0.03;
+  const series=[];
+  G.forEach((g,i)=>{const col=COLORS[i%COLORS.length];
+    series.push({type:'pts',pts:g.pts,color:col});
+    if(g.reg){series.push({type:'line',pts:[[0,g.reg.a],[umax*1.1,g.reg.a+g.reg.b*umax*1.1]],color:col,w:1.5,dash:'6 3'}); series.push({type:'pts',pts:[[0,g.reg.a,g.reg.sa]],color:col,marker:'sq',fill:'#fff'});}
+  });
+  plot(svg,{xmin:0,xmax:umax*1.1,ymin:ymin-pad,ymax:ymax+pad,xlabel:'R / xo',ylabel:'f / R',series});
+  $('regLegend').innerHTML=G.map((g,i)=>`<span><i style="background:${COLORS[i%COLORS.length]}"></i>φ = ${g.label}</span>`).join('')+'<span>□ = 外插截距 f∞</span>';
+  let h='<tr><th>φ</th><th>數據點數</th><th>截距 f<sub>∞</sub>/R</th><th>σ(迴歸)</th><th>σ(含 R 誤差)</th><th>斜率 k</th><th>R²</th><th>直接平均 f̄/R</th><th>σ<sub>f̄</sub></th></tr>';
+  G.forEach(g=>{const r=g.reg; h+=`<tr><td>${g.label}</td><td>${g.pts.length}</td><td><b>${r?r.a.toFixed(3):'—'}</b></td><td>${r?fmt(r.sa,3):'—'}</td><td>${fmt(g.finfS,3)}</td><td>${r?r.b.toFixed(3):'—'}</td><td>${r?fmt(r.r2,3):'—'}</td><td>${g.avg.toFixed(3)}</td><td>${fmt(g.avgS,3)}</td></tr>`;});
+  $('regTbl').innerHTML=h;
+  // f vs phi
+  const s2=[{type:'pts',pts:G.map(g=>[g.phi-0.6,g.avg,g.avgS]),color:'#e8a33d',marker:'sq'}];
+  const fi=G.filter(g=>g.reg).map(g=>[g.phi+0.6,g.reg.a,g.finfS]);
+  s2.push({type:'pts',pts:fi,color:'#1f6fb2'});
+  let yl=Math.min(...G.map(g=>g.avg),...fi.map(p=>p[1]))-0.15, yh=Math.max(...G.map(g=>g.avg),...fi.map(p=>p[1]))+0.15;
+  plot($('fphiSvg'),{xmin:0,xmax:75,ymin:Math.min(yl,1.2),ymax:Math.max(yh,2.1),xlabel:'入射透鏡方向角 φ (°)',ylabel:'等效焦距 f / R',series:s2});
+}
+
+/* ================= TAB 5 ================= */
+function drawT5(){
+  const n=+$('n5').value||1.33; const G=groups();
+  const th=[], th2=[]; for(let p=0.5;p<=75;p+=0.5){th.push([p,f1(p*deg,n)]); const v=f2(p*deg,n); if(isFinite(v)) th2.push([p,v]);}
+  const par=n/(2*(n-1));
+  const series=[{type:'line',pts:th,color:'#333',w:2},{type:'line',pts:[[0,par],[75,par]],color:'#999',dash:'5 4',w:1.5},{type:'line',pts:th2,color:'#8e44ad',dash:'8 4',w:1.8}];
+  series.push({type:'pts',pts:G.map(g=>[g.phi-0.6,g.avg,g.avgS]),color:'#e8a33d',marker:'sq'});
+  series.push({type:'pts',pts:G.filter(g=>g.reg).map(g=>[g.phi+0.6,g.reg.a,g.finfS]),color:'#1f6fb2'});
+  plot($('cmpSvg'),{xmin:0,xmax:75,ymin:0.9,ymax:2.2,xlabel:'入射透鏡方向角 φ (°)',ylabel:'等效焦距 f / R',series});
+  let h='<tr><th>φ</th><th>(1) 理論 f/R</th><th>實驗 f<sub>∞</sub>/R</th><th>差異</th><th>z</th><th>直接平均 f̄/R</th><th>差異</th><th>z</th></tr>';
+  G.forEach(g=>{const t=f1(g.phi*deg,n); const a=g.reg?g.reg.a:NaN; const za=(a-t)/g.finfS; const sb=Math.hypot(g.avgS||0,g.avg*S.Rsig/S.Rsel); const zb=(g.avg-t)/sb;
+    const cz=z=>!isFinite(z)?'':(Math.abs(z)<2?'color:#067647':'color:#b42318');
+    h+=`<tr><td>${g.label}</td><td>${t.toFixed(3)}</td><td>${fmt(a,3)} ± ${fmt(g.finfS,3)}</td><td>${fmt((a/t-1)*100,1)} %</td><td style="${cz(za)}">${fmt(za,1)}</td><td>${g.avg.toFixed(3)}</td><td>${fmt((g.avg/t-1)*100,1)} %</td><td style="${cz(zb)}">${fmt(zb,1)}</td></tr>`;});
+  if(!G.length) h+='<tr><td colspan="8" class="note">尚無數據</td></tr>';
+  $('cmpTbl').innerHTML=h;
+  // symmetric check
+  let s='';
+  if(S.Rsel&&S.cm!==null){
+    const rows=S.rows.map(r=>({r,c:rowCalc(r)})).filter(o=>o.c.xi>0&&Math.abs(o.c.xo-o.c.xi)/o.c.xo<0.12&&o.r.phi<Math.asin(1/n)/deg);
+    if(rows.length){ s='<table><tr><th>φ</th><th>x<sub>o</sub>/R</th><th>x<sub>i</sub>/R</th><th>實驗 f/R</th><th>(2) 預測 x<sub>o</sub>=x<sub>i</sub></th><th>(2) 預測 f/R</th></tr>'+rows.map(o=>`<tr><td>${o.r.phi}</td><td>${o.c.xoR.toFixed(3)}</td><td>${o.c.xiR.toFixed(3)}</td><td>${o.c.fR.toFixed(3)}</td><td>${(2*f2(o.r.phi*deg,n)).toFixed(3)}</td><td>${f2(o.r.phi*deg,n).toFixed(3)}</td></tr>`).join('')+'</table><p class="note">當 x<sub>o</sub> ≈ x<sub>i</sub> 時，窗中心的光線在罐內近似平行光軸，實驗的 x<sub>o</sub> 應接近 (2) 預測的 R sin θ<sub>i</sub>/sin(θ<sub>i</sub> − φ)。</p>'; }
+    else s='<p class="note">目前沒有 x<sub>o</sub> 與 x<sub>i</sub> 相差 12% 以內的數據。想檢驗 (2)，可把螢光棒放在第 ① 頁表格「(2) 所需 x<sub>o</sub>/R」的位置，看像是否出現在對稱位置。</p>';
+  }
+  $('sym5').innerHTML=s;
+}
+
+/* ================= TAB 6 ================= */
+function renderT6(){
+  const G=groups(); const n=1.33;
+  if(!G.length||!S.Rsel){$('errBudget').innerHTML='<p class="note">需要先有數據。</p>';return;}
+  let h=`<p>以下估計各誤差來源對 f/R 的影響（以你的數據與器材精度計算）：</p>
+  <table><tr><th>φ</th><th>R 的相對誤差<br>σ<sub>R</sub>/R</th><th>讀數 ±0.05 cm<br>（典型一筆）</th><th>剪窗角度 ±0.7°<br>|df/dφ|·δφ</th><th>窗寬 10° 內 f 的變化<br>（像的縱深，判讀困難）</th><th>迴歸殘差<br>s</th></tr>`;
+  G.forEach(g=>{
+    const ph=g.phi*deg; const dfd=(f1(ph+0.5*deg,n)-f1(ph-0.5*deg,n))/1; // per degree
+    const spread=Math.abs(f1(ph-5*deg,n)-f1(ph+5*deg,n));
+    const r0=g.rows[0], c=rowCalc(r0); const xo=c.xo, xi=c.xi;
+    const dfo=xi*xi/((xo+xi)**2), dfi=xo*xo/((xo+xi)**2);
+    const sRead=Math.hypot(dfo*Math.hypot(0.05,0.03), dfi*Math.hypot(0.05,0.03))/S.Rsel;
+    h+=`<tr><td>${g.label}</td><td>${(S.Rsig/S.Rsel*100).toFixed(2)} %</td><td>±${sRead.toFixed(3)}</td><td>±${Math.abs(dfd*0.7).toFixed(3)}</td><td>${spread.toFixed(3)}</td><td>${g.reg?fmt(g.reg.s,3):'—'}</td></tr>`;});
+  h+=`</table>
+  <h3>討論提示</h3>
+  <ul>
+   <li><b>有限物距（系統誤差，最大宗）</b>：(1) 假設平行光，但 x<sub>o</sub> 有限時 f 較短，φ 越大越明顯。這就是為什麼要用 f–R/x<sub>o</sub> 外插，而不是直接平均。</li>
+   <li><b>窗寬 10°</b>：窗內不同位置的光線交光軸的位置不同（像差），兩條亮線「合一」的地方其實是一段縱深，φ 越大縱深越長、判讀越難。</li>
+   <li><b>R 的量法</b>：直尺沒通過圓心量到的是弦（偏小）；紙條繞斜了周長偏大；兩法都量到罐外壁（多了壁厚約 0.2–0.3 mm），而真正折射的是水柱。R 的相對誤差會等比例進入所有 f/R。</li>
+   <li><b>螢光棒有粗細（0.6 cm）</b>：像是一條有寬度的亮帶，寬度隨放大率 x<sub>i</sub>/x<sub>o</sub> 變大；物距太近時像又寬又暗。</li>
+   <li><b>n 的取值</b>：題目給 n = 1.33，室溫下水對可見光約 1.333，會使理論 f 差約 0.5%。</li>
+   <li><b>塑膠罐壁</b>：薄壁兩面近乎平行，只造成極小的側移，可忽略。</li>
+  </ul>`;
+  $('errBudget').innerHTML=h;
+  if(S.revealed) reveal(true);
+}
+function reveal(silent){
+  S.revealed=true; const box=$('revealBox'); box.classList.remove('hidden');
+  const st=Rstats(); const R=S.Rt;
+  let h=`<h3>罐子</h3><div class="kv">
+   <span>水柱半徑（光學上的 R）</span><b>${R.toFixed(3)} cm</b>
+   <span>罐外半徑（含壁厚 ${(WALL*10).toFixed(2)} mm）</span><b>${S.Ro.toFixed(3)} cm</b>
+   <span>你選用的 R</span><b>${S.Rsel?S.Rsel.toFixed(3)+' ± '+S.Rsig.toFixed(3)+' cm':'—'}　${S.Rsel?'（偏差 '+((S.Rsel/R-1)*100).toFixed(2)+' %，z = '+((S.Rsel-R)/S.Rsig).toFixed(1)+'）':''}</b>
+   ${st.dia?`<span>直徑法平均</span><b>${st.dia.m.toFixed(3)} cm（直尺平均偏離圓心 ${ (mean(S.dia.map(d=>d.tru.off))*10).toFixed(2)} mm）</b>`:''}
+   ${st.circ?`<span>圓周法平均</span><b>${st.circ.m.toFixed(3)} cm（紙條平均傾斜 ${(mean(S.circ.map(d=>d.tru.tilt))/deg).toFixed(2)}°）</b>`:''}
+   <span>罐心真實位置</span><b>${S.ct.toFixed(3)} cm　（你量的 ${S.cm!==null?S.cm.toFixed(3):'—'} cm）</b>
+   <span>水的折射率</span><b>${N_W}</b></div>`;
+  if(S.masks.length){h+='<h3>遮罩實際角度</h3><table><tr><th>標示 φ</th><th>上窗中心</th><th>下窗中心</th><th>上窗寬</th><th>下窗寬</th></tr>'+S.masks.map(m=>`<tr><td>${m.phi}°</td><td>${m.top.toFixed(2)}°</td><td>${m.bot.toFixed(2)}°</td><td>${m.wt.toFixed(1)}°</td><td>${m.wb.toFixed(1)}°</td></tr>`).join('')+'</table>';}
+  const G=groups();
+  if(G.length){
+    h+='<h3>等效焦距：你的結果 vs 真值（真值 n = 1.333、真實 R、實際窗角）</h3><table><tr><th>φ</th><th>真值 f<sub>∞</sub>/R</th><th>你的 f<sub>∞</sub>/R</th><th>z</th><th>你的 f̄/R</th><th>z</th></tr>';
+    G.forEach(g=>{const m=S.masks[g.mask]; const pa=(m.top+m.bot)/2*deg; const tf=f1(pa,N_W);
+      const za=g.reg?(g.reg.a-tf)/g.finfS:NaN; const sb=Math.hypot(g.avgS||0,g.avg*S.Rsig/S.Rsel); const zb=(g.avg-tf)/sb;
+      const cz=z=>!isFinite(z)?'':(Math.abs(z)<2?'color:#067647;font-weight:600':'color:#b42318;font-weight:600');
+      h+=`<tr><td>${g.label}</td><td>${tf.toFixed(3)}</td><td>${g.reg?g.reg.a.toFixed(3)+' ± '+fmt(g.finfS,3):'—'}</td><td style="${cz(za)}">${fmt(za,1)}</td><td>${g.avg.toFixed(3)}</td><td style="${cz(zb)}">${fmt(zb,1)}</td></tr>`;});
+    h+='</table>';
+    h+='<h3>逐筆檢查：像的位置</h3><table><tr><th>#</th><th>φ</th><th>真實 x<sub>o</sub> (cm)</th><th>你的 x<sub>o</sub></th><th>窗中心光線的 x<sub>i</sub> (cm)</th><th>你的 x<sub>i</sub></th><th>真實 f/R</th><th>你的 f/R</th></tr>';
+    S.rows.forEach((r,i)=>{const m=S.masks[r.mask]; const xo=S.ct-r.sT; const xa=xiExact(xo,m.top*deg,R,N_W), xb=xiExact(xo,m.bot*deg,R,N_W); const xi=(xa+xb)/2; const c=rowCalc(r);
+      h+=`<tr><td>${i+1}</td><td>${r.phi}</td><td>${xo.toFixed(2)}</td><td>${c.xo.toFixed(2)}</td><td>${fmt(xi,2)}</td><td>${c.xi.toFixed(2)}</td><td>${fmt(xo*xi/(xo+xi)/R,3)}</td><td>${c.fR.toFixed(3)}</td></tr>`;});
+    h+='</table><h3>f–R/x<sub>o</sub>：真實曲線（實線）與你的數據</h3><svg id="revSvg" viewBox="0 0 760 420"></svg>';
+  }
+  box.innerHTML=h;
+  if(G.length){
+    const series=[]; let umax=0.05; G.forEach(g=>g.pts.forEach(p=>umax=Math.max(umax,p[0])));
+    let yl=Infinity,yh=-Infinity;
+    G.forEach((g,i)=>{const col=COLORS[i%COLORS.length]; const m=S.masks[g.mask];
+      const cur=[]; for(let k=0;k<=60;k++){const u=umax*1.1*k/60; const xo=u>0?R/u:1e6; const fa=fExact(xo,m.top*deg,R,N_W), fb=fExact(xo,m.bot*deg,R,N_W); const v=u===0?f1((m.top+m.bot)/2*deg,N_W):((fa+fb)/2)/R; cur.push([u,v]); if(isFinite(v)){yl=Math.min(yl,v);yh=Math.max(yh,v);}}
+      series.push({type:'line',pts:cur,color:col,w:2}); series.push({type:'pts',pts:g.pts,color:col,fill:'#fff'});
+      g.pts.forEach(p=>{yl=Math.min(yl,p[1]);yh=Math.max(yh,p[1]);});});
+    plot($('revSvg'),{xmin:0,xmax:umax*1.1,ymin:yl-0.08,ymax:yh+0.08,xlabel:'R / xo（真值曲線用真實 R）',ylabel:'f / R',series});
+  }
+  if(!silent) box.scrollIntoView({behavior:'smooth'});
+}
+
+/* ================= refresh ================= */
+function refreshAll(){
+  const tab=document.querySelector('section.tab.on').id;
+  if(tab==='t1') drawT1();
+  if(tab==='t2') renderT2();
+  if(tab==='t3'){ status3(); setupSliders(); bench(); renderTable(); }
+  if(tab==='t4') renderT4();
+  if(tab==='t5') drawT5();
+  if(tab==='t6') renderT6();
+}
+setInterval(()=>{ if(document.querySelector('section.tab.on').id==='t3' && S.stick.n) drawScreen(); if(document.querySelector('section.tab.on').id==='t2') {const b=stickBrightness(); if(S.stick.n){$('stickState').textContent=`第 ${S.stick.n} 支，亮度 ${(b*100).toFixed(0)}%`;}} },20000);
+newExperiment(false);
+</script>
+</body>
+</html>

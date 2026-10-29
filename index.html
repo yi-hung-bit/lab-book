@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>實驗培訓 光學篇</title>
+<meta name="description" content="歷屆物理學科能力競賽實驗題的虛擬實驗室">
+<meta name="theme-color" content="#25306b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="實驗培訓">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+body{margin:0} img{max-width:100%} [hidden]{display:none!important}
+.install{border:1px solid var(--accent);color:var(--accent);background:var(--paper);border-radius:999px;padding:8px 16px;cursor:pointer}
+.ios-tip{font-size:13px;color:var(--muted);margin-top:10px}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Serif+TC:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 一本攤開的書（桌面雙頁、手機單頁），封面 → 目錄 → 第三章光學扉頁 → 16 個實驗各一頁 → 封底 */
+:root{
+  --desk:#dfe2e6; --paper:#fbfaf7; --paper-2:#f2f0ea; --ink:#1d2333; --muted:#5f6576; --rule:#d9d6cd;
+  --cover:#25306b; --cover-ink:#f3f1ea; --accent:#2f3f94;
+  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8;
+  --shadow:0 18px 40px rgba(29,35,51,.18);
+  --f-display:"LXGW WenKai TC","Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
+  --f-body:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
+  --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec;
+  --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
+  --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec;
+  --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}
+
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 32px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* book */
+.book{display:grid;grid-template-columns:1fr 1fr;min-height:660px;perspective:2200px;filter:drop-shadow(var(--shadow))}
+.book.single{grid-template-columns:1fr}
+.book.cover-only{grid-template-columns:1fr 1fr}
+.page{position:relative;background:var(--paper);padding:44px 46px 56px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.page.left{border-radius:6px 0 0 6px;background:linear-gradient(to left,rgba(0,0,0,.09),transparent 34px),var(--paper)}
+.page.right{border-radius:0 6px 6px 0;background:linear-gradient(to right,rgba(0,0,0,.09),transparent 34px),var(--paper)}
+.book.single .page{border-radius:6px;background:var(--paper)}
+.page.ghost{visibility:hidden}
+.page.blank{background:var(--paper-2)}
+@media (prefers-reduced-motion:no-preference){
+  .turn-next .page.right,.turn-next.single .page{animation:inR .45s ease-out}
+  .turn-prev .page.left,.turn-prev.single .page{animation:inL .45s ease-out}
+}
+@keyframes inR{from{transform:rotateY(-24deg);transform-origin:left center;opacity:.3}to{transform:none;opacity:1}}
+@keyframes inL{from{transform:rotateY(24deg);transform-origin:right center;opacity:.3}to{transform:none;opacity:1}}
+
+.runhead{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:26px;letter-spacing:.05em}
+.folio{position:absolute;bottom:20px;font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.left .folio{left:46px} .right .folio{right:46px} .book.single .folio{left:50%;transform:translateX(-50%)}
+
+/* cover */
+.cover{background:var(--cover)!important;color:var(--cover-ink);justify-content:space-between;border-radius:4px 10px 10px 4px!important}
+.cover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:22px;background:rgba(0,0,0,.22)}
+.cover .kicker{font-size:14px;letter-spacing:.3em;opacity:.8;padding-left:12px}
+.cover h1{font-size:clamp(44px,7vw,72px);line-height:1.1;padding-left:12px}
+.cover .sub{font-size:18px;opacity:.9;padding-left:12px;margin-top:10px}
+.spectrum{display:flex;height:10px;margin:28px 0 0 12px;width:70%}
+.spectrum i{flex:1}
+.cover .foot{padding-left:12px;font-size:13px;opacity:.75;display:flex;flex-direction:column;gap:4px}
+.open-btn{align-self:flex-start;margin-left:12px;margin-top:22px;background:var(--cover-ink);color:var(--cover);border:0;border-radius:999px;padding:10px 20px;cursor:pointer;font-family:var(--f-display);font-size:16px}
+.cover-blurb{justify-content:center;gap:16px}
+.cover-blurb h2{font-size:26px}
+.cover-blurb p{margin:0;color:var(--muted);max-width:30em}
+
+/* toc */
+.toc h2{font-size:30px;margin-bottom:18px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.toc li{display:flex;align-items:baseline;gap:8px}
+.toc .ch{font-family:var(--f-display);font-size:17px}
+.toc .lead{flex:1;border-bottom:1px dotted var(--rule);transform:translateY(-4px);min-width:16px}
+.toc .pg{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.toc .sec{padding-left:2.2em;font-size:14px}
+.toc .sec .ch{font-family:var(--f-body);font-size:14px}
+.toc .wip .ch{color:var(--muted)}
+.toc a.pg{color:var(--muted);text-decoration:none;font-family:var(--f-body);font-size:12.5px}
+.toc a.pg:hover{color:var(--accent);text-decoration:underline}
+.linkbtn{background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.linkbtn:hover .ch{color:var(--accent)}
+.toc .now .ch{color:var(--accent)}
+
+/* chapter opener */
+.opener .chno{font-family:var(--f-display);font-size:16px;color:var(--accent);letter-spacing:.2em}
+.opener h2{font-size:clamp(46px,6vw,64px);line-height:1.1;margin:6px 0 14px}
+.opener p{margin:0 0 18px;max-width:30em}
+.prism{width:100%;max-width:300px;margin:4px 0 18px}
+.secs{display:grid;gap:10px}
+.secs button{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;background:none;border:0;border-top:1px solid var(--rule);padding:10px 0 0;text-align:left;cursor:pointer}
+.secs b{font-family:var(--f-mono);font-weight:500;color:var(--wc)}
+.secs span{font-family:var(--f-display);font-size:18px}
+.secs small{color:var(--muted);font-size:13px}
+.secs button:hover span{color:var(--wc)}
+
+/* experiment page */
+.exp .num{font-family:var(--f-mono);font-size:13px;color:var(--wc);letter-spacing:.06em}
+.exp h2{font-size:clamp(26px,3.2vw,34px);line-height:1.25;margin:4px 0 6px}
+.exp .src{font-size:13.5px;color:var(--muted);margin-bottom:16px}
+.exp .lede{margin:0 0 18px}
+.formula{border-left:3px solid var(--wc);background:var(--paper-2);padding:10px 14px;margin:0 0 18px;font-family:var(--f-mono);font-size:16px;overflow-x:auto}
+.formula small{display:block;font-family:var(--f-body);font-size:12px;color:var(--muted)}
+.exp h3{font-size:16px;margin-bottom:6px;color:var(--wc)}
+.steps{margin:0 0 18px;padding-left:1.5em;font-size:14.5px;line-height:1.7}
+.steps li.todo{color:var(--muted)}
+.steps li.todo::after{content:"（建置中）";font-size:12px;color:var(--w-lens)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.tag{font-size:12px;border:1px solid var(--rule);border-radius:4px;padding:0 7px;color:var(--muted)}
+.tag.warn{border-color:var(--w-lens);color:var(--w-lens)}
+.cta{border:0;cursor:pointer;margin-top:auto;align-self:flex-start;display:inline-flex;gap:8px;align-items:center;background:var(--ink);color:var(--paper);text-decoration:none;border-radius:6px;padding:10px 16px;font-family:var(--f-display);font-size:16px}
+.cta-note{font-size:12px;color:var(--muted);margin:8px 0 0}
+.cta-note a{color:var(--accent)}
+/* lab overlay */
+.lab{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--desk)}
+.lab-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--paper);border-bottom:3px solid var(--wc);padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.lab-back{border:1px solid var(--rule);background:var(--paper-2);border-radius:999px;padding:6px 14px;cursor:pointer;font-family:var(--f-display)}
+.lab-name{display:flex;gap:10px;align-items:baseline;min-width:0}
+.lab-name span{font-family:var(--f-mono);font-size:12px;color:var(--wc)}
+.lab-name b{font-family:var(--f-display);font-size:18px}
+.lab iframe{flex:1;width:100%;border:0;background:#fff;padding-bottom:env(safe-area-inset-bottom,0px)}
+html.lab-open,html.lab-open body{overflow:hidden}
+
+/* back cover */
+.back{justify-content:center;gap:14px}
+.back h2{font-size:26px}
+.back p{margin:0;color:var(--muted);max-width:30em}
+
+/* controls */
+.controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.nav{display:flex;gap:8px}
+.nav button{border:1px solid var(--rule);background:var(--paper);border-radius:999px;padding:8px 16px;cursor:pointer}
+.nav button:disabled{opacity:.4;cursor:default}
+.where{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.where button{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-left:10px}
+
+@media (max-width:820px){
+  .page{padding:30px 22px 52px;min-height:560px}
+  .left .folio,.right .folio{left:50%;right:auto;transform:translateX(-50%)}
+  .book{min-height:0}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="book" id="book" aria-live="polite"></div>
+  <div class="controls">
+    <div class="where" id="where"></div>
+    <div class="nav">
+      <button type="button" id="installBtn" class="install" hidden>⬇ 安裝 App</button>
+      <button type="button" id="prev" aria-label="上一頁">← 上一頁</button>
+      <button type="button" id="next" aria-label="下一頁">下一頁 →</button>
+    </div>
+  </div>
+  <p class="ios-tip" id="iosTip" hidden>iPhone / iPad：按 Safari 下方的「分享」→「加入主畫面」，就能像 App 一樣使用。</p>
+</div>
+
+<section class="lab" id="lab" hidden aria-label="虛擬實驗室">
+  <header class="lab-bar">
+    <button type="button" id="labClose" class="lab-back">← 回到書頁</button>
+    <div class="lab-name"><span id="labNum"></span><b id="labTitle"></b></div>
+  </header>
+  <iframe id="labFrame" title="虛擬實驗室" src="about:blank"></iframe>
+</section>
+
+<script>
+const SITE="https://sites.google.com/ms.mingdao.edu.tw/sim/";
+const OPTICS=SITE+"主題分類/光學/";
+const SPEC=["#e5484d","#f08c2e","#e9c22b","#3fa65b","#2f78d6","#6a4fc6"];
+
+const SECTIONS=[
+  {id:"refr",no:"3.1",name:"折射率",color:"var(--w-refr)",blurb:"同一個 n，八種量法：插針、視深、成像、平板反射、全反射。"},
+  {id:"int", no:"3.2",name:"干涉與繞射",color:"var(--w-int)",blurb:"光碟是光柵，空氣膜會出條紋，用波長去量看不見的距離。"},
+  {id:"lens",no:"3.3",name:"透鏡與面鏡",color:"var(--w-lens)",blurb:"焦距與曲率半徑：從成像、放大率到雷射光路。"},
+  {id:"pol", no:"3.4",name:"偏振",color:"var(--w-pol)",blurb:"光是橫波：找出反射光最弱的那個角度。"}
+];
+const EXP=[
+  {w:"refr",t:"折射率的測定",slug:"折射率的測定",lab:"refr-106tc",src:"106 學年度 臺中區",d:"凸透鏡成像後放入透明待測物，成像點往後移，由像距變化反推待測物折射率。",f:["近軸折射後的會聚距離","s₂ = n · s₁"],tabs:["原理動畫","虛擬實驗室"]},
+  {w:"refr",t:"104 臺南區 折射率",slug:"104臺南區學科能力競賽物理實驗試題1-折射率",lab:"refr-104tn",src:"104 學年度 臺南區複賽",d:"沒有雷射，只用牙籤與視線。壓克力用插針法與視深法，液體用量筒視深與燒杯柱面透鏡，兩兩交叉驗證。",f:["插針法","sin i = n · sin r"],tabs:["原理與設計","壓克力：插針法","壓克力：視差法視深","液體：量筒視深","液體：燒杯柱面透鏡","綜合與真值揭曉"],rnd:true},
+  {w:"refr",t:"105 嘉義區 折射率",slug:"105嘉義區學科能力競賽物理實驗試題-折射率",lab:"refr-105cy",src:"105 學年度 嘉義區",d:"雷射斜射壓克力平板，上表面與下表面各反射出一個光點，量兩光點間距 x 並迴歸求 n。",f:["迴歸變數","1/x²  對  1/cos²θ"],tabs:["原理與光路","裝置與測角","光點量測","數據與迴歸","誤差分析","真值揭曉"],rnd:true},
+  {w:"refr",t:"紙片埋藏深度",slug:"105臺中區學科能力競賽物理實驗試題-光學",lab:"refr-105tc",src:"105 學年度 中投區複賽",d:"用凸透鏡替代物體法找出埋在透明材料裡紙片的視深，再以俯視作圖法測折射率。",f:["視深的折射關係","n sin α = sin β"],tabs:["原理","裝置與對準","測量視深 h′","測折射率 n","數據分析","誤差與真值揭曉"],todo:[3,4,5],rnd:true},
+  {w:"refr",t:"圓柱體折射率",slug:"圓柱體折射率",lab:"refr-cyl",src:"93 學年度 北二區複賽",d:"游標尺量透明圓柱體積、量圓柱透鏡焦距，再由白線核心看起來的視半徑求折射率。",f:["視半徑法","n = B / b"],tabs:["原理","游標尺量體積","圓柱透鏡焦距","視半徑量測","分析與交叉驗證","真值揭曉"],rnd:true},
+  {w:"refr",t:"壓克力塊的折射率",slug:"壓克力塊的體積質量密度與折射率",lab:"refr-acrylic",src:"97 學年度 北二區",d:"一塊壓克力做到底：游標尺測體積、橡皮筋虎克定律校正、求質量與密度，最後量折射率。",f:["密度","ρ = m / V"],tabs:["游標尺測體積","橡皮筋虎克定律","質量與密度","折射率","總結與真值核對"],rnd:true},
+  {w:"refr",t:"甘油折射率與臨界角",slug:"甘油折射率與臨界角",lab:"refr-glycerin",src:"99 學年度 彰雲嘉區",d:"量光在甘油與空氣界面的入射角與折射角，迴歸求 n，再找出全反射臨界角。",f:["臨界角","θc = sin⁻¹(1 / n)"],tabs:["原理推導","器材與組裝","折射量測","迴歸求 n","臨界角","誤差與真值"]},
+  {w:"refr",t:"未知液體的折射率",slug:"未知液體的折射率測定",lab:"refr-liquid",src:"104 學年度 臺中區",d:"直尺側立在半滿的壓克力槽裡，液面下的刻度看起來和液面上錯開，由對齊的位置求液體折射率。",f:null,tabs:["原理與光路","器材組裝","觀察與對齊","數據與迴歸","誤差分析","真值揭曉"],rnd:true},
+  {w:"int",t:"楔形空氣膜干涉",slug:"楔形空氣模干涉",lab:"int-wedge",src:"95 學年度 全國決賽",d:"兩片玻片夾一根金屬線形成楔形空氣膜，由干涉條紋間距求金屬線直徑。可換光源與濾光片，並診斷做不出條紋的原因。",f:["條紋間距","Δx = λL / 2D"],tabs:["暗房觀察","失敗診斷","量測與分析","干涉原理"]},
+  {w:"int",t:"光學干涉實驗",slug:"光學干涉實驗",lab:"int-104n2",src:"104 學年度 北二區複賽",d:"三個任務一次練：水與空氣界面的全反射臨界角、CD/DVD 軌距、白光分光。",f:["反射式光柵","d (sin θ₁ − sin θ₂) = mλ"],tabs:["全反射臨界角","CD/DVD 軌距","白光分光"]},
+  {w:"int",t:"光碟軌道溝槽間距",slug:"光碟軌道溝槽間距-a-的量測",lab:"int-cd",src:"92 學年度 台南區複賽",d:"光碟的螺旋溝槽就是現成的反射式光柵，用 658.5 nm 雷射量出各級繞射光點，反推軌道間距 a。",f:["光柵方程式","a (sin βₘ − sin α) = mλ"],tabs:["實驗原理","器材與架設","實驗操作","數據與作圖","討論與延伸"]},
+  {w:"int",t:"光干涉（全國決賽題組）",slug:"光干涉",lab:"int-106final",src:"106 學年度 全國決賽",d:"完整決賽題組：奈米粒子溶液呈色、自製分光儀、光碟軌距、細線繞射，再用雷射與室內光做插針。",f:null,tabs:["溶液觀察","自製分光儀","光碟軌距","細線繞射","雷射插針","室內光插針","討論與真值"],rnd:true},
+  {w:"lens",t:"面鏡曲率半徑",slug:"面鏡曲率半徑",lab:"lens-mirror",src:"99 學年度 全國決賽",d:"雷射反射法分別量測彎月形透鏡凸面與凹面的曲率半徑，並比較小角度近似與精確光追的誤差。",f:["入射點法線角","sin θ = H / R"],tabs:["原理與光路","裝置與對準","凸面量測","凹面量測","迴歸分析","誤差與真值"]},
+  {w:"lens",t:"塑膠片焦距",slug:"94屏東實驗二-塑膠片焦距",lab:"lens-plastic",src:"94 學年度 屏東區複賽",d:"先判斷塑膠片相當於哪種透鏡並找出鏡心，再用雷射光路、放大率、成像三種方法求焦距。",f:["成像公式","1/p + 1/q = 1/f"],tabs:["透鏡種類與鏡心","找出鏡心","雷射光路法","放大率法","成像法","比較與真值揭曉"],rnd:true},
+  {w:"lens",t:"圓形透鏡的等效焦距",slug:"圓形透鏡的等效焦距",lab:"lens-cyl",src:"103 學年度 新竹區",d:"圓柱形透鏡的物距與像距都由圓心量起，探討等效焦距和入射方向角 φ 的關係。",f:["等效焦距","f = xₒ xᵢ / (xₒ + xᵢ)"],tabs:["原理推導","器材準備","成像量測","數據迴歸","與理論比較","誤差與真值揭曉"],rnd:true},
+  {w:"pol",t:"布魯斯特角",slug:"偏振",lab:"pol-brewster",src:"97 學年度 高雄區複賽",d:"用偏振片、雷射筆、載玻片與大頭針，找出雷射從載玻片表面反射最弱時的入射角。",f:["布魯斯特角","tan θB = n"],tabs:["原理","器材組裝與雷射偏振","尋找最弱反射","插針測角","數據分析","誤差與真值揭曉"]}
+];
+const CHAPTERS=[
+  {no:"一",name:"基礎能力",link:SITE+"基礎能力"},
+  {no:"二",name:"力學",link:SITE+"主題分類"},
+  {no:"三",name:"光學",ready:true},
+  {no:"四",name:"震盪",link:SITE+"主題分類/震盪"},
+  {no:"五",name:"質量",link:SITE+"主題分類/質量"},
+  {no:"六",name:"轉動",link:SITE+"主題分類/轉動"},
+  {no:"七",name:"重力加速度 g",link:SITE+"主題分類/g值"},
+  {no:"八",name:"流體",link:SITE+"主題分類/流體"},
+  {no:"九",name:"黏滯",link:SITE+"主題分類/黏滯"},
+  {no:"十",name:"密度",link:SITE+"主題分類/密度"},
+  {no:"十一",name:"電學",link:SITE+"主題分類/電學"}
+];
+
+/* ---------- pages ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const secOf=id=>SECTIONS.find(s=>s.id===id);
+const PAGES=[];
+PAGES.push({kind:"cover"});
+PAGES.push({kind:"toc"});
+PAGES.push({kind:"opener"});
+const firstPageOf={};
+SECTIONS.forEach(s=>{
+  EXP.filter(e=>e.w===s.id).forEach((e,i)=>{
+    if(i===0) firstPageOf[s.id]=PAGES.length;
+    PAGES.push({kind:"exp",e,s,idx:i+1});
+  });
+});
+PAGES.push({kind:"back"});
+let expCounter=0; PAGES.forEach(p=>{if(p.kind==="exp")p.n=++expCounter;});
+
+function runhead(left,right){return `<div class="runhead"><span>${left}</span><span>${right}</span></div>`;}
+function renderPage(i){
+  const p=PAGES[i];
+  const d=document.createElement("article");d.className="page";d.dataset.i=i;
+  const folio=`<span class="folio">${i}</span>`;
+  if(p.kind==="cover"){
+    d.classList.add("cover");
+    d.innerHTML=`<div>
+      <div class="kicker">物理科學科能力競賽</div>
+      <div class="spectrum">${SPEC.map(c=>`<i style="background:${c}"></i>`).join("")}</div>
+    </div>
+    <div>
+      <h1>實驗培訓</h1>
+      <div class="sub">歷屆實驗題的虛擬實驗室</div>
+      <button class="open-btn" type="button" data-go="1">翻開這本書</button>
+    </div>
+    <div class="foot"><span>第三章　光學　已完成</span><span>其餘章節撰寫中</span></div>`;
+  }else if(p.kind==="toc"){
+    d.classList.add("toc");
+    const rows=CHAPTERS.map(c=>{
+      if(c.ready){
+        const secs=SECTIONS.map(s=>`<li class="sec"><button class="linkbtn" type="button" data-go="${firstPageOf[s.id]}"><span class="ch">${s.no}　${s.name}</span></button><span class="lead"></span><span class="pg">${firstPageOf[s.id]}</span></li>`).join("");
+        return `<li class="now"><button class="linkbtn" type="button" data-go="2"><span class="ch">第${c.no}章　${c.name}</span></button><span class="lead"></span><span class="pg">2</span></li>${secs}`;
+      }
+      return `<li class="wip"><span class="ch">第${c.no}章　${c.name}</span><span class="lead"></span><a class="pg" href="${encodeURI(c.link)}" target="_blank" rel="noopener">撰寫中・看原站 ↗</a></li>`;
+    }).join("");
+    d.innerHTML=runhead("實驗培訓","目錄")+`<h2>目錄</h2><ol>${rows}</ol>`+folio;
+  }else if(p.kind==="opener"){
+    d.classList.add("opener");
+    const secs=SECTIONS.map(s=>{const n=EXP.filter(e=>e.w===s.id).length;return `<button type="button" data-go="${firstPageOf[s.id]}" style="--wc:${s.color}"><b>${s.no}</b><span>${s.name}</span><small>${n} 個實驗・p.${firstPageOf[s.id]}</small></button>`;}).join("");
+    d.innerHTML=runhead("實驗培訓","第三章")+`
+      <div class="chno">第三章</div><h2>光學</h2>
+      <svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <line x1="0" y1="74" x2="118" y2="64" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+        ${SPEC.map((c,k)=>`<polygon points="156,62 300,${18+k*16} 300,${32+k*16}" fill="${c}" opacity=".75"/>`).join("")}
+        <polygon points="138,12 182,104 94,104" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+      </svg>
+      <p>十六個實驗，每個對應一道競賽實驗題。先讀原理，再進虛擬實驗室量測、迴歸，最後揭曉真值，看看自己的誤差有多大。</p>
+      <div class="secs">${secs}</div>`+folio;
+  }else if(p.kind==="exp"){
+    const {e,s}=p;
+    d.classList.add("exp");d.style.setProperty("--wc",s.color);
+    const steps=e.tabs.map((t,k)=>`<li${e.todo&&e.todo.includes(k)?' class="todo"':""}>${esc(t)}</li>`).join("");
+    const tags=[`<span class="tag">${e.tabs.length} 個步驟</span>`];
+    if(e.rnd)tags.push(`<span class="tag">每次隨機待測值</span>`);
+    if(e.todo)tags.push(`<span class="tag warn">部分建置中</span>`);
+    d.innerHTML=runhead("第三章　光學",`${s.no}　${s.name}`)+`
+      <div class="num">實驗 3-${p.n}</div>
+      <h2>${esc(e.t)}</h2>
+      <div class="src">${esc(e.src)} 物理實驗試題改編</div>
+      <p class="lede">${esc(e.d)}</p>
+      ${e.f?`<div class="formula"><small>${esc(e.f[0])}</small>${esc(e.f[1])}</div>`:""}
+      <h3>實驗流程</h3>
+      <ol class="steps">${steps}</ol>
+      <div class="tags">${tags.join("")}</div>
+      <button class="cta" type="button" data-lab="${PAGES.indexOf(p)}">▶ 在書中開啟實驗室</button>
+      <p class="cta-note">原題 PDF 在<a href="${encodeURI(OPTICS+e.slug)}" target="_blank" rel="noopener">協作平台原頁面 ↗</a>（請用學校帳號登入）。</p>`+folio;
+  }else if(p.kind==="back"){
+    d.classList.add("back");
+    d.innerHTML=`<h2>光學篇到這裡結束</h2>
+      <p>其他章節還在撰寫中，內容目前仍放在學校協作平台。</p>
+      <p><a href="${SITE}" target="_blank" rel="noopener" style="color:var(--accent)">前往實驗培訓原站 ↗</a></p>
+      <p><button class="linkbtn" type="button" data-go="1" style="color:var(--accent);text-decoration:underline">回到目錄</button></p>`+folio;
+  }
+  return d;
+}
+
+/* ---------- book engine ---------- */
+const book=document.getElementById("book");
+const mq=window.matchMedia("(max-width: 820px)");
+let cur=0;
+function spreadStart(i){return i===0?0:(i%2===1?i:i-1);}
+function show(i,dir){
+  i=Math.max(0,Math.min(PAGES.length-1,i));
+  cur=i;
+  book.innerHTML="";
+  book.className="book"+(dir?(dir>0?" turn-next":" turn-prev"):"");
+  const single=mq.matches;
+  if(single){
+    book.classList.add("single");
+    book.appendChild(renderPage(i));
+  }else if(i===0){
+    const blurb=document.createElement("article");blurb.className="page left cover-blurb";
+    blurb.innerHTML=`<h2>給參加物理實驗競賽的同學</h2><p>這本書整理歷屆學科能力競賽的物理實驗題，每題都做成可以動手操作的虛擬實驗室：調器材、讀數據、作迴歸、算誤差。</p><p>按右下角「下一頁」或鍵盤方向鍵翻頁，也可以從目錄直接跳到想練的實驗。</p>`;
+    const c=renderPage(0);c.classList.add("right");
+    book.append(blurb,c);
+  }else{
+    const L=spreadStart(i);
+    const l=renderPage(L);l.classList.add("left");
+    let r;
+    if(L+1<PAGES.length){r=renderPage(L+1);}else{r=document.createElement("article");r.className="page blank";}
+    r.classList.add("right");
+    book.append(l,r);
+  }
+  book.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(+b.dataset.go)));
+  book.querySelectorAll("[data-lab]").forEach(b=>b.addEventListener("click",()=>openLab(PAGES[+b.dataset.lab])));
+  updateControls();
+  try{history.replaceState(null,"",i?("#p"+i):"#cover");}catch(e){location.hash=i?("p"+i):"cover";}
+}
+function step(){return mq.matches?1:2;}
+function next(){
+  if(mq.matches) return go(cur+1);
+  const L=spreadStart(cur); go(cur===0?1:L+2);
+}
+function prev(){
+  if(mq.matches) return go(cur-1);
+  const L=spreadStart(cur); go(L<=1?0:L-2);
+}
+function go(i){const dir=i>cur?1:-1;show(i,i===cur?0:dir);book.scrollIntoView({block:"start",behavior:"auto"});}
+function updateControls(){
+  const single=mq.matches, last=PAGES.length-1;
+  const L=spreadStart(cur);
+  document.getElementById("prev").disabled=cur===0;
+  document.getElementById("next").disabled=single?cur>=last:(cur!==0&&L+1>=last);
+  const w=document.getElementById("where");
+  let label;
+  if(cur===0)label="封面";
+  else if(single)label=`第 ${cur} 頁／共 ${last} 頁`;
+  else label=`第 ${L}–${Math.min(L+1,last)} 頁／共 ${last} 頁`;
+  w.innerHTML=`<span>${label}</span>`;
+  if(cur>1){const b=document.createElement("button");b.type="button";b.textContent="回目錄";b.onclick=()=>go(1);w.appendChild(b);}
+}
+const labEl=document.getElementById("lab"), labFrame=document.getElementById("labFrame");
+let labOpener=null;
+function openLab(p){
+  labOpener=document.activeElement;
+  document.getElementById("labNum").textContent="實驗 3-"+p.n;
+  document.getElementById("labTitle").textContent=p.e.t;
+  labEl.style.setProperty("--wc",p.s.color);
+  labFrame.src="labs/"+p.e.lab+".html";
+  labEl.hidden=false;document.documentElement.classList.add("lab-open");
+  document.getElementById("labClose").focus();
+}
+function closeLab(){
+  labEl.hidden=true;labFrame.src="about:blank";document.documentElement.classList.remove("lab-open");
+  if(labOpener&&labOpener.focus)labOpener.focus();
+}
+document.getElementById("labClose").onclick=closeLab;
+document.getElementById("next").onclick=next;
+document.getElementById("prev").onclick=prev;
+document.addEventListener("keydown",e=>{
+  if(e.target.closest&&e.target.closest("input,textarea"))return;
+  if(!labEl.hidden){if(e.key==="Escape")closeLab();return;}
+  if(e.key==="ArrowRight")next(); else if(e.key==="ArrowLeft")prev();
+});
+let tx=null;
+book.addEventListener("touchstart",e=>{tx=e.touches[0].clientX;},{passive:true});
+book.addEventListener("touchend",e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60)(dx<0?next:prev)();tx=null;});
+mq.addEventListener?mq.addEventListener("change",()=>show(cur,0)):mq.addListener(()=>show(cur,0));
+
+function fromHash(){const m=/^#p(\d+)$/.exec(location.hash);return m?+m[1]:0;}
+window.addEventListener("hashchange",()=>{const i=fromHash();if(i!==cur)show(i,0);});
+show(fromHash(),0);
+</script>
+
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+let deferredPrompt=null;
+const ib=document.getElementById("installBtn");
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;ib.hidden=false;});
+ib.addEventListener("click",async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;ib.hidden=true;});
+window.addEventListener("appinstalled",()=>{ib.hidden=true;});
+const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!standalone)document.getElementById("iosTip").hidden=false;
+</script>
+</body>
+</html>

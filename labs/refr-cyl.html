@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>圓柱體折射率虛擬實驗室</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d8dde6;--accent:#2563eb;--accent2:#d9731a;--good:#15803d;--bad:#b91c1c;--glass:#e3efff}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
+header{padding:12px 16px;background:#1e293b;color:#fff;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+header h1{font-size:1.15rem;margin:0}
+header .sub{font-size:.85rem;color:#cbd5e1}
+header .seed{font-size:.9rem;display:flex;gap:8px;align-items:center}
+header button{background:#334155;color:#fff;border:1px solid #64748b;border-radius:6px;padding:4px 10px;cursor:pointer}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#f8fafc;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.95rem;color:var(--ink)}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+nav button.todo{color:#94a3b8}
+main{max-width:1120px;margin:0 auto;padding:16px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:1.1rem;margin:0 0 8px}
+.card h3{font-size:1rem;margin:10px 0 6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:880px){.grid2{grid-template-columns:1fr}}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+label.ctl{display:flex;gap:8px;align-items:center;font-size:.95rem}
+input[type=range]{width:220px}
+button.b{border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:7px;padding:4px 10px;cursor:pointer;font-size:.9rem}
+button.b.fill{background:var(--accent);color:#fff}
+button.b.warn{border-color:var(--accent2);color:var(--accent2)}
+table.data{border-collapse:collapse;width:100%;font-size:.92rem}
+table.data th,table.data td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+table.data th{background:#f1f5f9;font-weight:600}
+input.cell{width:84px;padding:3px 4px;border:1px solid #cbd5e1;border-radius:5px;text-align:center;font-size:.92rem}
+input.cell.sel{outline:2px solid var(--accent2);background:#fff7ed}
+input.cell.ok{border-color:var(--good);background:#f0fdf4}
+input.cell.ng{border-color:var(--bad);background:#fef2f2}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:#fafafa}
+svg{display:block;max-width:100%}
+.note{background:#fff7ed;border-left:4px solid var(--accent2);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:.93rem}
+.err{background:#fef2f2;border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:.93rem}
+.info{background:#eff6ff;border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:.93rem}
+.f{font-family:"Cambria Math","Times New Roman",serif;font-size:1.05em}
+.res{font-size:.95rem}
+.res b{color:var(--accent)}
+.muted{color:var(--muted);font-size:.9rem}
+canvas{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#000;display:block}
+details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
+.placeholder{color:var(--muted);padding:30px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>圓柱體折射率虛擬實驗室</h1>
+    <div class="sub">九十三學年度 台灣省第二區（北二區）高中物理能力競賽 實驗試題｜競賽日期 93.11.12</div>
+  </div>
+  <div class="seed">樣品編號 <b id="seedLbl"></b><button id="newSample">換一組樣品</button></div>
+</header>
+<nav id="tabs">
+  <button data-t="t1" class="on">① 原理</button>
+  <button data-t="t2">② 游標尺量體積</button>
+  <button data-t="t3">③ 圓柱透鏡焦距</button>
+  <button data-t="t4">④ 視半徑量測</button>
+  <button data-t="t5">⑤ 分析與交叉驗證</button>
+  <button data-t="t6">⑥ 真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ ① 原理 ============ -->
+<section id="t1" class="on">
+  <div class="card">
+    <h2>實驗任務</h2>
+    <p>器材：透明圓柱、白線夾心圓柱（兩者透明部分材料相同）、游標尺（最小刻度 0.05 mm）、方木柱、標籤貼紙、直尺、方格紙等。</p>
+    <p>一、用游標尺量透明圓柱體積 <span class="f">V = πR²h</span>。二、設計實驗量圓柱透鏡焦距。三、測量光在空氣中速率是在圓柱材料中速率的幾倍，即折射率 <span class="f">n = v<sub>air</sub>/v<sub>t</sub></span>。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>視半徑法：n = B / b</h2>
+      <div class="row">
+        <label class="ctl">n <input type="range" id="p_n" min="1.35" max="1.65" step="0.01" value="1.48"><span id="p_nv"></span></label>
+        <label class="ctl">b <input type="range" id="p_b" min="2" max="7.5" step="0.05" value="5.0"><span id="p_bv"></span></label>
+      </div>
+      <svg id="svgApp" viewBox="0 0 560 400"></svg>
+      <div id="appTxt" class="res"></div>
+      <p class="muted">觀察者在右方遠處，光線近似平行進入眼睛。把光線反向追跡回圓柱內：恰好擦過白線核心邊緣的那一條光線（紅色），出射後離軸的距離就是看到的視半徑 B。</p>
+      <p>核心邊緣切線在圓柱內與法線夾角 θ<sub>r</sub>：<span class="f">sin θ<sub>r</sub> = b/R</span>；出射後與法線夾角 θ<sub>i</sub>：<span class="f">sin θ<sub>i</sub> = B/R</span>。由 <span class="f">sin θ<sub>i</sub> = n sin θ<sub>r</sub></span> 得 <span class="f">B = nb</span>，與 R 無關。</p>
+      <div class="note">適用條件：<span class="f">nb &lt; R</span>。若 nb ≥ R，整個圓柱看起來都是白色，視半徑被圓柱外緣截斷為 R，此法失效。因此任何量到的 B 都不可能超過 R。</div>
+    </div>
+
+    <div class="card">
+      <h2>圓柱透鏡的焦距</h2>
+      <svg id="svgFoc" viewBox="0 0 560 330"></svg>
+      <div id="focTxt" class="res"></div>
+      <p>圓柱（厚透鏡）兩主平面都通過圓心，近軸焦距由圓心量起：</p>
+      <p class="f" style="text-align:center">f = nR / 2(n − 1)</p>
+      <p class="muted">圖中是精確光線追跡：離軸愈遠的邊緣光線聚焦愈靠近圓柱（球面像差），所以實際觀察到「影像翻轉」的位置會比近軸焦點稍近。由 f 可反推 <span class="f">n = 2f / (2f − R)</span>，與視半徑法交叉驗證。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>參考解答勘誤</h2>
+    <div class="err"><b>第三部分：</b>B 的數據中出現 8.2 mm，但圓柱外半徑 R = 16.1/2 ≈ 8.05 mm，視半徑不可能超過 R。這筆數據在物理上不可能，應是讀數誤差。</div>
+    <div class="err"><b>第一部分：</b>高度表中「平均」欄寫 74.99 mm，實際上例如第 1 列 (75.00 + 4×74.95)/5 = 74.96 mm。以 D = 16.10 mm、h = 75.00 mm 計算，V = π(8.05)²(75.00) ≈ 15 269 mm³，不是 15 275 mm³。「15275.00 ± 105」的有效位數也過多，建議寫成 (1.527 ± 0.011)×10⁴ mm³。</div>
+    <div class="err"><b>第二、三部分一致性：</b>參考答案量得 f = 11.2 mm，代入 n = 2f/(2f − R) 得 n ≈ 1.56，與視半徑法的 1.45 相差不小。差異主要來自球面像差：肉眼判斷的翻轉點偏近。本模擬會在第 ⑤ 頁讓你量化這個差異。</div>
+  </div>
+</section>
+
+<!-- ============ ② 體積 ============ -->
+<section id="t2">
+  <div class="card">
+    <h2>② 游標尺量透明圓柱的體積</h2>
+    <p>點選下方表格的任一格，游標尺就會夾在對應位置。讀出主尺與副尺刻度後，把讀數（mm，讀到 0.05）填入該格。直徑在 3 個角度（相隔 60°）、5 個高度位置量；高度在圓周上 5 個位置、重複 3 次。</p>
+    <div class="grid2">
+      <div>
+        <div id="curLbl" class="res"><b>請點選表格中的一格開始量測</b></div>
+        <svg id="svgJaw" viewBox="0 0 300 170"></svg>
+      </div>
+      <div>
+        <div class="row" style="margin-bottom:6px">
+          <span>放大倍率</span>
+          <button class="b" data-z="24">×1</button><button class="b fill" data-z="36">×1.5</button><button class="b" data-z="54">×2.25</button>
+        </div>
+        <div class="row">
+          <button class="b" id="chkCell">檢查這一格</button>
+          <span id="chkMsg" class="res"></span>
+        </div>
+        <details><summary>教師工具</summary>
+          <div class="row" style="margin-top:6px">
+            <button class="b warn" id="autoFill">全部自動填入正確讀數（示範用）</button>
+            <button class="b warn" id="clearVol">清空表格</button>
+          </div>
+        </details>
+      </div>
+    </div>
+    <h3>游標尺讀數（左右捲動可看完整副尺）</h3>
+    <div class="scroll"><div id="vernier"></div></div>
+    <p class="muted">本游標尺副尺 20 格共 19 mm，每格 0.95 mm，最小讀數 1 − 0.95 = 0.05 mm。讀法：主尺讀副尺 0 線左邊的整數 mm，再找副尺哪一條線與主尺刻線對齊，第 k 條對齊就加 k × 0.05 mm。</p>
+  </div>
+
+  <div class="card">
+    <h3>直徑 D（mm）</h3>
+    <table class="data" id="tblD"></table>
+    <h3>高 h（mm）</h3>
+    <table class="data" id="tblH"></table>
+  </div>
+
+  <div class="card">
+    <h2>計算結果</h2>
+    <div id="volRes" class="res muted">填入數據後自動計算。</div>
+    <details><summary>不確定度的算法</summary>
+      <p>統計不確定度：平均值標準誤 <span class="f">s/√N</span>。儀器不確定度：讀數四捨五入到 0.05 mm，誤差在 ±0.025 mm 內均勻分布，標準不確定度 <span class="f">0.025/√3 ≈ 0.014 mm</span>。兩者平方和開根號為合成不確定度。</p>
+      <p>體積的相對不確定度：<span class="f">(u<sub>V</sub>/V)² = (2u<sub>D</sub>/D)² + (u<sub>h</sub>/h)²</span>。直徑有平方，所以誤差貢獻加倍，比高度重要得多。</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============ ③ 焦距 ============ -->
+<section id="t3">
+  <div class="card">
+    <h2>③ 圓柱透鏡焦距：影像翻轉法</h2>
+    <p>把貼有標籤（紅點＋黑色箭頭）的方木柱放在透明圓柱後方，從前方透過圓柱觀察。方木柱由貼近圓柱開始往後移：距離小於焦距時看到<b>正立放大虛像</b>，大於焦距時看到<b>左右顛倒的實像</b>，在焦距附近影像極度放大、模糊不清。記錄「不成像區間」的兩端，取中點為 f。</p>
+    <div class="info">圓柱只在水平方向聚焦，所以影像只有<b>左右</b>放大或翻轉，上下不變。兩側沒被圓柱擋住的標籤可以當作正立參考。</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>透過圓柱看到的影像</h3>
+      <canvas id="cvView" width="640" height="260"></canvas>
+      <div class="row" style="margin-top:10px">
+        <span>移動方木柱</span>
+        <button class="b" data-ds="-1">−1 mm</button><button class="b" data-ds="-0.1">−0.1</button>
+        <input type="range" id="sGap" min="0" max="20" step="0.01" value="1">
+        <button class="b" data-ds="0.1">+0.1</button><button class="b" data-ds="1">+1 mm</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <label class="ctl">觀察者到圓柱的距離 L <input type="range" id="Lobs" min="150" max="1500" step="10" value="300"><span id="Lv"></span></label>
+      </div>
+      <details><summary>提示</summary>
+        <p>① 判斷「清楚正立」與「清楚倒立」的準則要前後一致，例如以箭頭方向能否明確辨認為準。</p>
+        <p>② 多做幾次，一次由近往遠、一次由遠往近，可以檢查是否有判斷上的遲滯。</p>
+        <p>③ 試著改變觀察距離 L，看翻轉位置是否跟著變，想想為什麼。實驗時應該站近還是站遠？</p>
+      </details>
+    </div>
+    <div class="card">
+      <h3>俯視圖（圓柱與方木柱）</h3>
+      <svg id="svgTop" viewBox="0 0 640 300"></svg>
+      <h3>直尺放大圖：量圓柱表面到方木柱面的間距 s</h3>
+      <div class="scroll"><div id="rulerZoom"></div></div>
+      <p class="muted">直尺最小刻度 1 mm，請估讀到 0.1 mm。注意直尺的 0 刻度不一定剛好對齊圓柱表面（虛線），讀數時自行扣除。物距 d 由圓心量起：<span class="f">d = R + s</span>。</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>數據紀錄</h3>
+    <p class="res">使用的圓柱半徑 R = <b id="Rused"></b></p>
+    <table class="data" id="tblF"></table>
+    <div id="focRes" class="res muted" style="margin-top:8px">填入數據後自動計算。</div>
+  </div>
+</section>
+
+<!-- ============ ④ 視半徑 ============ -->
+<section id="t4">
+  <div class="card">
+    <h2>④ 白線夾心圓柱：量側面視半徑 B 與端面真實半徑 b</h2>
+    <p>白線圓柱的透明部分和透明圓柱材料相同，但直徑不一定一樣，所以先用游標尺量白線圓柱的外徑 D′。在端面貼標籤紙，標出 5 個量測方向 θ = 0°、36°、72°、108°、144°。每個方向做兩件事：從<b>側面</b>讀核心的視寬度，從<b>端面</b>用游標尺量核心的真實寬度。</p>
+    <div class="info">側面量的是垂直視線方向的寬度，所以側面量 θ 方向時，要轉動圓柱讓 θ 標記線垂直於視線；端面則把游標尺的兩爪沿 θ 方向夾在核心兩側。兩邊量的是同一個方向，逐方向配對才能消去核心截面不圓的影響。</div>
+  </div>
+
+  <div class="card">
+    <h3>1. 白線圓柱外徑 D′（游標尺）</h3>
+    <div class="row">
+      <button class="b" data-dp="0">夾 0° 方向</button><button class="b" data-dp="1">夾 60° 方向</button><button class="b" data-dp="2">夾 120° 方向</button>
+      <span id="dpLbl" class="muted"></span>
+    </div>
+    <div class="scroll" style="margin-top:6px"><div id="vern4a"><div class="placeholder">按上方按鈕，游標尺就會夾住白線圓柱。</div></div></div>
+    <table class="data" style="margin-top:8px"><tr><th></th><th>0°</th><th>60°</th><th>120°</th><th>D′ 平均</th></tr>
+      <tr><th>D′（mm）</th><td><input class="cell" id="Dp_0" inputmode="decimal"></td><td><input class="cell" id="Dp_1" inputmode="decimal"></td><td><input class="cell" id="Dp_2" inputmode="decimal"></td><td id="DpMean">—</td></tr></table>
+  </div>
+
+  <div class="card">
+    <h3>2. 側面觀察：直尺貼在圓柱前緣，讀核心與外緣的邊界位置</h3>
+    <div class="row">
+      <span>量測方向 θ：</span><span id="thBtnsS"></span>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="ctl">眼睛到圓柱中心的距離 L <input type="range" id="Lside" min="120" max="1200" step="10" value="300"><span id="LsideV"></span></label>
+    </div>
+    <div class="scroll" style="margin-top:8px"><canvas id="cvSide" width="880" height="270" style="width:880px;max-width:none"></canvas></div>
+    <p class="muted">直尺最小刻度 1 mm，估讀到 0.1 mm。直尺每換一個方向就重新擺放，0 刻度位置會變。眼睛太近（L &lt; 25 cm）看不清楚，太遠則刻度分辨率變差。</p>
+    <details><summary>為什麼還要讀「外緣」？</summary>
+      <p>眼睛在有限距離 L 時，看到的圓柱外緣寬度 W 和核心寬度都被同樣的比例壓縮：<span class="f">W/2 ≈ R′√[(L−R′)/(L+R′)]</span>。L = 30 cm 時約縮 3%，直接用 B/b 會系統性偏低。這個壓縮對核心與外緣幾乎相同，所以用比值 <span class="f">B = (w<sub>B</sub>/w<sub>W</sub>)·D′/2</span> 就能把視差消去。第 ⑤ 頁會兩種算法並列。</p>
+    </details>
+    <table class="data" id="tblS" style="margin-top:8px"></table>
+  </div>
+
+  <div class="card">
+    <h3>3. 端面觀察：游標尺兩爪對齊核心邊緣，量核心寬度 w<sub>b</sub> = 2b</h3>
+    <div class="row"><span>量測方向 θ：</span><span id="thBtnsE"></span></div>
+    <div class="grid2" style="margin-top:8px">
+      <div><canvas id="cvEnd" width="520" height="360"></canvas></div>
+      <div>
+        <div class="row"><span>游標尺位置</span><button class="b" data-jc="-0.05">←</button><input type="range" id="jawC" min="-3" max="3" step="0.01" value="0"><button class="b" data-jc="0.05">→</button></div>
+        <div class="row" style="margin-top:6px"><span>兩爪張開量</span><button class="b" data-jw="-0.05">−</button><input type="range" id="jawW" min="6" max="14" step="0.01" value="12"><button class="b" data-jw="0.05">＋</button></div>
+        <p class="muted">把兩爪內緣調到剛好切齊白色核心最外側的纖維，再讀下方游標尺。白線邊緣是一束纖維，本身就有些毛邊，要用一致的判斷準則。</p>
+      </div>
+    </div>
+    <div class="scroll"><div id="vern4b"></div></div>
+    <table class="data" id="tblE" style="margin-top:8px"></table>
+    <details><summary>教師工具</summary>
+      <div class="row" style="margin-top:6px"><button class="b warn" id="autoFill4">自動填入第 ④ 頁理想讀數（示範用，L = 300 mm）</button><button class="b warn" id="clear4">清空第 ④ 頁</button></div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ ⑤ 分析 ============ -->
+<section id="t5">
+  <div class="card">
+    <h2>⑤-1 視半徑法求 n</h2>
+    <div id="anaN" class="res muted">請先完成第 ④ 頁的 D′、側面與端面數據。</div>
+    <table class="data" id="tblN" style="margin-top:8px"></table>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>過原點迴歸：B<sub>修正</sub> 對 b</h3>
+      <svg id="svgReg" viewBox="0 0 460 320"></svg>
+      <div id="regTxt" class="res"></div>
+      <div class="note">5 個方向的 b 只差零點幾 mm，x 範圍太窄，所以「有截距」的迴歸斜率很不可靠，一定要用過原點迴歸（物理上 b = 0 時 B = 0）。過原點迴歸的斜率 Σxy/Σx² 其實就是以 b² 加權的比值平均。</div>
+    </div>
+    <div class="card">
+      <h3>⑤-2 與焦距交叉驗證</h3>
+      <div class="row"><label class="ctl">第 ③ 頁觀察時的眼睛距離 L（mm）<input class="cell" id="Lfoc" inputmode="decimal"></label></div>
+      <div id="focX" class="res muted" style="margin-top:6px">請先完成第 ③ 頁焦距數據。</div>
+      <svg id="svgAb" viewBox="0 0 460 300" style="margin-top:6px"></svg>
+    </div>
+  </div>
+  <div class="card">
+    <h3>觀念整理</h3>
+    <p><b>觀察距離修正：</b>眼睛不在無窮遠，影像翻轉的條件是「實像正好成在眼睛上」，不是「像在無窮遠」。由 <span class="f">1/d + 1/L = 1/f</span> 得 <span class="f">f = dL/(d+L)</span>，翻轉點會比 f 遠一點。</p>
+    <p><b>球面像差：</b>離軸愈遠的光線焦距愈短，翻轉區的近端由邊緣光線決定，所以不成像區間會往內延伸，中點偏短。</p>
+    <p>這兩個效應方向相反，但通常像差較大，所以焦距法求出的 n 常偏大；視半徑法用的是單一條切線光線，沒有像差問題，較準確。</p>
+  </div>
+</section>
+
+<!-- ============ ⑥ 真值 ============ -->
+<section id="t6">
+  <div class="card">
+    <h2>⑥ 真值揭曉</h2>
+    <p>確認所有數據都填好後再揭曉。揭曉後仍可回頭修改數據，本頁會即時更新。</p>
+    <button class="b fill" id="btnReveal">揭曉本組樣品的真值</button>
+    <div id="revealBox" style="margin-top:10px"></div>
+  </div>
+  <div class="grid2" id="revealMore" style="display:none">
+    <div class="card"><h3>核心截面形狀（誇大 8 倍顯示偏離圓形的部分）</h3><svg id="svgCore" viewBox="0 0 360 360"></svg></div>
+    <div class="card"><h3>誤差來源診斷</h3><div id="diag" class="res"></div></div>
+  </div>
+</section>
+</main>
+<script>
+"use strict";
+/* ---------- 隨機數與隱藏真值 ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gaussFrom(r){return function(){let u=0;while(u===0)u=r();const v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};}
+let T=null;
+function makeTruth(seed){
+  const r=mulberry32(seed*7919+13), g=gaussFrom(r);
+  const D0=16.06+0.08*r(), R0=D0/2;
+  const n=1.45+0.07*r();
+  const h0=74.90+0.12*r();
+  const ell=0.008+0.012*r(), ellPh=r()*Math.PI, taper=(r()-0.5)*0.04;
+  const tilt=0.01+0.02*r(), tiltPh=r()*2*Math.PI;
+  const Dm=[],Hm=[];
+  for(let k=0;k<3;k++){Dm.push([]);Hm.push([]);
+    for(let j=0;j<5;j++){
+      Dm[k].push(D0+ell*Math.cos(2*k*Math.PI/3+ellPh)+taper*(j-2)/2+0.005*g()+0.012*g());
+      Hm[k].push(h0+tilt*Math.cos(j*2*Math.PI/5+tiltPh)+0.012*g());
+    }}
+  const rulerOff=0.18*g();
+  return Object.assign({seed,D0,R0,n,h0,Dm,Hm,rulerOff},makeCore(seed,n));
+}
+function newSample(seed){
+  T=makeTruth(seed);
+  document.getElementById('seedLbl').textContent=seed;
+}
+
+/* ---------- 分頁 ---------- */
+document.querySelectorAll('#tabs button').forEach(bt=>bt.addEventListener('click',()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('main section').forEach(x=>x.classList.remove('on'));
+  bt.classList.add('on');document.getElementById(bt.dataset.t).classList.add('on');
+  if(bt.dataset.t==='t3'){updateRused();renderView();drawTop();drawRuler();}
+  if(bt.dataset.t==='t4'){renderSide();renderEnd();}
+  if(bt.dataset.t==='t5'){calcAnalysis();}
+  if(bt.dataset.t==='t6'){buildReveal();}
+}));
+
+/* ---------- 工具 ---------- */
+const fx=(x,d)=>Number(x).toFixed(d);
+function stats(a){const n=a.length;if(!n)return null;const m=a.reduce((s,x)=>s+x,0)/n;
+  const sd=n>1?Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(n-1)):0;return{n,m,sd,sem:n>1?sd/Math.sqrt(n):0};}
+function sigRound(u){if(!(u>0))return{u:0,dec:2};const e=Math.floor(Math.log10(u));const dec=Math.max(0,-(e-1));return{u:Number(u.toFixed(dec)),dec};}
+function refract2(d,N,eta){const c1=-(d[0]*N[0]+d[1]*N[1]);const k=1-eta*eta*(1-c1*c1);if(k<0)return null;const c2=Math.sqrt(k);
+  return[eta*d[0]+(eta*c1-c2)*N[0],eta*d[1]+(eta*c1-c2)*N[1]];}
+function traceCircle2(o,d,R,n){
+  const bb=o[0]*d[0]+o[1]*d[1],c=o[0]*o[0]+o[1]*o[1]-R*R,disc=bb*bb-c;if(disc<=0)return null;
+  const t1=-bb-Math.sqrt(disc);const p1=[o[0]+t1*d[0],o[1]+t1*d[1]];const N=[p1[0]/R,p1[1]/R];
+  const t=refract2(d,N,1/n);const s2=-2*(p1[0]*t[0]+p1[1]*t[1]);const p2=[p1[0]+s2*t[0],p1[1]+s2*t[1]];
+  const N2=[p2[0]/R,p2[1]/R];const out=refract2(t,[-N2[0],-N2[1]],n);return{p1,t,p2,out};}
+
+/* ---------- ① 原理圖 ---------- */
+function drawApparent(){
+  const n=+p_n.value,b=+p_b.value,R=8.05,sc=20,cx=230,cy=200;
+  document.getElementById('p_nv').textContent=fx(n,2);document.getElementById('p_bv').textContent=fx(b,2)+' mm';
+  const X=x=>cx+x*sc,Y=y=>cy-y*sc;
+  let s=`<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#555"/></marker></defs>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${R*sc}" fill="#e3efff" stroke="#6b8fc7" stroke-width="2"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${b*sc}" fill="#fff" stroke="#999" stroke-dasharray="4 3"/>`;
+  s+=`<line x1="${X(-R-1)}" y1="${cy}" x2="555" y2="${cy}" stroke="#bbb" stroke-dasharray="2 4"/>`;
+  const B=n*b,valid=B<R;
+  const rays=[];for(let i=-9;i<=9;i++)rays.push(i*R*0.98/9);
+  function one(y,style){
+    const res=traceCircle2([30,y],[-1,0],R,n);if(!res)return '';
+    let o=`<line x1="555" y1="${Y(y)}" x2="${X(res.p1[0])}" y2="${Y(res.p1[1])}" ${style}/>`;
+    const p=res.p1,t=res.t,dist=Math.abs(p[0]*t[1]-p[1]*t[0]);
+    if(dist<b){const pt=p[0]*t[0]+p[1]*t[1];const ss=-pt-Math.sqrt(pt*pt-(p[0]*p[0]+p[1]*p[1]-b*b));
+      o+=`<line x1="${X(p[0])}" y1="${Y(p[1])}" x2="${X(p[0]+ss*t[0])}" y2="${Y(p[1]+ss*t[1])}" ${style}/>`;}
+    else{o+=`<line x1="${X(p[0])}" y1="${Y(p[1])}" x2="${X(res.p2[0])}" y2="${Y(res.p2[1])}" ${style} opacity=".5"/>`;}
+    return{svg:o,hit:dist<b};
+  }
+  rays.forEach(y=>{const r1=one(y,'');if(!r1)return;const st=r1.hit?'stroke="#e07a1f" stroke-width="1.3"':'stroke="#9aa6b2" stroke-width="1"';s+=one(y,st).svg;});
+  if(valid){
+    const res=traceCircle2([30,B],[-1,0],R,n);const p=res.p1,t=res.t;
+    const pt=p[0]*t[0]+p[1]*t[1];const foot=[p[0]-pt*t[0],p[1]-pt*t[1]];
+    s+=`<line x1="555" y1="${Y(B)}" x2="${X(p[0])}" y2="${Y(p[1])}" stroke="#c81e1e" stroke-width="2.4"/>`;
+    s+=`<line x1="${X(p[0])}" y1="${Y(p[1])}" x2="${X(foot[0])}" y2="${Y(foot[1])}" stroke="#c81e1e" stroke-width="2.4"/>`;
+    s+=`<line x1="${cx}" y1="${cy}" x2="${X(p[0]*1.35)}" y2="${Y(p[1]*1.35)}" stroke="#333" stroke-dasharray="5 3"/>`;
+    s+=`<line x1="${cx}" y1="${cy}" x2="${X(foot[0])}" y2="${Y(foot[1])}" stroke="#15803d" stroke-width="2"/>`;
+    s+=`<text x="${X(foot[0]/2)-14}" y="${Y(foot[1]/2)-4}" fill="#15803d" font-size="15" font-style="italic">b</text>`;
+    s+=`<text x="${X(p[0]*0.55)+4}" y="${Y(p[1]*0.55)+16}" fill="#333" font-size="15" font-style="italic">R</text>`;
+    s+=`<text x="${X(p[0])+10}" y="${Y(p[1])-8}" fill="#c81e1e" font-size="14">θᵢ</text>`;
+    s+=`<text x="${X(p[0])-30}" y="${Y(p[1])+4}" fill="#c81e1e" font-size="14">θᵣ</text>`;
+    s+=`<line x1="520" y1="${cy}" x2="520" y2="${Y(B)}" stroke="#c81e1e" marker-end="url(#ah)"/>`;
+    s+=`<text x="526" y="${(cy+Y(B))/2+5}" fill="#c81e1e" font-size="15" font-style="italic">B</text>`;
+  }
+  s+=`<text x="440" y="390" fill="#555" font-size="13">→ 觀察者（遠處）</text>`;
+  s+=`<text x="${cx-10}" y="${cy+5}" fill="#777" font-size="12">白線</text>`;
+  document.getElementById('svgApp').innerHTML=s;
+  document.getElementById('appTxt').innerHTML=valid
+    ?`視半徑 B = nb = <b>${fx(B,2)} mm</b>（R = 8.05 mm），sin θᵣ = b/R = ${fx(b/R,3)}，sin θᵢ = B/R = ${fx(B/R,3)}`
+    :`<span style="color:#b91c1c">nb = ${fx(B,2)} mm ≥ R：整個圓柱看起來都是白色，視半徑被截斷為 R，無法用 n = B/b。</span>`;
+}
+function drawFocal(){
+  const n=+p_n.value,R=8.05,sc=14,cx=150,cy=165,X=x=>cx+x*sc,Y=y=>cy-y*sc;
+  let s=`<circle cx="${cx}" cy="${cy}" r="${R*sc}" fill="#e3efff" stroke="#6b8fc7" stroke-width="2"/>`;
+  s+=`<line x1="0" y1="${cy}" x2="560" y2="${cy}" stroke="#bbb" stroke-dasharray="2 4"/>`;
+  const f=n*R/(2*(n-1));
+  for(let i=-6;i<=6;i++){if(i===0)continue;const y=i*R*0.95/6;
+    const res=traceCircle2([-20,y],[1,0],R,n);if(!res||!res.out)continue;
+    const far=(560-X(res.p2[0]))/sc/Math.max(res.out[0],0.05);
+    const e=[res.p2[0]+far*res.out[0],res.p2[1]+far*res.out[1]];
+    const col=Math.abs(i)>=5?'#e07a1f':'#2563eb';
+    s+=`<polyline points="0,${Y(y)} ${X(res.p1[0])},${Y(res.p1[1])} ${X(res.p2[0])},${Y(res.p2[1])} ${X(e[0])},${Y(e[1])}" fill="none" stroke="${col}" stroke-width="1.2"/>`;}
+  if(X(f)<555){s+=`<line x1="${X(f)}" y1="30" x2="${X(f)}" y2="300" stroke="#c81e1e" stroke-dasharray="5 3"/>`;
+    s+=`<text x="${X(f)+4}" y="44" fill="#c81e1e" font-size="13">F（近軸）</text>`;}
+  s+=`<line x1="${cx}" y1="310" x2="${Math.min(X(f),555)}" y2="310" stroke="#333"/><text x="${cx+4}" y="325" font-size="13">f（由圓心量起）</text>`;
+  s+=`<text x="330" y="20" font-size="12" fill="#e07a1f">橙：邊緣光線，聚焦較近</text>`;
+  document.getElementById('svgFoc').innerHTML=s;
+  document.getElementById('focTxt').innerHTML=`n = ${fx(n,2)}，R = 8.05 mm：近軸焦距 f = <b>${fx(f,2)} mm</b>（由圓心量起），圓柱表面到焦點 ${fx(f-R,2)} mm`;
+}
+const p_n=document.getElementById('p_n'),p_b=document.getElementById('p_b');
+[p_n,p_b].forEach(e=>e.addEventListener('input',()=>{drawApparent();drawFocal();}));
+
+/* ---------- ② 游標尺 ---------- */
+let zoom=36,cur=null;
+function buildVolTables(){
+  let h='<tr><th>角度</th>'+[1,2,3,4,5].map(j=>`<th>位置 ${j}</th>`).join('')+'<th>列平均</th></tr>';
+  for(let k=0;k<3;k++){h+=`<tr><th>${k+1}（${k*60}°）</th>`;for(let j=0;j<5;j++)h+=`<td><input class="cell" id="D_${k}_${j}" data-q="D" data-k="${k}" data-j="${j}" inputmode="decimal"></td>`;h+=`<td id="Dr_${k}">—</td></tr>`;}
+  document.getElementById('tblD').innerHTML=h;
+  h='<tr><th>次數</th>'+[1,2,3,4,5].map(j=>`<th>位置 ${j}</th>`).join('')+'<th>列平均</th></tr>';
+  for(let k=0;k<3;k++){h+=`<tr><th>${k+1}</th>`;for(let j=0;j<5;j++)h+=`<td><input class="cell" id="H_${k}_${j}" data-q="H" data-k="${k}" data-j="${j}" inputmode="decimal"></td>`;h+=`<td id="Hr_${k}">—</td></tr>`;}
+  document.getElementById('tblH').innerHTML=h;
+  document.querySelectorAll('#tblD input,#tblH input').forEach(inp=>{
+    inp.addEventListener('focus',()=>selectCell(inp));
+    inp.addEventListener('input',()=>{inp.classList.remove('ok','ng');calcVol();});
+  });
+}
+function trueVal(q,k,j){return q==='D'?T.Dm[k][j]:T.Hm[k][j];}
+const correctRead=v=>Math.round(v/0.05)*0.05;
+function selectCell(inp){
+  document.querySelectorAll('input.cell.sel').forEach(x=>x.classList.remove('sel'));
+  inp.classList.add('sel');cur={q:inp.dataset.q,k:+inp.dataset.k,j:+inp.dataset.j,inp};
+  document.getElementById('chkMsg').textContent='';
+  document.getElementById('curLbl').innerHTML=cur.q==='D'
+    ?`<b>量測中：直徑 D｜角度 ${cur.k+1}（${cur.k*60}°）、高度位置 ${cur.j+1}</b>`
+    :`<b>量測中：高 h｜第 ${cur.k+1} 次、圓周位置 ${cur.j+1}（${cur.j*72}°）</b>`;
+  drawJaw();drawVernier(trueVal(cur.q,cur.k,cur.j));
+}
+function drawJaw(){
+  let s='';
+  if(cur.q==='D'){
+    const cx=90,cy=85,r=50,a=cur.k*Math.PI/3,ux=Math.cos(a),uy=-Math.sin(a);
+    s+=`<text x="10" y="18" font-size="12" fill="#555">俯視：量直徑的方向</text>`;
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#e3efff" stroke="#6b8fc7" stroke-width="2"/>`;
+    s+=`<line x1="${cx-ux*r}" y1="${cy-uy*r}" x2="${cx+ux*r}" y2="${cy+uy*r}" stroke="#d9731a" stroke-width="3"/>`;
+    [-1,1].forEach(sg=>{const px=cx+sg*ux*(r+5),py=cy+sg*uy*(r+5);s+=`<line x1="${px-uy*14}" y1="${py+ux*14}" x2="${px+uy*14}" y2="${py-ux*14}" stroke="#334155" stroke-width="5"/>`;});
+    s+=`<text x="10" y="162" font-size="12" fill="#555">角度 ${cur.k*60}°</text>`;
+    const x0=200,y0=20,w=40,hh=130;s+=`<text x="178" y="18" font-size="12" fill="#555">側視：高度位置</text>`;
+    s+=`<rect x="${x0}" y="${y0+6}" width="${w}" height="${hh}" fill="#e3efff" stroke="#6b8fc7" stroke-width="2"/>`;
+    for(let j=0;j<5;j++){const y=y0+6+hh*(j+0.5)/5;s+=`<line x1="${x0-6}" y1="${y}" x2="${x0+w+6}" y2="${y}" stroke="${j===cur.j?'#d9731a':'#cbd5e1'}" stroke-width="${j===cur.j?3:1}"/>`;s+=`<text x="${x0+w+10}" y="${y+4}" font-size="11" fill="#555">${j+1}</text>`;}
+  }else{
+    const cx=90,cy=85,r=50,a=cur.j*2*Math.PI/5-Math.PI/2;
+    s+=`<text x="10" y="18" font-size="12" fill="#555">俯視：圓周位置</text>`;
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#e3efff" stroke="#6b8fc7" stroke-width="2"/>`;
+    for(let j=0;j<5;j++){const aa=j*2*Math.PI/5-Math.PI/2,px=cx+Math.cos(aa)*r*0.8,py=cy+Math.sin(aa)*r*0.8;
+      s+=`<circle cx="${px}" cy="${py}" r="${j===cur.j?7:4}" fill="${j===cur.j?'#d9731a':'#94a3b8'}"/>`;}
+    s+=`<text x="${cx+Math.cos(a)*r*0.8-3}" y="${cy+Math.sin(a)*r*0.8+4}" font-size="10" fill="#fff">${cur.j+1}</text>`;
+    const x0=205,y0=20,w=40,hh=130;s+=`<text x="178" y="18" font-size="12" fill="#555">側視：夾上下底面</text>`;
+    s+=`<rect x="${x0}" y="${y0+6}" width="${w}" height="${hh}" fill="#e3efff" stroke="#6b8fc7" stroke-width="2"/>`;
+    s+=`<rect x="${x0-6}" y="${y0}" width="18" height="6" fill="#334155"/><rect x="${x0-6}" y="${y0+hh+6}" width="18" height="6" fill="#334155"/>`;
+    s+=`<line x1="${x0+3}" y1="${y0+6}" x2="${x0+3}" y2="${y0+hh+6}" stroke="#d9731a" stroke-width="3"/>`;
+  }
+  document.getElementById('svgJaw').innerHTML=s;
+}
+function drawVernier(val,id){id=id||'vernier';
+  const s=zoom,start=Math.floor(val)-3,end=Math.floor(val)+23,W=(end-start)*s+40,x=m=>20+(m-start)*s;
+  let o=`<svg width="${W}" height="150" viewBox="0 0 ${W} 150" style="max-width:none">`;
+  o+=`<rect x="0" y="6" width="${W}" height="64" fill="#e9e9e3" stroke="#999"/>`;
+  for(let m=Math.max(0,start);m<=end;m++){const L=m%10===0?34:(m%5===0?24:15);
+    o+=`<line x1="${x(m)}" y1="${70-L}" x2="${x(m)}" y2="70" stroke="#222" stroke-width="1.2"/>`;
+    if(m%10===0)o+=`<text x="${x(m)}" y="26" font-size="15" text-anchor="middle" fill="#222">${m/10}</text>`;}
+  o+=`<text x="${W-60}" y="22" font-size="12" fill="#666">主尺 cm</text>`;
+  o+=`<rect x="${x(val)-14}" y="70" width="${19*s+28}" height="62" fill="#d6e2ec" stroke="#7a8a99"/>`;
+  for(let i=0;i<=20;i++){const xv=x(val+0.95*i),L=i%10===0?30:(i%2===0?22:13);
+    o+=`<line x1="${xv}" y1="70" x2="${xv}" y2="${70+L}" stroke="#123" stroke-width="1.2"/>`;
+    if(i%2===0)o+=`<text x="${xv}" y="120" font-size="13" text-anchor="middle" fill="#123">${i/2}</text>`;}
+  o+=`<text x="${x(val)+19*s+20}" y="126" font-size="12" fill="#666">0.05 mm</text></svg>`;
+  document.getElementById(id).innerHTML=o;
+  const sc=document.getElementById(id).parentElement;sc.scrollLeft=Math.max(0,x(val)-120);
+}
+document.querySelectorAll('[data-z]').forEach(b=>b.addEventListener('click',()=>{
+  zoom=+b.dataset.z;document.querySelectorAll('[data-z]').forEach(x=>x.classList.remove('fill'));b.classList.add('fill');
+  if(cur)drawVernier(trueVal(cur.q,cur.k,cur.j));}));
+document.getElementById('chkCell').addEventListener('click',()=>{
+  const m=document.getElementById('chkMsg');if(!cur){m.textContent='請先點選一格。';return;}
+  const v=parseFloat(cur.inp.value);if(isNaN(v)){m.textContent='這一格還沒填。';return;}
+  const c=correctRead(trueVal(cur.q,cur.k,cur.j));
+  if(Math.abs(v-c)<0.001){cur.inp.classList.add('ok');cur.inp.classList.remove('ng');m.innerHTML='<span style="color:#15803d">✓ 讀數正確</span>';}
+  else{cur.inp.classList.add('ng');cur.inp.classList.remove('ok');m.innerHTML=`<span style="color:#b91c1c">✗ 讀數不正確${Math.abs(v-c)<0.051?'（差 0.05 mm，再找一次對齊的副尺線）':'（檢查主尺整數 mm）'}</span>`;}
+});
+document.getElementById('autoFill').addEventListener('click',()=>{
+  ['D','H'].forEach(q=>{for(let k=0;k<3;k++)for(let j=0;j<5;j++){const e=document.getElementById(`${q}_${k}_${j}`);e.value=fx(correctRead(trueVal(q,k,j)),2);e.classList.remove('ok','ng');}});calcVol();});
+document.getElementById('clearVol').addEventListener('click',()=>{document.querySelectorAll('#tblD input,#tblH input').forEach(e=>{e.value='';e.classList.remove('ok','ng');});calcVol();});
+
+let VOL=null; // {D,uD,h,uh,V,uV,R,uR}
+function calcVol(){
+  const U_INST=0.025/Math.sqrt(3),get=q=>{const a=[];for(let k=0;k<3;k++){const row=[];for(let j=0;j<5;j++){const v=parseFloat(document.getElementById(`${q}_${k}_${j}`).value);if(!isNaN(v)){a.push(v);row.push(v);}}
+    const st=stats(row);document.getElementById(`${q}r_${k}`).textContent=st?fx(st.m,3):'—';}return a;};
+  const Da=get('D'),Ha=get('H'),sD=stats(Da),sH=stats(Ha),box=document.getElementById('volRes');
+  if(!sD||!sH){VOL=null;box.innerHTML='直徑與高度都至少要有一筆數據。';box.className='res muted';updateRused();return;}
+  const uD=Math.sqrt(sD.sem**2+U_INST**2),uh=Math.sqrt(sH.sem**2+U_INST**2);
+  const V=Math.PI*sD.m**2*sH.m/4,rel=Math.sqrt((2*uD/sD.m)**2+(uh/sH.m)**2),uV=V*rel;
+  VOL={D:sD.m,uD,h:sH.m,uh,V,uV,R:sD.m/2,uR:uD/2};
+  const rv=sigRound(uV/1e4),Vs=(V/1e4).toFixed(rv.dec),rd=sigRound(uD),rh=sigRound(uh);
+  box.className='res';
+  box.innerHTML=`<p>直徑：N = ${sD.n}，D̄ = ${fx(sD.m,3)} mm，標準差 s = ${fx(sD.sd,3)} mm，標準誤 ${fx(sD.sem,4)} mm，合成不確定度 u<sub>D</sub> = ${fx(uD,3)} mm → <b>D = ${fx(sD.m,rd.dec)} ± ${fx(rd.u,rd.dec)} mm</b></p>
+  <p>高度：N = ${sH.n}，h̄ = ${fx(sH.m,3)} mm，標準差 s = ${fx(sH.sd,3)} mm，標準誤 ${fx(sH.sem,4)} mm，合成不確定度 u<sub>h</sub> = ${fx(uh,3)} mm → <b>h = ${fx(sH.m,rh.dec)} ± ${fx(rh.u,rh.dec)} mm</b></p>
+  <p>體積：V = πD̄²h̄/4 = ${fx(V,0)} mm³，相對不確定度 ${fx(rel*100,2)}%（直徑貢獻 ${fx(2*uD/sD.m*100,2)}%、高度貢獻 ${fx(uh/sH.m*100,2)}%）<br>→ <b>V = (${Vs} ± ${fx(rv.u,rv.dec)}) × 10⁴ mm³ = ${fx(V/1000,2)} cm³</b></p>
+  ${sD.sd>0.03?'<div class="note">不同角度的直徑差異明顯大於讀數精度，圓柱截面可能略呈橢圓。這是真實的形狀偏差，不是讀錯。</div>':''}`;
+  updateRused();
+}
+
+/* ---------- ③ 焦距 ---------- */
+const sGap=document.getElementById('sGap'),Lobs=document.getElementById('Lobs');
+const col=[0,0,0];
+function pat(y,z){
+  if(Math.abs(y)>15){const g=70+8*Math.sin(z*0.3);col[0]=g;col[1]=g+4;col[2]=g+12;return;}
+  if(Math.abs(y)<=11&&Math.abs(z)<=5.5){
+    let r=242,g=240,b=232;
+    if((y+6)*(y+6)+z*z<4.84){r=210;g=40;b=40;}
+    else if(y>-2.5&&y<4&&Math.abs(z)<0.8){r=g=b=25;}
+    else if(y>=4&&y<=8&&Math.abs(z)<(8-y)*0.75){r=g=b=25;}
+    else if(y>=5&&y<=10&&z>=3.3&&z<=4.7){r=40;g=90;b=200;}
+    col[0]=r;col[1]=g;col[2]=b;return;}
+  const gr=0.85+0.15*Math.sin(y*2.3+Math.sin(z*0.35)*1.5);col[0]=196*gr;col[1]=160*gr;col[2]=112*gr;
+}
+function fresT(ci,ct,n1,n2){const rs=(n1*ci-n2*ct)/(n1*ci+n2*ct),rp=(n2*ci-n1*ct)/(n2*ci+n1*ct);return 1-(rs*rs+rp*rp)/2;}
+function renderView(){
+  const cv=document.getElementById('cvView'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height,img=ctx.createImageData(W,H),D=img.data;
+  const n=T.n,R=T.R0,s=+sGap.value,d=R+s,L=+Lobs.value,Yh=16,Zh=Yh*H/W,ox=-L;
+  document.getElementById('Lv').textContent=`${L} mm`;
+  for(let py=0;py<H;py++){const v=Zh-(py+0.5)/H*2*Zh;
+    for(let px=0;px<W;px++){const u=(px+0.5)/W*2*Yh-Yh;
+      let dx=L,dy=u,dz=v;const nn=Math.hypot(dx,dy,dz);dx/=nn;dy/=nn;dz/=nn;
+      let rr,gg,bb2;
+      const a=dx*dx+dy*dy,bq=ox*dx,c=ox*ox-R*R,disc=bq*bq-a*c;
+      if(disc>0){
+        const t1=(-bq-Math.sqrt(disc))/a,p1x=ox+t1*dx,p1y=t1*dy,p1z=t1*dz,Nx=p1x/R,Ny=p1y/R;
+        const ci=-(dx*Nx+dy*Ny),eta=1/n,k=1-eta*eta*(1-ci*ci),ct=Math.sqrt(k),T1=fresT(ci,ct,1,n);
+        const cf=eta*ci-ct,tx=eta*dx+cf*Nx,ty=eta*dy+cf*Ny,tz=eta*dz;
+        const s2=-2*(p1x*tx+p1y*ty)/(tx*tx+ty*ty),p2x=p1x+s2*tx,p2y=p1y+s2*ty,p2z=p1z+s2*tz,N2x=p2x/R,N2y=p2y/R;
+        const ci2=tx*N2x+ty*N2y,k2=1-n*n*(1-ci2*ci2);
+        if(k2<0){rr=gg=bb2=20;}
+        else{const ct2=Math.sqrt(k2),T2=fresT(ci2,ct2,n,1),cf2=n*ci2-ct2;
+          const qx=n*tx-cf2*N2x,qy=n*ty-cf2*N2y,qz=n*tz;
+          if(qx<=1e-6){col[0]=col[1]=col[2]=60;}else{const tt=(d-p2x)/qx;pat(p2y+tt*qy,p2z+tt*qz);}
+          const Tt=T1*T2*0.97;rr=col[0]*Tt+226*(1-Tt);gg=col[1]*Tt+229*(1-Tt);bb2=col[2]*Tt+234*(1-Tt);}
+      }else{const tt=(d-ox)/dx;pat(tt*dy,tt*dz);rr=col[0];gg=col[1];bb2=col[2];}
+      const idx=(py*W+px)*4;D[idx]=rr;D[idx+1]=gg;D[idx+2]=bb2;D[idx+3]=255;}}
+  ctx.putImageData(img,0,0);
+}
+function drawTop(){
+  const R=T.R0,s=+sGap.value,sc=7,cx=250,cy=140,X=x=>cx+x*sc;
+  let o=`<rect x="0" y="0" width="640" height="300" fill="#fafafa"/>`;
+  o+=`<line x1="40" y1="${cy}" x2="630" y2="${cy}" stroke="#ccc" stroke-dasharray="3 4"/>`;
+  o+=`<line x1="40" y1="${cy}" x2="${X(0)}" y2="${cy-R*sc}" stroke="#cbd5e1"/><line x1="40" y1="${cy}" x2="${X(0)}" y2="${cy+R*sc}" stroke="#cbd5e1"/>`;
+  o+=`<circle cx="36" cy="${cy}" r="7" fill="#fff" stroke="#333"/><circle cx="39" cy="${cy}" r="3" fill="#333"/>`;
+  o+=`<text x="10" y="${cy-18}" font-size="12" fill="#555">眼</text><text x="10" y="${cy+28}" font-size="11" fill="#555">L = ${Lobs.value} mm</text><text x="10" y="${cy+42}" font-size="11" fill="#999">（未按比例）</text>`;
+  o+=`<circle cx="${cx}" cy="${cy}" r="${R*sc}" fill="#e3efff" stroke="#6b8fc7" stroke-width="2"/><text x="${cx-18}" y="${cy+5}" font-size="12" fill="#446">圓柱</text>`;
+  o+=`<line x1="${X(R)}" y1="${cy-80}" x2="${X(R)}" y2="${cy+120}" stroke="#6b8fc7" stroke-dasharray="4 3"/>`;
+  const bx=X(R+s);o+=`<rect x="${bx}" y="${cy-105}" width="160" height="210" fill="#c4a070" stroke="#8a6a3a"/>`;
+  o+=`<rect x="${bx}" y="${cy-77}" width="4" height="154" fill="#fff" stroke="#999" stroke-width=".5"/>`;
+  o+=`<text x="${bx+30}" y="${cy+5}" font-size="12" fill="#3b2a14">方木柱</text><text x="${bx+8}" y="${cy-84}" font-size="11" fill="#555">標籤面</text>`;
+  o+=`<line x1="${cx}" y1="${cy+125}" x2="${bx}" y2="${cy+125}" stroke="#c81e1e"/><line x1="${cx}" y1="${cy+118}" x2="${cx}" y2="${cy+132}" stroke="#c81e1e"/><line x1="${bx}" y1="${cy+118}" x2="${bx}" y2="${cy+132}" stroke="#c81e1e"/>`;
+  o+=`<text x="${(cx+bx)/2-4}" y="${cy+150}" font-size="13" fill="#c81e1e" font-style="italic">d</text>`;
+  document.getElementById('svgTop').innerHTML=o;
+}
+function drawRuler(){
+  const s=+sGap.value,off=T.rulerOff,sc=40,ws=Math.max(-2,Math.floor(s)-5),span=14,W=span*sc+40,x=m=>20+(m-ws)*sc;
+  let o=`<svg width="${W}" height="135" viewBox="0 0 ${W} 135" style="max-width:none">`;
+  if(x(0)>0)o+=`<rect x="0" y="8" width="${Math.max(0,x(0))}" height="62" fill="#e3efff"/><text x="${Math.max(4,x(0)-70)}" y="24" font-size="12" fill="#446">圓柱表面</text>`;
+  o+=`<line x1="${x(0)}" y1="4" x2="${x(0)}" y2="74" stroke="#6b8fc7" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+  o+=`<rect x="${x(s)}" y="8" width="${W}" height="62" fill="#c4a070"/><text x="${x(s)+8}" y="24" font-size="12" fill="#3b2a14">方木柱面</text>`;
+  const r0=x(off);o+=`<rect x="${Math.max(r0,0)}" y="72" width="${W}" height="56" fill="#fdf6d8" stroke="#b8a860"/>`;
+  for(let m=0;m<=30*10;m++){const xm=x(off+m);if(xm<0)continue;if(xm>W)break;const L=m%10===0?24:(m%5===0?17:10);
+    o+=`<line x1="${xm}" y1="72" x2="${xm}" y2="${72+L}" stroke="#222" stroke-width="1"/>`;
+    if(m%10===0)o+=`<text x="${xm}" y="116" font-size="14" text-anchor="middle">${m/10}</text>`;}
+  o+=`<text x="${W-70}" y="124" font-size="11" fill="#666">直尺 cm</text></svg>`;
+  document.getElementById('rulerZoom').innerHTML=o;
+}
+function stepS(ds){sGap.value=Math.min(20,Math.max(0,+sGap.value+ds));onS();}
+let raf=0;function onS(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{renderView();drawTop();drawRuler();});}
+sGap.addEventListener('input',onS);Lobs.addEventListener('input',onS);
+document.querySelectorAll('[data-ds]').forEach(b=>b.addEventListener('click',()=>stepS(+b.dataset.ds)));
+
+function buildFocTable(){
+  let h='<tr><th>次數</th><th>s₁：正立影像開始模糊不清（mm）</th><th>s₂：倒立影像開始清楚（mm）</th><th>d₁ = R + s₁</th><th>d₂ = R + s₂</th><th>f = (d₁+d₂)/2</th></tr>';
+  for(let i=0;i<5;i++)h+=`<tr><th>${i+1}</th><td><input class="cell" id="s1_${i}" inputmode="decimal"></td><td><input class="cell" id="s2_${i}" inputmode="decimal"></td><td id="d1_${i}">—</td><td id="d2_${i}">—</td><td id="fi_${i}">—</td></tr>`;
+  document.getElementById('tblF').innerHTML=h;
+  document.querySelectorAll('#tblF input').forEach(e=>e.addEventListener('input',calcFoc));
+}
+function Rinfo(){return VOL?{R:VOL.R,uR:VOL.uR,src:'②'}:{R:8.05,uR:0.025,src:'試題值'};}
+function updateRused(){const r=Rinfo();document.getElementById('Rused').textContent=`${fx(r.R,3)} mm（${r.src==='②'?'取自第 ② 頁量測':'尚未完成第 ② 頁，暫用試題 D = 16.1 mm'}）`;calcFoc();}
+let FOC=null;
+function calcFoc(){
+  const r=Rinfo(),fs=[],ws=[];
+  for(let i=0;i<5;i++){const a=parseFloat(document.getElementById(`s1_${i}`).value),b=parseFloat(document.getElementById(`s2_${i}`).value);
+    document.getElementById(`d1_${i}`).textContent=isNaN(a)?'—':fx(r.R+a,2);document.getElementById(`d2_${i}`).textContent=isNaN(b)?'—':fx(r.R+b,2);
+    if(!isNaN(a)&&!isNaN(b)){const f=r.R+(a+b)/2;fs.push(f);ws.push(Math.abs(b-a));document.getElementById(`fi_${i}`).textContent=fx(f,2);}
+    else document.getElementById(`fi_${i}`).textContent='—';}
+  const box=document.getElementById('focRes'),st=stats(fs);
+  if(!st){FOC=null;box.className='res muted';box.textContent='每一列要同時填 s₁ 與 s₂ 才會計算。';return;}
+  const wbar=ws.reduce((x,y)=>x+y,0)/ws.length,uZone=(wbar/2)/Math.sqrt(3),uRead=0.2,uf=Math.sqrt(st.sem**2+uZone**2+uRead**2/2+r.uR**2);
+  FOC={f:st.m,uf,R:r.R,uR:r.uR};const rf=sigRound(uf);
+  box.className='res';
+  box.innerHTML=`N = ${st.n}，f̄ = ${fx(st.m,2)} mm，標準差 ${fx(st.sd,2)} mm，平均不成像區間寬度 ${fx(wbar,2)} mm<br>
+  不確定度（標準誤、區間寬度、直尺估讀、R 四項合成）u<sub>f</sub> = ${fx(uf,2)} mm → <b>f = ${fx(st.m,rf.dec)} ± ${fx(rf.u,rf.dec)} mm</b>（由圓心量起）
+  ${st.n<3?'<div class="note">建議至少做 3 次，並交替由近往遠、由遠往近推。</div>':''}`;
+}
+
+/* ---------- ④ 白線圓柱：真值 ---------- */
+const THS=[0,36,72,108,144];
+function makeCore(seed,n){
+  const r=mulberry32(seed*104729+7),g=gaussFrom(r);
+  const Dp0=15.95+0.25*r(),Rp=Dp0/2;
+  const a2=0.05+0.07*r(),ph2=r()*Math.PI,a3=0.02+0.04*r(),ph3=r()*2*Math.PI;
+  let b0;do{b0=4.5+1.3*r();}while(n*(b0+a2+a3+0.08)>0.93*Rp);
+  const fib=[];for(let i=0;i<6;i++)fib.push([9+Math.floor(16*r()),0.006+0.008*r(),r()*2*Math.PI]);
+  const dpPh=r()*Math.PI,DpM=[0,1,2].map(k=>Dp0+0.012*Math.cos(2*k*Math.PI/3+dpPh)+0.008*g());
+  const rOff=THS.map(()=>-12.8+2*r());
+  return{Dp0,Rp,b0,a2,ph2,a3,ph3,fib,DpM,rOff};
+}
+function bfun(phi){let v=T.b0+T.a2*Math.cos(2*(phi-T.ph2))+T.a3*Math.cos(3*(phi-T.ph3));
+  for(const f of T.fib)v+=f[1]*Math.sin(f[0]*phi+f[2]);return v;}
+const deg=Math.PI/180;
+/* 側面：眼睛在 (L,0)，直尺平面 x = R′；回傳該讀數位置的光線資訊 */
+function sideRay(y,L,th){
+  const R=T.Rp,n=T.n;let dx=R-L,dy=y;const nn=Math.hypot(dx,dy);dx/=nn;dy/=nn;
+  const bq=L*dx,c=L*L-R*R,disc=bq*bq-c;if(disc<=0)return null;
+  const t1=-bq-Math.sqrt(disc),px=L+t1*dx,py=t1*dy,Nx=px/R,Ny=py/R;
+  const ci=-(dx*Nx+dy*Ny),eta=1/n,k=1-eta*eta*(1-ci*ci),ct=Math.sqrt(k);
+  const cf=eta*ci-ct,tx=eta*dx+cf*Nx,ty=eta*dy+cf*Ny,tn=Math.hypot(tx,ty),ux=tx/tn,uy=ty/tn;
+  const tau=-(px*ux+py*uy),qx=px+tau*ux,qy=py+tau*uy,dmin=Math.hypot(qx,qy);
+  const phi=Math.atan2(qy,qx)-Math.PI/2+th*deg;
+  return{margin:dmin-bfun(phi),T1:fresT(ci,ct,1,n)};
+}
+function sideEdges(L,th){
+  const R=T.Rp,W=R*Math.sqrt((L-R)/(L+R));
+  function edge(sg){let lo=0,hi=W*0.9999;for(let i=0;i<60;i++){const m=(lo+hi)/2;const r=sideRay(sg*m,L,th);if(r&&r.margin<0)lo=m;else hi=m;}return sg*lo;}
+  return{oL:-W,cL:edge(-1),cR:edge(1),oR:W};
+}
+function eyeBlur(L){const a=0.5*L*2.9e-4;const near=L<250?(250-L)*0.003:0;return Math.sqrt(0.02*0.02+a*a+near*near);}
+let thS=0,thE=0;
+const Lside=document.getElementById('Lside');
+function renderSide(){
+  const cv=document.getElementById('cvSide'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height,S=W/22,L=+Lside.value,th=THS[thS];
+  document.getElementById('LsideV').textContent=`${L} mm`;
+  const prof=new Float32Array(W);
+  for(let px=0;px<W;px++){const y=(px+0.5)/S-11;const r=sideRay(y,L,th);
+    if(!r){prof[px]=28;continue;}
+    const w=1/(1+Math.exp(r.margin/0.02));prof[px]=(30*(1-w)+238*w)*r.T1+(1-r.T1)*190;}
+  const sig=eyeBlur(L)*S,rad=Math.ceil(3*sig),ker=[];let ks=0;
+  for(let i=-rad;i<=rad;i++){const v=Math.exp(-i*i/(2*sig*sig));ker.push(v);ks+=v;}
+  const bl=new Float32Array(W);
+  for(let px=0;px<W;px++){let s=0;for(let i=-rad;i<=rad;i++){const q=Math.min(W-1,Math.max(0,px+i));s+=prof[q]*ker[i+rad];}bl[px]=s/ks;}
+  const off=T.rOff[thS],sT=Math.sqrt(sig*sig+(0.05*S)**2),tk=[new Float32Array(W),new Float32Array(W),new Float32Array(W)];
+  for(let m=-5;m<=40;m++){const cx=(off+m+11)*S;if(cx<-50||cx>W+50)continue;const cls=m%10===0?2:(m%5===0?1:0);
+    for(let px=Math.max(0,Math.floor(cx-4*sT));px<Math.min(W,cx+4*sT);px++){const v=Math.exp(-((px+0.5-cx)**2)/(2*sT*sT))*(0.05*S*2.5/(sT*2.5));
+      for(let c=0;c<=cls;c++)tk[c][px]+=v;}}
+  const img=ctx.createImageData(W,H),D=img.data,top=178;
+  for(let py=0;py<H;py++)for(let px=0;px<W;px++){const i=(py*W+px)*4;
+    if(py<top){const v=bl[px];D[i]=v;D[i+1]=v+2;D[i+2]=v+6;}
+    else{const dr=py-top;let w=dr<14?tk[0][px]:dr<22?tk[1][px]:dr<32?tk[2][px]:0;w=Math.min(1,w);const f=1-0.88*w;
+      D[i]=247*f;D[i+1]=241*f;D[i+2]=214*f;}
+    D[i+3]=255;}
+  ctx.putImageData(img,0,0);
+  ctx.fillStyle='#222';ctx.font='16px sans-serif';ctx.textAlign='center';
+  for(let m=0;m<=40;m+=10){const cx=(off+m+11)*S;if(cx>10&&cx<W-10)ctx.fillText(String(m/10),cx,top+50);}
+  ctx.textAlign='left';ctx.fillStyle='#555';ctx.font='12px sans-serif';ctx.fillText('直尺 cm（mm 刻度）',W-130,H-10);
+  ctx.fillStyle='#ddd';ctx.fillText(`θ = ${th}°　L = ${L} mm`,10,18);
+}
+Lside.addEventListener('input',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(renderSide);});
+
+/* 端面 */
+const jawC=document.getElementById('jawC'),jawW=document.getElementById('jawW');
+function endExtent(th){let mx=-1e9,mn=1e9;for(let i=0;i<3600;i++){const ps=i/3600*2*Math.PI,r=bfun(ps+th*deg),u=r*Math.cos(ps);if(u>mx)mx=u;if(u<mn)mn=u;}return{w:mx-mn,c:(mx+mn)/2};}
+function hash2(a,b){const s=Math.sin(a*127.1+b*311.7)*43758.5453;return s-Math.floor(s);}
+function renderEnd(){
+  const cv=document.getElementById('cvEnd'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height,S=26,th=THS[thE],R=T.Rp;
+  const c=+jawC.value,w=+jawW.value,xl=c-w/2,xr=c+w/2,img=ctx.createImageData(W,H),D=img.data;
+  for(let py=0;py<H;py++){const v=(H/2-py-0.5)/S;for(let px=0;px<W;px++){const u=(px+0.5-W/2)/S,i=(py*W+px)*4;
+    const r=Math.hypot(u,v);let R_=40,G_=42,B_=48;
+    if(r<R){const ps=Math.atan2(v,u),phi=ps+th*deg,m=r-bfun(phi);
+      const fibre=0.85+0.15*hash2(Math.round(phi*90),Math.round(r*12));
+      const wc=1/(1+Math.exp(m/0.025));
+      R_=(150*(1-wc)+242*wc*fibre);G_=(165*(1-wc)+240*wc*fibre);B_=(182*(1-wc)+234*wc*fibre);
+      if(r>R-0.12){R_*=0.7;G_*=0.7;B_*=0.75;}}
+    if(u<xl||u>xr){R_=R_*0.35+60*0.65*0.6;G_=G_*0.35+64*0.65*0.6;B_=B_*0.35+70*0.65*0.6;}
+    if(Math.abs(u-xl)<0.5/S*1.5||Math.abs(u-xr)<0.5/S*1.5){R_=230;G_=60;B_=40;}
+    D[i]=R_;D[i+1]=G_;D[i+2]=B_;D[i+3]=255;}}
+  ctx.putImageData(img,0,0);
+  ctx.fillStyle='#fff';ctx.font='13px sans-serif';ctx.fillText(`端面俯視，量測方向 θ = ${th}°（水平）`,10,18);
+  drawVernier(w,'vern4b');
+}
+function stepJ(el,d){el.value=Math.min(+el.max,Math.max(+el.min,+el.value+d));cancelAnimationFrame(raf);raf=requestAnimationFrame(renderEnd);}
+jawC.addEventListener('input',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(renderEnd);});
+jawW.addEventListener('input',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(renderEnd);});
+document.querySelectorAll('[data-jc]').forEach(b=>b.addEventListener('click',()=>stepJ(jawC,+b.dataset.jc)));
+document.querySelectorAll('[data-jw]').forEach(b=>b.addEventListener('click',()=>stepJ(jawW,+b.dataset.jw)));
+
+function thButtons(id,which){
+  document.getElementById(id).innerHTML=THS.map((t,i)=>`<button class="b${i===0?' fill':''}" data-i="${i}">${t}°</button>`).join(' ');
+  document.querySelectorAll(`#${id} button`).forEach(b=>b.addEventListener('click',()=>setTh(which,+b.dataset.i)));
+}
+function setTh(which,i){
+  const id=which==='S'?'thBtnsS':'thBtnsE';
+  document.querySelectorAll(`#${id} button`).forEach(b=>b.classList.toggle('fill',+b.dataset.i===i));
+  if(which==='S'){thS=i;renderSide();}else{thE=i;renderEnd();}
+}
+document.querySelectorAll('[data-dp]').forEach(b=>b.addEventListener('click',()=>{
+  const k=+b.dataset.dp;document.getElementById('dpLbl').textContent=`游標尺夾在白線圓柱 ${k*60}° 方向`;drawVernier(T.DpM[k],'vern4a');}));
+
+function build4(){
+  let h='<tr><th>θ</th><th>外緣左</th><th>核心左</th><th>核心右</th><th>外緣右</th><th>L（mm）</th><th>w<sub>W</sub> 外緣寬</th><th>w<sub>B</sub> 核心視寬</th></tr>';
+  THS.forEach((t,i)=>{h+=`<tr><th>${t}°</th>`+['oL','cL','cR','oR'].map(q=>`<td><input class="cell" id="S_${q}_${i}" data-i="${i}" inputmode="decimal"></td>`).join('')+
+    `<td><input class="cell" id="S_L_${i}" inputmode="decimal"></td><td id="S_wW_${i}">—</td><td id="S_wB_${i}">—</td></tr>`;});
+  document.getElementById('tblS').innerHTML=h;
+  h='<tr><th>θ</th>'+THS.map(t=>`<th>${t}°</th>`).join('')+'</tr><tr><th>w<sub>b</sub>（mm）</th>'+THS.map((t,i)=>`<td><input class="cell" id="E_${i}" data-i="${i}" inputmode="decimal"></td>`).join('')+'</tr>';
+  document.getElementById('tblE').innerHTML=h;
+  document.querySelectorAll('#tblS input').forEach(e=>{
+    e.addEventListener('focus',()=>{const i=+e.id.split('_').pop();if(i!==thS)setTh('S',i);});
+    e.addEventListener('input',()=>{const i=+e.id.split('_').pop(),Le=document.getElementById(`S_L_${i}`);if(e!==Le&&Le.value==='')Le.value=Lside.value;calc4();});});
+  document.querySelectorAll('#tblE input').forEach(e=>{
+    e.addEventListener('focus',()=>{const i=+e.dataset.i;if(i!==thE)setTh('E',i);});e.addEventListener('input',calc4);});
+  [0,1,2].forEach(k=>document.getElementById(`Dp_${k}`).addEventListener('input',calc4));
+  thButtons('thBtnsS','S');thButtons('thBtnsE','E');thS=0;thE=0;
+  document.getElementById('vern4a').innerHTML='<div class="placeholder">按上方按鈕，游標尺就會夾住白線圓柱。</div>';
+  document.getElementById('dpLbl').textContent='';
+}
+const num=id=>parseFloat(document.getElementById(id).value);
+let D4=null;
+function calc4(){
+  const dps=[0,1,2].map(k=>num(`Dp_${k}`)).filter(v=>!isNaN(v)),sd=stats(dps);
+  document.getElementById('DpMean').textContent=sd?fx(sd.m,3):'—';
+  const rows=[];
+  THS.forEach((t,i)=>{const oL=num(`S_oL_${i}`),cL=num(`S_cL_${i}`),cR=num(`S_cR_${i}`),oR=num(`S_oR_${i}`),Lr=num(`S_L_${i}`),wb=num(`E_${i}`);
+    const wW=oR-oL,wB=cR-cL;
+    document.getElementById(`S_wW_${i}`).textContent=isNaN(wW)?'—':fx(wW,2);document.getElementById(`S_wB_${i}`).textContent=isNaN(wB)?'—':fx(wB,2);
+    rows.push({t,wW,wB,wb,L:Lr});});
+  D4={Dp:sd?sd.m:NaN,uDp:sd?Math.sqrt(sd.sem**2+(0.025/Math.sqrt(3))**2):NaN,rows};
+}
+document.getElementById('autoFill4').addEventListener('click',()=>{
+  const L=300;[0,1,2].forEach(k=>document.getElementById(`Dp_${k}`).value=fx(correctRead(T.DpM[k]),2));
+  THS.forEach((t,i)=>{const e=sideEdges(L,t),off=T.rOff[i],rd=v=>fx(Math.round((v-off)*10)/10,1);
+    document.getElementById(`S_oL_${i}`).value=rd(e.oL);document.getElementById(`S_cL_${i}`).value=rd(e.cL);
+    document.getElementById(`S_cR_${i}`).value=rd(e.cR);document.getElementById(`S_oR_${i}`).value=rd(e.oR);
+    document.getElementById(`S_L_${i}`).value=L;document.getElementById(`E_${i}`).value=fx(correctRead(endExtent(t).w),2);});
+  Lside.value=L;calc4();renderSide();});
+document.getElementById('clear4').addEventListener('click',()=>{document.querySelectorAll('#t4 input.cell').forEach(e=>e.value='');calc4();});
+
+/* ---------- ⑤ 分析 ---------- */
+let RES=null;
+function fOfH(n,R,hh){const res=traceCircle2([-20,hh],[1,0],R,n);if(!res||!res.out||res.out[1]===0)return NaN;return res.p2[0]-res.p2[1]*res.out[0]/res.out[1];}
+function svgPlot(el,pts,line,opt){
+  const W=460,H=opt.H||320,m={l:58,r:14,t:14,b:44},xs=opt.x,ys=opt.y,X=x=>m.l+(x-xs[0])/(xs[1]-xs[0])*(W-m.l-m.r),Y=y=>H-m.b-(y-ys[0])/(ys[1]-ys[0])*(H-m.t-m.b);
+  let s=`<rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="#fff" stroke="#cbd5e1"/>`;
+  for(let k=0;k<=5;k++){const xv=xs[0]+(xs[1]-xs[0])*k/5,yv=ys[0]+(ys[1]-ys[0])*k/5;
+    s+=`<line x1="${X(xv)}" y1="${m.t}" x2="${X(xv)}" y2="${H-m.b}" stroke="#eef2f7"/><text x="${X(xv)}" y="${H-m.b+16}" font-size="11" text-anchor="middle" fill="#555">${fx(xv,opt.xd)}</text>`;
+    s+=`<line x1="${m.l}" y1="${Y(yv)}" x2="${W-m.r}" y2="${Y(yv)}" stroke="#eef2f7"/><text x="${m.l-6}" y="${Y(yv)+4}" font-size="11" text-anchor="end" fill="#555">${fx(yv,opt.yd)}</text>`;}
+  s+=`<text x="${(W+m.l)/2}" y="${H-6}" font-size="12" text-anchor="middle">${opt.xl}</text><text x="14" y="${(H-m.b+m.t)/2}" font-size="12" text-anchor="middle" transform="rotate(-90 14 ${(H-m.b+m.t)/2})">${opt.yl}</text>`;
+  (line||[]).forEach(l=>{s+=`<polyline fill="none" stroke="${l.c}" stroke-width="${l.w||1.8}" ${l.dash?'stroke-dasharray="5 4"':''} points="${l.p.map(q=>`${X(q[0])},${Y(q[1])}`).join(' ')}"/>`;
+    if(l.lab)s+=`<text x="${X(l.p[l.p.length-1][0])-4}" y="${Y(l.p[l.p.length-1][1])-6}" font-size="11" text-anchor="end" fill="${l.c}">${l.lab}</text>`;});
+  pts.forEach(p=>{s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4.5" fill="#2563eb" stroke="#fff"/>`;});
+  document.getElementById(el).innerHTML=s;
+}
+function calcAnalysis(){
+  calc4();RES={};
+  const box=document.getElementById('anaN'),tb=document.getElementById('tblN');
+  const ok=D4.rows.filter(r=>!isNaN(r.wW)&&!isNaN(r.wB)&&!isNaN(r.wb)&&r.wW>0&&r.wb>0);
+  if(!ok.length||isNaN(D4.Dp)){box.className='res muted';box.textContent='請先完成第 ④ 頁的 D′、側面與端面數據（同一方向三者都要有）。';tb.innerHTML='';document.getElementById('svgReg').innerHTML='';document.getElementById('regTxt').innerHTML='';}
+  else{
+    const Dp=D4.Dp;let h='<tr><th>θ</th><th>w<sub>W</sub></th><th>w<sub>B</sub></th><th>w<sub>b</sub></th><th>L</th><th>n<sub>未修正</sub> = w<sub>B</sub>/w<sub>b</sub></th><th>n<sub>修正</sub> = (w<sub>B</sub>/w<sub>W</sub>)·D′/w<sub>b</sub></th></tr>';
+    const nr=[],nc=[],xs=[],ys=[];
+    ok.forEach(r=>{const a=r.wB/r.wb,c=r.wB/r.wW*Dp/r.wb;nr.push(a);nc.push(c);xs.push(r.wb/2);ys.push(r.wB/r.wW*Dp/2);
+      h+=`<tr><th>${r.t}°</th><td>${fx(r.wW,2)}</td><td>${fx(r.wB,2)}</td><td>${fx(r.wb,2)}</td><td>${isNaN(r.L)?'—':r.L}</td><td>${fx(a,4)}</td><td>${fx(c,4)}</td></tr>`;});
+    tb.innerHTML=h;
+    const sr=stats(nr),sc=stats(nc),N=ok.length;
+    const r0=ok[0],uw=0.05*Math.SQRT2,uwb=Math.hypot(0.014,0.03);
+    const propRel=Math.sqrt((uw/r0.wB)**2+(uw/r0.wW)**2+(uwb/r0.wb)**2);
+    const uStat=N>1?sc.sem:sc.m*propRel,uc=Math.sqrt(uStat**2+(sc.m*D4.uDp/Dp)**2);
+    const uStatR=N>1?sr.sem:sr.m*Math.hypot(uw/r0.wB,uwb/r0.wb);
+    const Lm=stats(ok.map(r=>r.L).filter(v=>!isNaN(v))),Rp=Dp/2,fac=Lm?Math.sqrt((Lm.m-Rp)/(Lm.m+Rp)):NaN;
+    RES.nC=sc.m;RES.unC=uc;RES.nR=sr.m;RES.unR=uStatR;RES.N=N;RES.Dp=Dp;RES.uDp=D4.uDp;
+    RES.b=stats(xs).m;RES.ub=(N>1?stats(xs).sem:uwb/2);RES.Lm=Lm?Lm.m:NaN;
+    const ru=sigRound(uc),rr=sigRound(uStatR);
+    box.className='res';
+    box.innerHTML=`<p>D′ = ${fx(Dp,3)} ± ${fx(D4.uDp,3)} mm，有效方向數 N = ${N}</p>
+     <p>未修正（直接 B/b）：n = <b>${fx(sr.m,rr.dec)} ± ${fx(rr.u,rr.dec)}</b></p>
+     <p>視差修正（外緣比例）：n = <b>${fx(sc.m,ru.dec)} ± ${fx(ru.u,ru.dec)}</b>（含 D′ 的不確定度）</p>
+     ${Lm?`<p class="muted">平均觀察距離 L = ${fx(Lm.m,0)} mm，理論壓縮因子 √[(L−R′)/(L+R′)] = ${fx(fac,4)}，預期未修正值偏低約 ${fx((1-fac)*100,1)}%；你的數據偏低 ${fx((1-sr.m/sc.m)*100,1)}%。</p>`:''}
+     ${N<3?'<div class="note">方向數太少，建議 5 個方向都量，才能平均掉核心截面不圓的效應。</div>':''}`;
+    const k=xs.reduce((s,x,i)=>s+x*ys[i],0)/xs.reduce((s,x)=>s+x*x,0);
+    const uk=N>1?Math.sqrt(xs.reduce((s,x,i)=>s+(ys[i]-k*x)**2,0)/(N-1)/xs.reduce((s,x)=>s+x*x,0)):NaN;
+    let ol='';if(N>=3){const mx=stats(xs).m,my=stats(ys).m,sxx=xs.reduce((s,x)=>s+(x-mx)**2,0),sxy=xs.reduce((s,x,i)=>s+(x-mx)*(ys[i]-my),0);
+      if(sxx>0){const kk=sxy/sxx;ol=`<br>對照：有截距的一般迴歸斜率 = ${fx(kk,2)}（x 範圍只有 ${fx(Math.max(...xs)-Math.min(...xs),2)} mm，極不可靠）`;}}
+    RES.k=k;RES.uk=uk;
+    const x0=Math.min(...xs),x1=Math.max(...xs),pad=Math.max(0.15,(x1-x0)*0.3);
+    const y0=Math.min(...ys),y1=Math.max(...ys);
+    svgPlot('svgReg',xs.map((x,i)=>[x,ys[i]]),[{p:[[x0-pad,k*(x0-pad)],[x1+pad,k*(x1+pad)]],c:'#d9731a',lab:`B = ${fx(k,4)} b`}],
+      {x:[x0-pad,x1+pad],y:[Math.min(y0,k*(x0-pad))-0.1,Math.max(y1,k*(x1+pad))+0.1],xd:2,yd:2,xl:'b = w_b/2（mm）',yl:'B修正（mm）'});
+    document.getElementById('regTxt').innerHTML=`過原點斜率 n = <b>${fx(k,4)}</b>${isNaN(uk)?'':` ± ${fx(uk,4)}`}${ol}`;
+  }
+  // 焦距交叉驗證
+  const fb=document.getElementById('focX'),Lf=document.getElementById('Lfoc');
+  if(Lf.value==='')Lf.value=Lobs.value;
+  if(!FOC){fb.className='res muted';fb.textContent='請先完成第 ③ 頁焦距數據。';document.getElementById('svgAb').innerHTML='';return;}
+  const L=parseFloat(Lf.value)||+Lobs.value,R=FOC.R,dmid=FOC.f,us=Math.sqrt(Math.max(FOC.uf**2-FOC.uR**2,1e-6));
+  const nOf=f=>2*f/(2*f-R),fL=dmid*L/(dmid+L),ufL=us*(L/(dmid+L))**2;
+  const n1=nOf(dmid),u1=Math.hypot(2*R/(2*dmid-R)**2*us,2*(dmid-R)/(2*dmid-R)**2*FOC.uR);
+  const n2=nOf(fL),u2=Math.hypot(2*R/(2*fL-R)**2*ufL,2*(fL-R)/(2*fL-R)**2*FOC.uR);
+  RES.nF=n2;RES.unF=u2;RES.fL=fL;RES.dmid=dmid;RES.Lf=L;
+  let s=`<p>不成像區中點 d̄ = ${fx(dmid,2)} mm → n = 2d/(2d−R) = <b>${fx(n1,3)} ± ${fx(u1,3)}</b>（未做觀察距離修正）</p>
+   <p>觀察距離修正 f = dL/(d+L) = ${fx(fL,2)} mm → n<sub>f</sub> = <b>${fx(n2,3)} ± ${fx(u2,3)}</b></p>`;
+  if(RES.nC){const z=(n2-RES.nC)/Math.hypot(u2,RES.unC);
+    const fpar=RES.nC*R/(2*(RES.nC-1)),dpar=fpar*L/(L-fpar);
+    s+=`<p>與視半徑法 n = ${fx(RES.nC,4)} 相差 ${fx(n2-RES.nC,3)}，為 <b>${fx(z,1)} σ</b>${Math.abs(z)>2?'，兩法有顯著差異':''}。</p>
+     <p>若 n = ${fx(RES.nC,4)}，近軸焦距應為 f = ${fx(fpar,2)} mm，在 L = ${L} mm 下近軸翻轉點應在 d = ${fx(dpar,2)} mm；你量的中點短了 ${fx(dpar-dmid,2)} mm。</p>`;
+    const fmin=fOfH(RES.nC,R,0.97*R);let hEff=NaN;
+    if(fL<fpar&&fL>fmin){let lo=0.01,hi=0.97*R;for(let i=0;i<60;i++){const m=(lo+hi)/2;if(fOfH(RES.nC,R,m)>fL)lo=m;else hi=m;}hEff=lo;}
+    s+=isNaN(hEff)?'':`<p>你量到的焦距相當於離軸 <b>h ≈ ${fx(hEff,1)} mm</b>（約 ${fx(hEff/R*100,0)}% 半徑）那一圈光線的焦點，這就是球面像差讓翻轉點提前的程度。</p>`;
+    const pts=[];for(let i=1;i<=40;i++){const hh=0.97*R*i/40;pts.push([hh,fOfH(RES.nC,R,hh)]);}
+    const yv=pts.map(p=>p[1]).concat([fL,fpar]);
+    svgPlot('svgAb',[],[{p:pts,c:'#2563eb',lab:'f(h)，n 取視半徑法'},{p:[[0,fL],[R,fL]],c:'#d9731a',dash:1,lab:'你的 f（L 修正後）'}],
+      {H:300,x:[0,R],y:[Math.min(...yv)-0.3,Math.max(...yv)+0.3],xd:1,yd:1,xl:'入射光線離軸高度 h（mm）',yl:'焦點距圓心（mm）'});
+  }else document.getElementById('svgAb').innerHTML='';
+  fb.className='res';fb.innerHTML=s;
+}
+document.getElementById('Lfoc').addEventListener('input',calcAnalysis);
+
+/* ---------- ⑥ 真值 ---------- */
+let revealed=false;
+document.getElementById('btnReveal').addEventListener('click',()=>{revealed=true;buildReveal();});
+function zCell(v,u,t){if(isNaN(v))return'<td>—</td><td>—</td>';const d=v-t;if(!(u>0))return`<td>${fx(d,4)}</td><td>—</td>`;const z=d/u,c=Math.abs(z)<1?'#15803d':Math.abs(z)<2?'#b45309':'#b91c1c';return`<td>${d>=0?'+':''}${fx(d,4)}</td><td style="color:${c};font-weight:600">${fx(z,1)} σ</td>`;}
+function buildReveal(){
+  if(!revealed)return;calcVol();calcFoc();calcAnalysis();
+  const fpar=T.n*T.R0/(2*(T.n-1)),Vt=Math.PI*T.D0**2/4*T.h0;
+  const ext=THS.map(t=>endExtent(t).w),bT=stats(ext).m/2;
+  const L=RES.Lf||+Lobs.value,dflip=fpar*L/(L-fpar);
+  const rows=[
+    ['透明圓柱直徑 D（mm）',VOL?VOL.D:NaN,VOL?VOL.uD:NaN,T.D0,3],
+    ['透明圓柱高 h（mm）',VOL?VOL.h:NaN,VOL?VOL.uh:NaN,T.h0,3],
+    ['體積 V（mm³）',VOL?VOL.V:NaN,VOL?VOL.uV:NaN,Vt,0],
+    ['白線圓柱外徑 D′（mm）',RES.Dp??NaN,RES.uDp??NaN,T.Dp0,3],
+    ['核心平均半徑 b（mm）',RES.b??NaN,RES.ub??NaN,bT,3],
+    ['n：視半徑法（未修正）',RES.nR??NaN,RES.unR??NaN,T.n,4],
+    ['n：視半徑法（視差修正）',RES.nC??NaN,RES.unC??NaN,T.n,4],
+    ['n：過原點迴歸',RES.k??NaN,RES.uk??NaN,T.n,4],
+    ['n：焦距法（L 修正）',RES.nF??NaN,RES.unF??NaN,T.n,4],
+    ['近軸焦距 f（mm，由圓心）',RES.fL??NaN,FOC?FOC.uf:NaN,fpar,2],
+  ];
+  let h='<table class="data"><tr><th>物理量</th><th>你的結果</th><th>不確定度</th><th>真值</th><th>偏差</th><th>偏差 / 不確定度</th></tr>';
+  rows.forEach(r=>{h+=`<tr><th style="text-align:left">${r[0]}</th><td>${isNaN(r[1])?'—':fx(r[1],r[4])}</td><td>${isNaN(r[2])?'—':fx(r[2],r[4]+1)}</td><td><b>${fx(r[3],r[4])}</b></td>${zCell(r[1],r[2],r[3])}</tr>`;});
+  h+='</table><p class="muted">綠色 |z| &lt; 1、橙色 1–2、紅色 &gt; 2。|z| 大於 2 表示除了隨機誤差外，還有未處理的系統誤差，或不確定度估得太小。</p>';
+  h+=`<p class="muted">補充真值：近軸翻轉點在你的觀察距離 L = ${fx(L,0)} mm 下為 d = ${fx(dflip,2)} mm；各方向核心寬度 ${ext.map((w,i)=>`${THS[i]}°: ${fx(w,3)}`).join('，')} mm。</p>`;
+  document.getElementById('revealBox').innerHTML=h;
+  document.getElementById('revealMore').style.display='';
+  // 核心形狀
+  const cx=180,cy=180,sc=22,ex=8;let s=`<circle cx="${cx}" cy="${cy}" r="${T.Rp*sc}" fill="#e3efff" stroke="#6b8fc7" stroke-width="2"/>`;
+  let pts=[];for(let i=0;i<=720;i++){const p=i/720*2*Math.PI,r=T.b0+(bfun(p)-T.b0)*ex;pts.push(`${cx+r*sc*Math.cos(p)},${cy-r*sc*Math.sin(p)}`);}
+  s+=`<polygon points="${pts.join(' ')}" fill="#fff" stroke="#555"/><circle cx="${cx}" cy="${cy}" r="${T.b0*sc}" fill="none" stroke="#999" stroke-dasharray="4 3"/>`;
+  THS.forEach(t=>{const a=t*deg;s+=`<line x1="${cx-8.3*sc*Math.cos(a)}" y1="${cy+8.3*sc*Math.sin(a)}" x2="${cx+8.3*sc*Math.cos(a)}" y2="${cy-8.3*sc*Math.sin(a)}" stroke="#d9731a" stroke-dasharray="3 3"/><text x="${cx+7.6*sc*Math.cos(a)+2}" y="${cy-7.6*sc*Math.sin(a)}" font-size="11" fill="#d9731a">${t}°</text>`;});
+  document.getElementById('svgCore').innerHTML=s;
+  // 診斷
+  const dg=[];
+  if(!isNaN(RES.nR??NaN)&&!isNaN(RES.nC??NaN))dg.push(`<b>視差：</b>未修正的 n 比真值${RES.nR<T.n?'低':'高'} ${fx(Math.abs(RES.nR-T.n)/T.n*100,2)}%，修正後差 ${fx(Math.abs(RES.nC-T.n)/T.n*100,2)}%。眼睛在有限距離時，外緣與核心被同比例壓縮，用外緣寬度當尺度就能消去。`);
+  if(!isNaN(RES.nF??NaN))dg.push(`<b>焦距法：</b>n<sub>f</sub> 與真值差 ${fx((RES.nF-T.n)/T.n*100,1)}%。真值近軸焦距 ${fx(fpar,2)} mm，你的 f = ${fx(RES.fL,2)} mm。${RES.fL<fpar?'偏短，主要來自球面像差：邊緣光線先聚焦，影像提前「崩解」。':'偏長，可能是判斷準則偏向倒立影像清楚之後才記錄。'}`);
+  if(VOL)dg.push(`<b>體積：</b>直徑的相對誤差在 V 中加倍。本組透明圓柱截面略呈橢圓（三個角度的直徑平均相差約 ${fx(Math.max(...T.Dm.map(r=>stats(r).m))-Math.min(...T.Dm.map(r=>stats(r).m)),3)} mm），所以要在多個角度量直徑。`);
+  dg.push(`<b>核心不圓：</b>核心截面有 2θ、3θ 的形狀起伏（左圖誇大 8 倍）。同一方向配對 B 與 b，並在 5 個方向平均，可把這個影響降到最小。若只在一個方向量 B、另一方向量 b，n 可能偏差 ${fx(2*T.a2/T.b0*100,1)}% 左右。`);
+  dg.push(`<b>適用條件：</b>本組 nb = ${fx(T.n*T.b0,2)} mm，R′ = ${fx(T.Rp,2)} mm，nb/R′ = ${fx(T.n*T.b0/T.Rp,2)}。若 nb 接近 R′，視核心會「撐滿」整個圓柱，B 讀不準；參考解答中 B = 8.2 mm 超過 R = 8.05 mm，就是這種情況下的讀數錯誤。`);
+  document.getElementById('diag').innerHTML=dg.map(x=>`<p>${x}</p>`).join('');
+}
+
+/* ---------- 初始化 ---------- */
+function initAll(seed){
+  newSample(seed);
+  buildVolTables();buildFocTable();calcVol();
+  cur=null;document.getElementById('vernier').innerHTML='<div class="placeholder">點選表格中的一格，游標尺就會出現在這裡。</div>';
+  document.getElementById('svgJaw').innerHTML='';
+  document.getElementById('curLbl').innerHTML='<b>請點選表格中的一格開始量測</b>';
+  sGap.value=1;renderView();drawTop();drawRuler();
+  build4();calc4();jawC.value=0;jawW.value=12;renderSide();renderEnd();
+  revealed=false;document.getElementById('revealBox').innerHTML='';document.getElementById('revealMore').style.display='none';
+  document.getElementById('Lfoc').value='';
+}
+document.getElementById('newSample').addEventListener('click',()=>{
+  if(!confirm('換一組樣品會清空目前所有數據，確定嗎？'))return;
+  initAll(Math.floor(1000+Math.random()*9000));});
+drawApparent();drawFocal();
+initAll(Math.floor(1000+Math.random()*9000));
+</script>
+</body>
+</html>

@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>未知液體的折射率測定｜虛擬實驗室</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--ink:#1f2933;--mut:#616e7c;--line:#d9e2ec;--acc:#2f6fb3;--acc2:#d9822b;--ok:#2e7d32;--bad:#c62828;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
+header{background:#1f3a5f;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{margin:0;font-size:1.2rem}
+header p{margin:2px 0 0;font-size:.82rem;opacity:.85}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 16px;background:#e4ebf3;position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:.92rem}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+nav button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1120px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+h2{font-size:1.12rem;margin:0 0 8px;color:#1f3a5f}
+h3{font-size:1rem;margin:14px 0 6px;color:#1f3a5f}
+.grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}
+.grid2e{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.grid2,.grid2e{grid-template-columns:1fr}}
+.ctl{display:grid;grid-template-columns:150px 1fr 78px;align-items:center;gap:8px;margin:5px 0;font-size:.92rem}
+.ctl input[type=range]{width:100%}
+.ctl .v{font-family:Consolas,monospace;text-align:right}
+.btn{border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.9rem;margin:2px}
+.btn.sec{background:#fff;color:var(--acc)}
+.btn.warn{background:var(--acc2);border-color:var(--acc2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#eef2f7}
+td.l{text-align:left}
+.note{font-size:.86rem;color:var(--mut)}
+.warnbox{background:#fff4e5;border-left:4px solid var(--acc2);padding:8px 12px;border-radius:4px;font-size:.9rem;margin:8px 0}
+.okbox{background:#e8f5e9;border-left:4px solid var(--ok);padding:8px 12px;border-radius:4px;font-size:.9rem;margin:8px 0}
+.infobox{background:#e8f1fb;border-left:4px solid var(--acc);padding:8px 12px;border-radius:4px;font-size:.9rem;margin:8px 0}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px}
+.frac>span:first-child{border-bottom:1px solid currentColor;padding:0 3px}
+.sq{border-top:1px solid currentColor;padding:0 2px;margin-left:12px;position:relative}.sq::before{content:"√";position:absolute;left:-11px;top:-3px}
+.eq{font-family:"Times New Roman","Noto Serif TC",serif;font-size:1.06rem;margin:8px 0 8px 14px;overflow-x:auto}
+.eq i{font-style:italic}
+svg{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:6px}
+.mono{font-family:Consolas,monospace}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
+input[type=number],input[type=text]{width:90px;padding:4px 6px;border:1px solid #bcccdc;border-radius:5px;font-size:.92rem}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.8rem;background:#eef2f7;color:#334e68}
+ol li,ul li{margin:3px 0}
+.placeholder{text-align:center;padding:60px 20px;color:var(--mut)}
+.cap{font-size:.84rem;color:var(--mut);margin:4px 0 8px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>未知液體的折射率測定｜虛擬實驗室</h1>
+    <p>臺灣省台中區 104 學年度 高級中學數理及資訊學科能力競賽 物理科實驗試題</p>
+  </div>
+  <button class="btn warn" id="btnNew">新實驗（重新抽取未知液體）</button>
+</header>
+<nav id="nav">
+  <button data-t="t1" class="on">① 原理與光路</button>
+  <button data-t="t2">② 器材組裝</button>
+  <button data-t="t3">③ 觀察與對齊</button>
+  <button data-t="t4">④ 數據與迴歸</button>
+  <button data-t="t5">⑤ 誤差分析</button>
+  <button data-t="t6">⑥ 真值揭曉</button>
+</nav>
+<main>
+
+<!-- ================= ① ================= -->
+<section class="tab on" id="t1">
+  <div class="card">
+    <h2>實驗情境：這是一張俯視圖</h2>
+    <p>15 cm 直尺<b>側立</b>在壓克力槽中，刻度面朝向槽壁，加入液體使液面恰好切在刻度線高度的一半。每一條刻度線的<b>上半段</b>由液面上方的空氣傳光，<b>下半段</b>由液體傳光。眼睛在槽外隔著槽壁觀察時，下半段會相對上半段錯開。</p>
+    <p>觀察條件是：液面下的刻度 A（位置 <i>X</i>）看起來與液面上的刻度 B（位置 <i>X</i>+Δ<i>X</i>）<b>對齊</b>。這表示兩條光線以<b>同一個方向</b>進入眼睛：它們共用「眼睛 → 槽壁外側 → 穿過壁厚 → 槽壁內側」這一段，只在槽內才分成液體路徑與空氣路徑。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>光路圖（等比例）</h2>
+      <svg id="r1" viewBox="0 0 400 520" style="width:auto;max-width:100%;height:520px;margin:0 auto"></svg>
+      <p class="cap">藍實線：液體路徑（到刻度 A）；灰虛線：空氣路徑（正確，到刻度 B）；橘虛線：參考解答假設的空氣路徑（直線穿過壓克力）。</p>
+    </div>
+    <div class="card">
+      <h2>調整參數</h2>
+      <div class="ctl"><span>液體折射率 <i>n</i></span><input type="range" id="p_n" min="1.30" max="1.60" step="0.01" value="1.40"><span class="v" id="v_n"></span></div>
+      <div class="ctl"><span>直尺到槽壁 <i>D</i></span><input type="range" id="p_D" min="1" max="7.5" step="0.1" value="4"><span class="v" id="v_D"></span></div>
+      <div class="ctl"><span>眼睛到槽壁 <i>d</i></span><input type="range" id="p_d" min="5" max="30" step="0.5" value="15"><span class="v" id="v_d"></span></div>
+      <div class="ctl"><span>壓克力壁厚 <i>t</i></span><input type="range" id="p_t" min="0.1" max="1.0" step="0.05" value="0.3"><span class="v" id="v_t"></span></div>
+      <div class="ctl"><span>液面下刻度 A（<i>X</i>）</span><input type="range" id="p_A" min="1" max="12" step="0.1" value="6"><span class="v" id="v_A"></span></div>
+      <h3>計算結果</h3>
+      <table id="r1tab"></table>
+      <p class="note">第二張表：把「正確光路」算出的 A、B、<i>D</i>、<i>d</i>、<i>t</i> 當成完美量測值，再用三種公式反推 <i>n</i>。只有正確光路能還原真值。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>槽壁附近放大</h2>
+    <svg id="r1z" viewBox="0 0 760 260"></svg>
+    <p class="cap">兩條光線在壓克力內是同一段（θ₂）。從槽壁內側出發後，液體路徑偏折成 θ₁，空氣路徑恢復成 θ₃。橘線是參考解答的空氣路徑：在壓克力內沒有偏折，所以落在不同位置。</p>
+  </div>
+
+  <div class="card">
+    <h2>第 1 小題證明（不考慮壓克力）</h2>
+    <p>令 θ₁ 為光在液體中與法線的夾角，θ₂ 為光在空氣中的折射角，<i>R</i> 為折射點與眼睛垂足的水平距離。</p>
+    <div class="eq">Snell 定律：<i>n</i> sin θ₁ = 1 · sin θ₂　⇒　<i>n</i> = <span class="frac"><span>sin θ₂</span><span>sin θ₁</span></span></div>
+    <p>眼睛看到 B 的視線是直線，延長穿過液層：</p>
+    <div class="eq">tan θ₂ = <span class="frac"><span><i>R</i></span><span><i>d</i></span></span> = <span class="frac"><span><i>X</i> + Δ<i>X</i> − <i>R</i></span><span><i>D</i></span></span>　⇒　<i>R</i> = <span class="frac"><span><i>d</i>(<i>X</i> + Δ<i>X</i>)</span><span><i>D</i> + <i>d</i></span></span>，　<i>X</i> − <i>R</i> = <span class="frac"><span><i>DX</i> − <i>d</i>Δ<i>X</i></span><span><i>D</i> + <i>d</i></span></span></div>
+    <div class="eq">sin θ₂ = <span class="frac"><span><i>R</i></span><span><span class="sq"><i>d</i>² + <i>R</i>²</span></span></span>　　sin θ₁ = <span class="frac"><span><i>X</i> − <i>R</i></span><span><span class="sq"><i>D</i>² + (<i>X</i> − <i>R</i>)²</span></span></span></div>
+    <p>代入即得題目的關係式：</p>
+    <div class="eq"><i>n</i> = <span class="frac"><span><i>d</i>(<i>X</i>+Δ<i>X</i>)</span><span>(<i>D</i>+<i>d</i>)<span class="sq"><i>d</i>² + (<span class="frac"><span><i>d</i>(<i>X</i>+Δ<i>X</i>)</span><span><i>D</i>+<i>d</i></span></span>)²</span></span></span> × <span class="frac"><span>(<i>D</i>+<i>d</i>)<span class="sq"><i>D</i>² + (<span class="frac"><span><i>DX</i>−<i>d</i>Δ<i>X</i></span><span><i>D</i>+<i>d</i></span></span>)²</span></span><span>(<i>DX</i> − <i>d</i>Δ<i>X</i>)</span></span></div>
+    <p class="okbox">已逐步驗算：題目給的式子正確。</p>
+  </div>
+
+  <div class="card">
+    <h2>第 2 小題：考慮壓克力（壁厚 <i>t</i>，<i>n</i><sub>a</sub> = 1.49）</h2>
+    <p>眼睛看出去的方向與法線夾 θ₃。穿入壓克力後偏折為 θ₂（sin θ₃ = 1.49 sin θ₂）。液體路徑在槽內為 θ₁（sin θ₃ = <i>n</i> sin θ₁），空氣路徑在槽內仍為 θ₃。</p>
+    <div class="eq">液體路徑：<i>X</i> = <i>d</i> tan θ₃ + <i>t</i> tan θ₂ + <i>D</i> tan θ₁</div>
+    <div class="eq">空氣路徑：<i>X</i> + Δ<i>X</i> = <i>d</i> tan θ₃ + <i>t</i> tan θ₂ + <i>D</i> tan θ₃</div>
+    <p>先由空氣路徑以數值方法（二分法）解出 θ₃，再由液體路徑得到 tan θ₁，最後 <i>n</i> = sin θ₃ / sin θ₁。</p>
+    <div class="warnbox"><b>參考解答的疏漏：</b>參考解答把空氣路徑寫成 <i>X</i> + Δ<i>X</i> − <i>R</i> = (<i>D</i> + 0.3) tan θ₃，等於假設空氣路徑直線穿過壓克力。但空氣路徑與液體路徑在壓克力內是同一段光，也必須偏折成 θ₂。兩者相差 <i>t</i>(tan θ₃ − tan θ₂)，以 <i>t</i> = 0.30 cm、θ₃ ≈ 30° 估算約 0.07 cm，與刻度對齊的判讀精度同一量級。上方表格可以看到它造成的 <i>n</i> 偏差。</div>
+  </div>
+</section>
+
+<!-- ================= ② ================= -->
+<section class="tab" id="t2">
+  <div class="card">
+    <h2>器材與自訂規格</h2>
+    <p class="note">試題沒有給壓克力槽的尺寸，本模擬使用以下自訂值（標 * 者）：</p>
+    <table>
+      <tr><th>器材</th><th>規格</th><th>用途</th></tr>
+      <tr><td>壓克力槽*</td><td>內部 18.0 × 8.0 × 8.0 cm，壁厚約 0.30 cm（參考解答值，實際以游標卡尺量取），<i>n</i><sub>a</sub> = 1.49</td><td class="l">盛裝液體、槽壁為觀察窗</td></tr>
+      <tr><td>15 cm 塑膠直尺*</td><td>寬 3.0 cm，側立；mm 刻度線長 0.30 cm、5 mm 線 0.45 cm、cm 線 0.60 cm</td><td class="l">被觀察的刻度</td></tr>
+      <tr><td>30 cm 直尺</td><td>最小刻度 0.1 cm，讀數記錄到 0.05 cm</td><td class="l">量 <i>d</i> 與 <i>D</i></td></tr>
+      <tr><td>游標卡尺</td><td>精度 0.05 mm（20 分格）</td><td class="l">量壁厚 <i>t</i></td></tr>
+      <tr><td>500 cc 燒杯、滴管</td><td>燒杯盛裝未知液體 500 mL</td><td class="l">加液、微調液面</td></tr>
+      <tr><td>鐵架、固定夾</td><td>—</td><td class="l">夾住直尺避免漂浮或傾倒；固定眼睛參考位置</td></tr>
+      <tr><td>油性細簽字筆</td><td>—</td><td class="l">標記刻度 A、B</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>步驟 1：以游標卡尺量壓克力壁厚 <i>t</i></h2>
+    <p>在槽壁上三個不同位置測量（壓克力板厚度略有不均）。請讀出游標卡尺的讀數（單位 mm），輸入後按「確認讀數」。</p>
+    <div class="row">
+      <span>測量位置：</span>
+      <button class="btn sec" data-spot="0">位置 1</button>
+      <button class="btn sec" data-spot="1">位置 2</button>
+      <button class="btn sec" data-spot="2">位置 3</button>
+      <span class="tag" id="spotTag">位置 1</span>
+    </div>
+    <svg id="cal" viewBox="0 0 780 190"></svg>
+    <div class="row">
+      <span>讀數 =</span><input type="number" id="calIn" step="0.05" placeholder="mm"><span>mm</span>
+      <button class="btn" id="calOk">確認讀數</button>
+      <button class="btn sec" id="calHint">讀法提示</button>
+    </div>
+    <div id="calMsg"></div>
+    <div id="calHintBox" class="infobox" style="display:none">主尺讀數：游標 0 刻度線左邊最靠近的主尺 mm 數。游標讀數：找出游標上與主尺刻度線<b>最對齊</b>的那一條，第 k 條代表 k × 0.05 mm。兩者相加即為讀數。若有兩條看起來差不多對齊，讀數介於兩者之間，擇一即可。</div>
+    <table id="calTab" style="margin-top:8px"></table>
+  </div>
+
+  <div class="card">
+    <h2>步驟 2：加入液體，使液面切在刻度線一半的高度</h2>
+    <p>先用燒杯倒入大部分液體，再用滴管微調。放大圖中可看到直尺上緣的刻度線與液面位置。</p>
+    <div class="grid2e">
+      <div><svg id="tankSide" viewBox="0 0 640 300"></svg><p class="cap">正視圖（槽內直尺側立，刻度線由上緣向下）</p></div>
+      <div><svg id="tankZoom" viewBox="0 0 640 300"></svg><p class="cap">直尺上緣放大（約 × 8）</p></div>
+    </div>
+    <div class="row">
+      <button class="btn" data-pour="50">燒杯倒入 50 mL</button>
+      <button class="btn" data-pour="10">燒杯倒入 10 mL</button>
+      <button class="btn sec" data-pour="1">滴管 +1 mL</button>
+      <button class="btn sec" data-pour="-1">滴管吸出 1 mL</button>
+      <button class="btn warn" id="lvlCheck">檢查液面</button>
+      <span class="note" id="lvlInfo"></span>
+    </div>
+    <div id="lvlMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>步驟 3：架設檢查</h2>
+    <ul>
+      <li>以固定夾夾住直尺：塑膠直尺密度與某些液體（如甘油，約 1.26 g/cm³）接近或更小，未固定時可能浮起或傾斜。</li>
+      <li>直尺刻度面須與槽壁<b>平行</b>，否則不同刻度的 <i>D</i> 不同。</li>
+      <li>30 cm 直尺沿槽側面放置，用來量眼睛到槽壁外側的距離 <i>d</i>，以及直尺刻度面到槽壁內側的距離 <i>D</i>。</li>
+      <li>用油性筆標記刻度 A（液面下）與 B（液面上），在 ③ 中操作。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= ③ ================= -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>觀察程序（依參考解答的步驟）</h2>
+    <ol>
+      <li>設定並量取眼睛到槽壁外側的距離 <i>d</i>。</li>
+      <li>左右移動頭部，使<b>視野一</b>中 0 刻度的上下兩半段切齊，此時眼睛正對 0 刻度。</li>
+      <li>選定刻度 A、B 並以油性筆標記（紅點 = A，在液面下；藍三角 = B，在直尺上緣）。</li>
+      <li>前後移動直尺（改變 <i>D</i>），直到<b>視野二</b>中液面下的 A 與液面上的 B 切齊，量取 <i>D</i>。</li>
+      <li>每組重複觀察 3 次取平均；改變 <i>d</i> 或 A、B 再做一組，共做至少 5 組。</li>
+    </ol>
+    <div id="t3warn"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>控制台</h2>
+      <h3>1. 眼睛到槽壁距離 <i>d</i></h3>
+      <div class="ctl"><span>眼睛位置（前後）</span><input type="range" id="c_d" min="5" max="30" step="0.1" value="15"><span class="v" id="v_cd">近 ↔ 遠</span></div>
+      <div class="row"><button class="btn" id="measD_eye">用 30 cm 直尺量 <i>d</i></button><span id="dMeasOut" class="mono">尚未量測</span></div>
+      <h3>2. 眼睛左右位置</h3>
+      <div class="row">
+        <button class="btn sec" data-eye="-0.1">◀◀ 1 mm</button>
+        <button class="btn sec" data-eye="-0.02">◀ 0.2 mm</button>
+        <button class="btn sec" data-eye="0.02">0.2 mm ▶</button>
+        <button class="btn sec" data-eye="0.1">1 mm ▶▶</button>
+      </div>
+      <p class="note">頭部會有輕微自然晃動，無法完全靜止。</p>
+      <h3>3. 標記刻度 A、B（cm）</h3>
+      <div class="row">A = <input type="number" id="inA" step="0.1" min="1" max="12" value="6.0"> B = <input type="number" id="inB" step="0.1" min="1.1" max="14" value="6.5"> <button class="btn" id="markAB">以油性筆標記</button></div>
+      <div class="note" id="abInfo"></div>
+      <h3>4. 直尺到槽壁距離 <i>D</i></h3>
+      <div class="ctl"><span>前後移動直尺</span><input type="range" id="c_D" min="0.3" max="7.8" step="0.005" value="3"><span class="v">需量取</span></div>
+      <div class="row">
+        <button class="btn sec" data-dd="-0.1">−1 mm</button>
+        <button class="btn sec" data-dd="-0.02">−0.2 mm</button>
+        <button class="btn sec" data-dd="0.02">+0.2 mm</button>
+        <button class="btn sec" data-dd="0.1">+1 mm</button>
+      </div>
+      <div class="row"><button class="btn warn" id="recD">A、B 已切齊：量取 <i>D</i> 並記錄</button></div>
+      <div id="recMsg" class="note"></div>
+    </div>
+    <div class="card">
+      <h2>俯視示意（等比例）</h2>
+      <svg id="mini" viewBox="0 0 360 330"></svg>
+      <p class="cap">示意圖僅供確認架設，數值必須用直尺量取。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>視野一：0 刻度附近</h2>
+    <svg id="view0" viewBox="0 0 760 190"></svg>
+    <p class="cap">放大視野，已模擬人眼約 1 角分的解析度。眼睛正對 0 刻度時，0 刻度的上下兩半段連成一直線。</p>
+    <h2 style="margin-top:14px">視野二：刻度 A 附近</h2>
+    <svg id="viewA" viewBox="0 0 760 190"></svg>
+    <p class="cap">紅點標記的刻度 A 在液面下；藍三角標記的刻度 B 在直尺上緣。調整 <i>D</i> 使 A 的下半段與 B 的上半段切齊。</p>
+  </div>
+
+  <div class="card">
+    <h2>數據記錄</h2>
+    <table id="dataTab"></table>
+    <div class="row"><button class="btn sec" id="finishSet">結束目前這組</button><span class="note">改變 <i>d</i> 或 A、B 後記錄，會自動開始新的一組。</span></div>
+  </div>
+</section>
+
+<!-- ================= ④ ================= -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>數據整理</h2>
+    <p>每一組數據（<i>d</i>、<i>X</i>、<i>X</i>+Δ<i>X</i>、<i>D</i>）以正確光路換算成一對 (sin θ₁, sin θ₃)。由 Snell 定律 sin θ₃ = <i>n</i> sin θ₁，以 sin θ₃ 對 sin θ₁ 作最小平方迴歸，<b>斜率即為 <i>n</i></b>，截距應接近 0。</p>
+    <p>比起逐組算 <i>n</i> 再取平均，迴歸能利用所有數據決定一條最佳直線，並以截距檢查是否有系統誤差（例如眼睛沒對準 0 刻度）。</p>
+    <div class="row">
+      <span>壓克力壁厚 <i>t</i> =</span><input type="number" id="tUse" step="0.0005"><span>cm</span>
+      <span class="note" id="tSrc"></span>
+    </div>
+    <div class="row">
+      <button class="btn" id="impData">從 ③ 匯入數據</button>
+      <button class="btn sec" id="addRow">新增一列</button>
+      <button class="btn sec" id="demoData" title="模擬一位細心的學生完成 6 組量測，供教師預覽">教師示範：自動量測 6 組</button>
+    </div>
+    <p class="note">表格中白色欄位可以直接修改（例如輸入紙本記錄的數據）。修改後按 Enter 或點選別處即重新計算。</p>
+    <div style="overflow-x:auto"><table id="anaTab"></table></div>
+    <div id="anaMsg"></div>
+  </div>
+
+  <div class="grid2e">
+    <div class="card">
+      <h2>主要分析：sin θ₃ – sin θ₁ 迴歸</h2>
+      <svg id="plotMain" viewBox="0 0 520 380"></svg>
+      <div id="resMain"></div>
+    </div>
+    <div class="card">
+      <h2>對照：近軸近似線性化</h2>
+      <svg id="plotPar" viewBox="0 0 520 380"></svg>
+      <div id="resPar"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>近軸近似的推導與限制</h2>
+    <p>小角度時 sin θ ≈ tan θ ≈ θ，令 <i>d</i>′ = <i>d</i> + <i>t</i>/1.49（壓克力層等效的空氣厚度），兩條路徑變成：</p>
+    <div class="eq">液體路徑：<i>X</i> ≈ θ₃ (<i>d</i>′ + <i>D</i>/<i>n</i>)　　空氣路徑：<i>X</i> + Δ<i>X</i> ≈ θ₃ (<i>d</i>′ + <i>D</i>)</div>
+    <p>兩式相除消去 θ₃，整理成直線形式：</p>
+    <div class="eq"><i>X</i>(<i>d</i>′ + <i>D</i>) − (<i>X</i>+Δ<i>X</i>)<i>d</i>′ = <span class="frac"><span>1</span><span><i>n</i></span></span> · (<i>X</i>+Δ<i>X</i>)<i>D</i></div>
+    <p>以 (<i>X</i>+Δ<i>X</i>)<i>D</i> 為橫軸、左式為縱軸，斜率 = 1/<i>n</i>。這條線不需要解任何三角函數，計算很簡單，但它把所有角度都當成小角度。</p>
+    <div class="warnbox">本實驗的視角 θ₃ 常在 10°–30°。以 <i>n</i> = 1.40 為例，θ₃ ≈ 6° 時近軸法高估約 0.3%，≈ 18° 時高估約 2.5%，≈ 30° 時高估約 8%。角度越大，近軸線的 <i>n</i> 越偏高；大角度的數據點也會使近軸圖出現明顯的非線性。</div>
+  </div>
+</section>
+
+<!-- ================= ⑤ ================= -->
+<section class="tab" id="t5">
+  <div class="card">
+    <h2>1. 三種計算方式的比較（同一批數據）</h2>
+    <p>把同一批量測數據分別以三種光路模型換算成 (sin θ₁, sin θ₃) 再做迴歸。此時還不知道真值，只能比較三者之間的差異。</p>
+    <table id="cmpTab"></table>
+    <p class="note">參考解答的算法把空氣路徑畫成直線穿過壓克力，使推得的 sin θ₃ 偏小、sin θ₁ 偏大，因此 <i>n</i> 系統性偏低。忽略壓克力的第 1 小題公式反而只略微偏低，因為它把壓克力層當成空氣，只少算了 <i>t</i>(tan θ₃ − tan θ₂) 這一小段；參考解答則是液體路徑有算、空氣路徑沒算，兩條路徑不一致。</p>
+  </div>
+
+  <div class="card">
+    <h2>2. 單組數據的誤差傳遞</h2>
+    <div class="row">選擇組別：<select id="epSel"></select></div>
+    <p>以數值微分求 ∂<i>n</i>/∂<i>q</i>，再乘上各量的不確定度 σ<sub><i>q</i></sub>，最後以平方和開根號合成。各量的不確定度可以修改：</p>
+    <table id="epTab"></table>
+    <div id="epMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>3. 如何選擇 A、B：Δ<i>X</i> 與 <i>D</i> 的取捨</h2>
+    <p>固定 <i>d</i> 與刻度 A，Δ<i>X</i> 取得越大，所需的 <i>D</i> 越大，<i>D</i> 的讀數誤差對 <i>n</i> 的影響越小。但 <i>D</i> 不能超過槽寬（約 7.8 cm）。下表以你量得的 <i>n</i> 估算，σ<sub><i>D</i></sub> 取上表的設定值。</p>
+    <div class="row">A = <input type="number" id="dxA" value="6" step="0.5"> cm　<i>d</i> = <input type="number" id="dxd" value="15" step="1"> cm</div>
+    <table id="dxTab"></table>
+  </div>
+
+  <div class="card">
+    <h2>4. 近軸近似的系統誤差</h2>
+    <p>以你量得的 <i>n</i>、<i>d</i> = 15 cm、<i>D</i> = 5 cm 產生無誤差的理想數據，再用近軸公式反推 <i>n</i>：</p>
+    <table id="parTab"></table>
+  </div>
+
+  <div class="card">
+    <h2>5. 討論</h2>
+    <ol>
+      <li>為什麼要先讓 0 刻度的上下兩半段切齊？如果眼睛偏離 0 刻度 2 mm，量到的 <i>X</i> 與 <i>X</i>+Δ<i>X</i> 各會怎樣？迴歸的截距會出現什麼現象？</li>
+      <li>在誤差傳遞表中，哪一個量的貢獻最大？要怎麼改變實驗設計才能降低它？</li>
+      <li>壓克力壁只有 3 mm，為什麼仍然不能直接忽略？請用 <i>t</i>(tan θ₃ − tan θ₂) 和 Δ<i>X</i> 的大小比較說明。</li>
+      <li>近軸近似在什麼條件下可以接受？如果只能用近軸公式，應該怎麼選 A 和 <i>d</i>？</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= ⑥ ================= -->
+<section class="tab" id="t6">
+  <div class="card">
+    <h2>真值揭曉</h2>
+    <p>揭曉後仍可回到 ③ 繼續量測或修改 ④ 的數據，但請先完成自己的分析與結論再按下按鈕。</p>
+    <div class="row"><button class="btn warn" id="reveal">我已完成分析，揭曉真值</button></div>
+    <div id="revealOut"></div>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+/* ================= 物理核心 ================= */
+const NA = 1.49;               // 壓克力折射率（題目給定）
+const TANK_L = 18.0, TANK_W = 8.0, BASE_AREA = TANK_L * TANK_W; // cm, cm²
+const RULER_H = 3.0;           // 直尺寬（側立高度）cm
+const BEAKER = 500;            // mL
+
+// 已知空氣中方向 tanθ3 = tau，求進入折射率 m 介質後的 tanθ
+function tanIn(tau, m){ const s = tau/Math.hypot(1,tau)/m; return s/Math.sqrt(1-s*s); }
+function bis(f, target, lo=-6, hi=6){
+  for(let i=0;i<64;i++){ const m=(lo+hi)/2; if(f(m)<target) lo=m; else hi=m; }
+  return (lo+hi)/2;
+}
+// g = {n, D, d, t}；回傳由眼睛垂足量起的橫向位置
+function sAir(tau,g){ return (g.d+g.D)*tau + g.t*tanIn(tau,NA); }
+function sLiq(tau,g){ return g.d*tau + g.t*tanIn(tau,NA) + g.D*tanIn(tau,g.n); }
+function tauAir(u,g){ return bis(x=>sAir(x,g),u); }
+function tauLiq(u,g){ return bis(x=>sLiq(x,g),u); }
+
+// 三種由 (A=X, B=X+ΔX, D, d, t) 反推 n 的方法
+function nCorrect(A,B,D,d,t){
+  const tau = bis(x=>(d+D)*x + t*tanIn(x,NA), B);
+  const tb1 = (A - d*tau - t*tanIn(tau,NA))/D;
+  return (tau/Math.hypot(1,tau)) / (tb1/Math.hypot(1,tb1));
+}
+function nReference(A,B,D,d,t){
+  const R = d*B/(d+D+t);
+  const s3 = R/Math.hypot(d,R), s2 = s3/NA, r = t*s2/Math.sqrt(1-s2*s2);
+  const a = A-R-r; return s3/(a/Math.hypot(D,a));
+}
+function nNoWall(A,B,D,d){
+  const R = d*B/(D+d); const s2 = R/Math.hypot(d,R);
+  const a = A-R; return s2/(a/Math.hypot(D,a));
+}
+const deg = x => x*180/Math.PI;
+function gauss(){ let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+const round05 = x => Math.round(x/0.05)*0.05;
+const f = (x,k=2)=> (x==null||!isFinite(x)) ? '—' : x.toFixed(k);
+const $ = id => document.getElementById(id);
+
+/* ================= 狀態 ================= */
+let S;
+function newState(){
+  const t = 0.290 + Math.random()*0.020;
+  S = {
+    truth:{ n: +(1.33 + Math.random()*0.17).toFixed(3), t,
+            tSpots:[0,1,2].map(()=> t + gauss()*0.002) },
+    spot:0, tReads:[],
+    vol:0,
+    d:15, D:3.0, eyeU:(Math.random()<0.5?-1:1)*(0.15+Math.random()*0.3),
+    dMeas:null, A:6.0, B:6.5, marked:false,
+    sets:[], cur:null, lvlWarned:false,
+    ana:null, tUse:null, revealed:false,
+    sig:{D:0.05, d:0.10, X:0.002, B:0.002, t:0.005}
+  };
+}
+newState();
+
+/* ================= 分頁 ================= */
+let active='t1';
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  if(b.disabled) return;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  active=b.dataset.t;
+  if(active==='t2'){drawCal();drawTank();}
+  if(active==='t3'){syncT3();}
+  if(active==='t4'){enterT4();}
+  if(active==='t5'){renderT5();}
+  if(active==='t6'){renderT6();}
+});
+$('btnNew').onclick=()=>{
+  if(!confirm('重新抽取未知液體與槽壁厚度？所有已記錄的數據都會清除。')) return;
+  newState(); resetUI(); drawCal(); drawTank(); syncT3(); drawR1();
+  $('revealOut').innerHTML='';
+  if(active==='t4') enterT4(); if(active==='t5') renderT5();
+};
+function resetUI(){
+  $('calTab').innerHTML=''; $('calMsg').innerHTML=''; $('calIn').value='';
+  $('lvlMsg').innerHTML=''; $('recMsg').textContent='';
+  $('c_d').value=S.d; $('c_D').value=S.D; $('inA').value=S.A.toFixed(1); $('inB').value=S.B.toFixed(1);
+  $('dMeasOut').textContent='尚未量測'; $('spotTag').textContent='位置 1';
+  renderData();
+}
+
+/* ================= ① 原理與光路 ================= */
+const P1 = ['n','D','d','t','A'];
+P1.forEach(k=>$('p_'+k).oninput=drawR1);
+function line(x1,y1,x2,y2,st){return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" ${st}/>`;}
+function txt(x,y,s,st=''){return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" ${st}>${s}</text>`;}
+
+function drawR1(){
+  const g = {n:+$('p_n').value, D:+$('p_D').value, d:+$('p_d').value, t:+$('p_t').value};
+  const A = +$('p_A').value;
+  $('v_n').textContent=g.n.toFixed(2); $('v_D').textContent=g.D.toFixed(1)+' cm';
+  $('v_d').textContent=g.d.toFixed(1)+' cm'; $('v_t').textContent=g.t.toFixed(2)+' cm'; $('v_A').textContent=A.toFixed(1)+' cm';
+  const tau = tauLiq(A,g);
+  const t2 = tanIn(tau,NA), t1 = tanIn(tau,g.n);
+  const B = sAir(tau,g), Bref = (g.d+g.t+g.D)*tau;
+  const P1u = g.d*tau, P2u = P1u + g.t*t2;
+
+  // 主圖
+  const H=520, uMin=-1.5, uMax=Math.max(Bref,B,A)+1.5;
+  const yTot = g.D+g.t+g.d, s = (H-50)/(yTot+1.2);
+  const W = Math.max(300, (uMax-uMin)*s+20);
+  $('r1').setAttribute('viewBox',`0 0 ${W.toFixed(0)} ${H}`);
+  const X = u => 10+(u-uMin)*s, Y = y => 22+y*s;
+  let h='';
+  h+=`<rect x="${X(uMin)}" y="${Y(0)}" width="${(uMax-uMin)*s}" height="${g.D*s}" fill="#cfe8fa"/>`;
+  h+=`<rect x="${X(uMin)}" y="${Y(g.D)}" width="${(uMax-uMin)*s}" height="${Math.max(g.t*s,1.5)}" fill="#9fb3c8"/>`;
+  h+=txt(X(uMax)-6,Y(g.D)-6,'槽內','text-anchor="end" font-size="12" fill="#334e68"');
+  h+=txt(X(uMax)-6,Y(g.D+g.t)+14,'壓克力壁','text-anchor="end" font-size="12" fill="#334e68"');
+  h+=line(X(uMin),Y(0),X(uMax),Y(0),'stroke="#243b53" stroke-width="3"');
+  for(let k=0;k<=Math.floor(uMax);k++){ h+=line(X(k),Y(0),X(k),Y(0)-7,'stroke="#243b53"'); if(k%2===0) h+=txt(X(k),Y(0)-10,k,'text-anchor="middle" font-size="11"'); }
+  h+=line(X(0),Y(-0.6),X(0),Y(yTot),'stroke="#829ab1" stroke-dasharray="3 3"');
+  // 光線
+  h+=line(X(0),Y(yTot),X(P1u),Y(g.D+g.t),'stroke="#102a43" stroke-width="2"');
+  h+=line(X(P1u),Y(g.D+g.t),X(P2u),Y(g.D),'stroke="#102a43" stroke-width="2"');
+  h+=line(X(P2u),Y(g.D),X(A),Y(0),'stroke="#1f6fb2" stroke-width="2.2"');
+  h+=line(X(P2u),Y(g.D),X(B),Y(0),'stroke="#52606d" stroke-width="1.8" stroke-dasharray="6 4"');
+  h+=line(X(P1u),Y(g.D+g.t),X(Bref),Y(0),'stroke="#d9822b" stroke-width="1.6" stroke-dasharray="3 4"');
+  h+=`<circle cx="${X(A)}" cy="${Y(0)}" r="4" fill="#c62828"/>`+txt(X(A),Y(0)+16,'A','text-anchor="middle" font-size="13" fill="#c62828"');
+  h+=`<circle cx="${X(B)}" cy="${Y(0)}" r="4" fill="#1f6fb2"/>`+txt(X(B)+2,Y(0)+16,'B','text-anchor="start" font-size="13" fill="#1f6fb2"');
+  // 眼睛
+  h+=`<circle cx="${X(0)}" cy="${Y(yTot)}" r="9" fill="#fff" stroke="#102a43" stroke-width="2"/><circle cx="${X(0)}" cy="${Y(yTot)-3}" r="3.5" fill="#102a43"/>`;
+  h+=txt(X(0)+14,Y(yTot)+4,'眼睛','font-size="12"');
+  // 尺寸標註
+  const dimX = X(uMin)+14;
+  h+=line(dimX,Y(0),dimX,Y(g.D),'stroke="#486581"')+txt(dimX+4,Y(g.D/2),'D','font-size="13" font-style="italic"');
+  h+=line(dimX,Y(g.D+g.t),dimX,Y(yTot),'stroke="#486581"')+txt(dimX+4,Y(g.D+g.t+g.d/2),'d','font-size="13" font-style="italic"');
+  $('r1').innerHTML=h;
+
+  // 放大圖
+  const zW = 760, zH = 260;
+  const zsc = zH/(g.t+0.7);            // px/cm，縱向剛好容納壁厚上下各 0.35 cm
+  const ZU0 = P1u-0.3, ZY0 = g.D-0.35;
+  const ZX = u => (u-ZU0)*zsc, ZY = y => (y-ZY0)*zsc;
+  let z='';
+  z+=`<rect x="0" y="0" width="${zW}" height="${ZY(g.D)}" fill="#cfe8fa"/>`;
+  z+=`<rect x="0" y="${ZY(g.D)}" width="${zW}" height="${g.t*zsc}" fill="#9fb3c8"/>`;
+  const ext = 1.2; // cm 往槽內延伸
+  const Ly = g.D-ext;
+  z+=line(ZX(P1u-0.35*tau),ZY(g.D+g.t+0.35),ZX(P1u),ZY(g.D+g.t),'stroke="#102a43" stroke-width="2"');
+  z+=line(ZX(P1u),ZY(g.D+g.t),ZX(P2u),ZY(g.D),'stroke="#102a43" stroke-width="2"');
+  z+=line(ZX(P2u),ZY(g.D),ZX(P2u+ext*t1),ZY(Ly),'stroke="#1f6fb2" stroke-width="2.2"');
+  z+=line(ZX(P2u),ZY(g.D),ZX(P2u+ext*tau),ZY(Ly),'stroke="#52606d" stroke-width="1.8" stroke-dasharray="6 4"');
+  z+=line(ZX(P1u),ZY(g.D+g.t),ZX(P1u+(ext+g.t)*tau),ZY(Ly),'stroke="#d9822b" stroke-width="1.6" stroke-dasharray="3 4"');
+  z+=line(ZX(P1u),ZY(g.D+g.t+0.3),ZX(P1u),ZY(g.D-0.3),'stroke="#829ab1" stroke-dasharray="2 3"');
+  z+=line(ZX(P2u),ZY(g.D+0.1),ZX(P2u),ZY(g.D-0.5),'stroke="#829ab1" stroke-dasharray="2 3"');
+  z+=txt(8,ZY(g.D)+g.t*zsc/2+4,'壓克力','font-size="12" fill="#243b53"');
+  z+=txt(8,16,'槽內（往直尺方向）','font-size="12" fill="#243b53"');
+  z+=txt(8,zH-8,'槽外（往眼睛方向）','font-size="12" fill="#243b53"');
+  const gap = t2 ? g.t*(tau-t2) : 0;
+  z+=txt(zW-10,16,`兩條空氣路徑在槽壁內側已相差 t(tanθ₃ − tanθ₂) = ${f(gap*10,2)} mm`,'text-anchor="end" font-size="12" fill="#b35c00"');
+  $('r1z').innerHTML=z;
+
+  // 表格
+  const nC = nCorrect(A,B,g.D,g.d,g.t), nR = nReference(A,B,g.D,g.d,g.t), nN = nNoWall(A,B,g.D,g.d);
+  const pct = x => ((x-g.n)/g.n*100).toFixed(2)+' %';
+  $('r1tab').innerHTML =
+   `<tr><th>量</th><th>值</th></tr>
+    <tr><td>θ₃（空氣）</td><td>${f(deg(Math.atan(tau)),2)}°</td></tr>
+    <tr><td>θ₂（壓克力）</td><td>${f(deg(Math.atan(t2)),2)}°</td></tr>
+    <tr><td>θ₁（液體）</td><td>${f(deg(Math.atan(t1)),2)}°</td></tr>
+    <tr><td>B（正確光路）</td><td>${f(B,3)} cm，Δ<i>X</i> = ${f(B-A,3)} cm</td></tr>
+    <tr><td>B（參考解答光路）</td><td>${f(Bref,3)} cm（差 ${f((Bref-B)*10,2)} mm）</td></tr>`;
+  $('r1tab').innerHTML +=
+   `<tr><th>反推方法</th><th><i>n</i>（相對誤差）</th></tr>
+    <tr><td>正確光路</td><td>${f(nC,4)}（${pct(nC)}）</td></tr>
+    <tr><td>參考解答算法</td><td>${f(nR,4)}（${pct(nR)}）</td></tr>
+    <tr><td>第 1 小題公式（忽略壓克力）</td><td>${f(nN,4)}（${pct(nN)}）</td></tr>`;
+}
+
+/* ================= ② 器材組裝 ================= */
+document.querySelectorAll('[data-spot]').forEach(b=>b.onclick=()=>{
+  S.spot=+b.dataset.spot; $('spotTag').textContent='位置 '+(S.spot+1); $('calIn').value=''; $('calMsg').innerHTML=''; drawCal();
+});
+$('calHint').onclick=()=>{const b=$('calHintBox'); b.style.display=b.style.display==='none'?'block':'none';};
+function drawCal(){
+  const tmm = S.truth.tSpots[S.spot]*10;   // mm
+  const x0=40, px=24, yb=80;
+  let h='<rect x="0" y="0" width="780" height="190" fill="#f7f9fb"/>';
+  h+=`<rect x="10" y="20" width="760" height="${yb-20}" fill="#e3e8ee" stroke="#9aa5b1"/>`;
+  for(let m=0;m<=30;m++){
+    const L = m%10===0?30:(m%5===0?20:13);
+    h+=line(x0+m*px,yb,x0+m*px,yb-L,'stroke="#1f2933" stroke-width="1.3"');
+    if(m%10===0) h+=txt(x0+m*px,yb-34,m/10,'text-anchor="middle" font-size="14"');
+  }
+  h+=txt(760,36,'cm','text-anchor="end" font-size="12" fill="#52606d"');
+  const vx = x0+tmm*px;
+  h+=`<rect x="${vx-12}" y="${yb}" width="${19*px+24}" height="60" fill="#d3dce6" stroke="#9aa5b1"/>`;
+  for(let k=0;k<=20;k++){
+    const x = vx + k*0.95*px, L = k%10===0?26:(k%2===0?18:11);
+    h+=line(x,yb,x,yb+L,'stroke="#102a43" stroke-width="1.3"');
+    if(k%2===0) h+=txt(x,yb+42,k/2,'text-anchor="middle" font-size="12"');
+  }
+  h+=txt(vx+19*px+20,yb+56,'0.05 mm','text-anchor="end" font-size="11" fill="#52606d"');
+  h+=txt(20,176,'主尺（上）單位 mm；游標（下）20 分格，每格 0.05 mm。卡爪夾住槽壁。','font-size="12" fill="#52606d"');
+  $('cal').innerHTML=h;
+}
+$('calOk').onclick=()=>{
+  const v = parseFloat($('calIn').value);
+  if(!isFinite(v)){ $('calMsg').innerHTML='<div class="warnbox">請輸入讀數。</div>'; return; }
+  const tmm = S.truth.tSpots[S.spot]*10;
+  if(Math.abs(v-tmm) <= 0.05+1e-9 && Math.abs(v/0.05-Math.round(v/0.05))<1e-6){
+    S.tReads[S.spot]=v;
+    $('calMsg').innerHTML=`<div class="okbox">位置 ${S.spot+1} 讀數 ${v.toFixed(2)} mm 已記錄。</div>`;
+  } else if(Math.abs(v/0.05-Math.round(v/0.05))>1e-6){
+    $('calMsg').innerHTML='<div class="warnbox">游標卡尺精度 0.05 mm，讀數的最後一位應為 0 或 5。</div>';
+  } else {
+    $('calMsg').innerHTML='<div class="warnbox">讀數不正確。先讀主尺整數 mm，再找游標上最對齊的刻度線。</div>';
+  }
+  renderCalTab();
+};
+function tMeas(){ const r=S.tReads.filter(x=>x!=null); return r.length? r.reduce((a,b)=>a+b,0)/r.length/10 : null; }
+function renderCalTab(){
+  const r=S.tReads; const tm=tMeas();
+  $('calTab').innerHTML=`<tr><th>位置</th><th>1</th><th>2</th><th>3</th><th>平均 <i>t</i></th></tr>
+   <tr><td>讀數 (mm)</td>${[0,1,2].map(i=>`<td>${r[i]!=null?r[i].toFixed(2):'—'}</td>`).join('')}<td>${tm!=null?(tm*10).toFixed(3)+' mm = '+tm.toFixed(4)+' cm':'—'}</td></tr>`;
+}
+
+document.querySelectorAll('[data-pour]').forEach(b=>b.onclick=()=>{
+  const dv=+b.dataset.pour;
+  S.vol = Math.max(0, Math.min(BEAKER, S.vol+dv));
+  drawTank(); $('lvlMsg').innerHTML='';
+});
+const level = ()=> S.vol/BASE_AREA;
+function drawTank(){
+  const L = level();
+  $('lvlInfo').textContent=`槽內液體 ${S.vol.toFixed(0)} mL，燒杯剩 ${(BEAKER-S.vol).toFixed(0)} mL`;
+  // 正視圖
+  const s=32, x0=32, yb=270;
+  let h='';
+  h+=`<rect x="${x0-4}" y="${yb-8*s}" width="${TANK_L*s+8}" height="${8*s+4}" fill="none" stroke="#627d98" stroke-width="4"/>`;
+  if(L>0) h+=`<rect x="${x0}" y="${yb-L*s}" width="${TANK_L*s}" height="${L*s}" fill="rgba(74,163,223,.35)"/>`;
+  const rx=x0+1.5*s;
+  h+=`<rect x="${rx}" y="${yb-RULER_H*s}" width="${15*s}" height="${RULER_H*s}" fill="#fffbe8" stroke="#b8a26a"/>`;
+  for(let k=0;k<=150;k++){ const len=k%10===0?0.6:(k%5===0?0.45:0.3); h+=line(rx+k*0.1*s,yb-RULER_H*s,rx+k*0.1*s,yb-(RULER_H-len)*s,'stroke="#333" stroke-width=".6"'); }
+  for(let k=0;k<=15;k++) h+=txt(rx+k*s,yb-(RULER_H-0.95)*s,k,'text-anchor="middle" font-size="9"');
+  if(L>0) h+=line(x0,yb-L*s,x0+TANK_L*s,yb-L*s,'stroke="#1f6fb2" stroke-width="1.2"');
+  // 放大框示意
+  h+=`<rect x="${rx+4.5*s}" y="${yb-3.1*s}" width="${2.5*s}" height="${0.8*s}" fill="none" stroke="#d9822b" stroke-dasharray="3 2"/>`;
+  $('tankSide').innerHTML=h;
+  // 放大圖：u 4.5–7.0 cm，高度 2.3–3.1 cm
+  const W=640,H=300, u0=4.5, sx=W/2.5, h0=3.15, sy=H/0.85;
+  const ZX=u=>(u-u0)*sx, ZY=hh=>(h0-hh)*sy;
+  let z=`<rect x="0" y="0" width="${W}" height="${H}" fill="#e9eef3"/>`;
+  z+=`<rect x="0" y="${ZY(RULER_H)}" width="${W}" height="${H}" fill="#fffbe8"/>`;
+  for(let k=45;k<=70;k++){ const u=k*0.1, len=k%10===0?0.6:(k%5===0?0.45:0.3);
+    z+=line(ZX(u),ZY(RULER_H),ZX(u),ZY(RULER_H-len),'stroke="#222" stroke-width="2"'); }
+  z+=txt(ZX(5),ZY(2.33),'5','text-anchor="middle" font-size="20"')+txt(ZX(6),ZY(2.33),'6','text-anchor="middle" font-size="20"')+txt(ZX(7),ZY(2.33),'7','text-anchor="middle" font-size="20"');
+  if(L>2.2){
+    const yl = ZY(Math.min(L,3.2));
+    z+=`<rect x="0" y="${yl}" width="${W}" height="${H-yl}" fill="rgba(74,163,223,.30)"/>`;
+    z+=`<rect x="0" y="${yl-3}" width="${W}" height="6" fill="rgba(90,110,130,.35)"/>`;
+    z+=txt(W-8,yl-8,`液面 ${L.toFixed(2)} cm`,'text-anchor="end" font-size="13" fill="#1f4e79"');
+  } else {
+    z+=txt(W/2,H-14,L>0?`液面在 ${L.toFixed(2)} cm，低於放大範圍`:'尚未加液','text-anchor="middle" font-size="14" fill="#52606d"');
+  }
+  $('tankZoom').innerHTML=z;
+}
+$('lvlCheck').onclick=()=>{
+  const L=level(); let m;
+  if(L<=0) m='<div class="warnbox">槽內尚無液體。</div>';
+  else if(L<RULER_H-0.3) m='<div class="warnbox">液面低於 mm 刻度線的下緣，所有刻度都只透過空氣觀察，看不到錯位。</div>';
+  else if(L>=RULER_H) m='<div class="warnbox">液面已淹過直尺上緣，所有刻度都在液面下，無法與液面上的刻度比較。用滴管吸出一些。</div>';
+  else if(L>=2.78 && L<=2.92) m='<div class="okbox">液面約在 mm 刻度線中段，上下兩半段都清楚可見，可以開始觀察。</div>';
+  else m='<div class="infobox">上下兩半段都看得到，但比例不均，建議用滴管微調到 mm 刻度線中段。</div>';
+  $('lvlMsg').innerHTML=m;
+};
+
+/* ================= ③ 觀察與對齊 ================= */
+$('c_d').oninput=()=>{ S.d=+$('c_d').value; S.dMeas=null; $('dMeasOut').textContent='位置已改變，請重新量測'; drawMini(); };
+$('measD_eye').onclick=()=>{
+  S.dMeas = round05(S.d + gauss()*0.10);  // 瞳孔位置不易精確對準尺
+  $('dMeasOut').textContent = `d = ${S.dMeas.toFixed(2)} cm`;
+};
+document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{ S.eyeU += +b.dataset.eye; drawMini(); });
+document.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>{
+  S.D = Math.max(0.3, Math.min(7.8, S.D + +b.dataset.dd)); $('c_D').value=S.D; drawMini();
+});
+$('c_D').oninput=()=>{ S.D=+$('c_D').value; drawMini(); };
+$('markAB').onclick=()=>{
+  let A=Math.round(parseFloat($('inA').value)*10)/10, B=Math.round(parseFloat($('inB').value)*10)/10;
+  if(!(A>=1 && A<=12)){ $('abInfo').textContent='A 請在 1.0–12.0 cm 之間。'; return; }
+  if(!(B>A && B<=14.5)){ $('abInfo').textContent='B 必須大於 A（液面下的刻度看起來會往眼睛垂足的方向靠近）。'; return; }
+  S.A=A; S.B=B; S.marked=true; $('inA').value=A.toFixed(1); $('inB').value=B.toFixed(1);
+  $('abInfo').textContent=`已標記 A = ${A.toFixed(1)} cm、B = ${B.toFixed(1)} cm，ΔX = ${(B-A).toFixed(1)} cm。`;
+};
+$('recD').onclick=()=>{
+  if(!S.marked){ $('recMsg').textContent='請先標記 A、B。'; return; }
+  if(S.dMeas==null){ $('recMsg').textContent='請先量取 d。'; return; }
+  const L=level();
+  if(!(L>RULER_H-0.3 && L<RULER_H)){ $('recMsg').textContent='液面不在刻度線範圍內，請回到 ② 調整。'; return; }
+  const Dm = round05(S.D + gauss()*0.03);
+  const c=S.cur;
+  if(c && (c.dMeas!==S.dMeas || c.A!==S.A || c.B!==S.B)) finishSet();
+  if(!S.cur) S.cur={dMeas:S.dMeas,A:S.A,B:S.B,Ds:[],tru:[]};
+  S.cur.Ds.push(Dm);
+  S.cur.tru.push({D:S.D,d:S.d,eyeU:S.eyeU});
+  $('recMsg').textContent=`直尺讀數 D = ${Dm.toFixed(2)} cm（第 ${S.cur.Ds.length} 次）`;
+  if(S.cur.Ds.length>=3) finishSet();
+  renderData();
+};
+$('finishSet').onclick=()=>{ finishSet(); renderData(); };
+function finishSet(){
+  if(S.cur && S.cur.Ds.length){ S.cur.Dbar=S.cur.Ds.reduce((a,b)=>a+b,0)/S.cur.Ds.length; S.sets.push(S.cur); }
+  S.cur=null;
+}
+function renderData(){
+  let h='<tr><th>組</th><th><i>d</i> (cm)</th><th>A = <i>X</i> (cm)</th><th>B (cm)</th><th>Δ<i>X</i> (cm)</th><th><i>D</i>₁</th><th><i>D</i>₂</th><th><i>D</i>₃</th><th><i>D</i> 平均</th><th></th></tr>';
+  const row=(s,i,cur)=>`<tr${cur?' style="background:#fff8e6"':''}><td>${cur?'進行中':i+1}</td><td>${s.dMeas.toFixed(2)}</td><td>${s.A.toFixed(1)}</td><td>${s.B.toFixed(1)}</td><td>${(s.B-s.A).toFixed(1)}</td>${[0,1,2].map(j=>`<td>${s.Ds[j]!=null?s.Ds[j].toFixed(2):'—'}</td>`).join('')}<td>${cur?'—':s.Dbar.toFixed(3)}</td><td>${cur?'':`<button class="btn sec" data-del="${i}">刪除</button>`}</td></tr>`;
+  S.sets.forEach((s,i)=>h+=row(s,i,false));
+  if(S.cur) h+=row(S.cur,0,true);
+  if(!S.sets.length && !S.cur) h+='<tr><td colspan="10" class="note">尚無數據</td></tr>';
+  $('dataTab').innerHTML=h;
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ S.sets.splice(+b.dataset.del,1); renderData(); });
+}
+function syncT3(){
+  $('c_d').value=S.d; $('c_D').value=S.D; drawMini(); renderData();
+  const w=[];
+  if(tMeas()==null) w.push('尚未在 ② 量取壁厚 t（④ 分析時需要）。');
+  const L=level(); if(!(L>RULER_H-0.3 && L<RULER_H)) w.push('液面不在刻度線範圍內，請先到 ② 加液。');
+  $('t3warn').innerHTML = w.length? `<div class="warnbox">${w.join('<br>')}</div>` : '';
+  if(!S.marked) $('abInfo').textContent='尚未標記。建議 A 取 4–8 cm、ΔX 取 0.3–0.8 cm，d 取 10–20 cm，所需 D 才會落在槽內。';
+}
+function drawMini(){
+  const s=7, ox=180, top=14;
+  const X=u=>ox+(u-7.5)*s, Y=y=>top+y*s;   // y：0 = 遠側槽壁內側
+  const yw=TANK_W, t=S.truth.t;
+  let h='';
+  h+=`<rect x="${X(-1.5)}" y="${Y(0)}" width="${TANK_L*s}" height="${TANK_W*s}" fill="#e8f3fb" stroke="#627d98"/>`;
+  h+=`<rect x="${X(-1.5)}" y="${Y(yw)}" width="${TANK_L*s}" height="${Math.max(t*s,2)}" fill="#9fb3c8"/>`;
+  const yr = yw - S.D;
+  h+=`<rect x="${X(0)}" y="${Y(yr)-3}" width="${15*s}" height="3" fill="#b8a26a"/>`;
+  h+=txt(X(15)+4,Y(yr)+2,'直尺','font-size="10"');
+  const ye = yw + t + S.d;
+  h+=`<circle cx="${X(S.eyeU)}" cy="${Y(ye)}" r="5" fill="#fff" stroke="#102a43" stroke-width="1.5"/>`;
+  h+=txt(X(S.eyeU)+8,Y(ye)+4,'眼睛','font-size="10"');
+  h+=line(X(-3),Y(yr),X(-3),Y(yw),'stroke="#486581"')+txt(X(-3)-4,Y((yr+yw)/2)+4,'D','text-anchor="end" font-size="11" font-style="italic"');
+  h+=line(X(-3),Y(yw+t),X(-3),Y(ye),'stroke="#486581"')+txt(X(-3)-4,Y((yw+ye)/2)+4,'d','text-anchor="end" font-size="11" font-style="italic"');
+  $('mini').setAttribute('viewBox',`0 0 360 ${Math.ceil(Y(ye)+20)}`);
+  $('mini').innerHTML=h;
+}
+
+// 視野繪製：水平軸 = 視線方向 tanθ3
+function renderView(svg, fid, center, half, g, ue, L){
+  const W=760,H=190, h0=3.12, sy=H/0.92;
+  const XV = tau => W/2 + (tau-center)/half*(W/2);
+  const YV = hh => (h0-hh)*sy;
+  const top=RULER_H;
+  let h=`<defs><filter id="${fid}" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="1.1"/></filter></defs>`;
+  h+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#5a6b7b"/>`;
+  h+=`<rect x="0" y="${YV(top)}" width="${W}" height="${H-YV(top)}" fill="#fffbe8"/>`;
+  if(L>0 && L<h0) { const yl=YV(Math.min(L,top+0.12)); h+=`<rect x="0" y="${yl}" width="${W}" height="${H-yl}" fill="rgba(74,163,223,.28)"/>`; }
+  let marks='';
+  const approx = center*(g.d+g.D);
+  const span = half*(g.d+g.D)*1.6+0.4;
+  for(let k=0;k<=150;k++){
+    const u=k*0.1, rel=u-ue;
+    if(Math.abs(rel-approx)>span) continue;
+    const len = k%10===0?0.6:(k%5===0?0.45:0.3), bot=top-len;
+    if(L<top){ // 空氣部分
+      const lo=Math.max(L,bot);
+      const x=XV(tauAir(rel,g));
+      if(x>-10&&x<W+10) marks+=line(x,YV(top),x,YV(lo),'stroke="#111" stroke-width="2.4"');
+    }
+    if(L>bot){ // 液體部分
+      const hi=Math.min(L,top);
+      const x=XV(tauLiq(rel,g));
+      if(x>-10&&x<W+10) marks+=line(x,YV(hi),x,YV(bot),'stroke="#111" stroke-width="2.4"');
+    }
+    if(k%10===0){
+      const hl=2.32, x = XV(L>hl? tauLiq(rel,g) : tauAir(rel,g));
+      if(x>-20&&x<W+20) marks+=txt(x,YV(hl),k/10,'text-anchor="middle" font-size="26" fill="#111"');
+    }
+  }
+  // 油性筆標記
+  if(S.marked){
+    const xa = XV(tauLiq(S.A-ue+0.03,g));
+    marks+=`<circle cx="${xa}" cy="${YV(2.55)}" r="6" fill="#d32f2f"/>`;
+    const xb = XV((L>top+0.02? tauLiq : tauAir)(S.B-ue,g));
+    marks+=`<path d="M${xb-8},${YV(top+0.07)} L${xb+8},${YV(top+0.07)} L${xb},${YV(top)} Z" fill="#1565c0"/>`;
+  }
+  h+=`<g filter="url(#${fid})">${marks}</g>`;
+  if(L>RULER_H-0.35 && L<h0){ const yl=YV(Math.min(L,top+0.1)); h+=`<rect x="0" y="${yl-2.5}" width="${W}" height="5" fill="rgba(80,95,110,.45)" filter="url(#${fid})"/>`; }
+  svg.innerHTML=h;
+}
+function animate(){
+  if(active==='t3'){
+    const tt=performance.now()/1000;
+    const swayU = 0.025*Math.sin(2*Math.PI*tt/3.7) + 0.012*Math.sin(2*Math.PI*tt/1.3+1.1);
+    const swayD = 0.05*Math.sin(2*Math.PI*tt/5.1+0.4);
+    const g={n:S.truth.n, D:S.D, d:S.d+swayD, t:S.truth.t};
+    const ue=S.eyeU+swayU, L=level();
+    renderView($('view0'),'bl0',0,0.03,g,ue,L);
+    const gc={n:S.truth.n, D:S.D, d:S.d, t:S.truth.t};
+    const cA = S.marked ? tauLiq(S.A-S.eyeU,gc) : tauLiq(6-S.eyeU,gc);
+    renderView($('viewA'),'blA',cA,0.035,g,ue,L);
+  }
+  requestAnimationFrame(animate);
+}
+
+/* ================= 分析共用 ================= */
+// 三種模型：回傳 {sa: 空氣側 sin, sl: 液體側 sin}
+const MODELS = {
+  correct:{name:'正確光路（壓克力內兩路徑共用）', f:(p,t)=>{
+    const tau = bis(x=>(p.d+p.D)*x + t*tanIn(x,NA), p.B);
+    const tb1 = (p.X - p.d*tau - t*tanIn(tau,NA))/p.D;
+    return {sa:tau/Math.hypot(1,tau), sl:tb1/Math.hypot(1,tb1), th:deg(Math.atan(tau))};
+  }},
+  reference:{name:'參考解答算法（空氣路徑直線穿過壓克力）', f:(p,t)=>{
+    const R = p.d*p.B/(p.d+p.D+t);
+    const s3 = R/Math.hypot(p.d,R), s2 = s3/NA, r = t*s2/Math.sqrt(1-s2*s2);
+    const a = p.X-R-r; return {sa:s3, sl:a/Math.hypot(p.D,a)};
+  }},
+  nowall:{name:'第 1 小題公式（忽略壓克力）', f:(p,t)=>{
+    const R = p.d*p.B/(p.D+p.d); const a = p.X-R;
+    return {sa:R/Math.hypot(p.d,R), sl:a/Math.hypot(p.D,a)};
+  }}
+};
+function paraxXY(p,t){ const dp=p.d+t/NA; return {x:p.B*p.D, y:p.X*(dp+p.D)-p.B*dp}; }
+function ols(xs,ys){
+  const N=xs.length; if(N<2) return null;
+  const mx=xs.reduce((a,b)=>a+b,0)/N, my=ys.reduce((a,b)=>a+b,0)/N;
+  let Sxx=0,Sxy=0,Syy=0; for(let i=0;i<N;i++){Sxx+=(xs[i]-mx)**2;Sxy+=(xs[i]-mx)*(ys[i]-my);Syy+=(ys[i]-my)**2;}
+  if(Sxx<=0) return null;
+  const b=Sxy/Sxx, a=my-b*mx;
+  let SSE=0; for(let i=0;i<N;i++) SSE+=(ys[i]-a-b*xs[i])**2;
+  const s2 = N>2? SSE/(N-2) : NaN;
+  return {b,a,seb:Math.sqrt(s2/Sxx), sea:Math.sqrt(s2*(1/N+mx*mx/Sxx)), r2: Syy>0?1-SSE/Syy:1, N};
+}
+function ols0(xs,ys){
+  const N=xs.length; if(N<1) return null;
+  let Sxx=0,Sxy=0; for(let i=0;i<N;i++){Sxx+=xs[i]*xs[i];Sxy+=xs[i]*ys[i];}
+  const b=Sxy/Sxx; let SSE=0; for(let i=0;i<N;i++) SSE+=(ys[i]-b*xs[i])**2;
+  return {b, seb: N>1? Math.sqrt(SSE/(N-1)/Sxx) : NaN, N};
+}
+function validRows(){
+  return (S.ana||[]).filter(p=>[p.d,p.X,p.B,p.D].every(v=>isFinite(v)&&v>0) && p.B>p.X);
+}
+function tNow(){ return isFinite(S.tUse)&&S.tUse>0 ? S.tUse : 0.30; }
+function fitModel(key){
+  const rows=validRows(), t=tNow(); const xs=[],ys=[];
+  rows.forEach(p=>{ const r=MODELS[key].f(p,t); if(isFinite(r.sa)&&isFinite(r.sl)&&r.sl>0){xs.push(r.sl);ys.push(r.sa);} });
+  return {xs,ys,fit:ols(xs,ys),fit0:ols0(xs,ys)};
+}
+function fitParax(){
+  const rows=validRows(), t=tNow(); const xs=[],ys=[];
+  rows.forEach(p=>{const q=paraxXY(p,t); xs.push(q.x); ys.push(q.y);});
+  const fit=ols(xs,ys), fit0=ols0(xs,ys);
+  [fit,fit0].forEach(q=>{ if(q){ q.n=1/q.b; q.sen=q.seb/(q.b*q.b); } });
+  return {xs,ys,fit,fit0};
+}
+function niceStep(r){ const e=Math.pow(10,Math.floor(Math.log10(r))); const m=r/e; return (m<1.5?1:m<3?2:m<7?5:10)*e; }
+function plotXY(svg,o){
+  const W=520,H=380,L=62,R=16,T=16,B=50;
+  let x0=Math.min(0,...o.xs), x1=Math.max(...o.xs), y0=Math.min(0,...o.ys), y1=Math.max(...o.ys);
+  if(!o.xs.length){x0=0;x1=1;y0=0;y1=1;}
+  x1+= (x1-x0)*0.08||1; y1+=(y1-y0)*0.08||1;
+  const sx=v=>L+(v-x0)/(x1-x0)*(W-L-R), sy=v=>H-B-(v-y0)/(y1-y0)*(H-T-B);
+  let h=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>`;
+  const stx=niceStep((x1-x0)/5), sty=niceStep((y1-y0)/5);
+  const dec=s=>Math.max(0,-Math.floor(Math.log10(s)+1e-9));
+  for(let v=Math.ceil(x0/stx)*stx; v<=x1+1e-12; v+=stx){ h+=line(sx(v),T,sx(v),H-B,'stroke="#eef2f7"')+txt(sx(v),H-B+16,v.toFixed(dec(stx)),'text-anchor="middle" font-size="11" fill="#52606d"'); }
+  for(let v=Math.ceil(y0/sty)*sty; v<=y1+1e-12; v+=sty){ h+=line(L,sy(v),W-R,sy(v),'stroke="#eef2f7"')+txt(L-6,sy(v)+4,v.toFixed(dec(sty)),'text-anchor="end" font-size="11" fill="#52606d"'); }
+  h+=line(L,H-B,W-R,H-B,'stroke="#334e68"')+line(L,T,L,H-B,'stroke="#334e68"');
+  h+=txt((L+W-R)/2,H-10,o.xl,'text-anchor="middle" font-size="13"');
+  h+=`<text x="16" y="${(T+H-B)/2}" transform="rotate(-90 16 ${(T+H-B)/2})" text-anchor="middle" font-size="13">${o.yl}</text>`;
+  h+=`<clipPath id="cp_${svg.id}"><rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}"/></clipPath><g clip-path="url(#cp_${svg.id})">`;
+  (o.lines||[]).forEach(l=>{ h+=line(sx(x0),sy(l.a+l.b*x0),sx(x1),sy(l.a+l.b*x1),`stroke="${l.c}" stroke-width="2" ${l.dash?'stroke-dasharray="6 4"':''}`); });
+  h+='</g>';
+  o.xs.forEach((x,i)=>{ h+=`<circle cx="${sx(x).toFixed(1)}" cy="${sy(o.ys[i]).toFixed(1)}" r="4.5" fill="#1f6fb2" stroke="#fff"/>`; });
+  let ly=T+14; (o.lines||[]).forEach(l=>{ if(!l.label) return; h+=line(L+10,ly-4,L+34,ly-4,`stroke="${l.c}" stroke-width="2" ${l.dash?'stroke-dasharray="6 4"':''}`)+txt(L+40,ly,l.label,'font-size="12"'); ly+=17; });
+  svg.innerHTML=h;
+}
+
+/* ================= ④ 數據與迴歸 ================= */
+function importSets(){
+  finishSet();
+  S.ana = S.sets.map(s=>({d:s.dMeas, X:s.A, B:s.B, D:+s.Dbar.toFixed(3), tru:s.tru}));
+}
+function enterT4(){
+  if(S.ana==null) importSets();
+  if(S.tUse==null){ const tm=tMeas(); S.tUse = tm!=null? +tm.toFixed(4) : null; }
+  $('tUse').value = S.tUse!=null? S.tUse : '';
+  $('tSrc').textContent = tMeas()!=null ? `（② 游標卡尺平均 ${tMeas().toFixed(4)} cm）` : '（尚未在 ② 量取，暫用 0.30 cm）';
+  renderAnaTab(); renderT4();
+}
+$('tUse').onchange=()=>{ const v=parseFloat($('tUse').value); S.tUse = isFinite(v)&&v>0? v : null; renderAnaTab(); renderT4(); };
+$('impData').onclick=()=>{
+  if(S.ana && S.ana.length && !confirm('以 ③ 的數據取代目前表格？')) return;
+  importSets(); renderAnaTab(); renderT4();
+};
+$('addRow').onclick=()=>{ if(!S.ana) S.ana=[]; S.ana.push({d:NaN,X:NaN,B:NaN,D:NaN}); renderAnaTab(); };
+function neededD(n,t,d,A,B,eu){
+  const g={n,t,d,D:0};
+  const f=D=>{ g.D=D; return sAir(tauLiq(A-eu,g),g)-(B-eu); };
+  let lo=0.3,hi=7.8; if(f(lo)>0||f(hi)<0) return null;
+  for(let i=0;i<50;i++){const m=(lo+hi)/2; if(f(m)<0) lo=m; else hi=m;}
+  return (lo+hi)/2;
+}
+$('demoData').onclick=()=>{
+  if(S.ana && S.ana.length && !confirm('以示範數據取代目前表格？')) return;
+  const n=S.truth.n, t=S.truth.t; S.ana=[];
+  const plan=[[3,12],[4.5,15],[6,15],[7.5,18],[9,20],[10.5,20]];
+  plan.forEach(([A,dset])=>{
+    const dTrue = dset + gauss()*0.1, eu = gauss()*0.015;
+    let best=null;
+    for(let k=1;k<=20;k++){ const B=+(A+k*0.1).toFixed(1); const Dn=neededD(n,t,dTrue,A,B,eu);
+      if(Dn!=null && (best==null || Math.abs(Dn-5)<Math.abs(best.Dn-5))) best={B,Dn}; }
+    if(!best) return;
+    const Ds=[0,1,2].map(()=>round05(best.Dn + gauss()*0.03));
+    S.ana.push({d:round05(dTrue+gauss()*0.05), X:A, B:best.B, D:+(Ds.reduce((a,b)=>a+b,0)/3).toFixed(3),
+                tru:Ds.map(()=>({D:best.Dn,d:dTrue,eyeU:eu}))});
+  });
+  if(S.tUse==null) S.tUse = +(t + gauss()*0.001).toFixed(4);
+  $('tUse').value=S.tUse;
+  renderAnaTab(); renderT4();
+};
+function renderAnaTab(){
+  const t=tNow();
+  let h=`<tr><th>組</th><th><i>d</i> (cm)</th><th><i>X</i> (cm)</th><th><i>X</i>+Δ<i>X</i> (cm)</th><th><i>D</i> (cm)</th><th>θ₃ (°)</th><th>sin θ₁</th><th>sin θ₃</th><th>單組 <i>n</i></th><th>近軸 橫軸<br>(<i>X</i>+Δ<i>X</i>)<i>D</i></th><th>近軸 縱軸</th><th></th></tr>`;
+  (S.ana||[]).forEach((p,i)=>{
+    const ok=[p.d,p.X,p.B,p.D].every(v=>isFinite(v)&&v>0)&&p.B>p.X;
+    let c=['—','—','—','—','—','—'];
+    if(ok){ const r=MODELS.correct.f(p,t), q=paraxXY(p,t);
+      c=[f(r.th,2),f(r.sl,4),f(r.sa,4),f(r.sa/r.sl,4),f(q.x,3),f(q.y,3)]; }
+    const inp=(k,st)=>`<td><input type="number" step="${st}" data-r="${i}" data-k="${k}" value="${isFinite(p[k])?p[k]:''}" style="width:74px"></td>`;
+    h+=`<tr><td>${i+1}</td>${inp('d',0.05)}${inp('X',0.1)}${inp('B',0.1)}${inp('D',0.005)}${c.map(v=>`<td>${v}</td>`).join('')}<td><button class="btn sec" data-rdel="${i}">刪除</button></td></tr>`;
+  });
+  if(!S.ana || !S.ana.length) h+='<tr><td colspan="12" class="note">尚無數據。請到 ③ 量測，或按「新增一列」手動輸入。</td></tr>';
+  $('anaTab').innerHTML=h;
+  document.querySelectorAll('#anaTab input').forEach(el=>el.onchange=()=>{
+    S.ana[+el.dataset.r][el.dataset.k]=parseFloat(el.value); delete S.ana[+el.dataset.r].tru; renderAnaTab(); renderT4();
+  });
+  document.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{ S.ana.splice(+b.dataset.rdel,1); renderAnaTab(); renderT4(); });
+}
+function renderT4(){
+  const m=fitModel('correct'), p=fitParax(), N=m.xs.length;
+  const warn=[];
+  if(N<3) warn.push(`目前有效數據 ${N} 組，迴歸至少需要 3 組（建議 5 組以上）。`);
+  if(N>=2){ const r=Math.max(...m.xs)-Math.min(...m.xs); if(r<0.1) warn.push('各組 sin θ₁ 的範圍太窄，斜率會很不穩定。請改變 A 的位置（例如 3、5、7、9 cm），讓視角分散。'); }
+  if(S.tUse==null) warn.push('壁厚 t 尚未量測，暫用 0.30 cm。');
+  $('anaMsg').innerHTML = warn.length? `<div class="warnbox">${warn.join('<br>')}</div>`:'';
+  const lm = [];
+  if(m.fit0) lm.push({a:0,b:m.fit0.b,c:'#c62828',label:'過原點迴歸（Snell 定律要求）'});
+  if(m.fit) lm.push({a:m.fit.a,b:m.fit.b,c:'#829ab1',dash:true,label:'含截距迴歸（檢查系統誤差）'});
+  plotXY($('plotMain'),{xs:m.xs,ys:m.ys,xl:'sin θ₁（液體中）',yl:'sin θ₃（空氣中）',lines:lm});
+  if(m.fit && N>=3){
+    const zi = m.fit.a/m.fit.sea;
+    $('resMain').innerHTML=`<table>
+      <tr><td class="l">過原點迴歸斜率 = <i>n</i></td><td><b>${f(m.fit0.b,4)} ± ${f(m.fit0.seb,4)}</b></td></tr>
+      <tr><td class="l">含截距迴歸斜率</td><td>${f(m.fit.b,4)} ± ${f(m.fit.seb,4)}</td></tr>
+      <tr><td class="l">含截距迴歸的截距</td><td>${f(m.fit.a,4)} ± ${f(m.fit.sea,4)}</td></tr>
+      <tr><td class="l">r²</td><td>${f(m.fit.r2,5)}</td></tr>
+      <tr><td class="l">單組 <i>n</i> 直接平均（對照）</td><td>${f(mean(m.ys.map((y,i)=>y/m.xs[i])),4)} ± ${f(sdev(m.ys.map((y,i)=>y/m.xs[i]))/Math.sqrt(N),4)}</td></tr></table>
+      <p class="note">${Math.abs(zi)<2? '截距與 0 的差距在 2 個標準差以內，看不出明顯的系統誤差，可以採用過原點迴歸的結果。' : `截距偏離 0 約 ${f(Math.abs(zi),1)} 個標準差，可能有系統誤差（例如眼睛沒對準 0 刻度、直尺與槽壁不平行），過原點迴歸的結果也會受影響。`}</p>
+      <p class="note">為什麼以過原點迴歸為主：Snell 定律 sin θ₃ = <i>n</i> sin θ₁ 必定通過原點。本實驗的 sin θ₁ 只分布在一小段範圍內，若多估一個截距，斜率的不確定度會被放大好幾倍。含截距迴歸仍然有用，它是檢查系統誤差的工具。</p>`;
+  } else $('resMain').innerHTML='<p class="note">數據不足。</p>';
+  const lp=[]; if(p.fit0) lp.push({a:0,b:p.fit0.b,c:'#d9822b',label:'近軸過原點迴歸（斜率 1/n）'});
+  if(m.fit0 && N>=3) lp.push({a:0,b:1/m.fit0.b,c:'#c62828',dash:true,label:'斜率 = 1/n（正確光路結果）'});
+  plotXY($('plotPar'),{xs:p.xs,ys:p.ys,xl:'(X+ΔX)·D  (cm²)',yl:"X(d′+D) − (X+ΔX)d′  (cm²)",lines:lp});
+  if(p.fit && N>=3 && m.fit0){
+    const diff=(p.fit0.n-m.fit0.b)/m.fit0.b*100;
+    $('resPar').innerHTML=`<table>
+      <tr><td class="l">過原點斜率 = 1/<i>n</i></td><td>${f(p.fit0.b,5)} ± ${f(p.fit0.seb,5)}</td></tr>
+      <tr><td class="l">近軸 <i>n</i></td><td><b>${f(p.fit0.n,4)} ± ${f(p.fit0.sen,4)}</b></td></tr>
+      <tr><td class="l">含截距迴歸的截距</td><td>${f(p.fit.a,3)} ± ${f(p.fit.sea,3)} cm²</td></tr>
+      <tr><td class="l">與正確光路相差</td><td>${diff>=0?'+':''}${f(diff,2)} %</td></tr></table>
+      <p class="note">近軸法把大角度也當成小角度，<i>n</i> 會系統性偏高；θ₃ 越大的點偏離虛線越多。</p>`;
+  } else $('resPar').innerHTML='<p class="note">數據不足。</p>';
+}
+function mean(a){return a.reduce((x,y)=>x+y,0)/a.length;}
+function sdev(a){const m=mean(a);return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(a.length-1));}
+
+/* ================= ⑤ 誤差分析 ================= */
+function renderT5(){
+  if(S.ana==null) enterT4();
+  // 1. 三種模型
+  let h='<tr><th>計算方式</th><th><i>n</i>（過原點迴歸）</th><th>含截距迴歸的截距</th><th>與正確光路相差</th></tr>';
+  const base=fitModel('correct').fit0;
+  Object.keys(MODELS).forEach(k=>{ const F=fitModel(k), r=F.fit0;
+    h+= r&&r.N>=3 ? `<tr><td class="l">${MODELS[k].name}</td><td>${f(r.b,4)} ± ${f(r.seb,4)}</td><td>${f(F.fit.a,4)} ± ${f(F.fit.sea,4)}</td><td>${k==='correct'?'—':f((r.b-base.b)/base.b*100,2)+' %'}</td></tr>` : `<tr><td class="l">${MODELS[k].name}</td><td colspan="3" class="note">數據不足</td></tr>`; });
+  const PF=fitParax(), pr=PF.fit0;
+  if(pr&&pr.N>=3&&base) h+=`<tr><td class="l">近軸近似</td><td>${f(pr.n,4)} ± ${f(pr.sen,4)}</td><td>${f(PF.fit.a,3)} ± ${f(PF.fit.sea,3)} cm²</td><td>${f((pr.n-base.b)/base.b*100,2)} %</td></tr>`;
+  $('cmpTab').innerHTML=h;
+  // 2. 誤差傳遞
+  const rows=validRows(), sel=$('epSel'), prev=+sel.value||0;
+  sel.innerHTML=rows.map((p,i)=>`<option value="${i}">第 ${i+1} 組（X = ${p.X}, ΔX = ${f(p.B-p.X,1)}）</option>`).join('');
+  if(prev<rows.length) sel.value=prev;
+  renderEP();
+  renderDX();
+  // 4. 近軸誤差表
+  const nM = base? base.b : 1.40, t=tNow();
+  let ph='<tr><th>θ₃</th><th>X (cm)</th><th>Δ<i>X</i> (cm)</th><th>近軸 <i>n</i></th><th>相對誤差</th></tr>';
+  [5,10,15,20,25,30,35].forEach(a=>{
+    const tau=Math.tan(a*Math.PI/180), g={n:nM,t,d:15,D:5};
+    const X=sLiq(tau,g), B=sAir(tau,g), dp=15+t/NA, np=(B*5)/(X*(dp+5)-B*dp);
+    ph+=`<tr><td>${a}°</td><td>${f(X,2)}</td><td>${f(B-X,3)}</td><td>${f(np,4)}</td><td>+${f((np-nM)/nM*100,2)} %</td></tr>`;
+  });
+  $('parTab').innerHTML=ph;
+}
+$('epSel').onchange=renderEP;
+function nOf(p,t){ const r=MODELS.correct.f(p,t); return r.sa/r.sl; }
+function renderEP(){
+  const rows=validRows(); const i=+$('epSel').value||0;
+  if(!rows.length){ $('epTab').innerHTML='<tr><td class="note">尚無數據</td></tr>'; $('epMsg').innerHTML=''; return; }
+  const p=rows[i], t=tNow(), n0=nOf(p,t);
+  const Q=[['D','直尺到槽壁 <i>D</i>','cm'],['d','眼睛到槽壁 <i>d</i>','cm'],['X','刻度 <i>X</i>','cm'],['B','刻度 <i>X</i>+Δ<i>X</i>','cm'],['t','壁厚 <i>t</i>','cm']];
+  let tot=0, parts=[];
+  Q.forEach(([k])=>{
+    const h=1e-4, q1={...p}, q2={...p}; let t1=t,t2=t;
+    if(k==='t'){t1=t+h;t2=t-h;} else {q1[k]+=h;q2[k]-=h;}
+    const der=(nOf(q1,t1)-nOf(q2,t2))/(2*h), c=Math.abs(der)*S.sig[k];
+    parts.push({k,der,c}); tot+=c*c;
+  });
+  tot=Math.sqrt(tot);
+  let h='<tr><th>量</th><th>值</th><th>σ（可修改）</th><th>∂n/∂q (1/cm)</th><th>對 n 的貢獻</th><th>占比（變異數）</th></tr>';
+  parts.forEach((r,j)=>{ const [k,lab]=Q[j], val=k==='t'?t:p[k];
+    h+=`<tr><td class="l">${lab}</td><td>${f(val,3)}</td><td><input type="number" step="0.005" data-sig="${k}" value="${S.sig[k]}" style="width:70px"></td><td>${f(r.der,4)}</td><td>${f(r.c,4)}</td><td style="text-align:left"><span style="display:inline-block;height:10px;background:#2f6fb3;width:${(r.c*r.c/tot/tot*120).toFixed(0)}px"></span> ${f(r.c*r.c/tot/tot*100,0)} %</td></tr>`; });
+  h+=`<tr><th colspan="4">合成不確定度 σ<sub>n</sub></th><th colspan="2">${f(n0,4)} ± ${f(tot,4)}</th></tr>`;
+  $('epTab').innerHTML=h;
+  document.querySelectorAll('[data-sig]').forEach(el=>el.onchange=()=>{ const v=parseFloat(el.value); if(isFinite(v)&&v>=0){S.sig[el.dataset.sig]=v; renderEP(); renderDX();} });
+  const big=parts.reduce((a,b)=>b.c>a.c?b:a);
+  const common = parts[2].der+parts[3].der;
+  $('epMsg').innerHTML=`<div class="infobox">預設不確定度的依據：σ<sub><i>D</i></sub> = 0.05 cm 包含直尺讀數與「兩刻度是否切齊」的判斷；σ<sub><i>d</i></sub> = 0.1 cm 是瞳孔位置難以對準尺的誤差；<i>X</i>、<i>X</i>+Δ<i>X</i> 是直尺上的刻度，只剩印刷誤差（約 0.02 mm）；σ<sub><i>t</i></sub> 取游標卡尺三處讀數的差異。此組貢獻最大的是 <b>${Q.find(q=>q[0]===big.k)[1]}</b>。回到 ③ 比較同一組 3 次 <i>D</i> 讀數的差異，可以檢驗 σ<sub><i>D</i></sub> 的設定是否合理。</div>
+  <div class="infobox">∂<i>n</i>/∂<i>X</i> 與 ∂<i>n</i>/∂(<i>X</i>+Δ<i>X</i>) 都很大，但正負相反。眼睛偏離 0 刻度時，兩個刻度的相對位置<b>一起</b>偏移，效應是兩者相加：${f(parts[2].der,3)} + ${f(parts[3].der,3)} = ${f(common,3)} cm⁻¹。偏移 1 mm 只改變 <i>n</i> 約 ${f(Math.abs(common)*0.1,4)}，所以對齊 0 刻度雖然必要，但要求不必極端嚴格。</div>`;
+}
+$('dxA').onchange=renderDX; $('dxd').onchange=renderDX;
+function renderDX(){
+  const base=fitModel('correct').fit0, nM=base&&base.N>=3? base.b : 1.40, t=tNow();
+  const A=parseFloat($('dxA').value), d=parseFloat($('dxd').value);
+  let h='<tr><th>Δ<i>X</i> (cm)</th><th>所需 <i>D</i> (cm)</th><th>θ₃</th><th>σ<sub>n</sub>（只計 σ<sub>D</sub>）</th></tr>';
+  for(let k=1;k<=12;k++){
+    const dx=k*0.1, B=A+dx, Dn=neededD(nM,t,d,A,B,0);
+    if(Dn==null){ h+=`<tr><td>${dx.toFixed(1)}</td><td colspan="3" class="note">所需 D 超出槽內範圍（0.3–7.8 cm）</td></tr>`; continue; }
+    const p={d,X:A,B,D:Dn}, hh=1e-4, der=(nOf({...p,D:Dn+hh},t)-nOf({...p,D:Dn-hh},t))/(2*hh);
+    h+=`<tr><td>${dx.toFixed(1)}</td><td>${f(Dn,2)}</td><td>${f(MODELS.correct.f(p,t).th,1)}°</td><td>${f(Math.abs(der)*S.sig.D,4)}</td></tr>`;
+  }
+  $('dxTab').innerHTML=h;
+}
+
+/* ================= ⑥ 真值揭曉 ================= */
+$('reveal').onclick=()=>{
+  if(validRows().length<3){ alert('有效數據少於 3 組，請先完成量測與分析。'); return; }
+  if(!S.revealed && !confirm('確定揭曉？建議先寫下你的 n 與不確定度。')) return;
+  S.revealed=true; renderT6();
+};
+function renderT6(){
+  if(!S.revealed){ $('revealOut').innerHTML=''; return; }
+  const nT=S.truth.n, tT=S.truth.t;
+  const verdict=z=>{ const a=Math.abs(z); return a<1?'<span style="color:#2e7d32">1σ 內，非常好</span>':a<2?'<span style="color:#2e7d32">2σ 內，合理</span>':a<3?'<span style="color:#d9822b">2–3σ，可能有系統誤差</span>':'<span style="color:#c62828">超過 3σ，有明顯系統誤差</span>'; };
+  let h=`<div class="okbox" style="font-size:1rem">未知液體折射率真值 <b><i>n</i> = ${nT.toFixed(3)}</b>　　壓克力壁厚真值 <i>t</i> = ${(tT*10).toFixed(3)} mm（你使用 ${(tNow()*10).toFixed(3)} mm）</div>`;
+  h+='<table><tr><th>計算方式</th><th>你的 <i>n</i></th><th>偏差</th><th>相對誤差</th><th>偏差 / σ</th><th>評語</th></tr>';
+  const rowH=(name,n,s)=>{ const z=(n-nT)/s; return `<tr><td class="l">${name}</td><td>${f(n,4)} ± ${f(s,4)}</td><td>${n-nT>=0?'+':''}${f(n-nT,4)}</td><td>${f((n-nT)/nT*100,2)} %</td><td>${f(z,2)}</td><td>${verdict(z)}</td></tr>`; };
+  const m=fitModel('correct');
+  Object.keys(MODELS).forEach(k=>{ const r=fitModel(k).fit0; if(r&&r.N>=3) h+=rowH(MODELS[k].name+'，過原點迴歸',r.b,r.seb); });
+  if(m.fit&&m.fit.N>=3) h+=rowH('正確光路，含截距迴歸（對照）',m.fit.b,m.fit.seb);
+  const pr=fitParax().fit0; if(pr&&pr.N>=3) h+=rowH('近軸近似，過原點迴歸',pr.n,pr.sen);
+  const singles=m.ys.map((y,i)=>y/m.xs[i]); if(singles.length>=3) h+=rowH('正確光路，單組平均（對照）',mean(singles),sdev(singles)/Math.sqrt(singles.length));
+  h+='</table><p class="note">偏差 / σ：以各方法自己的迴歸標準誤差衡量偏差。|偏差 / σ| 很大，代表誤差不是隨機的，而是方法本身（或操作）有系統偏差。</p>';
+  $('revealOut').innerHTML=h+'<svg id="plotRev" viewBox="0 0 520 380" style="max-width:620px;margin:10px auto"></svg><div id="diag"></div>';
+  const lines=[{a:0,b:nT,c:'#2e7d32',label:`真值 n = ${nT.toFixed(3)}（過原點）`}];
+  if(m.fit0) lines.push({a:0,b:m.fit0.b,c:'#c62828',dash:true,label:'你的過原點迴歸線'});
+  plotXY($('plotRev'),{xs:m.xs,ys:m.ys,xl:'sin θ₁（液體中）',yl:'sin θ₃（空氣中）',lines});
+  // 操作診斷
+  const rows=validRows(); let dg='<h3>操作診斷（依據你在 ③ 記錄時的實際狀態）</h3><table><tr><th>組</th><th>眼睛偏離 0 刻度</th><th>d 記錄 − 實際</th><th>D 記錄 − 對齊所需</th><th>單組 n</th><th>單組偏差</th></tr>';
+  let any=false;
+  rows.forEach((p,i)=>{ if(!p.tru||!p.tru.length) return; any=true;
+    const eu=mean(p.tru.map(q=>q.eyeU)), dT=mean(p.tru.map(q=>q.d));
+    const Dn=neededD(nT,tT,dT,p.X,p.B,eu);
+    const nn=nOf(p,tNow());
+    dg+=`<tr><td>${i+1}</td><td>${f(eu*10,2)} mm</td><td>${f((p.d-dT)*10,1)} mm</td><td>${Dn!=null?f((p.D-Dn)*10,2)+' mm':'—'}</td><td>${f(nn,4)}</td><td>${f(nn-nT,4)}</td></tr>`;
+  });
+  dg+='</table><p class="note">眼睛偏離 0 刻度時，X 與 X+ΔX 的實際位置都要扣掉偏移量，記錄值因此一起偏移；D 記錄值與對齊所需值的差，來自「切齊」的判斷與直尺讀數。</p>';
+  $('diag').innerHTML = any? dg : '<p class="note">這批數據是手動輸入的，沒有 ③ 的操作記錄可以診斷。</p>';
+}
+
+/* ================= 初始化 ================= */
+drawR1(); drawCal(); renderCalTab(); drawTank(); resetUI(); syncT3();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

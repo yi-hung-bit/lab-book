@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>壓克力塊虛擬實驗室</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1f2933; --muted:#5f6b7a; --line:#d8dde3;
+  --accent:#1f6feb; --accent2:#c2410c; --ok:#15803d; --warn:#b45309; --soft:#eef3fb;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;line-height:1.6}
+header{background:#3a1f5d;color:#fff;padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+header h1{margin:0;font-size:1.2rem}
+header .sub{font-size:.9rem;opacity:.85}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#e3e8ef;position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.92rem}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+main{max-width:1180px;margin:0 auto;padding:14px 16px 60px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.card h2{margin:0 0 6px;font-size:1.12rem}
+.card h3{margin:10px 0 4px;font-size:1rem}
+.row{display:flex;flex-wrap:wrap;gap:14px}
+.col{flex:1 1 340px;min-width:0}
+.ctl{display:grid;grid-template-columns:150px 1fr 78px;align-items:center;gap:6px;margin:4px 0;font-size:.92rem}
+.ctl input[type=range]{width:100%}
+.ctl output{font-variant-numeric:tabular-nums;text-align:right}
+button{font-family:inherit}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.92rem;margin:3px 4px 3px 0}
+.btn.ghost{background:#fff;color:var(--accent)}
+.btn.warn{background:#fff;color:var(--accent2);border-color:var(--accent2)}
+.btn.sel{background:#3a1f5d;border-color:#3a1f5d}
+svg{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:8px}
+.note{font-size:.88rem;color:var(--muted)}
+.hint{background:var(--soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;font-size:.92rem;margin:8px 0}
+.caution{background:#fff7ed;border-left:4px solid var(--warn);padding:8px 12px;border-radius:6px;font-size:.92rem;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#f0f3f7}
+td input{width:80px;text-align:center;border:1px solid #cfd6de;border-radius:4px;padding:2px}
+textarea{width:100%;min-height:70px;font-family:inherit;font-size:.92rem;border:1px solid var(--line);border-radius:6px;padding:6px}
+details{margin:8px 0}
+summary{cursor:pointer;color:var(--accent);font-weight:600}
+.big{font-size:1.05rem;font-weight:600}
+.mono{font-variant-numeric:tabular-nums}
+.eq{font-family:"Times New Roman",serif;font-style:italic;font-size:1.05rem}
+@media (max-width:640px){.ctl{grid-template-columns:110px 1fr 64px}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>臺灣省北二區 97 學年度物理學科能力競賽實驗試題</h1>
+  <div class="sub">虛擬實驗室｜壓克力塊的體積、質量、密度與折射率</div></div>
+  <button class="btn warn" id="btnNew" style="background:#fff">更換壓克力塊（重新抽樣）</button>
+</header>
+<nav id="nav">
+  <button data-t="t1" class="on">① 游標尺測體積</button>
+  <button data-t="t2">② 橡皮筋虎克定律</button>
+  <button data-t="t3">③ 質量與密度</button>
+  <button data-t="t4">④ 折射率</button>
+  <button data-t="t5">⑤ 總結與真值核對</button>
+</nav>
+<main>
+
+<!-- ============ ① ============ -->
+<section class="tab on" id="t1">
+  <div class="card">
+    <h2>第一題：以游標尺測壓克力塊的體積 (10 分)</h2>
+    <p>壓克力塊是長方體。分別以塑膠游標尺量出長 <span class="eq">L</span>、寬 <span class="eq">W</span>、高 <span class="eq">H</span>，體積 <span class="eq">V = L×W×H</span>。拖曳滑桿移動游標尺的量爪，直到夾住壓克力塊的邊緣再記錄讀數。</p>
+    <div class="row" id="dimRows"></div>
+  </div>
+  <div class="card">
+    <h2>體積計算</h2>
+    <div id="volSum" class="note">尚無足夠數據。</div>
+  </div>
+</section>
+
+<!-- ============ ② ============ -->
+<section class="tab" id="t2">
+  <div class="card">
+    <h2>第二題：橡皮筋的虎克定律校正 (10 分)</h2>
+    <p>用鐵架把橡皮筋固定，下方掛一個塑膠杯。以注射器（20 mL）分次加水到杯中：水的密度為 1 g/mL，所以加入 <span class="eq">V</span> mL 的水，重量即為 <span class="eq">F = V</span> 公克重（gw）。用長尺量橡皮筋的伸長量 <span class="eq">Δx</span>。重複做 3 組（可能是同一條橡皮筋重複測量，或不同橡皮筋），比較是否符合虎克定律。</p>
+    <div class="row">
+      <div class="col">
+        <svg id="v2" viewBox="0 0 300 300"></svg>
+      </div>
+      <div class="col" style="flex:0 1 380px">
+        <div>目前試驗組：
+          <button class="btn ghost sel" id="trial0" data-tr="0">第 1 組</button>
+          <button class="btn ghost" id="trial1" data-tr="1">第 2 組</button>
+          <button class="btn ghost" id="trial2" data-tr="2">第 3 組</button>
+        </div>
+        <div class="ctl"><label>累積加水量</label><input type="range" id="vol2" min="0" max="60" step="0.5" value="10"><output id="vol2o"></output></div>
+        <div id="state2" class="note"></div>
+        <button class="btn" id="rec2">記錄這個點</button>
+        <div class="hint">建議每組取 5～6 個不同的加水量，範圍盡量涵蓋 10～60 mL。</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>數據與 Δx–F 關係圖</h2>
+    <div class="row">
+      <div class="col" style="flex:0 1 460px">
+        <table><thead><tr><th>組</th><th>#</th><th>F (gw)</th><th>Δx (cm)</th><th></th></tr></thead><tbody id="tb2"></tbody></table>
+        <button class="btn warn" id="clr2">清除全部</button>
+      </div>
+      <div class="col">
+        <svg id="plot2" viewBox="0 0 520 340"></svg>
+        <div id="fit2" class="mono"></div>
+      </div>
+    </div>
+    <h3>你的結論</h3>
+    <textarea id="hooke2" placeholder="橡皮筋是否符合虎克定律？彈力常數是否穩定？若不符合，你會如何用這條 Δx–F 曲線來量力？"></textarea>
+  </div>
+</section>
+
+<!-- ============ ③ ============ -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>第三題：估算壓克力塊的質量與密度 (10 分)</h2>
+    <p>把壓克力塊改用棉繩掛在同一條橡皮筋下方（取代塑膠杯），量出伸長量 <span class="eq">Δx</span>。利用分頁 ② 的 Δx–F 校正關係，把 <span class="eq">Δx</span> 換算成重量 <span class="eq">F</span>（等於質量，單位公克），再除以分頁 ① 量到的體積得到密度。</p>
+    <div class="row">
+      <div class="col">
+        <svg id="v3" viewBox="0 0 480 140"></svg>
+        <div class="note">紅色游標＝你的量尺讀數；黑色刻度＝橡皮筋下端實際位置。拖曳滑桿使兩者重合。</div>
+      </div>
+      <div class="col" style="flex:0 1 340px">
+        <div class="ctl"><label>量尺讀數 Δx</label><input type="range" id="dx3" min="0" max="2.5" step="0.005" value="1"><output id="dx3o"></output></div>
+        <div id="state3" class="note"></div>
+        <button class="btn" id="rec3">記錄這次讀數</button>
+      </div>
+    </div>
+    <table><thead><tr><th>#</th><th>Δx (cm)</th><th></th></tr></thead><tbody id="tb3"></tbody></table>
+  </div>
+  <div class="card">
+    <h2>質量與密度</h2>
+    <div id="mdSum" class="note">請先完成分頁 ①②③ 的數據蒐集。</div>
+  </div>
+</section>
+
+<!-- ============ ④ ============ -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>第四題：測量壓克力塊的折射率 (10 分)</h2>
+    <p>器材中沒有量角器，所以用「等距垂直偏移法」：在入射線與折射線上，各取一點與入射點 O 的距離同為 <span class="eq">r</span>（此模擬取 r = 6 cm），量出這兩點到法線的垂直距離 <span class="eq">d₁</span>、<span class="eq">d₂</span>。因為 <span class="eq">d₁ = r sinθᵢ</span>、<span class="eq">d₂ = r sinθᵣ</span>，兩者半徑相同，所以</p>
+    <p class="eq" style="text-align:center">n = sinθᵢ / sinθᵣ = d₁ / d₂</p>
+    <div class="row">
+      <div class="col">
+        <svg id="v4" viewBox="0 0 480 380"></svg>
+      </div>
+      <div class="col" style="flex:0 1 360px">
+        <div class="ctl"><label>入射角方向（第一、二根牙籤）</label><input type="range" id="th4" min="10" max="75" step="1" value="40"><output id="th4o"></output></div>
+        <div class="ctl"><label>量到的 d₁</label><input type="range" id="d1_4" min="0" max="6" step="0.02" value="3"><output id="d1_4o"></output></div>
+        <div class="ctl"><label>量到的 d₂</label><input type="range" id="d2_4" min="0" max="6" step="0.02" value="2"><output id="d2_4o"></output></div>
+        <div id="state4" class="note"></div>
+        <button class="btn" id="rec4">記錄這一次量測</button>
+        <div class="hint">每個入射角都要把 d₁、d₂ 的滑桿對齊圖上的虛線長度再記錄；換 3～5 個不同角度重複。</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>數據與折射率</h2>
+    <table><thead><tr><th>#</th><th>θᵢ (°)</th><th>d₁ (cm)</th><th>d₂ (cm)</th><th>n = d₁/d₂</th><th></th></tr></thead><tbody id="tb4"></tbody></table>
+    <p class="big mono" id="sum4"></p>
+  </div>
+</section>
+
+<!-- ============ ⑤ ============ -->
+<section class="tab" id="t5">
+  <div class="card">
+    <h2>總結（非計分項目，供自我核對）</h2>
+    <div id="cmp5"></div>
+    <button class="btn warn" id="reveal5">揭曉真值</button>
+    <div id="truth5"></div>
+  </div>
+</section>
+
+</main>
+<script>
+"use strict";
+const $ = id=>document.getElementById(id);
+const fx = (x,n=2)=>Number(x).toFixed(n);
+const rnd = (x,s)=>Math.round(x/s)*s;
+function gauss(){ let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+function stats(a){
+  const n=a.length; if(!n) return {m:NaN,sd:NaN,se:NaN};
+  const m=a.reduce((x,y)=>x+y,0)/n;
+  const sd=n>1?Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(n-1)):0.02;
+  return {m,sd,se:n>1?sd/Math.sqrt(n):0.02};
+}
+
+// ================== 隱藏真值 ==================
+let T=null;
+function newTruth(){
+  const L0=4+Math.random()*2, W0=2.5+Math.random()*1.5, H0=1+Math.random()*1;
+  const rho0=1.15+Math.random()*0.05;
+  const n0=1.46+Math.random()*0.06;
+  const a=0.015+Math.random()*0.010;
+  const bsign=Math.random()<0.5?-1:1;
+  const b=bsign*(0.00003+Math.random()*0.00003);
+  const trialFactor=[1, 1+(Math.random()*0.06-0.03), 1+(Math.random()*0.06-0.03)];
+  T={L0,W0,H0,rho0,n0,a,b,trialFactor,mass0:rho0*L0*W0*H0};
+}
+function xBase(F){ return T.a*F + T.b*F*F; }
+
+// ================== 分頁切換 ==================
+$('nav').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.t));
+  drawAll();
+});
+
+// ================== ① 游標尺測體積 ==================
+const DIMS=['L','W','H'];
+const dimLabel={L:'長 L',W:'寬 W',H:'高 H'};
+let recDim={L:[],W:[],H:[]};
+function buildDimRows(){
+  $('dimRows').innerHTML = DIMS.map(k=>`
+    <div class="col">
+      <h3>${dimLabel[k]}</h3>
+      <svg id="v1${k}" viewBox="0 0 480 90"></svg>
+      <div class="ctl"><label>游標尺讀數</label><input type="range" id="p1${k}" min="0" max="10" step="0.01" value="3"><output id="p1${k}o"></output></div>
+      <div id="state1${k}" class="note"></div>
+      <button class="btn" data-rec1="${k}">記錄讀數</button>
+      <table><thead><tr><th>#</th><th>${k} (cm)</th><th></th></tr></thead><tbody id="tb1${k}"></tbody></table>
+    </div>`).join('');
+  DIMS.forEach(k=>{
+    $('p1'+k).addEventListener('input',()=>drawCaliper(k));
+  });
+  $('dimRows').querySelectorAll('[data-rec1]').forEach(b=>b.addEventListener('click',()=>recordDim(b.dataset.rec1)));
+}
+function drawCaliper(key){
+  const val=+$('p1'+key).value, trueVal=T[key+'0'];
+  $('p1'+key+'o').textContent=fx(val,2)+' cm';
+  const scale=40, jawX0=30, W=480, H=90;
+  const xTrue=jawX0+trueVal*scale, xJaw=jawX0+val*scale;
+  let ticks=''; for(let i=0;i<=10;i++) ticks+=`<line x1="${jawX0+i*scale}" y1="76" x2="${jawX0+i*scale}" y2="80" stroke="#333"/><text x="${jawX0+i*scale}" y="72" font-size="9" text-anchor="middle" fill="#777">${i}</text>`;
+  let s=`<rect width="${W}" height="${H}" fill="#fff"/>
+  <line x1="${jawX0}" y1="18" x2="${jawX0}" y2="70" stroke="#333" stroke-width="4"/>
+  <rect x="${jawX0}" y="38" width="${Math.max(xTrue-jawX0,2)}" height="14" fill="#cfe0f5" stroke="#3b6ea5"/>
+  <line x1="${xJaw}" y1="18" x2="${xJaw}" y2="70" stroke="#c2410c" stroke-width="4"/>
+  <line x1="${jawX0}" y1="80" x2="${jawX0+10*scale}" y2="80" stroke="#333"/>${ticks}`;
+  $('v1'+key).innerHTML=s;
+  const diff=Math.abs(val-trueVal);
+  $('state1'+key).innerHTML = diff<0.03 ? '<b style="color:#15803d">已夾緊邊緣，可以記錄。</b>' : '游標尚未夾緊邊緣，請微調滑桿。';
+}
+function recordDim(key){
+  const val=+$('p1'+key).value;
+  recDim[key].push(rnd(val+gauss()*0.01,0.02));
+  tableDim(key); updateVolume();
+}
+function tableDim(key){
+  $('tb1'+key).innerHTML=recDim[key].map((v,i)=>`<tr><td>${i+1}</td><td>${fx(v,2)}</td><td><button class="btn warn" data-d1="${key},${i}">刪</button></td></tr>`).join('');
+  $('tb1'+key).querySelectorAll('[data-d1]').forEach(b=>b.onclick=()=>{
+    const [k,i]=b.dataset.d1.split(','); recDim[k].splice(+i,1); tableDim(k); updateVolume();
+  });
+}
+function updateVolume(){
+  const st={}; for(const k of DIMS) st[k]=stats(recDim[k]);
+  if(DIMS.every(k=>recDim[k].length>=1)){
+    const V=st.L.m*st.W.m*st.H.m;
+    const relL=st.L.m?st.L.se/st.L.m:0, relW=st.W.m?st.W.se/st.W.m:0, relH=st.H.m?st.H.se/st.H.m:0;
+    const relV=Math.sqrt(relL**2+relW**2+relH**2);
+    $('volSum').innerHTML=`L̄ = ${fx(st.L.m,3)} ± ${fx(st.L.se,3)} cm　W̄ = ${fx(st.W.m,3)} ± ${fx(st.W.se,3)} cm　H̄ = ${fx(st.H.m,3)} ± ${fx(st.H.se,3)} cm<br>
+      <span class="big">V = L̄×W̄×H̄ = ${fx(V,2)} ± ${fx(V*relV,2)} cm³</span>`;
+  } else $('volSum').textContent='每個尺寸至少記錄一次讀數。';
+}
+
+// ================== ② 虎克定律校正 ==================
+let recTrial=[[],[],[]];
+let curTrial=0, K2=null, R2_2=null;
+document.querySelectorAll('[data-tr]').forEach(b=>b.addEventListener('click',()=>{
+  curTrial=+b.dataset.tr;
+  document.querySelectorAll('[data-tr]').forEach(x=>x.classList.toggle('sel',x===b));
+  draw2();
+}));
+function draw2(){
+  const vol=+$('vol2').value, F=vol;
+  $('vol2o').textContent=fx(vol,1)+' mL';
+  const dx=xBase(F)*T.trialFactor[curTrial];
+  const W=300,H=300, topY=30, scale=90;
+  const bandBottom=topY+40+dx*scale;
+  let s=`<rect width="${W}" height="${H}" fill="#fff"/>
+  <rect x="110" y="10" width="80" height="14" fill="#888" rx="2"/>
+  <line x1="150" y1="24" x2="150" y2="${topY+40}" stroke="#c9a24a" stroke-width="3"/>
+  <line x1="150" y1="${topY+40}" x2="150" y2="${bandBottom}" stroke="#c9a24a" stroke-width="6"/>
+  <rect x="130" y="${bandBottom}" width="40" height="30" fill="#a8d0e6" stroke="#3b6ea5"/>
+  <rect x="130" y="${bandBottom+30-Math.min(26,vol/60*26)}" width="40" height="${Math.min(26,vol/60*26)}" fill="#5fa8d3" opacity="0.7"/>
+  <text x="150" y="${bandBottom+50}" font-size="11" text-anchor="middle" fill="#555">水 ${fx(vol,1)} mL</text>
+  <text x="20" y="${topY+40}" font-size="11" fill="#555">原長</text>
+  <line x1="60" y1="${topY+40}" x2="140" y2="${topY+40}" stroke="#999" stroke-dasharray="3 3"/>
+  <text x="20" y="${bandBottom}" font-size="11" fill="#555">Δx=${fx(dx,2)}cm</text>`;
+  $('v2').innerHTML=s;
+  $('state2').innerHTML=`第 ${curTrial+1} 組　F = ${fx(F,1)} gw　Δx ≈ ${fx(dx,3)} cm（實際記錄時會加入讀數誤差）`;
+}
+$('vol2').addEventListener('input',draw2);
+$('rec2').addEventListener('click',()=>{
+  const F=+$('vol2').value, dx=rnd(xBase(F)*T.trialFactor[curTrial]+gauss()*0.015,0.01);
+  recTrial[curTrial].push({F,dx});
+  table2(); fit2();
+});
+$('clr2').addEventListener('click',()=>{ if(confirm('確定清除全部數據？')){recTrial=[[],[],[]]; table2(); fit2();} });
+function table2(){
+  let rows=[];
+  recTrial.forEach((arr,ti)=>arr.forEach((d,i)=>rows.push([ti,i,d])));
+  $('tb2').innerHTML=rows.map(([ti,i,d])=>`<tr><td>${ti+1}</td><td>${i+1}</td><td>${fx(d.F,1)}</td><td>${fx(d.dx,3)}</td>
+    <td><button class="btn warn" data-d2="${ti},${i}">刪</button></td></tr>`).join('');
+  $('tb2').querySelectorAll('[data-d2]').forEach(b=>b.onclick=()=>{
+    const [ti,i]=b.dataset.d2.split(',').map(Number); recTrial[ti].splice(i,1); table2(); fit2();
+  });
+}
+function fit2(){
+  const all=recTrial.flat();
+  if(all.length>=2){
+    const sxx=all.reduce((s,d)=>s+d.dx*d.dx,0), sxy=all.reduce((s,d)=>s+d.dx*d.F,0);
+    K2=sxy/sxx;
+    const pred=all.map(d=>K2*d.dx);
+    const ssr=all.reduce((s,d,i)=>s+(d.F-pred[i])**2,0);
+    const my=all.reduce((s,d)=>s+d.F,0)/all.length;
+    const sst=all.reduce((s,d)=>s+(d.F-my)**2,0);
+    R2_2=1-ssr/sst;
+    $('fit2').innerHTML=`<p class="big">過原點迴歸 F = k·Δx：k = ${fx(K2,2)} gw/cm，R² = ${fx(R2_2,4)}</p>
+      <p class="note">R² 越接近 1 代表越符合線性（虎克定律）；若明顯偏離，代表橡皮筋在這個範圍內不是理想彈簧。</p>`;
+  } else { K2=null; R2_2=null; $('fit2').innerHTML='<p class="note">至少需要 2 筆數據。</p>'; }
+  plot2();
+}
+function plot2(){
+  const W=520,H=340,L=56,R=16,Tp=16,Bt=46;
+  const all=recTrial.flat();
+  const xm=Math.max(0.2,...all.map(d=>d.dx))*1.15, ym=Math.max(5,...all.map(d=>d.F))*1.15;
+  const X=x=>L+x/xm*(W-L-R), Y=y=>H-Bt-y/ym*(H-Tp-Bt);
+  let s=`<rect width="${W}" height="${H}" fill="#fff"/>
+  <line x1="${L}" y1="${H-Bt}" x2="${W-R}" y2="${H-Bt}" stroke="#333"/><line x1="${L}" y1="${Tp}" x2="${L}" y2="${H-Bt}" stroke="#333"/>
+  <text x="${(L+W-R)/2}" y="${H-8}" font-size="13" text-anchor="middle">Δx (cm)</text>
+  <text x="14" y="${(Tp+H-Bt)/2}" font-size="13" text-anchor="middle" transform="rotate(-90 14 ${(Tp+H-Bt)/2})">F (gw)</text>`;
+  if(K2!==null) s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(xm)}" y2="${Y(K2*xm)}" stroke="#1f6feb" stroke-width="2"/>`;
+  const cols=['#c0392b','#1f6feb','#15803d'];
+  recTrial.forEach((arr,ti)=>arr.forEach(d=>s+=`<circle cx="${X(d.dx)}" cy="${Y(d.F)}" r="4" fill="${cols[ti]}"/>`));
+  s+=`<text x="${W-R-90}" y="${Tp+14}" font-size="11" fill="${cols[0]}">● 第1組</text>
+      <text x="${W-R-90}" y="${Tp+28}" font-size="11" fill="${cols[1]}">● 第2組</text>
+      <text x="${W-R-90}" y="${Tp+42}" font-size="11" fill="${cols[2]}">● 第3組</text>`;
+  $('plot2').innerHTML=s;
+}
+
+// ================== ③ 質量與密度 ==================
+let rec3=[];
+function draw3(){
+  const val=+$('dx3').value, trueVal=xBase(T.mass0);
+  $('dx3o').textContent=fx(val,3)+' cm';
+  const W=480,H=140, x0=40, scale=170;
+  let s=`<rect width="${W}" height="${H}" fill="#fff"/>
+  <line x1="${x0}" y1="20" x2="${x0}" y2="120" stroke="#333"/>`;
+  for(let i=0;i<=25;i++){ const xx=x0+i/10*scale; if(xx>W-10) break; s+=`<line x1="${xx}" y1="20" x2="${xx}" y2="${i%5===0?30:26}" stroke="#333"/>`; if(i%5===0) s+=`<text x="${xx}" y="16" font-size="9" text-anchor="middle">${fx(i/10,1)}</text>`; }
+  s+=`<line x1="${x0+trueVal*scale}" y1="34" x2="${x0+trueVal*scale}" y2="90" stroke="#123" stroke-width="3"/>
+  <text x="${x0+trueVal*scale}" y="100" font-size="10" text-anchor="middle" fill="#123">橡皮筋下端</text>
+  <line x1="${x0+val*scale}" y1="34" x2="${x0+val*scale}" y2="90" stroke="#e11" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="${x0+val*scale}" y="112" font-size="10" text-anchor="middle" fill="#e11">你的讀數</text>`;
+  $('v3').innerHTML=s;
+  const diff=Math.abs(val-trueVal);
+  $('state3').innerHTML= diff<0.02 ? '<b style="color:#15803d">已對齊，可以記錄。</b>' : `差 ${fx(diff,3)} cm，請再微調滑桿對齊黑色刻度。`;
+}
+$('dx3').addEventListener('input',draw3);
+$('rec3').addEventListener('click',()=>{
+  const val=+$('dx3').value; rec3.push(rnd(val+gauss()*0.008,0.005)); table3();
+});
+function table3(){
+  $('tb3').innerHTML=rec3.map((v,i)=>`<tr><td>${i+1}</td><td>${fx(v,3)}</td><td><button class="btn warn" data-d3="${i}">刪</button></td></tr>`).join('');
+  $('tb3').querySelectorAll('[data-d3]').forEach(b=>b.onclick=()=>{rec3.splice(+b.dataset.d3,1); table3(); updateMD();});
+  updateMD();
+}
+function updateMD(){
+  const st3=stats(rec3);
+  const stL=stats(recDim.L), stW=stats(recDim.W), stH=stats(recDim.H);
+  if(!rec3.length){ $('mdSum').textContent='請先在上方記錄橡皮筋伸長量。'; return; }
+  if(K2===null){ $('mdSum').textContent='請先到分頁 ② 蒐集至少 2 筆校正數據。'; return; }
+  if(!(recDim.L.length&&recDim.W.length&&recDim.H.length)){ $('mdSum').textContent='請先到分頁 ① 完成體積量測。'; return; }
+  const F=K2*st3.m, mass=F;
+  const V=stL.m*stW.m*stH.m;
+  const rho=mass/V;
+  const relDx=st3.m?st3.se/st3.m:0, relV=Math.sqrt((stL.se/stL.m)**2+(stW.se/stW.m)**2+(stH.se/stH.m)**2);
+  const relRho=Math.sqrt(relDx**2+relV**2);
+  $('mdSum').innerHTML=`Δx̄ = ${fx(st3.m,3)} ± ${fx(st3.se,3)} cm　（用分頁②的 k = ${fx(K2,2)} gw/cm 換算）<br>
+    <span class="big">質量 m = k·Δx̄ = ${fx(mass,2)} ± ${fx(mass*relDx,2)} g</span><br>
+    體積 V（分頁①）= ${fx(V,2)} cm³<br>
+    <span class="big">密度 ρ = m / V = ${fx(rho,3)} ± ${fx(rho*relRho,3)} g/cm³</span>`;
+}
+
+// ================== ④ 折射率 ==================
+let rec4=[];
+function draw4(){
+  const thi=+$('th4').value*Math.PI/180;
+  const d1=+$('d1_4').value, d2=+$('d2_4').value;
+  $('th4o').textContent=(+$('th4').value)+'°'; $('d1_4o').textContent=fx(d1,2)+' cm'; $('d2_4o').textContent=fx(d2,2)+' cm';
+  const thr=Math.asin(Math.sin(thi)/T.n0);
+  const r=6, scale=32, ox=240, oy=140;
+  const Px=ox+r*Math.sin(thi)*scale, Py=oy-r*Math.cos(thi)*scale;
+  const Qx=ox+r*Math.sin(thr)*scale, Qy=oy+r*Math.cos(thr)*scale;
+  const d1true=r*Math.sin(thi), d2true=r*Math.sin(thr);
+  let s=`<rect width="480" height="380" fill="#fff"/>
+  <rect x="0" y="${oy}" width="480" height="180" fill="#dcebf7"/>
+  <line x1="${ox}" y1="10" x2="${ox}" y2="370" stroke="#999" stroke-dasharray="4 3"/>
+  <text x="${ox+6}" y="20" font-size="11" fill="#666">法線</text>
+  <line x1="${ox}" y1="${oy}" x2="${Px}" y2="${Py}" stroke="#c0392b" stroke-width="2"/>
+  <line x1="${ox}" y1="${oy}" x2="${Qx}" y2="${Qy}" stroke="#1f6feb" stroke-width="2"/>
+  <circle cx="${ox}" cy="${oy}" r="4" fill="#123"/>
+  <text x="${ox+8}" y="${oy-4}" font-size="11" fill="#123">O（入射點）</text>
+  <circle cx="${Px}" cy="${Py}" r="3" fill="#c0392b"/><text x="${Px+6}" y="${Py}" font-size="10" fill="#c0392b">P</text>
+  <circle cx="${Qx}" cy="${Qy}" r="3" fill="#1f6feb"/><text x="${Qx+6}" y="${Qy}" font-size="10" fill="#1f6feb">Q</text>
+  <line x1="${Px}" y1="${Py}" x2="${ox}" y2="${Py}" stroke="#c0392b" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <line x1="${Qx}" y1="${Qy}" x2="${ox}" y2="${Qy}" stroke="#1f6feb" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="${(ox+Px)/2}" y="${Py-6}" font-size="10" fill="#c0392b">d₁ 真實 ${fx(d1true,2)}</text>
+  <text x="${(ox+Qx)/2}" y="${Qy+14}" font-size="10" fill="#1f6feb">d₂ 真實 ${fx(d2true,2)}</text>
+  <line x1="${ox-d1*scale}" y1="${Py-14}" x2="${ox}" y2="${Py-14}" stroke="#e88" stroke-width="4"/>
+  <text x="${ox-d1*scale-4}" y="${Py-18}" font-size="10" text-anchor="end" fill="#e88">你量的 d₁</text>
+  <line x1="${ox}" y1="${Qy+14}" x2="${ox+d2*scale}" y2="${Qy+14}" stroke="#88b" stroke-width="4"/>
+  <text x="${ox+d2*scale+4}" y="${Qy+26}" font-size="10" fill="#88b">你量的 d₂</text>`;
+  $('v4').innerHTML=s;
+  const diff1=Math.abs(d1-d1true), diff2=Math.abs(d2-d2true);
+  $('state4').innerHTML = (diff1<0.05&&diff2<0.05) ? '<b style="color:#15803d">d₁、d₂ 都已對齊，可以記錄。</b>' : `d₁ 差 ${fx(diff1,2)}，d₂ 差 ${fx(diff2,2)}，請調整滑桿使紅／藍色粗線對齊虛線長度。`;
+}
+['th4','d1_4','d2_4'].forEach(id=>$(id).addEventListener('input',draw4));
+$('rec4').addEventListener('click',()=>{
+  const thiDeg=+$('th4').value, thi=thiDeg*Math.PI/180;
+  const r=6, thr=Math.asin(Math.sin(thi)/T.n0);
+  const d1true=r*Math.sin(thi), d2true=r*Math.sin(thr);
+  const d1=+$('d1_4').value, d2=+$('d2_4').value;
+  if(Math.abs(d1-d1true)>0.06||Math.abs(d2-d2true)>0.06){ alert('d₁、d₂ 尚未對齊，請再微調。'); return; }
+  const d1r=rnd(d1true+gauss()*0.03,0.02), d2r=rnd(d2true+gauss()*0.03,0.02);
+  rec4.push({thi:thiDeg,d1:d1r,d2:d2r});
+  table4();
+});
+function table4(){
+  $('tb4').innerHTML=rec4.map((d,i)=>`<tr><td>${i+1}</td><td>${d.thi}</td><td>${fx(d.d1,2)}</td><td>${fx(d.d2,2)}</td><td>${fx(d.d1/d.d2,3)}</td>
+    <td><button class="btn warn" data-d4="${i}">刪</button></td></tr>`).join('');
+  $('tb4').querySelectorAll('[data-d4]').forEach(b=>b.onclick=()=>{rec4.splice(+b.dataset.d4,1); table4();});
+  const st=stats(rec4.map(d=>d.d1/d.d2));
+  $('sum4').textContent = rec4.length ? `n̄ = ${fx(st.m,3)} ± ${fx(st.se,3)}（n = ${rec4.length}）` : '尚無紀錄';
+}
+
+// ================== ⑤ 總結 ==================
+function draw5(){
+  const rows=[];
+  if(DIMS.every(k=>recDim[k].length)){
+    const V=stats(recDim.L).m*stats(recDim.W).m*stats(recDim.H).m;
+    rows.push(['體積 V (cm³)', fx(V,2)]);
+  }
+  if(K2!==null && rec3.length){
+    const mass=K2*stats(rec3).m;
+    rows.push(['質量 m (g)', fx(mass,2)]);
+    if(DIMS.every(k=>recDim[k].length)){
+      const V=stats(recDim.L).m*stats(recDim.W).m*stats(recDim.H).m;
+      rows.push(['密度 ρ (g/cm³)', fx(mass/V,3)]);
+    }
+  }
+  if(rec4.length) rows.push(['折射率 n', fx(stats(rec4.map(d=>d.d1/d.d2)).m,3)]);
+  $('cmp5').innerHTML = rows.length ? '<table><thead><tr><th>項目</th><th>你的結果</th></tr></thead><tbody>'+
+    rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')+'</tbody></table>'
+    : '<p class="note">請先完成分頁 ①②③④ 的數據蒐集。</p>';
+}
+$('reveal5').addEventListener('click',()=>{
+  $('truth5').innerHTML=`<p class="big">真實尺寸：L₀=${fx(T.L0,2)} cm　W₀=${fx(T.W0,2)} cm　H₀=${fx(T.H0,2)} cm</p>
+  <p class="big">真實體積 V₀ = ${fx(T.L0*T.W0*T.H0,2)} cm³　真實質量 m₀ = ${fx(T.mass0,2)} g　真實密度 ρ₀ = ${fx(T.rho0,3)} g/cm³</p>
+  <p class="big">真實折射率 n₀ = ${fx(T.n0,3)}</p>`;
+});
+
+// ================== 初始化 ==================
+function resetAll(){
+  newTruth();
+  recDim={L:[],W:[],H:[]}; recTrial=[[],[],[]]; rec3=[]; rec4=[];
+  K2=null; R2_2=null; curTrial=0;
+  document.querySelectorAll('[data-tr]').forEach(x=>x.classList.toggle('sel',x.dataset.tr==='0'));
+  $('vol2').value=10; $('dx3').value=1; $('th4').value=40; $('d1_4').value=3; $('d2_4').value=2;
+  $('truth5').innerHTML='';
+  DIMS.forEach(k=>{ $('p1'+k).value=3; tableDim(k); });
+  table2(); fit2(); table3(); table4();
+  drawAll();
+}
+function drawAll(){ DIMS.forEach(drawCaliper); updateVolume(); draw2(); draw3(); draw4(); draw5(); }
+$('btnNew').addEventListener('click',()=>{ if(confirm('更換壓克力塊會清除所有紀錄並重新抽樣隱藏真值，確定？')) resetAll(); });
+buildDimRows();
+resetAll();
+</script>
+</body>
+</html>

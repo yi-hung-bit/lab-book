@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>凸凹透鏡曲率半徑虛擬實驗室</title>
+<style>
+:root{--bg:#f4f5f8;--card:#fff;--ink:#1d2433;--muted:#5b6475;--line:#d9dde5;--acc:#1f5fbf;--red:#e0262f;--ok:#1a7f37;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
+header{background:#14213d;color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:1.22rem}
+header p{margin:2px 0 0;font-size:.85rem;opacity:.8}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#e6e9ef;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
+nav button{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.9rem;font-family:inherit}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+nav button.todo{opacity:.5}
+main{max-width:1240px;margin:0 auto;padding:14px}
+section.tab{display:none}section.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.col{flex:1 1 360px;min-width:0}
+h2{font-size:1.08rem;margin:0 0 8px}h3{font-size:.98rem;margin:12px 0 6px}
+label{font-size:.9rem}
+input[type=number]{width:86px;padding:3px 6px;font-family:inherit}
+input[type=range]{width:220px;vertical-align:middle}
+.btn{border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:.88rem;font-family:inherit;margin:2px}
+.btn.ghost{background:#fff;color:var(--acc)}
+.btn.sm{padding:2px 8px;font-size:.8rem}
+.btn:disabled{opacity:.4;cursor:default}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#f0f2f6;font-weight:600}
+td input{width:76px}
+.note{font-size:.85rem;color:var(--muted)}
+.warn{background:#fff4e5;border:1px solid #f0c080;color:#6b3a00;padding:8px 12px;border-radius:8px;font-size:.88rem;margin:4px 0}
+.okbox{background:#e9f7ee;border:1px solid #9ad3ad;color:#0f5323;padding:8px 12px;border-radius:8px;font-size:.88rem;margin:4px 0}
+.errbox{background:#fdecec;border:1px solid #f0a8a8;color:#7a1010;padding:8px 12px;border-radius:8px;font-size:.88rem;margin:4px 0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:.9rem}
+.kv span:nth-child(odd){color:var(--muted)}
+.mono{font-family:Consolas,"Courier New",monospace}
+svg{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:8px;touch-action:none;user-select:none}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:6px 0}
+.step{display:inline-block;background:var(--acc);color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:.85rem;margin-right:6px}
+ol,ul{margin:4px 0;padding-left:22px}
+.f{font-family:"Times New Roman",serif;font-style:italic}
+.eq{background:#f7f8fb;border-left:3px solid var(--acc);padding:6px 12px;margin:6px 0;font-family:"Times New Roman","Noto Sans TC",serif}
+</style>
+</head>
+<body>
+<header>
+<h1>凸凹透鏡曲率半徑虛擬實驗室（雷射反射法）</h1>
+<p>教育部 99 學年度 高級中學數理及資訊學科能力競賽 物理科決賽 實驗試題</p>
+</header>
+<nav id="nav">
+<button data-t="t1" class="on">① 原理與光路</button>
+<button data-t="t2">② 裝置與對準</button>
+<button data-t="t3">③ 凸面量測</button>
+<button data-t="t4">④ 凹面量測</button>
+<button data-t="t5">⑤ 迴歸分析</button>
+<button data-t="t6">⑥ 誤差與真值</button>
+</nav>
+<main>
+
+<!-- ============ TAB 1 ============ -->
+<section class="tab on" id="t1">
+<div class="card">
+<h2>題目</h2>
+<p>給定一片玻璃製凸凹透鏡（彎月形），請應用幾何光學原理，分別量測此透鏡凸面及凹面的曲率半徑。器材：筆型雷射、45 cm 直尺（最小刻度 1 mm）、大頭針、牙籤與長竹籤、隱形膠帶、厚紙板、方格紙（1 mm 方眼）、保麗龍板等。</p>
+</div>
+<div class="row">
+<div class="col" style="flex:2 1 620px">
+<div class="card">
+<h2>互動光路圖（上視圖，單一反射面）</h2>
+<div class="ctl">
+<label><input type="radio" name="t1face" value="convex" checked> 凸面朝雷射</label>
+<label><input type="radio" name="t1face" value="concave"> 凹面朝雷射</label>
+</div>
+<div class="ctl">
+<label>曲率半徑 <span class="f">R</span> = <b id="t1Rv"></b> cm <input type="range" id="t1R" min="5" max="40" step="0.1" value="30.6"></label>
+</div>
+<div class="ctl">
+<label>雷射距主軸 <span class="f">H</span> = <b id="t1Hv"></b> cm <input type="range" id="t1H" min="0" max="2.4" step="0.05" value="1.5"></label>
+<label>竹籤線距鏡心 <span class="f">L</span> = <b id="t1Lv"></b> cm <input type="range" id="t1L" min="5" max="30" step="0.1" value="14.1"></label>
+</div>
+<svg id="t1svg" viewBox="0 0 720 430"></svg>
+</div>
+</div>
+<div class="col">
+<div class="card">
+<h2>即時數值</h2>
+<div class="kv" id="t1kv"></div>
+<p class="note" style="margin-top:8px">「精確光追」考慮了入射點相對鏡心頂點的凹陷量 <span class="f">s</span>，且法線角滿足 sin<span class="f">θ</span> = <span class="f">H</span>/<span class="f">R</span>。參考解的算法忽略 <span class="f">s</span>，並以 tan<span class="f">θ</span> ≈ <span class="f">H</span>/<span class="f">R</span> 近似。把 <span class="f">H</span> 拉大、<span class="f">R</span> 調小，可以看到兩項近似誤差變大。</p>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>原理</h2>
+<p>平行主軸、距主軸 <span class="f">H</span> 的光線打在球面上。入射點的法線通過曲率中心，與主軸夾角 <span class="f">θ</span> 滿足：</p>
+<div class="eq">sin <i>θ</i> = <i>H</i> / <i>R</i>　（小角度時 ≈ tan <i>θ</i> ≈ <i>θ</i>）</div>
+<p>由反射定律，入射角 = 反射角 = <span class="f">θ</span>，反射光相對入射光偏轉 2<span class="f">θ</span>。在距鏡心 <span class="f">L</span> 處量反射光與入射線的垂直距離 <span class="f">D</span>：</p>
+<div class="eq">tan 2<i>θ</i> ≈ <i>D</i> / <i>L</i>　⇒　<i>θ</i> ≈ ½ tan<sup>−1</sup>(<i>D</i>/<i>L</i>)</div>
+<p>改變 <span class="f">H</span> 量多組 <span class="f">D</span>，作 <span class="f">H</span>–tan<span class="f">θ</span> 圖，以最小平方法求直線 <span class="f">H</span> = <span class="f">a</span> + <span class="f">b</span>·tan<span class="f">θ</span>，斜率 <span class="f">b</span> 即為曲率半徑 <span class="f">R</span>。凸面反射光往遠離主軸方向發散；凹面反射光會先向主軸會聚、越過主軸後再散開。</p>
+</div>
+<div class="card">
+<h2>參考解勘誤</h2>
+<ol>
+<li><b>分析圖縱軸標錯：</b>凸面分析表與圖的縱軸寫 <span class="f">D</span>，但圖上各點 (0.0209, 0.50)…(0.0705, 2.00) 的縱座標是 <span class="f">H</span>。以 <span class="f">H</span>–tan<span class="f">θ</span> 作最小平方，驗算得斜率 30.82 cm、截距 −0.119 cm，與圖上方程式相同，所以圖中的「<span class="f">D</span> =」應為「<span class="f">H</span> =」。凹面同理：驗算得斜率 8.49 cm、截距 +0.32 cm。</li>
+<li><b>凹面分析表 D 列誤植：</b>該列抄成凸面的 0.59、0.82、1.02、1.40、2.00，正確應為 0.80、1.34、2.40、4.45、6.15。表中 tan<span class="f">θ</span> 列（0.0264…0.1956）是用正確 <span class="f">D</span> 算的。</li>
+<li><b>tan<span class="f">θ</span> ≈ <span class="f">H</span>/<span class="f">R</span> 只是近似：</b>對球面，精確關係是 sin<span class="f">θ</span> = <span class="f">H</span>/<span class="f">R</span>。由於 tan<span class="f">θ</span> &gt; sin<span class="f">θ</span>，用 <span class="f">R</span> = <span class="f">H</span>/tan<span class="f">θ</span> 求得的 <span class="f">R</span> 會<b>偏小</b>。凹面 <span class="f">R</span> ≈ 10 cm、<span class="f">H</span> = 2 cm 時，<span class="f">θ</span> ≈ 11.5°，單此一項就偏小約 2%。</li>
+<li><b>L 的起算點：</b>入射點並不在鏡心頂點，與頂點相差 <span class="f">s</span> = <span class="f">R</span> − √(<span class="f">R</span>² − <span class="f">H</span>²)（凹面、<span class="f">H</span> = 2 cm 時 <span class="f">s</span> ≈ 0.2 cm）。凹面的入射點比頂點更靠近竹籤，使 <span class="f">D</span> 略小；凸面則相反。精確光追、以參考解的 <span class="f">H</span> 值作迴歸，兩項合計使斜率偏小約 1%（凸面 30.56 → 30.29 cm；凹面 10.00 → 9.90 cm）。</li>
+<li><b>凸面數據含有系統偏移：</b>以 <span class="f">R</span> = 30.56 cm、<span class="f">L</span> = 14.12 cm 精確計算，理論 <span class="f">D</span> 依序約為 0.46、0.69、0.93、1.39、1.87 cm，記錄值則為 0.59、0.82、1.02、1.40、2.00 cm。除 <span class="f">H</span> = 1.50 cm 外，其餘各點都多出約 0.1 cm。若鏡片殘留傾角 <span class="f">δ</span>，反射光會整體偏轉 2<span class="f">δ</span>，使每點的 <span class="f">D</span> 都加上約 2<span class="f">δL</span> 的定值（0.13 cm 相當於 <span class="f">δ</span> ≈ 0.26°）。迴歸截距 −0.12 cm 正反映這個偏移，而斜率受的影響小得多。這正是用迴歸而不用單點計算的理由（第⑤頁會展示）。</li>
+<li><b>凹面偏差 15%：</b>測得 8.49 cm，球徑計值 9.98 cm。這個差距遠大於第 3、4 點的近似誤差，無法單靠近似誤差解釋（第⑥頁探討）。</li>
+</ol>
+</div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section class="tab" id="t2">
+<div class="card">
+<h2>本頁任務</h2>
+<p><span class="step">A</span>用對稱法在方格紙上找出鏡心。<span class="step">B</span>將鏡片豎立插入保麗龍板的割痕，並選定朝向雷射的面。<span class="step">C</span>將雷射沿主軸射向鏡片，轉動鏡片直到反射光沿原路返回（結果討論第 1 點）。三步都會影響後續量測的系統誤差。</p>
+<div class="ctl"><button class="btn ghost sm" id="newLensBtn">換一片新鏡片（清除所有數據）</button><span class="note">每片鏡片的曲率半徑為隱藏的隨機真值，第⑥頁揭曉。</span></div>
+</div>
+<div class="row">
+<div class="col">
+<div class="card">
+<h2><span class="step">A</span>找鏡心（鏡片平放於方格紙）</h2>
+<p class="note">拖曳兩條藍色直線，使它們分別與鏡片上緣、下緣相切（先點選一條線，再用按鈕微調）。按「標出鏡心」後，以兩線中點為鏡心，過此點的水平方格線即為主軸。</p>
+<svg id="flatSvg" viewBox="0 0 560 480"></svg>
+<div class="ctl">
+<span>選取：<b id="selLine">上緣線</b></span>
+<button class="btn ghost sm" data-fl="1">▲ 1 mm</button>
+<button class="btn ghost sm" data-fl="0.1">▲ 0.1 mm</button>
+<button class="btn ghost sm" data-fl="-0.1">▼ 0.1 mm</button>
+<button class="btn ghost sm" data-fl="-1">▼ 1 mm</button>
+<button class="btn" id="markBtn">標出鏡心</button>
+</div>
+<div id="markInfo"></div>
+</div>
+</div>
+<div class="col">
+<div class="card">
+<h2><span class="step">B</span>豎立鏡片、選擇反射面</h2>
+<div class="ctl">
+<label><input type="radio" name="face" value="convex" checked> 凸面朝向雷射（第③頁）</label>
+<label><input type="radio" name="face" value="concave"> 凹面朝向雷射（第④頁）</label>
+</div>
+<div class="ctl"><button class="btn" id="insertBtn">將鏡片插入割痕</button><span id="insertInfo" class="note"></span></div>
+<svg id="setupSvg" viewBox="0 0 520 190"></svg>
+<div class="ctl"><label><input type="checkbox" id="tapeChk"> 在鏡片<b>背面</b>貼隱形膠帶</label></div>
+<p class="note">隱形膠帶是霧面的，會把穿透到背面的光散射掉。這樣可抑制「光進入玻璃 → 背面反射 → 再折射出來」形成的鬼影光點，前表面的反射則完全不受影響。</p>
+</div>
+<div class="card">
+<h2><span class="step">C</span>主軸對準（反射光沿原路返回）</h2>
+<p class="note">雷射筆沿主軸（<span class="f">H</span> = 0）放置，筆前立一張戳了小孔的厚紙板，雷射從孔中穿出。下圖是從鏡片方向看紙板的正視圖。轉動鏡片，使前表面的反射光點回到小孔上。</p>
+<svg id="alignSvg" viewBox="0 0 440 240"></svg>
+<div class="ctl">
+<span>轉動鏡片：</span>
+<button class="btn ghost sm" data-rot="1">↺ 1°</button>
+<button class="btn ghost sm" data-rot="0.2">↺ 0.2°</button>
+<button class="btn ghost sm" data-rot="0.05">↺ 0.05°</button>
+<button class="btn ghost sm" data-rot="0.01">↺ 0.01°</button>
+<button class="btn ghost sm" data-rot="-0.01">↻ 0.01°</button>
+<button class="btn ghost sm" data-rot="-0.05">↻ 0.05°</button>
+<button class="btn ghost sm" data-rot="-0.2">↻ 0.2°</button>
+<button class="btn ghost sm" data-rot="-1">↻ 1°</button>
+</div>
+<div class="ctl"><button class="btn" id="alignBtn">完成對準</button><span id="alignInfo" class="note"></span></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section class="tab" id="t3"></section>
+
+<!-- ============ TAB 4 ============ -->
+<section class="tab" id="t4"></section>
+
+<!-- ============ TAB 5 ============ -->
+<section class="tab" id="t5">
+<div class="card"><h2>迴歸分析：<span class="f">H</span> = <span class="f">a</span> + <span class="f">b</span>·tan<span class="f">θ</span></h2>
+<div class="ctl"><span>數據來源（第⑤、⑥頁共用）：</span>
+<label><input type="radio" name="src" value="mine" checked> 我的量測數據</label>
+<label><input type="radio" name="src" value="ref"> 參考解數據（凸面 <span class="f">L</span> = 14.12 cm、凹面 <span class="f">L</span> = 15.12 cm）</label></div>
+<p class="note">每組數據先算 tan<span class="f">θ</span> = tan[½ tan⁻¹(<span class="f">D</span>/<span class="f">L</span>)]，再以最小平方法擬合 <span class="f">H</span> 對 tan<span class="f">θ</span> 的直線。斜率 <span class="f">b</span> 即曲率半徑 <span class="f">R</span>，不確定度 σ<sub><i>b</i></sub> 由殘差估計。</p></div>
+<div class="row"><div class="col"><div class="card" id="fitconvex"></div></div><div class="col"><div class="card" id="fitconcave"></div></div></div>
+<div class="card"><h2>截距從哪裡來？為什麼迴歸比單點法可靠？</h2>
+<ul>
+<li><b>鏡心偏離所畫的主軸 <span class="f">e</span>：</b>若鏡心實際在所畫主軸上方 <span class="f">e</span> 處，雷射到真正主軸的距離是 <span class="f">H</span> − <span class="f">e</span>，於是 <span class="f">H</span> − <span class="f">e</span> = <span class="f">R</span> tan<span class="f">θ</span>，即 <span class="f">H</span> = <span class="f">e</span> + <span class="f">R</span> tan<span class="f">θ</span>，截距為 +<span class="f">e</span>。</li>
+<li><b>鏡片殘留傾角 <span class="f">δ</span>：</b>每一點的法線角都多了 ±<span class="f">δ</span>，量得的 tan<span class="f">θ</span> ≈ <span class="f">H</span>/<span class="f">R</span> ± <span class="f">δ</span>，即 <span class="f">H</span> = <span class="f">R</span> tan<span class="f">θ</span> ∓ <span class="f">Rδ</span>，截距為 ∓<span class="f">Rδ</span>。</li>
+<li>兩者都只平移直線、不改變斜率（一階近似），所以<b>迴歸斜率仍然可靠</b>。單點法 <span class="f">R<sub>i</sub></span> = <span class="f">H<sub>i</sub></span>/tan<span class="f">θ<sub>i</sub></span> ≈ <span class="f">R</span>·<span class="f">H<sub>i</sub></span>/(<span class="f">H<sub>i</sub></span> − <span class="f">a</span>) 則每一點都被截距污染，<span class="f">H</span> 愈小污染愈嚴重，而且平均也消不掉這種系統誤差。</li>
+</ul></div>
+</section>
+
+<!-- ============ TAB 6 ============ -->
+<section class="tab" id="t6">
+<div class="card"><h2>A. 去掉近似：sin<span class="f">θ</span> 精確式＋入射點凹陷修正</h2>
+<p>對球面，法線角精確滿足 sin<span class="f">θ</span> = <span class="f">H</span>/<span class="f">R</span>。入射點相對頂點凹陷 <span class="f">s</span> = <span class="f">R</span> − √(<span class="f">R</span>² − <span class="f">H</span>²)，所以反射點到竹籤線的真正距離是：</p>
+<div class="eq">凸面：<i>L′</i> = <i>L</i> + <i>s</i>　　凹面：<i>L′</i> = <i>L</i> − <i>s</i>　　⇒　<i>θ</i> = ½ tan<sup>−1</sup>(<i>D</i>/<i>L′</i>)，作 <i>H</i>–sin<i>θ</i> 迴歸，斜率 = <i>R</i></div>
+<p class="note"><span class="f">s</span> 需要用到 <span class="f">R</span>，所以先用第⑤頁的斜率當初值，反覆代入計算直到收斂（通常 2～3 次就穩定）。在沒有傾角、沒有鏡心偏移、讀數精確的情況下，這個算法是嚴格正確的。數據來源同第⑤頁：<b id="srcShow"></b>。</p></div>
+<div class="row"><div class="col"><div class="card" id="corrconvex"></div></div><div class="col"><div class="card" id="corrconcave"></div></div></div>
+<div class="card"><h2>B. 真值揭曉</h2>
+<div class="ctl"><button class="btn" id="revealBtn">揭曉真值</button><span class="note">揭曉後仍可繼續量測；更換鏡片會重新隱藏。</span></div>
+<div id="revealOut"></div></div>
+<div class="card"><h2>C. 參考解的凹面為何偏差 15%？</h2><div id="refDiag"></div></div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ================= utilities ================= */
+const $=id=>document.getElementById(id);
+const D2R=Math.PI/180, R2D=180/Math.PI;
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const fx=(x,n)=>Number.isFinite(x)?x.toFixed(n):'—';
+
+/* ================= state ================= */
+const S={};
+const LASER_X=-33;          // laser tip x (cm); lens vertex at x=0
+const W0=0.08;              // laser beam radius (cm)
+const TP_R=0.10;            // toothpick radius (cm)
+function rdelta(){const m=0.6+Math.random()*1.4;return (Math.random()<.5?-1:1)*m*D2R;}
+function newLaser(){return {dy:randn()*0.015,eps:randn()*0.0008};}
+function newLens(){
+  S.lens={R1:30.6*(1+0.04*clamp(randn(),-2.2,2.2)),R2:10.0*(1+0.05*clamp(randn(),-2.2,2.2)),n:1.52,tc:0.30,ap:2.5};
+  S.setup={
+    flat:{cx:(Math.random()-0.5)*6,cy:(Math.random()-0.5)*6},
+    lines:{yT:29,yB:-29},sel:'yT',
+    marked:false,markErr:null,
+    e:randn()*0.12,           // true lens-centre offset from the drawn axis (cm); coarse until marked
+    xv:randn()*0.015,         // vertex offset from the slit line (cm)
+    face:null,delta:{convex:0,concave:0},aligned:{convex:false,concave:false},
+    al:{convex:newLaser(),concave:newLaser()},tape:false
+  };
+  S.meas={convex:{L:14.0,H:0.5,laser:newLaser(),tp:0.6},concave:{L:15.0,H:0.5,laser:newLaser(),tp:0}};
+  S.data={convex:[],concave:[]};
+  S.teach=false;S.revealed=false;
+}
+newLens();
+
+/* ================= optics engine ================= */
+// Lens local frame: front vertex at origin, axis along +x (light travels +x towards lens).
+function surfaces(face){
+  const {R1,R2,tc}=S.lens;
+  return face==='convex'
+    ?[{c:R1,r:R1,v:0},{c:tc+R2,r:R2,v:tc}]      // front convex R1, back (concave from outside) R2
+    :[{c:-R2,r:R2,v:0},{c:tc-R1,r:R1,v:tc}];    // front concave R2, back convex R1
+}
+function hitCircle(o,d,s,ap){
+  const ox=o.x-s.c,oy=o.y,b=ox*d.x+oy*d.y,cc=ox*ox+oy*oy-s.r*s.r,disc=b*b-cc;
+  if(disc<0)return null;
+  const sq=Math.sqrt(disc);let best=null;
+  for(const t of[-b-sq,-b+sq]){
+    if(t<1e-7)continue;
+    const p={x:o.x+t*d.x,y:o.y+t*d.y};
+    if(Math.abs(p.y)>ap||Math.abs(p.x-s.v)>1.5)continue;
+    if(!best||Math.abs(p.x-s.v)<Math.abs(best.p.x-s.v))best={t,p};
+  }
+  return best;
+}
+const nrm=(p,s)=>({x:(p.x-s.c)/s.r,y:p.y/s.r});
+function reflect(d,n){const k=2*(d.x*n.x+d.y*n.y);return{x:d.x-k*n.x,y:d.y-k*n.y};}
+function refract(d,n,n1,n2){
+  let c=d.x*n.x+d.y*n.y,nn=n;if(c>0){nn={x:-n.x,y:-n.y};c=-c;}
+  const ci=-c,eta=n1/n2,k=1-eta*eta*(1-ci*ci);if(k<0)return null;
+  const f=eta*ci-Math.sqrt(k);return{x:eta*d.x+f*nn.x,y:eta*d.y+f*nn.y};
+}
+function rot(p,a){const c=Math.cos(a),s=Math.sin(a);return{x:c*p.x-s*p.y,y:s*p.x+c*p.y};}
+function pose(face){return{d:S.setup.delta[face],tx:S.setup.xv,ty:S.setup.e};}
+const toL=(p,P)=>rot({x:p.x-P.tx,y:p.y-P.ty},-P.d);
+const toW=(p,P)=>{const q=rot(p,P.d);return{x:q.x+P.tx,y:q.y+P.ty};};
+function traceLens(face,oW,dW,P){
+  const [S1,S2]=surfaces(face),n=S.lens.n,ap=S.lens.ap;
+  const o=toL(oW,P),d=rot(dW,-P.d);
+  const h1=hitCircle(o,d,S1,ap);
+  const res={hit:null,main:null,ghost:null};
+  if(!h1)return res;
+  const n1=nrm(h1.p,S1);
+  res.hit=toW(h1.p,P);
+  res.main={p:res.hit,d:rot(reflect(d,n1),P.d)};
+  const dt=refract(d,n1,1,n);
+  if(dt){const h2=hitCircle(h1.p,dt,S2,ap);
+    if(h2){const dr=reflect(dt,nrm(h2.p,S2));const h3=hitCircle(h2.p,dr,S1,ap);
+      if(h3){const dout=refract(dr,nrm(h3.p,S1),n,1);
+        if(dout)res.ghost={p:toW(h3.p,P),d:rot(dout,P.d),pts:[h1.p,h2.p,h3.p].map(q=>toW(q,P))};}}}
+  return res;
+}
+function atX(ray,X){if(!ray||ray.d.x>=-1e-9)return null;const t=(X-ray.p.x)/ray.d.x;if(t<0)return null;return ray.p.y+t*ray.d.y;}
+// Spots of main / ghost reflections on the line x = X ; spot radius from two marginal rays
+function spotsAt(face,y0,eps,X){
+  const P=pose(face),dir={x:Math.cos(eps),y:Math.sin(eps)};
+  const run=y=>traceLens(face,{x:LASER_X,y},dir,P);
+  const c=run(y0),a=run(y0+W0),b=run(y0-W0),out=[];
+  for(const key of['main','ghost']){
+    const yc=atX(c[key],X);if(yc==null)continue;
+    const ya=atX(a[key],X),yb=atX(b[key],X);
+    let w=(ya!=null&&yb!=null)?Math.abs(ya-yb)/2:0.15;w=Math.max(w,0.03);
+    const A=key==='main'?1:(S.setup.tape?0.05:0.9);   // ghost ≈ 0.96×4%×0.96 ≈ 0.92 of front-surface 4%
+    out.push({key,y:yc,w,A});
+  }
+  return{spots:out,ray:c};
+}
+
+/* ================= tabs ================= */
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  renderAll();window.scrollTo(0,0);
+});
+
+/* ================= TAB 1 ================= */
+let t1face='convex';
+document.querySelectorAll('input[name=t1face]').forEach(r=>r.onchange=()=>{t1face=r.value;$('t1R').value=t1face==='convex'?30.6:10.0;renderT1();});
+['t1R','t1H','t1L'].forEach(id=>$(id).oninput=renderT1);
+function renderT1(){
+  const R=+$('t1R').value,H=+$('t1H').value,L=+$('t1L').value,cx=t1face==='convex'?R:-R;
+  $('t1Rv').textContent=R.toFixed(1);$('t1Hv').textContent=H.toFixed(2);$('t1Lv').textContent=L.toFixed(1);
+  const ap=2.5,Hc=Math.min(H,ap);
+  const sg=t1face==='convex'?-1:1;
+  const hx=cx+sg*Math.sqrt(R*R-Hc*Hc);                // incidence point
+  const n={x:(hx-cx)/R,y:Hc/R};
+  const dr=reflect({x:1,y:0},n);
+  const ys=Hc+(-L-hx)/dr.x*dr.y;                      // spot on screen x=-L
+  const th=Math.asin(Hc/R),s=Math.abs(hx);
+  const Dex=Math.abs(ys-Hc),Dap=L*Math.tan(2*th);
+  const tth=Math.tan(0.5*Math.atan(Dex/L)),Rt=Hc/tth,Rs=Hc/Math.sin(0.5*Math.atan(Dex/L));
+  // drawing
+  const W=720,Hh=430,xmin=-L-2.5,xmax=5,k=W/(xmax-xmin),ymid=0;
+  const X=x=>(x-xmin)*k,Y=y=>Hh/2-(y-ymid)*k,yspan=Hh/2/k;
+  let g='';
+  // grid
+  for(let x=Math.ceil(xmin);x<=xmax;x++)g+=`<line x1="${X(x)}" y1="0" x2="${X(x)}" y2="${Hh}" stroke="${x%5?'#eef3ee':'#d7e6d9'}"/>`;
+  for(let y=Math.ceil(-yspan);y<=yspan;y++)g+=`<line x1="0" y1="${Y(y)}" x2="${W}" y2="${Y(y)}" stroke="${y%5?'#eef3ee':'#d7e6d9'}"/>`;
+  g+=`<line x1="0" y1="${Y(0)}" x2="${W}" y2="${Y(0)}" stroke="#555" stroke-dasharray="6 4"/><text x="6" y="${Y(0)-5}" font-size="12" fill="#555">主軸</text>`;
+  // lens surface
+  let pts=[];for(let i=0;i<=40;i++){const y=-ap+2*ap*i/40;pts.push([cx+sg*Math.sqrt(R*R-y*y),y]);}
+  const back=t1face==='convex'?0.6:0.6;
+  let poly=pts.map(p=>`${X(p[0])},${Y(p[1])}`).join(' ')+' '+pts.slice().reverse().map(p=>`${X(p[0]+back+(t1face==='concave'?0:0))},${Y(p[1])}`).join(' ');
+  g+=`<polygon points="${poly}" fill="#cfe6f7" opacity=".6"/>`;
+  g+=`<polyline points="${pts.map(p=>`${X(p[0])},${Y(p[1])}`).join(' ')}" fill="none" stroke="#1d5f93" stroke-width="3"/>`;
+  g+=`<text x="${X(1.2)}" y="${Y(2.9)}" font-size="13" fill="#1d5f93">${t1face==='convex'?'凸面':'凹面'}（反射面）</text>`;
+  // screen line
+  g+=`<line x1="${X(-L)}" y1="0" x2="${X(-L)}" y2="${Hh}" stroke="#8a6d3b" stroke-width="2" stroke-dasharray="3 3"/><text x="${X(-L)+4}" y="16" font-size="12" fill="#8a6d3b">竹籤排列線</text>`;
+  // normal line toward centre
+  const nl=Math.min(R,8);
+  g+=`<line x1="${X(hx)}" y1="${Y(Hc)}" x2="${X(hx-n.x*(t1face==='convex'?-nl:nl))}" y2="${Y(Hc-n.y*(t1face==='convex'?-nl:nl))}" stroke="#2b8a3e" stroke-dasharray="5 4"/>`;
+  g+=`<line x1="${X(hx)}" y1="${Y(Hc)}" x2="${X(hx+n.x*(t1face==='convex'?-2:2)*-1)}" y2="${Y(Hc+n.y*(t1face==='convex'?-2:2)*-1)}" stroke="#2b8a3e" stroke-dasharray="5 4"/>`;
+  if(cx>xmin&&cx<xmax)g+=`<circle cx="${X(cx)}" cy="${Y(0)}" r="4" fill="#2b8a3e"/><text x="${X(cx)+6}" y="${Y(0)+16}" font-size="12" fill="#2b8a3e">曲率中心 C</text>`;
+  else g+=`<text x="${X(hx)-10}" y="${Y(Hc)+(t1face==='convex'?-10:20)}" font-size="12" text-anchor="end" fill="#2b8a3e">法線（通過 C，C 在圖外 ${t1face==='convex'?'右':'左'}方 ${R.toFixed(1)} cm）</text>`;
+  // rays
+  g+=`<line x1="${X(xmin)}" y1="${Y(Hc)}" x2="${X(hx)}" y2="${Y(Hc)}" stroke="#e0262f" stroke-width="2"/>`;
+  g+=`<line x1="${X(hx)}" y1="${Y(Hc)}" x2="${X(-L)}" y2="${Y(ys)}" stroke="#e0262f" stroke-width="2"/>`;
+  g+=`<line x1="${X(-L)}" y1="${Y(ys)}" x2="${X(xmin)}" y2="${Y(ys+(xmin+L)/dr.x*dr.y)}" stroke="#e0262f" stroke-width="1.2" opacity=".4"/>`;
+  g+=`<line x1="${X(-L)}" y1="${Y(Hc)}" x2="${X(xmin)}" y2="${Y(Hc)}" stroke="#e0262f" stroke-dasharray="3 3" opacity=".6"/>`;
+  g+=`<circle cx="${X(-L)}" cy="${Y(ys)}" r="5" fill="#e0262f"/>`;
+  // D bracket
+  const bx=X(-L)-18;
+  g+=`<line x1="${bx}" y1="${Y(Hc)}" x2="${bx}" y2="${Y(ys)}" stroke="#333" marker-start="url(#ar)" marker-end="url(#ar)"/><text x="${bx-16}" y="${(Y(Hc)+Y(ys))/2+5}" font-size="15" font-style="italic" font-family="Times New Roman">D</text>`;
+  // H bracket
+  const hxp=X(-L)+30;
+  if(Hc>0.05)g+=`<line x1="${hxp}" y1="${Y(0)}" x2="${hxp}" y2="${Y(Hc)}" stroke="#333" marker-start="url(#ar)" marker-end="url(#ar)"/><text x="${hxp+5}" y="${(Y(0)+Y(Hc))/2+5}" font-size="15" font-style="italic" font-family="Times New Roman">H</text>`;
+  // L bracket
+  const ly=Hh-18;
+  g+=`<line x1="${X(-L)}" y1="${ly}" x2="${X(0)}" y2="${ly}" stroke="#333" marker-start="url(#ar)" marker-end="url(#ar)"/><text x="${(X(-L)+X(0))/2}" y="${ly-6}" font-size="15" font-style="italic" font-family="Times New Roman">L</text>`;
+  g+=`<line x1="${X(0)}" y1="${ly-10}" x2="${X(0)}" y2="${Y(0)}" stroke="#999" stroke-dasharray="2 3"/>`;
+  $('t1svg').innerHTML=`<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker></defs>`+g;
+  $('t1kv').innerHTML=`
+    <span>法線角 θ（sinθ = H/R）</span><span>${fx(th*R2D,3)}°</span>
+    <span>偏向角 2θ</span><span>${fx(2*th*R2D,3)}°</span>
+    <span>入射點凹陷 s</span><span>${fx(s*10,2)} mm</span>
+    <span>D（精確光追）</span><span><b>${fx(Dex,3)} cm</b></span>
+    <span>D（L·tan2θ，忽略 s）</span><span>${fx(Dap,3)} cm</span>
+    <span>由 D 反推 tanθ</span><span>${fx(tth,4)}</span>
+    <span>R = H / tanθ（參考解算法）</span><span>${fx(Rt,3)} cm（${fx((Rt/R-1)*100,2)}%）</span>
+    <span>R = H / sinθ（改用 sin）</span><span>${fx(Rs,3)} cm（${fx((Rs/R-1)*100,2)}%）</span>`;
+}
+
+/* ================= TAB 2 ================= */
+// --- A: flat lens centre finding ---
+const FK=8; // px per mm
+const fX=x=>280+x*FK,fY=y=>240-y*FK;
+function renderFlat(){
+  const f=S.setup.flat,Ls=S.setup.lines;let g='';
+  g+=`<rect width="560" height="480" fill="#fbfdfb"/>`;
+  for(let x=-35;x<=35;x++)g+=`<line x1="${fX(x)}" y1="0" x2="${fX(x)}" y2="480" stroke="${x%10===0?'#7fbf8f':x%5===0?'#b3dcbc':'#e1efe3'}" stroke-width="${x%10===0?1.2:1}"/>`;
+  for(let y=-30;y<=30;y++)g+=`<line x1="0" y1="${fY(y)}" x2="560" y2="${fY(y)}" stroke="${y%10===0?'#7fbf8f':y%5===0?'#b3dcbc':'#e1efe3'}" stroke-width="${y%10===0?1.2:1}"/>`;
+  g+=`<circle cx="${fX(f.cx)}" cy="${fY(f.cy)}" r="${25*FK}" fill="rgba(160,205,240,.35)" stroke="#4d86b3" stroke-width="2"/>`;
+  g+=`<circle cx="${fX(f.cx)}" cy="${fY(f.cy)}" r="${23.5*FK}" fill="none" stroke="rgba(77,134,179,.35)" stroke-width="1"/>`;
+  for(const key of['yT','yB']){const y=Ls[key],on=S.setup.sel===key;
+    g+=`<line x1="0" y1="${fY(y)}" x2="560" y2="${fY(y)}" stroke="${on?'#1f5fbf':'#6d8fc7'}" stroke-width="${on?2:1.3}"/>`;
+    g+=`<rect x="502" y="${fY(y)-10}" width="54" height="20" rx="4" fill="${on?'#1f5fbf':'#6d8fc7'}"/><text x="529" y="${fY(y)+5}" font-size="12" fill="#fff" text-anchor="middle">${key==='yT'?'上緣線':'下緣線'}</text>`;}
+  if(S.setup.marked){const m=S.setup.markY;
+    g+=`<line x1="0" y1="${fY(m)}" x2="560" y2="${fY(m)}" stroke="#333" stroke-dasharray="8 4"/><circle cx="${fX(f.cx)}" cy="${fY(m)}" r="4" fill="#333"/><text x="8" y="${fY(m)-6}" font-size="12">主軸（通過標出的鏡心）</text>`;}
+  $('flatSvg').innerHTML=g;
+  $('selLine').textContent=S.setup.sel==='yT'?'上緣線':'下緣線';
+}
+(function(){
+  const svg=$('flatSvg');let drag=null;
+  const toMM=ev=>{const r=svg.getBoundingClientRect();return(240-(ev.clientY-r.top)*480/r.height)/FK;};
+  svg.addEventListener('pointerdown',ev=>{const y=toMM(ev),Ls=S.setup.lines;
+    const key=Math.abs(y-Ls.yT)<Math.abs(y-Ls.yB)?'yT':'yB';S.setup.sel=key;
+    if(Math.abs(y-Ls[key])<3){drag={key,off:Ls[key]-y};svg.setPointerCapture(ev.pointerId);}renderFlat();});
+  svg.addEventListener('pointermove',ev=>{if(!drag)return;S.setup.lines[drag.key]=clamp(toMM(ev)+drag.off,-30,30);renderFlat();});
+  svg.addEventListener('pointerup',()=>drag=null);
+})();
+document.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{const k=S.setup.sel;S.setup.lines[k]=clamp(+(S.setup.lines[k]+ +b.dataset.fl).toFixed(2),-30,30);renderFlat();});
+$('markBtn').onclick=()=>{
+  const Ls=S.setup.lines,mid=(Ls.yT+Ls.yB)/2,dia=Ls.yT-Ls.yB;
+  S.setup.marked=true;S.setup.markY=mid;S.setup.markErr=mid-S.setup.flat.cy;       // mm
+  S.setup.e=-S.setup.markErr/10+randn()*0.005;                                     // + slit-insertion scatter
+  S.setup.face=null;S.setup.aligned={convex:false,concave:false};
+  $('markInfo').innerHTML=`<div class="okbox">已標出鏡心：兩切線間距（鏡片直徑讀值）= ${dia.toFixed(1)} mm。主軸改以通過此點的水平線為準。<br>標定改變了鏡片在割痕中的位置，請重新進行 B、C 兩步。</div>`;
+  renderFlat();renderSetup();renderAlign();
+};
+
+// --- B: insert ---
+document.querySelectorAll('input[name=face]').forEach(r=>r.onchange=()=>{});
+$('insertBtn').onclick=()=>{
+  const face=document.querySelector('input[name=face]:checked').value;
+  S.setup.face=face;S.setup.delta[face]=rdelta();S.setup.aligned[face]=false;S.setup.al[face]=newLaser();
+  S.setup.xv=randn()*0.015;
+  renderSetup();renderAlign();
+};
+$('tapeChk').onchange=e=>{S.setup.tape=e.target.checked;renderAll();};
+function renderSetup(){
+  const f=S.setup.face;
+  $('insertInfo').innerHTML=f?`目前：<b>${f==='convex'?'凸面':'凹面'}</b>朝向雷射${S.setup.aligned[f]?'，已對準':'，尚未對準'}`:'尚未插入';
+  let g=`<rect width="520" height="190" fill="#f3f1ea"/>`;
+  g+=`<rect x="20" y="20" width="440" height="150" fill="#fbfdfb" stroke="#b3dcbc"/>`;
+  for(let x=20;x<=460;x+=11)g+=`<line x1="${x}" y1="20" x2="${x}" y2="170" stroke="#e1efe3"/>`;
+  for(let y=20;y<=170;y+=11)g+=`<line x1="20" y1="${y}" x2="460" y2="${y}" stroke="#e1efe3"/>`;
+  g+=`<line x1="20" y1="95" x2="460" y2="95" stroke="#333" stroke-dasharray="6 4"/><text x="24" y="90" font-size="11">主軸</text>`;
+  g+=`<rect x="416" y="50" width="6" height="90" fill="#bbb"/><text x="380" y="45" font-size="11" fill="#666">割痕</text>`;
+  if(f){const a=(S.setup.delta[f]||0)*R2D*6; // exaggerated
+    const path=f==='convex'?'M-4,-42 Q-12,0 -4,42 L6,42 Q-1,0 6,-42 Z':'M-10,-42 Q0,0 -10,42 L6,42 Q12,0 6,-42 Z';
+    g+=`<g transform="translate(419,95) rotate(${-a})"><path d="${path}" fill="#bfe0f5" stroke="#1d5f93" stroke-width="1.5"/></g>`;
+    g+=`<text x="330" y="182" font-size="11" fill="#1d5f93">${f==='convex'?'凸面':'凹面'}朝左（朝雷射）｜傾角放大 6 倍示意</text>`;}
+  g+=`<rect x="0" y="89" width="46" height="12" rx="3" fill="#333"/><rect x="46" y="92" width="4" height="6" fill="#e0262f"/><text x="4" y="118" font-size="11">雷射筆</text>`;
+  $('setupSvg').innerHTML=g;
+}
+
+// --- C: alignment ---
+const AK=80; // px per cm on card
+document.querySelectorAll('[data-rot]').forEach(b=>b.onclick=()=>{const f=S.setup.face;if(!f)return;S.setup.delta[f]+= +b.dataset.rot*D2R;S.setup.aligned[f]=false;renderSetup();renderAlign();});
+$('alignBtn').onclick=()=>{const f=S.setup.face;if(!f)return;S.setup.aligned[f]=true;renderSetup();renderAlign();renderAll();};
+function spotSVG(cx,cy,r,op,id,col){
+  return `<defs><radialGradient id="${id}"><stop offset="0" stop-color="${col||'#ff2a2a'}" stop-opacity="1"/><stop offset=".45" stop-color="${col||'#ff2a2a'}" stop-opacity=".55"/><stop offset="1" stop-color="${col||'#ff2a2a'}" stop-opacity="0"/></radialGradient></defs><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id})" opacity="${clamp(op,0,1)}"/>`;
+}
+function renderAlign(){
+  const f=S.setup.face;let g=`<rect width="440" height="240" fill="#3a3a3a"/>`;
+  g+=`<rect x="10" y="20" width="420" height="200" fill="#e9dfc8" stroke="#b9a77f"/>`;
+  g+=`<text x="16" y="36" font-size="11" fill="#7a6a45">厚紙板（從鏡片方向看）</text>`;
+  const cx=220,cy=120;
+  for(let mm=-25;mm<=25;mm++){const x=cx+mm*AK/10,h=mm%10===0?14:mm%5===0?9:5;
+    g+=`<line x1="${x}" y1="${cy+22}" x2="${x}" y2="${cy+22+h}" stroke="#6b5a35" stroke-width="${mm%10===0?1.4:1}"/>`;
+    if(mm%10===0)g+=`<text x="${x}" y="${cy+50}" font-size="10" text-anchor="middle" fill="#6b5a35">${mm/10} cm</text>`;}
+  if(!f){g+=`<text x="220" y="100" font-size="14" text-anchor="middle" fill="#7a1010">請先完成步驟 B（插入鏡片）</text>`;$('alignSvg').innerHTML=g;$('alignInfo').textContent='';return;}
+  const al=S.setup.al[f],X=LASER_X+0.3;
+  const sp=spotsAt(f,al.dy,al.eps,X).spots;
+  let arrows='';
+  sp.forEach((s,i)=>{const px=cx+(s.y-al.dy)*AK,r=Math.max(2*s.w*AK,6),op=s.A*Math.min(1,0.12/s.w)*1.1;
+    if(px<10||px>430){arrows+=`<text x="${px<10?16:424}" y="${cy-30-i*14}" font-size="12" fill="#b00" text-anchor="${px<10?'start':'end'}">${px<10?'◀':'▶'} ${s.key==='main'?'有光點':'有暗淡光點'}在紙板外</text>`;}
+    else g+=spotSVG(px,cy,r,op,'as'+i);});
+  g+=`<circle cx="${cx}" cy="${cy}" r="4" fill="#111"/>`+arrows;
+  $('alignSvg').innerHTML=g;
+  $('alignInfo').innerHTML=S.setup.aligned[f]?'<span style="color:#1a7f37">已記錄對準狀態。</span>':'';
+}
+
+/* ================= TAB 3 (generic measurement page) ================= */
+const MK=18,MX0=-41,MY0=13;             // main view: px/cm, origin
+const mX=x=>(x-MX0)*MK,mY=y=>(MY0-y)*MK;
+const GK=300;                            // magnifier px/cm (30 px/mm)
+function buildMeasure(face,secId){
+  const fz=face==='convex'?'凸':'凹',p=face;
+  $(secId).innerHTML=`
+  <div class="card"><h2>${fz}面量測：沿入射線平行主軸射雷射，用竹籤找出反射光</h2>
+  <div id="${p}Warn"></div>
+  <p class="note">雷射筆沿 <span class="f">y</span> = <span class="f">H</span> 的方格線、平行主軸放置。沿距鏡心頂點 <span class="f">L</span> 的竹籤排列線移動竹籤；竹籤被光打到時會發出紅光。把竹籤移到紅光最亮、左右對稱的位置，再從方格紙讀出竹籤中心到入射線的距離 <span class="f">D</span>（1 mm 方格，估讀到 0.1 mm）。</p>
+  ${face==='convex'
+   ?'<p class="note">凸面的反射光往遠離主軸的方向發散，光點在入射線<b>外側</b>。若沒有貼膠帶，更外側還會有一個較大、較散的背面鬼影光點，不要誤認。</p>'
+   :'<p class="note">凹面的反射光先向主軸會聚，約在 <span class="f">R</span>/2 處越過主軸。竹籤線若在焦點之外，光點會出現在<b>主軸的另一側</b>，此時 <span class="f">D</span> = <span class="f">H</span> + |<span class="f">y</span>|。另外，<b>入射線附近</b>會有一個亮度相近的背面鬼影光點（光經背面凸面反射後幾乎平行射回），它的 <span class="f">D</span> 只有零點幾毫米，千萬不要當成反射光。</p>'}
+  </div>
+  <div class="row">
+   <div class="col" style="flex:2 1 600px"><div class="card"><h3>上視全圖（保麗龍板＋方格紙）　<span class="note">點擊竹籤排列線可粗略移動竹籤</span></h3>
+     <svg id="${p}Main" viewBox="0 0 792 468"></svg>
+     <div class="ctl"><label><input type="checkbox" id="${p}Teach"> 教學模式：顯示光路（實際空氣中看不到光束）</label>
+     <label><input type="checkbox" id="${p}Tape"> 背面貼隱形膠帶</label></div></div></div>
+   <div class="col"><div class="card"><h3>放大鏡（竹籤附近，1 格 = 1 mm）</h3>
+     <svg id="${p}Mag" viewBox="0 0 360 330"></svg>
+     <div class="ctl"><span>移動竹籤：</span>
+      <button class="btn ghost sm" data-tp="${p}:0.1">▲ 1 mm</button><button class="btn ghost sm" data-tp="${p}:0.02">▲ 0.2 mm</button>
+      <button class="btn ghost sm" data-tp="${p}:-0.02">▼ 0.2 mm</button><button class="btn ghost sm" data-tp="${p}:-0.1">▼ 1 mm</button></div>
+     <p class="note">也可在放大鏡中上下拖曳竹籤。</p>
+     <h3>裝置設定</h3>
+     <div class="ctl"><label>竹籤線距鏡心 <span class="f">L</span> = <input type="number" id="${p}L" step="0.1" min="5" max="30"> cm</label></div>
+     <div class="ctl"><label>雷射距主軸 <span class="f">H</span> = <input type="number" id="${p}H" step="0.1" min="0.2" max="2.4"> cm</label>
+       <button class="btn ghost sm" id="${p}Replace">重新放置雷射</button></div>
+     <p class="note">每次放置雷射筆，都有約 ±0.2 mm 的位置誤差和約 ±0.05° 的方向誤差（手放不可能完全平行）。</p>
+   </div></div>
+  </div>
+  <div class="card"><h2>數據記錄</h2>
+   <div class="ctl"><span>目前 <span class="f">H</span> = <b id="${p}Hshow"></b> cm，<span class="f">L</span> = <b id="${p}Lshow"></b> cm</span>
+    <label>讀得 <span class="f">D</span> = <input type="number" id="${p}D" step="0.01"> cm</label>
+    <button class="btn" id="${p}Rec">記錄這組</button><span id="${p}RecMsg" class="note"></span></div>
+   <table><thead><tr><th>#</th><th><i>H</i> (cm)</th><th><i>L</i> (cm)</th><th><i>D</i> (cm)</th><th>tan <i>θ</i> = tan[½ tan⁻¹(<i>D</i>/<i>L</i>)]</th><th></th></tr></thead><tbody id="${p}Tb"></tbody></table>
+   <p class="note">建議：固定 <span class="f">L</span>，<span class="f">H</span> 取 0.5～2.0 cm 間至少 5 組（參考解用 <span class="f">L</span> = 14.12 cm，<span class="f">H</span> = 0.50、0.75、1.00、1.50、2.00 cm）。表中 <span class="f">D</span> 可直接修改。</p>
+  </div>`;
+  const M=S.meas[face];
+  $(p+'L').value=M.L;$(p+'H').value=M.H;
+  $(p+'L').onchange=e=>{M.L=clamp(Math.round(+e.target.value*10)/10,5,30);e.target.value=M.L;renderMeasure(face);};
+  $(p+'H').onchange=e=>{M.H=clamp(Math.round(+e.target.value*10)/10,0.2,2.4);e.target.value=M.H;M.laser=newLaser();renderMeasure(face);};
+  $(p+'Replace').onclick=()=>{M.laser=newLaser();renderMeasure(face);};
+  $(p+'Teach').onchange=e=>{S.teach=e.target.checked;renderMeasure(face);};
+  $(p+'Tape').onchange=e=>{S.setup.tape=e.target.checked;$('tapeChk').checked=S.setup.tape;renderAll();};
+  $(p+'Rec').onclick=()=>{
+    const D=+$(p+'D').value;
+    if(S.setup.face!==face){$(p+'RecMsg').textContent='鏡片不是'+fz+'面朝向雷射，無法記錄';return;}
+    if(!(D>0)){$(p+'RecMsg').textContent='請輸入正的 D 值';return;}
+    const sp=spotsAt(face,M.H+M.laser.dy,M.laser.eps,-M.L).spots.find(s=>s.key==='main');
+    S.data[face].push({H:M.H,L:M.L,D,tp:M.tp,trueY:sp?sp.y:null,delta:S.setup.delta[face],e:S.setup.e,xv:S.setup.xv,laser:{...M.laser}});
+    $(p+'D').value='';$(p+'RecMsg').textContent='已記錄';renderTable(face);renderMeasure(face);
+  };
+  const svg=$(p+'Mag');let drag=null;
+  svg.addEventListener('pointerdown',ev=>{drag={y:ev.clientY,tp:M.tp};svg.setPointerCapture(ev.pointerId);});
+  svg.addEventListener('pointermove',ev=>{if(!drag)return;const r=svg.getBoundingClientRect();
+    M.tp=clamp(drag.tp+(drag.y-ev.clientY)*330/r.height/GK,-12,12);renderMeasure(face);});
+  svg.addEventListener('pointerup',()=>drag=null);
+  $(p+'Main').addEventListener('pointerdown',ev=>{const r=$(p+'Main').getBoundingClientRect();
+    const x=(ev.clientX-r.left)*792/r.width/MK+MX0,y=MY0-(ev.clientY-r.top)*468/r.height/MK;
+    if(Math.abs(x+M.L)<1.2){M.tp=clamp(Math.round(y*50)/50,-12,12);renderMeasure(face);}});
+  document.querySelectorAll(`[data-tp^="${p}:"]`).forEach(b=>b.onclick=()=>{M.tp=clamp(+(M.tp+ +b.dataset.tp.split(':')[1]).toFixed(3),-12,12);renderMeasure(face);});
+}
+function renderTable(face){
+  const tb=$(face+'Tb');tb.innerHTML='';
+  S.data[face].forEach((r,i)=>{const t=Math.tan(0.5*Math.atan(r.D/r.L));
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${r.H.toFixed(2)}</td><td>${r.L.toFixed(2)}</td><td><input type="number" step="0.01" value="${r.D}"></td><td class="mono">${t.toFixed(4)}</td><td><button class="btn ghost sm">刪除</button></td>`;
+    tr.querySelector('input').onchange=e=>{const v=+e.target.value;if(v>0){r.D=v;renderTable(face);}};
+    tr.querySelector('button').onclick=()=>{S.data[face].splice(i,1);renderTable(face);renderMeasure(face);};
+    tb.appendChild(tr);});
+}
+function lensPolyW(face){
+  const [S1,S2]=surfaces(face),ap=S.lens.ap,P=pose(face),pts=[];
+  const arc=(s,rev)=>{const a=[];for(let i=0;i<=30;i++){const y=-ap+2*ap*i/30;a.push({x:s.c+Math.sign(s.v-s.c)*Math.sqrt(s.r*s.r-y*y),y});}return rev?a.reverse():a;};
+  return arc(S1,false).concat(arc(S2,true)).map(q=>toW(q,P));
+}
+function renderMeasure(face){
+  const p=face,M=S.meas[face],sec=$(p+'Main');if(!sec)return;
+  $(p+'Tape').checked=S.setup.tape;$(p+'Teach').checked=S.teach;
+  $(p+'Hshow').textContent=M.H.toFixed(2);$(p+'Lshow').textContent=M.L.toFixed(2);
+  const ready=S.setup.face===face;
+  let w='';
+  if(!ready)w+=`<div class="errbox">鏡片目前${S.setup.face?'是'+(S.setup.face==='convex'?'凸':'凹')+'面朝向雷射':'尚未插入割痕'}。請先到第②頁，選「${face==='convex'?'凸':'凹'}面朝向雷射」並插入鏡片。</div>`;
+  else{
+    if(!S.setup.marked)w+=`<div class="warn">尚未用對稱法標定鏡心（第②頁 A），主軸是目測畫的，鏡心可能偏離主軸 1 mm 以上。</div>`;
+    if(!S.setup.aligned[face])w+=`<div class="warn">尚未完成主軸對準（第②頁 C），鏡片可能帶有 1° 左右的傾角。</div>`;
+    if(S.setup.marked&&S.setup.aligned[face])w+=`<div class="okbox">鏡心已標定、主軸已對準。</div>`;
+  }
+  $(p+'Warn').innerHTML=w;
+  // ---------- main view ----------
+  let g=`<rect width="792" height="468" fill="#efece3"/>`;
+  g+=`<rect x="${mX(-34)}" y="${mY(12.5)}" width="${36*MK}" height="${25*MK}" fill="#fbfdfb" stroke="#9cc9a6"/>`;
+  for(let x=-34;x<=2;x++)g+=`<line x1="${mX(x)}" y1="${mY(12.5)}" x2="${mX(x)}" y2="${mY(-12.5)}" stroke="${x%5===0?'#b3dcbc':'#e3f0e5'}"/>`;
+  for(let y=-12;y<=12;y++)g+=`<line x1="${mX(-34)}" y1="${mY(y)}" x2="${mX(2)}" y2="${mY(y)}" stroke="${y%5===0?'#b3dcbc':'#e3f0e5'}"/>`;
+  for(let x=-30;x<=0;x+=5)g+=`<text x="${mX(x)}" y="${mY(-12.5)+14}" font-size="10" text-anchor="middle" fill="#6a8">${x}</text>`;
+  for(let y=-10;y<=10;y+=5)g+=`<text x="${mX(-34)-4}" y="${mY(y)+4}" font-size="10" text-anchor="end" fill="#6a8">${y}</text>`;
+  g+=`<line x1="${mX(-34)}" y1="${mY(0)}" x2="${mX(2)}" y2="${mY(0)}" stroke="#555" stroke-dasharray="6 4"/>`;
+  g+=`<line x1="${mX(-M.L)}" y1="${mY(12.5)}" x2="${mX(-M.L)}" y2="${mY(-12.5)}" stroke="#8a6d3b" stroke-dasharray="3 3"/>`;
+  g+=`<text x="${mX(-M.L)+4}" y="${mY(12.5)+12}" font-size="11" fill="#8a6d3b">竹籤線 L=${M.L.toFixed(1)}</text>`;
+  g+=`<rect x="${mX(0)-4}" y="${mY(3)}" width="8" height="${6*MK}" fill="#ccc"/>`;
+  if(ready){
+    const poly=lensPolyW(face).map(q=>`${mX(q.x)},${mY(q.y)}`).join(' ');
+    g+=`<polygon points="${poly}" fill="#bfe0f5" stroke="#1d5f93" stroke-width="1.2"/>`;
+  }
+  const y0=M.H+M.laser.dy;
+  g+=`<g transform="rotate(${-M.laser.eps*R2D} ${mX(LASER_X)} ${mY(y0)})"><rect x="${mX(-40)}" y="${mY(y0)-8}" width="${7*MK}" height="16" rx="4" fill="#333"/><rect x="${mX(LASER_X)-2}" y="${mY(y0)-3}" width="4" height="6" fill="#e0262f"/></g>`;
+  let lit=[];
+  if(ready){
+    const res=spotsAt(face,y0,M.laser.eps,-M.L),ray=res.ray;
+    // incident beam at the toothpick line
+    const yin=y0+(-M.L-LASER_X)*Math.tan(M.laser.eps);
+    const incBlock=Math.exp(-((M.tp-yin)**2)/(2*((W0/2)**2+(TP_R*0.7)**2)));
+    lit.push({key:'inc',y:yin,w:W0,A:1});
+    res.spots.forEach(s=>{s.A*=(1-incBlock);lit.push(s);});
+    if(S.teach&&ray.hit){
+      g+=`<line x1="${mX(LASER_X)}" y1="${mY(y0)}" x2="${mX(ray.hit.x)}" y2="${mY(ray.hit.y)}" stroke="#e0262f" stroke-width="1.5"/>`;
+      if(ray.main){const ye=atX(ray.main,-34);if(ye!=null)g+=`<line x1="${mX(ray.hit.x)}" y1="${mY(ray.hit.y)}" x2="${mX(-34)}" y2="${mY(ye)}" stroke="#e0262f" stroke-width="1.5"/>`;}
+      if(ray.ghost){const ye=atX(ray.ghost,-34);if(ye!=null)g+=`<line x1="${mX(ray.ghost.p.x)}" y1="${mY(ray.ghost.p.y)}" x2="${mX(-34)}" y2="${mY(ye)}" stroke="#ff8c00" stroke-width="1.2" stroke-dasharray="5 3" opacity="${S.setup.tape?0.25:0.9}"/><text x="${mX(-34)+4}" y="${mY(ye)-4}" font-size="11" fill="#c66a00">背面鬼影</text>`;}
+    }else{
+      g+=`<line x1="${mX(LASER_X)}" y1="${mY(y0)}" x2="${mX(0)}" y2="${mY(y0)}" stroke="#e0262f" stroke-width="1" opacity=".25" stroke-dasharray="2 4"/>`;
+    }
+  }
+  // recorded pins at same L
+  S.data[face].forEach(r=>{if(Math.abs(r.L-M.L)<1e-6)g+=`<circle cx="${mX(-r.L)}" cy="${mY(r.tp)}" r="2.5" fill="none" stroke="#222"/>`;});
+  // toothpick with glow
+  let B=0;lit.forEach(s=>{const sig2=(s.w/2)**2+(TP_R*0.7)**2;B+=s.A*Math.min(1.6,W0/s.w)*Math.exp(-((M.tp-s.y)**2)/(2*sig2));});
+  if(B>0.03)g+=spotSVG(mX(-M.L),mY(M.tp),14,B,'mg');
+  g+=`<circle cx="${mX(-M.L)}" cy="${mY(M.tp)}" r="4" fill="#d9b77c" stroke="#7a5a2a"/>`;
+  sec.innerHTML=g;
+  // ---------- magnifier ----------
+  const xc=-M.L,yc=M.tp,gX=x=>180+(x-xc)*GK,gY=y=>165-(y-yc)*GK;
+  let h=`<rect width="360" height="330" fill="#fbfdfb"/>`;
+  for(let mm=Math.floor((xc-0.7)*10);mm<=Math.ceil((xc+0.7)*10);mm++){const x=gX(mm/10),b=mm%10===0?2:mm%5===0?1.4:0.8;
+    h+=`<line x1="${x}" y1="0" x2="${x}" y2="330" stroke="${mm%5===0?'#8cc79a':'#c9e6cf'}" stroke-width="${b}"/>`;}
+  for(let mm=Math.floor((yc-0.6)*10);mm<=Math.ceil((yc+0.6)*10);mm++){const y=gY(mm/10),b=mm%10===0?2:mm%5===0?1.4:0.8;
+    h+=`<line x1="0" y1="${y}" x2="360" y2="${y}" stroke="${mm%5===0?'#8cc79a':'#c9e6cf'}" stroke-width="${b}"/>`;
+    if(mm%5===0)h+=`<text x="4" y="${y-3}" font-size="11" fill="#3f7a4d">y = ${(mm/10).toFixed(1)} cm</text>`;}
+  h+=`<line x1="${gX(xc)}" y1="0" x2="${gX(xc)}" y2="330" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 4"/>`;
+  if(Math.abs(M.H-yc)<0.6)h+=`<line x1="0" y1="${gY(M.H)}" x2="360" y2="${gY(M.H)}" stroke="#777" stroke-dasharray="7 4"/><text x="250" y="${gY(M.H)-4}" font-size="11" fill="#555">入射線 y=H</text>`;
+  if(Math.abs(yc)<0.6)h+=`<line x1="0" y1="${gY(0)}" x2="360" y2="${gY(0)}" stroke="#333" stroke-dasharray="9 4"/><text x="290" y="${gY(0)+13}" font-size="11">主軸</text>`;
+  S.data[face].forEach(r=>{if(Math.abs(r.L-M.L)<1e-6&&Math.abs(r.tp-yc)<0.6)h+=`<circle cx="${gX(xc)}" cy="${gY(r.tp)}" r="5" fill="none" stroke="#222" stroke-width="1.5"/><circle cx="${gX(xc)}" cy="${gY(r.tp)}" r="1.5" fill="#222"/>`;});
+  // light on paper near & on toothpick
+  let id=0;
+  lit.forEach(s=>{const sig2=(s.w/2)**2+(TP_R*0.7)**2,ov=Math.exp(-((yc-s.y)**2)/(2*sig2)),bri=s.A*Math.min(1.6,W0/s.w)*ov;
+    if(bri<0.02)return;const sh=clamp(s.y-yc,-TP_R,TP_R)*0.6;
+    h+=spotSVG(gX(xc),gY(yc+sh),TP_R*GK*1.9,bri*0.35,'pg'+(id++));
+    h+=spotSVG(gX(xc)+4,gY(yc+sh),TP_R*GK*0.95,bri,'tg'+(id++),'#ff3b2f');});
+  h+=`<circle cx="${gX(xc)}" cy="${gY(yc)}" r="${TP_R*GK}" fill="#d9b77c" fill-opacity=".55" stroke="#7a5a2a" stroke-width="1.5"/>`;
+  lit.forEach(s=>{const sig2=(s.w/2)**2+(TP_R*0.7)**2,ov=Math.exp(-((yc-s.y)**2)/(2*sig2)),bri=s.A*Math.min(1.6,W0/s.w)*ov;
+    if(bri<0.02)return;const sh=clamp(s.y-yc,-TP_R,TP_R)*0.6;
+    h+=spotSVG(gX(xc)+6,gY(yc+sh),TP_R*GK*0.7,bri,'tt'+(id++),'#ff4a3a');});
+  h+=`<line x1="${gX(xc)-6}" y1="${gY(yc)}" x2="${gX(xc)+6}" y2="${gY(yc)}" stroke="#5a3d12" stroke-width="1"/><line x1="${gX(xc)}" y1="${gY(yc)-6}" x2="${gX(xc)}" y2="${gY(yc)+6}" stroke="#5a3d12" stroke-width="1"/>`;
+  h+=`<text x="356" y="324" font-size="10" text-anchor="end" fill="#777">← 往雷射方向　｜　往鏡片方向 →</text>`;
+  $(p+'Mag').innerHTML=h;
+}
+
+
+/* ================= TAB 5 / 6 analysis ================= */
+const REF={convex:{L:14.12,H:[.5,.75,1,1.5,2],D:[.59,.82,1.02,1.4,2],Rs:30.56},
+           concave:{L:15.12,H:[.5,.75,1,1.5,2],D:[.8,1.34,2.4,4.45,6.15],Rs:9.98}};
+S.src='mine';
+document.querySelectorAll('input[name=src]').forEach(r=>r.onchange=()=>{S.src=r.value;renderAnalysis();});
+const FZ={convex:'凸面 R₁',concave:'凹面 R₂'};
+function rowsOf(face){if(S.src==='ref'){const r=REF[face];return r.H.map((h,i)=>({H:h,L:r.L,D:r.D[i]}));}return S.data[face].slice();}
+function linfit(x,y){
+  const n=x.length;if(n<2)return null;const mx=x.reduce((a,b)=>a+b)/n,my=y.reduce((a,b)=>a+b)/n;
+  let sxx=0,sxy=0,syy=0;for(let i=0;i<n;i++){sxx+=(x[i]-mx)**2;sxy+=(x[i]-mx)*(y[i]-my);syy+=(y[i]-my)**2;}
+  if(sxx<=0)return null;const b=sxy/sxx,a=my-b*mx;let ssr=0;for(let i=0;i<n;i++)ssr+=(y[i]-a-b*x[i])**2;
+  const s2=n>2?ssr/(n-2):NaN;return{n,a,b,sb:Math.sqrt(s2/sxx),sa:Math.sqrt(s2*(1/n+mx*mx/sxx)),r2:syy>0?1-ssr/syy:1};
+}
+const tanTh=r=>Math.tan(0.5*Math.atan(r.D/r.L));
+const fitTan=rs=>linfit(rs.map(tanTh),rs.map(r=>r.H));
+function fitCorr(face,rs){
+  let f=fitTan(rs);if(!f)return null;let tab=[];
+  for(let it=0;it<8;it++){const R=f.b;
+    tab=rs.map(r=>{const s=R>r.H?R-Math.sqrt(R*R-r.H*r.H):0,Lp=face==='convex'?r.L+s:r.L-s;return{...r,s,Lp,sn:Math.sin(0.5*Math.atan(r.D/Lp))};});
+    f=linfit(tab.map(t=>t.sn),tab.map(t=>t.H));if(!f)return null;}
+  return{f,tab};
+}
+function niceStep(span){const raw=span/5,m=Math.pow(10,Math.floor(Math.log10(raw))),q=raw/m;return(q<1.5?1:q<3.5?2:q<7.5?5:10)*m;}
+function plotFit(xs,ys,f,xl,yl){
+  const W=480,Hh=320,ml=54,mr=14,mt=14,mb=44,pw=W-ml-mr,ph=Hh-mt-mb;
+  const xmax=Math.max(...xs)*1.12,ymax=Math.max(...ys,f?f.a+f.b*xmax:0)*1.08,ymin=Math.min(0,...ys,f?f.a:0)-0.05*ymax;
+  const X=x=>ml+x/xmax*pw,Y=y=>mt+(ymax-y)/(ymax-ymin)*ph;
+  let g=`<rect width="${W}" height="${Hh}" fill="#fff"/>`;
+  const sx=niceStep(xmax),sy=niceStep(ymax-ymin),dx=Math.max(0,-Math.floor(Math.log10(sx))),dy=Math.max(0,-Math.floor(Math.log10(sy)));
+  for(let x=0;x<=xmax+1e-12;x+=sx)g+=`<line x1="${X(x)}" y1="${mt}" x2="${X(x)}" y2="${mt+ph}" stroke="#eef0f4"/><text x="${X(x)}" y="${mt+ph+16}" font-size="11" text-anchor="middle" fill="#555">${x.toFixed(dx)}</text>`;
+  for(let y=Math.ceil(ymin/sy)*sy;y<=ymax+1e-12;y+=sy)g+=`<line x1="${ml}" y1="${Y(y)}" x2="${ml+pw}" y2="${Y(y)}" stroke="#eef0f4"/><text x="${ml-6}" y="${Y(y)+4}" font-size="11" text-anchor="end" fill="#555">${y.toFixed(dy)}</text>`;
+  g+=`<line x1="${ml}" y1="${Y(0)}" x2="${ml+pw}" y2="${Y(0)}" stroke="#888"/><line x1="${X(0)}" y1="${mt}" x2="${X(0)}" y2="${mt+ph}" stroke="#888"/>`;
+  g+=`<text x="${ml+pw/2}" y="${Hh-6}" font-size="13" text-anchor="middle" font-style="italic" font-family="Times New Roman">${xl}</text>`;
+  g+=`<text x="14" y="${mt+ph/2}" font-size="13" text-anchor="middle" font-style="italic" font-family="Times New Roman" transform="rotate(-90 14 ${mt+ph/2})">${yl}</text>`;
+  if(f){g+=`<line x1="${X(0)}" y1="${Y(f.a)}" x2="${X(xmax)}" y2="${Y(f.a+f.b*xmax)}" stroke="#1f5fbf" stroke-width="1.8"/>`;
+    g+=`<circle cx="${X(0)}" cy="${Y(f.a)}" r="4" fill="none" stroke="#c0392b" stroke-width="1.5"/><text x="${X(0)+8}" y="${Y(f.a)+(f.a>=0?-6:14)}" font-size="11" fill="#c0392b">截距 a</text>`;}
+  xs.forEach((x,i)=>g+=`<circle cx="${X(x)}" cy="${Y(ys[i])}" r="4.5" fill="#e0262f" stroke="#fff"/>`);
+  return `<svg viewBox="0 0 ${W} ${Hh}">${g}</svg>`;
+}
+const pm=(v,s,n)=>`${fx(v,n)} ± ${Number.isFinite(s)?s.toFixed(n):'—'}`;
+function renderFit(face){
+  const el=$('fit'+face);if(!el)return;const rs=rowsOf(face);let h=`<h2>${FZ[face]}</h2>`;
+  if(rs.length<3){el.innerHTML=h+`<div class="warn">至少需要 3 組數據（目前 ${rs.length} 組）。請到第${face==='convex'?'③':'④'}頁量測，或切換到參考解數據。</div>`;return;}
+  const x=rs.map(tanTh),y=rs.map(r=>r.H),f=linfit(x,y);
+  h+=plotFit(x,y,f,'tan θ','H (cm)');
+  h+=`<div class="kv" style="margin-top:8px"><span>斜率 b = R</span><span><b>${pm(f.b,f.sb,2)} cm</b>（相對不確定度 ${fx(f.sb/f.b*100,1)}%）</span>
+   <span>截距 a</span><span>${pm(f.a,f.sa,3)} cm</span><span>R²</span><span>${fx(f.r2,4)}</span>
+   <span>截距若全由鏡心偏移造成</span><span>e ≈ ${fx(f.a*10,1)} mm</span>
+   <span>截距若全由傾角造成</span><span>|δ| ≈ ${fx(Math.abs(f.a)/f.b*R2D,2)}°</span></div>`;
+  const Ri=rs.map((r,i)=>r.H/x[i]),m=Ri.reduce((a,b)=>a+b)/Ri.length,sd=Math.sqrt(Ri.reduce((a,b)=>a+(b-m)**2,0)/(Ri.length-1));
+  h+=`<h3>單點法對照：R<sub>i</sub> = H<sub>i</sub> / tanθ<sub>i</sub></h3><table><tr><th>H (cm)</th><th>L (cm)</th><th>D (cm)</th><th>tanθ</th><th>R<sub>i</sub> (cm)</th></tr>`+
+    rs.map((r,i)=>`<tr><td>${r.H.toFixed(2)}</td><td>${r.L.toFixed(2)}</td><td>${r.D.toFixed(2)}</td><td class="mono">${x[i].toFixed(4)}</td><td>${Ri[i].toFixed(2)}</td></tr>`).join('')+
+    `<tr><th colspan="4">平均 ± 標準差</th><th>${m.toFixed(2)} ± ${sd.toFixed(2)}</th></tr></table>`;
+  const sorted=rs.map((r,i)=>[r.H,Ri[i]]).sort((p,q)=>p[0]-q[0]);
+  const trend=sorted[0][1]-sorted[sorted.length-1][1];
+  h+=`<p class="note">單點法的平均值與迴歸斜率相差 ${fx(Math.abs(m-f.b),2)} cm。截距 a ${f.a<0?'< 0':'> 0'}，依 R<sub>i</sub> ≈ R·H/(H − a) 預期小 H 的 R<sub>i</sub> 會${f.a<0?'偏小':'偏大'}；本組數據最小 H 與最大 H 的 R<sub>i</sub> 相差 ${fx(trend,2)} cm。</p>`;
+  el.innerHTML=h;
+}
+function renderCorr(face){
+  const el=$('corr'+face);if(!el)return;const rs=rowsOf(face);let h=`<h2>${FZ[face]}</h2>`;
+  if(rs.length<3){el.innerHTML=h+`<div class="warn">至少需要 3 組數據。</div>`;return;}
+  const t=fitTan(rs),c=fitCorr(face,rs);
+  h+=`<table><tr><th>H</th><th>L</th><th>D</th><th>s (mm)</th><th>L′</th><th>sinθ</th></tr>`+
+    c.tab.map(r=>`<tr><td>${r.H.toFixed(2)}</td><td>${r.L.toFixed(2)}</td><td>${r.D.toFixed(2)}</td><td>${(r.s*10).toFixed(2)}</td><td>${r.Lp.toFixed(3)}</td><td class="mono">${r.sn.toFixed(4)}</td></tr>`).join('')+`</table>`;
+  h+=`<div class="kv" style="margin-top:8px"><span>參考解算法（tanθ、L）</span><span>R = ${pm(t.b,t.sb,2)} cm，a = ${fx(t.a,3)} cm</span>
+   <span>修正算法（sinθ、L′）</span><span><b>R = ${pm(c.f.b,c.f.sb,2)} cm</b>，a = ${fx(c.f.a,3)} cm</span>
+   <span>修正量</span><span>${fx(c.f.b-t.b,2)} cm（${fx((c.f.b/t.b-1)*100,2)}%）</span></div>`;
+  el.innerHTML=h;
+}
+function trueD(face,r,delta,e,xv){
+  const sv=[S.setup.delta[face],S.setup.e,S.setup.xv];S.setup.delta[face]=delta;S.setup.e=e;S.setup.xv=xv;
+  const sp=spotsAt(face,r.H,0,-r.L).spots.find(q=>q.key==='main');
+  [S.setup.delta[face],S.setup.e,S.setup.xv]=sv;if(!sp)return NaN;return face==='convex'?sp.y-r.H:r.H-sp.y;
+}
+function zTxt(v,s,T){const z=(v-T)/s;if(!Number.isFinite(z))return'—';const a=Math.abs(z);
+  return `${z.toFixed(1)}σ ${a<=1?'<span style="color:#1a7f37">（1σ 內）</span>':a<=2?'<span style="color:#1a7f37">（2σ 內）</span>':a<=3?'<span style="color:#b36b00">（2～3σ）</span>':'<span style="color:#b00">（&gt;3σ，有未排除的系統誤差）</span>'}`;}
+function revealFace(face){
+  const rs=rowsOf(face);if(rs.length<3)return `<h3>${FZ[face]}</h3><p class="note">數據不足 3 組。</p>`;
+  const T=S.src==='ref'?REF[face].Rs:(face==='convex'?S.lens.R1:S.lens.R2);
+  const t=fitTan(rs),c=fitCorr(face,rs);
+  const row=(name,f)=>`<tr><td style="text-align:left">${name}</td><td>${pm(f.b,f.sb,2)}</td><td>${fx((f.b/T-1)*100,2)}%</td><td>${zTxt(f.b,f.sb,T)}</td></tr>`;
+  let h=`<h3>${FZ[face]}：${S.src==='ref'?'球徑計值':'隱藏真值'} R = <span style="color:#b00">${T.toFixed(2)} cm</span></h3>
+   <table><tr><th>算法</th><th>R (cm)</th><th>與真值偏差</th><th>偏差 / σ</th></tr>${row('參考解算法（tanθ、L 由頂點起算）',t)}${row('修正算法（sinθ、L′ 修正凹陷）',c.f)}</table>`;
+  if(S.src==='ref')return h;
+  const ideal=rs.map(r=>({H:r.H,L:r.L,D:trueD(face,r,0,0,0)})),setup=rs.map(r=>({H:r.H,L:r.L,D:trueD(face,r,r.delta,r.e,r.xv)}));
+  const fi=fitTan(ideal),fs=fitTan(setup);
+  const dl=rs.map(r=>r.delta*R2D),es=rs.map(r=>r.e*10);
+  const rng=a=>{const lo=Math.min(...a),hi=Math.max(...a);return Math.abs(hi-lo)<1e-9?lo.toFixed(2):`${lo.toFixed(2)} ～ ${hi.toFixed(2)}`;};
+  h+=`<p class="note" style="margin-top:8px">記錄數據時鏡片的真實狀態：傾角 δ = ${rng(dl)}°，鏡心相對所畫主軸偏移 e = ${rng(es)} mm。</p>
+   <table><tr><th>誤差分解（參考解算法）</th><th>R (cm)</th><th>截距 a (cm)</th><th>說明</th></tr>
+   <tr><td style="text-align:left">① 理想裝置、讀數無誤</td><td>${fx(fi.b,2)}</td><td>${fx(fi.a,3)}</td><td style="text-align:left">只剩 tan 近似與忽略凹陷造成的偏差：${fx((fi.b/T-1)*100,2)}%</td></tr>
+   <tr><td style="text-align:left">② 你的裝置（δ、e）、讀數無誤</td><td>${fx(fs.b,2)}</td><td>${fx(fs.a,3)}</td><td style="text-align:left">傾角與偏移主要改變截距；斜率只再變 ${fx(fs.b-fi.b,2)} cm</td></tr>
+   <tr><td style="text-align:left">③ 你的實際讀數</td><td>${fx(t.b,2)}</td><td>${fx(t.a,3)}</td><td style="text-align:left">再加上雷射放置與讀取竹籤位置的隨機誤差：${fx(t.b-fs.b,2)} cm</td></tr></table>`;
+  const bad=rs.map((r,i)=>{if(r.trueY==null)return{i,dd:0};const d=face==='convex'?r.trueY-r.H:r.H-r.trueY;return{i,H:r.H,dd:r.D-d};}).filter(q=>Math.abs(q.dd)>0.1);
+  if(bad.length)h+=`<div class="warn">第 ${bad.map(q=>q.i+1).join('、')} 組的 D 與當時光點中心的實際位置相差超過 1 mm（${bad.map(q=>fx(q.dd*10,1)+' mm').join('、')}），請檢查是否讀錯位置或誤把鬼影光點當成反射光。</div>`;
+  return h;
+}
+function renderReveal(){
+  const el=$('revealOut');if(!el)return;
+  if(!S.revealed){el.innerHTML='';$('revealBtn').disabled=false;return;}
+  $('revealBtn').disabled=true;el.innerHTML=revealFace('convex')+revealFace('concave');
+}
+$('revealBtn').onclick=()=>{S.revealed=true;renderReveal();};
+function renderRefDiag(){
+  const r=REF.concave,R=r.Rs;
+  const Dm=(h,L,e)=>{const hh=h-e,th=Math.asin(hh/R),s=R-Math.sqrt(R*R-hh*hh);return(L-s)*Math.tan(2*th);};
+  let best=null;for(let e=-0.6;e<=0.6;e+=0.005)for(let L=10;L<=25;L+=0.02){let ss=0;r.H.forEach((h,i)=>ss+=(Dm(h,L,e)-r.D[i])**2);if(!best||ss<best[0])best=[ss,e,L];}
+  const rms=Math.sqrt(best[0]/r.H.length);
+  $('refDiag').innerHTML=`<p>以球徑計值 <span class="f">R</span> = 9.98 cm、<span class="f">L</span> = 15.12 cm 精確光追，與參考解記錄的 <span class="f">D</span> 比較：</p>
+  <table><tr><th>H (cm)</th><th>記錄 D (cm)</th><th>理論 D (cm)</th><th>記錄 / 理論</th><th>模型：e = ${(best[1]*10).toFixed(1)} mm、L = ${best[2].toFixed(1)} cm</th></tr>`+
+  r.H.map((h,i)=>{const d0=Dm(h,r.L,0);return`<tr><td>${h.toFixed(2)}</td><td>${r.D[i].toFixed(2)}</td><td>${d0.toFixed(2)}</td><td>${(r.D[i]/d0).toFixed(2)}</td><td>${Dm(h,best[2],best[1]).toFixed(2)}</td></tr>`;}).join('')+`</table>
+  <ul>
+  <li>小 <span class="f">H</span> 時記錄值只有理論值的一半左右，大 <span class="f">H</span> 時卻接近理論值。所以不是單一比例誤差，無法用 tan 近似或凹陷（兩者合計約 1%）解釋。</li>
+  <li>迴歸截距 +0.32 cm 很大，表示主軸標定有明顯偏差。若允許「鏡心偏移 <span class="f">e</span>」與「竹籤線實際距離 <span class="f">L</span>」兩個未知數，最小平方得 <span class="f">e</span> ≈ ${(best[1]*10).toFixed(1)} mm、<span class="f">L</span> ≈ ${best[2].toFixed(1)} cm，殘差 rms ≈ ${(rms*10).toFixed(1)} mm，可以大致重現記錄的 <span class="f">D</span>。</li>
+  <li>這只是能解釋數據的<b>一種</b>組合，並不唯一（例如傾角也能產生類似的截距），僅憑 5 組數據無法斷定真正原因。可以確定的是：偏差來自裝置與量測的系統誤差，而非公式近似。凹面 <span class="f">R</span> 小、光束偏轉大，這類誤差被放大得比凸面嚴重。</li>
+  </ul>`;
+}
+function renderAnalysis(){
+  if(!$('fitconvex'))return;
+  $('srcShow').textContent=S.src==='ref'?'參考解數據':'我的量測數據';
+  renderFit('convex');renderFit('concave');renderCorr('convex');renderCorr('concave');renderReveal();
+}
+renderRefDiag();
+
+/* ================= global ================= */
+buildMeasure('convex','t3');
+buildMeasure('concave','t4');
+$('newLensBtn').onclick=()=>{if(!confirm('換新鏡片會清除所有標定、對準與數據，確定嗎？'))return;newLens();
+  $('markInfo').innerHTML='';$('tapeChk').checked=false;renderTable('convex');renderTable('concave');renderAll();};
+function renderAll(){renderT1();renderFlat();renderSetup();renderAlign();renderMeasure('convex');renderMeasure('concave');renderAnalysis();}
+renderAll();
+</script>
+</body>
+</html>

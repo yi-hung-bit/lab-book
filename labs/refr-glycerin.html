@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>甘油折射率與臨界角之測定｜虛擬實驗室</title>
+<style>
+:root{
+  --bg:#f6f4ef; --card:#fffdf8; --ink:#23201c; --muted:#726a5e;
+  --line:#e0d8c9; --accent:#0f6e6e; --accent2:#b5651d;
+  --laser:#e0342b; --gly:#f2d98c; --gly2:#e8c96a;
+  --ok:#2d7a4b; --warn:#b3261e; --shadow:0 1px 3px rgba(60,50,30,.10);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+ line-height:1.75;font-size:15px}
+header{background:linear-gradient(135deg,#123f3f,#0f6e6e);color:#fff;padding:18px 20px 14px}
+header h1{margin:0;font-size:20px;letter-spacing:.5px}
+header p{margin:4px 0 0;font-size:13px;opacity:.85}
+nav{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;background:#eae4d8;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+nav button{border:1px solid var(--line);background:#fffdf8;color:var(--muted);
+ padding:7px 13px;border-radius:999px;cursor:pointer;font-size:14px;font-family:inherit}
+nav button:hover{border-color:var(--accent)}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+nav button.todo{opacity:.5}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 70px}
+section{display:none}
+section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;font-size:17px;color:var(--accent)}
+.card h3{margin:16px 0 6px;font-size:15px;color:var(--accent2)}
+.grid{display:grid;gap:16px}
+@media(min-width:880px){.g2{grid-template-columns:1fr 1fr}.g32{grid-template-columns:1.35fr 1fr}}
+.note{background:#f0f5f2;border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 6px 6px 0;font-size:14px;margin:10px 0}
+.warn{background:#fdf1ef;border-left:3px solid var(--warn);padding:10px 12px;border-radius:0 6px 6px 0;font-size:14px;margin:10px 0}
+.ok{background:#eff6f0;border-left:3px solid var(--ok);padding:10px 12px;border-radius:0 6px 6px 0;font-size:14px;margin:10px 0}
+.eq{background:#f7f4ec;border:1px dashed var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;
+ font-family:"Cambria Math",Georgia,serif;font-size:16px;text-align:center}
+.ctrl{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap}
+.ctrl label{min-width:150px;font-size:14px;color:var(--muted)}
+.ctrl input[type=range]{flex:1;min-width:150px;accent-color:var(--accent)}
+.val{font-family:ui-monospace,Menlo,monospace;background:#efeadf;padding:2px 8px;border-radius:5px;font-size:14px;min-width:72px;text-align:right;display:inline-block}
+button.act{background:var(--accent);color:#fff;border:0;padding:8px 14px;border-radius:7px;cursor:pointer;font-size:14px;font-family:inherit;margin:4px 6px 4px 0}
+button.act:hover{filter:brightness(1.1)}
+button.act.sec{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+button.act.dim{background:#9a9183}
+button.act:disabled{background:#c8c1b4;cursor:not-allowed}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:8px}
+th,td{border:1px solid var(--line);padding:5px 6px;text-align:center}
+th{background:#efeadf;font-weight:600;color:var(--muted)}
+td input{width:62px;border:1px solid transparent;background:transparent;text-align:center;font-family:ui-monospace,monospace;font-size:13px;padding:2px;border-radius:4px}
+td input:focus{border-color:var(--accent);background:#fff;outline:none}
+td.calc{background:#faf8f2;font-family:ui-monospace,monospace;color:var(--muted)}
+.del{color:var(--warn);cursor:pointer;font-weight:700}
+svg{width:100%;height:auto;display:block}
+.chk{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.chk .mark{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:13px;color:#fff}
+.chk.done .mark{background:var(--ok);border-color:var(--ok)}
+.chk .txt{flex:1;font-size:14px}
+.chk .txt small{color:var(--muted);display:block;font-size:12.5px}
+.read{font-family:ui-monospace,monospace;font-size:14px;background:#f7f4ec;border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:8px 0}
+.read b{color:var(--accent2)}
+.pill{display:inline-block;background:#efeadf;border-radius:999px;padding:1px 9px;font-size:12.5px;color:var(--muted);margin-right:6px}
+.todo-box{text-align:center;padding:40px 20px;color:var(--muted)}
+ol,ul{padding-left:22px}
+li{margin:4px 0}
+.small{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>甘油折射率與臨界角之測定 — 虛擬實驗室</h1>
+  <p>臺灣省彰雲嘉區 九十九學年度 高級中學數理及資訊學科能力競賽．物理科實驗試題</p>
+</header>
+
+<nav>
+  <button class="on" data-t="1">① 原理推導</button>
+  <button data-t="2">② 器材與組裝</button>
+  <button data-t="3">③ 折射量測</button>
+  <button class="todo" data-t="4">④ 迴歸求 n</button>
+  <button class="todo" data-t="5">⑤ 臨界角</button>
+  <button class="todo" data-t="6">⑥ 誤差與真值</button>
+</nav>
+
+<main>
+<!-- ============ TAB 1 ============ -->
+<section id="s1" class="on">
+  <div class="card">
+    <h2>第 1 小題：臨界角與折射率的關係（10 分）</h2>
+    <p>由 Snell's Law：<span class="eq" style="display:inline-block;padding:2px 10px;margin:0">n₁ sinθ₁ = n₂ sinθ₂</span></p>
+    <p>當 n₁ &gt; n₂，折射光會偏離法線（θ₂ &gt; θ₁）。逐漸加大 θ₁，θ₂ 會先達到 90°，此時的入射角即為臨界角 θ<sub>c</sub>：</p>
+    <div class="eq">n₁ sinθ<sub>c</sub> = n₂ sin90° = n₂ &nbsp;⟹&nbsp; <b>θ<sub>c</sub> = sin⁻¹(n₂ / n₁)</b></div>
+    <p>本實驗中 n₁ = n<sub>甘油</sub>、n₂ = n<sub>空氣</sub> = 1，故 <b>θ<sub>c</sub> = sin⁻¹(1/n<sub>甘油</sub>)</b>。當 θ₁ ≧ θ<sub>c</sub> 時折射光消失，入射光能量全部回到原介質，即全反射。</p>
+  </div>
+
+  <div class="grid g32">
+    <div class="card">
+      <h2>互動光路</h2>
+      <div id="fig1"></div>
+      <div class="ctrl"><label>示範用折射率 n</label>
+        <input type="range" id="nDemo" min="1.30" max="1.60" step="0.005" value="1.470">
+        <span class="val" id="nDemoV">1.470</span></div>
+      <div class="ctrl"><label>入射角 θ</label>
+        <input type="range" id="thDemo" min="0" max="89" step="0.5" value="35">
+        <span class="val" id="thDemoV">35.0°</span></div>
+      <div class="ctrl"><label>光的行進方向</label>
+        <button class="act sec" id="dirBtn">空氣 → 甘油</button></div>
+      <div class="read" id="fig1Read"></div>
+      <p class="small">※ 此處的 n 僅為「示範用」可調值。本模擬中桶內甘油的真實折射率是隨機隱藏的（甘油含水量與溫度都會影響），必須由你自己量出來。</p>
+    </div>
+
+    <div class="card">
+      <h2>第 2 小題：平行平板的 B 點能全反射嗎？（10 分）</h2>
+      <div id="fig2"></div>
+      <p><b>不能，B 點永遠不會發生全反射。</b></p>
+      <ol>
+        <li>A 點（n₂ → n₁，n₁ &gt; n₂）：n₂ sinθ<sub>A</sub> = n₁ sinθ′<sub>A</sub> ⟹ sinθ′<sub>A</sub> = (n₂/n₁) sinθ<sub>A</sub> ≦ n₂/n₁ = sinθ<sub>c</sub>。</li>
+        <li>平板上下表面平行 ⟹ B 點的入射角 θ<sub>B</sub> = θ′<sub>A</sub>。</li>
+        <li>因此恆有 <b>θ<sub>B</sub> ≦ θ<sub>c</sub></b>，等號只在 θ<sub>A</sub> = 90°（掠射）時成立，而掠射時光強度趨近於零。</li>
+      </ol>
+      <p>結論：光由外部射入平行平板後必能射出，且出射光與入射光<b>平行</b>（僅產生側向位移）。這正是「只要光的來源在平板外，就不可能靠調整入射角讓它在對面全反射」。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>延伸：為什麼「直立桶壁」量不到臨界角？</h2>
+    <p>液面（水平）與桶壁（鉛直）互相垂直。光由液面折射入甘油後與鉛直線夾 θ₂，打到桶壁時的入射角為 90° − θ₂。由於任何從空氣射入的光必有 θ₂ ≦ θ<sub>c</sub>：</p>
+    <div class="eq">θ<sub>壁</sub> = 90° − θ₂ ≧ 90° − θ<sub>c</sub></div>
+    <div id="fig3"></div>
+    <div class="read" id="fig3Read"></div>
+    <p>甘油 n ≈ 1.47 時 θ<sub>c</sub> ≈ 42.8°，而 90° − θ<sub>c</sub> ≈ 47.2° <b>&gt;</b> θ<sub>c</sub>。也就是說，只要 n &gt; √2 ≈ 1.414，射到桶壁的光<b>一定</b>全反射，永遠看不到「剛好開始漏光」的門檻。第 4 小題必須改用其他設計（掠射極限法／傾斜桶身法），這點會在分頁 ⑤ 處理。</p>
+  </div>
+
+  <div class="card">
+    <h2>第 3、4 小題的實驗設計構想</h2>
+    <h3>求折射率 n（第 3 小題，40 分）</h3>
+    <p>量出多組 (θ₁, θ₂)，把 <b>sinθ₂ 當 x 軸、sinθ₁ 當 y 軸</b>作圖，由 Snell's Law：</p>
+    <div class="eq">sinθ₁ = n · sinθ₂ &nbsp;（過原點的直線，<b>斜率即為 n</b>）</div>
+    <p>「非常有技巧的處理數據」指的就是：量到的是<b>長度</b>，先換成 tanθ，再換成 sinθ，才會得到線性關係。另一條對照路線是固定入射角、逐次加深液深 h，量底部光點位移 x：</p>
+    <div class="eq">x = h · tanθ₂ + x₀ &nbsp;（x–h 直線，斜率 = tanθ₂）</div>
+    <h3>求臨界角（第 4 小題，30 分）</h3>
+    <ul>
+      <li><b>掠射極限法</b>：雷射貼近液面以 θ₁ → 90° 入射，此時 θ₂ → θ<sub>c</sub>（光路可逆）。量底部光點的最大偏移 x<sub>max</sub> = h·tanθ<sub>c</sub>，並以 x–sinθ₁ 外插至 sinθ₁ = 1。</li>
+      <li><b>傾斜桶身法</b>：雷射鉛直射入（不折射），把桶身夾斜 β 角，桶底法線與光線夾角即為 β。當 β ≧ θ<sub>c</sub> 時桶底下方的光點消失（全反射）。θ<sub>c</sub> = β<sub>門檻</sub>。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section id="s2">
+  <div class="card">
+    <h2>實驗器材（規格）</h2>
+    <div class="grid g2">
+      <div>
+        <ul style="margin:0">
+          <li><b>直桶</b>：透明壓克力，內徑 12.00 cm、內高 8.00 cm、壁厚 0.30 cm，底部平坦</li>
+          <li><b>甘油</b> 500 mL（可分次倒入）</li>
+          <li><b>雷射筆</b>（含電池）1 支，波長 650 nm</li>
+          <li><b>鐵架</b> 2 座、<b>三叉夾</b> 3 個、轉接頭 3 個</li>
+        </ul>
+      </div>
+      <div>
+        <ul style="margin:0">
+          <li><b>長尺</b> 30 cm ×2（最小刻度 1 mm，可估讀至 0.05 cm）</li>
+          <li><b>棉線</b> 1 捲、<b>螺帽（鉛錘）</b> 2 顆 → 做兩條鉛錘線</li>
+          <li><b>A4 白紙</b> 10 張、<b>膠帶</b>、<b>剪刀</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="note">試題未標示直桶尺寸，以上規格為本模擬設定值（已檢查幾何可行性：此尺寸下 θ₁ 可掃到約 65° 而折射光仍落在桶底而不會先打到桶壁）。<b>桶內底面的橫截面積 A = π×6.00² = 113.10 cm²</b>，但請注意——實驗時你應該自己量液深 h，而不是用體積去算。</div>
+    <div class="warn">安全提醒（試題附註）：實驗過程請勿直視雷射光束，請勿將雷射光筆置入甘油內。</div>
+  </div>
+
+  <div class="grid g32">
+    <div class="card">
+      <h2>裝置組裝</h2>
+      <div id="figSetup"></div>
+    </div>
+    <div class="card">
+      <h2>組裝步驟</h2>
+      <div id="chkList"></div>
+
+      <h3>① 倒入甘油</h3>
+      <div class="ctrl"><label>倒入體積</label>
+        <input type="range" id="volR" min="100" max="500" step="25" value="500">
+        <span class="val" id="volV">500 mL</span></div>
+      <button class="act" id="pourBtn">倒入 / 調整至此體積</button>
+      <p class="small">建議：折射量測主線用 500 mL（液深大、解析度好）；分頁 ⑤ 的傾斜法要改用 100–150 mL 才不會溢出。</p>
+
+      <h3>② 桶底標尺與鉛垂面校準</h3>
+      <button class="act sec" id="scaleBtn">裁 A4 紙、轉繪刻度、貼於桶內底面</button>
+      <button class="act sec" id="alignBtn">以鉛錘線校準雷射光軸落在鉛垂面內</button>
+
+      <h3>③ 量液深 h 與液面至桶緣距離 Δ</h3>
+      <p class="small">h：長尺垂直插到桶底，讀甘油沾濕的高度。Δ：長尺勾在桶緣，量到液面的垂直距離。各量 3 次取平均。</p>
+      <button class="act" id="hBtn">量一次 h</button>
+      <button class="act" id="dBtn">量一次 Δ</button>
+      <button class="act dim" id="clrBtn">清除本次量測</button>
+      <div class="read" id="setupRead"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section id="s3">
+  <div class="card" id="gate3" style="display:none">
+    <div class="warn">請先回到分頁 ②完成組裝：倒入甘油、貼桶底標尺、校準鉛垂面，並量得 h 與 Δ。</div>
+  </div>
+
+  <div class="card">
+    <h2>量測原理：不用量角器，怎麼量 θ₁ 與 θ₂？</h2>
+    <div class="grid g2">
+      <div>
+        <p><b>入射角 θ₁</b>（全部在空氣中，可直接用鉛錘線與直尺）：</p>
+        <div class="eq">tanθ₁ = (x<sub>O</sub> − x<sub>S</sub>) / (H + Δ)</div>
+        <p class="small">x<sub>S</sub>：筆尖鉛錘線落在桶緣尺上的讀數；H：桶緣到筆尖的垂直高度；Δ：桶緣到液面的垂直距離；x<sub>O</sub>：光束射入液面的入射點（用第二條棉線鉛錘對位，讀桶緣尺）。</p>
+      </div>
+      <div>
+        <p><b>折射角 θ₂</b>（在甘油中，用液深與底部光點位移）：</p>
+        <div class="eq">tanθ₂ = (x<sub>B</sub> − x<sub>O</sub>) / h</div>
+        <p class="small">x<sub>B</sub>：桶底標尺上紅色光點的讀數；h：液深。所有 x 讀數都以同一面桶壁為原點（桶緣尺與桶底標尺對齊）。</p>
+      </div>
+    </div>
+    <div class="note">由 tan 換回 sin：sinθ = tanθ / √(1 + tan²θ)。取得多組 (sinθ₂, sinθ₁) 後到分頁 ④ 做線性迴歸，斜率即為甘油折射率。建議取 6–8 組，讓 sinθ₁ 平均分布在 0.2 ~ 0.85 之間。</div>
+  </div>
+
+  <div class="grid g32">
+    <div class="card">
+      <h2>光路即時模擬</h2>
+      <div id="figMeas"></div>
+      <div id="statusMsg"></div>
+    </div>
+    <div class="card">
+      <h2>雷射筆位置（三叉夾）</h2>
+      <div class="ctrl"><label>水平位置 x<sub>S</sub>(設定)</label>
+        <input type="range" id="xsR" min="-12" max="6" step="0.1" value="-3.2"><span class="val" id="xsV">-3.20 cm</span></div>
+      <div class="ctrl"><label>桶緣上方高度 H(設定)</label>
+        <input type="range" id="hrR" min="2" max="9" step="0.1" value="5.0"><span class="val" id="hrV">5.00 cm</span></div>
+      <div class="ctrl"><label>雷射傾角 θ₁(設定)</label>
+        <input type="range" id="thR" min="5" max="70" step="0.5" value="40"><span class="val" id="thV">40.0°</span></div>
+      <p class="small">※ 設定值是「你把夾子調到的位置」，不是量測值。真正進表格的必須是你<b>量出來</b>的四個讀數。</p>
+      <button class="act" id="measBtn">量測本組四項讀數</button>
+      <button class="act sec" id="pushBtn" disabled>寫入數據表</button>
+      <div class="read" id="measRead">尚未量測。</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>數據表</h2>
+    <p class="small">表中 x<sub>S</sub>、H、x<sub>O</sub>、x<sub>B</sub> 皆可手動修改（模擬抄錄與重讀）。導出量以目前的 h̄ = <span id="hUse">—</span>、Δ̄ = <span id="dUse">—</span> 計算。</p>
+    <div style="overflow-x:auto"><table id="tbl">
+      <thead><tr><th>#</th><th>x<sub>S</sub>(cm)</th><th>H(cm)</th><th>x<sub>O</sub>(cm)</th><th>x<sub>B</sub>(cm)</th>
+      <th>tanθ₁</th><th>θ₁(°)</th><th>sinθ₁</th><th>tanθ₂</th><th>θ₂(°)</th><th>sinθ₂</th><th>sinθ₁/sinθ₂</th><th></th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+    <div class="read" id="tblSum">尚無數據。</div>
+    <button class="act dim" id="clrRows">清空數據表</button>
+  </div>
+</section>
+
+<section id="s4"><div class="card todo-box"><h2>④ sinθ₁–sinθ₂ 線性迴歸求 n</h2><p>待確認分頁 ①–③ 後建置（含最小平方法逐項計算表、x–h 深度法對照軌）。</p></div></section>
+<section id="s5"><div class="card todo-box"><h2>⑤ 臨界角量測（掠射極限法 ＋ 傾斜桶身法）</h2><p>待確認分頁 ①–③ 後建置。</p></div></section>
+<section id="s6"><div class="card todo-box"><h2>⑥ 誤差分析與真值揭曉</h2><p>待確認分頁 ①–③ 後建置。</p></div></section>
+</main>
+
+<script>
+"use strict";
+/* ===================== 基本工具 ===================== */
+function gauss(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function r05(v){return Math.round(v/0.05)*0.05;}
+function f(v,d){return (v===null||v===undefined||!isFinite(v))?"—":Number(v).toFixed(d===undefined?2:d);}
+function D2R(d){return d*Math.PI/180;}
+function R2D(r){return r*180/Math.PI;}
+function el(id){return document.getElementById(id);}
+function sin(t){return Math.sin(t);} function tan(t){return Math.tan(t);}
+
+/* ===================== 隱藏真值 ===================== */
+const BUCKET={Din:12.00, Hin:8.00, wall:0.30};
+const AREA=Math.PI*Math.pow(BUCKET.Din/2,2);   // 113.10 cm^2
+
+const T={
+  n: 1.442+Math.random()*0.032,                 // 甘油真實折射率(含水量未知) 1.442~1.474
+  Hin: BUCKET.Hin+gauss()*0.02,                 // 桶內高微差
+  eps: gauss()*D2R(0.25),                       // 液面(桶底)微傾
+  delta: D2R(1.1+Math.abs(gauss())*0.7),        // 雷射光軸出平面角(未校準)
+  biasS: gauss()*0.08,                          // 鉛錘線懸點不在出光孔
+  biasH: gauss()*0.06,                          // 直尺未完全鉛直
+  climb: 0.025+Math.abs(gauss())*0.020          // 甘油沿尺爬升
+};
+
+/* ===================== 狀態 ===================== */
+const S={
+  V:500, poured:false, Vact:0, hTrue:0,
+  scaled:false, aligned:false,
+  hT:[], dT:[],
+  xS:-3.2, Hr:5.0, th:40,
+  pend:null, rows:[]
+};
+
+/* ===================== 分頁 ===================== */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('section').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); el('s'+b.dataset.t).classList.add('on');
+    if(b.dataset.t==='2') drawSetup();
+    if(b.dataset.t==='3'){checkGate();drawMeas();}
+  };
+});
+
+/* ===================== 分頁① 原理 ===================== */
+let dirAir2Gly=true;
+function drawFig1(){
+  const n=parseFloat(el('nDemo').value), th=parseFloat(el('thDemo').value);
+  el('nDemoV').textContent=n.toFixed(3); el('thDemoV').textContent=th.toFixed(1)+'°';
+  const W=460,H=300,cx=230,cy=150,L=125;
+  const thc=R2D(Math.asin(1/n));
+  let inRay,outRay,txt,tir=false;
+  const t=D2R(th);
+  if(dirAir2Gly){
+    const s2=sin(t)/n, t2=Math.asin(s2);
+    inRay={x:cx-L*sin(t),y:cy-L*Math.cos(t)};
+    outRay={x:cx+L*sin(t2),y:cy+L*Math.cos(t2)};
+    txt=`空氣 → 甘油：θ₁ = ${th.toFixed(1)}°，θ₂ = <b>${R2D(t2).toFixed(2)}°</b>（恆小於 θ<sub>c</sub>）<br>
+         臨界角 θ<sub>c</sub> = sin⁻¹(1/${n.toFixed(3)}) = <b>${thc.toFixed(2)}°</b>`;
+  }else{
+    const s2=n*sin(t);
+    inRay={x:cx-L*sin(t),y:cy+L*Math.cos(t)};
+    if(s2>=1){tir=true;outRay={x:cx+L*sin(t),y:cy+L*Math.cos(t)};
+      txt=`甘油 → 空氣：θ₁ = ${th.toFixed(1)}° ≧ θ<sub>c</sub> = <b>${thc.toFixed(2)}°</b> ⟹ <b style="color:#b3261e">全反射</b>，折射光消失`;
+    }else{const t2=Math.asin(s2);outRay={x:cx+L*sin(t2),y:cy-L*Math.cos(t2)};
+      txt=`甘油 → 空氣：θ₁ = ${th.toFixed(1)}°，θ₂ = <b>${R2D(t2).toFixed(2)}°</b><br>
+           臨界角 θ<sub>c</sub> = <b>${thc.toFixed(2)}°</b>，再加大入射角即發生全反射`;}
+  }
+  const arcIn=arcPath(cx,cy,42,dirAir2Gly?-90:90,dirAir2Gly?-90-th:90+th);
+  let svg=`<svg viewBox="0 0 ${W} ${H}">
+   <rect x="0" y="${cy}" width="${W}" height="${H-cy}" fill="var(--gly)" opacity=".55"/>
+   <line x1="0" y1="${cy}" x2="${W}" y2="${cy}" stroke="#8a7d63" stroke-width="2"/>
+   <line x1="${cx}" y1="15" x2="${cx}" y2="${H-15}" stroke="#9a9183" stroke-width="1.3" stroke-dasharray="6 4"/>
+   <text x="12" y="${cy-12}" font-size="13" fill="#726a5e">空氣 n = 1</text>
+   <text x="12" y="${cy+20}" font-size="13" fill="#7a6a3a">甘油 n = ${n.toFixed(3)}</text>
+   <text x="${cx+6}" y="24" font-size="12" fill="#9a9183">法線</text>
+   <path d="${arcIn}" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+   <line x1="${inRay.x}" y1="${inRay.y}" x2="${cx}" y2="${cy}" stroke="var(--laser)" stroke-width="2.6"/>
+   <polygon points="${arrow(inRay.x,inRay.y,cx,cy,.6)}" fill="var(--laser)"/>
+   <line x1="${cx}" y1="${cy}" x2="${outRay.x}" y2="${outRay.y}" stroke="${tir?'var(--laser)':'var(--laser)'}" stroke-width="2.6" opacity="${tir?1:1}"/>
+   <polygon points="${arrow(cx,cy,outRay.x,outRay.y,.92)}" fill="var(--laser)"/>
+   <circle cx="${cx}" cy="${cy}" r="3.5" fill="#23201c"/>`;
+  if(!dirAir2Gly){
+    const cxr=cx+L*sin(t)*0.0;
+    svg+=`<text x="${cx+8}" y="${cy+26}" font-size="13" fill="var(--accent)">θ₁</text>`;
+  }else{
+    svg+=`<text x="${cx-30}" y="${cy-30}" font-size="13" fill="var(--accent)">θ₁</text>
+          <text x="${cx+12}" y="${cy+40}" font-size="13" fill="var(--accent)">θ₂</text>`;
+  }
+  svg+=`</svg>`;
+  el('fig1').innerHTML=svg;
+  el('fig1Read').innerHTML=txt;
+  el('dirBtn').textContent=dirAir2Gly?'空氣 → 甘油':'甘油 → 空氣（可觀察全反射）';
+  drawFig3(n);
+}
+function arrow(x1,y1,x2,y2,frac){
+  const px=x1+(x2-x1)*frac, py=y1+(y2-y1)*frac;
+  const a=Math.atan2(y2-y1,x2-x1), s=7;
+  return `${px},${py} ${px-s*Math.cos(a-0.4)},${py-s*Math.sin(a-0.4)} ${px-s*Math.cos(a+0.4)},${py-s*Math.sin(a+0.4)}`;
+}
+function arcPath(cx,cy,r,a1,a2){
+  const p1=[cx+r*Math.cos(D2R(a1)),cy+r*Math.sin(D2R(a1))];
+  const p2=[cx+r*Math.cos(D2R(a2)),cy+r*Math.sin(D2R(a2))];
+  const large=Math.abs(a2-a1)>180?1:0, sweep=a2>a1?1:0;
+  return `M ${p1[0]} ${p1[1]} A ${r} ${r} 0 ${large} ${sweep} ${p2[0]} ${p2[1]}`;
+}
+function drawFig2(){
+  const n1=1.47,n2=1.0,thA=38,t=D2R(thA);
+  const tA=Math.asin(n2*sin(t)/n1);
+  const W=440,H=250,yT=95,yB=165,cx=170;
+  const dx=(yB-yT)*tan(tA), xB=cx+dx;
+  const inx=cx-70*sin(t), iny=yT-70*Math.cos(t);
+  const outx=xB+70*sin(t), outy=yB+70*Math.cos(t);
+  el('fig2').innerHTML=`<svg viewBox="0 0 ${W} ${H}">
+   <rect x="20" y="${yT}" width="${W-40}" height="${yB-yT}" fill="#dfe9ea" stroke="#8fa3a5"/>
+   <text x="26" y="${yT-10}" font-size="12.5" fill="#726a5e">n₂（周圍介質）</text>
+   <text x="26" y="${yT+22}" font-size="12.5" fill="#4a6668">n₁（平板，n₁ &gt; n₂）</text>
+   <text x="26" y="${yB+20}" font-size="12.5" fill="#726a5e">n₂</text>
+   <line x1="${cx}" y1="${yT-55}" x2="${cx}" y2="${yT+55}" stroke="#9a9183" stroke-dasharray="5 4"/>
+   <line x1="${xB}" y1="${yB-55}" x2="${xB}" y2="${yB+55}" stroke="#9a9183" stroke-dasharray="5 4"/>
+   <line x1="${inx}" y1="${iny}" x2="${cx}" y2="${yT}" stroke="var(--laser)" stroke-width="2.4"/>
+   <polygon points="${arrow(inx,iny,cx,yT,.62)}" fill="var(--laser)"/>
+   <line x1="${cx}" y1="${yT}" x2="${xB}" y2="${yB}" stroke="var(--laser)" stroke-width="2.4"/>
+   <line x1="${xB}" y1="${yB}" x2="${outx}" y2="${outy}" stroke="var(--laser)" stroke-width="2.4"/>
+   <polygon points="${arrow(xB,yB,outx,outy,.9)}" fill="var(--laser)"/>
+   <circle cx="${cx}" cy="${yT}" r="3.2" fill="#23201c"/><text x="${cx-16}" y="${yT-6}" font-size="13">A</text>
+   <circle cx="${xB}" cy="${yB}" r="3.2" fill="#23201c"/><text x="${xB+7}" y="${yB+16}" font-size="13">B</text>
+   <text x="${cx-26}" y="${yT+26}" font-size="12.5" fill="var(--accent)">θ′<tspan baseline-shift="sub" font-size="9">A</tspan></text>
+   <text x="${xB-30}" y="${yB-10}" font-size="12.5" fill="var(--accent)">θ<tspan baseline-shift="sub" font-size="9">B</tspan></text>
+   <text x="${W-160}" y="${yT-16}" font-size="12.5" fill="#2d7a4b">θ<tspan baseline-shift="sub" font-size="9">B</tspan> = θ′<tspan baseline-shift="sub" font-size="9">A</tspan> ≦ θ<tspan baseline-shift="sub" font-size="9">c</tspan> ⟹ 必射出</text>
+  </svg>`;
+}
+function drawFig3(n){
+  const thc=R2D(Math.asin(1/n)), t2=Math.asin(sin(D2R(60))/n);
+  const W=440,H=210,x0=70,x1=330,ys=45,yb=180;
+  const ox=150, bx=ox+(yb-ys)*tan(t2);
+  const wallHit=Math.min(bx,x1);
+  el('fig3').innerHTML=`<svg viewBox="0 0 ${W} ${H}">
+   <rect x="${x0}" y="${ys}" width="${x1-x0}" height="${yb-ys}" fill="var(--gly)" opacity=".5"/>
+   <line x1="${x0}" y1="${ys}" x2="${x1}" y2="${ys}" stroke="#8a7d63" stroke-width="2"/>
+   <line x1="${x1}" y1="${ys-18}" x2="${x1}" y2="${yb}" stroke="#8a7d63" stroke-width="3"/>
+   <line x1="${x0}" y1="${ys-18}" x2="${x0}" y2="${yb}" stroke="#8a7d63" stroke-width="3"/>
+   <line x1="${x0}" y1="${yb}" x2="${x1}" y2="${yb}" stroke="#8a7d63" stroke-width="3"/>
+   <line x1="${ox-60*sin(D2R(60))}" y1="${ys-60*Math.cos(D2R(60))}" x2="${ox}" y2="${ys}" stroke="var(--laser)" stroke-width="2.4"/>
+   <line x1="${ox}" y1="${ys}" x2="${x1}" y2="${ys+(x1-ox)/tan(Math.PI/2-t2)}" stroke="var(--laser)" stroke-width="2.4"/>
+   <line x1="${x1}" y1="${ys+(x1-ox)/tan(Math.PI/2-t2)}" x2="${x1-(yb-ys-(x1-ox)/tan(Math.PI/2-t2))*tan(t2)}" y2="${yb}" stroke="var(--laser)" stroke-width="2.4" opacity=".85"/>
+   <line x1="${x1-30}" y1="${ys+(x1-ox)/tan(Math.PI/2-t2)}" x2="${x1+30}" y2="${ys+(x1-ox)/tan(Math.PI/2-t2)}" stroke="#9a9183" stroke-dasharray="5 4"/>
+   <text x="${x1-118}" y="${ys+(x1-ox)/tan(Math.PI/2-t2)-8}" font-size="12.5" fill="var(--warn)">θ<tspan baseline-shift="sub" font-size="9">壁</tspan> = 90°−θ₂ ⟹ 全反射</text>
+   <text x="${ox+6}" y="${ys+22}" font-size="12.5" fill="var(--accent)">θ₂</text>
+   <text x="${x0+6}" y="${ys-24}" font-size="12.5" fill="#726a5e">水平液面</text>
+   <text x="${x0-58}" y="${(ys+yb)/2}" font-size="12.5" fill="#726a5e">鉛直桶壁</text>
+  </svg>`;
+  el('fig3Read').innerHTML=`n = ${n.toFixed(3)} ⟹ θ<sub>c</sub> = <b>${thc.toFixed(2)}°</b>，
+    而由液面射入者其 θ<sub>壁</sub> 最小值 = 90° − θ<sub>c</sub> = <b>${(90-thc).toFixed(2)}°</b>。
+    ${(90-thc)>thc?'<span style="color:#b3261e">θ<sub>壁</sub> 恆大於 θ<sub>c</sub> ⟹ 一定全反射，無法測得門檻。</span>'
+      :'<span style="color:#2d7a4b">此 n 值 &lt; √2，桶壁才可能不全反射（甘油不屬此情形）。</span>'}`;
+}
+el('nDemo').oninput=drawFig1; el('thDemo').oninput=drawFig1;
+el('dirBtn').onclick=()=>{dirAir2Gly=!dirAir2Gly;drawFig1();};
+
+/* ===================== 分頁② 組裝 ===================== */
+const SC=15, OX=180, OY=330;   // 桶內底面中心座標系：x(cm)→px
+function X(c){return OX+c*SC;} function Y(c){return OY-c*SC;}
+
+function pour(){
+  S.V=parseInt(el('volR').value);
+  S.Vact=S.V*(1+gauss()*0.006);
+  S.hTrue=S.Vact/AREA;
+  S.poured=true; S.hT=[]; S.dT=[];
+  drawSetup(); renderSetup(); checkGate();
+}
+el('volR').oninput=()=>{el('volV').textContent=el('volR').value+' mL';};
+el('pourBtn').onclick=pour;
+el('scaleBtn').onclick=()=>{S.scaled=true;renderSetup();drawSetup();checkGate();};
+el('alignBtn').onclick=()=>{S.aligned=true;renderSetup();checkGate();};
+el('hBtn').onclick=()=>{if(!S.poured)return;
+  S.hT.push(r05(S.hTrue+T.climb+gauss()*0.04));renderSetup();checkGate();};
+el('dBtn').onclick=()=>{if(!S.poured)return;
+  S.dT.push(r05((T.Hin-S.hTrue)-T.climb+gauss()*0.05));renderSetup();checkGate();};
+el('clrBtn').onclick=()=>{S.hT=[];S.dT=[];renderSetup();checkGate();};
+
+function avg(a){return a.length?a.reduce((p,c)=>p+c,0)/a.length:null;}
+function hBar(){return avg(S.hT);} function dBar(){return avg(S.dT);}
+
+function renderSetup(){
+  const steps=[
+    {ok:S.poured,t:`倒入甘油 ${S.poured?S.V+' mL':''}`,s:'從 500 mL 瓶中倒入直桶。體積本身不必精確——後面要用的是量出來的液深 h。'},
+    {ok:S.scaled,t:'桶底貼自製標尺',s:'剪一條 A4 紙，用 30 cm 長尺把 0–12 cm 刻度轉繪上去，膠帶貼在桶內底面，沿直徑方向，0 對齊桶壁內緣。'},
+    {ok:S.aligned,t:'校準雷射鉛垂面',s:'掛一條鉛錘線，調整三叉夾使雷射光束與鉛錘線共面（光點要落在桶底標尺線上）。未校準時光點會偏離標尺線，讀數誤差變大。'},
+    {ok:S.hT.length>0,t:`量液深 h（已量 ${S.hT.length} 次）`,s:'長尺垂直插到桶底，抽出後看甘油沾濕的高度。'},
+    {ok:S.dT.length>0,t:`量桶緣至液面 Δ（已量 ${S.dT.length} 次）`,s:'長尺勾在桶緣垂直下放，讀到液面的距離。'}
+  ];
+  el('chkList').innerHTML=steps.map(x=>
+    `<div class="chk ${x.ok?'done':''}"><div class="mark">${x.ok?'✓':''}</div>
+     <div class="txt"><b>${x.t}</b><small>${x.s}</small></div></div>`).join('');
+
+  let r='';
+  if(S.poured){
+    r+=`<div><b>h 量測值</b>：${S.hT.length?S.hT.map(v=>f(v)).join(' , '):'—'} `+
+       `${S.hT.length?`⟹ h̄ = <b>${f(hBar())} cm</b>`:''}</div>`;
+    r+=`<div><b>Δ 量測值</b>：${S.dT.length?S.dT.map(v=>f(v)).join(' , '):'—'} `+
+       `${S.dT.length?`⟹ Δ̄ = <b>${f(dBar())} cm</b>`:''}</div>`;
+    if(S.hT.length&&S.dT.length){
+      const sum=hBar()+dBar();
+      r+=`<div style="margin-top:6px">一致性檢查：h̄ + Δ̄ = <b>${f(sum)} cm</b>，應接近桶內高 8.00 cm
+          （差 ${f(sum-8,2)} cm）。${Math.abs(sum-8)>0.15?'<span style="color:#b3261e">偏差偏大，建議重量。</span>':''}</div>`;
+    }
+  }else r='尚未倒入甘油。';
+  el('setupRead').innerHTML=r;
+}
+
+function drawSetup(){
+  const h=S.poured?S.hTrue:0;
+  el('figSetup').innerHTML=`<svg viewBox="0 0 470 380">
+    ${bench()}
+    ${bucketSVG(h)}
+    ${standSVG(60)}${standSVG(400)}
+    <g stroke="#6b6154" stroke-width="3" fill="none">
+      <line x1="72" y1="120" x2="150" y2="120"/>
+      <rect x="150" y="108" width="52" height="24" rx="5" fill="#4a4540" stroke="none"/>
+      <circle cx="205" cy="120" r="4" fill="var(--laser)" stroke="none"/>
+    </g>
+    <text x="150" y="102" font-size="12" fill="#726a5e">雷射筆（三叉夾固定）</text>
+    ${S.scaled?`<text x="${X(3.4)}" y="${Y(0)-7}" font-size="11" fill="#8a7d63">桶底標尺 0–12 cm</text>`:''}
+    <line x1="392" y1="60" x2="392" y2="250" stroke="#8a8378" stroke-width="1" stroke-dasharray="3 3"/>
+    <circle cx="392" cy="252" r="5" fill="#6b6154"/>
+    <text x="330" y="70" font-size="11.5" fill="#726a5e">棉線＋螺帽（鉛錘線）</text>
+    <text x="${X(0)}" y="${Y(-1.1)}" font-size="11.5" fill="#726a5e">內徑 12.00 cm ／ 內高 8.00 cm</text>
+  </svg>`;
+}
+function bench(){return `<rect x="0" y="355" width="470" height="25" fill="#cbbfa6"/>`;}
+function standSVG(x){return `<g fill="#6b6154"><rect x="${x-26}" y="348" width="56" height="8" rx="3"/>
+  <rect x="${x-3}" y="90" width="7" height="260"/></g>`;}
+function bucketSVG(h){
+  const w=BUCKET.wall*SC;
+  return `<g>
+    <rect x="${X(0)-w}" y="${Y(BUCKET.Hin)}" width="${12*SC+2*w}" height="${8*SC+w}" fill="none" stroke="#b9c9cc" stroke-width="${w}"/>
+    <rect x="${X(0)}" y="${Y(h)}" width="${12*SC}" height="${h*SC}" fill="var(--gly)" opacity=".8"/>
+    ${h>0?`<line x1="${X(0)}" y1="${Y(h)}" x2="${X(12)}" y2="${Y(h)}" stroke="#d3b45c" stroke-width="1.5"/>`:''}
+    ${S.scaled?scaleBar():''}
+  </g>`;
+}
+function scaleBar(){
+  let t=`<rect x="${X(0)}" y="${Y(0)-5}" width="${12*SC}" height="5" fill="#fdfbf3" opacity=".9"/>`;
+  for(let i=0;i<=12;i++){t+=`<line x1="${X(i)}" y1="${Y(0)-5}" x2="${X(i)}" y2="${Y(0)-(i%2===0?5:3)+1}" stroke="#8a7d63" stroke-width="${i%2===0?1.1:0.7}"/>`;}
+  return t;
+}
+
+/* ===================== 分頁③ 量測 ===================== */
+function checkGate(){
+  const ready=S.poured&&S.scaled&&S.hT.length>0&&S.dT.length>0;
+  el('gate3').style.display=ready?'none':'block';
+  el('measBtn').disabled=!ready;
+  el('hUse').textContent=hBar()?f(hBar())+' cm':'—';
+  el('dUse').textContent=dBar()?f(dBar())+' cm':'—';
+  renderRows();
+  return ready;
+}
+['xsR','hrR','thR'].forEach(id=>{el(id).oninput=()=>{
+  S.xS=parseFloat(el('xsR').value);S.Hr=parseFloat(el('hrR').value);S.th=parseFloat(el('thR').value);
+  el('xsV').textContent=f(S.xS)+' cm';el('hrV').textContent=f(S.Hr)+' cm';el('thV').textContent=f(S.th,1)+'°';
+  drawMeas();};});
+
+function path(){
+  const h=S.hTrue, n=T.n, t=D2R(S.th);
+  const tipY=T.Hin+S.Hr, tipX=S.xS;
+  const xRim=tipX+S.Hr*tan(t);
+  const xO=tipX+(tipY-h)*tan(t);
+  const res={tipX,tipY,xRim,xO,h,t};
+  if(xRim<=0.05){res.status='rim';return res;}
+  if(xRim>=BUCKET.Din-0.05||xO>=BUCKET.Din-0.05){res.status='over';return res;}
+  const thi=t+T.eps;
+  if(sin(thi)/n>=1){res.status='bad';return res;}
+  const t2=Math.asin(sin(thi)/n)-T.eps;
+  res.t2=t2;
+  const run=h*tan(t2);
+  if(xO+run<=BUCKET.Din){res.xB=xO+run;res.status='ok';}
+  else{
+    const yw=h-(BUCKET.Din-xO)/tan(t2);       // 打到桶壁的高度
+    res.yw=yw; res.xW=BUCKET.Din;
+    res.xB=BUCKET.Din-yw*tan(t2); res.status='tir';
+  }
+  return res;
+}
+
+function drawMeas(){
+  const p=path(), h=S.poured?S.hTrue:0;
+  let rays='', msg='';
+  const tipPx=[X(p.tipX),Y(p.tipY)];
+  if(p.status==='rim'){
+    const yHit=BUCKET.Hin, xHit=p.xRim;
+    rays=`<line x1="${tipPx[0]}" y1="${tipPx[1]}" x2="${X(Math.max(xHit,-0.3))}" y2="${Y(yHit)}" stroke="var(--laser)" stroke-width="2.4"/>`;
+    msg=`<div class="warn">光束被桶緣（左側桶壁上緣）擋住，未進入液面。請把雷射往右移、或降低高度 H、或減小傾角。</div>`;
+  }else if(p.status==='over'){
+    rays=`<line x1="${tipPx[0]}" y1="${tipPx[1]}" x2="${X(Math.min(p.xO,14))}" y2="${Y(h)}" stroke="var(--laser)" stroke-width="2.4"/>`;
+    msg=`<div class="warn">入射點落在桶外（或緊貼右桶壁）。請把雷射往左移或減小傾角。</div>`;
+  }else{
+    const O=[X(p.xO),Y(h)];
+    rays=`<line x1="${tipPx[0]}" y1="${tipPx[1]}" x2="${O[0]}" y2="${O[1]}" stroke="var(--laser)" stroke-width="2.4"/>
+      <line x1="${O[0]}" y1="${O[1]}" x2="${X(p.xO+(BUCKET.Hin-h)*0.35*tan(p.t))}" y2="${Y(h+(BUCKET.Hin-h)*0.35)}" stroke="var(--laser)" stroke-width="1.2" opacity=".35"/>
+      <circle cx="${O[0]}" cy="${O[1]}" r="3" fill="var(--laser)"/>
+      <line x1="${O[0]}" y1="${Y(h+2.2)}" x2="${O[0]}" y2="${Y(h-2.6)}" stroke="#9a9183" stroke-width="1" stroke-dasharray="5 4"/>`;
+    if(p.status==='ok'){
+      rays+=`<line x1="${O[0]}" y1="${O[1]}" x2="${X(p.xB)}" y2="${Y(0)}" stroke="var(--laser)" stroke-width="2.4"/>
+        <circle cx="${X(p.xB)}" cy="${Y(0)-2}" r="4" fill="var(--laser)" opacity=".85"/>`;
+      msg=`<div class="ok">光路正常：入射點 x<sub>O</sub> ≈ ${f(p.xO)} cm，桶底光點 x<sub>B</sub> ≈ ${f(p.xB)} cm（此為真值，非你的讀數）。</div>`;
+    }else if(p.status==='tir'){
+      rays+=`<line x1="${O[0]}" y1="${O[1]}" x2="${X(BUCKET.Din)}" y2="${Y(p.yw)}" stroke="var(--laser)" stroke-width="2.4"/>
+        <line x1="${X(BUCKET.Din)}" y1="${Y(p.yw)}" x2="${X(p.xB)}" y2="${Y(0)}" stroke="var(--laser)" stroke-width="2.2" opacity=".8"/>
+        <circle cx="${X(BUCKET.Din)}" cy="${Y(p.yw)}" r="4" fill="none" stroke="var(--warn)" stroke-width="1.6"/>`;
+      msg=`<div class="warn">折射光先打到右側桶壁並發生<b>全反射</b>（呼應第 2 小題的分析：液面與桶壁互相垂直，θ<sub>壁</sub> = 90°−θ₂ 必大於 θ<sub>c</sub>）。此時桶底的光點已不是直接折射點，<b>這組數據不可用</b>。請減小傾角或把入射點往左移。</div>`;
+    }
+  }
+  const rulerY=Y(BUCKET.Hin);
+  let ruler=`<rect x="${X(-12)}" y="${rulerY-13}" width="${27*SC}" height="13" fill="#fdfbf3" stroke="#cbbfa6"/>`;
+  for(let i=-12;i<=15;i++){
+    ruler+=`<line x1="${X(i)}" y1="${rulerY-13}" x2="${X(i)}" y2="${rulerY-(i%2===0?4:8)}" stroke="#8a7d63" stroke-width="${i%2===0?1:0.6}"/>`;
+    if(i%3===0)ruler+=`<text x="${X(i)}" y="${rulerY-16}" font-size="9.5" fill="#8a7d63" text-anchor="middle">${i}</text>`;
+  }
+  const plumb=`<line x1="${tipPx[0]}" y1="${tipPx[1]}" x2="${tipPx[0]}" y2="${rulerY+6}" stroke="#8a8378" stroke-width="1" stroke-dasharray="3 3"/>
+     <circle cx="${tipPx[0]}" cy="${rulerY+8}" r="4" fill="#6b6154"/>`;
+  el('figMeas').innerHTML=`<svg viewBox="0 0 470 380">
+    ${bench()}
+    ${bucketSVG(h)}
+    ${ruler}${plumb}
+    <g><rect x="${tipPx[0]-46*Math.cos(D2R(90-S.th))}" y="${tipPx[1]-46*Math.sin(D2R(90-S.th))}" width="46" height="13"
+      transform="rotate(${90-S.th},${tipPx[0]},${tipPx[1]})" fill="#4a4540" rx="3"/></g>
+    ${rays}
+    <text x="${X(-11.5)}" y="${Y(BUCKET.Hin)+18}" font-size="11" fill="#726a5e">桶緣尺（x 讀數共用原點：左桶壁內緣 = 0）</text>
+  </svg>`;
+  el('statusMsg').innerHTML=msg;
+}
+
+el('measBtn').onclick=()=>{
+  if(!checkGate())return;
+  const p=path();
+  if(p.status!=='ok'){el('measRead').innerHTML='<span style="color:#b3261e">目前光路無法取得有效的桶底折射光點，請先調整雷射位置。</span>';
+    el('pushBtn').disabled=true;return;}
+  const lat=(S.aligned?0.35:1)*T.delta*((T.Hin+S.Hr-p.h)*tan(p.t)+p.h*tan(p.t2));
+  const m={
+    xS:r05(S.xS+T.biasS+gauss()*0.04),
+    Hr:r05(S.Hr+T.biasH+gauss()*0.05),
+    xO:r05(p.xO+gauss()*(0.05+0.045*tan(p.t))),
+    xB:r05(p.xB+gauss()*(0.05+0.06*(1/Math.cos(p.t2)-1)+0.5*lat))
+  };
+  S.pend=m; el('pushBtn').disabled=false;
+  el('measRead').innerHTML=
+    `<div>x<sub>S</sub>（筆尖鉛錘線 → 桶緣尺）＝ <b>${f(m.xS)}</b> cm</div>
+     <div>H（桶緣 → 筆尖，直尺）＝ <b>${f(m.Hr)}</b> cm</div>
+     <div>x<sub>O</sub>（棉線鉛錘對位液面光點）＝ <b>${f(m.xO)}</b> cm</div>
+     <div>x<sub>B</sub>（桶底標尺上紅點）＝ <b>${f(m.xB)}</b> cm</div>
+     <div class="small" style="margin-top:6px">${S.aligned?'':'※ 未做鉛垂面校準，桶底光點偏離標尺線，x<sub>B</sub> 讀數不確定度增大。'}
+     每按一次都會重新讀一次（反覆讀取可看出讀數散布）。</div>`;
+};
+el('pushBtn').onclick=()=>{if(!S.pend)return;S.rows.push(Object.assign({},S.pend));
+  S.pend=null;el('pushBtn').disabled=true;renderRows();};
+el('clrRows').onclick=()=>{S.rows=[];renderRows();};
+
+function derive(r){
+  const hb=hBar(), db=dBar();
+  if(hb===null||db===null)return {};
+  const t1=(r.xO-r.xS)/(r.Hr+db), t2=(r.xB-r.xO)/hb;
+  const s1=t1/Math.sqrt(1+t1*t1), s2=t2/Math.sqrt(1+t2*t2);
+  return {t1,t2,s1,s2,a1:R2D(Math.atan(t1)),a2:R2D(Math.atan(t2)),ratio:s2!==0?s1/s2:null};
+}
+function renderRows(){
+  const tb=el('tbody'); tb.innerHTML='';
+  S.rows.forEach((r,i)=>{
+    const d=derive(r);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td>
+      ${['xS','Hr','xO','xB'].map(k=>`<td><input type="number" step="0.05" value="${r[k].toFixed(2)}" data-i="${i}" data-k="${k}"></td>`).join('')}
+      <td class="calc">${f(d.t1,3)}</td><td class="calc">${f(d.a1,2)}</td><td class="calc">${f(d.s1,4)}</td>
+      <td class="calc">${f(d.t2,3)}</td><td class="calc">${f(d.a2,2)}</td><td class="calc">${f(d.s2,4)}</td>
+      <td class="calc"><b>${f(d.ratio,3)}</b></td>
+      <td class="del" data-del="${i}">✕</td>`;
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('input').forEach(inp=>{inp.onchange=()=>{
+    const v=parseFloat(inp.value); if(isFinite(v)){S.rows[inp.dataset.i][inp.dataset.k]=v;renderRows();}};});
+  tb.querySelectorAll('.del').forEach(d=>{d.onclick=()=>{S.rows.splice(+d.dataset.del,1);renderRows();};});
+
+  if(!S.rows.length){el('tblSum').textContent='尚無數據。';return;}
+  const rs=S.rows.map(derive).filter(d=>isFinite(d.ratio));
+  const m=rs.reduce((p,c)=>p+c.ratio,0)/rs.length;
+  const sd=Math.sqrt(rs.reduce((p,c)=>p+Math.pow(c.ratio-m,2),0)/Math.max(1,rs.length-1));
+  const s1s=rs.map(d=>d.s1);
+  el('tblSum').innerHTML=`共 ${S.rows.length} 組；sinθ₁ 分布 ${f(Math.min(...s1s),3)} ~ ${f(Math.max(...s1s),3)}
+    ${Math.max(...s1s)-Math.min(...s1s)<0.4?'<span style="color:#b3261e">（範圍偏窄，迴歸斜率會不穩，建議再取大小角度各數組）</span>':''}
+    <br>單點比值 sinθ₁/sinθ₂ 平均 = <b>${f(m,3)}</b>，標準差 = ${f(sd,3)}
+    <span class="small">（單點平均只是參考；正式結果請到分頁 ④ 用最小平方法求斜率）</span>`;
+}
+
+/* ===================== 啟動 ===================== */
+drawFig1(); drawFig2(); pour(); renderSetup(); drawSetup(); drawMeas(); checkGate();
+el('volV').textContent=S.V+' mL';
+el('xsV').textContent=f(S.xS)+' cm';el('hrV').textContent=f(S.Hr)+' cm';el('thV').textContent=f(S.th,1)+'°';
+</script>
+</body>
+</html>

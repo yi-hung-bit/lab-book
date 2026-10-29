@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>光碟軌道間距虛擬實驗室｜92學年度台南區複賽 物理第一題</title>
+<style>
+:root{
+  --ink:#101319;
+  --bench:#171c24;
+  --panel:#1e242e;
+  --panel2:#252c38;
+  --line:#333d4c;
+  --text:#dde5ef;
+  --muted:#8794a4;
+  --laser:#ff3b30;
+  --laser-soft:rgba(255,59,48,.35);
+  --cyan:#5cc9e8;
+  --amber:#e8b54a;
+  --good:#5fd39a;
+  --paper:#fcfcf8;
+  --grid:#9dbccb;
+  --grid-strong:#5f8ca1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1220px;margin:0 auto;padding:0 20px 80px}
+
+/* ---------- 頁首 ---------- */
+header.masthead{
+  padding:38px 0 26px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:0;
+}
+.exam-line{
+  color:var(--muted);
+  font-size:13.5px;
+  letter-spacing:.04em;
+}
+h1.title{
+  font-size:34px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  margin:6px 0 10px;
+  line-height:1.25;
+}
+.lede{color:var(--muted);max-width:56ch;margin:0}
+.lede b{color:var(--text);font-weight:600}
+
+/* ---------- 分頁 ---------- */
+nav.tabs{
+  display:flex;gap:2px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+  margin-bottom:28px;
+  position:sticky;top:0;z-index:30;
+  background:var(--ink);
+}
+nav.tabs button{
+  background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--muted);font:inherit;font-size:14.5px;
+  padding:14px 16px;cursor:pointer;margin-bottom:-1px;
+  transition:color .15s;
+}
+nav.tabs button:hover{color:var(--text)}
+nav.tabs button[aria-selected="true"]{color:var(--laser);border-bottom-color:var(--laser)}
+nav.tabs button:focus-visible{outline:2px solid var(--cyan);outline-offset:-4px}
+section.tab{display:none}
+section.tab.on{display:block}
+
+/* ---------- 版塊 ---------- */
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:22px 24px;
+  margin-bottom:18px;
+}
+.card h2{font-size:19px;margin:0 0 12px;font-weight:650}
+.card h3{font-size:15.5px;margin:20px 0 8px;font-weight:650;color:var(--cyan)}
+.card p{margin:0 0 12px}
+.card ul,.card ol{margin:0 0 12px;padding-left:1.4em}
+.card li{margin-bottom:5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+
+.eq{
+  background:var(--ink);
+  border-left:3px solid var(--laser);
+  padding:14px 18px;margin:14px 0;border-radius:0 6px 6px 0;
+  font-size:17px;letter-spacing:.02em;
+}
+.eq small{display:block;color:var(--muted);font-size:13px;letter-spacing:0;margin-top:6px}
+.note{color:var(--muted);font-size:13.5px}
+.warn{
+  background:rgba(232,181,74,.1);
+  border:1px solid rgba(232,181,74,.35);
+  color:#f0cd84;border-radius:7px;padding:10px 14px;font-size:14px;margin:12px 0;
+}
+.ok{
+  background:rgba(95,211,154,.1);
+  border:1px solid rgba(95,211,154,.35);
+  color:#8fe3bb;border-radius:7px;padding:10px 14px;font-size:14px;margin:12px 0;
+}
+
+/* ---------- 工作台 ---------- */
+.bench{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start}
+@media(max-width:960px){.bench{grid-template-columns:1fr}}
+.rail{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:18px;position:sticky;top:60px;
+}
+@media(max-width:960px){.rail{position:static}}
+.rail h3{font-size:13px;color:var(--muted);margin:0 0 14px;font-weight:600;letter-spacing:.05em}
+.ctl{margin-bottom:18px}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;margin-bottom:6px;color:var(--muted)}
+.ctl label span.val{color:var(--text);font-variant-numeric:tabular-nums;font-size:14px}
+input[type=range]{width:100%;accent-color:var(--laser);cursor:pointer}
+select,input[type=number]{
+  background:var(--panel2);color:var(--text);border:1px solid var(--line);
+  border-radius:6px;padding:7px 9px;font:inherit;font-size:14px;width:100%;
+}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+button.btn{
+  background:var(--panel2);color:var(--text);border:1px solid var(--line);
+  border-radius:7px;padding:9px 14px;font:inherit;font-size:14px;cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+button.btn:hover{border-color:var(--muted)}
+button.btn.primary{background:var(--laser);border-color:var(--laser);color:#fff;font-weight:600}
+button.btn.primary:hover{background:#e5342a}
+button.btn.cyan{border-color:var(--cyan);color:var(--cyan)}
+button.btn:disabled{opacity:.4;cursor:not-allowed}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{flex:1;background:var(--panel2);border:none;color:var(--muted);font:inherit;font-size:13.5px;padding:9px 4px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--laser);color:#fff;font-weight:600}
+
+.stage{display:flex;flex-direction:column;gap:18px}
+.frame{background:var(--bench);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.frame > .cap{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:11px 16px;border-bottom:1px solid var(--line);
+  font-size:13.5px;color:var(--muted);flex-wrap:wrap;
+}
+.frame > .cap b{color:var(--text);font-weight:600}
+.sideview{display:block;width:100%;height:auto;background:var(--bench)}
+
+/* ---------- 方格紙 ---------- */
+.paperscroll{overflow-x:auto;overflow-y:hidden;background:#0c0f14;padding:12px}
+.paperscroll svg{display:block}
+.readout{
+  display:flex;gap:22px;flex-wrap:wrap;align-items:center;
+  padding:12px 16px;border-top:1px solid var(--line);background:var(--panel);
+}
+.ro{display:flex;flex-direction:column;gap:1px}
+.ro em{font-style:normal;font-size:12px;color:var(--muted)}
+.ro strong{
+  font-size:19px;font-weight:600;
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em;
+}
+.ro.big strong{color:var(--cyan);font-size:22px}
+
+/* ---------- 表格 ---------- */
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:right;white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:12.5px;text-align:right;border-bottom-color:var(--muted)}
+th:first-child,td:first-child{text-align:center}
+td input{width:82px;text-align:right;padding:4px 6px;font-size:13.5px}
+td.calc{font-variant-numeric:tabular-nums;color:var(--cyan)}
+tr.m2 td:first-child{color:var(--amber)}
+button.del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px}
+button.del:hover{color:var(--laser)}
+.empty{padding:28px 0;text-align:center;color:var(--muted);font-size:14px}
+
+/* ---------- 結果 ---------- */
+.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:6px}
+.res{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.res em{font-style:normal;display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.res strong{font-size:23px;font-weight:600;font-variant-numeric:tabular-nums;display:block}
+.res small{color:var(--muted);font-size:12.5px}
+.res.hero strong{color:var(--laser);font-size:30px}
+
+.stepline{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px}
+.stepline .n{
+  flex:none;width:26px;height:26px;border-radius:50%;
+  border:1px solid var(--line);background:var(--ink);
+  display:grid;place-items:center;font-size:13px;color:var(--muted);margin-top:2px;
+}
+.stepline.done .n{background:var(--good);border-color:var(--good);color:#0d2018;font-weight:700}
+.stepline .b{flex:1}
+.stepline .b b{display:block;font-weight:600;margin-bottom:2px}
+.stepline .b span{color:var(--muted);font-size:13.5px}
+
+kbd{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:inherit}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="exam-line">九十二學年度高級中學自然學科競賽　台南區複賽　物理科實驗試題第一題</div>
+  <h1 class="title">光碟軌道溝槽間距 <i>a</i> 的量測</h1>
+  <p class="lede">光碟片表面密排的螺旋溝槽就是一面現成的<b>反射式光柵</b>。用波長 658.5 nm 的雷射照射它，在方格紙上量出各級繞射光點的位置，就能反推出肉眼看不見的軌道間距。</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="t1">實驗原理</button>
+  <button role="tab" aria-selected="false" data-tab="t2">器材與架設</button>
+  <button role="tab" aria-selected="false" data-tab="t3">實驗操作</button>
+  <button role="tab" aria-selected="false" data-tab="t4">數據與作圖</button>
+  <button role="tab" aria-selected="false" data-tab="t5">討論與延伸</button>
+</nav>
+
+<!-- ================= 原理 ================= -->
+<section class="tab on" id="t1">
+  <div class="card">
+    <h2>光碟片為什麼是光柵</h2>
+    <p>CD 的資料以一條由內向外的螺旋狀溝槽記錄，相鄰圈之間的距離就是題目要求的 <i>a</i>。在雷射光斑照到的那一小塊區域（直徑約 1～2 mm）內，這些螺旋可以視為一組<b>等間距的平行直線</b>，因此整片光碟對雷射而言，等效於一面週期為 <i>a</i> 的光柵。</p>
+    <p>由於鋁膜會把光反射回來，未經處理的光碟是<b>反射式光柵</b>；若把鋁膜剝除，留下的透明聚碳酸酯基板仍保有溝槽的起伏，就變成<b>穿透式光柵</b>。兩者的繞射公式完全相同。</p>
+
+    <h3>光柵方程式</h3>
+    <div class="eq">
+      <i>a</i> ( sin β<sub>m</sub> − sin α ) = <i>m</i> λ
+      <small>α：入射角；β<sub>m</sub>：第 m 級繞射角（皆自光碟法線量起）；λ = 658.5 nm；m = 0, ±1, ±2, …</small>
+    </div>
+    <p>若把雷射調到<b>垂直入射</b>（α = 0），公式簡化為：</p>
+    <div class="eq">
+      sin β<sub>m</sub> = <i>m</i> λ / <i>a</i>　　⟹　　<i>a</i> = <i>m</i> λ / sin β<sub>m</sub>
+    </div>
+    <p>以 CD 規格值 <i>a</i> ≈ 1.6 μm 估算：第一級 β₁ ≈ 24°，第二級 β₂ ≈ 55°，而第三級需要 3λ/<i>a</i> = 1.23 &gt; 1，<b>不存在</b>。所以這片光碟在這支雷射下最多只能看到 ±1、±2 兩組繞射光點。</p>
+  </div>
+
+  <div class="card">
+    <h2>怎麼把角度換成長度</h2>
+    <p>角度不能直接量，但方格紙上的長度可以。把方格紙平行於光碟放在距離 <i>L</i> 處，第 m 級光點落在離中央 0 級光點 <i>x<sub>m</sub></i> 的位置：</p>
+    <div class="eq">tan β<sub>m</sub> = <i>x<sub>m</sub></i> / <i>L</i></div>
+    <p>單測一組 (<i>x</i>, <i>L</i>) 就能算出一個 <i>a</i>，但那等於把全部誤差壓在一次讀數上。更好的做法是<b>改變 L 量多組 x</b>：由於 β₁ 只由光碟決定、與 <i>L</i> 無關，理論上</p>
+    <div class="eq">
+      <i>x₁</i> = ( tan β₁ ) · <i>L</i>
+      <small>x₁ 對 L 作圖應為通過原點的直線，斜率 k = tan β₁</small>
+    </div>
+    <p>斜率取自最小平方法，等於讓每一筆數據都貢獻資訊；而截距是否接近 0，正好可以檢查系統誤差（例如 <i>L</i> 的起算點量錯）。求得 k 之後：</p>
+    <div class="eq">
+      sin β₁ = k / √(1 + k²)　　⟹　　<i>a</i> = λ / sin β₁
+    </div>
+    <h3>一個實作上的關鍵</h3>
+    <p>不要去量「0 級到 +1 級」的單邊距離——0 級光點的中心位置最難認定（反射式時它還會從紙上的小孔穿回去）。改量<b>左右兩個同級光點之間的總距離 D</b>，再取 <i>x</i> = D/2。這樣不需要知道中心在哪裡，而且讀數誤差被除以 2，同時左右對稱與否還能當作準直的檢查。</p>
+  </div>
+</section>
+
+<!-- ================= 器材 ================= -->
+<section class="tab" id="t2">
+  <div class="card">
+    <h2>器材清單怎麼用</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="text-align:left">器材</th><th style="text-align:left">規格</th><th style="text-align:left">在這個實驗裡的角色</th></tr></thead>
+        <tbody id="kitTable"></tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:14px">題目已註明「以上儀器不一定全部需要用到」。棉線除了綁雷射筆，也可以用來拉出一條直線輔助對準，或量取弧長；小刀在反射法中並非必要。</p>
+  </div>
+
+  <div class="card">
+    <h2>選擇實驗路線</h2>
+    <div class="seg" style="max-width:420px;margin-bottom:16px">
+      <button id="modeR" aria-pressed="true">反射式（完整光碟）</button>
+      <button id="modeT" aria-pressed="false">穿透式（剝除鋁膜）</button>
+    </div>
+    <div class="two">
+      <div>
+        <h3>反射式</h3>
+        <p class="note">雷射穿過方格紙中央的小孔打在光碟上，繞射光再反射回方格紙成像。不必破壞光碟，但方格紙要挖孔，且必須確認光束垂直入射。</p>
+      </div>
+      <div>
+        <h3>穿透式</h3>
+        <p class="note">用小刀沿光碟邊緣劃開保護漆，再以膠帶把鋁反射層整片撕下，得到透明光柵。光路是一直線，架設與對準都容易得多，代價是犧牲一片光碟。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="prepCard">
+    <h2>架設步驟</h2>
+    <div id="stepList"></div>
+    <div class="btnrow">
+      <button class="btn primary" id="peelBtn">撕除鋁反射層</button>
+      <button class="btn" id="resetPrep">換一片新光碟</button>
+    </div>
+    <div id="prepMsg"></div>
+  </div>
+</section>
+
+<!-- ================= 操作 ================= -->
+<section class="tab" id="t3">
+  <div class="bench">
+    <aside class="rail">
+      <h3>光學平台</h3>
+
+      <div class="ctl">
+        <label>光碟到方格紙的距離 <span class="val" id="LVal">20.0 cm</span></label>
+        <input type="range" id="Lsl" min="3" max="45" step="0.5" value="20">
+        <div class="note" style="font-size:12.5px">直尺最長 45 cm</div>
+      </div>
+
+      <div class="ctl">
+        <label>雷射傾角微調 <span class="val" id="tiltVal">—</span></label>
+        <input type="range" id="tiltSl" min="-6" max="6" step="0.1" value="0">
+        <div class="note" style="font-size:12.5px">刻度無標示，請依光點是否左右對稱判斷</div>
+      </div>
+
+      <div class="ctl">
+        <label>方格紙張數 <span class="val" id="sheetVal">2 張</span></label>
+        <input type="range" id="sheetSl" min="1" max="4" step="1" value="2">
+        <div class="note" style="font-size:12.5px">用膠帶拼接可加寬量測範圍</div>
+      </div>
+
+      <div class="ctl">
+        <label>顯示比例</label>
+        <select id="zoomSel">
+          <option value="12">12 px / cm</option>
+          <option value="20" selected>20 px / cm</option>
+          <option value="32">32 px / cm</option>
+        </select>
+      </div>
+
+      <div class="ctl">
+        <label>本次記錄的級數</label>
+        <select id="orderSel">
+          <option value="1" selected>第 1 級（m = 1）</option>
+          <option value="2">第 2 級（m = 2）</option>
+        </select>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn primary" id="laserBtn">開啟雷射</button>
+        <button class="btn" id="rejig">重新對準</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="clearCur">清除游標</button>
+      </div>
+    </aside>
+
+    <div class="stage">
+      <div class="frame">
+        <div class="cap"><b>側視圖</b><span id="sideNote">光路示意，非等比例</span></div>
+        <svg class="sideview" id="side" viewBox="0 0 840 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="光路側視圖"></svg>
+      </div>
+
+      <div class="frame">
+        <div class="cap">
+          <b>方格紙（正視）</b>
+          <span>點一下光點中心放置游標，可用 <kbd>←</kbd> <kbd>→</kbd> 微調 0.05 cm</span>
+        </div>
+        <div class="paperscroll" id="paperScroll">
+          <svg id="paper" role="img" aria-label="方格紙上的繞射光點"></svg>
+        </div>
+        <div class="readout">
+          <div class="ro"><em>游標 A</em><strong id="roA">—</strong></div>
+          <div class="ro"><em>游標 B</em><strong id="roB">—</strong></div>
+          <div class="ro big"><em>兩游標間距 D</em><strong id="roD">—</strong></div>
+          <div class="ro"><em>直尺量得 L</em><strong id="roL">—</strong></div>
+          <div style="margin-left:auto"><button class="btn primary" id="recBtn" disabled>記錄這一筆</button></div>
+        </div>
+      </div>
+      <div id="opMsg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 數據 ================= -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>數據紀錄</h2>
+    <p class="note">表格中的 L 與 D 可直接修改，用來更正抄錄錯誤。每一列右欄先用單點法算出對應的 <i>a</i>，方便對照迴歸結果。</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>m</th><th>L (cm)</th><th>D (cm)</th><th>x = D/2 (cm)</th>
+          <th>sin β</th><th>單點 a (μm)</th><th></th>
+        </tr></thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyMsg" class="empty">尚無數據。請到「實驗操作」量測後按「記錄這一筆」。</div>
+    <div class="btnrow">
+      <button class="btn" id="clearData">清空全部數據</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>x – L 關係圖</h2>
+    <svg id="chart" viewBox="0 0 760 440" style="width:100%;height:auto" role="img" aria-label="x 對 L 的線性迴歸圖"></svg>
+    <p class="note">實線為最小平方法迴歸直線。理論上截距應為 0，若明顯偏離，代表 L 的起算基準有系統性偏差。</p>
+  </div>
+
+  <div class="card">
+    <h2>計算結果</h2>
+    <div id="resultBox"><p class="note">至少需要同一級數的 3 筆數據才能進行迴歸。</p></div>
+  </div>
+
+  <div class="card">
+    <h2>與真值比對</h2>
+    <p class="note">本次模擬的光碟軌道間距是隨機生成的隱藏值（落在實際 CD 的製造公差範圍內）。先完成你的分析與誤差估計，再揭曉。</p>
+    <div class="btnrow">
+      <button class="btn cyan" id="revealBtn">揭曉真值</button>
+      <button class="btn" id="newDisc">換一片新光碟並重置</button>
+    </div>
+    <div id="revealBox"></div>
+  </div>
+</section>
+
+<!-- ================= 討論 ================= -->
+<section class="tab" id="t5">
+  <div class="card">
+    <h2>實驗報告該寫什麼</h2>
+    <p>評分依據是報告本身，以下是這一題最容易被扣分、也最容易拿分的幾個地方。</p>
+    <h3>必須交代的設計理由</h3>
+    <ul>
+      <li>為什麼選反射式或穿透式，以及該路線的架設細節。</li>
+      <li>為什麼量 ±m 級的<b>總距離 D</b> 而不是單邊距離。</li>
+      <li>為什麼改變 <i>L</i> 取多組數據作圖，而不是單點代入公式。</li>
+      <li>如何確認雷射垂直入射（這是本題最大的系統誤差來源）。</li>
+    </ul>
+    <h3>作圖與計算</h3>
+    <ul>
+      <li>橫軸 <i>L</i>、縱軸 <i>x</i>，標明單位與刻度，畫出最適直線並標示斜率的求法。</li>
+      <li>由斜率 k 得 sin β = k/√(1+k²)，再代回 <i>a</i> = mλ/sin β。不要直接寫「sin β ≈ tan β」——β₁ 約 24°，兩者相差 1/cos β₁ ≈ 1.10，會讓 <i>a</i> 低估約 9%。</li>
+      <li>第 1 級與第 2 級分別分析，兩者結果若一致，是內部自洽性的有力證據。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>誤差來源</h2>
+    <div class="two">
+      <div>
+        <h3>系統誤差</h3>
+        <ul class="note">
+          <li><b>入射不垂直。</b>α ≠ 0 時 +m 與 −m 級不再對稱，取平均仍殘留 tan 函數非線性造成的偏差。α = 3° 約造成 <i>a</i> 偏低 0.9%，在本實驗的統計誤差下已是可偵測的顯著偏差。判斷方式：0 級光點是否回到小孔上、左右一級光點到 0 級的距離是否相等。</li>
+          <li><b>方格紙不平行光碟。</b>會讓兩側的有效 L 不同，同樣破壞對稱。</li>
+          <li><b>L 的起算點。</b>應從光碟表面量起，不是從支架或紙盒邊緣。此誤差會反映在迴歸截距上。</li>
+        </ul>
+      </div>
+      <div>
+        <h3>隨機誤差</h3>
+        <ul class="note">
+          <li><b>光點有大小。</b>雷射光斑本身約 1～3 mm，高階光點還會因溝槽不完全等距而稍微拉長，中心判定約有 ±0.5 mm 的不確定度。</li>
+          <li><b>方格紙讀數。</b>1 mm 方格可估讀到 0.5 mm。</li>
+          <li><b>L 的量測。</b>直尺最小刻度 1 mm，加上垂直度判斷，實務上約 ±1 mm。</li>
+        </ul>
+        <p class="note">以迴歸斜率的標準誤差 σ<sub>k</sub> 傳遞到 <i>a</i>：σ<sub>a</sub> = (mλ / sin²β) · σ<sub>k</sub> / (1+k²)<sup>3/2</sup>。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>延伸問題</h2>
+    <ol>
+      <li><b>為什麼看不到第三級？</b>因為 3λ/a &gt; 1，sin β 無解。反過來說，若改用 DVD（a ≈ 0.74 μm），連第二級都會消失（2λ/a = 1.78 &gt; 1）——這正好成為分辨 CD 與 DVD 的判據。</li>
+      <li><b>光碟能存多少資料？</b>CD 記錄區從半徑 23 mm 到 58 mm，軌道總長 ≈ π(58² − 23²) / a（單位 mm）。代入 a = 1.6 μm 約得 5.6 km 的螺旋長度，配合每個記錄坑的長度即可粗估容量。</li>
+      <li><b>寶特瓶還能怎麼用？</b>裝滿水的圓柱瓶身是一個柱面透鏡，可把雷射點展開成一條垂直亮線。讓亮線橫跨光碟上多條軌道，繞射光在紙上也成為亮線，中心位置反而更容易判定。這是本題器材表的另一種解讀。</li>
+      <li><b>如果雷射波長未知呢？</b>反過來用規格值 a = 1.6 μm 的 CD 當標準光柵，就能測未知光源的波長。</li>
+    </ol>
+  </div>
+</section>
+
+</div>
+
+<script>
+"use strict";
+
+/* ===================== 常數與狀態 ===================== */
+const LAMBDA = 658.5;          // nm
+const PAPER_H = 200;           // 方格紙顯示高度 px
+const SIDE_W = 840, SIDE_H = 300;
+
+function gauss(){
+  let u = 0, v = 0;
+  while(u === 0) u = Math.random();
+  while(v === 0) v = Math.random();
+  return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v);
+}
+
+const S = {
+  mode: 'reflect',
+  peeled: false,
+  L: 20,
+  tiltSlider: 0,
+  tiltHidden: 0,
+  sheets: 2,
+  zoom: 20,
+  laser: false,
+  aTrue: 1600,
+  jitter: {},
+  Ljitter: 0,
+  curA: null,
+  curB: null,
+  active: 'A',
+  rows: [],
+  seq: 0,
+  revealed: false
+};
+
+function newDisc(){
+  S.aTrue = 1545 + Math.random()*140;              // nm，涵蓋實際 CD 製造公差
+  S.tiltHidden = (Math.random()*6 - 3);            // 度，初始未準直
+  S.peeled = false;
+  S.tiltSlider = 0;
+  S.revealed = false;
+  reJig();
+}
+function reJig(){
+  S.jitter = {};
+  for(let m = -2; m <= 2; m++) S.jitter[m] = gauss()*0.035;   // cm
+  S.Ljitter = gauss()*0.09;                                   // cm
+}
+newDisc();
+
+const alphaDeg = () => S.tiltSlider + S.tiltHidden;
+const sinBeta = m => Math.sin(alphaDeg()*Math.PI/180) + m*LAMBDA/S.aTrue;
+const paperW = () => 29.7 + 21*(S.sheets - 1);                 // cm
+
+/* 0 級以外各級在方格紙上的位置（cm，相對於光碟法線交點） */
+function spots(){
+  const out = [];
+  for(let m = -2; m <= 2; m++){
+    const s = sinBeta(m);
+    if(Math.abs(s) >= 1) continue;
+    const b = Math.asin(s);
+    out.push({ m, x: S.L*Math.tan(b) + S.jitter[m], beta: b });
+  }
+  return out;
+}
+function holeX(){                                              // 反射式：小孔位置
+  return -S.L*Math.tan(alphaDeg()*Math.PI/180);
+}
+
+/* ===================== 分頁 ===================== */
+document.querySelectorAll('nav.tabs button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button').forEach(x => x.setAttribute('aria-selected','false'));
+    b.setAttribute('aria-selected','true');
+    document.querySelectorAll('section.tab').forEach(s => s.classList.remove('on'));
+    document.getElementById(b.dataset.tab).classList.add('on');
+    if(b.dataset.tab === 't4'){ renderTable(); analyze(); }
+    if(b.dataset.tab === 't3'){ drawSide(); drawPaper(); }
+    window.scrollTo({top:0, behavior:'instant'});
+  });
+});
+
+/* ===================== 器材表 ===================== */
+const KIT = [
+  ['光碟片','2 片','待測光柵。一片保持完整作反射式，另一片可剝膜作穿透式'],
+  ['寶特瓶','600 ml，裝滿水','雷射筆支架。滿水重心低不易晃動，也可用來壓住開關；瓶身另可當柱面透鏡'],
+  ['雷射筆','λ = 658.5 nm','單色光源，波長為已知量'],
+  ['方格紙','A4，1 mm','成像屏兼量尺。可用膠帶拼接加寬'],
+  ['棉線','1 捲','綁固雷射筆；亦可拉直線輔助對準'],
+  ['小刀','1 把','劃開光碟保護漆，配合膠帶剝除鋁膜'],
+  ['膠帶','1 捲','撕除鋁膜、固定器材、拼接方格紙'],
+  ['直尺','45 cm，1 mm','量測 L 與必要時直接量光點距離']
+];
+document.getElementById('kitTable').innerHTML = KIT.map(r =>
+  `<tr><td style="text-align:left">${r[0]}</td><td style="text-align:left;color:var(--muted)">${r[1]}</td><td style="text-align:left;white-space:normal;color:var(--muted)">${r[2]}</td></tr>`
+).join('');
+
+/* ===================== 架設分頁 ===================== */
+const mR = document.getElementById('modeR'), mT = document.getElementById('modeT');
+function setMode(m){
+  S.mode = m;
+  mR.setAttribute('aria-pressed', m === 'reflect');
+  mT.setAttribute('aria-pressed', m === 'transmit');
+  renderSteps(); drawSide(); drawPaper();
+}
+mR.addEventListener('click', () => setMode('reflect'));
+mT.addEventListener('click', () => setMode('transmit'));
+
+function renderSteps(){
+  const reflect = [
+    ['用棉線與膠帶把雷射筆綁在裝滿水的寶特瓶上','讓光束高度固定，並用膠帶壓住開關維持常亮', true],
+    ['在一張方格紙中央戳一個小孔，垂直立起','小孔僅供入射光通過，孔徑越小越好', true],
+    ['把光碟垂直立在方格紙正前方，記錄面朝向雷射','讓雷射穿過小孔正射光碟', true],
+    ['用直尺量出光碟表面到方格紙的垂直距離 L','起算點是光碟表面，不是支架邊緣', true],
+    ['調整雷射傾角，直到 0 級光點打回小孔','此時入射光垂直光碟，左右各級光點對稱', true]
+  ];
+  const transmit = [
+    ['用小刀沿光碟邊緣輕輕劃開一圈保護漆','只劃表層，不要切穿基板', true],
+    ['用膠帶黏住劃開處，整片撕下鋁反射層','完成後光碟變成透明，對光可見彩虹色', S.peeled],
+    ['用棉線與膠帶把雷射筆固定在寶特瓶上','光源、光柵、方格紙三者共軸', true],
+    ['把透明光柵立在雷射前方，方格紙立在後方','光路成一直線，不需挖孔', true],
+    ['用直尺量出光柵到方格紙的垂直距離 L','並確認方格紙與光柵平行', true]
+  ];
+  const list = S.mode === 'reflect' ? reflect : transmit;
+  document.getElementById('stepList').innerHTML = list.map((s,i) =>
+    `<div class="stepline ${s[2] ? 'done' : ''}"><div class="n">${s[2] ? '✓' : i+1}</div>
+     <div class="b"><b>${s[0]}</b><span>${s[1]}</span></div></div>`
+  ).join('');
+  document.getElementById('peelBtn').disabled = (S.mode !== 'transmit' || S.peeled);
+  const msg = document.getElementById('prepMsg');
+  if(S.mode === 'transmit'){
+    msg.innerHTML = S.peeled
+      ? '<div class="ok">鋁膜已完全剝除，得到透明的穿透式光柵。可以到「實驗操作」開始量測。</div>'
+      : '<div class="warn">尚未剝膜。未剝膜的光碟不透光，穿透式光路無法成像。</div>';
+  } else {
+    msg.innerHTML = '<div class="ok">反射式不需要破壞光碟。請到「實驗操作」開始量測，並特別注意光束是否垂直入射。</div>';
+  }
+}
+document.getElementById('peelBtn').addEventListener('click', () => { S.peeled = true; renderSteps(); drawSide(); drawPaper(); });
+document.getElementById('resetPrep').addEventListener('click', () => { S.peeled = false; renderSteps(); drawSide(); drawPaper(); });
+renderSteps();
+
+/* ===================== 控制項 ===================== */
+const Lsl = document.getElementById('Lsl'), tiltSl = document.getElementById('tiltSl'),
+      sheetSl = document.getElementById('sheetSl'), zoomSel = document.getElementById('zoomSel');
+
+Lsl.addEventListener('input', () => {
+  S.L = parseFloat(Lsl.value);
+  document.getElementById('LVal').textContent = S.L.toFixed(1) + ' cm';
+  reJig(); S.curA = S.curB = null; refresh();
+});
+tiltSl.addEventListener('input', () => { S.tiltSlider = parseFloat(tiltSl.value); reJig(); refresh(); });
+sheetSl.addEventListener('input', () => {
+  S.sheets = parseInt(sheetSl.value);
+  document.getElementById('sheetVal').textContent = S.sheets + ' 張';
+  S.curA = S.curB = null; refresh();
+});
+zoomSel.addEventListener('change', () => { S.zoom = parseInt(zoomSel.value); drawPaper(); });
+
+document.getElementById('laserBtn').addEventListener('click', () => {
+  S.laser = !S.laser;
+  document.getElementById('laserBtn').textContent = S.laser ? '關閉雷射' : '開啟雷射';
+  refresh();
+});
+document.getElementById('rejig').addEventListener('click', () => { reJig(); refresh(); });
+document.getElementById('clearCur').addEventListener('click', () => { S.curA = S.curB = null; S.active = 'A'; refresh(); });
+
+function refresh(){ drawSide(); drawPaper(); updateReadout(); }
+
+/* ===================== 側視圖 ===================== */
+function drawSide(){
+  const sc = 13.2, vs = 3.4, cy = SIDE_H/2;
+  const halfPaper = Math.min(paperW()/2*vs, 128);
+  let g = '';
+  const beam = S.laser ? 'var(--laser)' : 'var(--line)';
+
+  const bottle = (x, y) =>
+    `<rect x="${x}" y="${y-34}" width="30" height="52" rx="6" fill="#1f4a3d" stroke="#2f6b57"/>
+     <rect x="${x+3}" y="${y-18}" width="24" height="34" rx="3" fill="#2a7f68" opacity=".55"/>
+     <rect x="${x+9}" y="${y-44}" width="12" height="12" rx="2" fill="#2f6b57"/>`;
+  const pen = (x, y, flip) =>
+    `<g transform="translate(${x},${y}) ${flip ? 'scale(-1,1)' : ''}">
+       <rect x="0" y="-6" width="46" height="12" rx="4" fill="#3c4654" stroke="#55637a"/>
+       <rect x="40" y="-4" width="8" height="8" rx="2" fill="${S.laser ? '#ff6b62' : '#2a323e'}"/>
+       <rect x="8" y="-8" width="8" height="4" rx="1.5" fill="#8794a4"/>
+     </g>`;
+
+  if(S.mode === 'reflect'){
+    const paperX = 150, cdX = paperX + S.L*sc;
+    const hx = holeX()*vs;
+    g += bottle(52, cy + 30);
+    g += pen(64, cy - hx*0.35 - 8, false);
+
+    // 方格紙（側視為一條垂直線，中間留孔）
+    g += `<line x1="${paperX}" y1="${cy-halfPaper}" x2="${paperX}" y2="${cy-hx-7}" stroke="#cfcfc6" stroke-width="3"/>
+          <line x1="${paperX}" y1="${cy-hx+7}" x2="${paperX}" y2="${cy+halfPaper}" stroke="#cfcfc6" stroke-width="3"/>
+          <text x="${paperX-10}" y="${cy+halfPaper+18}" fill="var(--muted)" font-size="12" text-anchor="end">方格紙</text>
+          <text x="${paperX+8}" y="${cy-hx+4}" fill="var(--muted)" font-size="11">小孔</text>`;
+
+    // 光碟
+    g += `<line x1="${cdX}" y1="${cy-58}" x2="${cdX}" y2="${cy+58}" stroke="#a9b4c4" stroke-width="5"/>
+          <line x1="${cdX-3}" y1="${cy-58}" x2="${cdX-3}" y2="${cy+58}" stroke="#6f7d90" stroke-width="2"/>
+          <text x="${cdX+10}" y="${cy-64}" fill="var(--muted)" font-size="12">光碟片</text>`;
+
+    // 入射光
+    g += `<line x1="${110}" y1="${cy-hx*0.35-8}" x2="${cdX}" y2="${cy}" stroke="${beam}" stroke-width="2"/>`;
+    // 繞射光
+    if(S.laser) spots().forEach(sp => {
+      const y = cy - sp.x*vs;
+      if(Math.abs(sp.x) > paperW()/2) return;
+      g += `<line x1="${cdX}" y1="${cy}" x2="${paperX}" y2="${y}" stroke="var(--laser)" stroke-width="${sp.m===0?2:1.4}" opacity="${sp.m===0?.95:(Math.abs(sp.m)===1?.8:.55)}"/>
+            <circle cx="${paperX}" cy="${y}" r="3.4" fill="var(--laser)"/>
+            <text x="${paperX-12}" y="${y+4}" fill="var(--laser)" font-size="11" text-anchor="end">${sp.m>0?'+':''}${sp.m}</text>`;
+    });
+    // L 標註
+    g += dim(paperX, cdX, cy + halfPaper + 34, 'L = ' + S.L.toFixed(1) + ' cm');
+  } else {
+    const cdX = 250, paperX = cdX + S.L*sc;
+    g += bottle(52, cy + 30);
+    g += pen(90, cy, false);
+    const lit = S.laser && S.peeled;
+
+    g += `<line x1="${cdX}" y1="${cy-58}" x2="${cdX}" y2="${cy+58}" stroke="${S.peeled ? '#7fd0e8' : '#a9b4c4'}" stroke-width="4" opacity="${S.peeled ? .75 : 1}"/>
+          <text x="${cdX-6}" y="${cy-64}" fill="var(--muted)" font-size="12" text-anchor="middle">${S.peeled ? '透明光柵' : '光碟片（未剝膜）'}</text>`;
+    g += `<line x1="${paperX}" y1="${cy-halfPaper}" x2="${paperX}" y2="${cy+halfPaper}" stroke="#cfcfc6" stroke-width="3"/>
+          <text x="${paperX+10}" y="${cy+halfPaper+18}" fill="var(--muted)" font-size="12">方格紙</text>`;
+    g += `<line x1="${136}" y1="${cy}" x2="${cdX}" y2="${cy}" stroke="${S.laser ? 'var(--laser)' : 'var(--line)'}" stroke-width="2"/>`;
+
+    if(lit) spots().forEach(sp => {
+      const y = cy - sp.x*vs;
+      if(Math.abs(sp.x) > paperW()/2) return;
+      g += `<line x1="${cdX}" y1="${cy}" x2="${paperX}" y2="${y}" stroke="var(--laser)" stroke-width="${sp.m===0?2:1.4}" opacity="${sp.m===0?.95:(Math.abs(sp.m)===1?.8:.55)}"/>
+            <circle cx="${paperX}" cy="${y}" r="3.4" fill="var(--laser)"/>
+            <text x="${paperX+12}" y="${y+4}" fill="var(--laser)" font-size="11">${sp.m>0?'+':''}${sp.m}</text>`;
+    });
+    if(S.laser && !S.peeled)
+      g += `<text x="${cdX+18}" y="${cy-4}" fill="var(--amber)" font-size="12">鋁膜擋光，無穿透光</text>`;
+    g += dim(cdX, paperX, cy + halfPaper + 34, 'L = ' + S.L.toFixed(1) + ' cm');
+  }
+  document.getElementById('side').innerHTML = g;
+}
+function dim(x1, x2, y, label){
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="var(--muted)" stroke-width="1"/>
+          <line x1="${x1}" y1="${y-5}" x2="${x1}" y2="${y+5}" stroke="var(--muted)"/>
+          <line x1="${x2}" y1="${y-5}" x2="${x2}" y2="${y+5}" stroke="var(--muted)"/>
+          <rect x="${(x1+x2)/2-46}" y="${y-11}" width="92" height="20" fill="var(--bench)"/>
+          <text x="${(x1+x2)/2}" y="${y+4}" fill="var(--muted)" font-size="12" text-anchor="middle">${label}</text>`;
+}
+
+/* ===================== 方格紙 ===================== */
+function drawPaper(){
+  const W = paperW(), z = S.zoom, px = W*z, H = PAPER_H;
+  const svg = document.getElementById('paper');
+  svg.setAttribute('width', px);
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${px} ${H}`);
+
+  let g = `<defs><filter id="glow" x="-120%" y="-120%" width="340%" height="340%">
+             <feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+  g += `<rect width="${px}" height="${H}" fill="var(--paper)"/>`;
+
+  // 方格：1 mm 細線、5 mm 中線、1 cm 粗線
+  let mm = '', mid = '', cm = '';
+  for(let i = 0; i*0.1 <= W + 1e-9; i++){
+    const X = (i*0.1*z).toFixed(2);
+    if(i % 10 === 0) cm += `M${X} 0V${H}`;
+    else if(i % 5 === 0) mid += `M${X} 0V${H}`;
+    else mm += `M${X} 0V${H}`;
+  }
+  let hmm = '', hcm = '';
+  for(let j = 0; j*0.1*z <= H; j++){
+    const Y = (j*0.1*z).toFixed(2);
+    if(j % 10 === 0) hcm += `M0 ${Y}H${px}`; else hmm += `M0 ${Y}H${px}`;
+  }
+  if(z >= 20) g += `<path d="${mm}${hmm}" stroke="var(--grid)" stroke-width=".45" opacity=".42" fill="none"/>`;
+  g += `<path d="${mid}" stroke="var(--grid)" stroke-width=".7" opacity=".7" fill="none"/>`;
+  g += `<path d="${cm}${hcm}" stroke="var(--grid-strong)" stroke-width=".9" opacity=".85" fill="none"/>`;
+
+  // 拼接處
+  for(let s = 1; s < S.sheets; s++){
+    const X = ((29.7 + 21*(s-1))*z).toFixed(1);
+    g += `<line x1="${X}" y1="0" x2="${X}" y2="${H}" stroke="#c9b27a" stroke-width="3" opacity=".55"/>`;
+  }
+  // 刻度數字
+  for(let c = 0; c <= W; c += 5){
+    const X = c*z;
+    g += `<text x="${X+3}" y="${H-6}" fill="#3f5a68" font-size="11">${c}</text>`;
+  }
+
+  const toPx = xcm => (xcm + W/2)*z;
+
+  // 小孔
+  if(S.mode === 'reflect'){
+    const hp = toPx(holeX());
+    g += `<circle cx="${hp}" cy="${H/2}" r="3" fill="#2b3742"/>
+          <circle cx="${hp}" cy="${H/2}" r="7" fill="none" stroke="#7a8b99" stroke-width="1" stroke-dasharray="2 2"/>`;
+  }
+
+  // 光點
+  const visible = (S.mode === 'reflect') ? S.laser : (S.laser && S.peeled);
+  let offPaper = 0;
+  if(visible){
+    spots().forEach(sp => {
+      if(Math.abs(sp.x) > W/2){ offPaper++; return; }
+      const X = toPx(sp.x), Y = H/2;
+      const op = sp.m === 0 ? 1 : (Math.abs(sp.m) === 1 ? .92 : .62);
+      const rx = Math.max(2.6, 0.14*z*(1 + 0.45*Math.abs(sp.m)));
+      const ry = Math.max(2.4, 0.13*z);
+      g += `<ellipse cx="${X}" cy="${Y}" rx="${rx*2.1}" ry="${ry*2.1}" fill="var(--laser-soft)" opacity="${op*.5}" filter="url(#glow)"/>
+            <ellipse cx="${X}" cy="${Y}" rx="${rx}" ry="${ry}" fill="#ff4438" opacity="${op}"/>
+            <ellipse cx="${X}" cy="${Y}" rx="${rx*.4}" ry="${ry*.4}" fill="#fff3f0" opacity="${op*.9}"/>`;
+    });
+  }
+
+  // 游標
+  [['A', S.curA, '#1f6f8b'], ['B', S.curB, '#8b5a1f']].forEach(([n, v, col]) => {
+    if(v === null) return;
+    const X = v*z;
+    g += `<line x1="${X}" y1="0" x2="${X}" y2="${H}" stroke="${col}" stroke-width="1.6"/>
+          <rect x="${X-16}" y="4" width="32" height="17" rx="3" fill="${col}"/>
+          <text x="${X}" y="17" fill="#fff" font-size="11.5" text-anchor="middle">${n}</text>`;
+  });
+
+  svg.innerHTML = g;
+
+  const msg = document.getElementById('opMsg');
+  if(!S.laser) msg.innerHTML = '<div class="warn">雷射未開啟。</div>';
+  else if(S.mode === 'transmit' && !S.peeled) msg.innerHTML = '<div class="warn">光碟鋁膜尚未剝除，光無法穿透。請先到「器材與架設」完成剝膜。</div>';
+  else if(offPaper > 0) msg.innerHTML = `<div class="warn">有 ${offPaper} 個光點落在方格紙外。請縮短 L，或用膠帶拼接更多張方格紙。</div>`;
+  else msg.innerHTML = '';
+}
+
+/* ===================== 量測互動 ===================== */
+const paperSvg = document.getElementById('paper');
+paperSvg.style.cursor = 'crosshair';
+paperSvg.addEventListener('click', e => {
+  const r = paperSvg.getBoundingClientRect();
+  let v = (e.clientX - r.left) / S.zoom;
+  v = Math.round(v/0.05)*0.05;
+  v = Math.max(0, Math.min(paperW(), v));
+  if(S.active === 'A'){ S.curA = v; S.active = 'B'; } else { S.curB = v; S.active = 'A'; }
+  drawPaper(); updateReadout();
+});
+document.addEventListener('keydown', e => {
+  if(!document.getElementById('t3').classList.contains('on')) return;
+  if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  const last = S.active === 'A' ? 'B' : 'A';
+  const key = last === 'A' ? 'curA' : 'curB';
+  if(S[key] === null) return;
+  e.preventDefault();
+  S[key] = Math.round((S[key] + (e.key === 'ArrowRight' ? 0.05 : -0.05))/0.05)*0.05;
+  S[key] = Math.max(0, Math.min(paperW(), S[key]));
+  drawPaper(); updateReadout();
+});
+
+function updateReadout(){
+  const f = v => v === null ? '—' : v.toFixed(2) + ' cm';
+  document.getElementById('roA').textContent = f(S.curA);
+  document.getElementById('roB').textContent = f(S.curB);
+  const ok = S.curA !== null && S.curB !== null;
+  const D = ok ? Math.abs(S.curA - S.curB) : null;
+  document.getElementById('roD').textContent = ok ? D.toFixed(2) + ' cm' : '—';
+  const Lm = Math.round((S.L + S.Ljitter)*10)/10;
+  document.getElementById('roL').textContent = Lm.toFixed(1) + ' cm';
+  document.getElementById('recBtn').disabled = !(ok && D > 0.1);
+  document.getElementById('tiltVal').textContent = S.revealed
+    ? (alphaDeg().toFixed(2) + '°') : (S.tiltSlider >= 0 ? '+' : '') + S.tiltSlider.toFixed(1);
+}
+
+document.getElementById('recBtn').addEventListener('click', () => {
+  const D = Math.abs(S.curA - S.curB);
+  const Lm = Math.round((S.L + S.Ljitter)*10)/10;
+  const m = parseInt(document.getElementById('orderSel').value);
+  S.rows.push({ id: ++S.seq, m, L: Lm, D: Math.round(D*100)/100 });
+  S.curA = S.curB = null; S.active = 'A';
+  drawPaper(); updateReadout();
+  document.getElementById('opMsg').innerHTML =
+    `<div class="ok">已記錄第 ${S.rows.length} 筆：m = ${m}，L = ${Lm.toFixed(1)} cm，D = ${D.toFixed(2)} cm。</div>`;
+});
+
+/* ===================== 數據表 ===================== */
+function rowCalc(r){
+  const x = r.D/2;
+  const sinb = x/Math.sqrt(x*x + r.L*r.L);
+  const a = sinb > 0 ? r.m*LAMBDA/sinb : NaN;
+  return { x, sinb, a };
+}
+function renderTable(){
+  const tb = document.getElementById('dataBody');
+  document.getElementById('emptyMsg').style.display = S.rows.length ? 'none' : 'block';
+  tb.innerHTML = S.rows.map((r, i) => {
+    const c = rowCalc(r);
+    return `<tr class="${r.m===2?'m2':''}">
+      <td>${i+1}</td><td>${r.m}</td>
+      <td><input type="number" step="0.1" value="${r.L.toFixed(1)}" data-i="${i}" data-k="L"></td>
+      <td><input type="number" step="0.01" value="${r.D.toFixed(2)}" data-i="${i}" data-k="D"></td>
+      <td class="calc">${c.x.toFixed(3)}</td>
+      <td class="calc">${c.sinb.toFixed(4)}</td>
+      <td class="calc">${(c.a/1000).toFixed(4)}</td>
+      <td><button class="del" data-del="${i}" title="刪除">✕</button></td></tr>`;
+  }).join('');
+  tb.querySelectorAll('input').forEach(inp => inp.addEventListener('change', e => {
+    const i = +e.target.dataset.i, k = e.target.dataset.k, v = parseFloat(e.target.value);
+    if(!isNaN(v) && v > 0){ S.rows[i][k] = v; renderTable(); analyze(); }
+  }));
+  tb.querySelectorAll('button[data-del]').forEach(b => b.addEventListener('click', e => {
+    S.rows.splice(+e.target.dataset.del, 1); renderTable(); analyze();
+  }));
+}
+document.getElementById('clearData').addEventListener('click', () => {
+  if(S.rows.length && !confirm('確定清空全部數據？')) return;
+  S.rows = []; S.seq = 0; renderTable(); analyze();
+});
+
+/* ===================== 迴歸與結果 ===================== */
+function linreg(pts){
+  const n = pts.length;
+  if(n < 3) return null;
+  const mx = pts.reduce((s,p) => s+p.x, 0)/n;
+  const my = pts.reduce((s,p) => s+p.y, 0)/n;
+  let sxx = 0, sxy = 0;
+  pts.forEach(p => { sxx += (p.x-mx)**2; sxy += (p.x-mx)*(p.y-my); });
+  if(sxx === 0) return null;
+  const k = sxy/sxx, b = my - k*mx;
+  let ss = 0, tss = 0;
+  pts.forEach(p => { ss += (p.y - (k*p.x+b))**2; tss += (p.y-my)**2; });
+  const s = Math.sqrt(ss/(n-2));
+  return { k, b, n, sk: s/Math.sqrt(sxx), sb: s*Math.sqrt(1/n + mx*mx/sxx), r2: tss > 0 ? 1-ss/tss : 1, s };
+}
+function fitFor(m){
+  const pts = S.rows.filter(r => r.m === m).map(r => ({ x: r.L, y: r.D/2 }));
+  const f = linreg(pts);
+  if(!f) return null;
+  const k = f.k;
+  const sinb = k/Math.sqrt(1+k*k);
+  const a = m*LAMBDA/sinb;
+  const sa = (m*LAMBDA/(sinb*sinb)) * f.sk / Math.pow(1+k*k, 1.5);
+  return Object.assign({}, f, { m, sinb, beta: Math.atan(k)*180/Math.PI, a, sa, pts });
+}
+let lastFits = [];
+
+function analyze(){
+  const box = document.getElementById('resultBox');
+  const fits = [1,2].map(fitFor).filter(Boolean);
+  lastFits = fits;
+  drawChart(fits);
+  if(!fits.length){
+    box.innerHTML = '<p class="note">至少需要同一級數的 3 筆數據才能進行迴歸。</p>';
+    return;
+  }
+  let html = '';
+  fits.forEach(f => {
+    html += `<h3>第 ${f.m} 級（${f.n} 筆數據）</h3>
+      <div class="results">
+        <div class="res"><em>迴歸斜率 k = tan β</em><strong>${f.k.toFixed(4)}</strong><small>± ${f.sk.toFixed(4)}</small></div>
+        <div class="res"><em>截距</em><strong>${f.b.toFixed(3)}</strong><small>cm，理論值 0 ± ${f.sb.toFixed(3)}</small></div>
+        <div class="res"><em>β${f.m}</em><strong>${f.beta.toFixed(2)}°</strong><small>sin β = ${f.sinb.toFixed(4)}</small></div>
+        <div class="res"><em>判定係數 r²</em><strong>${f.r2.toFixed(5)}</strong><small>殘差 s = ${f.s.toFixed(3)} cm</small></div>
+        <div class="res hero"><em>軌道間距 a = ${f.m}λ / sin β</em><strong>${(f.a/1000).toFixed(4)}</strong><small>± ${(f.sa/1000).toFixed(4)} μm</small></div>
+      </div>`;
+    if(Math.abs(f.b) > 2*f.sb + 0.05)
+      html += `<div class="warn">截距 ${f.b.toFixed(3)} cm 顯著偏離 0，超過 2 倍標準誤差。請檢查 L 的起算基準是否一致。</div>`;
+  });
+
+  if(fits.length === 2){
+    const [f1, f2] = fits;
+    const w1 = 1/(f1.sa**2), w2 = 1/(f2.sa**2);
+    const aw = (f1.a*w1 + f2.a*w2)/(w1+w2), saw = Math.sqrt(1/(w1+w2));
+    const diff = Math.abs(f1.a - f2.a), sd = Math.sqrt(f1.sa**2 + f2.sa**2);
+    html += `<h3>合併結果</h3>
+      <div class="results">
+        <div class="res hero"><em>加權平均 a</em><strong>${(aw/1000).toFixed(4)}</strong><small>± ${(saw/1000).toFixed(4)} μm</small></div>
+        <div class="res"><em>兩級數差異</em><strong>${(diff/1000).toFixed(4)}</strong><small>μm，相當於 ${(diff/sd).toFixed(2)} σ</small></div>
+      </div>`;
+    html += (diff/sd < 2)
+      ? '<div class="ok">兩個級數的結果在 2σ 內一致，內部自洽性良好。</div>'
+      : '<div class="warn">兩個級數的結果差異超過 2σ，暗示存在未計入的系統誤差（最常見的是入射角未歸零）。</div>';
+  }
+
+  // 單點平均法對照
+  const singles = S.rows.map(r => rowCalc(r).a).filter(v => isFinite(v));
+  if(singles.length >= 2){
+    const mean = singles.reduce((s,v) => s+v, 0)/singles.length;
+    const sd = Math.sqrt(singles.reduce((s,v) => s+(v-mean)**2, 0)/(singles.length-1));
+    html += `<h3>對照：單點計算後取平均</h3>
+      <div class="results">
+        <div class="res"><em>平均 a</em><strong>${(mean/1000).toFixed(4)}</strong><small>± ${(sd/Math.sqrt(singles.length)/1000).toFixed(4)} μm（標準誤差）</small></div>
+        <div class="res"><em>樣本標準差</em><strong>${(sd/1000).toFixed(4)}</strong><small>μm</small></div>
+      </div>
+      <p class="note">單點法把 L 與 D 的誤差各自獨立地放進每一筆結果，且無法檢查截距是否為 0；迴歸法則利用了 x 與 L 應成正比這項先驗資訊，並能診斷系統誤差。報告中兩者都列出，並說明為何採用迴歸值，是加分的寫法。</p>`;
+  }
+  box.innerHTML = html;
+}
+
+/* ===================== 作圖 ===================== */
+function drawChart(fits){
+  const W = 760, H = 440, ml = 74, mr = 24, mt = 24, mb = 58;
+  const pw = W-ml-mr, ph = H-mt-mb;
+  let g = `<rect width="${W}" height="${H}" fill="var(--ink)"/>`;
+
+  const all = S.rows.map(r => ({ x: r.L, y: r.D/2, m: r.m }));
+  const xmax = Math.max(10, ...all.map(p => p.x)) * 1.1;
+  const ymax = Math.max(5, ...all.map(p => p.y)) * 1.15;
+  const X = v => ml + v/xmax*pw;
+  const Y = v => mt + ph - v/ymax*ph;
+
+  const xstep = niceStep(xmax), ystep = niceStep(ymax);
+  for(let v = 0; v <= xmax; v += xstep){
+    g += `<line x1="${X(v)}" y1="${mt}" x2="${X(v)}" y2="${mt+ph}" stroke="var(--line)" stroke-width=".8"/>
+          <text x="${X(v)}" y="${mt+ph+20}" fill="var(--muted)" font-size="12" text-anchor="middle">${round2(v)}</text>`;
+  }
+  for(let v = 0; v <= ymax; v += ystep){
+    g += `<line x1="${ml}" y1="${Y(v)}" x2="${ml+pw}" y2="${Y(v)}" stroke="var(--line)" stroke-width=".8"/>
+          <text x="${ml-10}" y="${Y(v)+4}" fill="var(--muted)" font-size="12" text-anchor="end">${round2(v)}</text>`;
+  }
+  g += `<line x1="${ml}" y1="${mt}" x2="${ml}" y2="${mt+ph}" stroke="var(--muted)"/>
+        <line x1="${ml}" y1="${mt+ph}" x2="${ml+pw}" y2="${mt+ph}" stroke="var(--muted)"/>
+        <text x="${ml+pw/2}" y="${H-14}" fill="var(--text)" font-size="13.5" text-anchor="middle">光碟到方格紙距離 L (cm)</text>
+        <text x="20" y="${mt+ph/2}" fill="var(--text)" font-size="13.5" text-anchor="middle" transform="rotate(-90 20 ${mt+ph/2})">光點半距 x = D/2 (cm)</text>`;
+
+  const COL = { 1:'var(--laser)', 2:'var(--amber)' };
+  (fits||[]).forEach(f => {
+    const x0 = 0, x1 = xmax;
+    g += `<line x1="${X(x0)}" y1="${Y(f.k*x0+f.b)}" x2="${X(x1)}" y2="${Y(f.k*x1+f.b)}" stroke="${COL[f.m]}" stroke-width="1.8" opacity=".9"/>`;
+  });
+  all.forEach(p => {
+    g += `<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4.5" fill="${COL[p.m]}" stroke="var(--ink)" stroke-width="1.2"/>`;
+  });
+  if(all.length){
+    let ly = mt + 14;
+    [1,2].forEach(m => {
+      if(!all.some(p => p.m === m)) return;
+      g += `<circle cx="${ml+pw-116}" cy="${ly-4}" r="4.5" fill="${COL[m]}"/>
+            <text x="${ml+pw-104}" y="${ly}" fill="var(--muted)" font-size="12.5">第 ${m} 級</text>`;
+      ly += 20;
+    });
+  } else {
+    g += `<text x="${ml+pw/2}" y="${mt+ph/2}" fill="var(--muted)" font-size="14" text-anchor="middle">尚無數據</text>`;
+  }
+  document.getElementById('chart').innerHTML = g;
+}
+function niceStep(max){
+  const raw = max/6, p = Math.pow(10, Math.floor(Math.log10(raw))), n = raw/p;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
+}
+function round2(v){ return Math.abs(v) < 1e-9 ? '0' : (Math.round(v*100)/100).toString(); }
+
+/* ===================== 揭曉 ===================== */
+document.getElementById('revealBtn').addEventListener('click', () => {
+  S.revealed = true;
+  const box = document.getElementById('revealBox');
+  const fits = lastFits;
+  let html = `<div class="results" style="margin-top:14px">
+      <div class="res hero"><em>本片光碟真實軌道間距</em><strong>${(S.aTrue/1000).toFixed(4)}</strong><small>μm（CD 規格值 1.6 μm，DVD 為 0.74 μm）</small></div>
+      <div class="res"><em>實際雷射入射角 α</em><strong>${alphaDeg().toFixed(2)}°</strong><small>0° 代表完全垂直入射</small></div>
+    </div>`;
+  if(fits.length){
+    html += '<h3>你的結果</h3><div class="results">';
+    fits.forEach(f => {
+      const d = f.a - S.aTrue, nsig = Math.abs(d)/f.sa;
+      html += `<div class="res"><em>第 ${f.m} 級</em><strong>${(f.a/1000).toFixed(4)}</strong>
+        <small>偏差 ${(d/1000 >= 0 ? '+' : '')}${(d/1000).toFixed(4)} μm（${(d/S.aTrue*100).toFixed(2)}%）<br>
+        相當於 ${nsig.toFixed(2)} σ</small></div>`;
+    });
+    html += '</div>';
+    const worst = Math.max(...fits.map(f => Math.abs(f.a - S.aTrue)/f.sa));
+    if(worst < 1) html += '<div class="ok">結果落在 1σ 之內，量測與誤差估計都相當可靠。</div>';
+    else if(worst < 2) html += '<div class="ok">結果落在 2σ 之內，屬合理範圍。</div>';
+    else html += `<div class="warn">偏差達 ${worst.toFixed(1)}σ，代表存在未被誤差估計涵蓋的系統性偏差。檢查方向：入射角是否確實歸零（本次為 ${alphaDeg().toFixed(2)}°）、L 的起算點、是否誤把不同級數的光點配成一對。</div>`;
+  } else {
+    html += '<div class="warn">尚未完成迴歸分析，無法比對。</div>';
+  }
+  const off = Math.abs(alphaDeg());
+  if(off > 0.5) html += `<div class="warn">本次的入射角偏離垂直 ${off.toFixed(2)}°。若在量測前先調整傾角讓 0 級光點回到小孔、並確認左右一級光點等距，可以把這項系統誤差降到最低。</div>`;
+  box.innerHTML = html;
+  updateReadout();
+});
+document.getElementById('newDisc').addEventListener('click', () => {
+  if(!confirm('將更換一片新的光碟（重新隨機生成軌道間距與初始傾角），並清空所有數據。確定嗎？')) return;
+  newDisc();
+  S.rows = []; S.seq = 0; S.curA = S.curB = null; S.active = 'A';
+  S.tiltSlider = 0; tiltSl.value = 0;
+  document.getElementById('revealBox').innerHTML = '';
+  renderSteps(); renderTable(); analyze(); refresh();
+});
+
+/* ===================== 初始化 ===================== */
+document.getElementById('LVal').textContent = S.L.toFixed(1) + ' cm';
+document.getElementById('sheetVal').textContent = S.sheets + ' 張';
+renderTable(); analyze(); refresh();
+</script>
+</body>
+</html>

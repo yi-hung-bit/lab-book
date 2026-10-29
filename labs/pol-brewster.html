@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>布魯斯特角虛擬實驗室</title>
+<style>
+:root{--bg:#f6f4ef;--panel:#fff;--ink:#22252b;--mut:#666b75;--line:#d9d5cc;--acc:#1f5f8b;--acc2:#b8452e;--ok:#2d7d46;--warn:#b7791f;--bad:#b42318;--laser:#e0261b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6;font-size:15px}
+header{background:#1d2a36;color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:19px;font-weight:600}
+header p{margin:2px 0 0;font-size:13px;opacity:.8}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 16px;background:#e9e5dc;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:6px;cursor:pointer;font:inherit;font-size:14px}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1180px;margin:0 auto;padding:16px}
+section.tab{display:none}section.tab.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:17px;color:var(--acc)}
+.card h3{margin:10px 0 6px;font-size:15px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+.eq{background:#f3f6f9;border-left:3px solid var(--acc);padding:6px 10px;font-family:"Cambria Math","Times New Roman",serif;margin:6px 0}
+.note{background:#fff8e6;border:1px solid #f0d58c;border-radius:8px;padding:8px 10px;font-size:14px}
+.danger{background:#fdecea;border:1px solid #f5b5ae;color:#8a1c12;border-radius:8px;padding:8px 10px;font-weight:600}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}.mut{color:var(--mut);font-size:13px}
+.ctl{display:grid;grid-template-columns:120px 1fr auto;gap:6px 10px;align-items:center;margin:6px 0}
+.ctl label{font-size:14px}
+input[type=range]{width:100%}
+button.b{border:1px solid var(--acc);background:#fff;color:var(--acc);padding:5px 10px;border-radius:6px;cursor:pointer;font:inherit;font-size:13px}
+button.b:hover{background:#eaf2f8}
+button.p{background:var(--acc);color:#fff}
+button.p:hover{background:#174a6d}
+button.r{border-color:var(--acc2);color:var(--acc2)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border:1px solid var(--line);padding:3px 5px;text-align:center;white-space:nowrap}
+th{background:#eef1f4}
+td input{width:54px;font:inherit;font-size:12px;text-align:center;border:1px solid #ccd;border-radius:3px;padding:1px}
+.scroll{overflow-x:auto}
+svg{display:block;max-width:100%;height:auto}
+.steps li{margin:4px 0}
+.stepbtn{display:flex;gap:8px;align-items:center;margin:5px 0}
+.stepbtn span.st{width:20px;text-align:center}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:#eef1f4;margin-left:4px}
+textarea{width:100%;min-height:110px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:6px;padding:6px}
+.big{font-size:20px;font-weight:700}
+select{font:inherit;font-size:14px;padding:3px}
+.kv td:first-child{text-align:left;background:#f7f7f4}
+.kv td{text-align:left;white-space:normal}
+#revPlot{max-width:760px}
+</style>
+</head>
+<body>
+<header>
+<h1>97 學年度 高雄市高級中學自然學科競賽複賽｜物理實驗第二題｜布魯斯特角虛擬實驗室</h1>
+<p>題目：利用偏振片、雷射筆、載玻片與大頭針，求雷射光從載玻片表面具有最弱反射時的入射角</p>
+</header>
+<nav id="nav">
+<button data-t="t1" class="on">① 原理</button>
+<button data-t="t2">② 器材組裝與雷射偏振</button>
+<button data-t="t3">③ 尋找最弱反射</button>
+<button data-t="t4">④ 插針測角</button>
+<button data-t="t5">⑤ 數據分析</button>
+<button data-t="t6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ ① 原理 ============ -->
+<section class="tab on" id="t1">
+<div class="card">
+<h2>光是橫波：s 偏振與 p 偏振</h2>
+<p>入射光線與反射面法線所構成的平面稱為<b>入射面</b>。本實驗中雷射光貼著水平的保麗龍板前進、載玻片垂直立起，因此入射面就是<b>水平面</b>。</p>
+<ul>
+<li><b>s 偏振</b>（德文 senkrecht，垂直）：電場振動方向垂直於入射面，即<b>鉛直</b>方向。</li>
+<li><b>p 偏振</b>（parallel，平行）：電場振動方向在入射面內，即<b>水平</b>方向（且垂直於光的前進方向）。</li>
+</ul>
+<p>兩種偏振的反射率由 Fresnel 公式給出（n₁ = 1 為空氣，n₂ = n 為玻璃，θ 為入射角，θₜ 為折射角）：</p>
+<div class="eq">r<sub>s</sub> = (cos θ − n cos θₜ) / (cos θ + n cos θₜ)　　r<sub>p</sub> = (n cos θ − cos θₜ) / (n cos θ + cos θₜ)　　R = r²</div>
+<p>當 n cos θ = cos θₜ 時 r<sub>p</sub> = 0，p 偏振光<b>完全不反射</b>。配合司乃耳定律 sin θ = n sin θₜ，可得此時 θ + θₜ = 90°，也就是<b>反射光與折射光互相垂直</b>，並推得</p>
+<div class="eq" style="font-size:18px">tan θ<sub>B</sub> = n　　（布魯斯特角 Brewster angle）</div>
+<p class="mut">物理圖像：玻璃中被 p 偏振電場驅動的電偶極沿「垂直折射光」的方向振盪；在 θ<sub>B</sub> 時這個方向恰好就是反射方向，而電偶極不沿自身振盪軸輻射，所以沒有反射光。s 偏振的偶極是鉛直振動，任何水平方向都能輻射，因此 R<sub>s</sub> 不會是零。</p>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h2>反射率曲線</h2>
+<div class="ctl"><label>玻璃折射率 n</label><input type="range" id="p1n" min="1.30" max="1.80" step="0.005" value="1.52"><span id="p1nv"></span></div>
+<div class="row"><label><input type="checkbox" id="p1log"> 對數縱軸（看清楚極小值附近）</label></div>
+<svg id="p1plot" viewBox="0 0 520 320"></svg>
+<p id="p1txt" class="mut"></p>
+</div>
+<div class="card">
+<h2>光路圖：反射光 ⟂ 折射光</h2>
+<div class="ctl"><label>入射角 θ</label><input type="range" id="p1t" min="5" max="85" step="0.1" value="40"><span id="p1tv"></span></div>
+<svg id="p1ray" viewBox="0 0 420 320"></svg>
+<p id="p1raytxt"></p>
+</div>
+</div>
+
+<div class="card">
+<h2>本實驗的關鍵：p 偏振光的極小值很「寬」</h2>
+<p>在燈光下用名片紙看光點，眼睛只能判斷「看得見」或「看不見」。在 θ<sub>B</sub> 兩側好幾度內 R<sub>p</sub> 都低於眼睛的可見門檻，所以「看起來最暗的角度」其實是一段區間。而且 R<sub>p</sub> 曲線<b>左右不對稱</b>（大角度那一側上升得較快），區間的中點會<b>系統性地偏向小角度</b>，區間越寬偏得越多。第 ⑤ 頁的「夾擠法迴歸」就是用來消除這個偏差。</p>
+<p>另外兩個實作重點：</p>
+<ol>
+<li>偏振片穿透軸必須轉成<b>水平</b>（p）。試題附圖中的箭頭是鉛直的，照原樣使用會得到 s 光，反射反而最強。</li>
+<li>半導體雷射筆輸出的光<b>本身就是部分線偏振</b>。先用偏振片找出雷射筆自己的偏振方向，再旋轉筆身讓它對齊水平，可以壓低殘留亮度（第 ② 頁）。</li>
+</ol>
+</div>
+</section>
+
+<!-- ============ ② 組裝 ============ -->
+<section class="tab" id="t2">
+<div class="danger">⚠ 安全規定（列入操作評分重點）：絕對不可用眼睛直視雷射光；任何時刻都必須用名片紙擋住雷射光的去向，避免直射或反射誤射他人。本模擬會記錄違規次數，並在第 ⑥ 頁顯示操作安全分。</div>
+<div class="grid3" style="margin-top:14px">
+<div class="card">
+<h2>器材組裝（俯視圖，40 cm × 40 cm 保麗龍板）</h2>
+<svg id="asmSvg" viewBox="0 0 400 400"></svg>
+</div>
+<div class="card">
+<h2>組裝步驟</h2>
+<div id="asmSteps"></div>
+<p class="mut">完成全部步驟後即可到第 ③ 頁量測。每一步都可以點兩下取消，觀察缺少該步驟時的問題。</p>
+</div>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h2>前置實驗：雷射筆本身的偏振方向</h2>
+<p>先不放載玻片，讓雷射直接穿過偏振片打在名片紙上。旋轉偏振片，觀察光點亮度的變化：</p>
+<ul>
+<li>若亮度隨 φ 明顯變化，表示雷射本身是偏振光。<b>最亮時</b>穿透軸方向就是雷射的偏振方向。</li>
+<li>最暗時光點<b>不會完全消失</b>，代表還有未偏振的成分。</li>
+</ul>
+<div class="ctl"><label>偏振片旋轉 φ</label><input type="range" id="pre_phi" min="0" max="180" step="1" value="0"><span id="pre_phiv"></span></div>
+<div class="ctl"><label>雷射筆自轉 ρ</label><input type="range" id="pre_rho" min="0" max="180" step="1" value="0"><span id="pre_rhov"></span></div>
+<div class="row"><button class="b" id="preLaser">開啟雷射</button><label><input type="checkbox" id="preCard" checked> 名片紙擋在偏振片後方</label></div>
+<div class="row"><button class="b" id="preRecMax">記錄「最亮」的 φ</button><button class="b" id="preRecMin">記錄「最暗」的 φ</button></div>
+<div id="preLog" class="mut"></div>
+</div>
+<div class="card">
+<h2>名片紙上的光點（正視）</h2>
+<div class="row"><svg id="preCardSvg" viewBox="0 0 240 160" style="width:240px"></svg><svg id="prePolSvg" viewBox="0 0 120 120" style="width:120px"></svg></div>
+<div class="note">建議作法：找到最亮的 φ（雷射的偏振方向）後，旋轉雷射筆本身（改變 ρ），使最亮方向落在 φ = 90°（水平）。這樣第 ③ 頁把偏振片設為水平時，通過的 p 光最多、漏過的 s 光最少。<br>注意：偏振片框上的箭頭是印刷標示，與真正穿透軸可能差幾度。</div>
+</div>
+</div>
+</section>
+
+<!-- ============ ③ 量測 ============ -->
+<section class="tab" id="t3">
+<div id="warn3"></div>
+<div class="grid3">
+<div class="card">
+<h2>實驗台（俯視）</h2>
+<svg id="labSvg" viewBox="0 0 400 400"></svg>
+<p class="mut">紅線是雷射光路。雷射筆的擺放方向沒有刻度，入射角必須在第 ④ 頁由大頭針位置量出。</p>
+</div>
+<div>
+<div class="card">
+<h2>觀察</h2>
+<div class="row" style="align-items:flex-start">
+<div><div class="mut">反射光點（名片紙局部放大，30 mm × 20 mm）</div><svg id="labCard" viewBox="0 0 240 160" style="width:240px"></svg></div>
+<div><div class="mut">偏振片（迎光看）</div><svg id="labPol" viewBox="0 0 120 120" style="width:110px"></svg></div>
+</div>
+</div>
+<div class="card">
+<h2>操作</h2>
+<div class="row"><button class="b p" id="labLaser">開啟雷射</button>
+<label><input type="checkbox" id="cardR" checked> 名片紙擋反射光</label>
+<label><input type="checkbox" id="cardT" checked> 名片紙擋穿透光</label></div>
+<div class="row">偏振片位置：
+<label><input type="radio" name="pos" value="before" checked> 入射前</label>
+<label><input type="radio" name="pos" value="after"> 反射後</label>
+<label><input type="radio" name="pos" value="none"> 不放</label></div>
+<div class="ctl"><label>雷射筆方向</label><input type="range" id="th0" min="20" max="80" step="0.05" value="40"><span></span></div>
+<div class="row" style="margin-left:126px"><button class="b" data-d="-1">◀◀ 大</button><button class="b" data-d="-0.2">◀ 微</button><button class="b" data-d="0.2">微 ▶</button><button class="b" data-d="1">大 ▶▶</button></div>
+<div class="ctl"><label>偏振片旋轉 φ</label><input type="range" id="phi" min="0" max="180" step="0.5" value="0"><span id="phiv"></span></div>
+<div class="ctl"><label>雷射筆自轉 ρ</label><input type="range" id="rho" min="0" max="180" step="1" value="0"><span id="rhov"></span></div>
+<div class="row">環境光：
+<label><input type="radio" name="amb" value="on" checked> 燈全開</label>
+<label><input type="radio" name="amb" value="dim"> 關一半</label>
+<label><input type="radio" name="amb" value="dark"> 關燈＋手遮</label></div>
+<hr style="border:none;border-top:1px solid var(--line)">
+<div class="row">記錄類型：<select id="recType">
+<option value="dark">最暗點（目視）</option>
+<option value="lo">θ₁：由小往大轉，光點剛消失</option>
+<option value="hi">θ₂：繼續轉大，光點剛出現</option>
+<option value="obs">一般觀察</option>
+</select>
+<button class="b p" id="recBtn">插針並記錄此角度</button></div>
+<div id="recMsg" class="mut"></div>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>建議操作流程</h2>
+<ol class="steps">
+<li>先把偏振片放在<b>入射前</b>，φ 設為 90°（水平，p 光）。將入射角從約 40° 慢慢轉大，觀察反射光點變暗後又變亮。</li>
+<li>在最暗附近<b>交替微調</b>入射角與 φ，讓光點盡量暗。因為箭頭標示可能有誤差、載玻片也可能微微傾斜，最佳 φ 不一定剛好是 90°。</li>
+<li>試著把 φ 轉到 0°（s 光）比較：在同一角度光點應該很亮。</li>
+<li><b>夾擠法</b>：在每一種環境光下，由小角度往大轉，光點剛消失時記錄 θ₁；繼續轉，光點剛重新出現時記錄 θ₂。每種環境光重複 3 次以上。</li>
+<li><b>目視法</b>：直接把入射角調到你認為最暗的位置，記錄「最暗點」，重複 5 次以上。</li>
+<li>試試看把偏振片移到<b>反射後</b>（當檢偏片）：結果應該相同。</li>
+</ol>
+</div>
+</section>
+
+<!-- ============ ④ 插針測角 ============ -->
+<section class="tab" id="t4">
+<div class="card">
+<h2>插針作圖求入射角</h2>
+<p>座標系以簽字筆沿載玻片前緣畫的直線為 x 軸，入射點 O 為原點，y 軸為法線並指向雷射一側。每次記錄時，沿入射光與反射光各插兩支大頭針（距 O 約 8 cm 與 16 cm），再從方格紙讀出針孔座標（單位 mm，可估讀到 0.5 mm）。</p>
+<div class="eq">入射光：tan θ<sub>入</sub> = −Δx / Δy　　反射光：tan θ<sub>反</sub> = Δx / Δy　　θ = (θ<sub>入</sub> + θ<sub>反</sub>) / 2</div>
+<p class="mut">取 θ<sub>入</sub> 與 θ<sub>反</sub> 的平均有個重要好處：如果簽字筆線畫歪了 ε，θ<sub>入</sub> 會偏 +ε、θ<sub>反</sub> 會偏 −ε，平均後正好抵消。量角器（直徑小於 9 cm）也同樣分別量兩邊再平均。表格中的座標與量角器讀數都可以修改。</p>
+</div>
+<div class="grid3">
+<div class="card scroll">
+<h2>數據記錄表</h2>
+<table id="dataTbl"></table>
+<div class="row"><button class="b r" id="clearAll">清除全部記錄</button></div>
+</div>
+<div class="card">
+<h2>方格紙作圖（點選表格列）</h2>
+<svg id="paperSvg" viewBox="0 0 400 260"></svg>
+<div id="paperTxt" class="mut"></div>
+</div>
+</div>
+</section>
+
+<!-- ============ ⑤ 分析 ============ -->
+<section class="tab" id="t5">
+<div class="card">
+<div class="row">角度來源：<label><input type="radio" name="src" value="pin" checked> 大頭針 tan 法</label><label><input type="radio" name="src" value="prot"> 量角器</label></div>
+</div>
+<div class="grid2">
+<div class="card">
+<h2>方法 A：目視最暗點直接平均</h2>
+<div id="anaA"></div>
+</div>
+<div class="card">
+<h2>方法 B：夾擠法＋中點對 w² 迴歸外插</h2>
+<p class="mut">每組 (θ₁, θ₂)：中點 m = (θ₁+θ₂)/2，半寬 w = (θ₂−θ₁)/2。因為 R<sub>p</sub> 曲線不對稱，m 會隨 w 增大而偏離 θ<sub>B</sub>，且偏差近似與 w² 成正比：</p>
+<div class="eq">m = θ<sub>B</sub> + k·w²　→ 以 m 對 w² 做最小平方迴歸，截距就是 θ<sub>B</sub></div>
+<p class="mut">三種環境光的可見門檻不同，會給出不同寬度的區間，所以至少需要兩種環境光的數據才能外插。</p>
+<svg id="anaBplot" viewBox="0 0 480 300"></svg>
+<div id="anaB"></div>
+</div>
+</div>
+<div class="card">
+<h2>結果與折射率</h2>
+<div class="eq">n = tan θ<sub>B</sub>　　σ<sub>n</sub> = sec²θ<sub>B</sub> · σ<sub>θ</sub>（弧度）= (1 + n²) σ<sub>θ</sub></div>
+<div id="anaRes"></div>
+</div>
+<div class="card">
+<h2>(e) 誤差討論（自行填寫，答案卷用）</h2>
+<textarea id="errText" placeholder="例如：目視判斷最暗位置的範圍、偏振片箭頭標示誤差、雷射本身的偏振、大頭針插歪……"></textarea>
+</div>
+</section>
+
+<!-- ============ ⑥ 真值揭曉 ============ -->
+<section class="tab" id="t6">
+<div class="card">
+<h2>誤差來源整理</h2>
+<table class="kv">
+<tr><th style="width:24%">來源</th><th>影響與對策</th></tr>
+<tr><td>極小值區間寬且不對稱</td><td>目視「最暗點」幾乎等於可見區間的中點，會<b>系統性偏小</b>，燈越亮偏越多（燈全開時約 −0.8°，對應 n 偏低約 0.05）。對策：降低環境光，並用夾擠法對 w² 迴歸外插。</td></tr>
+<tr><td>偏振片箭頭標示誤差、載玻片傾斜</td><td>真正的 p 方向與「箭頭水平」差幾度時，會漏過 sin²δ·R<sub>s</sub> 的 s 光，光點在 θ<sub>B</sub> 也不會消失。對策：在最暗附近交替微調 θ 與 φ。</td></tr>
+<tr><td>雷射本身部分偏振</td><td>雷射偏振方向若與穿透軸垂直，p 光很弱、偏振片漏光比例變高。對策：先旋轉筆身，讓雷射偏振對齊水平。</td></tr>
+<tr><td>偏振片消光比有限</td><td>即使完全對準，仍有少量 s 光通過，造成暗室中也看得到微弱光點。</td></tr>
+<tr><td>載玻片前後兩面反射</td><td>兩個光點錯開不到 1 mm 而重疊；兩者在同一個 θ<sub>B</sub> 消失，不影響結果，但讓光點看起來比較大。</td></tr>
+<tr><td>插針與讀座標</td><td>針距 O 8 cm 時，0.4 mm 的偏差約為 0.3°；取入射、反射平均可抵消畫線歪斜。小量角器讀數只到 0.5°。</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>真值揭曉</h2>
+<div class="row"><button class="b p" id="reveal">揭曉真值</button><button class="b r" id="newSample">換一片新載玻片（重新抽樣、清除數據）</button></div>
+<div id="revealBox"></div>
+</div>
+<div class="card" id="revealPlotCard" style="display:none">
+<h2>反射光點亮度 vs 入射角（以你最後一筆記錄的設定計算）</h2>
+<svg id="revPlot" viewBox="0 0 620 340"></svg>
+<p class="mut">水平虛線是三種環境光的可見門檻：曲線低於門檻時看不見光點。三角形是你記錄的 θ₁、θ₂，圓點是目視最暗點，綠線是真正的 θ<sub>B</sub>。</p>
+</div>
+</section>
+</main>
+
+<script>
+"use strict";
+const D2R=Math.PI/180, R2D=180/Math.PI;
+const $=id=>document.getElementById(id);
+const randn=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+const rnd=(a,b)=>a+(b-a)*Math.random();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const r05=x=>Math.round(x*2)/2;
+const f2=x=>(isFinite(x)?x.toFixed(2):'—');
+const SVGNS='http://www.w3.org/2000/svg';
+
+/* ---------- 隱藏真值 ---------- */
+let H;
+function newSample(){
+  H={n:rnd(1.500,1.530), P:rnd(0.75,0.97), psi0:rnd(0,180), beta:rnd(-1,1), dMark:rnd(-2,2),
+     eps:rnd(0.001,0.004), tau:rnd(0.78,0.86), lineErr:randn()*0.4, oErr:[randn()*0.3,randn()*0.3]};
+}
+newSample();
+
+/* ---------- 物理模型 ---------- */
+function fres(th,n){const c=Math.cos(th),s=Math.sin(th),st=s/n,ct=Math.sqrt(1-st*st);
+  const rs=(c-n*ct)/(c+n*ct), rp=(n*c-ct)/(n*c+ct); return {rs,rp,Rs:rs*rs,Rp:rp*rp,ct,c};}
+// 幾何：雷射水平入射，水平方向與名義法線夾 θ0；載玻片傾斜 β
+function geom(th0){
+  const t=th0*D2R,b=H.beta*D2R;
+  const th=Math.acos(Math.cos(t)*Math.cos(b))*R2D;           // 真實 3D 入射角
+  const gam=Math.atan(Math.tan(b)/Math.sin(t))*R2D;          // s/p 基底繞光軸旋轉
+  const rx=Math.sin(t), ry=Math.cos(t)*Math.cos(2*b), rz=Math.cos(t)*Math.sin(2*b);
+  const hn=Math.hypot(rx,ry);
+  return {th, gam, thOut:Math.atan2(rx,ry)*R2D, slope:rz/hn};
+}
+// 名片紙上光點強度（雷射輸出 = 1）
+function optics(o){
+  const g=geom(o.theta0), F=fres(g.th*D2R,H.n);
+  const psi=(H.psi0+o.rho)*D2R, gam=g.gam*D2R, phT=(o.phi+H.dMark)*D2R;
+  const P=H.P, U=1-P, t1=H.tau, t2=H.tau*H.eps;
+  const bS=(1-F.Rs)**2*F.Rs, bP=(1-F.Rp)**2*F.Rp;
+  let front=0, back=0;
+  const inc=(I,a)=>{const al=a-gam, c2=Math.cos(al)**2, s2=1-c2; front+=I*(c2*F.Rs+s2*F.Rp); back+=I*(c2*bS+s2*bP);};
+  if(o.pos==='before'){const d=psi-phT,c2=Math.cos(d)**2;
+    inc(t1*(P*c2+U/2),phT); inc(t2*(P*(1-c2)+U/2),phT+Math.PI/2);
+  }else if(o.pos==='none'){inc(P,psi); inc(U/2,0); inc(U/2,Math.PI/2);}
+  else{const Es=Math.sqrt(P)*Math.cos(psi-gam), Ep=Math.sqrt(P)*Math.sin(psi-gam), chi=phT-gam, cc=Math.cos(chi)**2, ss=1-cc;
+    const an=(rs,rp,Rs,Rp)=>{const as=Es*rs, ap=Ep*rp, A=as*Math.cos(chi)+ap*Math.sin(chi), B=-as*Math.sin(chi)+ap*Math.cos(chi);
+      const Us=U/2*Rs, Up=U/2*Rp; return t1*(A*A+Us*cc+Up*ss)+t2*(B*B+Us*ss+Up*cc);};
+    front=an(F.rs,F.rp,F.Rs,F.Rp); back=an(-(1-F.Rs)*F.rs,-(1-F.Rp)*F.rp,bS,bP);
+  }
+  front+=3e-5; back+=1.5e-5; // 表面灰塵散射
+  const sep=2*1.0*Math.tan(Math.asin(Math.sin(g.th*D2R)/H.n))*Math.cos(g.th*D2R); // 前後光點側向間距 mm（玻片厚 1 mm）
+  return {front,back,g,sep};
+}
+const AMB={on:{T:6e-3,lab:'燈全開',bg:'#f2efe6',ink:'#888'},dim:{T:2e-3,lab:'關一半',bg:'#a7a297',ink:'#555'},dark:{T:4e-4,lab:'關燈＋手遮',bg:'#3a3833',ink:'#888'}};
+const bright=(I,T)=>clamp(Math.log10(I/T)/2.5,0,1);
+
+/* ---------- 狀態 ---------- */
+const S={on:false,theta0:40,phi:0,rho:0,pos:'before',amb:'on',cardR:true,cardT:true,recs:[],viol:0,unsafeT:0,unsafeFlag:false,sel:-1,
+  pre:{on:false,phi:0,rho:0,card:true,log:[]},asm:[false,false,false,false,false,false],revealed:false};
+
+/* ---------- 分頁 ---------- */
+let curTab='t1';
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  curTab=b.dataset.t; refresh();
+});
+function refresh(){ if(curTab==='t1'){drawP1();drawRay();} if(curTab==='t2'){drawAsm();} if(curTab==='t3')drawLab(); if(curTab==='t4')drawTable(); if(curTab==='t5')analyze(); if(curTab==='t6'&&S.revealed)doReveal(); }
+
+/* ---------- 共用 SVG ---------- */
+function el(tag,attrs,parent,text){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!==undefined)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function clear(s){while(s.firstChild)s.removeChild(s.firstChild);}
+
+/* ================= ① 原理 ================= */
+function drawP1(){
+  const n=+$('p1n').value; $('p1nv').textContent=n.toFixed(3);
+  const lg=$('p1log').checked, s=$('p1plot'); clear(s);
+  const X0=50,X1=500,Y0=280,Y1=20, xs=t=>X0+(X1-X0)*t/90;
+  const ys=lg?(R=>Y0-(Y0-Y1)*(Math.log10(Math.max(R,1e-4))+4)/4):(R=>Y0-(Y0-Y1)*R);
+  for(let t=0;t<=90;t+=10){el('line',{x1:xs(t),y1:Y0,x2:xs(t),y2:Y1,stroke:'#e6e3dc'},s);el('text',{x:xs(t),y:Y0+16,'text-anchor':'middle','font-size':11},s,t+'°');}
+  const ticks=lg?[1e-4,1e-3,1e-2,1e-1,1]:[0,0.2,0.4,0.6,0.8,1];
+  ticks.forEach(R=>{el('line',{x1:X0,y1:ys(R),x2:X1,y2:ys(R),stroke:'#e6e3dc'},s);el('text',{x:X0-5,y:ys(R)+4,'text-anchor':'end','font-size':11},s,lg?('10'+['⁻⁴','⁻³','⁻²','⁻¹','⁰'][Math.round(Math.log10(R))+4]):R.toFixed(1));});
+  let ds='',dp='';
+  for(let t=0;t<=89.9;t+=0.25){const F=fres(t*D2R,n);ds+=(ds?'L':'M')+xs(t).toFixed(1)+','+ys(F.Rs).toFixed(1);dp+=(dp?'L':'M')+xs(t).toFixed(1)+','+ys(F.Rp).toFixed(1);}
+  el('path',{d:ds,fill:'none',stroke:'#1f5f8b','stroke-width':2},s);el('path',{d:dp,fill:'none',stroke:'#b8452e','stroke-width':2},s);
+  const tb=Math.atan(n)*R2D; el('line',{x1:xs(tb),y1:Y0,x2:xs(tb),y2:Y1,stroke:'#2d7d46','stroke-dasharray':'4 3'},s);
+  el('text',{x:xs(tb)+4,y:Y1+12,'font-size':12,fill:'#2d7d46'},s,'θB = '+tb.toFixed(2)+'°');
+  el('text',{x:X0+8,y:Y1+14,'font-size':12,fill:'#1f5f8b'},s,'Rs（s 偏振）');el('text',{x:X0+8,y:Y1+30,'font-size':12,fill:'#b8452e'},s,'Rp（p 偏振）');
+  el('text',{x:(X0+X1)/2,y:Y0+32,'text-anchor':'middle','font-size':12},s,'入射角 θ');
+  const Fb=fres(tb*D2R,n);
+  $('p1txt').innerHTML=`n = ${n.toFixed(3)}：θ<sub>B</sub> = ${tb.toFixed(2)}°，此時 R<sub>s</sub> = ${(Fb.Rs*100).toFixed(1)}%，R<sub>p</sub> = 0。勾選對數縱軸可以看到 R<sub>p</sub> 在 θ<sub>B</sub> 附近的深谷，以及兩側上升速率不同。`;
+}
+function drawRay(){
+  const n=+$('p1n').value, t=+$('p1t').value; $('p1tv').textContent=t.toFixed(1)+'°';
+  const s=$('p1ray'); clear(s);
+  const O=[210,160], L=140;
+  el('rect',{x:0,y:160,width:420,height:160,fill:'#dfeef5'},s);
+  el('line',{x1:0,y1:160,x2:420,y2:160,stroke:'#567'},s);
+  el('line',{x1:210,y1:20,x2:210,y2:300,stroke:'#999','stroke-dasharray':'4 4'},s);
+  el('text',{x:10,y:180,'font-size':12,fill:'#345'},s,'玻璃 n = '+n.toFixed(3));el('text',{x:10,y:150,'font-size':12,fill:'#345'},s,'空氣');
+  const tr=Math.asin(Math.sin(t*D2R)/n)*R2D, F=fres(t*D2R,n);
+  const pI=[O[0]-L*Math.sin(t*D2R),O[1]-L*Math.cos(t*D2R)], pR=[O[0]+L*Math.sin(t*D2R),O[1]-L*Math.cos(t*D2R)], pT=[O[0]+L*Math.sin(tr*D2R),O[1]+L*Math.cos(tr*D2R)];
+  el('line',{x1:pI[0],y1:pI[1],x2:O[0],y2:O[1],stroke:'#e0261b','stroke-width':3},s);
+  el('line',{x1:O[0],y1:O[1],x2:pR[0],y2:pR[1],stroke:'#e0261b','stroke-width':3,opacity:clamp(0.15+F.Rp*8,0.15,1),'stroke-dasharray':'7 4'},s);
+  el('line',{x1:O[0],y1:O[1],x2:pT[0],y2:pT[1],stroke:'#e0261b','stroke-width':3,opacity:.8},s);
+  // p 偶極（玻璃中，垂直折射光、在入射面內）
+  const m=[O[0]+0.55*L*Math.sin(tr*D2R),O[1]+0.55*L*Math.cos(tr*D2R)], dx=Math.cos(tr*D2R)*22, dy=-Math.sin(tr*D2R)*22;
+  el('line',{x1:m[0]-dx,y1:m[1]-dy,x2:m[0]+dx,y2:m[1]+dy,stroke:'#1f5f8b','stroke-width':2.5,'marker-end':'url(#ah)','marker-start':'url(#ah)'},s);
+  const defs=el('defs',{},s), mk=el('marker',{id:'ah',viewBox:'0 0 10 10',refX:5,refY:5,markerWidth:6,markerHeight:6,orient:'auto-start-reverse'},defs); el('path',{d:'M0,0L10,5L0,10z',fill:'#1f5f8b'},mk);
+  el('text',{x:m[0]+dx+4,y:m[1]+dy,'font-size':11,fill:'#1f5f8b'},s,'p 偶極振動方向');
+  // 偶極方向的延長線（虛線）
+  el('line',{x1:O[0],y1:O[1],x2:O[0]-1.2*L*Math.cos(tr*D2R)*-1,y2:O[1]-1.2*L*Math.sin(tr*D2R),stroke:'#1f5f8b','stroke-dasharray':'2 4',opacity:.6},s);
+  const ang=180-t-tr;
+  $('p1raytxt').innerHTML=`入射角 ${t.toFixed(1)}°，折射角 ${tr.toFixed(1)}°，反射光與折射光夾角 <b>${ang.toFixed(1)}°</b>；R<sub>p</sub> = ${(F.Rp*100).toFixed(3)}%，R<sub>s</sub> = ${(F.Rs*100).toFixed(2)}%。`+
+    (Math.abs(ang-90)<0.3?' <span class="ok">夾角 90°：偶極振動方向就是反射方向，p 光不反射！</span>':'');
+}
+['p1n','p1log','p1t'].forEach(id=>$(id).addEventListener('input',()=>{drawP1();drawRay();}));
+
+/* ================= 實驗台繪圖（②、③ 共用） ================= */
+function drawBoard(s,opt){
+  clear(s);
+  el('rect',{x:0,y:0,width:400,height:400,fill:'#fbfbf8',stroke:'#bbb'},s);
+  if(opt.paper){ for(let i=0;i<=400;i+=10)el('line',{x1:i,y1:0,x2:i,y2:400,stroke:i%50?'#e4ecf2':'#c8d8e4','stroke-width':i%50?.5:.8},s);
+                 for(let i=0;i<=400;i+=10)el('line',{x1:0,y1:i,x2:400,y2:i,stroke:i%50?'#e4ecf2':'#c8d8e4','stroke-width':i%50?.5:.8},s);}
+  const O=[200,250];
+  if(opt.line) el('line',{x1:150,y1:250-0.5,x2:250,y2:250+0.5+Math.tan(H.lineErr*D2R)*0,stroke:'#222','stroke-width':.8,transform:`rotate(${-H.lineErr} 200 250)`},s);
+  if(opt.slide){ el('rect',{x:162.5,y:249,width:75,height:2.4,fill:'#bfe3ef',stroke:'#5aa5bd','stroke-width':.6},s);
+    el('rect',{x:165,y:251.4,width:16,height:8,fill:'#333'},s); el('rect',{x:219,y:251.4,width:16,height:8,fill:'#333'},s);
+    el('text',{x:200,y:274,'text-anchor':'middle','font-size':10,fill:'#456'},s,'載玻片＋長尾夾'); }
+  const t=opt.theta0*D2R, g=opt.g;
+  const ui=[-Math.sin(t),-Math.cos(t)];                 // O 指向雷射
+  const ur=[Math.sin(g.thOut*D2R),-Math.cos(g.thOut*D2R)];   // 反射方向
+  const L=[O[0]+150*ui[0],O[1]+150*ui[1]];
+  if(opt.laser){ const a=Math.atan2(-ui[1],-ui[0])*R2D;
+    const gL=el('g',{transform:`translate(${L[0]},${L[1]}) rotate(${a})`},s);
+    el('rect',{x:-55,y:-5,width:55,height:10,rx:3,fill:'#444'},gL); el('rect',{x:-6,y:-3,width:6,height:6,fill:'#999'},gL);
+    el('text',{x:L[0]+ui[0]*30+12,y:L[1]+ui[1]*30+22,'font-size':10,fill:'#333','text-anchor':'middle'},s,'雷射筆'); }
+  const on=opt.on;
+  if(on){
+    el('line',{x1:L[0],y1:L[1],x2:O[0],y2:O[1],stroke:'#e0261b','stroke-width':1.6},s);
+    const rEnd=opt.cardR?170:420;
+    el('line',{x1:O[0],y1:O[1],x2:O[0]+rEnd*ur[0],y2:O[1]+rEnd*ur[1],stroke:'#e0261b','stroke-width':1.6,opacity:opt.rOpac??0.7,'stroke-dasharray':opt.cardR?'':'5 3'},s);
+    if(opt.slide){ const tEnd=opt.cardT?110:420; const ut=[Math.sin(t),Math.cos(t)];
+      el('line',{x1:O[0],y1:O[1],x2:O[0]+tEnd*ut[0],y2:O[1]+tEnd*ut[1],stroke:'#e0261b','stroke-width':1.4,opacity:.8,'stroke-dasharray':opt.cardT?'':'5 3'},s);}
+  }
+  // 名片紙
+  const card=(P,u,lab)=>{const px=-u[1],py=u[0];el('line',{x1:P[0]-27*px,y1:P[1]-27*py,x2:P[0]+27*px,y2:P[1]+27*py,stroke:'#7a5c2e','stroke-width':3},s);el('text',{x:P[0]+u[0]*14,y:P[1]+u[1]*14+4,'font-size':9,'text-anchor':'middle',fill:'#7a5c2e'},s,lab);};
+  if(opt.cardR) card([O[0]+170*ur[0],O[1]+170*ur[1]],ur,'名片紙');
+  if(opt.cardT&&opt.slide){const ut=[Math.sin(t),Math.cos(t)];card([O[0]+110*ut[0],O[1]+110*ut[1]],ut,'名片紙');}
+  // 偏振片
+  if(opt.pos&&opt.pos!=='none'){ const u=opt.pos==='before'?ui:ur; const P=[O[0]+80*u[0],O[1]+80*u[1]], px=-u[1],py=u[0];
+    el('line',{x1:P[0]-14*px,y1:P[1]-14*py,x2:P[0]+14*px,y2:P[1]+14*py,stroke:'#555','stroke-width':4},s);
+    el('text',{x:P[0]+u[0]*0-px*24,y:P[1]-py*24,'font-size':9,'text-anchor':'middle',fill:'#333'},s,'偏振片');}
+  // 大頭針
+  if(opt.pins) opt.pins.forEach(r=>{const tr=(p)=>{ // 繪圖座標：真實座標（未含畫線誤差）
+      return [O[0]+p[0],O[1]-p[1]];};
+    r.truePins.forEach(p=>{const q=tr(p);el('circle',{cx:q[0],cy:q[1],r:2.2,fill:r===opt.pins[opt.pins.length-1]?'#1f5f8b':'#9bb',stroke:'#fff','stroke-width':.6},s);});});
+  // 違規
+  if(on&&(!opt.cardR||(opt.slide&&!opt.cardT))) el('text',{x:200,y:20,'text-anchor':'middle','font-size':14,fill:'#b42318','font-weight':700},s,'⚠ 雷射光未被名片紙擋住！');
+}
+function drawSpot(s,front,back,sep,zmm,amb,label){
+  clear(s); const A=AMB[amb];
+  el('rect',{x:0,y:0,width:240,height:160,fill:A.bg,rx:4},s);
+  const cx=120, cy=80-zmm*8;
+  const defs=el('defs',{},s);
+  const mk=(id,b)=>{const g=el('radialGradient',{id},defs);el('stop',{offset:'0%','stop-color':'#fff6f0','stop-opacity':b},g);el('stop',{offset:'35%','stop-color':'#ff2a1a','stop-opacity':b},g);el('stop',{offset:'100%','stop-color':'#ff2a1a','stop-opacity':0},g);};
+  const fl=1+0.03*randn(), ft=1+0.06*randn();
+  // 兩光點錯開不到 1 mm、光束直徑約 2 mm，眼睛看到的是合成亮度
+  const tot=(front+back)*fl, bt=bright(tot,A.T*ft);
+  const bf=tot>0?bt*clamp(0.55+0.45*front/((front+back)||1),0,1):0, bb=tot>0?bt*clamp(back/((front)||1),0,1):0;
+  mk('gF'+s.id,bf); mk('gB'+s.id,bb);
+  if(bb>0) el('circle',{cx:cx+sep*8,cy,r:9+9*bb,fill:`url(#gB${s.id})`},s);
+  if(bf>0) el('circle',{cx,cy,r:9+9*bf,fill:`url(#gF${s.id})`},s);
+  el('text',{x:6,y:154,'font-size':10,fill:A.ink},s,label||'');
+  return bf>0||bb>0;
+}
+function drawPol(s,phi){
+  clear(s); el('rect',{x:10,y:10,width:100,height:100,rx:6,fill:'#ddd',stroke:'#888'},s);
+  el('circle',{cx:60,cy:60,r:38,fill:'#8b8f96',opacity:.7},s);
+  const a=phi*D2R, dx=Math.sin(a)*34, dy=-Math.cos(a)*34;
+  el('line',{x1:60-dx,y1:60-dy,x2:60+dx,y2:60+dy,stroke:'#fff','stroke-width':2.5},s);
+  el('polygon',{points:`${60+dx},${60+dy} ${60+dx*0.7-dy*0.2},${60+dy*0.7+dx*0.2} ${60+dx*0.7+dy*0.2},${60+dy*0.7-dx*0.2}`,fill:'#fff'},s);
+  el('text',{x:60,y:118,'text-anchor':'middle','font-size':10},s,'箭頭 φ = '+phi+'°');
+}
+
+/* ================= ② 組裝 ================= */
+const ASM=['將方格紙用膠帶貼在保麗龍板上','用長尾夾把載玻片垂直立在板子中央','用簽字筆沿載玻片前緣在方格紙上畫線（x 軸）','用膠帶／牙籤把雷射筆固定在板面，雷射光貼著板面前進','把夾著偏振片的幻燈片夾立在雷射前方','名片紙擋在反射光與穿透光的去向'];
+function drawAsm(){
+  const box=$('asmSteps'); box.innerHTML='';
+  ASM.forEach((t,i)=>{const d=document.createElement('div');d.className='stepbtn';
+    d.innerHTML=`<span class="st">${S.asm[i]?'✅':'⬜'}</span><button class="b">${i+1}. ${t}</button>`;
+    d.querySelector('button').onclick=()=>{S.asm[i]=!S.asm[i];drawAsm();};box.appendChild(d);});
+  const g=geom(55);
+  drawBoard($('asmSvg'),{paper:S.asm[0],slide:S.asm[1],line:S.asm[2],laser:S.asm[3],pos:S.asm[4]?'before':'none',cardR:S.asm[5],cardT:S.asm[5],on:S.asm[3]&&S.pre.on,theta0:55,g});
+  // 前置實驗
+  const p=S.pre; $('pre_phiv').textContent=p.phi+'°'; $('pre_rhov').textContent=p.rho+'°';
+  $('preLaser').textContent=p.on?'關閉雷射':'開啟雷射';
+  const psi=(H.psi0+p.rho)*D2R, phT=(p.phi+H.dMark)*D2R, d=psi-phT, c2=Math.cos(d)**2;
+  const I=H.tau*(H.P*c2+(1-H.P)/2)+H.tau*H.eps*(H.P*(1-c2)+(1-H.P)/2);
+  drawSpot($('preCardSvg'),p.on&&p.card?I:0,0,0,0,'on','名片紙（燈全開，光點強度 ≈ 雷射輸出）');
+  drawPol($('prePolSvg'),p.phi);
+  $('preLog').innerHTML=p.log.map(x=>`${x.k}：φ = ${x.phi}°（ρ = ${x.rho}°）`).join('<br>');
+}
+// 前置實驗光點對強光：用門檻 T 高一點顯示亮度差
+$('pre_phi').oninput=e=>{S.pre.phi=+e.target.value;drawAsm();};
+$('pre_rho').oninput=e=>{S.pre.rho=+e.target.value;drawAsm();};
+$('preLaser').onclick=()=>{S.pre.on=!S.pre.on;if(S.pre.on&&!S.pre.card)S.viol++;drawAsm();};
+$('preCard').onchange=e=>{S.pre.card=e.target.checked;if(S.pre.on&&!S.pre.card)S.viol++;drawAsm();};
+$('preRecMax').onclick=()=>{S.pre.log.push({k:'最亮',phi:S.pre.phi,rho:S.pre.rho});drawAsm();};
+$('preRecMin').onclick=()=>{S.pre.log.push({k:'最暗',phi:S.pre.phi,rho:S.pre.rho});drawAsm();};
+
+/* ================= ③ 量測 ================= */
+function opt3(){return {theta0:S.theta0,phi:S.phi,rho:S.rho,pos:S.pos};}
+function drawLab(){
+  $('phiv').textContent=S.phi.toFixed(1)+'°'; $('rhov').textContent=S.rho+'°';
+  $('labLaser').textContent=S.on?'關閉雷射':'開啟雷射';
+  const o=optics(opt3());
+  const vis=S.on&&S.cardR? drawSpot($('labCard'),o.front,o.back,o.sep,170*o.g.slope,S.amb,AMB[S.amb].lab) : drawSpot($('labCard'),0,0,0,0,S.amb,S.on?(S.cardR?'':'反射光沒有打在名片紙上！'):'雷射關閉');
+  drawPol($('labPol'),S.phi);
+  const ropa=S.on?clamp(0.08+Math.log10((o.front+o.back)/1e-4)/4,0.08,0.9):0;
+  drawBoard($('labSvg'),{paper:true,slide:true,line:true,laser:true,pos:S.pos,cardR:S.cardR,cardT:S.cardT,on:S.on,theta0:S.theta0,g:o.g,rOpac:ropa,pins:S.recs.slice(-1)});
+  const unsafe=S.on&&(!S.cardR||!S.cardT);
+  $('warn3').innerHTML=unsafe?'<div class="danger" style="margin-bottom:10px">⚠ 雷射光沒有被名片紙擋住，這會被扣操作分數！累計違規 '+S.viol+' 次。</div>':(S.viol?`<div class="mut" style="margin-bottom:8px">累計安全違規 ${S.viol} 次</div>`:'');
+}
+setInterval(()=>{
+  const unsafe=S.on&&(!S.cardR||!S.cardT);
+  if(unsafe){S.unsafeT+=0.12; if(S.unsafeT>1&&!S.unsafeFlag){S.viol++;S.unsafeFlag=true;}} else {S.unsafeT=0;S.unsafeFlag=false;}
+  if(curTab==='t3')drawLab();
+  if(curTab==='t2'&&S.pre.on)drawAsm();
+},120);
+$('labLaser').onclick=()=>{S.on=!S.on;drawLab();};
+$('cardR').onchange=e=>{S.cardR=e.target.checked;};
+$('cardT').onchange=e=>{S.cardT=e.target.checked;};
+document.querySelectorAll('input[name=pos]').forEach(r=>r.onchange=()=>{S.pos=r.value;});
+document.querySelectorAll('input[name=amb]').forEach(r=>r.onchange=()=>{S.amb=r.value;});
+$('th0').oninput=e=>{S.theta0=+e.target.value;};
+document.querySelectorAll('#t3 button[data-d]').forEach(b=>b.onclick=()=>{S.theta0=clamp(S.theta0+(+b.dataset.d),20,80);$('th0').value=S.theta0;});
+$('phi').oninput=e=>{S.phi=+e.target.value;};
+$('rho').oninput=e=>{S.rho=+e.target.value;};
+
+function pinCalc(r){ // 由座標計算角度
+  const [a1,a2,b1,b2]=r.pins;
+  const thIn=Math.atan2(-(a2[0]-a1[0]),a2[1]-a1[1])*R2D, thOut=Math.atan2(b2[0]-b1[0],b2[1]-b1[1])*R2D;
+  r.thIn=thIn; r.thOut=thOut; r.thPin=(thIn+thOut)/2; r.thProt=(r.prot[0]+r.prot[1])/2;
+}
+$('recBtn').onclick=()=>{
+  if(!S.on){$('recMsg').textContent='請先開啟雷射。';return;}
+  const o=optics(opt3()), e=H.lineErr, tIn=S.theta0, tOut=o.g.thOut;
+  const mkPin=(r,ang,sign)=>{ // sign=-1 入射側（x<0）, +1 反射側；畫線座標系（含 e 旋轉）
+    const a=(ang+(sign<0?e:-e))*D2R, pe=randn()*0.4;
+    let x=sign*r*Math.sin(a)+pe*Math.cos(a), y=r*Math.cos(a)-sign*pe*Math.sin(a);
+    x+=H.oErr[0]+randn()*0.15; y+=H.oErr[1]+randn()*0.15;
+    return [r05(x),r05(y)];};
+  const trueP=(r,ang,sign)=>[sign*r*Math.sin(ang*D2R),r*Math.cos(ang*D2R)];
+  const rec={type:$('recType').value,amb:S.amb,phi:S.phi,rho:S.rho,pos:S.pos,theta0:S.theta0,thTrue:o.g.th,
+    vis:(o.front+o.back)>AMB[S.amb].T,
+    pins:[mkPin(80,tIn,-1),mkPin(160,tIn,-1),mkPin(80,tOut,1),mkPin(160,tOut,1)],
+    truePins:[trueP(80,tIn,-1),trueP(160,tIn,-1),trueP(80,tOut,1),trueP(160,tOut,1)],
+    prot:[r05(tIn+e+randn()*0.4),r05(tOut-e+randn()*0.4)]};
+  pinCalc(rec); S.recs.push(rec);
+  const TN={dark:'最暗點',lo:'θ₁ 剛消失',hi:'θ₂ 剛出現',obs:'一般觀察'};
+  $('recMsg').innerHTML=`已記錄第 ${S.recs.length} 筆（${TN[rec.type]}，${AMB[S.amb].lab}，偏振片${{before:'入射前',after:'反射後',none:'未放'}[S.pos]}，φ = ${S.phi}°）。大頭針座標請到第 ④ 頁查看。`;
+};
+
+/* ================= ④ 數據表 ================= */
+const TN2={dark:'最暗點',lo:'θ₁',hi:'θ₂',obs:'觀察'};
+function drawTable(){
+  const t=$('dataTbl');
+  let h='<tr><th>#</th><th>類型</th><th>環境光</th><th>φ</th><th colspan="2">入射針1 (x,y)</th><th colspan="2">入射針2</th><th colspan="2">反射針1</th><th colspan="2">反射針2</th><th>θ入</th><th>θ反</th><th>θ̄ 針</th><th colspan="2">量角器 θ入, θ反</th><th>θ̄ 量</th><th></th></tr>';
+  S.recs.forEach((r,i)=>{
+    h+=`<tr data-i="${i}" style="${i===S.sel?'background:#eaf2f8':''}"><td>${i+1}</td><td>${TN2[r.type]}</td><td>${AMB[r.amb].lab}</td><td>${r.phi}</td>`;
+    r.pins.forEach((p,j)=>{h+=`<td><input data-i="${i}" data-p="${j}" data-c="0" value="${p[0]}"></td><td><input data-i="${i}" data-p="${j}" data-c="1" value="${p[1]}"></td>`;});
+    h+=`<td>${f2(r.thIn)}</td><td>${f2(r.thOut)}</td><td><b>${f2(r.thPin)}</b></td>`;
+    h+=`<td><input data-i="${i}" data-q="0" value="${r.prot[0]}"></td><td><input data-i="${i}" data-q="1" value="${r.prot[1]}"></td><td><b>${f2(r.thProt)}</b></td>`;
+    h+=`<td><button class="b r" data-del="${i}">✕</button></td></tr>`;});
+  if(!S.recs.length)h+='<tr><td colspan="20" class="mut">尚無記錄，請到第 ③ 頁量測。</td></tr>';
+  t.innerHTML=h;
+  t.querySelectorAll('input').forEach(inp=>inp.onchange=()=>{const r=S.recs[+inp.dataset.i];const v=parseFloat(inp.value);if(!isFinite(v))return;
+    if(inp.dataset.q!==undefined)r.prot[+inp.dataset.q]=v; else r.pins[+inp.dataset.p][+inp.dataset.c]=v; pinCalc(r); drawTable();});
+  t.querySelectorAll('tr[data-i]').forEach(tr=>tr.onclick=e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON')return;S.sel=+tr.dataset.i;drawTable();});
+  t.querySelectorAll('button[data-del]').forEach(b=>b.onclick=()=>{S.recs.splice(+b.dataset.del,1);S.sel=-1;drawTable();});
+  drawPaper();
+}
+$('clearAll').onclick=()=>{if(confirm('確定清除全部記錄？')){S.recs=[];S.sel=-1;drawTable();}};
+function drawPaper(){
+  const s=$('paperSvg'); clear(s); const r=S.recs[S.sel>=0?S.sel:S.recs.length-1];
+  const sc=1.1, O=[200,235];
+  for(let i=-180;i<=180;i+=10)el('line',{x1:O[0]+i*sc,y1:0,x2:O[0]+i*sc,y2:260,stroke:i%50?'#e4ecf2':'#c8d8e4'},s);
+  for(let j=0;j<=210;j+=10)el('line',{x1:0,y1:O[1]-j*sc,x2:400,y2:O[1]-j*sc,stroke:j%50?'#e4ecf2':'#c8d8e4'},s);
+  el('line',{x1:20,y1:O[1],x2:380,y2:O[1],stroke:'#222','stroke-width':1.2},s); el('text',{x:382,y:O[1]+4,'font-size':10},s,'x');
+  el('line',{x1:O[0],y1:O[1],x2:O[0],y2:10,stroke:'#666','stroke-dasharray':'4 3'},s); el('text',{x:O[0]+3,y:16,'font-size':10},s,'y（法線）');
+  if(!r){$('paperTxt').textContent='尚無記錄';return;}
+  const P=p=>[O[0]+p[0]*sc,O[1]-p[1]*sc];
+  const ext=(a,b)=>{const A=P(a),B=P(b),dx=B[0]-A[0],dy=B[1]-A[1],k=(O[1]-A[1])/dy;return [A[0]+dx*k,A[1]+dy*k];};
+  const [a1,a2,b1,b2]=r.pins;
+  [[a1,a2],[b1,b2]].forEach(([u,v])=>{const E=ext(u,v),V=P(v);el('line',{x1:E[0],y1:E[1],x2:V[0],y2:V[1],stroke:'#e0261b','stroke-width':1},s);});
+  r.pins.forEach((p,k)=>{const q=P(p);el('circle',{cx:q[0],cy:q[1],r:3,fill:'#1f5f8b'},s);el('text',{x:q[0]+5,y:q[1]-4,'font-size':9,fill:'#1f5f8b'},s,`(${p[0]}, ${p[1]})`);});
+  $('paperTxt').innerHTML=`第 ${S.recs.indexOf(r)+1} 筆：θ<sub>入</sub> = ${f2(r.thIn)}°，θ<sub>反</sub> = ${f2(r.thOut)}°，平均 ${f2(r.thPin)}°（量角器平均 ${f2(r.thProt)}°）`;
+}
+
+/* ================= ⑤ 分析 ================= */
+const stats=a=>{const n=a.length,m=a.reduce((x,y)=>x+y,0)/n,sd=n>1?Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(n-1)):NaN;return {n,m,sd,se:sd/Math.sqrt(n)};};
+function linreg(x,y){const n=x.length,mx=x.reduce((a,b)=>a+b)/n,my=y.reduce((a,b)=>a+b)/n;let sxx=0,sxy=0;for(let i=0;i<n;i++){sxx+=(x[i]-mx)**2;sxy+=(x[i]-mx)*(y[i]-my);}
+  const k=sxy/sxx,b=my-k*mx;let sse=0;for(let i=0;i<n;i++)sse+=(y[i]-b-k*x[i])**2;const s2=n>2?sse/(n-2):NaN;
+  return {k,b,seb:Math.sqrt(s2*(1/n+mx*mx/sxx)),sek:Math.sqrt(s2/sxx),r2:1-sse/y.reduce((a,v)=>a+(v-my)**2,0)};}
+const thOf=r=>document.querySelector('input[name=src]:checked').value==='pin'?r.thPin:r.thProt;
+let RES={};
+function analyze(){
+  RES={};
+  // A
+  const A=S.recs.filter(r=>r.type==='dark');
+  let hA='';
+  if(A.length){const v=A.map(thOf),st=stats(v);
+    const sig=Math.max(isFinite(st.se)?st.se:0.3,0.15);
+    const n=Math.tan(st.m*D2R),sn=(1+n*n)*sig*D2R; RES.A={th:st.m,sig,n,sn,N:A.length};
+    const byAmb={};A.forEach(r=>{(byAmb[r.amb]=byAmb[r.amb]||[]).push(thOf(r));});
+    hA=`<table><tr><th>#</th>${A.map((_,i)=>`<th>${i+1}</th>`).join('')}</tr><tr><td>θ (°)</td>${v.map(x=>`<td>${f2(x)}</td>`).join('')}</tr><tr><td>環境光</td>${A.map(r=>`<td>${AMB[r.amb].lab}</td>`).join('')}</tr></table>
+    <p>N = ${st.n}，平均 θ̄ = <b>${f2(st.m)}°</b>，標準差 s = ${f2(st.sd)}°，平均值標準誤 = ${f2(st.se)}°</p>
+    <p>n = tan θ̄ = <b>${n.toFixed(4)} ± ${sn.toFixed(4)}</b></p>`+
+    (Object.keys(byAmb).length>1?'<p class="mut">各環境光分開平均：'+Object.entries(byAmb).map(([k,a])=>`${AMB[k].lab} ${f2(stats(a).m)}°（${a.length} 筆）`).join('、')+'。燈越亮，平均值是否越小？</p>':'')
+    +(A.length<5?'<p class="note">建議至少 5 筆。</p>':'');
+  } else hA='<p class="mut">尚無「最暗點」記錄。</p>';
+  $('anaA').innerHTML=hA;
+  // B：同環境光內依記錄順序配對 θ₁、θ₂
+  const pairs=[];
+  Object.keys(AMB).forEach(k=>{const lo=S.recs.filter(r=>r.type==='lo'&&r.amb===k),hi=S.recs.filter(r=>r.type==='hi'&&r.amb===k);
+    for(let i=0;i<Math.min(lo.length,hi.length);i++){const a=thOf(lo[i]),b=thOf(hi[i]);if(b>a)pairs.push({amb:k,t1:a,t2:b,m:(a+b)/2,w:(b-a)/2});}});
+  const s=$('anaBplot'); clear(s);
+  let hB='';
+  if(pairs.length){
+    hB='<table><tr><th>環境光</th><th>θ₁</th><th>θ₂</th><th>中點 m</th><th>半寬 w</th><th>w²</th></tr>'+pairs.map(p=>`<tr><td>${AMB[p.amb].lab}</td><td>${f2(p.t1)}</td><td>${f2(p.t2)}</td><td>${f2(p.m)}</td><td>${f2(p.w)}</td><td>${f2(p.w*p.w)}</td></tr>`).join('')+'</table>';
+    const x=pairs.map(p=>p.w*p.w),y=pairs.map(p=>p.m);
+    const nAmb=new Set(pairs.map(p=>p.amb)).size;
+    let L=null;
+    if(nAmb>=2&&pairs.length>=3){L=linreg(x,y);
+      const sig=Math.max(isFinite(L.seb)?L.seb:0.3,0.1), n=Math.tan(L.b*D2R), sn=(1+n*n)*sig*D2R;
+      RES.B={th:L.b,sig,n,sn,k:L.k,N:pairs.length};
+      hB+=`<p>迴歸：m = <b>${f2(L.b)}°</b> + (${L.k.toFixed(4)}) w²，截距標準誤 ${f2(L.seb)}°，R² = ${L.r2.toFixed(3)}</p><p>θ<sub>B</sub> = ${f2(L.b)}° → n = <b>${n.toFixed(4)} ± ${sn.toFixed(4)}</b></p>`+
+        (L.k<0?'<p class="mut">斜率為負：區間越寬，中點越偏向小角度，符合 R<sub>p</sub> 曲線大角度側較陡的預期。</p>':'<p class="mut">斜率不為負，可能數據還太少或判斷誤差較大，建議增加重複次數。</p>');
+    }else{const st=stats(y);hB+=`<p class="note">需要至少兩種環境光、共 3 組以上的 (θ₁, θ₂) 才能迴歸外插。目前只能直接平均中點：${f2(st.m)}°。</p>`;}
+    // 圖
+    const xmax=Math.max(...x,1)*1.15, ys=y.concat(L?[L.b]:[]), ymin=Math.min(...ys)-0.6, ymax=Math.max(...ys)+0.6;
+    const X0=55,X1=465,Y0=260,Y1=15, sx=v=>X0+(X1-X0)*v/xmax, sy=v=>Y0-(Y0-Y1)*(v-ymin)/(ymax-ymin);
+    el('line',{x1:X0,y1:Y0,x2:X1,y2:Y0,stroke:'#333'},s);el('line',{x1:X0,y1:Y0,x2:X0,y2:Y1,stroke:'#333'},s);
+    for(let i=0;i<=5;i++){const v=xmax*i/5;el('text',{x:sx(v),y:Y0+15,'text-anchor':'middle','font-size':10},s,v.toFixed(0));const u=ymin+(ymax-ymin)*i/5;el('text',{x:X0-5,y:sy(u)+3,'text-anchor':'end','font-size':10},s,u.toFixed(1));el('line',{x1:X0,y1:sy(u),x2:X1,y2:sy(u),stroke:'#eee'},s);}
+    el('text',{x:(X0+X1)/2,y:Y0+32,'text-anchor':'middle','font-size':12},s,'w²（度²）');el('text',{x:14,y:(Y0+Y1)/2,'font-size':12,transform:`rotate(-90 14 ${(Y0+Y1)/2})`,'text-anchor':'middle'},s,'中點 m（度）');
+    const col={on:'#b7791f',dim:'#1f5f8b',dark:'#333'};
+    pairs.forEach(p=>el('circle',{cx:sx(p.w*p.w),cy:sy(p.m),r:4,fill:col[p.amb]},s));
+    if(L){el('line',{x1:sx(0),y1:sy(L.b),x2:sx(xmax),y2:sy(L.b+L.k*xmax),stroke:'#b8452e','stroke-width':1.5},s);el('circle',{cx:sx(0),cy:sy(L.b),r:5,fill:'none',stroke:'#b8452e','stroke-width':2},s);el('text',{x:sx(0)+8,y:sy(L.b)-6,'font-size':11,fill:'#b8452e'},s,'截距 θB = '+f2(L.b)+'°');}
+    Object.keys(col).forEach((k,i)=>{el('circle',{cx:X1-90,cy:Y1+8+i*15,r:4,fill:col[k]},s);el('text',{x:X1-82,y:Y1+12+i*15,'font-size':11},s,AMB[k].lab);});
+  } else hB='<p class="mut">尚無成對的 θ₁、θ₂ 記錄。</p>';
+  $('anaB').innerHTML=hB;
+  let hr='<table><tr><th>方法</th><th>θ<sub>B</sub> (°)</th><th>σ<sub>θ</sub> (°)</th><th>n</th><th>σ<sub>n</sub></th></tr>';
+  if(RES.A)hr+=`<tr><td>A 目視最暗點</td><td>${f2(RES.A.th)}</td><td>${f2(RES.A.sig)}</td><td>${RES.A.n.toFixed(4)}</td><td>${RES.A.sn.toFixed(4)}</td></tr>`;
+  if(RES.B)hr+=`<tr><td>B 夾擠法迴歸</td><td>${f2(RES.B.th)}</td><td>${f2(RES.B.sig)}</td><td>${RES.B.n.toFixed(4)}</td><td>${RES.B.sn.toFixed(4)}</td></tr>`;
+  hr+='</table><p class="mut">σ<sub>θ</sub> 取統計標準誤，並設下限（A 0.15°、B 0.1°）以反映插針作圖的精度。</p>';
+  $('anaRes').innerHTML=hr;
+}
+document.querySelectorAll('input[name=src]').forEach(r=>r.onchange=analyze);
+
+/* ================= ⑥ 真值揭曉 ================= */
+function doReveal(){
+  S.revealed=true; analyze();
+  const tb=Math.atan(H.n)*R2D, safe=Math.max(0,10-2*S.viol);
+  let h=`<table class="kv"><tr><td>載玻片折射率 n（真值）</td><td><b class="big">${H.n.toFixed(4)}</b></td></tr>
+  <tr><td>布魯斯特角 θ<sub>B</sub> = tan⁻¹ n</td><td><b class="big">${tb.toFixed(2)}°</b></td></tr>
+  <tr><td>雷射偏振度 P／偏振方向（ρ = 0 時，由鉛直算起）</td><td>${(H.P*100).toFixed(0)}%／${H.psi0.toFixed(1)}°　→ 讓雷射偏振為水平所需 ρ ≈ ${(((90-H.psi0)%180+180)%180).toFixed(0)}°</td></tr>
+  <tr><td>偏振片箭頭標示誤差</td><td>${H.dMark>=0?'+':''}${H.dMark.toFixed(2)}°（真正 p 方向在 φ ≈ ${(90-H.dMark).toFixed(1)}° 附近，再加上載玻片傾斜的修正）</td></tr>
+  <tr><td>載玻片傾斜 β／偏振片消光比</td><td>${H.beta.toFixed(2)}°／${(H.eps*100).toFixed(2)}%</td></tr>
+  <tr><td>簽字筆畫線歪斜 ε</td><td>${H.lineErr.toFixed(2)}°（取入射與反射平均後抵消）</td></tr>
+  <tr><td>操作安全分</td><td><b>${safe} / 10</b>（違規 ${S.viol} 次，每次扣 2 分）</td></tr></table>`;
+  const cmp=(k,lab)=>{const R=RES[k];if(!R)return '';const d=R.n-H.n,z=d/R.sn;
+    return `<tr><td>${lab}</td><td>${R.n.toFixed(4)} ± ${R.sn.toFixed(4)}</td><td>${f2(R.th-tb)}°</td><td>${d>=0?'+':''}${d.toFixed(4)}（${(d/H.n*100).toFixed(2)}%）</td><td class="${Math.abs(z)<=2?'ok':'bad'}">${z.toFixed(2)} σ</td></tr>`;};
+  if(RES.A||RES.B) h+=`<h3>你的結果</h3><table><tr><th>方法</th><th>n</th><th>θ 偏差</th><th>n 偏差</th><th>偏差 / σ</th></tr>${cmp('A','A 目視最暗點')}${cmp('B','B 夾擠法迴歸')}</table>
+  <p class="mut">|偏差/σ| ≤ 2 表示在誤差範圍內與真值相符。若 A 的 θ 明顯偏小、B 較準，正是 R<sub>p</sub> 曲線不對稱造成的系統誤差被迴歸外插消除了。</p>`;
+  else h+='<p class="mut">尚無分析結果，請先完成第 ③～⑤ 頁。</p>';
+  $('revealBox').innerHTML=h;
+  // 曲線
+  $('revealPlotCard').style.display='';
+  const last=S.recs[S.recs.length-1]||{phi:90,rho:0,pos:'before'};
+  const s=$('revPlot'); clear(s);
+  const X0=60,X1=600,Y0=300,Y1=15,ta=35,tb2=75, sx=t=>X0+(X1-X0)*(t-ta)/(tb2-ta), sy=I=>Y0-(Y0-Y1)*(Math.log10(Math.max(I,1e-5))+5)/5;
+  for(let t=35;t<=75;t+=5){el('line',{x1:sx(t),y1:Y0,x2:sx(t),y2:Y1,stroke:'#eee'},s);el('text',{x:sx(t),y:Y0+15,'text-anchor':'middle','font-size':10},s,t+'°');}
+  for(let e=-5;e<=0;e++){el('line',{x1:X0,y1:sy(10**e),x2:X1,y2:sy(10**e),stroke:'#eee'},s);el('text',{x:X0-5,y:sy(10**e)+3,'text-anchor':'end','font-size':10},s,'10'+['⁻⁵','⁻⁴','⁻³','⁻²','⁻¹','⁰'][e+5]);}
+  let d='';for(let t=ta;t<=tb2;t+=0.1){const o=optics({theta0:t,phi:last.phi,rho:last.rho,pos:last.pos});d+=(d?'L':'M')+sx(t).toFixed(1)+','+sy(o.front+o.back).toFixed(1);}
+  el('path',{d,fill:'none',stroke:'#b8452e','stroke-width':2},s);
+  let d2='';for(let t=ta;t<=tb2;t+=0.1){const o=optics({theta0:t,phi:(90-H.dMark),rho:(((90-H.psi0)%180+180)%180),pos:'before'});d2+=(d2?'L':'M')+sx(t).toFixed(1)+','+sy(o.front+o.back).toFixed(1);}
+  el('path',{d:d2,fill:'none',stroke:'#999','stroke-width':1.2,'stroke-dasharray':'4 3'},s);
+  Object.entries(AMB).forEach(([k,A])=>{el('line',{x1:X0,y1:sy(A.T),x2:X1,y2:sy(A.T),stroke:'#1f5f8b','stroke-dasharray':'6 4',opacity:.7},s);el('text',{x:X1-4,y:sy(A.T)-3,'text-anchor':'end','font-size':10,fill:'#1f5f8b'},s,'門檻：'+A.lab);});
+  el('line',{x1:sx(tb),y1:Y0,x2:sx(tb),y2:Y1,stroke:'#2d7d46','stroke-width':1.5},s);el('text',{x:sx(tb)+4,y:Y1+12,'font-size':11,fill:'#2d7d46'},s,'真 θB '+tb.toFixed(2)+'°');
+  S.recs.forEach(r=>{const x=sx(r.thTrue),y=Y0-8;
+    if(r.type==='lo')el('polygon',{points:`${x},${y-8} ${x-5},${y} ${x+5},${y}`,fill:'#b7791f'},s);
+    else if(r.type==='hi')el('polygon',{points:`${x},${y-8} ${x-5},${y} ${x+5},${y}`,fill:'#1f5f8b'},s);
+    else if(r.type==='dark')el('circle',{cx:x,cy:y-4,r:3.5,fill:'#333'},s);});
+  el('text',{x:X0+6,y:Y1+12,'font-size':11,fill:'#b8452e'},s,'實線：你最後一筆記錄的 φ、ρ、偏振片位置');
+  el('text',{x:X0+6,y:Y1+26,'font-size':11,fill:'#777'},s,'虛線：理想對準（雷射偏振水平、φ 對準真 p 方向）');
+  el('text',{x:(X0+X1)/2,y:Y0+32,'text-anchor':'middle','font-size':12},s,'入射角（真值）');
+}
+$('reveal').onclick=doReveal;
+$('newSample').onclick=()=>{if(!confirm('會清除所有記錄並換一片新的載玻片，確定？'))return;newSample();S.recs=[];S.sel=-1;S.viol=0;S.revealed=false;$('revealBox').innerHTML='';$('revealPlotCard').style.display='none';S.pre.log=[];refresh();};
+
+drawP1();drawRay();
+</script>
+</body>
+</html>

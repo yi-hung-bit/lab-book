@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>楔形空氣膜干涉 — 光學方法測量金屬線直徑</title>
+<style>
+:root{
+  --ink:#0C1014;
+  --panel:#161D24;
+  --panel2:#1D262F;
+  --edge:#2A3540;
+  --fg:#D9E1E8;
+  --dim:#7E8D9A;
+  --safe:#C8503C;
+  --brass:#C89B54;
+  --paper:#EDE7D9;
+  --ok:#6FA98A;
+  --bad:#C8503C;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink);color:var(--fg);
+  font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
+  font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"Songti TC","Noto Serif TC","Source Han Serif TC","PMingLiU",serif;font-weight:600;margin:0;letter-spacing:.03em}
+header{max-width:1120px;margin:0 auto;padding:28px 22px 0}
+header h1{font-size:25px;line-height:1.35}
+header .sub{color:var(--dim);font-size:13.5px;margin-top:6px}
+nav{max-width:1120px;margin:20px auto 0;padding:0 22px;display:flex;gap:2px;border-bottom:1px solid var(--edge);flex-wrap:wrap}
+nav button{
+  background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);
+  font:inherit;font-size:15px;padding:9px 16px;cursor:pointer;
+  font-family:"Songti TC","Noto Serif TC","PMingLiU",serif;letter-spacing:.05em;
+}
+nav button:hover{color:var(--fg)}
+nav button[aria-selected="true"]{color:var(--brass);border-bottom-color:var(--brass)}
+nav button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+main{max-width:1120px;margin:0 auto;padding:22px}
+section[hidden]{display:none}
+
+.lab{display:grid;grid-template-columns:1fr 292px;gap:18px;align-items:start}
+.stage{background:#04070A;border:1px solid var(--edge);overflow:hidden}
+canvas{display:block;width:100%;height:auto}
+#view{cursor:ew-resize;touch-action:none}
+.readout{display:flex;flex-wrap:wrap;gap:16px;padding:9px 13px;background:var(--panel);
+  border-top:1px solid var(--edge);font-variant-numeric:tabular-nums;font-size:13px;color:var(--dim)}
+.readout b{color:var(--fg);font-weight:600}
+
+.ctl{background:var(--panel);border:1px solid var(--edge);padding:14px 15px}
+.ctl h3{font-size:14.5px;color:var(--brass);margin-bottom:10px}
+.f{margin-bottom:13px}
+.f label{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);margin-bottom:3px}
+.f label span{color:var(--fg);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--brass);margin:0}
+select,input[type=number]{
+  width:100%;background:var(--panel2);color:var(--fg);border:1px solid var(--edge);
+  padding:5px 7px;font:inherit;font-size:13.5px;border-radius:2px;
+}
+button.act{
+  background:var(--panel2);color:var(--fg);border:1px solid var(--edge);
+  font:inherit;font-size:13.5px;padding:6px 12px;cursor:pointer;border-radius:2px;
+}
+button.act:hover{border-color:var(--brass);color:var(--brass)}
+button.act.primary{border-color:var(--brass);color:var(--brass)}
+button.act:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+.checks{display:grid;gap:0;border:1px solid var(--edge)}
+.chk{display:grid;grid-template-columns:26px 1fr;gap:10px;padding:12px 14px;border-bottom:1px solid var(--edge);background:var(--panel)}
+.chk:last-child{border-bottom:none}
+.chk .mark{font-size:17px;line-height:1.5;text-align:center}
+.chk h4{margin:0;font-size:14.5px;font-weight:600}
+.chk p{margin:2px 0 0;font-size:13px;color:var(--dim)}
+.chk .num{font-variant-numeric:tabular-nums;color:var(--fg)}
+.pass .mark{color:var(--ok)}
+.fail .mark{color:var(--bad)}
+.fail h4{color:var(--bad)}
+
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cmp figure{margin:0}
+.cmp figcaption{font-size:12.5px;color:var(--dim);padding:7px 2px 0}
+.cmp .stage{background:#04070A}
+
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:13.5px}
+th,td{border:1px solid var(--edge);padding:5px 8px;text-align:right}
+th{background:var(--panel);color:var(--dim);font-weight:500}
+td input{width:100%;background:none;border:none;color:var(--fg);font:inherit;text-align:right;font-variant-numeric:tabular-nums}
+td input:focus{outline:1px solid var(--brass)}
+td.del{width:34px;text-align:center}
+td.del button{background:none;border:none;color:var(--dim);cursor:pointer;font:inherit}
+td.del button:hover{color:var(--bad)}
+
+.result{background:var(--panel);border-left:3px solid var(--brass);padding:13px 16px;margin-top:16px}
+.result .big{font-size:19px;font-variant-numeric:tabular-nums}
+.verdict{margin-top:9px;padding:9px 13px;background:rgba(200,155,84,.09);font-size:13.5px}
+#plot{background:var(--paper);border:1px solid var(--edge);width:100%;height:auto}
+
+.theory{max-width:70ch}
+.theory p{color:#BBC7D1;margin:12px 0}
+.eq{font-family:"Times New Roman",Georgia,serif;font-size:18.5px;font-style:italic;
+  background:var(--panel);border-left:2px solid var(--brass);padding:9px 18px;margin:14px 0}
+.eq small{font-style:normal;font-family:inherit;font-size:12.5px;color:var(--dim);margin-left:14px}
+.note{font-size:13px;color:var(--dim);border-top:1px solid var(--edge);padding-top:10px;margin-top:16px}
+@media(max-width:880px){
+  .lab{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
+  main{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>楔形空氣膜干涉</h1>
+  <div class="sub">95 學年度高級中學物理科學科能力競賽決賽實驗・第一部分：利用光學方法測量金屬線直徑</div>
+</header>
+
+<nav role="tablist">
+  <button role="tab" id="t1" aria-selected="true" aria-controls="p1">暗房觀察</button>
+  <button role="tab" id="t2" aria-selected="false" aria-controls="p2">失敗診斷</button>
+  <button role="tab" id="t3" aria-selected="false" aria-controls="p3">量測與分析</button>
+  <button role="tab" id="t4" aria-selected="false" aria-controls="p4">干涉原理</button>
+</nav>
+
+<main>
+
+<!-- ══════════ 暗房觀察 ══════════ -->
+<section id="p1" role="tabpanel" aria-labelledby="t1">
+  <div class="lab">
+    <div>
+      <div class="stage">
+        <canvas id="view" width="768" height="384"></canvas>
+        <div class="readout">
+          <div>視野中心距接觸線 <b id="r-pos">0.0</b> mm</div>
+          <div>空氣膜厚度 <b id="r-d">0.00</b> µm</div>
+          <div>條紋間距 <b id="r-sp">0.00</b> mm</div>
+          <div>可見度 <b id="r-vis">0.00</b></div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--dim);margin-top:10px">
+        左右拖曳畫面可沿玻片移動視野。左緣為兩玻片接觸線，右緣為夾金屬線處。
+      </p>
+    </div>
+
+    <div class="ctl">
+      <h3>器材與設定</h3>
+      <div class="f">
+        <label for="c-src">光源</label>
+        <select id="c-src">
+          <option value="tri" selected>三原光日光燈（611/543/452 窄線）</option>
+          <option value="inc">白熾燈泡（連續譜）</option>
+          <option value="led">白光 LED（藍峰＋寬黃磷光）</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="c-flt">濾光</label>
+        <select id="c-flt">
+          <option value="red" selected>紅玻璃紙（長波通 ≳600 nm）</option>
+          <option value="none">不加濾光</option>
+          <option value="narrow">干涉濾片（611 nm，Δλ = 10 nm）</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="c-D">金屬線直徑 D<span id="v-D">0.036 mm</span></label>
+        <input type="range" id="c-D" min="15" max="400" step="1" value="36">
+      </div>
+      <div class="f">
+        <label for="c-L">玻片長度 L<span id="v-L">75 mm</span></label>
+        <input type="range" id="c-L" min="40" max="90" step="1" value="75">
+      </div>
+      <div class="f">
+        <label for="c-mode">觀察方式</label>
+        <select id="c-mode">
+          <option value="refl" selected>反射光（燈在上方，視線近法線）</option>
+          <option value="trans">透射光（對著光源看）</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="c-bg">玻片下方</label>
+        <select id="c-bg">
+          <option value="black" selected>黑紙</option>
+          <option value="wood">木桌面</option>
+          <option value="white">白紙</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="c-mag">放大</label>
+        <select id="c-mag">
+          <option value="1">肉眼（25 cm）</option>
+          <option value="3" selected>放大鏡 ×3</option>
+          <option value="10">放大鏡 ×10</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="c-foc">對焦偏離膜面<span id="v-foc">0 mm</span></label>
+        <input type="range" id="c-foc" min="0" max="40" step="1" value="0">
+      </div>
+      <div class="f">
+        <label for="c-d0">接觸端灰塵間隙<span id="v-d0">0.0 µm</span></label>
+        <input type="range" id="c-d0" min="0" max="40" step="1" value="0">
+      </div>
+      <div class="f">
+        <label for="c-flat">玻片起伏<span id="v-flat">0.0 µm</span></label>
+        <input type="range" id="c-flat" min="0" max="20" step="1" value="0">
+      </div>
+      <div class="f">
+        <label for="c-pos">視野中心<span id="v-pos">3.0 mm</span></label>
+        <input type="range" id="c-pos" min="0" max="900" step="1" value="30">
+      </div>
+      <div class="btnrow">
+        <button class="act primary" id="b-ideal">理想條件</button>
+        <button class="act" id="b-mine">重現你的照片</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 失敗診斷 ══════════ -->
+<section id="p2" role="tabpanel" aria-labelledby="t2" hidden>
+  <p style="max-width:72ch;color:#BBC7D1">
+    以下每一項都用「暗房觀察」分頁目前的設定即時判定。任何一項不過，條紋就會消失——實際做不出來時，通常同時踩到三、四項。
+  </p>
+  <div class="checks" id="checks"></div>
+
+  <h2 style="font-size:18px;margin:26px 0 12px">實拍對照</h2>
+  <p style="max-width:72ch;color:#BBC7D1;margin-top:0">
+    左邊是依你照片的拍攝條件重建的模擬影像，右邊是同一組玻片在正確條件下的樣子。兩張都是計算出來的，不是你的原始照片。
+  </p>
+  <div class="cmp">
+    <figure>
+      <div class="stage"><canvas id="cmpA" width="512" height="384"></canvas></div>
+      <figcaption>你的條件：漆包線未刮漆（D ≈ 0.25 mm）、白光 LED＋紅玻璃紙、透射觀察、白紙背景、對焦在光源上。均勻紅圓盤，沒有任何結構。</figcaption>
+    </figure>
+    <figure>
+      <div class="stage"><canvas id="cmpB" width="512" height="384"></canvas></div>
+      <figcaption>正確條件：刮漆後銅芯（D = 0.036 mm）、三原光燈＋紅玻璃紙、反射觀察、黑紙背景、放大鏡 ×3 對焦在膜面。接觸線附近出現等間距直條紋。</figcaption>
+    </figure>
+  </div>
+
+  <div class="note">
+    照片裡那片失焦的紅色圓盤是光源本身的像。楔形干涉條紋<b>定域在空氣膜上</b>，眼睛或相機必須把焦點放在兩玻片的接觸面，對到燈上就什麼都看不到。
+  </div>
+</section>
+
+<!-- ══════════ 量測與分析 ══════════ -->
+<section id="p3" role="tabpanel" aria-labelledby="t3">
+  <p style="max-width:72ch;color:#BBC7D1;margin-top:0">
+    這一頁的金屬線直徑是隨機給定的未知值，器材條件固定在可觀測的設定（三原光燈＋紅玻璃紙、反射觀察、放大鏡 ×10）。
+    拖曳游標對準暗紋，讀取直尺刻度並記錄，作 y<sub>n</sub>–n 圖求斜率。
+  </p>
+
+  <div class="stage" style="margin-bottom:6px">
+    <canvas id="meas" width="768" height="300"></canvas>
+  </div>
+  <div class="readout" style="border:1px solid var(--edge);border-top:none;flex-wrap:wrap">
+    <div>游標讀數 <b id="m-read">0.00</b> mm</div>
+    <div style="display:flex;gap:7px;align-items:center">
+      <span>暗紋級數 n</span>
+      <input type="number" id="m-n" value="5" min="1" step="1" style="width:74px">
+      <button class="act" id="m-rec">記錄這條暗紋</button>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center">
+      <label for="m-lbl" style="cursor:pointer">標示級數</label>
+      <input type="checkbox" id="m-lbl">
+    </div>
+    <div><button class="act" id="m-new">換一條新的金屬線</button></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.25fr);gap:18px;align-items:start;margin-top:18px">
+    <div>
+      <table id="tbl">
+        <thead><tr><th>n</th><th>y<sub>n</sub> (mm)</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="btnrow">
+        <button class="act" id="t-add">手動加一列</button>
+        <button class="act" id="t-clear">清空</button>
+      </div>
+    </div>
+    <div>
+      <canvas id="plot" width="560" height="380"></canvas>
+    </div>
+  </div>
+
+  <div class="result">
+    <div>最小平方擬合　<span class="big" id="fit-eq">尚無足夠數據</span></div>
+    <div style="margin-top:7px">由斜率 <i>s</i> = λL / 2D 得　<span class="big" id="fit-D">—</span></div>
+    <div style="margin-top:5px;font-size:13.5px;color:var(--dim)" id="fit-b">—</div>
+    <div class="btnrow"><button class="act primary" id="b-reveal">公布真值</button></div>
+    <div class="verdict" id="verdict" hidden></div>
+  </div>
+</section>
+
+<!-- ══════════ 干涉原理 ══════════ -->
+<section id="p4" role="tabpanel" aria-labelledby="t4" hidden>
+  <div class="theory">
+    <h2 style="font-size:19px">條紋從哪裡來</h2>
+    <p>兩片玻片一端直接接觸、另一端夾入待測金屬線，中間夾出一層厚度沿長度線性變化的空氣楔。從上方入射的光，一部分在上玻片的<b>下</b>表面反射（玻璃→空氣），一部分穿過空氣層後在下玻片的<b>上</b>表面反射（空氣→玻璃）。</p>
+
+    <svg viewBox="0 0 660 250" width="100%" style="max-width:660px;margin:6px 0" role="img" aria-label="楔形空氣膜側視圖與兩道反射光路">
+      <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#C89B54"/></marker></defs>
+      <polygon points="46,74 616,52 616,86 46,108" fill="#22303B" stroke="#43596B"/>
+      <polygon points="46,124 616,124 616,158 46,158" fill="#22303B" stroke="#43596B"/>
+      <text x="70" y="96" fill="#7E8D9A" font-size="12">玻璃</text>
+      <text x="70" y="146" fill="#7E8D9A" font-size="12">玻璃</text>
+      <text x="300" y="122" fill="#7E8D9A" font-size="12">空氣 d</text>
+      <circle cx="606" cy="116" r="9" fill="#7A6A55" stroke="#C89B54"/>
+      <text x="560" y="196" fill="#C89B54" font-size="12">金屬線 D</text>
+      <line x1="606" y1="124" x2="606" y2="182" stroke="#C89B54" stroke-dasharray="3 3"/>
+      <line x1="46" y1="108" x2="46" y2="182" stroke="#43596B" stroke-dasharray="3 3"/>
+      <text x="52" y="196" fill="#7E8D9A" font-size="12">接觸線 (d = 0)</text>
+      <line x1="46" y1="176" x2="606" y2="176" stroke="#43596B"/>
+      <text x="300" y="196" fill="#7E8D9A" font-size="12">L</text>
+      <line x1="250" y1="12" x2="276" y2="94" stroke="#C8503C" stroke-width="1.6" marker-end="url(#ar)"/>
+      <line x1="276" y1="94" x2="252" y2="14" stroke="#C8503C" stroke-width="1.6" opacity=".55"/>
+      <text x="196" y="30" fill="#C8503C" font-size="12">①　無相位變化</text>
+      <line x1="276" y1="94" x2="292" y2="140" stroke="#C8503C" stroke-width="1.6" opacity=".8"/>
+      <line x1="292" y1="140" x2="318" y2="20" stroke="#C8503C" stroke-width="1.6" marker-end="url(#ar)" opacity=".8"/>
+      <text x="326" y="30" fill="#C8503C" font-size="12">②　反射時相位差 π</text>
+    </svg>
+
+    <p>兩道光的幾何光程差是 2<i>d</i>（近法線入射、空氣 n ≈ 1）。光線②在光密介質表面反射，額外多了 π 的相位差，因此：</p>
+    <div class="eq">2d = nλ<small>暗紋，n = 0, 1, 2, …</small></div>
+    <div class="eq">2d = (n + ½)λ<small>亮紋</small></div>
+    <p>d = 0 的接觸線本身是<b>暗</b>的，這是檢查玻片有沒有真正貼合的最快判據：如果最邊緣那條不是暗的，中間就有灰塵。</p>
+
+    <h2 style="font-size:19px;margin-top:28px">怎麼換成線徑</h2>
+    <p>楔形是線性的，距接觸線 y 處的膜厚為 <i>d</i> = D · y / L。代入暗紋條件：</p>
+    <div class="eq">y<sub>n</sub> = (λL / 2D) · n</div>
+    <p>所以 y<sub>n</sub> 對 n 作圖是一條過原點的直線，斜率 <i>s</i> = λL / 2D，於是</p>
+    <div class="eq">D = λL / 2s</div>
+    <p>相鄰兩條暗紋的間距就是 Δy = λL / 2D。這個式子是整個實驗的成敗關鍵：D 越粗，條紋越密。L = 75 mm、λ = 611 nm 時，D = 0.036 mm 給出 Δy = 0.64 mm，放大鏡下數得動；D = 0.25 mm（漆包線沒刮漆）只剩 0.092 mm，已經在肉眼與普通放大鏡的解析極限之外。</p>
+
+    <h2 style="font-size:19px;margin-top:28px">為什麼遠離接觸線就糊掉</h2>
+    <p>光源不是單色的。頻寬 Δλ 的光，各波長的條紋位置不同，到了第 N 級時互相錯開整整一級而抵銷：</p>
+    <div class="eq">N ≈ λ / Δλ<small>可見級數上限</small></div>
+    <p>三原光日光燈的紅線（611 nm）來自銪離子躍遷，頻寬只有 5–10 nm，紅玻璃紙擋掉綠、藍兩線之後剩下的就是這條窄線，N 可達數十級——參考解答數到 n = 45 正是靠這一點。換成白熾燈或白光 LED 配紅玻璃紙，透過的是 600–700 nm 一整片，Δλ ≈ 80 nm，N 掉到 8 級左右，接觸線外 5 mm 就什麼都沒有了。</p>
+
+    <h2 style="font-size:19px;margin-top:28px">為什麼一定要看反射光</h2>
+    <p>玻璃—空氣界面的反射率只有約 4%。反射觀察時，兩道振幅相當的弱反射光互相干涉，背景又暗，可見度接近 1。透射觀察時，直接穿過的強光佔了絕大部分，被調制的部分不到十分之一，可見度只剩 0.08 上下——條紋確實存在，但淹沒在亮背景裡，眼睛分辨不出來。</p>
+
+    <div class="note">
+      本模擬對每個像素沿波長積分 I(λ) ∝ 1 − cos(4πd/λ)，再以 CIE 配色函數轉為 sRGB，因此白光下的彩色條紋、窄線光源下的高級數條紋、以及頻寬造成的褪色都是算出來的，不是畫上去的。
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+
+/* ═══════════ 分頁 ═══════════ */
+const tabs=[...document.querySelectorAll('nav button')];
+tabs.forEach(b=>b.addEventListener('click',()=>{
+  tabs.forEach(o=>{
+    const on=o===b;
+    o.setAttribute('aria-selected',on?'true':'false');
+    document.getElementById(o.getAttribute('aria-controls')).hidden=!on;
+  });
+  if(b.id==='t2'){drawCompare();}
+  if(b.id==='t3'){drawMeas();drawPlot();}
+}));
+document.getElementById('p3').hidden=true;
+
+/* ═══════════ 光譜與配色 ═══════════ */
+const LAM0=380,LAM1=720,NLAM=69;                 // 5 nm 取樣
+const LAMS=Array.from({length:NLAM},(_,i)=>LAM0+i*(LAM1-LAM0)/(NLAM-1));
+
+function gauss(x,mu,s1,s2){const s=x<mu?s1:s2,t=(x-mu)/s;return Math.exp(-0.5*t*t);}
+// Wyman et al. 多瓣高斯擬合的 CIE 1931 配色函數
+function cie(l){
+  const x=1.056*gauss(l,599.8,37.9,31.0)+0.362*gauss(l,442.0,16.0,26.7)-0.065*gauss(l,501.1,20.4,26.2);
+  const y=0.821*gauss(l,568.8,46.9,40.5)+0.286*gauss(l,530.9,16.3,31.1);
+  const z=1.217*gauss(l,437.0,11.8,36.0)+0.681*gauss(l,459.0,26.0,13.8);
+  return [x,y,z];
+}
+const CMF=LAMS.map(cie);
+
+function planck(l,T){const a=1.191e8/Math.pow(l,5);return a/(Math.expm1(1.4388e7/(l*T)));}
+function sourceS(kind,l){
+  if(kind==='tri')  return 1.00*gauss(l,611,4,4)+0.85*gauss(l,543,5,5)+0.70*gauss(l,452,7,7)+0.004;
+  if(kind==='inc')  return planck(l,2800)/planck(700,2800);
+  /* led */         return 0.95*gauss(l,452,9,11)+0.80*gauss(l,555,38,55);
+}
+function filterT(kind,l){
+  if(kind==='none')   return 1;
+  if(kind==='narrow') return gauss(l,611,4.3,4.3);   // FWHM ≈ 10 nm
+  return 1/(1+Math.exp(-(l-602)/6));                 // 紅玻璃紙：長波通
+}
+
+/* 有效光譜、重心波長、等效頻寬 */
+function spectrum(src,flt){
+  const S=LAMS.map(l=>Math.max(0,sourceS(src,l))*filterT(flt,l));
+  // 以視覺亮度 ȳ(λ) 加權：決定條紋褪色的是眼睛看得到的那一段光譜
+  let s0=0,s1=0,s2=0;
+  for(let i=0;i<NLAM;i++){
+    const w=S[i]*CMF[i][1];
+    s0+=w;s1+=w*LAMS[i];s2+=w*LAMS[i]*LAMS[i];
+  }
+  const lbar=s1/s0, varr=Math.max(0,s2/s0-lbar*lbar);
+  const dl=2.355*Math.sqrt(varr);                    // 以 FWHM 表示
+  return {S,s0,lbar,dl};
+}
+
+/* 白點正規化（供 sRGB 轉換） */
+function xyz2lin(X,Y,Z){
+  return [ 3.2406*X-1.5372*Y-0.4986*Z,
+          -0.9689*X+1.8758*Y+0.0415*Z,
+           0.0557*X-0.2040*Y+1.0570*Z];
+}
+function smoothstep(e0,e1,x){const t=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return t*t*(3-2*t);}
+function gam(v){
+  v=Math.max(0,Math.min(1,v));
+  v=v<=0.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-0.055;
+  return v*255;
+}
+
+/* OPD → 顏色查表。回傳 {tab:Float32Array(3N), o0, do_, n} 單位 µm */
+function buildLUT(sp,o0,o1,n){
+  n=Math.max(64,Math.min(60000,n|0));
+  const step=(o1-o0)/(n-1), tab=new Float32Array(3*n);
+  const S=sp.S, TWOPI=Math.PI*2;
+  // 白點：完全去調制（平均強度 = 1）
+  let Xw=0,Yw=0,Zw=0;
+  for(let i=0;i<NLAM;i++){Xw+=S[i]*CMF[i][0];Yw+=S[i]*CMF[i][1];Zw+=S[i]*CMF[i][2];}
+  const kw=1/Math.max(1e-9,Yw);
+  for(let j=0;j<n;j++){
+    const opd=(o0+j*step)*1000;                      // µm → nm
+    let X=0,Y=0,Z=0;
+    for(let i=0;i<NLAM;i++){
+      const m=1-Math.cos(TWOPI*opd/LAMS[i]);         // 0…2
+      const w=S[i]*m*0.5;
+      X+=w*CMF[i][0];Y+=w*CMF[i][1];Z+=w*CMF[i][2];
+    }
+    tab[3*j]=X*kw;tab[3*j+1]=Y*kw;tab[3*j+2]=Z*kw;
+  }
+  return {tab,o0,step,n,Xw:Xw*kw,Yw:Yw*kw,Zw:Zw*kw};
+}
+
+/* ═══════════ 場景計算 ═══════════ */
+function thickness(x,y,P){                            // x,y 以 mm 計，回傳 µm
+  const xc=Math.min(P.L,Math.max(0,x));
+  let d=P.d0+P.D*1000*xc/P.L;
+  if(P.flat>0){
+    d+=P.flat*(0.62*Math.sin(2*Math.PI*x/23.0+1.1)+0.38*Math.sin(2*Math.PI*y/16.0+2.7));
+  }
+  return Math.max(0,d);
+}
+
+const BGLEVEL={black:0.015,wood:0.22,white:0.80};
+
+/* 把場景畫到 canvas。P 為參數物件 */
+function render(cv,P){
+  const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  const sp=spectrum(P.src,P.flt);
+  const mmPerPx=P.fovW/W;
+  const x0=P.center-P.fovW/2, y0=-(H*mmPerPx)/2;
+
+  // 視野內厚度範圍
+  let dmin=1e9,dmax=-1e9;
+  for(let i=0;i<=16;i++)for(let j=0;j<=8;j++){
+    const d=thickness(x0+P.fovW*i/16,y0+H*mmPerPx*j/8,P);
+    if(d<dmin)dmin=d; if(d>dmax)dmax=d;
+  }
+  const o0=2*dmin, o1=2*dmax+0.001;
+  const need=Math.ceil((o1-o0)*1000/(sp.lbar/14))+8;   // 每條紋至少取樣 14 點
+  const lut=buildLUT(sp,o0,o1,need);
+
+  const V=(P.mode==='refl')?0.92:0.085;
+  const bg=BGLEVEL[P.bg]*((P.mode==='refl')?0.55:1.0);
+  const expo=(P.mode==='refl')?1.0:0.85;
+
+  const buf=new Float32Array(W*H*3);
+  const invStep=1/lut.step;
+  // 條紋間距小於一個像素時要在像素內取樣，否則畫面會出現假的疊紋
+  const spacingMM=sp.lbar*1e-6*P.L/(2*P.D);
+  const nsub=Math.max(1,Math.min(8,Math.ceil(2.5*mmPerPx/Math.max(1e-9,spacingMM))));
+  for(let py=0;py<H;py++){
+    const ym=y0+py*mmPerPx;
+    for(let px=0;px<W;px++){
+      const xm=x0+px*mmPerPx;
+      let X,Y,Z;
+      if(xm<0){                                        // 接觸線之外：只有玻片邊緣
+        X=lut.Xw*0.10;Y=lut.Yw*0.10;Z=lut.Zw*0.10;
+      }else{
+        X=0;Y=0;Z=0;
+        for(let s2=0;s2<nsub;s2++){
+          const xs=xm+((s2+0.5)/nsub-0.5)*mmPerPx;
+          const d=thickness(xs,ym,P);
+          let idx=Math.round((2*d-lut.o0)*invStep);
+          if(idx<0)idx=0; if(idx>=lut.n)idx=lut.n-1;
+          X+=lut.tab[3*idx];Y+=lut.tab[3*idx+1];Z+=lut.tab[3*idx+2];
+        }
+        X/=nsub;Y/=nsub;Z/=nsub;
+      }
+      // 可見度壓縮：往白點（完全去調制）靠攏
+      X=lut.Xw+V*(X-lut.Xw);
+      Y=lut.Yw+V*(Y-lut.Yw);
+      Z=lut.Zw+V*(Z-lut.Zw);
+      // 雜散背景（與光源同色）
+      X=expo*X+bg*lut.Xw;Y=expo*Y+bg*lut.Yw;Z=expo*Z+bg*lut.Zw;
+      const o=(py*W+px)*3;
+      buf[o]=X;buf[o+1]=Y;buf[o+2]=Z;
+    }
+  }
+
+  // 模糊：對焦誤差 ⊕ 眼睛解析極限
+  const defocus=0.045*P.foc;                           // mm
+  const resolve=0.09/P.mag;                            // mm
+  const sigma=Math.sqrt(defocus*defocus+resolve*resolve)/2.2;
+  const rad=Math.min(40,Math.round(sigma/mmPerPx));
+  if(rad>0){boxBlur(buf,W,H,rad);boxBlur(buf,W,H,rad);}
+
+  const img=ctx.createImageData(W,H), dat=img.data;
+  const wl=xyz2lin(lut.Xw,lut.Yw,lut.Zw);
+  const k=0.5/Math.max(1e-6,Math.max(wl[0],wl[1],wl[2]));  // 去調制的白點落在半亮
+  const disc=P.disc||0, cxp=W*0.52, cyp=H*0.5, Rp=Math.min(W,H)*0.60;
+  for(let i=0,p=0;i<W*H;i++,p+=4){
+    const o=i*3;
+    const c=xyz2lin(buf[o],buf[o+1],buf[o+2]);
+    let s3=k;
+    if(disc>0){                                        // 對到光源時，畫面其實是失焦的燈影
+      const px2=i%W, py2=(i/W)|0;
+      const r=Math.hypot(px2-cxp,py2-cyp)/Rp;
+      s3*= (1-disc*0.70*smoothstep(0.82,1.12,r))*(1-disc*0.25*smoothstep(1.15,1.9,r));
+    }
+    dat[p]=gam(c[0]*s3);dat[p+1]=gam(c[1]*s3);dat[p+2]=gam(c[2]*s3);dat[p+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+  return {sp,spacing:sp.lbar*1e-6*P.L/(2*P.D),V,lut,mmPerPx,x0,y0};
+}
+
+function boxBlur(buf,W,H,r){
+  const tmp=new Float32Array(buf.length), n=2*r+1;
+  for(let c=0;c<3;c++){
+    for(let y=0;y<H;y++){
+      let acc=0;
+      for(let k=-r;k<=r;k++)acc+=buf[(y*W+Math.min(W-1,Math.max(0,k)))*3+c];
+      for(let x=0;x<W;x++){
+        tmp[(y*W+x)*3+c]=acc/n;
+        const add=Math.min(W-1,x+r+1), sub=Math.max(0,x-r);
+        acc+=buf[(y*W+add)*3+c]-buf[(y*W+sub)*3+c];
+      }
+    }
+    for(let x=0;x<W;x++){
+      let acc=0;
+      for(let k=-r;k<=r;k++)acc+=tmp[(Math.min(H-1,Math.max(0,k))*W+x)*3+c];
+      for(let y=0;y<H;y++){
+        buf[(y*W+x)*3+c]=acc/n;
+        const add=Math.min(H-1,y+r+1), sub=Math.max(0,y-r);
+        acc+=tmp[(add*W+x)*3+c]-tmp[(sub*W+x)*3+c];
+      }
+    }
+  }
+}
+
+/* ═══════════ 暗房觀察分頁 ═══════════ */
+const $=id=>document.getElementById(id);
+const FOV={1:38,3:13,10:4.2};
+
+function readParams(){
+  const mag=+$('c-mag').value;
+  return {
+    src:$('c-src').value, flt:$('c-flt').value,
+    D:(+$('c-D').value)/1000, L:+$('c-L').value,
+    mode:$('c-mode').value, bg:$('c-bg').value,
+    mag, foc:+$('c-foc').value, d0:(+$('c-d0').value)/10,
+    flat:(+$('c-flat').value)/10,
+    center:(+$('c-pos').value)/10, fovW:FOV[mag]
+  };
+}
+let lastP=null,lastR=null;
+
+function update(){
+  const P=readParams();
+  $('v-D').textContent=P.D.toFixed(3)+' mm';
+  $('v-L').textContent=P.L+' mm';
+  $('v-foc').textContent=P.foc+' mm';
+  $('v-d0').textContent=P.d0.toFixed(1)+' µm';
+  $('v-flat').textContent=P.flat.toFixed(1)+' µm';
+  $('c-pos').max=Math.round(P.L*10);
+  if(P.center>P.L){P.center=P.L;$('c-pos').value=Math.round(P.L*10);}
+  $('v-pos').textContent=P.center.toFixed(1)+' mm';
+
+  const R=render($('view'),P);
+  lastP=P;lastR=R;
+  $('r-pos').textContent=P.center.toFixed(1);
+  $('r-d').textContent=thickness(P.center,0,P).toFixed(2);
+  $('r-sp').textContent=R.spacing.toFixed(3);
+  $('r-vis').textContent=visibilityAt(P,R).toFixed(2);
+  buildChecks(P,R);
+}
+['c-src','c-flt','c-D','c-L','c-mode','c-bg','c-mag','c-foc','c-d0','c-flat','c-pos']
+  .forEach(id=>$(id).addEventListener('input',update));
+
+/* 綜合可見度估計：頻寬褪色 × 觀察方式 × 解析極限 × 背景稀釋 */
+function visibilityAt(P,R){
+  const sp=R.sp;
+  const d=thickness(P.center,0,P);
+  const N=2*d*1000/sp.lbar;                            // 目前級數
+  const Nmax=sp.lbar/Math.max(1e-6,sp.dl);
+  const band=Math.exp(-0.5*Math.pow(N/Math.max(0.6,Nmax),2));
+  const optical=(P.mode==='refl')?0.92:0.085;
+  const defocus=0.045*P.foc, resolve=0.09/P.mag;
+  const sigma=Math.sqrt(defocus*defocus+resolve*resolve)/2.2;
+  const mtf=Math.exp(-2*Math.PI*Math.PI*sigma*sigma/(R.spacing*R.spacing));
+  const bg=BGLEVEL[P.bg]*((P.mode==='refl')?0.55:1.0);
+  return band*optical*mtf/(1+bg);
+}
+
+/* ═══════════ 失敗診斷 ═══════════ */
+function buildChecks(P,R){
+  const sp=R.sp, host=$('checks');
+  const resolve=0.09/P.mag;
+  const Nmax=sp.lbar/Math.max(1e-6,sp.dl);
+  const visRange=Nmax*R.spacing;
+  const d=thickness(P.center,0,P);
+  const Ncur=2*d*1000/sp.lbar;
+  const defocus=0.045*P.foc;
+  const V=visibilityAt(P,R);
+
+  const items=[
+    { ok:R.spacing>resolve*1.3,
+      t:'條紋間距 vs 解析極限',
+      s:`Δy = λL/2D = <span class="num">${R.spacing.toFixed(3)} mm</span>，目前放大倍率可分辨 <span class="num">${resolve.toFixed(3)} mm</span>。`,
+      bad:'金屬線太粗。漆包線必須先用小刀刮掉外層絕緣漆，只夾裡面的銅芯；連漆一起夾，D 大了 5–8 倍，條紋密到看不見。'},
+    { ok:P.mode==='refl',
+      t:'反射觀察',
+      s:`目前為 ${P.mode==='refl'?'反射光，可見度約 0.92':'透射光，可見度僅約 0.085'}。`,
+      bad:'透射條紋的對比度只有百分之幾。把檯燈移到斜上方，視線接近法線，看玻片表面的反光。'},
+    { ok:sp.dl<25,
+      t:'光源頻寬',
+      s:`有效波長 <span class="num">${sp.lbar.toFixed(0)} nm</span>，頻寬 <span class="num">${sp.dl.toFixed(0)} nm</span>，可見級數上限約 <span class="num">${Nmax.toFixed(0)}</span> 級，對應接觸線外 <span class="num">${visRange.toFixed(1)} mm</span>。`,
+      bad:'白熾燈或白光 LED 配紅玻璃紙透過的是一整片紅光。改用三原光日光燈管，紅玻璃紙才能只留下 611 nm 那條窄線。'},
+    { ok:Ncur<Nmax*0.9,
+      t:'觀察位置',
+      s:`視野中心在第 <span class="num">${Ncur.toFixed(0)}</span> 級，可見上限第 <span class="num">${Nmax.toFixed(0)}</span> 級。`,
+      bad:'離接觸線太遠，條紋已經被頻寬洗掉。把視野移回接觸線附近再往外找。'},
+    { ok:defocus<R.spacing*0.8,
+      t:'對焦位置',
+      s:`對焦偏離膜面 <span class="num">${P.foc} mm</span>，造成 <span class="num">${defocus.toFixed(3)} mm</span> 的模糊圈。`,
+      bad:'條紋定域在空氣膜上。焦點要放在兩玻片的接觸面，不是放在光源或桌面上。'},
+    { ok:BGLEVEL[P.bg]<0.3,
+      t:'背景雜散光',
+      s:`玻片下方為${P.bg==='black'?'黑紙，背景 0.02':P.bg==='wood'?'木桌面，背景 0.22':'白紙，背景 0.80'}。`,
+      bad:'穿透玻片的光從下方反射回來，把條紋沖淡。墊一張黑紙。'},
+    { ok:P.d0<0.6,
+      t:'接觸端貼合',
+      s:`接觸端間隙 <span class="num">${P.d0.toFixed(1)} µm</span>，相當於起始級數 <span class="num">${(2*P.d0*1000/sp.lbar).toFixed(1)}</span>。`,
+      bad:'灰塵把兩片撐開，最邊緣那條就不是暗紋，y_n–n 圖會出現截距。先用無塵紙擦乾淨再夾。'},
+    { ok:P.flat<0.5,
+      t:'玻片平整度',
+      s:`起伏振幅 <span class="num">${P.flat.toFixed(1)} µm</span>。`,
+      bad:'玻片不平時條紋會彎曲、間距不均，量到的斜率失真。換兩片平整的載玻片。'},
+  ];
+
+  host.innerHTML=items.map(it=>`
+    <div class="chk ${it.ok?'pass':'fail'}">
+      <div class="mark">${it.ok?'✓':'✕'}</div>
+      <div>
+        <h4>${it.t}</h4>
+        <p>${it.s}</p>
+        ${it.ok?'':`<p style="color:#D8B0A8;margin-top:5px">${it.bad}</p>`}
+      </div>
+    </div>`).join('')
+    +`<div class="chk ${V>0.12?'pass':'fail'}">
+        <div class="mark">${V>0.12?'✓':'✕'}</div>
+        <div><h4>綜合可見度</h4>
+        <p>上列各項相乘後為 <span class="num">${V.toFixed(3)}</span>。低於 0.05 時肉眼幾乎看不出條紋。</p></div>
+      </div>`;
+}
+
+/* 一鍵設定 */
+$('b-ideal').addEventListener('click',()=>{
+  $('c-src').value='tri';$('c-flt').value='red';$('c-D').value=36;$('c-L').value=75;
+  $('c-mode').value='refl';$('c-bg').value='black';$('c-mag').value='3';
+  $('c-foc').value=0;$('c-d0').value=0;$('c-flat').value=0;$('c-pos').value=30;update();
+});
+$('b-mine').addEventListener('click',()=>{
+  $('c-src').value='led';$('c-flt').value='red';$('c-D').value=250;$('c-L').value=75;
+  $('c-mode').value='trans';$('c-bg').value='white';$('c-mag').value='1';
+  $('c-foc').value=22;$('c-d0').value=18;$('c-flat').value=6;$('c-pos').value=180;update();
+});
+
+/* 拖曳平移 */
+(function(){
+  const cv=$('view');let dragging=false,lastX=0;
+  const start=e=>{dragging=true;lastX=(e.touches?e.touches[0].clientX:e.clientX);};
+  const move=e=>{
+    if(!dragging)return;
+    const x=(e.touches?e.touches[0].clientX:e.clientX);
+    const dxPx=(x-lastX)*(cv.width/cv.getBoundingClientRect().width);
+    lastX=x;
+    const P=readParams();
+    const dmm=-dxPx*P.fovW/cv.width;
+    const v=Math.max(0,Math.min(P.L,P.center+dmm));
+    $('c-pos').value=Math.round(v*10);update();
+    if(e.cancelable)e.preventDefault();
+  };
+  const end=()=>{dragging=false;};
+  cv.addEventListener('mousedown',start);window.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+  cv.addEventListener('touchstart',start,{passive:true});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',end);
+})();
+
+/* ═══════════ 實拍對照 ═══════════ */
+let cmpDone=false;
+function drawCompare(){
+  if(cmpDone)return;cmpDone=true;
+  render($('cmpA'),{src:'led',flt:'red',D:0.25,L:75,mode:'trans',bg:'white',
+    mag:1,foc:22,d0:1.8,flat:0.6,center:18,fovW:38,disc:1});
+  render($('cmpB'),{src:'tri',flt:'red',D:0.036,L:75,mode:'refl',bg:'black',
+    mag:3,foc:0,d0:0,flat:0,center:3,fovW:13});
+}
+
+/* ═══════════ 量測與分析 ═══════════ */
+const MEAS={L:75,src:'tri',flt:'red',mode:'refl',bg:'black',mag:10,foc:0,flat:0};
+let trueD=0,trueD0=0,cursorMM=1.0,rows=[];
+
+function newWire(){
+  trueD=0.026+Math.random()*0.030;                     // 0.026–0.056 mm
+  trueD0=Math.random()<0.45?Math.random()*0.35:0;      // 偶爾有灰塵
+  rows=[];cursorMM=1.0;renderTable();drawMeas();drawPlot();
+  $('verdict').hidden=true;
+}
+function measParams(){
+  return {...MEAS,D:trueD,d0:trueD0,center:0,fovW:0};
+}
+const MEAS_W=14;                                        // 量測視野寬度 mm（固定）
+
+function drawMeas(){
+  const cv=$('meas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  const stripH=200;
+  const P={...measParams(),center:MEAS_W/2,fovW:MEAS_W};
+  const tmp=document.createElement('canvas');tmp.width=W;tmp.height=stripH;
+  render(tmp,P);
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(tmp,0,0);
+
+  const mmPerPx=MEAS_W/W;
+  const sp=spectrum(P.src,P.flt);
+  const spacing=sp.lbar*1e-6*P.L/(2*P.D);
+
+  // 直尺
+  ctx.fillStyle='#EDE7D9';ctx.fillRect(0,stripH,W,H-stripH);
+  ctx.strokeStyle='#3A3428';ctx.fillStyle='#3A3428';
+  ctx.font='11px ui-monospace,Menlo,monospace';ctx.textAlign='center';
+  for(let mm=0;mm<=MEAS_W;mm+=0.5){
+    const x=mm/mmPerPx;const major=Math.abs(mm-Math.round(mm))<1e-6;
+    ctx.beginPath();ctx.moveTo(x,stripH);ctx.lineTo(x,stripH+(major?14:8));ctx.stroke();
+    if(major)ctx.fillText(mm.toFixed(0),x,stripH+27);
+  }
+  ctx.textAlign='left';ctx.fillText('mm（0 對準兩玻片接觸線）',6,stripH+46);
+
+  // 暗紋級數標示
+  if($('m-lbl').checked){
+    ctx.strokeStyle='rgba(200,155,84,.6)';ctx.fillStyle='#C89B54';ctx.textAlign='center';
+    for(let n=1;n<=200;n++){
+      const y=(n*spacing)-(trueD0*P.L/(P.D*1000));
+      if(y<0)continue; if(y>MEAS_W)break;
+      if(n%5)continue;
+      const x=y/mmPerPx;
+      ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,12);ctx.stroke();
+      ctx.fillText(String(n),x,24);
+    }
+  }
+
+  // 游標
+  const cx=cursorMM/mmPerPx;
+  ctx.strokeStyle='#6FD3F2';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,stripH+16);ctx.stroke();
+  ctx.fillStyle='#6FD3F2';ctx.beginPath();
+  ctx.moveTo(cx,stripH+16);ctx.lineTo(cx-5,stripH+26);ctx.lineTo(cx+5,stripH+26);ctx.closePath();ctx.fill();
+  $('m-read').textContent=readCursor().toFixed(2);
+}
+function readCursor(){return Math.round(cursorMM/0.05)*0.05;}  // 直尺讀到 0.05 mm
+
+(function(){
+  const cv=$('meas');
+  const set=e=>{
+    const r=cv.getBoundingClientRect();
+    const x=((e.touches?e.touches[0].clientX:e.clientX)-r.left)*(cv.width/r.width);
+    cursorMM=Math.max(0,Math.min(MEAS_W,x*MEAS_W/cv.width));drawMeas();
+    if(e.cancelable&&e.type!=='mousedown')e.preventDefault();
+  };
+  let down=false;
+  cv.addEventListener('mousedown',e=>{down=true;set(e);});
+  window.addEventListener('mousemove',e=>{if(down)set(e);});
+  window.addEventListener('mouseup',()=>{down=false;});
+  cv.addEventListener('touchstart',set,{passive:true});
+  cv.addEventListener('touchmove',set,{passive:false});
+})();
+
+$('m-lbl').addEventListener('change',drawMeas);
+$('m-new').addEventListener('click',newWire);
+$('m-rec').addEventListener('click',()=>{
+  const n=parseInt($('m-n').value,10);
+  if(!Number.isFinite(n)||n<1)return;
+  rows.push({n,y:readCursor()});
+  $('m-n').value=n+5;
+  renderTable();drawPlot();
+});
+$('t-add').addEventListener('click',()=>{rows.push({n:'',y:''});renderTable();});
+$('t-clear').addEventListener('click',()=>{rows=[];renderTable();drawPlot();$('verdict').hidden=true;});
+
+function renderTable(){
+  const tb=$('tbl').querySelector('tbody');
+  tb.innerHTML=rows.map((r,i)=>`<tr>
+    <td><input data-i="${i}" data-k="n" value="${r.n}"></td>
+    <td><input data-i="${i}" data-k="y" value="${r.y}"></td>
+    <td class="del"><button data-del="${i}" title="刪除">×</button></td></tr>`).join('');
+  tb.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',e=>{
+    const i=+e.target.dataset.i,k=e.target.dataset.k;
+    const v=parseFloat(e.target.value);
+    rows[i][k]=Number.isFinite(v)?v:'';
+    drawPlot();
+  }));
+  tb.querySelectorAll('button[data-del]').forEach(b=>b.addEventListener('click',e=>{
+    rows.splice(+e.target.dataset.del,1);renderTable();drawPlot();
+  }));
+}
+
+function fit(){
+  const pts=rows.filter(r=>Number.isFinite(+r.n)&&Number.isFinite(+r.y)&&r.n!==''&&r.y!=='')
+                .map(r=>({x:+r.n,y:+r.y}));
+  if(pts.length<3)return null;
+  const N=pts.length;
+  let sx=0,sy=0;pts.forEach(p=>{sx+=p.x;sy+=p.y;});
+  const mx=sx/N,my=sy/N;
+  let sxx=0,sxy=0;pts.forEach(p=>{sxx+=(p.x-mx)**2;sxy+=(p.x-mx)*(p.y-my);});
+  if(sxx<=0)return null;
+  const b=sxy/sxx,a=my-b*mx;
+  let ss=0;pts.forEach(p=>{ss+=(p.y-(a+b*p.x))**2;});
+  const syx=N>2?Math.sqrt(ss/(N-2)):0;
+  return {a,b,sb:syx/Math.sqrt(sxx),sa:syx*Math.sqrt(1/N+mx*mx/sxx),pts,N};
+}
+
+function drawPlot(){
+  const cv=$('plot'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.fillStyle='#EDE7D9';ctx.fillRect(0,0,W,H);
+  const m={l:62,r:16,t:16,b:46};
+  const f=fit();
+  const pts=(f?f.pts:rows.filter(r=>Number.isFinite(+r.n)&&Number.isFinite(+r.y)&&r.n!==''&&r.y!=='').map(r=>({x:+r.n,y:+r.y})));
+  const xmax=Math.max(10,...pts.map(p=>p.x))*1.15;
+  const ymax=Math.max(2,...pts.map(p=>p.y))*1.15;
+
+  ctx.strokeStyle='#C4BCA6';ctx.lineWidth=0.5;
+  for(let i=0;i<=10;i++){
+    const x=m.l+(W-m.l-m.r)*i/10, y=m.t+(H-m.t-m.b)*i/10;
+    ctx.beginPath();ctx.moveTo(x,m.t);ctx.lineTo(x,H-m.b);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(W-m.r,y);ctx.stroke();
+  }
+  ctx.strokeStyle='#3A3428';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(m.l,m.t);ctx.lineTo(m.l,H-m.b);ctx.lineTo(W-m.r,H-m.b);ctx.stroke();
+
+  const X=v=>m.l+(W-m.l-m.r)*v/xmax, Y=v=>H-m.b-(H-m.t-m.b)*v/ymax;
+  ctx.fillStyle='#3A3428';ctx.font='12px ui-monospace,Menlo,monospace';ctx.textAlign='center';
+  for(let i=0;i<=5;i++){const v=xmax*i/5;ctx.fillText(v.toFixed(0),X(v),H-m.b+18);}
+  ctx.textAlign='right';
+  for(let i=0;i<=5;i++){const v=ymax*i/5;ctx.fillText(v.toFixed(1),m.l-8,Y(v)+4);}
+  ctx.textAlign='center';ctx.font='13px serif';
+  ctx.fillText('暗紋級數 n',(m.l+W-m.r)/2,H-10);
+  ctx.save();ctx.translate(16,(m.t+H-m.b)/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText('yn (mm)',0,0);ctx.restore();
+
+  if(f){
+    ctx.strokeStyle='#8A5A3A';ctx.lineWidth=1.4;ctx.setLineDash([6,4]);
+    ctx.beginPath();ctx.moveTo(X(0),Y(f.a));ctx.lineTo(X(xmax),Y(f.a+f.b*xmax));ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.fillStyle='#1E2A33';
+  pts.forEach(p=>{ctx.fillRect(X(p.x)-3.5,Y(p.y)-3.5,7,7);});
+
+  // 結果
+  if(!f){
+    $('fit-eq').textContent='尚無足夠數據（至少 3 點）';
+    $('fit-D').textContent='—';$('fit-b').textContent='—';
+    return;
+  }
+  const sp=spectrum(MEAS.src,MEAS.flt);
+  const lam=sp.lbar*1e-6;                               // mm
+  const D=lam*MEAS.L/(2*f.b);
+  const sD=D*f.sb/f.b;
+  $('fit-eq').innerHTML=`y = (${f.a.toFixed(3)} ± ${f.sa.toFixed(3)}) + (${f.b.toFixed(4)} ± ${f.sb.toFixed(4)}) n`;
+  $('fit-D').innerHTML=`D = ${D.toFixed(4)} ± ${sD.toFixed(4)} mm`;
+  const d0fit=-f.a*(D)/MEAS.L*1000;
+  $('fit-b').innerHTML=`λ = ${sp.lbar.toFixed(0)} nm，L = ${MEAS.L} mm，N = ${f.N} 點。`
+    +`截距 ${f.a>=0?'+':''}${f.a.toFixed(3)} mm 對應接觸端間隙 ${Math.max(0,d0fit).toFixed(2)} µm。`;
+  $('verdict').dataset.D=D;$('verdict').dataset.sD=sD;
+}
+
+$('b-reveal').addEventListener('click',()=>{
+  const f=fit();const el=$('verdict');el.hidden=false;
+  if(!f){el.innerHTML=`真值：D = ${trueD.toFixed(4)} mm，接觸端間隙 ${trueD0.toFixed(2)} µm。（尚未擬合）`;return;}
+  const D=+el.dataset.D,sD=+el.dataset.sD;
+  const z=Math.abs(D-trueD)/Math.max(1e-9,sD);
+  const judge=z<1?'落在 1σ 內，量得很準。':z<2?'落在 2σ 內，可以接受。':z<3?'偏離 2–3σ，檢查是否漏數或多數了條紋。':'偏離超過 3σ，斜率有系統性誤差——通常是數暗紋時跳級，或把亮紋當成暗紋。';
+  el.innerHTML=`真值 D = <b>${trueD.toFixed(4)} mm</b>，接觸端間隙 ${trueD0.toFixed(2)} µm。<br>`
+    +`你的結果 ${D.toFixed(4)} ± ${sD.toFixed(4)} mm，差距 ${Math.abs(D-trueD).toFixed(4)} mm = <b>${z.toFixed(1)}σ</b>。${judge}`;
+});
+
+/* ═══════════ 啟動 ═══════════ */
+update();
+newWire();
+</script>
+</body>
+</html>

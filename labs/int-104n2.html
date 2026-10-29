@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光學干涉．全反射與光柵繞射．模擬實驗室</title>
+<style>
+  :root{
+    --bg: #14181d;
+    --panel: #1c2229;
+    --panel-2: #222a33;
+    --line: #33404c;
+    --text: #e9e6de;
+    --muted: #93a1ad;
+    --amber: #ffb454;
+    --teal: #5fd0c0;
+    --teal-dim: rgba(95,208,192,0.18);
+    --red: #e2634f;
+    --green: #7fd08a;
+    --blue: #5fa8e6;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Noto Sans Mono TC", monospace;
+    --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+    --sans: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  .wrap{max-width:960px;margin:0 auto;padding:22px 16px 60px;}
+  header{margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:14px;}
+  header h1{font-family:var(--serif);font-size:1.5rem;font-weight:700;margin:0 0 4px;letter-spacing:0.02em;}
+  header p{margin:0;color:var(--muted);font-size:0.88rem;}
+  .setup-line{font-family:var(--mono);font-size:0.8rem;color:var(--teal);margin-top:8px;}
+
+  .tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--panel-2);border-radius:8px;padding:3px;flex-wrap:wrap;}
+  .tab-btn{flex:1;min-width:120px;padding:10px 12px;background:transparent;border:none;color:var(--muted);font-size:0.88rem;
+    font-weight:600;border-radius:6px;cursor:pointer;font-family:var(--sans);transition:background .15s,color .15s;}
+  .tab-btn.active{background:var(--amber);color:#221805;}
+
+  section.panel{display:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;}
+  section.panel.active{display:block;}
+
+  .grid2{display:grid;grid-template-columns:1fr 300px;gap:18px;}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+
+  canvas{width:100%;height:auto;background:#0f1318;border:1px solid var(--line);border-radius:8px;display:block;}
+
+  .ctrl-box{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px;}
+  .ctrl-row{margin-bottom:12px;}
+  .ctrl-row:last-child{margin-bottom:0;}
+  .ctrl-row label{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--muted);margin-bottom:4px;}
+  .ctrl-row label b{color:var(--amber);font-family:var(--mono);font-weight:600;}
+  input[type=range]{width:100%;accent-color:var(--amber);}
+  .btn{background:var(--amber);color:#221805;border:none;padding:9px 14px;border-radius:6px;font-weight:700;
+    cursor:pointer;font-size:0.85rem;font-family:var(--sans);}
+  .btn:disabled{background:#4a4536;color:#8a8578;cursor:not-allowed;}
+  .btn.secondary{background:transparent;border:1px solid var(--line);color:var(--text);}
+  .btn.danger{background:transparent;border:1px solid var(--red);color:var(--red);}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+  .formula-box{margin-top:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+    padding:14px;font-family:var(--mono);font-size:0.82rem;line-height:1.9;color:var(--text);}
+  .formula-box .hl{color:var(--amber);}
+  .formula-box .hl2{color:var(--teal);}
+
+  .note{font-size:0.8rem;color:var(--muted);margin-top:10px;line-height:1.6;}
+
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-family:var(--mono);font-size:0.8rem;}
+  th,td{text-align:center;padding:6px 4px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:600;}
+  td button{background:none;border:none;color:var(--red);cursor:pointer;font-size:0.85rem;}
+
+  .status-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.78rem;font-weight:700;font-family:var(--mono);}
+  .status-a{background:rgba(226,99,79,0.18);color:var(--red);}
+  .status-b{background:rgba(255,180,84,0.18);color:var(--amber);}
+  .status-c{background:rgba(127,208,138,0.18);color:var(--green);}
+
+  .result-box{margin-top:14px;background:var(--panel-2);border:1px solid var(--teal-dim);border-radius:8px;padding:14px;}
+  .result-box .n-value{font-family:var(--mono);font-size:1.5rem;color:var(--teal);font-weight:700;}
+
+  h3{font-family:var(--serif);font-size:1.05rem;margin:0 0 10px;color:var(--text);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>光學干涉實驗 — 模擬實驗室</h1>
+    <p>全反射臨界角 × CD/DVD 軌距量測 × 白光分光，改編自 104 學年度北二區物理實驗複賽試題</p>
+    <div class="setup-line">雷射波長固定 λ = 650 nm（一般紅光雷射筆）</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="crit">① 全反射臨界角</button>
+    <button class="tab-btn" data-tab="grating">② CD/DVD 軌距</button>
+    <button class="tab-btn" data-tab="disperse">③ 白光分光</button>
+  </div>
+
+  <!-- ===================== 第一部分：全反射臨界角 ===================== -->
+  <section class="panel active" id="panel-crit">
+    <p class="note" style="margin-top:0">
+      任務：轉動雷射角度，找出水（n = 1.33）與空氣界面發生全反射的臨界角，並與理論值比較誤差。
+    </p>
+    <div class="grid2">
+      <div>
+        <canvas id="critCanvas" width="700" height="320"></canvas>
+        <div class="formula-box">
+          Snell 定律（水→空氣）：n<sub>水</sub> sinθ<sub>1</sub> = sinθ<sub>2</sub><br>
+          目前入射角 θ<sub>1</sub> = <span class="hl" id="c-t1">--</span>°　　
+          折射角 θ<sub>2</sub> = <span class="hl2" id="c-t2">--</span><br>
+          理論臨界角：θ<sub>c</sub> = arcsin(1/1.33) = <span class="hl2">48.8°</span>
+        </div>
+      </div>
+      <div>
+        <div class="ctrl-box">
+          <div class="ctrl-row">
+            <label>入射角 θ1 <b id="c-slider-out">30.0°</b></label>
+            <input type="range" id="critSlider" min="0" max="85" step="0.1" value="30">
+          </div>
+          <div class="ctrl-row" style="display:flex;align-items:center;justify-content:space-between;">
+            <span class="status-pill status-c" id="critStatus">有折射光</span>
+            <button class="btn" id="recordCrit">📏 記錄為臨界角</button>
+          </div>
+        </div>
+        <div class="ctrl-box">
+          <h3 style="margin-top:0">量測紀錄</h3>
+          <table id="critTable">
+            <thead><tr><th>#</th><th>記錄角度</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="btn-row">
+            <button class="btn secondary" id="clearCrit">清除全部</button>
+          </div>
+        </div>
+        <div class="result-box" id="critResult" style="display:none;">
+          <div style="font-family:var(--mono);font-size:0.85rem;line-height:1.8;">
+            平均測得臨界角 = <span class="n-value" id="critAvg">--</span>°<br>
+            與理論值 48.8° 誤差 = <span id="critErr">--</span>%
+          </div>
+        </div>
+        <div class="note">
+          慢慢增加入射角，觀察折射光何時消失（只剩反射光）。找到轉變點附近再多測幾次取平均，效果更準。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 第二部分：CD/DVD 光柵 ===================== -->
+  <section class="panel" id="panel-grating">
+    <p class="note" style="margin-top:0">
+      任務：這是一片<b>未知軌距</b>的光碟片。改變入射角 θ1，量測第一階繞射角 θ2（讀數會四捨五入到 0.5°，模擬真實量角器精度），
+      至少記錄 3 組數據，再用線性迴歸求出軌距 d。公式：d(sinθ1 − sinθ2) = mλ　（m = 1）
+    </p>
+    <div class="grid2">
+      <div>
+        <canvas id="gratingCanvas" width="700" height="320"></canvas>
+        <div class="formula-box">
+          θ1 = <span class="hl" id="g-t1">--</span>°　　sinθ1 = <span class="hl" id="g-s1">--</span><br>
+          第一階繞射角 θ2 = <span class="hl2" id="g-t2">--</span>　　sinθ2 = <span class="hl2" id="g-s2">--</span>
+        </div>
+      </div>
+      <div>
+        <div class="ctrl-box">
+          <div class="ctrl-row">
+            <label>入射角 θ1 <b id="g-slider-out">30.0°</b></label>
+            <input type="range" id="gratingSlider" min="5" max="75" step="0.5" value="30">
+          </div>
+          <div class="btn-row">
+            <button class="btn" id="recordGrating">📏 記錄這筆數據</button>
+            <button class="btn secondary" id="newDisc">🔄 換一片光碟片</button>
+          </div>
+        </div>
+        <div class="ctrl-box">
+          <h3 style="margin-top:0">實驗數據</h3>
+          <table id="gratingTable">
+            <thead><tr><th>#</th><th>θ1</th><th>θ2</th><th>d (μm)</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="btn-row">
+            <button class="btn secondary" id="clearGrating">清除全部</button>
+          </div>
+        </div>
+        <div class="result-box" id="gratingResult" style="display:none;">
+          <h3 style="margin-top:0">迴歸結果</h3>
+          <div style="font-family:var(--mono);font-size:0.85rem;line-height:1.8;">
+            斜率 a = <span id="g-a">--</span>　截距 b = <span id="g-b">--</span>　R² = <span id="g-r2">--</span><br>
+            軌距 d = <span class="n-value" id="g-d">--</span> μm
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn secondary" id="revealDisc">🔍 公布真實軌距</button>
+        </div>
+        <div class="note" id="gratingReveal"></div>
+      </div>
+    </div>
+    <canvas id="gratingReg" width="900" height="240" style="margin-top:14px;"></canvas>
+  </section>
+
+  <!-- ===================== 第三部分：白光分光 ===================== -->
+  <section class="panel" id="panel-disperse">
+    <p class="note" style="margin-top:0">
+      任務：固定入射角，把雷射換成白光照射 CD（d = 1.6 μm）。拖曳波長滑桿，觀察為什麼紅光與藍光的繞射角不同。
+    </p>
+    <div class="grid2">
+      <div>
+        <canvas id="dispCanvas" width="700" height="320"></canvas>
+      </div>
+      <div>
+        <div class="ctrl-box">
+          <div class="ctrl-row">
+            <label>入射角 θ1 <b id="d-t1-out">30°</b></label>
+            <input type="range" id="dispTheta1" min="10" max="60" step="1" value="30">
+          </div>
+          <div class="ctrl-row">
+            <label>波長 λ <b id="d-lam-out">550 nm</b></label>
+            <input type="range" id="dispLambda" min="400" max="700" step="1" value="550">
+          </div>
+        </div>
+        <div class="formula-box">
+          紅光 (700nm) 繞射角 ≈ <span class="hl" id="d-red">--</span>°<br>
+          藍光 (450nm) 繞射角 ≈ <span class="hl2" id="d-blue">--</span>°<br>
+          目前波長繞射角 ≈ <span id="d-cur">--</span>°
+        </div>
+        <div class="note">
+          同一入射角、同一階數下，波長越長（越紅），需要越大的繞射角才能滿足 d(sinθ1−sinθ2)=mλ，
+          所以紅光偏折角度比藍光大，白光因此展開成彩虹光帶。
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const LAMBDA_UM = 0.65; // 650 nm
+const deg2rad = d => d*Math.PI/180;
+const rad2deg = r => r*180/Math.PI;
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ================= 第一部分：全反射臨界角 ================= */
+const N_WATER = 1.33;
+const THETA_C = rad2deg(Math.asin(1/N_WATER));
+const cc = document.getElementById('critCanvas'), cctx = cc.getContext('2d');
+let critTheta1 = 30, critLog = [];
+
+function drawCrit(){
+  const W=cc.width, H=cc.height, x0=350, y0=170, L=140;
+  cctx.clearRect(0,0,W,H);
+  cctx.fillStyle='rgba(95,208,192,0.12)';
+  cctx.fillRect(120,y0,460,130);
+  cctx.strokeStyle='var(--line)'; cctx.strokeStyle='#33404c'; cctx.lineWidth=1;
+  cctx.strokeRect(120,y0,460,130);
+  cctx.fillStyle='#5fd0c0'; cctx.font='12px sans-serif'; cctx.textAlign='left';
+  cctx.fillText('水 n = 1.33', 130, y0+20);
+  cctx.fillStyle='#93a1ad'; cctx.fillText('空氣', 130, y0-10);
+
+  cctx.strokeStyle='#4a5560'; cctx.setLineDash([4,4]);
+  cctx.beginPath(); cctx.moveTo(x0,40); cctx.lineTo(x0,y0+130); cctx.stroke();
+  cctx.setLineDash([]);
+
+  const th1 = critTheta1;
+  const ix = x0 - L*Math.sin(deg2rad(th1)), iy = y0 + L*Math.cos(deg2rad(th1));
+  cctx.strokeStyle='#ffb454'; cctx.lineWidth=1.8;
+  cctx.beginPath(); cctx.moveTo(ix,iy); cctx.lineTo(x0,y0); cctx.stroke();
+
+  const isTIR = th1 >= THETA_C;
+  cctx.strokeStyle = isTIR ? '#e2634f' : '#93a1ad';
+  cctx.lineWidth = isTIR ? 2 : 1.2;
+  const rx = x0 + L*Math.sin(deg2rad(th1)), ry = y0 + L*Math.cos(deg2rad(th1));
+  cctx.beginPath(); cctx.moveTo(x0,y0); cctx.lineTo(rx,ry); cctx.stroke();
+
+  let th2txt = '—（全反射，無折射光）';
+  if(!isTIR){
+    const sin2 = N_WATER*Math.sin(deg2rad(th1));
+    const th2 = rad2deg(Math.asin(sin2));
+    const fx = x0 + L*Math.sin(deg2rad(th2)), fy = y0 - L*Math.cos(deg2rad(th2));
+    cctx.strokeStyle='#5fd0c0'; cctx.lineWidth=1.8;
+    cctx.beginPath(); cctx.moveTo(x0,y0); cctx.lineTo(fx,fy); cctx.stroke();
+    th2txt = th2.toFixed(1)+'°';
+  }
+
+  document.getElementById('c-t1').textContent = th1.toFixed(1);
+  document.getElementById('c-t2').textContent = th2txt;
+
+  const pill = document.getElementById('critStatus');
+  if(isTIR){ pill.textContent='全反射'; pill.className='status-pill status-a'; }
+  else if(Math.abs(th1-THETA_C)<2){ pill.textContent='接近臨界'; pill.className='status-pill status-b'; }
+  else { pill.textContent='有折射光'; pill.className='status-pill status-c'; }
+}
+
+document.getElementById('critSlider').addEventListener('input', e=>{
+  critTheta1 = parseFloat(e.target.value);
+  document.getElementById('c-slider-out').textContent = critTheta1.toFixed(1)+'°';
+  drawCrit();
+});
+document.getElementById('recordCrit').addEventListener('click', ()=>{
+  critLog.push(critTheta1);
+  renderCritTable();
+});
+document.getElementById('clearCrit').addEventListener('click', ()=>{
+  critLog = []; renderCritTable();
+});
+function renderCritTable(){
+  const tbody = document.querySelector('#critTable tbody');
+  tbody.innerHTML='';
+  critLog.forEach((v,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+(i+1)+'</td><td>'+v.toFixed(1)+'°</td><td><button data-i="'+i+'">✕</button></td>';
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{ critLog.splice(+b.dataset.i,1); renderCritTable(); });
+  });
+  const box = document.getElementById('critResult');
+  if(critLog.length>=1){
+    const avg = critLog.reduce((a,b)=>a+b,0)/critLog.length;
+    const err = Math.abs(avg-THETA_C)/THETA_C*100;
+    document.getElementById('critAvg').textContent = avg.toFixed(2);
+    document.getElementById('critErr').textContent = err.toFixed(1);
+    box.style.display='block';
+  } else { box.style.display='none'; }
+}
+drawCrit();
+
+/* ================= 第二部分：CD/DVD 光柵 ================= */
+const gc = document.getElementById('gratingCanvas'), gctx = gc.getContext('2d');
+const grc = document.getElementById('gratingReg'), grctx = grc.getContext('2d');
+let gTheta1 = 30, gData = [], hiddenD, hiddenType;
+
+function newDisc(){
+  hiddenType = Math.random()<0.5 ? 'CD' : 'DVD';
+  const base = hiddenType==='CD' ? 1.6 : 0.74;
+  hiddenD = +(base * (0.95+Math.random()*0.1)).toFixed(3);
+  gData = [];
+  document.getElementById('gratingReveal').textContent='';
+  document.getElementById('gratingResult').style.display='none';
+  renderGratingTable(); drawGratingReg();
+}
+
+function computeTheta2(th1deg){
+  const sin1 = Math.sin(deg2rad(th1deg));
+  const sin2 = sin1 - LAMBDA_UM/hiddenD;
+  if(Math.abs(sin2)>1) return null;
+  return rad2deg(Math.asin(sin2));
+}
+
+function drawGrating(){
+  const W=gc.width, H=gc.height, cx=340, cy=250, L=170;
+  gctx.clearRect(0,0,W,H);
+  gctx.fillStyle='#B4B2A9';
+  gctx.fillRect(120,cy,440,10);
+  gctx.strokeStyle='#4a5560'; gctx.setLineDash([4,4]);
+  gctx.beginPath(); gctx.moveTo(cx,60); gctx.lineTo(cx,cy); gctx.stroke();
+  gctx.setLineDash([]);
+
+  const sin1 = Math.sin(deg2rad(gTheta1));
+  const ix = cx - L*sin1, iy = cy - L*Math.cos(deg2rad(gTheta1));
+  gctx.strokeStyle='#5fa8e6'; gctx.lineWidth=1.6;
+  gctx.beginPath(); gctx.moveTo(ix,iy); gctx.lineTo(cx,cy); gctx.stroke();
+
+  const rx = cx + L*sin1, ry = cy - L*Math.cos(deg2rad(gTheta1));
+  gctx.strokeStyle='#93a1ad'; gctx.lineWidth=1.2;
+  gctx.beginPath(); gctx.moveTo(cx,cy); gctx.lineTo(rx,ry); gctx.stroke();
+
+  const th2 = computeTheta2(gTheta1);
+  let s2txt='—（此角度看不到第一階）', t2txt='—';
+  document.getElementById('recordGrating').disabled = true;
+  if(th2!==null){
+    const measured = Math.round(th2*2)/2;
+    const fx = cx + L*Math.sin(deg2rad(measured)), fy = cy - L*Math.cos(deg2rad(measured));
+    gctx.strokeStyle='#ffb454'; gctx.lineWidth=1.8;
+    gctx.beginPath(); gctx.moveTo(cx,cy); gctx.lineTo(fx,fy); gctx.stroke();
+    t2txt = measured.toFixed(1)+'°';
+    s2txt = Math.sin(deg2rad(measured)).toFixed(3);
+    document.getElementById('recordGrating').disabled = false;
+  }
+  document.getElementById('g-t1').textContent = gTheta1.toFixed(1);
+  document.getElementById('g-s1').textContent = sin1.toFixed(3);
+  document.getElementById('g-t2').textContent = t2txt;
+  document.getElementById('g-s2').textContent = s2txt;
+}
+
+document.getElementById('gratingSlider').addEventListener('input', e=>{
+  gTheta1 = parseFloat(e.target.value);
+  document.getElementById('g-slider-out').textContent = gTheta1.toFixed(1)+'°';
+  drawGrating();
+});
+document.getElementById('recordGrating').addEventListener('click', ()=>{
+  const th2 = computeTheta2(gTheta1);
+  if(th2===null) return;
+  const measured = Math.round(th2*2)/2;
+  const sin1 = Math.sin(deg2rad(gTheta1)), sin2 = Math.sin(deg2rad(measured));
+  const dCalc = LAMBDA_UM/Math.abs(sin1-sin2);
+  gData.push({t1:gTheta1, t2:measured, s1:sin1, s2:sin2, d:dCalc});
+  renderGratingTable();
+});
+document.getElementById('clearGrating').addEventListener('click', ()=>{
+  gData=[]; renderGratingTable();
+});
+document.getElementById('newDisc').addEventListener('click', newDisc);
+document.getElementById('revealDisc').addEventListener('click', ()=>{
+  let msg = '真實光碟片：'+hiddenType+'，實際軌距 d = '+hiddenD.toFixed(3)+' μm。';
+  const fit = computeGFit();
+  if(fit && !isNaN(fit.d)){
+    const err = Math.abs(fit.d-hiddenD)/hiddenD*100;
+    msg += '　你的迴歸結果 d = '+fit.d.toFixed(3)+' μm，誤差 '+err.toFixed(1)+'%。';
+  }
+  document.getElementById('gratingReveal').textContent = msg;
+});
+
+function renderGratingTable(){
+  const tbody = document.querySelector('#gratingTable tbody');
+  tbody.innerHTML='';
+  gData.forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+(i+1)+'</td><td>'+r.t1.toFixed(1)+'°</td><td>'+r.t2.toFixed(1)+'°</td><td>'+r.d.toFixed(3)+'</td>'
+      + '<td><button data-i="'+i+'">✕</button></td>';
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{ gData.splice(+b.dataset.i,1); renderGratingTable(); });
+  });
+  runGRegression();
+}
+
+function computeGFit(){
+  const n = gData.length;
+  if(n<3) return null;
+  const xs = gData.map(d=>d.s1), ys = gData.map(d=>d.s2);
+  const sumX=xs.reduce((a,b)=>a+b,0), sumY=ys.reduce((a,b)=>a+b,0);
+  const sumXY=xs.reduce((a,x,i)=>a+x*ys[i],0), sumX2=xs.reduce((a,x)=>a+x*x,0);
+  const denom = n*sumX2 - sumX*sumX;
+  if(Math.abs(denom)<1e-9) return null;
+  const a=(n*sumXY-sumX*sumY)/denom, b=(sumX2*sumY-sumX*sumXY)/denom;
+  const meanY=sumY/n; let ssTot=0, ssRes=0;
+  xs.forEach((x,i)=>{ const yp=a*x+b; ssTot+=(ys[i]-meanY)**2; ssRes+=(ys[i]-yp)**2; });
+  const r2 = ssTot>1e-9 ? 1-ssRes/ssTot : 1;
+  const d = Math.abs(b)>1e-6 ? LAMBDA_UM/Math.abs(b) : NaN;
+  return {a,b,r2,d};
+}
+
+function runGRegression(){
+  const fit = computeGFit();
+  const box = document.getElementById('gratingResult');
+  if(!fit){ box.style.display='none'; }
+  else{
+    box.style.display='block';
+    document.getElementById('g-a').textContent = fit.a.toFixed(3);
+    document.getElementById('g-b').textContent = fit.b.toFixed(4);
+    document.getElementById('g-r2').textContent = fit.r2.toFixed(4);
+    document.getElementById('g-d').textContent = isNaN(fit.d)?'--':fit.d.toFixed(3);
+  }
+  drawGratingReg();
+}
+
+function drawGratingReg(){
+  const W=grc.width, H=grc.height, padL=55,padR=25,padT=20,padB=40;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  grctx.clearRect(0,0,W,H);
+  grctx.strokeStyle='#33404c'; grctx.lineWidth=1;
+  grctx.beginPath(); grctx.moveTo(padL,padT); grctx.lineTo(padL,H-padB); grctx.lineTo(W-padR,H-padB); grctx.stroke();
+  grctx.fillStyle='#93a1ad'; grctx.font='11px sans-serif'; grctx.textAlign='center';
+  grctx.fillText('sinθ1', W/2, H-8);
+  grctx.save(); grctx.translate(16,H/2); grctx.rotate(-Math.PI/2);
+  grctx.fillText('sinθ2',0,0); grctx.restore();
+
+  if(gData.length===0){
+    grctx.fillStyle='#4a5560'; grctx.textAlign='center';
+    grctx.fillText('尚無數據 — 到左方調整入射角並記錄', W/2, H/2);
+    return;
+  }
+  const xMax=1, yMin=-1, yMax=1;
+  const X = s => padL + s*plotW;
+  const Y = s => H-padB - ((s-yMin)/(yMax-yMin))*plotH;
+  grctx.fillStyle='#617180'; grctx.font='10px monospace';
+  for(let s=0;s<=1;s+=0.2) grctx.fillText(s.toFixed(1), X(s), H-padB+14);
+  grctx.textAlign='right';
+  for(let s=-1;s<=1;s+=0.5) grctx.fillText(s.toFixed(1), padL-8, Y(s)+3);
+  grctx.textAlign='center';
+
+  const fit = computeGFit();
+  if(fit){
+    grctx.strokeStyle='#ffb454'; grctx.lineWidth=1.6;
+    grctx.beginPath(); grctx.moveTo(X(0),Y(fit.a*0+fit.b)); grctx.lineTo(X(xMax),Y(fit.a*xMax+fit.b)); grctx.stroke();
+  }
+  gData.forEach(d=>{
+    grctx.fillStyle='#5fd0c0';
+    grctx.beginPath(); grctx.arc(X(d.s1),Y(d.s2),4,0,7); grctx.fill();
+  });
+}
+newDisc();
+drawGrating();
+
+/* ================= 第三部分：白光分光 ================= */
+const dc = document.getElementById('dispCanvas'), dctx = dc.getContext('2d');
+const D_CD = 1.6;
+let dTheta1=30, dLambda=550;
+
+function wavelengthColor(nm){
+  let hue = 270 - (nm-400)/(700-400)*270;
+  if(hue<0) hue=0; if(hue>270) hue=270;
+  return 'hsl('+hue+',85%,58%)';
+}
+function calcTheta2(th1deg, lamNm){
+  const sin1=Math.sin(deg2rad(th1deg));
+  const sin2 = sin1 - (lamNm/1000)/D_CD;
+  if(Math.abs(sin2)>1) return null;
+  return rad2deg(Math.asin(sin2));
+}
+function drawDisp(){
+  const W=dc.width,H=dc.height,cx=340,cy=250,L=170;
+  dctx.clearRect(0,0,W,H);
+  dctx.fillStyle='#B4B2A9'; dctx.fillRect(120,cy,440,10);
+  dctx.strokeStyle='#4a5560'; dctx.setLineDash([4,4]);
+  dctx.beginPath(); dctx.moveTo(cx,60); dctx.lineTo(cx,cy); dctx.stroke();
+  dctx.setLineDash([]);
+
+  const sin1=Math.sin(deg2rad(dTheta1));
+  const ix=cx-L*sin1, iy=cy-L*Math.cos(deg2rad(dTheta1));
+  dctx.strokeStyle='#e9e6de'; dctx.lineWidth=1.6;
+  dctx.beginPath(); dctx.moveTo(ix,iy); dctx.lineTo(cx,cy); dctx.stroke();
+
+  [700,450].forEach(nm=>{
+    const t2=calcTheta2(dTheta1,nm);
+    if(t2===null) return;
+    const fx=cx+L*Math.sin(deg2rad(t2)), fy=cy-L*Math.cos(deg2rad(t2));
+    dctx.strokeStyle=wavelengthColor(nm); dctx.globalAlpha=0.55; dctx.lineWidth=1.4;
+    dctx.beginPath(); dctx.moveTo(cx,cy); dctx.lineTo(fx,fy); dctx.stroke();
+    dctx.globalAlpha=1;
+  });
+
+  const tCur = calcTheta2(dTheta1,dLambda);
+  let curTxt='—';
+  if(tCur!==null){
+    const fx=cx+L*Math.sin(deg2rad(tCur)), fy=cy-L*Math.cos(deg2rad(tCur));
+    dctx.strokeStyle=wavelengthColor(dLambda); dctx.lineWidth=2.2;
+    dctx.beginPath(); dctx.moveTo(cx,cy); dctx.lineTo(fx,fy); dctx.stroke();
+    curTxt=tCur.toFixed(1);
+  }
+  const tR=calcTheta2(dTheta1,700), tB=calcTheta2(dTheta1,450);
+  document.getElementById('d-red').textContent = tR===null?'—':tR.toFixed(1);
+  document.getElementById('d-blue').textContent = tB===null?'—':tB.toFixed(1);
+  document.getElementById('d-cur').textContent = curTxt;
+}
+document.getElementById('dispTheta1').addEventListener('input', e=>{
+  dTheta1=parseFloat(e.target.value);
+  document.getElementById('d-t1-out').textContent=dTheta1+'°';
+  drawDisp();
+});
+document.getElementById('dispLambda').addEventListener('input', e=>{
+  dLambda=parseFloat(e.target.value);
+  document.getElementById('d-lam-out').textContent=dLambda+' nm';
+  drawDisp();
+});
+drawDisp();
+</script>
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>紙片埋藏深度虛擬實驗室</title>
+<style>
+:root{
+  --bg:#f4f1ea; --card:#ffffff; --ink:#1f2328; --muted:#5f6670; --line:#d9d4c7;
+  --accent:#0f6b8f; --accent2:#c0392b; --ok:#2e7d32; --warn:#b26a00; --dark:#1d2229;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.65}
+header{background:var(--dark);color:#fff;padding:16px 20px}
+header h1{margin:0;font-size:1.35rem;letter-spacing:.04em}
+header .sub{color:#b9c3cc;font-size:.9rem}
+header .hbtn{float:right;margin-top:4px}
+nav{display:flex;flex-wrap:wrap;gap:4px;background:#e6e1d5;padding:8px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:.92rem;color:var(--ink)}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+nav button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1080px;margin:0 auto;padding:16px}
+section{display:none}
+section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.card h2{margin:0 0 8px;font-size:1.12rem;color:var(--accent)}
+.card h3{margin:12px 0 6px;font-size:1rem}
+.note{background:#fff8e6;border-color:#ecd9a6}
+.warnbox{background:#fdecea;border:1px solid #f1b8b1;border-radius:8px;padding:8px 12px;margin:8px 0}
+.eq{font-family:"Times New Roman",serif;font-size:1.08rem;background:#f5f7f9;border-left:4px solid var(--accent);padding:6px 12px;margin:6px 0;border-radius:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:320px 1fr;gap:16px}
+@media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+svg,canvas{max-width:100%;height:auto;display:block}
+.btn{border:1px solid var(--accent);background:#fff;color:var(--accent);padding:6px 12px;border-radius:7px;cursor:pointer;font-size:.9rem;margin:2px}
+.btn.fill{background:var(--accent);color:#fff}
+.btn.red{border-color:var(--accent2);color:var(--accent2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:3px 8px;font-size:.82rem}
+.ctl{margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fafaf7}
+.ctl .lab{font-weight:600;font-size:.92rem;display:block;margin-bottom:2px}
+.ctl input[type=range]{width:100%}
+.ctl.dis{opacity:.5}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+input[type=number],input[type=text]{width:100px;padding:5px 7px;border:1px solid #bbb;border-radius:6px;font-size:.95rem}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:center}
+th{background:#eef2f4}
+.steps{margin:0;padding-left:0;list-style:none}
+.steps li{padding:6px 10px;border-left:4px solid #ccc;margin:4px 0;background:#fafaf7;border-radius:0 6px 6px 0;font-size:.92rem}
+.steps li.cur{border-left-color:var(--accent);background:#e8f3f7;font-weight:600}
+.steps li.done{border-left-color:var(--ok);color:var(--muted)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:10px;background:#eee;color:#444;margin-left:6px}
+.muted{color:var(--muted);font-size:.88rem}
+.cap{font-size:.82rem;color:var(--muted);text-align:center;margin-top:4px}
+.stat{font-family:"Times New Roman",serif;font-size:1.02rem}
+.darkbox{background:#15181c;border-radius:10px;padding:8px}
+</style>
+</head>
+<body>
+<header>
+  <button class="btn hbtn" style="color:#fff;background:transparent;border-color:#8fa3b3" onclick="resetAll()">重新抽取待測物</button>
+  <h1>紙片埋藏深度之測定　虛擬實驗室</h1>
+  <div class="sub">105 學年度 臺灣省第三區（中投區）複賽　物理實驗｜凸透鏡替代物體法測視深 h′ × 俯視作圖法測折射率 n</div>
+</header>
+<nav id="nav">
+  <button data-t="t1" class="on">① 原理</button>
+  <button data-t="t2">② 裝置與對準</button>
+  <button data-t="t3">③ 測量視深 h′</button>
+  <button disabled title="待確認後建置">④ 測折射率 n（待建置）</button>
+  <button disabled title="待確認後建置">⑤ 數據分析（待建置）</button>
+  <button disabled title="待確認後建置">⑥ 誤差與真值揭曉（待建置）</button>
+</nav>
+<main>
+
+<!-- ================= ① 原理 ================= -->
+<section id="t1" class="on">
+  <div class="card">
+    <h2>一、替代物體法：凹透鏡虛像的例子</h2>
+    <p>位於 A 的物體發出的光經凹透鏡後發散，<b>看起來就像</b>是由位於 B 的物體直接發出。凸透鏡只「看得到」光線的方向，無法分辨光線究竟是從 A 經凹透鏡偏折而來，還是從 B 直接射來。所以只要兩種情況在同一屏幕上都成清晰的像，<b>B 就是虛像的位置</b>。</p>
+    <div class="row" style="margin-bottom:6px">
+      <button class="btn fill" id="bA" onclick="setDemoA('A')">情況 1：物體在 A，經凹透鏡</button>
+      <button class="btn" id="bB" onclick="setDemoA('B')">情況 2：移除凹透鏡，物體直接放在 B</button>
+    </div>
+    <svg id="svgA" viewBox="0 0 900 270"></svg>
+    <div class="cap">兩種情況下，凹透鏡右側的光線完全重合，因此在同一屏幕上聚焦於同一點（示意圖，縱向放大）。</div>
+  </div>
+
+  <div class="card">
+    <h2>二、視深：為什麼紙片看起來比較淺？</h2>
+    <div class="grid2">
+      <div>
+        <svg id="svgB" viewBox="0 0 560 300"></svg>
+        <div class="ctl"><span class="lab">材料折射率 n（示範用）：<span id="nVal"></span></span><input type="range" id="nSl" min="1.30" max="1.70" step="0.01" value="1.50"></div>
+        <div class="ctl"><span class="lab">觀察方向與法線夾角 β（空氣中）：<span id="bVal"></span></span><input type="range" id="bSl" min="0.5" max="60" step="0.5" value="20"></div>
+      </div>
+      <div>
+        <p>設紙片在材料內的深度為 h，光線在材料內與法線夾角為 α，出射到空氣後的夾角為 β（取空氣折射率 n₂ ≈ 1，n 代表相對折射率 n₁/n₂）：</p>
+        <div class="eq">n sin α = sin β</div>
+        <p>出射點離光軸的高度 y = h tan α。把出射光線往回延長，與光軸交於深度 h′ 處，因此 y = h′ tan β：</p>
+        <div class="eq">h′ = h · tan α ⁄ tan β</div>
+        <p>在<b>傍軸</b>條件下（α、β 很小），tan ≈ sin，於是</p>
+        <div class="eq">h′ ≈ h · sin α ⁄ sin β = h ⁄ n　⇒　<b>h = n · h′</b></div>
+        <p id="depthReadout" class="stat"></p>
+        <svg id="svgC" viewBox="0 0 300 180"></svg>
+        <div class="cap">h′/h 隨觀察角 β 的變化；虛線為傍軸極限 1/n。</div>
+      </div>
+    </div>
+    <div class="warnbox"><b>重要推論：</b>h′ 會隨角度改變，所以紙片的「虛像」其實不是一個完美的點（平面折射造成的球面像差）。凸透鏡口徑越大，收進的光錐角度越大，最清晰位置越偏離傍軸值 h/n，但對焦的判斷也越靈敏。第 ③ 頁可以用光闌改變口徑，親自比較這個取捨。</div>
+  </div>
+
+  <div class="card">
+    <h2>三、本實驗的測量策略</h2>
+    <ol>
+      <li><b>測視深 h′（第 ③ 頁）</b>：先讓紙片符號經凸透鏡在屏幕上成清晰的像，記下待測物右緣位置（虛線 1）。接著移除待測物，透鏡與屏幕保持不動，把同樣的符號紙貼在手電筒前當作新物體，移動它直到屏幕上再度清晰。此時符號紙的位置 O′ 就是原先虛像的位置，h′ = 虛線 1 − O′。</li>
+      <li><b>測相對折射率 n（第 ④ 頁）</b>：將待測物平放在白紙上，透過材料對齊直線作圖，畫出光在材料內的路徑，量得入射角與折射角後由司乃耳定律求 n。</li>
+      <li><b>求深度</b>：h = n · h′，並分析誤差如何傳遞（第 ⑤、⑥ 頁）。</li>
+    </ol>
+  </div>
+
+  <div class="card note">
+    <h2>本模擬的器材假設</h2>
+    <p class="muted" style="margin:0">原試題卷未附器材規格，以下為合理預設值：凸透鏡焦距 f = 10.0 cm、口徑 4.0 cm（可加紙卡光闌縮小）；待測物為 10 × 5 × 5 cm 的透明長方塊，側面霧面、看不見紙片，右側面貼紅色膠帶作為觀察面；光學軌道附 1 mm 刻度直尺，讀數請估讀到 0.05 cm。每次開啟時，隨機抽取待測物的折射率 n 與埋藏深度 h 作為隱藏真值，於第 ⑥ 頁揭曉。</p>
+  </div>
+</section>
+
+<!-- ================= ② 裝置與對準 ================= -->
+<section id="t2">
+  <div class="card">
+    <h2>裝置組裝與對準</h2>
+    <p>h = n·h′ 只在<b>傍軸、正向觀察</b>時成立，所以要做到兩件事：(1) 凸透鏡中心要與紙片符號等高；(2) 待測物的觀察面（紅色膠帶面）要垂直於光軸。對準不佳時，屏幕上的像會偏離中心、變得模糊，視深也會有系統誤差。器材剛放上去時<b>並未對準</b>，請自行檢查。</p>
+    <div class="row">
+      <button class="btn fill" id="flashBtn2" onclick="toggleFlash()">打開手電筒</button>
+      <span class="muted">手電筒從待測物左方（無紅色膠帶那一側）照亮紙片符號。</span>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h2>(1) 高度對準：透鏡中心 ↔ 待測物中心</h2>
+      <p class="muted">側面為霧面，看不見紙片。請用直立直尺讀出待測物上緣、下緣高度，取平均得到中心高度（紙片約埋在中心高度），再把凸透鏡中心標記調到同一高度。</p>
+      <div class="row">
+        <button class="btn sm" onclick="setVZ('top')">看待測物上緣</button>
+        <button class="btn sm" onclick="setVZ('bottom')">看待測物下緣</button>
+        <button class="btn sm" onclick="setVZ('lens')">看透鏡中心標記</button>
+      </div>
+      <div class="darkbox" style="margin-top:6px"><canvas id="zoomV" width="300" height="300"></canvas></div>
+      <div class="cap" id="vzCap"></div>
+      <div class="row" style="margin-top:6px">上緣 <input type="number" step="0.05" id="rTop"> 下緣 <input type="number" step="0.05" id="rBot"> cm</div>
+      <div class="row">中心高度 = <b id="rCen">—</b> cm　透鏡中心 <input type="number" step="0.05" id="rLens"> cm</div>
+      <div class="ctl"><span class="lab">升降凸透鏡</span>
+        <div class="row">
+          <button class="btn sm" onclick="adjLensY(-0.5)">▼ 0.5</button><button class="btn sm" onclick="adjLensY(-0.1)">▼ 0.1</button><button class="btn sm" onclick="adjLensY(-0.02)">▼ 微調</button>
+          <button class="btn sm" onclick="adjLensY(0.02)">▲ 微調</button><button class="btn sm" onclick="adjLensY(0.1)">▲ 0.1</button><button class="btn sm" onclick="adjLensY(0.5)">▲ 0.5</button>
+        </div></div>
+    </div>
+    <div class="card">
+      <h2>(2) 垂直對準：直角尺檢查觀察面</h2>
+      <p class="muted">直角尺的尺座靠緊光學軌道側邊，尺片推到貼住待測物右側面。從上往下看，若觀察面不垂直光軸，尺片與面之間會透出楔形光縫。轉動待測物，直到光縫消失。</p>
+      <div class="darkbox"><canvas id="tiltCv" width="300" height="300"></canvas></div>
+      <div class="cap">俯視放大圖（橫向放大 8 倍以便看清光縫）</div>
+      <div class="ctl"><span class="lab">轉動待測物（繞鉛直軸）</span>
+        <div class="row">
+          <button class="btn sm" onclick="adjTilt(-1)">↺ 1°</button><button class="btn sm" onclick="adjTilt(-0.2)">↺ 0.2°</button><button class="btn sm" onclick="adjTilt(-0.05)">↺ 微調</button>
+          <button class="btn sm" onclick="adjTilt(0.05)">↻ 微調</button><button class="btn sm" onclick="adjTilt(0.2)">↻ 0.2°</button><button class="btn sm" onclick="adjTilt(1)">↻ 1°</button>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ③ 測量 h′ ================= -->
+<section id="t3">
+  <div class="card">
+    <h2>光學軌道（側視圖）</h2>
+    <div class="darkbox"><canvas id="bench" width="980" height="260"></canvas></div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn fill" id="flashBtn3" onclick="toggleFlash()">打開手電筒</button>
+      <label class="muted"><input type="checkbox" id="raysCk"> 顯示光線（教學用；真實實驗看不到光線，量測時請關閉）</label>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div>
+      <div class="card" style="padding:12px">
+        <h2>屏幕上的像</h2>
+        <div class="darkbox"><canvas id="scr" width="300" height="300"></canvas></div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn sm" id="zBtn" onclick="toggleZoom()">近看屏幕（3×）</button>
+          <span class="muted">判斷「最清晰」的位置</span>
+        </div>
+      </div>
+      <div class="card" style="padding:12px">
+        <h2>放大鏡讀尺</h2>
+        <div class="row">
+          <button class="btn sm" onclick="setHZ('face')" id="hzFace">待測物右緣／虛線 1</button>
+          <button class="btn sm" onclick="setHZ('card')" id="hzCard">符號紙 O′</button>
+          <button class="btn sm" onclick="setHZ('lens')">凸透鏡</button>
+          <button class="btn sm" onclick="setHZ('screen')">屏幕</button>
+        </div>
+        <div class="darkbox" style="margin-top:6px"><canvas id="zoomH" width="300" height="130"></canvas></div>
+        <div class="cap" id="hzCap"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>操作步驟 <span class="tag" id="trialTag">第 1 次</span></h2>
+        <ol class="steps" id="stepList">
+          <li data-s="1">打開手電筒，照亮紙片符號。</li>
+          <li data-s="2">移動凸透鏡與屏幕，使屏幕上出現清晰的符號像。</li>
+          <li data-s="3">用放大鏡讀出待測物右緣（虛線 1）的位置並輸入。</li>
+          <li data-s="4">移除待測物（透鏡、屏幕鎖定不動），將符號紙貼在手電筒前，往右移動，直到屏幕上再度出現清晰的像。</li>
+          <li data-s="5">讀出符號紙位置 O′ 並輸入，記錄本次 h′。</li>
+        </ol>
+        <div id="ctlLens" class="ctl"><span class="lab">凸透鏡位置</span>
+          <input type="range" id="slLens" min="30" max="80" step="0.01">
+          <div class="row"><button class="btn sm" onclick="nud('lensX',-1)">◀ 1 cm</button><button class="btn sm" onclick="nud('lensX',-0.1)">◀ 0.1</button><button class="btn sm" onclick="nud('lensX',0.1)">0.1 ▶</button><button class="btn sm" onclick="nud('lensX',1)">1 cm ▶</button>
+          <span class="muted">光闌口徑</span>
+          <select id="stopSel"><option value="4">4.0 cm（全口徑）</option><option value="2.5">2.5 cm</option><option value="1.5">1.5 cm</option><option value="0.8">0.8 cm</option></select></div>
+        </div>
+        <div id="ctlScr" class="ctl"><span class="lab">屏幕位置</span>
+          <input type="range" id="slScr" min="35" max="100" step="0.01">
+          <div class="row"><button class="btn sm" onclick="nud('screenX',-1)">◀ 1 cm</button><button class="btn sm" onclick="nud('screenX',-0.1)">◀ 0.1</button><button class="btn sm" onclick="nud('screenX',-0.02)">◀ 微調</button><button class="btn sm" onclick="nud('screenX',0.02)">微調 ▶</button><button class="btn sm" onclick="nud('screenX',0.1)">0.1 ▶</button><button class="btn sm" onclick="nud('screenX',1)">1 cm ▶</button></div>
+        </div>
+        <div class="row" style="margin:6px 0">
+          虛線 1 讀數 <input type="number" step="0.05" id="inL1"> cm
+          <button class="btn red" id="removeBtn" onclick="removeBlock()">移除待測物</button>
+        </div>
+        <div id="ctlCard" class="ctl dis"><span class="lab">手電筒＋符號紙位置</span>
+          <input type="range" id="slCard" min="5" max="60" step="0.01" disabled>
+          <div class="row"><button class="btn sm cardb" onclick="nud('cardX',-1)">◀ 1 cm</button><button class="btn sm cardb" onclick="nud('cardX',-0.1)">◀ 0.1</button><button class="btn sm cardb" onclick="nud('cardX',-0.02)">◀ 微調</button><button class="btn sm cardb" onclick="nud('cardX',0.02)">微調 ▶</button><button class="btn sm cardb" onclick="nud('cardX',0.1)">0.1 ▶</button><button class="btn sm cardb" onclick="nud('cardX',1)">1 cm ▶</button></div>
+        </div>
+        <div class="row" style="margin:6px 0">
+          O′ 讀數 <input type="number" step="0.05" id="inO" disabled> cm
+          <button class="btn fill" id="recBtn" onclick="recordTrial()" disabled>記錄本次 h′</button>
+          <button class="btn" id="nextBtn" onclick="nextTrial()" disabled>放回待測物，進行下一次</button>
+        </div>
+        <div class="muted" id="msg3"></div>
+      </div>
+
+      <div class="card">
+        <h2>數據表：視深 h′</h2>
+        <table id="tbl"><thead><tr><th>次</th><th>虛線 1 (cm)</th><th>O′ (cm)</th><th>h′ = 虛線 1 − O′ (cm)</th><th>光闌 (cm)</th><th></th></tr></thead><tbody></tbody></table>
+        <p class="stat" id="stats"></p>
+        <p class="muted">建議至少做 5 次。每次重新開始時屏幕會被移開，請重新對焦，讓每次量測彼此獨立。</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+'use strict';
+/* ================= 常數與狀態 ================= */
+const F = 10.0;            // 凸透鏡焦距 (cm)
+const LENS_D = 4.0;        // 全口徑 (cm)
+const BLOCK_L = 10.0, BLOCK_H = 5.0, BLOCK_W = 5.0;
+const $ = id => document.getElementById(id);
+const rand = (a, b) => a + Math.random() * (b - a);
+const sgn = () => (Math.random() < 0.5 ? -1 : 1);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+let T, S, E;   // T：隱藏真值；S：裝置對準；E：第③頁實驗狀態
+
+function newSample() {
+  T = {
+    n: rand(1.40, 1.60),          // 相對折射率（隱藏）
+    h: rand(3.8, 7.2),            // 紙片距右側面深度（隱藏）
+    faceX: rand(28, 32),          // 右側面在軌道上的位置
+    symY: rand(11.6, 12.6),       // 紙片符號高度
+    blockDy: rand(-0.15, 0.15),   // 待測物中心相對符號的高度差（製作誤差）
+    cardDy: rand(-0.25, 0.25)     // 手電筒前符號紙的高度差
+  };
+  S = { flash: false, lensY: T.symY + sgn() * rand(0.5, 1.0), tilt: sgn() * rand(2, 5) };
+  E = {
+    phase: 'focus', lensX: T.faceX + rand(14, 18), screenX: rand(74, 90), stop: 4.0,
+    cardX: T.faceX - BLOCK_L - 0.3, zoom: 1, rays: false, trials: [], hz: 'face'
+  };
+}
+
+/* ================= 光線追跡（二維子午面） =================
+   物點在 (x0, 0)。若 block 為真，光先在材料中前進，
+   在通過 (faceX, 0)、法向量 (cosφ, sinφ) 的平面折射後進入空氣；
+   接著經中心高度為 off 的理想薄透鏡，最後到達屏幕。 */
+function trace(o, wantPaths) {
+  const N = 360;
+  let lo, hi;
+  if (o.block) {
+    const h = o.faceX - o.x0, d = o.lensX - o.faceX;
+    const den = h + d * o.n, mg = (1.2 + 0.8 * o.R) / den;
+    lo = (o.off - o.R) / den - mg; hi = (o.off + o.R) / den + mg;
+  } else {
+    const d = o.lensX - o.x0;
+    lo = Math.atan((o.off - o.R) / d); hi = Math.atan((o.off + o.R) / d);
+  }
+  const nx = Math.cos(o.tilt || 0), ny = Math.sin(o.tilt || 0);
+  let s = 0, s2 = 0, c = 0; const paths = [];
+  for (let i = 0; i < N; i++) {
+    const a = lo + (hi - lo) * (i + 0.5) / N;
+    let px = o.x0, py = 0, dx = Math.cos(a), dy = Math.sin(a);
+    const pts = [[px, py]];
+    if (o.block) {
+      const cosi = dx * nx + dy * ny;
+      if (cosi <= 0) continue;
+      const t = ((o.faceX - px) * nx + (0 - py) * ny) / cosi;
+      px += t * dx; py += t * dy;
+      if (Math.abs(py) > BLOCK_H / 2) continue;
+      const k = 1 - o.n * o.n * (1 - cosi * cosi);
+      if (k < 0) continue;                         // 全反射
+      const cc = o.n * cosi - Math.sqrt(k);
+      dx = o.n * dx - cc * nx; dy = o.n * dy - cc * ny;
+      pts.push([px, py]);
+    }
+    if (dx <= 1e-9) continue;
+    const u = dy / dx, yL = py + (o.lensX - px) * u;
+    if (Math.abs(yL - o.off) > o.R) continue;       // 被透鏡／光闌擋住
+    const u2 = u - (yL - o.off) / F;                  // 理想薄透鏡
+    const ys = yL + (o.screenX - o.lensX) * u2;
+    s += ys; s2 += ys * ys; c++;
+    if (wantPaths) { pts.push([o.lensX, yL], [o.screenX, ys]); paths.push(pts); }
+  }
+  if (c < 3) return null;
+  const m = s / c;
+  let sel = paths;
+  if (wantPaths && paths.length > 9) { sel = []; for (let j = 0; j < 9; j++) sel.push(paths[Math.round(j * (paths.length - 1) / 8)]); }
+  return { yc: m, rms: Math.sqrt(Math.max(0, s2 / c - m * m)), count: c, paths: sel };
+}
+
+function objState() {
+  const block = E.phase === 'focus';
+  return {
+    block,
+    x0: block ? T.faceX - T.h : E.cardX,
+    yObj: block ? T.symY : T.symY + T.cardDy
+  };
+}
+
+function imageParams() {
+  if (!S.flash) return null;
+  const R = E.stop / 2, ob = objState();
+  const offV = S.lensY - ob.yObj;
+  const base = { block: ob.block, x0: ob.x0, n: T.n, faceX: T.faceX, lensX: E.lensX, R, screenX: E.screenX };
+  const tv = trace(Object.assign({}, base, { tilt: 0, off: offV }));
+  const th = trace(Object.assign({}, base, { tilt: ob.block ? S.tilt * Math.PI / 180 : 0, off: 0 }));
+  if (!tv || !th) return null;
+  const xApp = ob.block ? T.faceX - T.h / T.n : ob.x0;
+  const uApp = E.lensX - xApp;
+  const m = -(E.screenX - E.lensX) / uApp;
+  return {
+    cx: th.yc, cy: tv.yc - offV, m,
+    rx: Math.sqrt(3) * th.rms + 0.004, ry: Math.sqrt(3) * tv.rms + 0.004, R
+  };
+}
+
+/* ================= 物平面紋理（被照亮的符號紙） ================= */
+const OBJ_PPC = 160, OBJ_T = 512;
+const objTex = document.createElement('canvas');
+objTex.width = objTex.height = OBJ_T;
+(function buildTex() {
+  const g = objTex.getContext('2d'), c = OBJ_T / 2;
+  g.fillStyle = '#000'; g.fillRect(0, 0, OBJ_T, OBJ_T);
+  const rg = g.createRadialGradient(c, c, 0, c, c, 1.25 * OBJ_PPC);
+  rg.addColorStop(0, '#fff6dc'); rg.addColorStop(0.72, '#f2e3bd'); rg.addColorStop(0.88, '#7a6a4a'); rg.addColorStop(1, '#000');
+  g.fillStyle = rg; g.beginPath(); g.arc(c, c, 1.25 * OBJ_PPC, 0, 7); g.fill();
+  const P = (X, Y) => [c + X * OBJ_PPC, c - Y * OBJ_PPC];
+  const rect = (x1, y1, x2, y2) => { const a = P(x1, y2), b = P(x2, y1); g.fillRect(a[0], a[1], b[0] - a[0], b[1] - a[1]); };
+  g.fillStyle = '#2a1f14';
+  rect(-0.28, -0.42, -0.16, 0.42);   // 直筆
+  rect(-0.28, 0.30, 0.28, 0.42);     // 上橫
+  rect(-0.28, 0.02, 0.14, 0.13);     // 中橫
+  const d = P(0.22, -0.30); g.beginPath(); g.arc(d[0], d[1], 0.07 * OBJ_PPC, 0, 7); g.fill();
+})();
+
+const noiseCv = document.createElement('canvas');
+noiseCv.width = noiseCv.height = 300;
+(function () {
+  const g = noiseCv.getContext('2d'), im = g.createImageData(300, 300);
+  for (let i = 0; i < im.data.length; i += 4) { const v = 128 + (Math.random() - 0.5) * 60; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+  g.putImageData(im, 0, 0);
+})();
+const bufCv = document.createElement('canvas');
+bufCv.width = bufCv.height = 300;
+
+/* ================= 屏幕繪製 ================= */
+function drawScreen() {
+  const cv = $('scr'), ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  ctx.fillStyle = '#3f3b35'; ctx.fillRect(0, 0, W, H);
+  const p = imageParams();
+  if (p) {
+    const win = E.zoom === 1 ? 5 : 5 / 3, ppc = W / win;
+    const b = bufCv.getContext('2d');
+    b.setTransform(1, 0, 0, 1, 0, 0); b.globalAlpha = 1;
+    b.fillStyle = '#000'; b.fillRect(0, 0, W, H);
+    b.imageSmoothingEnabled = true;
+    const k = p.m * ppc / OBJ_PPC;
+    const e0 = W / 2 + p.cx * ppc - k * OBJ_T / 2, f0 = H / 2 - p.cy * ppc - k * OBJ_T / 2;
+    const rxp = p.rx * ppc, ryp = p.ry * ppc, rmax = Math.max(rxp, ryp);
+    let bright = (0.3 + 0.7 * Math.pow(p.R / 2, 2)) * Math.min(1.3, 1.6 / (p.m * p.m));
+    if (rmax > 70) {
+      // 嚴重離焦：只剩一團光暈
+      const cxp = W / 2 + p.cx * ppc, cyp = H / 2 - p.cy * ppc;
+      const rr = Math.abs(p.m) * 1.2 * ppc + rmax;
+      b.save(); b.translate(cxp, cyp); b.scale(1, (Math.abs(p.m) * 1.2 * ppc + ryp) / rr);
+      const g = b.createRadialGradient(0, 0, 0, 0, 0, rr);
+      const a = clamp(Math.pow(Math.abs(p.m) * 1.2 * ppc / rr, 2) * 1.6, 0.03, 0.9);
+      g.addColorStop(0, `rgba(255,240,205,${a})`); g.addColorStop(0.8, `rgba(255,240,205,${a * 0.8})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+      b.fillStyle = g; b.beginPath(); b.arc(0, 0, rr, 0, 7); b.fill(); b.restore();
+    } else {
+      const N = rmax < 0.6 ? 1 : Math.min(72, Math.ceil(8 + rmax * 1.6));
+      for (let i = 0; i < N; i++) {
+        const r = N === 1 ? 0 : Math.sqrt((i + 0.5) / N), th = i * 2.399963;
+        b.globalAlpha = 1 / (i + 1);
+        b.setTransform(k, 0, 0, k, e0 + rxp * r * Math.cos(th), f0 + ryp * r * Math.sin(th));
+        b.drawImage(objTex, 0, 0);
+      }
+      b.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = clamp(bright, 0.12, 1.1);
+    ctx.drawImage(bufCv, 0, 0);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 0.10; ctx.drawImage(noiseCv, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = '12px sans-serif';
+  ctx.fillText(E.zoom === 1 ? '屏幕（視野寬 5 cm）' : '屏幕近看（視野寬 1.7 cm）', 8, 18);
+  if (!S.flash) { ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillText('手電筒未開啟', W / 2 - 38, H / 2); }
+}
+
+/* ================= 軌道側視圖 ================= */
+function drawBench() {
+  const cv = $('bench'), ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+  const sx = 9.4, X = x => 20 + x * sx, rail = H - 40, Y = y => rail - y * sx;
+  ctx.fillStyle = '#1d2229'; ctx.fillRect(0, 0, W, H);
+  // 軌道與直尺
+  ctx.fillStyle = '#7d848c'; ctx.fillRect(X(0), rail, X(100) - X(0), 9);
+  ctx.fillStyle = '#ece4cc'; ctx.fillRect(X(0), rail + 9, X(100) - X(0), 18);
+  ctx.strokeStyle = '#333'; ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 100; i++) {
+    const L = i % 10 === 0 ? 10 : (i % 5 === 0 ? 7 : 4);
+    ctx.beginPath(); ctx.moveTo(X(i) + .5, rail + 9); ctx.lineTo(X(i) + .5, rail + 9 + L); ctx.stroke();
+    if (i % 10 === 0) ctx.fillText(i, X(i) - (i < 10 ? 3 : (i === 100 ? 16 : 6)), rail + 26);
+  }
+  const ob = objState();
+  // 虛線 1（鉛筆記號）
+  if (E.phase !== 'focus') {
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = '#c9c9c9';
+    ctx.beginPath(); ctx.moveTo(X(T.faceX), Y(T.symY + 4)); ctx.lineTo(X(T.faceX), rail); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#c9c9c9'; ctx.font = '12px sans-serif'; ctx.fillText('虛線 1', X(T.faceX) - 18, Y(T.symY + 4.6));
+  }
+  // 待測物
+  if (E.phase === 'focus') {
+    const cy = T.symY + T.blockDy, x1 = X(T.faceX - BLOCK_L), x2 = X(T.faceX);
+    ctx.fillStyle = '#50565e'; ctx.fillRect((x1 + x2) / 2 - 5, Y(cy - BLOCK_H / 2), 10, rail - Y(cy - BLOCK_H / 2));
+    ctx.fillStyle = 'rgba(170,205,225,0.55)'; ctx.fillRect(x1, Y(cy + BLOCK_H / 2), x2 - x1, BLOCK_H * sx);
+    ctx.strokeStyle = '#d6ecf7'; ctx.strokeRect(x1, Y(cy + BLOCK_H / 2), x2 - x1, BLOCK_H * sx);
+    ctx.fillStyle = '#d33'; ctx.fillRect(x2 - 3, Y(cy + BLOCK_H / 2), 4, BLOCK_H * sx);
+    ctx.fillStyle = '#e8eef2'; ctx.font = '12px sans-serif'; ctx.fillText('待測物（側面霧面）', x1, Y(cy + BLOCK_H / 2) - 6);
+  }
+  // 手電筒
+  const fx = E.phase === 'focus' ? T.faceX - BLOCK_L : E.cardX;
+  const fy = E.phase === 'focus' ? T.symY : T.symY + T.cardDy;
+  ctx.fillStyle = '#50565e'; ctx.fillRect(X(fx - 2.5) - 4, Y(fy - 1.3), 8, rail - Y(fy - 1.3));
+  ctx.fillStyle = '#2f343a'; ctx.fillRect(X(fx - 5), Y(fy + 1.0), X(fx - 0.2) - X(fx - 5), 2.0 * sx);
+  ctx.fillStyle = '#9aa3ab'; ctx.fillRect(X(fx - 1.2), Y(fy + 1.3), X(fx - 0.15) - X(fx - 1.2), 2.6 * sx);
+  if (S.flash) { ctx.fillStyle = 'rgba(255,240,180,.25)'; ctx.fillRect(X(fx - 0.15), Y(fy + 1.3), 5, 2.6 * sx); }
+  if (E.phase !== 'focus') {
+    ctx.fillStyle = '#fafafa'; ctx.fillRect(X(fx) - 2, Y(fy + 1.5), 3, 3 * sx);
+    ctx.fillStyle = '#e8eef2'; ctx.font = '12px sans-serif'; ctx.fillText('符號紙', X(fx) - 16, Y(fy + 1.5) - 6);
+  }
+  ctx.fillStyle = '#e8eef2'; ctx.font = '12px sans-serif'; ctx.fillText('手電筒', X(fx - 5), Y(fy - 1.3) + 16);
+  // 凸透鏡
+  const lx = X(E.lensX), ly = Y(S.lensY);
+  ctx.fillStyle = '#50565e'; ctx.fillRect(lx - 3, ly + LENS_D / 2 * sx, 6, rail - ly - LENS_D / 2 * sx);
+  ctx.fillStyle = 'rgba(150,205,255,.5)'; ctx.strokeStyle = '#bfe3ff';
+  ctx.beginPath(); ctx.ellipse(lx, ly, 4, LENS_D / 2 * sx, 0, 0, 7); ctx.fill(); ctx.stroke();
+  if (E.stop < LENS_D) {
+    ctx.fillStyle = '#111'; const a = E.stop / 2 * sx, t = LENS_D / 2 * sx + 4;
+    ctx.fillRect(lx - 8, ly - t, 3, t - a); ctx.fillRect(lx - 8, ly + a, 3, t - a);
+  }
+  ctx.fillStyle = '#e8eef2'; ctx.fillText('凸透鏡', lx - 18, ly - LENS_D / 2 * sx - 6);
+  // 屏幕
+  const scx = X(E.screenX);
+  ctx.fillStyle = '#50565e'; ctx.fillRect(scx - 2, Y(S.lensY - 5), 6, rail - Y(S.lensY - 5));
+  ctx.fillStyle = '#f2f2f2'; ctx.fillRect(scx - 2, Y(S.lensY + 5), 4, 10 * sx);
+  ctx.fillStyle = '#e8eef2'; ctx.fillText('屏幕', scx - 12, Y(S.lensY + 5) - 6);
+  // 光線（教學用）
+  if (E.rays && S.flash) {
+    const tr = trace({ block: ob.block, x0: ob.x0, n: T.n, faceX: T.faceX, lensX: E.lensX, R: E.stop / 2, screenX: E.screenX, tilt: 0, off: S.lensY - ob.yObj }, true);
+    if (tr) {
+      ctx.strokeStyle = 'rgba(255,220,90,.75)'; ctx.lineWidth = 1;
+      tr.paths.forEach(pts => { ctx.beginPath(); pts.forEach((q, i) => { const px = X(q[0]), py = Y(ob.yObj + q[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.stroke(); });
+    }
+  }
+  if (E.phase !== 'focus') { ctx.fillStyle = '#ffcf6b'; ctx.font = '12px sans-serif'; ctx.fillText('🔒 透鏡與屏幕已鎖定', W - 150, 18); }
+}
+
+/* ================= 放大鏡：水平讀尺 ================= */
+function drawHZoom() {
+  const cv = $('zoomH'), ctx = cv.getContext('2d'), W = cv.width, H = cv.height, ppc = 100;
+  let x, kind, cap;
+  if (E.hz === 'face') { x = T.faceX; kind = E.phase === 'focus' ? 'face' : 'pencil'; cap = E.phase === 'focus' ? '待測物右緣（紅色膠帶面）' : '虛線 1（鉛筆記號）'; }
+  else if (E.hz === 'card') { x = E.cardX; kind = 'card'; cap = '符號紙表面（手電筒前）'; }
+  else if (E.hz === 'lens') { x = E.lensX; kind = 'index'; cap = '凸透鏡座中心刻線'; }
+  else { x = E.screenX; kind = 'index'; cap = '屏幕座刻線'; }
+  const c0 = Math.floor(x) + 0.5, Xp = v => W / 2 + (v - c0) * ppc, rTop = H - 44;
+  ctx.fillStyle = '#d9dde0'; ctx.fillRect(0, 0, W, rTop);
+  const px = Xp(x);
+  if (kind === 'face') {
+    ctx.fillStyle = 'rgba(120,165,200,.6)'; ctx.fillRect(0, 6, px, rTop - 6);
+    ctx.fillStyle = '#d42a2a'; ctx.fillRect(px - 2, 6, 2, rTop - 6);
+    ctx.fillStyle = '#123'; ctx.font = '11px sans-serif'; ctx.fillText('待測物', 6, 22);
+  } else if (kind === 'pencil') {
+    ctx.strokeStyle = 'rgba(70,70,70,.85)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(px, rTop - 40); ctx.lineTo(px + 0.4, rTop); ctx.stroke();
+  } else if (kind === 'card') {
+    if (x - c0 > -2) { ctx.fillStyle = '#3a3f45'; ctx.fillRect(0, 26, Math.max(0, px - 3), rTop - 40); }
+    ctx.fillStyle = '#fff'; ctx.fillRect(px - 3, 8, 3, rTop - 8); ctx.strokeStyle = '#888'; ctx.strokeRect(px - 3, 8, 3, rTop - 8);
+    ctx.fillStyle = '#123'; ctx.font = '11px sans-serif'; ctx.fillText('手電筒', 6, 22);
+  } else {
+    ctx.fillStyle = '#5b6168'; ctx.fillRect(px - 0.45 * ppc, rTop - 34, 0.9 * ppc, 34);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(px, rTop - 34); ctx.lineTo(px, rTop); ctx.stroke();
+  }
+  ctx.fillStyle = '#f1e7c6'; ctx.fillRect(0, rTop, W, H - rTop);
+  ctx.strokeStyle = '#1a1a1a'; ctx.fillStyle = '#1a1a1a'; ctx.lineWidth = 1; ctx.font = '12px sans-serif';
+  const i0 = Math.floor((c0 - W / 2 / ppc) * 10) - 1, i1 = Math.ceil((c0 + W / 2 / ppc) * 10) + 1;
+  for (let i = i0; i <= i1; i++) {
+    const p = Xp(i / 10), L = i % 10 === 0 ? 20 : (i % 5 === 0 ? 14 : 8);
+    ctx.beginPath(); ctx.moveTo(p, rTop); ctx.lineTo(p, rTop + L); ctx.stroke();
+    if (i % 10 === 0) ctx.fillText(String(i / 10), p - 7, rTop + 36);
+  }
+  $('hzCap').textContent = '放大鏡：' + cap + '（最小刻度 1 mm，請估讀到 0.05 cm）';
+}
+
+/* ================= ② 放大鏡：垂直讀尺 ================= */
+let vzTarget = 'top';
+function setVZ(t) { vzTarget = t; drawVZoom(); }
+function drawVZoom() {
+  const cv = $('zoomV'), ctx = cv.getContext('2d'), W = cv.width, H = cv.height, ppc = 80;
+  const bc = T.symY + T.blockDy;
+  let y, cap;
+  if (vzTarget === 'top') { y = bc + BLOCK_H / 2; cap = '待測物上緣'; }
+  else if (vzTarget === 'bottom') { y = bc - BLOCK_H / 2; cap = '待測物下緣'; }
+  else { y = S.lensY; cap = '凸透鏡中心標記'; }
+  const c0 = Math.floor(y) + 0.5, Yp = v => H / 2 - (v - c0) * ppc, rw = 60;
+  ctx.fillStyle = '#d9dde0'; ctx.fillRect(0, 0, W, H);
+  const py = Yp(y);
+  if (vzTarget === 'top') { ctx.fillStyle = 'rgba(150,185,205,.8)'; ctx.fillRect(rw + 6, py, W - rw - 12, H - py); }
+  else if (vzTarget === 'bottom') { ctx.fillStyle = 'rgba(150,185,205,.8)'; ctx.fillRect(rw + 6, 0, W - rw - 12, py); ctx.fillStyle = '#50565e'; ctx.fillRect(W / 2 + 10, py, 30, H - py); }
+  else {
+    ctx.fillStyle = 'rgba(150,205,255,.45)'; ctx.fillRect(rw + 60, 0, 60, H);
+    ctx.strokeStyle = '#111'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(rw + 40, py); ctx.lineTo(rw + 140, py); ctx.stroke();
+    ctx.fillStyle = '#111'; ctx.font = '11px sans-serif'; ctx.fillText('中心標記', rw + 146, py + 4);
+  }
+  if (vzTarget !== 'lens') { ctx.strokeStyle = '#123'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(rw + 6, py); ctx.lineTo(W - 6, py); ctx.stroke(); }
+  ctx.fillStyle = '#f1e7c6'; ctx.fillRect(0, 0, rw, H);
+  ctx.strokeStyle = '#1a1a1a'; ctx.fillStyle = '#1a1a1a'; ctx.font = '12px sans-serif'; ctx.lineWidth = 1;
+  const i0 = Math.floor((c0 - H / 2 / ppc) * 10) - 1, i1 = Math.ceil((c0 + H / 2 / ppc) * 10) + 1;
+  for (let i = i0; i <= i1; i++) {
+    const p = Yp(i / 10), L = i % 10 === 0 ? 20 : (i % 5 === 0 ? 14 : 8);
+    ctx.beginPath(); ctx.moveTo(rw - L, p); ctx.lineTo(rw, p); ctx.stroke();
+    if (i % 10 === 0) ctx.fillText(String(i / 10), 4, p + 4);
+  }
+  $('vzCap').textContent = '直立直尺放大：' + cap + '（單位 cm，高度由軌道面起算）';
+}
+
+/* ================= ② 直角尺俯視 ================= */
+function drawTilt() {
+  const cv = $('tiltCv'), ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+  const vs = 50, hs = 400;   // 縱向 50 px/cm；橫向 400 px/cm（相對放大 8 倍）
+  const tn = Math.tan(S.tilt * Math.PI / 180), xb = (BLOCK_W / 2) * Math.abs(tn);
+  const Xb = W / 2 + 40;
+  const Yp = y => H / 2 - y * vs;
+  const faceXp = y => Xb + ((-y * tn) - xb) * hs;
+  ctx.fillStyle = '#202328'; ctx.fillRect(0, 0, W, H);
+  // 背光
+  ctx.fillStyle = '#fff3c4'; ctx.fillRect(0, Yp(BLOCK_W / 2), Xb, BLOCK_W * vs);
+  // 待測物
+  ctx.fillStyle = '#6f9fbd'; ctx.beginPath();
+  ctx.moveTo(0, Yp(BLOCK_W / 2)); ctx.lineTo(faceXp(BLOCK_W / 2), Yp(BLOCK_W / 2));
+  ctx.lineTo(faceXp(-BLOCK_W / 2), Yp(-BLOCK_W / 2)); ctx.lineTo(0, Yp(-BLOCK_W / 2)); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#d42a2a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(faceXp(BLOCK_W / 2), Yp(BLOCK_W / 2)); ctx.lineTo(faceXp(-BLOCK_W / 2), Yp(-BLOCK_W / 2)); ctx.stroke();
+  // 直角尺
+  ctx.fillStyle = '#9ca3aa'; ctx.fillRect(Xb, 10, W - Xb, H - 20);
+  ctx.fillStyle = '#6c737a'; ctx.fillRect(Xb + 40, H - 60, W - Xb - 40, 50);
+  ctx.fillStyle = '#fff'; ctx.font = '12px sans-serif';
+  ctx.fillText('待測物', 10, H / 2); ctx.fillStyle = '#111'; ctx.fillText('直角尺', Xb + 8, 28);
+  ctx.fillStyle = '#ddd'; ctx.fillText('軌道側邊 →（尺座靠緊）', 8, H - 12);
+}
+
+/* ================= ① 原理圖 ================= */
+let demoMode = 'A';
+function setDemoA(m) { demoMode = m; $('bA').classList.toggle('fill', m === 'A'); $('bB').classList.toggle('fill', m === 'B'); drawDemoA(); }
+function drawDemoA() {
+  const X = x => 40 + x * 20.5, Y = y => 135 - y * 38;
+  let s = `<rect width="900" height="270" fill="#fbfaf6"/>`;
+  s += `<line x1="20" y1="${Y(0)}" x2="880" y2="${Y(0)}" stroke="#888" stroke-dasharray="6 4"/>`;
+  const arrow = (x, h, col, dash) => `<line x1="${X(x)}" y1="${Y(0)}" x2="${X(x)}" y2="${Y(h)}" stroke="${col}" stroke-width="3" ${dash ? 'stroke-dasharray="5 3"' : ''}/><path d="M${X(x) - 6},${Y(h) + 10} L${X(x)},${Y(h)} L${X(x) + 6},${Y(h) + 10}" fill="none" stroke="${col}" stroke-width="3"/>`;
+  // 凹透鏡
+  const cc = demoMode === 'A' ? '#1f6f99' : '#bbb';
+  s += `<path d="M${X(10) - 9},${Y(3)} Q${X(10) - 2},${Y(0)} ${X(10) - 9},${Y(-3)} L${X(10) + 9},${Y(-3)} Q${X(10) + 2},${Y(0)} ${X(10) + 9},${Y(3)} Z" fill="${demoMode === 'A' ? 'rgba(90,160,210,.35)' : 'none'}" stroke="${cc}" ${demoMode === 'B' ? 'stroke-dasharray="5 4"' : ''}/>`;
+  s += `<text x="${X(10) - 30}" y="${Y(3) - 8}" font-size="13" fill="${cc}">凹透鏡 C${demoMode === 'B' ? '（已移除）' : ''}</text>`;
+  // 凸透鏡
+  s += `<ellipse cx="${X(25)}" cy="${Y(0)}" rx="10" ry="${3.2 * 38}" fill="rgba(90,160,210,.35)" stroke="#1f6f99"/><text x="${X(25) - 20}" y="${Y(3.2) - 6}" font-size="13" fill="#1f6f99">凸透鏡</text>`;
+  s += `<line x1="${X(38.333)}" y1="${Y(3)}" x2="${X(38.333)}" y2="${Y(-3)}" stroke="#333" stroke-width="3"/><text x="${X(38.333) - 14}" y="${Y(-3) + 18}" font-size="13">屏幕</text>`;
+  const ycs = [1.0, 0.5, 0.0], cols = ['#c0392b', '#d68910', '#1e8449'];
+  ycs.forEach((yc, i) => {
+    const s1 = (yc - 0.5) / 5, yv = yc + 15 * s1, s2 = s1 - yv / 8, ysc = yv + 13.333 * s2;
+    let path;
+    if (demoMode === 'A') {
+      path = `M${X(0)},${Y(1)} L${X(10)},${Y(yc)} L${X(25)},${Y(yv)} L${X(38.333)},${Y(ysc)}`;
+      s += `<line x1="${X(10)}" y1="${Y(yc)}" x2="${X(5)}" y2="${Y(0.5)}" stroke="${cols[i]}" stroke-dasharray="4 4" opacity=".8"/>`;
+    } else {
+      path = `M${X(5)},${Y(0.5)} L${X(10)},${Y(yc)} L${X(25)},${Y(yv)} L${X(38.333)},${Y(ysc)}`;
+    }
+    s += `<path d="${path}" fill="none" stroke="${cols[i]}" stroke-width="2"/>`;
+  });
+  if (demoMode === 'A') { s += arrow(0, 1, '#111', false) + arrow(5, 0.5, '#777', true); }
+  else { s += arrow(5, 0.5, '#111', false); }
+  s += `<text x="${X(0) - 5}" y="${Y(1) - 10}" font-size="15" font-weight="bold">A</text><text x="${X(5) - 4}" y="${Y(0.5) - 10}" font-size="15" font-weight="bold">B</text>`;
+  s += `<circle cx="${X(38.333)}" cy="${Y(-0.3333)}" r="4" fill="#111"/><text x="${X(38.333) + 8}" y="${Y(-0.3333) + 5}" font-size="13">清晰像</text>`;
+  s += `<text x="20" y="258" font-size="13" fill="#555">${demoMode === 'A' ? '實線：實際光路；虛線：往回延長，交會於虛像 B' : '物體直接放在 B：凹透鏡右側的光路與情況 1 完全相同'}</text>`;
+  $('svgA').innerHTML = s;
+}
+
+function drawDepth() {
+  const n = parseFloat($('nSl').value), bdeg = parseFloat($('bSl').value);
+  $('nVal').textContent = n.toFixed(2); $('bVal').textContent = bdeg.toFixed(1) + '°';
+  const b = bdeg * Math.PI / 180, a = Math.asin(Math.sin(b) / n);
+  const h = 6, sc = 30, xi = 340, ya = 170;
+  const y = h * Math.tan(a), hp = y / Math.tan(b), hpar = h / n;
+  const X = d => xi - d * sc, Yv = v => ya - v * sc;
+  let s = `<rect width="560" height="300" fill="#fbfaf6"/>`;
+  s += `<rect x="20" y="20" width="${xi - 20}" height="260" fill="rgba(120,180,220,.22)"/>`;
+  s += `<line x1="${xi}" y1="20" x2="${xi}" y2="280" stroke="#d33" stroke-width="3"/>`;
+  s += `<text x="30" y="40" font-size="13" fill="#1f6f99">材料 n = ${n.toFixed(2)}</text><text x="${xi + 14}" y="40" font-size="13">空氣</text>`;
+  s += `<line x1="20" y1="${ya}" x2="550" y2="${ya}" stroke="#999" stroke-dasharray="5 4"/>`;
+  s += `<circle cx="${X(h)}" cy="${ya}" r="5" fill="#111"/><text x="${X(h) - 20}" y="${ya + 22}" font-size="13">紙片</text>`;
+  const ex = xi + 190, ey = Yv(y) - 190 * Math.tan(b);
+  s += `<line x1="${X(h)}" y1="${ya}" x2="${xi}" y2="${Yv(y)}" stroke="#c0392b" stroke-width="2.2"/>`;
+  s += `<line x1="${xi}" y1="${Yv(y)}" x2="${ex}" y2="${ey}" stroke="#c0392b" stroke-width="2.2"/>`;
+  s += `<line x1="${xi}" y1="${Yv(y)}" x2="${X(hp)}" y2="${ya}" stroke="#c0392b" stroke-dasharray="5 4"/>`;
+  s += `<circle cx="${X(hp)}" cy="${ya}" r="4" fill="#fff" stroke="#c0392b" stroke-width="2"/>`;
+  s += `<line x1="${X(hpar)}" y1="${ya - 10}" x2="${X(hpar)}" y2="${ya + 10}" stroke="#1e8449" stroke-width="2.5"/>`;
+  s += `<text x="${X(hpar) - 18}" y="${ya + 40}" font-size="12" fill="#1e8449">h/n</text>`;
+  s += `<text x="${X(hp) - 10}" y="${ya - 14}" font-size="12" fill="#c0392b">h′</text>`;
+  s += `<line x1="${X(h)}" y1="${ya + 55}" x2="${xi}" y2="${ya + 55}" stroke="#111"/><text x="${(X(h) + xi) / 2 - 5}" y="${ya + 72}" font-size="13">h</text>`;
+  s += `<text x="${ex - 20}" y="${ey - 6}" font-size="18">👁</text>`;
+  $('svgB').innerHTML = s;
+  $('depthReadout').innerHTML = `α = ${(a * 180 / Math.PI).toFixed(2)}°，β = ${bdeg.toFixed(1)}°　→　h′/h = ${(hp / h).toFixed(4)}（傍軸極限 1/n = ${(1 / n).toFixed(4)}）`;
+  // 曲線
+  const cx = v => 36 + v / 70 * 250, cy = r => 150 - (r - 0.3) / 0.45 * 130;
+  let c = `<rect width="300" height="180" fill="#fbfaf6"/><line x1="36" y1="150" x2="290" y2="150" stroke="#555"/><line x1="36" y1="10" x2="36" y2="150" stroke="#555"/>`;
+  let d = '';
+  for (let k = 0; k <= 70; k += 1) { const bb = Math.max(0.2, k) * Math.PI / 180, aa = Math.asin(Math.sin(bb) / n); const r = Math.tan(aa) / Math.tan(bb); d += (k ? 'L' : 'M') + cx(k).toFixed(1) + ',' + cy(r).toFixed(1); }
+  c += `<path d="${d}" fill="none" stroke="#c0392b" stroke-width="2"/>`;
+  c += `<line x1="36" y1="${cy(1 / n)}" x2="290" y2="${cy(1 / n)}" stroke="#1e8449" stroke-dasharray="5 4"/>`;
+  c += `<circle cx="${cx(bdeg)}" cy="${cy(hp / h)}" r="4" fill="#c0392b"/>`;
+  [0.3, 0.5, 0.7].forEach(v => { c += `<text x="4" y="${cy(v) + 4}" font-size="10">${v.toFixed(1)}</text>`; });
+  [0, 20, 40, 60].forEach(v => { c += `<text x="${cx(v) - 6}" y="166" font-size="10">${v}°</text>`; });
+  c += `<text x="240" y="176" font-size="10">β</text><text x="40" y="20" font-size="10">h′/h</text>`;
+  $('svgC').innerHTML = c;
+}
+
+/* ================= 操作 ================= */
+function toggleFlash() { S.flash = !S.flash; syncFlashBtns(); updateUI(); req(); drawTilt(); }
+function syncFlashBtns() { ['flashBtn2', 'flashBtn3'].forEach(id => { $(id).textContent = S.flash ? '關閉手電筒' : '打開手電筒'; $(id).classList.toggle('fill', !S.flash); }); }
+function adjLensY(d) { S.lensY = clamp(S.lensY + d, 8, 16); drawVZoom(); req(); }
+function adjTilt(d) { S.tilt = clamp(S.tilt + d, -15, 15); drawTilt(); req(); }
+function toggleZoom() { E.zoom = E.zoom === 1 ? 3 : 1; $('zBtn').textContent = E.zoom === 1 ? '近看屏幕（3×）' : '回到全視野'; req(); }
+function setHZ(t) { E.hz = t; drawHZoom(); }
+
+function limits() {
+  return {
+    lensX: [T.faceX + 6, 75],
+    screenX: [E.lensX + 3, 100],
+    cardX: [T.faceX - BLOCK_L - 8, E.lensX - 3]
+  };
+}
+function nud(key, d) {
+  if ((key === 'lensX' || key === 'screenX') && E.phase !== 'focus') return;
+  if (key === 'cardX' && E.phase !== 'sub') return;
+  const L = limits()[key]; E[key] = clamp(E[key] + d, L[0], L[1]);
+  if (key === 'lensX') E.screenX = clamp(E.screenX, E.lensX + 3, 100);
+  syncSliders(); req();
+}
+function syncSliders() {
+  const L = limits();
+  const set = (id, key) => { const el = $(id); el.min = L[key][0]; el.max = L[key][1]; el.value = E[key]; };
+  set('slLens', 'lensX'); set('slScr', 'screenX'); set('slCard', 'cardX');
+}
+['slLens', 'slScr', 'slCard'].forEach((id, i) => {
+  const key = ['lensX', 'screenX', 'cardX'][i];
+  document.addEventListener('DOMContentLoaded', () => {
+    $(id).addEventListener('input', e => {
+      if ((key === 'lensX' || key === 'screenX') && E.phase !== 'focus') { syncSliders(); return; }
+      if (key === 'cardX' && E.phase !== 'sub') { syncSliders(); return; }
+      const L = limits()[key]; E[key] = clamp(parseFloat(e.target.value), L[0], L[1]);
+      if (key === 'lensX') E.screenX = clamp(E.screenX, E.lensX + 3, 100);
+      syncSliders(); req();
+    });
+  });
+});
+
+function msg(t, col) { $('msg3').innerHTML = t; $('msg3').style.color = col || ''; }
+
+function removeBlock() {
+  const v = parseFloat($('inL1').value);
+  if (!isFinite(v)) { msg('請先用放大鏡讀出待測物右緣（虛線 1）的位置並輸入。', '#b26a00'); return; }
+  if (!S.flash) { msg('請先打開手電筒，並確認屏幕上已經有清晰的像。', '#b26a00'); return; }
+  E.phase = 'sub'; E.cardX = T.faceX - BLOCK_L - 0.3; E.hz = 'card';
+  msg('已移除待測物，透鏡與屏幕鎖定。請移動手電筒＋符號紙，找到屏幕上再度清晰的位置。');
+  updateUI(); req();
+}
+function recordTrial() {
+  const l1 = parseFloat($('inL1').value), o = parseFloat($('inO').value);
+  if (!isFinite(o)) { msg('請輸入符號紙位置 O′ 的讀數。', '#b26a00'); return; }
+  if (o >= l1) { msg('O′ 應位於虛線 1 的左側（O′ < 虛線 1），請重新確認讀數。', '#b26a00'); return; }
+  E.trials.push({ l1, o, hp: l1 - o, stop: E.stop });
+  E.phase = 'done';
+  msg(`已記錄第 ${E.trials.length} 次：h′ = ${(l1 - o).toFixed(2)} cm。`, '#2e7d32');
+  renderTable(); updateUI(); req();
+}
+function nextTrial() {
+  E.phase = 'focus';
+  E.screenX = clamp(E.screenX + sgn() * rand(2.5, 5), E.lensX + 3, 100);
+  E.cardX = T.faceX - BLOCK_L - 0.3; E.hz = 'face';
+  $('inL1').value = ''; $('inO').value = '';
+  msg('待測物已放回，屏幕被移開了。請重新對焦後，再讀一次虛線 1。');
+  updateUI(); req();
+}
+function delTrial(i) { E.trials.splice(i, 1); renderTable(); updateUI(); }
+
+function renderTable() {
+  const tb = $('tbl').querySelector('tbody');
+  tb.innerHTML = E.trials.map((t, i) => `<tr><td>${i + 1}</td><td>${t.l1.toFixed(2)}</td><td>${t.o.toFixed(2)}</td><td><b>${t.hp.toFixed(2)}</b></td><td>${t.stop.toFixed(1)}</td><td><button class="btn sm red" onclick="delTrial(${i})">刪除</button></td></tr>`).join('');
+  const N = E.trials.length;
+  if (N === 0) { $('stats').innerHTML = ''; return; }
+  const hs = E.trials.map(t => t.hp), mean = hs.reduce((a, b) => a + b, 0) / N;
+  if (N === 1) { $('stats').innerHTML = `N = 1　h′ = ${mean.toFixed(3)} cm（至少需 2 次才能估計標準差）`; return; }
+  const sd = Math.sqrt(hs.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (N - 1)), se = sd / Math.sqrt(N);
+  $('stats').innerHTML = `N = ${N}　平均 h̄′ = <b>${mean.toFixed(3)} cm</b>　樣本標準差 s = ${sd.toFixed(3)} cm　平均值標準誤 s/√N = ${se.toFixed(3)} cm`;
+}
+
+function updateUI() {
+  const ph = E.phase;
+  let cur = !S.flash ? 1 : (ph === 'focus' ? (isFinite(parseFloat($('inL1').value)) ? 4 : 2) : (ph === 'sub' ? (isFinite(parseFloat($('inO').value)) ? 5 : 4) : 6));
+  document.querySelectorAll('#stepList li').forEach(li => { const s = +li.dataset.s; li.className = s < cur ? 'done' : (s === cur ? 'cur' : ''); });
+  $('trialTag').textContent = `第 ${E.trials.length + (ph === 'done' ? 0 : 1)} 次`;
+  const focus = ph === 'focus';
+  $('ctlLens').classList.toggle('dis', !focus); $('ctlScr').classList.toggle('dis', !focus);
+  $('slLens').disabled = !focus; $('slScr').disabled = !focus; $('stopSel').disabled = !focus;
+  $('inL1').disabled = !focus; $('removeBtn').disabled = !focus;
+  $('ctlCard').classList.toggle('dis', ph !== 'sub'); $('slCard').disabled = ph !== 'sub';
+  $('inO').disabled = ph !== 'sub'; $('recBtn').disabled = ph !== 'sub';
+  $('nextBtn').disabled = ph !== 'done';
+  $('hzCard').disabled = focus;
+  syncSliders();
+}
+
+let pending = false;
+function req() { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; drawBench(); drawScreen(); drawHZoom(); }); }
+
+function resetAll() {
+  if (E && E.trials.length && !confirm('重新抽取待測物會清除目前所有數據，確定嗎？')) return;
+  newSample();
+  $('inL1').value = ''; $('inO').value = ''; $('stopSel').value = '4';
+  ['rTop', 'rBot', 'rLens'].forEach(id => $(id).value = ''); $('rCen').textContent = '—';
+  $('raysCk').checked = false;
+  syncFlashBtns(); renderTable(); updateUI(); drawVZoom(); drawTilt(); req();
+  msg('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#nav button[data-t]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#nav button').forEach(x => x.classList.remove('on')); b.classList.add('on');
+    document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === b.dataset.t));
+    window.scrollTo(0, 0); req();
+  }));
+  $('nSl').addEventListener('input', drawDepth); $('bSl').addEventListener('input', drawDepth);
+  $('stopSel').addEventListener('change', e => { E.stop = parseFloat(e.target.value); req(); });
+  $('raysCk').addEventListener('change', e => { E.rays = e.target.checked; req(); });
+  $('inL1').addEventListener('input', updateUI); $('inO').addEventListener('input', updateUI);
+  const cen = () => { const a = parseFloat($('rTop').value), b = parseFloat($('rBot').value); $('rCen').textContent = (isFinite(a) && isFinite(b)) ? ((a + b) / 2).toFixed(3) : '—'; };
+  $('rTop').addEventListener('input', cen); $('rBot').addEventListener('input', cen);
+  newSample(); setDemoA('A'); drawDepth(); syncFlashBtns(); updateUI(); drawVZoom(); drawTilt(); req();
+});
+</script>
+</body>
+</html>
