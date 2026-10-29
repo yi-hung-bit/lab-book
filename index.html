@@ -467,7 +467,12 @@ show(fromHash(),0);
 </script>
 
 <script>
-if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").then(r=>r.update()).catch(()=>{}));
+  // 新版離線檔安裝好時自動重新整理一次，讓書頁換成最新內容
+  let reloaded=false; const hadController=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(hadController&&!reloaded){reloaded=true;location.reload();}});
+}
 let deferredPrompt=null;
 const ib=document.getElementById("installBtn");
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;ib.hidden=false;});

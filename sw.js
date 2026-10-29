@@ -1,5 +1,5 @@
 // 實驗培訓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v5";
+const VERSION="v6";
 const CACHE="lab-book-"+VERSION;
 const FILES=[
  "./",
@@ -40,7 +40,13 @@ self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.
 self.addEventListener("fetch",e=>{
   const req=e.request; if(req.method!=="GET")return;
   const url=new URL(req.url);
-  if(url.origin===location.origin){
+  if(url.origin===location.origin && (req.mode==="navigate" || url.pathname.endsWith("/") || url.pathname.endsWith("index.html") || url.pathname.endsWith("sw.js"))){
+    // 書本頁面：有網路就先拿最新版，沒網路才用快取
+    e.respondWith(caches.open(CACHE).then(async c=>{
+      try{const r=await fetch(req,{cache:"no-cache"}); if(r.ok)c.put(req,r.clone()); return r;}
+      catch(err){return (await c.match(req,{ignoreSearch:true}))||(await c.match("./"))||Response.error();}
+    }));
+  }else if(url.origin===location.origin){
     // 自己的檔案：先用快取（離線可用），同時在背景抓新版
     e.respondWith(caches.open(CACHE).then(async c=>{
       const hit=await c.match(req,{ignoreSearch:true});
