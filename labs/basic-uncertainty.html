@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>測量與不確定度 · 互動教材</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f4ec; --paper:#fffdf8; --ink:#20293a; --ink-soft:#5c6779;
+  --grid:rgba(32,41,58,0.09); --accent:#c1652b; --accent-soft:#f1dcc7;
+  --sig:#20293a; --unsure:#c1652b; --nosig:#b6bcc6; --good:#3f7d58; --bad:#b33a3a;
+  --line:#20293a1f;
+  font-size:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#171a20; --paper:#20242c; --ink:#eef0f4; --ink-soft:#9aa3b2;
+    --grid:rgba(238,240,244,0.08); --accent:#e08b4e; --accent-soft:#3a2c22;
+    --sig:#eef0f4; --unsure:#e08b4e; --nosig:#565f6e; --good:#6fbf8b; --bad:#e08080;
+    --line:#eef0f41f;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171a20; --paper:#20242c; --ink:#eef0f4; --ink-soft:#9aa3b2;
+  --grid:rgba(238,240,244,0.08); --accent:#e08b4e; --accent-soft:#3a2c22;
+  --sig:#eef0f4; --unsure:#e08b4e; --nosig:#565f6e; --good:#6fbf8b; --bad:#e08080;
+  --line:#eef0f41f;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans TC",sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.wrap{max-width:920px;margin:0 auto;padding:28px 20px 60px;}
+header.top{margin-bottom:22px;}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--accent);letter-spacing:.02em;}
+h1{
+  font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(1.7rem,5vw,2.5rem);
+  margin:.2em 0 .1em; line-height:1.15;
+}
+.sub{color:var(--ink-soft);font-size:.98rem;max-width:60ch;}
+
+nav.tabs{
+  display:flex; gap:6px; margin:26px 0 18px; flex-wrap:wrap;
+  border-bottom:2px solid var(--line); padding-bottom:0;
+}
+nav.tabs button{
+  font-family:"Noto Sans TC",sans-serif; font-weight:700; font-size:.92rem;
+  background:none;border:none;color:var(--ink-soft);cursor:pointer;
+  padding:10px 14px; border-bottom:3px solid transparent; margin-bottom:-2px;
+  transition:color .15s;
+}
+nav.tabs button.active{color:var(--ink); border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--ink);}
+
+section.panel{display:none;}
+section.panel.active{display:block; animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+.card{
+  background:var(--paper); border:1px solid var(--line); border-radius:4px;
+  padding:22px 22px 24px; margin-bottom:18px;
+  box-shadow:0 1px 0 var(--line);
+}
+h2{
+  font-family:"Noto Serif TC",serif; font-weight:700; font-size:1.25rem; margin:0 0 4px;
+  display:flex; align-items:baseline; gap:8px;
+}
+h2 .tag{font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--accent);font-weight:600;border:1px solid var(--accent);padding:2px 6px;border-radius:3px;}
+p.hint{color:var(--ink-soft);font-size:.9rem;margin:0 0 16px;line-height:1.6;}
+
+label{display:block;font-size:.85rem;color:var(--ink-soft);margin:12px 0 5px;font-weight:500;}
+input[type=text],input[type=number]{
+  width:100%; font-family:"IBM Plex Mono",monospace; font-size:1.05rem;
+  background:var(--bg); border:1px solid var(--line); border-radius:3px;
+  padding:9px 11px; color:var(--ink);
+}
+input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+.row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+.row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+@media(max-width:560px){.row,.row3{grid-template-columns:1fr;}}
+
+.btn{
+  font-family:"Noto Sans TC",sans-serif; font-weight:700; font-size:.92rem;
+  background:var(--ink); color:var(--paper); border:none; border-radius:3px;
+  padding:10px 18px; cursor:pointer; margin-top:16px;
+}
+.btn:hover{background:var(--accent);}
+.opbtns{display:flex; gap:8px; margin:12px 0 0; flex-wrap:wrap;}
+.opbtns button{
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1rem;
+  background:var(--bg); border:1px solid var(--line); border-radius:3px;
+  padding:8px 16px; cursor:pointer; color:var(--ink);
+}
+.opbtns button.sel{background:var(--accent); border-color:var(--accent); color:#fff;}
+
+.readout{
+  margin-top:18px; padding:16px 18px; background:var(--bg); border-left:3px solid var(--accent);
+  border-radius:0 3px 3px 0; font-family:"IBM Plex Mono",monospace;
+}
+.readout .big{font-size:1.3rem; font-weight:600;}
+.readout .steps{margin-top:10px; font-size:.85rem; color:var(--ink-soft); line-height:1.9;}
+.readout .steps span.k{color:var(--ink);}
+
+.digits{font-family:"IBM Plex Mono",monospace; font-size:2rem; letter-spacing:.03em; margin:18px 0 6px; word-break:break-all;}
+.digits .sigd{color:var(--sig); font-weight:600;}
+.digits .lastd{color:var(--unsure); font-weight:700; border-bottom:3px solid var(--unsure);}
+.digits .nosigd{color:var(--nosig);}
+.digits .pt{color:var(--ink-soft);}
+.legend{display:flex; gap:18px; flex-wrap:wrap; font-size:.82rem; color:var(--ink-soft); margin-bottom:4px;}
+.legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+
+table.ref{width:100%; border-collapse:collapse; font-size:.9rem; margin-top:8px;}
+table.ref th,table.ref td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--line);}
+table.ref th{color:var(--ink-soft); font-weight:600; font-size:.78rem;}
+table.ref td.mono{font-family:"IBM Plex Mono",monospace;}
+
+.example{
+  margin-top:16px; padding:16px; background:var(--accent-soft); border-radius:4px; font-size:.92rem; line-height:1.7;
+}
+.example summary{cursor:pointer; font-weight:700; color:var(--ink);}
+.chips{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+.chip{
+  font-family:"IBM Plex Mono",monospace; font-size:.82rem; background:var(--bg); border:1px solid var(--line);
+  border-radius:20px; padding:5px 12px; cursor:pointer; color:var(--ink-soft);
+}
+.chip:hover{border-color:var(--accent); color:var(--ink);}
+footer{margin-top:30px; color:var(--ink-soft); font-size:.8rem; text-align:center;}
+
+.labhead{
+  background:var(--ink); color:var(--paper); border-radius:4px; padding:20px 22px; margin-bottom:16px;
+}
+.labhead h2{color:var(--paper); font-size:1.2rem;}
+.labhead p{color:#ffffffaa; font-size:.88rem; margin:4px 0 14px; max-width:60ch;}
+.labhead .btn{background:var(--accent); color:#fff; margin-top:0;}
+.labhead .btn:hover{background:#fff; color:var(--ink);}
+table.labtbl{width:100%; border-collapse:collapse; font-family:"IBM Plex Mono",monospace; font-size:.85rem; margin-top:10px;}
+table.labtbl th,table.labtbl td{padding:6px 9px; border-bottom:1px solid var(--line); text-align:right;}
+table.labtbl th{color:var(--ink-soft); font-weight:600; font-size:.72rem; text-transform:none;}
+table.labtbl td:first-child, table.labtbl th:first-child{text-align:left;}
+.verdict{padding:14px 16px; border-radius:4px; margin-top:14px; font-weight:600;}
+.verdict.pass{background:var(--good); color:#fff;}
+.verdict.fail{background:var(--bad); color:#fff;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">高一物理 · 實驗基礎</div>
+    <h1>測量與不確定度</h1>
+    <p class="sub">四個小工具，練習有效數字判讀、不確定度計算、不確定度組合與因次分析 — 對應課本 Part 1–3。</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-t="sig">有效數字判讀</button>
+    <button data-t="unc">不確定度計算機</button>
+    <button data-t="prop">不確定度組合</button>
+    <button data-t="dim">因次分析</button>
+    <button data-t="fit">最小平方法</button>
+    <button data-t="lab">虛擬實驗室</button>
+  </nav>
+
+  <!-- PART 1: 有效數字 -->
+  <section class="panel active" id="sig">
+    <div class="card">
+      <h2>有效數字判讀器 <span class="tag">PART 1</span></h2>
+      <p class="hint">輸入一個測量數值（可含小數點），程式會依教材規則標出「有效數字」與「可疑（估計）數字」。試試 40003、320、0.025、0.02500、2.51000。</p>
+      <label for="sigInput">測量數值</label>
+      <input type="text" id="sigInput" value="0.02500" placeholder="例如 40003 或 0.025">
+      <div class="legend">
+        <span><span class="dot" style="background:var(--sig)"></span>準確值（有效）</span>
+        <span><span class="dot" style="background:var(--unsure)"></span>末位估計值（可疑數字）</span>
+        <span><span class="dot" style="background:var(--nosig)"></span>非有效數字</span>
+      </div>
+      <div class="digits" id="digitsOut"></div>
+      <div class="readout"><div class="big" id="sigCountOut"></div><div class="steps" id="sigRuleOut"></div></div>
+      <div class="chips" id="sigChips">
+        <span class="chip" data-v="40003">40003</span>
+        <span class="chip" data-v="320">320</span>
+        <span class="chip" data-v="0.025">0.025</span>
+        <span class="chip" data-v="0.02500">0.02500</span>
+        <span class="chip" data-v="2.51000">2.51000</span>
+        <span class="chip" data-v="100.0">100.0</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PART 1b: 不確定度計算機 -->
+  <section class="panel" id="unc">
+    <div class="card">
+      <h2>不確定度計算機 <span class="tag">PART 1</span></h2>
+      <p class="hint">輸入重複測量值（逗號分隔）求 A 類不確定度，並輸入儀器最小刻度求 B 類不確定度，程式會依課本規則合成並取捨。</p>
+      <div class="example" style="margin-top:0;margin-bottom:16px;">
+        <strong>誤差 vs. 不確定度</strong>　「誤差」＝測量值－真值，是單一測量的偏差（真值通常未知）；「不確定度／不準量」則是測量值分布範圍的估計，恆為正值，用來宣稱真值可能落在的區間。</div>
+      <label for="dataIn">重複測量值（以逗號分隔）</label>
+      <input type="text" id="dataIn" value="2.73, 2.89, 2.84, 2.77">
+      <div class="row">
+        <div>
+          <label for="instRes">B 類：儀器最小刻度 a</label>
+          <input type="number" step="any" id="instRes" value="0.01">
+        </div>
+        <div>
+          <label for="uncUnit">單位（顯示用）</label>
+          <input type="text" id="uncUnit" value="s">
+        </div>
+      </div>
+      <button class="btn" onclick="calcUncertainty()">計算</button>
+      <div class="readout" id="uncOut" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- PART 2: 不確定度組合 -->
+  <section class="panel" id="prop">
+    <div class="card">
+      <h2>不確定度傳遞模擬 <span class="tag">PART 2</span></h2>
+      <p class="hint">輸入兩個受測量 X = x ± u_x 與 Y = y ± u_y，選擇運算方式，觀察不確定度如何組合。</p>
+      <div class="row">
+        <div><label>x</label><input type="number" step="any" id="px" value="20.00"></div>
+        <div><label>u_x</label><input type="number" step="any" id="pux" value="0.30"></div>
+      </div>
+      <div class="row">
+        <div><label>y</label><input type="number" step="any" id="py" value="10.00"></div>
+        <div><label>u_y</label><input type="number" step="any" id="puy" value="0.20"></div>
+      </div>
+      <div class="opbtns" id="opBtns">
+        <button data-op="add" class="sel">X + Y</button>
+        <button data-op="sub">X − Y</button>
+        <button data-op="mul">X × Y</button>
+        <button data-op="div">X ÷ Y</button>
+      </div>
+      <button class="btn" onclick="calcProp()">計算</button>
+      <div class="readout" id="propOut" style="display:none;"></div>
+      <details class="example">
+        <summary>課本例題：A4 紙張面積</summary>
+        長 (29.68 ± 0.13) cm、寬 (21.03 ± 0.11) cm 相乘 → 面積 ≈ (624.2 ± 4.3) cm²。點選上方「X × Y」並代入試試看。
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>乘方傳遞：Z = a·Xⁿ <span class="tag">PART 2</span></h2>
+      <p class="hint">單一受測量 X = x ± u_x 取乘方或倍率時，相對不確定度為 |σ_Z/Z| = |n|·(u_x/x)。試試課本例：r = (10.0 ± 0.3) cm 的圓面積 A = πr²（a = π, n = 2）。</p>
+      <div class="row3">
+        <div><label>係數 a</label><input type="number" step="any" id="pax" value="3.14159"></div>
+        <div><label>x</label><input type="number" step="any" id="pxp" value="10.0"></div>
+        <div><label>u_x</label><input type="number" step="any" id="puxp" value="0.3"></div>
+      </div>
+      <label>指數 n</label>
+      <input type="number" step="any" id="ppow" value="2">
+      <button class="btn" onclick="calcPower()">計算</button>
+      <div class="readout" id="powOut" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <h2>指數傳遞：X = a·e^(bu) <span class="tag">師大講義</span></h2>
+      <p class="hint">相對不確定度 σ_X/X = |b|·σ_u（σ_u 為 u 的絕對不確定度）。例：輻射強度衰減 N = N₀e^(-t/τ)，N₀=1000/s，τ=5days，t=20±0.042 days，此時 b = -1/τ = -0.2。</p>
+      <div class="row3">
+        <div><label>係數 a</label><input type="number" step="any" id="eax" value="1000"></div>
+        <div><label>b</label><input type="number" step="any" id="ebx" value="-0.2"></div>
+        <div><label>u</label><input type="number" step="any" id="eux" value="20"></div>
+      </div>
+      <label>u 的不確定度 σ_u</label>
+      <input type="number" step="any" id="esux" value="0.042">
+      <button class="btn" onclick="calcExp()">計算</button>
+      <div class="readout" id="expOut" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <h2>對數傳遞：X = a·ln(w) <span class="tag">師大講義</span></h2>
+      <p class="hint">σ_X = |a|×(σ_u/u)，只與 u 的「相對不確定度」有關。例：輻射時間 t = -τ·ln(N/N₀)，τ=5，N=10±1（相對不確定度 10%），N₀=1000，此時 a = -τ、ln 內數值 w = N/N₀ = 0.01。</p>
+      <div class="row3">
+        <div><label>係數 a</label><input type="number" step="any" id="lax" value="-5"></div>
+        <div><label>ln 內數值 w</label><input type="number" step="any" id="lwx" value="0.01"></div>
+        <div><label>u 的相對不確定度 (%)</label><input type="number" step="any" id="lrelx" value="10"></div>
+      </div>
+      <button class="btn" onclick="calcLog()">計算</button>
+      <div class="readout" id="logOut" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- PART 3: 因次分析 -->
+  <section class="panel" id="dim">
+    <div class="card">
+      <h2>因次參考表 <span class="tag">PART 3</span></h2>
+      <p class="hint">「因次」表明物理量的成分，與單位選擇無關。以下為 SI 基本量的因次符號。</p>
+      <table class="ref">
+        <tr><th>物理量</th><th>因次</th><th>物理量</th><th>因次</th></tr>
+        <tr><td>長度</td><td class="mono">[L]</td><td>溫度</td><td class="mono">[Θ]</td></tr>
+        <tr><td>質量</td><td class="mono">[M]</td><td>發光強度</td><td class="mono">[J]</td></tr>
+        <tr><td>時間</td><td class="mono">[T]</td><td>物質量</td><td class="mono">[N]</td></tr>
+        <tr><td>電流</td><td class="mono">[I]</td><td>角度（導出，無因次）</td><td class="mono">1</td></tr>
+      </table>
+      <details class="example" open>
+        <summary>範例：彈簧振動週期的因次分析</summary>
+        週期 P 與彈簧常數 k、質量 m、振幅 R 的關係設為 P = a·k<sup>x</sup>m<sup>y</sup>R<sup>z</sup>，a 為無因次常數。<br><br>
+        [k] = [M][T]<sup>−2</sup>（力／長度）　　[P] = [T]<br><br>
+        代入：[T] = ([M][T]<sup>−2</sup>)<sup>x</sup>[M]<sup>y</sup>[L]<sup>z</sup><br>
+        比對 M：x + y = 0　比對 T：−2x = 1　比對 L：z = 0<br>
+        解得 x = −1/2, y = 1/2, z = 0　→　P = a√(m/k)，振幅 R 與週期無關。
+      </details>
+    </div>
+  </section>
+
+  <!-- PART 4b: 最小平方法 -->
+  <section class="panel" id="fit">
+    <div class="card">
+      <h2>最小平方法（線性回歸）<span class="tag">師大講義</span></h2>
+      <p class="hint">輸入成對的 x、y 數據（以逗號分隔，個數需相同），求最佳擬合直線 y = mx + b 及其斜率、截距的不確定度。對應公式 (14)(15)(29)(35)。</p>
+      <label for="fitX">x 數據</label>
+      <input type="text" id="fitX" value="82.14, 85.45, 88.59, 95.39, 105.79, 119.85, 132.15">
+      <label for="fitY">y 數據</label>
+      <input type="text" id="fitY" value="1.818, 1.857, 1.891, 1.962, 2.065, 2.119, 2.308">
+      <button class="btn" onclick="calcFit()">計算最佳擬合直線</button>
+      <div class="readout" id="fitOut" style="display:none;"></div>
+      <details class="example">
+        <summary>座標紙選用提醒</summary>
+        線性關係 y = mx+b 用直角座標紙；指數關係 y = a·e^(bx) 取對數後成直線，宜用半對數座標紙；乘方關係 y = a·xⁿ 取對數後成直線，宜用全對數座標紙，斜率即為 n。
+      </details>
+    </div>
+  </section>
+
+  <!-- VIRTUAL LAB -->
+  <section class="panel" id="lab">
+    <div class="labhead">
+      <h2>單擺測重力加速度 · 虛擬實驗室</h2>
+      <p>模擬六種擺長，每種擺長以碼錶重複計時 5 次（最小刻度 0.01 s）。練習從原始數據算出不確定度，再用最小平方法求出 g，最後跟真值核對。</p>
+      <button class="btn" onclick="resampleLab()">重新抽樣（更換這組擺的真實 g）</button>
+    </div>
+    <div class="opbtns" id="labSteps">
+      <button data-step="1" class="sel">① 各擺長的週期測量</button>
+      <button data-step="2">② 迴歸求 g</button>
+      <button data-step="3">③ 真值核對</button>
+    </div>
+    <div class="card" id="labStep1"></div>
+    <div class="card" id="labStep2" style="display:none;"></div>
+    <div class="card" id="labStep3" style="display:none;"></div>
+  </section>
+
+  <footer>依「測量與不確定度」（翰林版）與師大物理實驗教學手冊內容製作 · 僅供課堂練習</footer>
+</div>
+
+<script>
+// ---- tabs ----
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('section.panel').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.t).classList.add('active');
+  });
+});
+
+// ---- Part 1: significant figures ----
+function analyzeSig(raw){
+  raw = raw.trim();
+  let neg = raw.startsWith('-');
+  if(neg) raw = raw.slice(1);
+  let hasDot = raw.includes('.');
+  let [intPart, decPart=''] = raw.split('.');
+  intPart = intPart || '0';
+  let full = intPart + decPart;
+  let firstNZ = -1, lastNZ = -1;
+  for(let i=0;i<full.length;i++){
+    if(full[i] !== '0'){ if(firstNZ===-1) firstNZ = i; lastNZ = i; }
+  }
+  if(firstNZ === -1){ return {count:0, valid:true, full, hasDot, intPart, decPart, firstNZ:-1, lastNZ:-1}; }
+  let sigEnd = hasDot ? full.length-1 : lastNZ;
+  let count = sigEnd - firstNZ + 1;
+  return {count, valid:true, full, hasDot, intPart, decPart, firstNZ, sigEnd};
+}
+
+function renderSig(){
+  let raw = document.getElementById('sigInput').value;
+  let out = document.getElementById('digitsOut');
+  let countOut = document.getElementById('sigCountOut');
+  let ruleOut = document.getElementById('sigRuleOut');
+  if(!/^-?\d*\.?\d+$/.test(raw.trim()) || raw.trim()===''){
+    out.innerHTML = '<span style="color:var(--bad);font-size:1rem;">請輸入有效的數字格式</span>';
+    countOut.textContent=''; ruleOut.textContent=''; return;
+  }
+  let r = analyzeSig(raw);
+  let intLen = r.intPart.length;
+  let html = '';
+  let globalIdx = 0;
+  for(let i=0;i<r.intPart.length;i++){
+    html += classifyChar(r.intPart[i], globalIdx, r);
+    globalIdx++;
+  }
+  if(r.hasDot){
+    html += '<span class="pt">.</span>';
+    for(let i=0;i<r.decPart.length;i++){
+      html += classifyChar(r.decPart[i], globalIdx, r);
+      globalIdx++;
+    }
+  }
+  out.innerHTML = html;
+  if(r.count===0){
+    countOut.textContent = '此數值為 0，視情況另行判斷。';
+    ruleOut.innerHTML='';
+    return;
+  }
+  countOut.innerHTML = `共 <span style="color:var(--accent)">${r.count}</span> 位有效數字`;
+  let rules = [];
+  if(r.hasDot){
+    if(r.firstNZ >= r.intPart.length || (r.intPart==='0')) rules.push('純小數：數值前的 0 不是有效數字（規則5）');
+    rules.push('小數點後末位的 0 皆為有效數字（規則6）');
+  } else {
+    rules.push('整數末端的 0 不是有效數字（規則4）');
+  }
+  if(r.full.slice(r.firstNZ, r.sigEnd+1).includes('0')) rules.push('非零數字之間的 0 皆為有效數字（規則3）');
+  ruleOut.innerHTML = rules.map(x=>'· '+x).join('<br>');
+}
+function classifyChar(ch, idx, r){
+  if(idx < r.firstNZ) return `<span class="nosigd">${ch}</span>`;
+  if(idx > r.sigEnd) return `<span class="nosigd">${ch}</span>`;
+  if(idx === r.sigEnd) return `<span class="lastd">${ch}</span>`;
+  return `<span class="sigd">${ch}</span>`;
+}
+document.getElementById('sigInput').addEventListener('input', renderSig);
+document.querySelectorAll('#sigChips .chip').forEach(c=>{
+  c.addEventListener('click', ()=>{ document.getElementById('sigInput').value = c.dataset.v; renderSig(); });
+});
+renderSig();
+
+// ---- Part 1b: uncertainty calculator ----
+function roundUncertainty(u){
+  // 保留兩位有效數字，無條件進入法，遇0則不進一
+  if(u===0) return {value:0, decimals:0};
+  let exp = Math.floor(Math.log10(Math.abs(u)));
+  let decimals = -(exp-1); // digits after decimal to keep 2 sig figs
+  let scale = Math.pow(10, decimals);
+  let scaled = u*scale; // e.g. 36.15
+  let truncated = Math.floor(scaled);
+  let remainder = scaled - truncated;
+  let finalVal;
+  if(remainder === 0){ finalVal = truncated; }
+  else { finalVal = truncated + 1; } // 無條件進入法：只要有餘數就進位
+  return {value: finalVal/scale, decimals: Math.max(decimals,0)};
+}
+function fmt(v, decimals){ return v.toFixed(Math.max(decimals,0)); }
+
+function calcUncertainty(){
+  let dataStr = document.getElementById('dataIn').value;
+  let a = parseFloat(document.getElementById('instRes').value);
+  let unit = document.getElementById('uncUnit').value || '';
+  let nums = dataStr.split(',').map(s=>parseFloat(s.trim())).filter(n=>!isNaN(n));
+  let out = document.getElementById('uncOut');
+  out.style.display='block';
+  if(nums.length < 1){ out.innerHTML = '<span style="color:var(--bad)">請輸入至少一筆測量值</span>'; return; }
+  let N = nums.length;
+  let mean = nums.reduce((a,b)=>a+b,0)/N;
+  let uA = 0, s = 0;
+  if(N>1){
+    s = Math.sqrt(nums.reduce((acc,x)=>acc+(x-mean)**2,0)/(N-1));
+    uA = s/Math.sqrt(N);
+  }
+  let uB = (!isNaN(a) && a>0) ? a/(2*Math.sqrt(3)) : 0;
+  let u = Math.sqrt(uA*uA + uB*uB);
+  let rounded = roundUncertainty(u);
+  let meanRounded = fmt(mean, rounded.decimals);
+  let rel = (rounded.value/parseFloat(meanRounded)*100);
+  out.innerHTML = `
+    <div class="big">測量結果 = (${meanRounded} ± ${fmt(rounded.value,rounded.decimals)}) ${unit}</div>
+    <div class="steps">
+      <div><span class="k">N</span> = ${N}　<span class="k">平均值 x̄</span> = ${mean.toFixed(4)}　<span class="k">標準差 s</span> = ${s.toFixed(4)}</div>
+      <div><span class="k">u_A</span> = s/√N = ${uA.toFixed(4)} ${unit}</div>
+      <div><span class="k">u_B</span> = a/(2√3) = ${uB.toFixed(4)} ${unit}</div>
+      <div><span class="k">合成 u</span> = √(u_A² + u_B²) = ${u.toFixed(4)} ${unit} → 取兩位有效數字 = ${fmt(rounded.value,rounded.decimals)} ${unit}</div>
+      <div><span class="k">相對不確定度</span> ≈ ${rel.toFixed(2)}%</div>
+    </div>`;
+}
+
+// ---- Part 2: propagation ----
+let curOp = 'add';
+document.querySelectorAll('#opBtns button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#opBtns button').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); curOp = b.dataset.op;
+  });
+});
+function sigFromDecimals(v, decimals){ return v.toFixed(decimals); }
+function calcProp(){
+  let x = parseFloat(document.getElementById('px').value);
+  let ux = parseFloat(document.getElementById('pux').value);
+  let y = parseFloat(document.getElementById('py').value);
+  let uy = parseFloat(document.getElementById('puy').value);
+  let out = document.getElementById('propOut');
+  out.style.display='block';
+  if([x,ux,y,uy].some(isNaN)){ out.innerHTML='<span style="color:var(--bad)">請完整輸入四個數值</span>'; return; }
+  let z, uz, steps;
+  if(curOp==='add' || curOp==='sub'){
+    z = curOp==='add' ? x+y : x-y;
+    uz = Math.sqrt(ux*ux + uy*uy);
+    let r = roundUncertainty(uz);
+    let zr = sigFromDecimals(z, r.decimals);
+    steps = `<div><span class="k">Z</span> = x ${curOp==='add'?'+':'−'} y = ${z}</div>
+      <div><span class="k">u_Z</span> = √(u_x² + u_y²) = ${uz.toFixed(4)} → ${fmt(r.value,r.decimals)}</div>`;
+    out.innerHTML = `<div class="big">Z = (${zr} ± ${fmt(r.value,r.decimals)})</div><div class="steps">${steps}</div>`;
+  } else {
+    let relX = ux/x, relY = uy/y;
+    let rel = Math.sqrt(relX*relX + relY*relY);
+    z = curOp==='mul' ? x*y : x/y;
+    uz = Math.abs(z)*rel;
+    let r = roundUncertainty(uz);
+    let zr = sigFromDecimals(z, r.decimals);
+    steps = `<div><span class="k">相對不確定度</span> = √((u_x/x)² + (u_y/y)²) = √(${(relX*100).toFixed(2)}%² + ${(relY*100).toFixed(2)}%²) = ${(rel*100).toFixed(2)}%</div>
+      <div><span class="k">Z</span> = x ${curOp==='mul'?'×':'÷'} y = ${z.toFixed(4)}</div>
+      <div><span class="k">u_Z</span> = |Z| × 相對不確定度 = ${uz.toFixed(4)} → ${fmt(r.value,r.decimals)}</div>`;
+    out.innerHTML = `<div class="big">Z = (${zr} ± ${fmt(r.value,r.decimals)})</div><div class="steps">${steps}</div>`;
+  }
+}
+
+// ---- Part 2b: power propagation ----
+function calcPower(){
+  let a = parseFloat(document.getElementById('pax').value);
+  let x = parseFloat(document.getElementById('pxp').value);
+  let ux = parseFloat(document.getElementById('puxp').value);
+  let n = parseFloat(document.getElementById('ppow').value);
+  let out = document.getElementById('powOut');
+  out.style.display='block';
+  if([a,x,ux,n].some(isNaN)){ out.innerHTML='<span style="color:var(--bad)">請完整輸入四個數值</span>'; return; }
+  let Z = a*Math.pow(x,n);
+  let uZ = Math.abs(Z*n*ux/x);
+  let r = roundUncertainty(uZ);
+  let zr = sigFromDecimals(Z, r.decimals);
+  out.innerHTML = `<div class="big">Z = (${zr} ± ${fmt(r.value,r.decimals)})</div>
+    <div class="steps">
+      <div><span class="k">Z</span> = a·xⁿ = ${Z.toFixed(4)}</div>
+      <div><span class="k">相對不確定度</span> = |n|·(u_x/x) = ${(Math.abs(n)*ux/x*100).toFixed(2)}%</div>
+      <div><span class="k">u_Z</span> = |Z|×相對不確定度 = ${uZ.toFixed(4)} → ${fmt(r.value,r.decimals)}</div>
+    </div>`;
+}
+
+function calcExp(){
+  let a = parseFloat(document.getElementById('eax').value);
+  let b = parseFloat(document.getElementById('ebx').value);
+  let u = parseFloat(document.getElementById('eux').value);
+  let su = parseFloat(document.getElementById('esux').value);
+  let out = document.getElementById('expOut');
+  out.style.display='block';
+  if([a,b,u,su].some(isNaN)){ out.innerHTML='<span style="color:var(--bad)">請完整輸入四個數值</span>'; return; }
+  let X = a*Math.exp(b*u);
+  let sX = Math.abs(b)*Math.abs(X)*su;
+  let r = roundUncertainty(sX);
+  let Xr = sigFromDecimals(X, r.decimals);
+  out.innerHTML = `<div class="big">X = (${Xr} ± ${fmt(r.value,r.decimals)})</div>
+    <div class="steps">
+      <div><span class="k">X</span> = a·e^(bu) = ${X.toFixed(4)}</div>
+      <div><span class="k">σ_X/X</span> = |b|·σ_u = ${(Math.abs(b)*su).toFixed(4)}</div>
+      <div><span class="k">σ_X</span> = |b|·|X|·σ_u = ${sX.toFixed(4)} → ${fmt(r.value,r.decimals)}</div>
+    </div>`;
+}
+
+function calcLog(){
+  let a = parseFloat(document.getElementById('lax').value);
+  let w = parseFloat(document.getElementById('lwx').value);
+  let rel = parseFloat(document.getElementById('lrelx').value)/100;
+  let out = document.getElementById('logOut');
+  out.style.display='block';
+  if([a,w,rel].some(isNaN) || w<=0){ out.innerHTML='<span style="color:var(--bad)">請完整輸入數值，ln 內數值需大於 0</span>'; return; }
+  let X = a*Math.log(w);
+  let sX = Math.abs(a)*rel;
+  let r = roundUncertainty(sX);
+  let Xr = sigFromDecimals(X, r.decimals);
+  out.innerHTML = `<div class="big">X = (${Xr} ± ${fmt(r.value,r.decimals)})</div>
+    <div class="steps">
+      <div><span class="k">X</span> = a·ln(w) = ${X.toFixed(4)}</div>
+      <div><span class="k">σ_X</span> = |a|×(σ_u/u) = |${a}|×${(rel*100).toFixed(2)}% = ${sX.toFixed(4)} → ${fmt(r.value,r.decimals)}</div>
+    </div>`;
+}
+
+// ---- Virtual lab: pendulum ----
+let labData = null;
+function gaussianNoise(sd){
+  let u1=Math.random(), u2=Math.random();
+  return sd*Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+}
+function resampleLab(){
+  let trueG = 9.75 + Math.random()*0.10;
+  let lengths = [0.30,0.45,0.60,0.75,0.90,1.05];
+  let rows = lengths.map(l=>{
+    let trueT = 2*Math.PI*Math.sqrt(l/trueG);
+    let trials = [];
+    for(let i=0;i<5;i++){
+      let noisy = trueT + gaussianNoise(trueT*0.006);
+      let rounded = Math.round(noisy/0.01)*0.01;
+      trials.push(rounded);
+    }
+    return {l, trials};
+  });
+  labData = {trueG, rows};
+  renderLabAll();
+}
+function statsOf(trials){
+  let N = trials.length;
+  let mean = trials.reduce((a,b)=>a+b,0)/N;
+  let s = Math.sqrt(trials.reduce((a,x)=>a+(x-mean)**2,0)/(N-1));
+  let uA = s/Math.sqrt(N);
+  let uB = 0.01/(2*Math.sqrt(3));
+  let u = Math.sqrt(uA*uA+uB*uB);
+  return {mean, s, uA, uB, u};
+}
+function renderLabAll(){
+  let s1 = document.getElementById('labStep1');
+  let rowsHtml = labData.rows.map(r=>{
+    let st = statsOf(r.trials);
+    r._stats = st;
+    return `<tr><td>${r.l.toFixed(2)} m</td><td>${r.trials.map(t=>t.toFixed(2)).join(', ')}</td>
+      <td>${st.mean.toFixed(3)}</td><td>${st.s.toFixed(3)}</td><td>${st.u.toFixed(3)}</td></tr>`;
+  }).join('');
+  s1.innerHTML = `<h2>各擺長重複計時 5 次 <span class="tag">STEP 1</span></h2>
+    <p class="hint">碼錶最小刻度 0.01 s，u_B = 0.01/(2√3)。每個擺長的週期取五次計時的平均值，並依 u = √(u_A²+u_B²) 合成不確定度。</p>
+    <table class="labtbl"><tr><th>擺長 ℓ</th><th>五次計時 T (s)</th><th>平均 T̄</th><th>標準差 s</th><th>合成 u</th></tr>${rowsHtml}</table>`;
+
+  let s2 = document.getElementById('labStep2');
+  let xs = labData.rows.map(r=>r.l);
+  let ys = labData.rows.map(r=>r._stats.mean*r._stats.mean); // T^2
+  let n = xs.length;
+  let sx=0,sy=0,sxx=0,sxy=0;
+  for(let i=0;i<n;i++){ sx+=xs[i]; sy+=ys[i]; sxx+=xs[i]*xs[i]; sxy+=xs[i]*ys[i]; }
+  let delta = n*sxx - sx*sx;
+  let m = (n*sxy - sx*sy)/delta;
+  let b = (sxx*sy - sx*sxy)/delta;
+  let ssRes=0;
+  for(let i=0;i<n;i++){ let yhat=m*xs[i]+b; ssRes += (ys[i]-yhat)**2; }
+  let sigma2 = ssRes/(n-2);
+  let sigmaM = Math.sqrt(n*sigma2/delta);
+  let g = 4*Math.PI*Math.PI/m;
+  let sigmaG = g*(sigmaM/m); // relative propagation
+  labData.fit = {m, b, sigmaM, g, sigmaG};
+  s2.innerHTML = `<h2>T² 對 ℓ 作最小平方法迴歸 <span class="tag">STEP 2</span></h2>
+    <p class="hint">依 T² = (4π²/g)·ℓ + 截距，斜率 m = 4π²/g，因此 g = 4π²/m，不確定度以 σ_g/g = σ_m/m 傳遞。</p>
+    <div class="readout">
+      <div class="big">T² = ${m.toFixed(4)} ℓ + ${b.toFixed(4)}　（斜率不確定度 σ_m = ${sigmaM.toFixed(4)}）</div>
+      <div class="steps">
+        <div><span class="k">g</span> = 4π²/m = ${g.toFixed(3)} m/s²</div>
+        <div><span class="k">σ_g</span> = g×(σ_m/m) = ${sigmaG.toFixed(3)} m/s²</div>
+        <div><span class="k">實驗結果</span> g = (${g.toFixed(2)} ± ${sigmaG.toFixed(2)}) m/s²</div>
+      </div>
+    </div>`;
+
+  let s3 = document.getElementById('labStep3');
+  let lo = g - sigmaG, hi = g + sigmaG;
+  let hit = labData.trueG >= lo && labData.trueG <= hi;
+  s3.innerHTML = `<h2>與真值核對 <span class="tag">STEP 3</span></h2>
+    <p class="hint">這組模擬數據背後設定的「真實」g 值（平常實驗中未知，這裡揭曉讓你核對）：</p>
+    <div class="readout"><div class="big">真值 g₀ = ${labData.trueG.toFixed(3)} m/s²　實驗值 = (${g.toFixed(2)} ± ${sigmaG.toFixed(2)}) m/s²</div></div>
+    <div class="verdict ${hit?'pass':'fail'}">${hit ? '✓ 真值落在實驗結果的不確定度範圍內，測量結果與真值一致。' : '✗ 真值落在不確定度範圍之外——可能是隨機誤差偏大，或存在未校正的系統誤差，值得重新檢視數據。'}</div>`;
+}
+document.querySelectorAll('#labSteps button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#labSteps button').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    document.querySelectorAll('#labStep1,#labStep2,#labStep3').forEach(x=>x.style.display='none');
+    document.getElementById('labStep'+b.dataset.step).style.display='block';
+  });
+});
+resampleLab();
+
+// ---- Part 4b: least-squares fit ----
+function calcFit(){
+  let xs = document.getElementById('fitX').value.split(',').map(s=>parseFloat(s.trim())).filter(v=>!isNaN(v));
+  let ys = document.getElementById('fitY').value.split(',').map(s=>parseFloat(s.trim())).filter(v=>!isNaN(v));
+  let out = document.getElementById('fitOut');
+  out.style.display='block';
+  let n = xs.length;
+  if(n < 3 || n !== ys.length){ out.innerHTML = '<span style="color:var(--bad)">x、y 數據筆數需相同，且至少需要 3 組</span>'; return; }
+  let sx=0, sy=0, sxx=0, sxy=0;
+  for(let i=0;i<n;i++){ sx+=xs[i]; sy+=ys[i]; sxx+=xs[i]*xs[i]; sxy+=xs[i]*ys[i]; }
+  let delta = n*sxx - sx*sx;
+  if(delta === 0){ out.innerHTML = '<span style="color:var(--bad)">x 數據無變化，無法擬合</span>'; return; }
+  let m = (n*sxy - sx*sy)/delta;
+  let b = (sxx*sy - sx*sxy)/delta;
+  let ssRes = 0;
+  for(let i=0;i<n;i++){ let yhat = m*xs[i]+b; ssRes += (ys[i]-yhat)**2; }
+  let sigma2 = ssRes/(n-2);
+  let sigma = Math.sqrt(sigma2);
+  let sigmaM = Math.sqrt(n*sigma2/delta);
+  let sigmaB = Math.sqrt(sigma2*sxx/delta);
+  out.innerHTML = `
+    <div class="big">y = ${m.toFixed(4)} x + ${b.toFixed(4)}</div>
+    <div class="steps">
+      <div><span class="k">n</span> = ${n}　<span class="k">Δ</span> = nΣx²−(Σx)² = ${delta.toFixed(4)}</div>
+      <div><span class="k">斜率 m</span> = ${m.toFixed(4)} ± ${sigmaM.toFixed(4)}</div>
+      <div><span class="k">截距 b</span> = ${b.toFixed(4)} ± ${sigmaB.toFixed(4)}</div>
+      <div><span class="k">殘差標準差 σ</span> = √(Σ(yᵢ−ŷᵢ)²/(n−2)) = ${sigma.toFixed(5)}</div>
+    </div>`;
+}
+</script>
+</body>
+</html>

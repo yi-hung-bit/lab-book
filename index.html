@@ -27,7 +27,7 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 :root{
   --desk:#dfe2e6; --paper:#fbfaf7; --paper-2:#f2f0ea; --ink:#1d2333; --muted:#5f6576; --rule:#d9d6cd;
   --cover:#25306b; --cover-ink:#f3f1ea; --accent:#2f3f94;
-  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8;
+  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e;
   --shadow:0 18px 40px rgba(29,35,51,.18);
   --f-display:"LXGW WenKai TC","Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
   --f-body:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
@@ -36,12 +36,12 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}
 
 body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75}
@@ -185,16 +185,22 @@ html.lab-open,html.lab-open body{overflow:hidden}
 
 <script>
 const SITE="https://sites.google.com/ms.mingdao.edu.tw/sim/";
-const OPTICS=SITE+"主題分類/光學/";
 const SPEC=["#e5484d","#f08c2e","#e9c22b","#3fa65b","#2f78d6","#6a4fc6"];
+const ART={
+  prism:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <line x1="0" y1="74" x2="118" y2="64" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+        ${SPEC.map((c,k)=>`<polygon points="156,62 300,${18+k*16} 300,${32+k*16}" fill="${c}" opacity=".75"/>`).join("")}
+        <polygon points="138,12 182,104 94,104" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+      </svg>`,
+  fit:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <line x1="20" y1="108" x2="292" y2="108" stroke="var(--muted)" stroke-width="1.5"/>
+        <line x1="20" y1="108" x2="20" y2="6" stroke="var(--muted)" stroke-width="1.5"/>
+        <line x1="24" y1="100" x2="288" y2="16" stroke="var(--c1)" stroke-width="2.5" stroke-linecap="round"/>
+        ${[[50,86,9],[90,78,7],[130,58,10],[170,53,8],[210,36,9],[250,30,7]].map(([x,y,e])=>`<line x1="${x}" y1="${y-e}" x2="${x}" y2="${y+e}" stroke="var(--ink)" stroke-width="1.2"/><circle cx="${x}" cy="${y}" r="4.5" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>`).join("")}
+      </svg>`
+};
 
-const SECTIONS=[
-  {id:"refr",no:"3.1",name:"折射率",color:"var(--w-refr)",blurb:"同一個 n，八種量法：插針、視深、成像、平板反射、全反射。"},
-  {id:"int", no:"3.2",name:"干涉與繞射",color:"var(--w-int)",blurb:"光碟是光柵，空氣膜會出條紋，用波長去量看不見的距離。"},
-  {id:"lens",no:"3.3",name:"透鏡與面鏡",color:"var(--w-lens)",blurb:"焦距與曲率半徑：從成像、放大率到雷射光路。"},
-  {id:"pol", no:"3.4",name:"偏振",color:"var(--w-pol)",blurb:"光是橫波：找出反射光最弱的那個角度。"}
-];
-const EXP=[
+const OPTICS_EXP=[
   {w:"refr",t:"折射率的測定",slug:"折射率的測定",lab:"refr-106tc",src:"106 學年度 臺中區",d:"凸透鏡成像後放入透明待測物，成像點往後移，由像距變化反推待測物折射率。",f:["近軸折射後的會聚距離","s₂ = n · s₁"],tabs:["原理動畫","虛擬實驗室"]},
   {w:"refr",t:"104 臺南區 折射率",slug:"104臺南區學科能力競賽物理實驗試題1-折射率",lab:"refr-104tn",src:"104 學年度 臺南區複賽",d:"沒有雷射，只用牙籤與視線。壓克力用插針法與視深法，液體用量筒視深與燒杯柱面透鏡，兩兩交叉驗證。",f:["插針法","sin i = n · sin r"],tabs:["原理與設計","壓克力：插針法","壓克力：視差法視深","液體：量筒視深","液體：燒杯柱面透鏡","綜合與真值揭曉"],rnd:true},
   {w:"refr",t:"105 嘉義區 折射率",slug:"105嘉義區學科能力競賽物理實驗試題-折射率",lab:"refr-105cy",src:"105 學年度 嘉義區",d:"雷射斜射壓克力平板，上表面與下表面各反射出一個光點，量兩光點間距 x 並迴歸求 n。",f:["迴歸變數","1/x²  對  1/cos²θ"],tabs:["原理與光路","裝置與測角","光點量測","數據與迴歸","誤差分析","真值揭曉"],rnd:true},
@@ -212,36 +218,56 @@ const EXP=[
   {w:"lens",t:"圓形透鏡的等效焦距",slug:"圓形透鏡的等效焦距",lab:"lens-cyl",src:"103 學年度 新竹區",d:"圓柱形透鏡的物距與像距都由圓心量起，探討等效焦距和入射方向角 φ 的關係。",f:["等效焦距","f = xₒ xᵢ / (xₒ + xᵢ)"],tabs:["原理推導","器材準備","成像量測","數據迴歸","與理論比較","誤差與真值揭曉"],rnd:true},
   {w:"pol",t:"布魯斯特角",slug:"偏振",lab:"pol-brewster",src:"97 學年度 高雄區複賽",d:"用偏振片、雷射筆、載玻片與大頭針，找出雷射從載玻片表面反射最弱時的入射角。",f:["布魯斯特角","tan θB = n"],tabs:["原理","器材組裝與雷射偏振","尋找最弱反射","插針測角","數據分析","誤差與真值揭曉"]}
 ];
+
+const BASIC_EXP=[
+  {t:"測量與不確定度",slug:"測量與不確定度",lab:"basic-uncertainty",srcText:"高一物理 實驗基礎・對應課本 Part 1–3",d:"一組練習實驗基本功的小工具：判讀有效數字、計算 A 類與 B 類不確定度、練習加減乘除與乘方、指數、對數的不確定度傳遞、因次分析，再用最小平方法擬合直線，最後到單擺虛擬實驗室量週期、迴歸求 g。",f:["乘方的不確定度傳遞","|σ_Z / Z| = |n| · (u_x / x)"],tabs:["有效數字判讀","不確定度計算機","不確定度組合","因次分析","最小平方法","虛擬實驗室：單擺迴歸求 g"],rnd:true},
+  {t:"最小平方法練習",slug:"最小平方法練習",lab:"basic-leastsq",srcText:"自由落體測速實驗・最小平方法數據分析",d:"物體從高塔落下，雷射測速閘每隔一段時間記錄一次瞬時速率。從帶誤差的 v–t 數據用最小平方法求重力加速度，看殘差圖判斷模型是否合適，再把實驗重做 200 次檢驗斜率不確定度。打開空氣阻力可以觀察系統誤差。",f:["最小平方法常態方程式","na + bΣx = Σy　　aΣx + bΣx² = Σxy"],tabs:["進行實驗","原始數據","最小平方法運算","殘差與標準偏差","重複實驗 200 次檢驗 σ","揭曉真值","思考與延伸"],rnd:true}
+];
+
+/* 每一章一個物件；ready:true 的章才會排進書頁 */
 const CHAPTERS=[
-  {no:"一",name:"基礎能力",link:SITE+"基礎能力"},
-  {no:"二",name:"力學",link:SITE+"主題分類"},
-  {no:"三",name:"光學",ready:true},
-  {no:"四",name:"震盪",link:SITE+"主題分類/震盪"},
-  {no:"五",name:"質量",link:SITE+"主題分類/質量"},
-  {no:"六",name:"轉動",link:SITE+"主題分類/轉動"},
-  {no:"七",name:"重力加速度 g",link:SITE+"主題分類/g值"},
-  {no:"八",name:"流體",link:SITE+"主題分類/流體"},
-  {no:"九",name:"黏滯",link:SITE+"主題分類/黏滯"},
-  {no:"十",name:"密度",link:SITE+"主題分類/密度"},
-  {no:"十一",name:"電學",link:SITE+"主題分類/電學"}
+  {no:"一",num:1,name:"基礎能力",path:"基礎能力/",ready:true,color:"var(--c1)",art:"fit",
+   intro:"做任何實驗之前的基本功：讀對有效數字、算出不確定度，再用最小平方法從數據求出物理量，並誠實說出結果可靠到什麼程度。",
+   sections:null,exps:BASIC_EXP},
+  {no:"二",num:2,name:"力學",path:"主題分類/"},
+  {no:"三",num:3,name:"光學",path:"主題分類/光學/",ready:true,art:"prism",
+   intro:"十六個實驗，每個對應一道競賽實驗題。先讀原理，再進虛擬實驗室量測、迴歸，最後揭曉真值，看看自己的誤差有多大。",
+   sections:[
+    {id:"refr",no:"3.1",name:"折射率",color:"var(--w-refr)",blurb:"同一個 n，八種量法：插針、視深、成像、平板反射、全反射。"},
+    {id:"int", no:"3.2",name:"干涉與繞射",color:"var(--w-int)",blurb:"光碟是光柵，空氣膜會出條紋，用波長去量看不見的距離。"},
+    {id:"lens",no:"3.3",name:"透鏡與面鏡",color:"var(--w-lens)",blurb:"焦距與曲率半徑：從成像、放大率到雷射光路。"},
+    {id:"pol", no:"3.4",name:"偏振",color:"var(--w-pol)",blurb:"光是橫波：找出反射光最弱的那個角度。"}],
+   exps:OPTICS_EXP},
+  {no:"四",num:4,name:"震盪",path:"主題分類/震盪/"},
+  {no:"五",num:5,name:"質量",path:"主題分類/質量/"},
+  {no:"六",num:6,name:"轉動",path:"主題分類/轉動/"},
+  {no:"七",num:7,name:"重力加速度 g",path:"主題分類/g值/"},
+  {no:"八",num:8,name:"流體",path:"主題分類/流體/"},
+  {no:"九",num:9,name:"黏滯",path:"主題分類/黏滯/"},
+  {no:"十",num:10,name:"密度",path:"主題分類/密度/"},
+  {no:"十一",num:11,name:"電學",path:"主題分類/電學/"}
 ];
 
 /* ---------- pages ---------- */
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const secOf=id=>SECTIONS.find(s=>s.id===id);
 const PAGES=[];
 PAGES.push({kind:"cover"});
 PAGES.push({kind:"toc"});
-PAGES.push({kind:"opener"});
-const firstPageOf={};
-SECTIONS.forEach(s=>{
-  EXP.filter(e=>e.w===s.id).forEach((e,i)=>{
-    if(i===0) firstPageOf[s.id]=PAGES.length;
-    PAGES.push({kind:"exp",e,s,idx:i+1});
+CHAPTERS.filter(c=>c.ready).forEach(c=>{
+  c.page=PAGES.length;
+  PAGES.push({kind:"opener",c});
+  const groups=c.sections?c.sections.map(s=>({s,list:c.exps.filter(e=>e.w===s.id)})):[{s:{id:"all",no:"",name:c.name,color:c.color},list:c.exps}];
+  let n=0;
+  groups.forEach(g=>{
+    g.list.forEach((e,i)=>{
+      if(i===0) g.s.page=PAGES.length;
+      e.page=PAGES.length;
+      PAGES.push({kind:"exp",c,e,s:g.s,n:++n});
+    });
   });
 });
 PAGES.push({kind:"back"});
-let expCounter=0; PAGES.forEach(p=>{if(p.kind==="exp")p.n=++expCounter;});
+const chTitle=c=>`第${c.no}章　${c.name}`;
 
 function runhead(left,right){return `<div class="runhead"><span>${left}</span><span>${right}</span></div>`;}
 function renderPage(i){
@@ -249,6 +275,8 @@ function renderPage(i){
   const d=document.createElement("article");d.className="page";d.dataset.i=i;
   const folio=`<span class="folio">${i}</span>`;
   if(p.kind==="cover"){
+    const done=CHAPTERS.filter(c=>c.ready).map(c=>c.name).join("、");
+    const left=CHAPTERS.filter(c=>!c.ready).length;
     d.classList.add("cover");
     d.innerHTML=`<div>
       <div class="kicker">物理科學科能力競賽</div>
@@ -259,51 +287,58 @@ function renderPage(i){
       <div class="sub">歷屆實驗題的虛擬實驗室</div>
       <button class="open-btn" type="button" data-go="1">翻開這本書</button>
     </div>
-    <div class="foot"><span>第三章　光學　已完成</span><span>其餘章節撰寫中</span></div>`;
+    <div class="foot"><span>已完成：${done}</span><span>${left?`其餘 ${left} 章撰寫中`:"全書完成"}</span></div>`;
   }else if(p.kind==="toc"){
     d.classList.add("toc");
     const rows=CHAPTERS.map(c=>{
       if(c.ready){
-        const secs=SECTIONS.map(s=>`<li class="sec"><button class="linkbtn" type="button" data-go="${firstPageOf[s.id]}"><span class="ch">${s.no}　${s.name}</span></button><span class="lead"></span><span class="pg">${firstPageOf[s.id]}</span></li>`).join("");
-        return `<li class="now"><button class="linkbtn" type="button" data-go="2"><span class="ch">第${c.no}章　${c.name}</span></button><span class="lead"></span><span class="pg">2</span></li>${secs}`;
+        return `<li class="now"><button class="linkbtn" type="button" data-go="${c.page}"><span class="ch">${chTitle(c)}</span></button><span class="lead"></span><span class="pg">${c.page}</span></li>`;
       }
-      return `<li class="wip"><span class="ch">第${c.no}章　${c.name}</span><span class="lead"></span><a class="pg" href="${encodeURI(c.link)}" target="_blank" rel="noopener">撰寫中・看原站 ↗</a></li>`;
+      return `<li class="wip"><span class="ch">${chTitle(c)}</span><span class="lead"></span><a class="pg" href="${encodeURI(SITE+c.path)}" target="_blank" rel="noopener">撰寫中・看原站 ↗</a></li>`;
     }).join("");
     d.innerHTML=runhead("實驗培訓","目錄")+`<h2>目錄</h2><ol>${rows}</ol>`+folio;
   }else if(p.kind==="opener"){
+    const c=p.c;
     d.classList.add("opener");
-    const secs=SECTIONS.map(s=>{const n=EXP.filter(e=>e.w===s.id).length;return `<button type="button" data-go="${firstPageOf[s.id]}" style="--wc:${s.color}"><b>${s.no}</b><span>${s.name}</span><small>${n} 個實驗・p.${firstPageOf[s.id]}</small></button>`;}).join("");
-    d.innerHTML=runhead("實驗培訓","第三章")+`
-      <div class="chno">第三章</div><h2>光學</h2>
-      <svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
-        <line x1="0" y1="74" x2="118" y2="64" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
-        ${SPEC.map((c,k)=>`<polygon points="156,62 300,${18+k*16} 300,${32+k*16}" fill="${c}" opacity=".75"/>`).join("")}
-        <polygon points="138,12 182,104 94,104" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
-      </svg>
-      <p>十六個實驗，每個對應一道競賽實驗題。先讀原理，再進虛擬實驗室量測、迴歸，最後揭曉真值，看看自己的誤差有多大。</p>
-      <div class="secs">${secs}</div>`+folio;
+    let items;
+    if(c.sections){
+      items=c.sections.map(s=>{const n=c.exps.filter(e=>e.w===s.id).length;return `<button type="button" data-go="${s.page}" style="--wc:${s.color}"><b>${s.no}</b><span>${s.name}</span><small>${n} 個實驗・p.${s.page}</small></button>`;}).join("");
+    }else{
+      items=c.exps.map((e,k)=>`<button type="button" data-go="${e.page}" style="--wc:${c.color}"><b>${c.num}-${k+1}</b><span>${esc(e.t)}</span><small>p.${e.page}</small></button>`).join("");
+    }
+    d.innerHTML=runhead("實驗培訓",`第${c.no}章`)+`
+      <div class="chno">第${c.no}章</div><h2>${c.name}</h2>
+      ${ART[c.art]||""}
+      <p>${c.intro}</p>
+      <div class="secs">${items}</div>`+folio;
   }else if(p.kind==="exp"){
-    const {e,s}=p;
+    const {c,e,s}=p;
     d.classList.add("exp");d.style.setProperty("--wc",s.color);
     const steps=e.tabs.map((t,k)=>`<li${e.todo&&e.todo.includes(k)?' class="todo"':""}>${esc(t)}</li>`).join("");
     const tags=[`<span class="tag">${e.tabs.length} 個步驟</span>`];
     if(e.rnd)tags.push(`<span class="tag">每次隨機待測值</span>`);
     if(e.todo)tags.push(`<span class="tag warn">部分建置中</span>`);
-    d.innerHTML=runhead("第三章　光學",`${s.no}　${s.name}`)+`
-      <div class="num">實驗 3-${p.n}</div>
+    const page=encodeURI(SITE+c.path+e.slug);
+    const cta=e.lab
+      ?`<button class="cta" type="button" data-lab="${i}">▶ 在書中開啟實驗室</button>
+      <p class="cta-note">原題與補充資料在<a href="${page}" target="_blank" rel="noopener">協作平台原頁面 ↗</a>（請用學校帳號登入）。</p>`
+      :`<a class="cta" href="${page}" target="_blank" rel="noopener">到協作平台看這個實驗 ↗</a>
+      <p class="cta-note">這個實驗還沒有虛擬實驗室，請用學校帳號登入原站。</p>`;
+    d.innerHTML=runhead(chTitle(c),s.no?`${s.no}　${s.name}`:"")+`
+      <div class="num">實驗 ${c.num}-${p.n}</div>
       <h2>${esc(e.t)}</h2>
-      <div class="src">${esc(e.src)} 物理實驗試題改編</div>
+      <div class="src">${esc(e.srcText||(e.src+" 物理實驗試題改編"))}</div>
       <p class="lede">${esc(e.d)}</p>
       ${e.f?`<div class="formula"><small>${esc(e.f[0])}</small>${esc(e.f[1])}</div>`:""}
       <h3>實驗流程</h3>
       <ol class="steps">${steps}</ol>
       <div class="tags">${tags.join("")}</div>
-      <button class="cta" type="button" data-lab="${PAGES.indexOf(p)}">▶ 在書中開啟實驗室</button>
-      <p class="cta-note">原題 PDF 在<a href="${encodeURI(OPTICS+e.slug)}" target="_blank" rel="noopener">協作平台原頁面 ↗</a>（請用學校帳號登入）。</p>`+folio;
+      ${cta}`+folio;
   }else if(p.kind==="back"){
+    const left=CHAPTERS.filter(c=>!c.ready).length;
     d.classList.add("back");
-    d.innerHTML=`<h2>光學篇到這裡結束</h2>
-      <p>其他章節還在撰寫中，內容目前仍放在學校協作平台。</p>
+    d.innerHTML=`<h2>${left?"目前的內容到這裡":"全書完"}</h2>
+      ${left?`<p>還有 ${left} 章撰寫中，內容目前仍放在學校協作平台。</p>`:""}
       <p><a href="${SITE}" target="_blank" rel="noopener" style="color:var(--accent)">前往實驗培訓原站 ↗</a></p>
       <p><button class="linkbtn" type="button" data-go="1" style="color:var(--accent);text-decoration:underline">回到目錄</button></p>`+folio;
   }
@@ -369,7 +404,7 @@ const labEl=document.getElementById("lab"), labFrame=document.getElementById("la
 let labOpener=null;
 function openLab(p){
   labOpener=document.activeElement;
-  document.getElementById("labNum").textContent="實驗 3-"+p.n;
+  document.getElementById("labNum").textContent="實驗 "+p.c.num+"-"+p.n;
   document.getElementById("labTitle").textContent=p.e.t;
   labEl.style.setProperty("--wc",p.s.color);
   labFrame.src="labs/"+p.e.lab+".html";
