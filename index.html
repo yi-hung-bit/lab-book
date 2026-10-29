@@ -27,7 +27,7 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 :root{
   --desk:#dfe2e6; --paper:#fbfaf7; --paper-2:#f2f0ea; --ink:#1d2333; --muted:#5f6576; --rule:#d9d6cd;
   --cover:#25306b; --cover-ink:#f3f1ea; --accent:#2f3f94;
-  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a;
+  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a; --c4:#1d6f8a;
   --shadow:0 18px 40px rgba(29,35,51,.18);
   --f-display:"LXGW WenKai TC","Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
   --f-body:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
@@ -36,12 +36,12 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}
 
 body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75}
@@ -187,6 +187,13 @@ html.lab-open,html.lab-open body{overflow:hidden}
 const SITE="https://sites.google.com/ms.mingdao.edu.tw/sim/";
 const SPEC=["#e5484d","#f08c2e","#e9c22b","#3fa65b","#2f78d6","#6a4fc6"];
 const ART={
+  wave:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <line x1="20" y1="60" x2="290" y2="60" stroke="var(--muted)" stroke-width="1.2"/>
+        <polyline points="20,16.0 30,19.8 40,23.3 50,26.5 60,29.4 70,32.1 80,34.5 90,36.7 100,38.7 110,40.6 120,42.3 130,43.8 140,45.2 150,46.5 160,47.7 170,48.7 180,49.7 190,50.6 200,51.4 210,52.2 220,52.9 230,53.5 240,54.0 250,54.6 260,55.0 270,55.5 280,55.9" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 4"/>
+        <polyline points="20,104.0 30,100.2 40,96.7 50,93.5 60,90.6 70,87.9 80,85.5 90,83.3 100,81.3 110,79.4 120,77.7 130,76.2 140,74.8 150,73.5 160,72.3 170,71.3 180,70.3 190,69.4 200,68.6 210,67.8 220,67.1 230,66.5 240,66.0 250,65.4 260,65.0 270,64.5 280,64.1" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 4"/>
+        <polyline points="20,60.0 23,44.8 26,32.4 29,24.1 32,20.8 35,22.7 38,29.3 41,39.3 44,51.5 47,64.1 50,75.6 53,84.4 56,89.7 59,90.9 62,88.1 65,81.9 68,73.2 71,63.3 74,53.6 77,45.1 80,39.0 83,35.9 86,36.0 89,39.2 92,44.8 95,52.1 98,60.0 101,67.5 104,73.6 107,77.7 110,79.3 113,78.3 116,75.1 119,70.2 122,64.2 125,58.0 128,52.3 131,48.0 134,45.4 137,44.8 140,46.2 143,49.2 146,53.5 149,58.4 152,63.2 155,67.3 158,70.3 161,71.9 164,71.8 167,70.2 170,67.5 173,63.9 176,60.0 179,56.3 182,53.3 185,51.3 188,50.5 191,51.0 194,52.6 197,55.0 200,57.9 203,61.0 206,63.8 209,65.9 212,67.2 215,67.5 218,66.8 221,65.3 224,63.2 227,60.8 230,58.4 233,56.4 236,54.9 239,54.2 242,54.2 245,55.0 248,56.3 251,58.1 254,60.0 257,61.8 260,63.3 263,64.3 266,64.7 269,64.4 272,63.7 275,62.5 278,61.0" fill="none" stroke="var(--c4)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <text x="288" y="26" text-anchor="end" font-size="13" fill="var(--ink)" font-style="italic">A₀e^(−bt/2m)</text>
+      </svg>`,
   prism:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
         <line x1="0" y1="74" x2="118" y2="64" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
         ${SPEC.map((c,k)=>`<polygon points="156,62 300,${18+k*16} 300,${32+k*16}" fill="${c}" opacity=".75"/>`).join("")}
@@ -239,6 +246,13 @@ const MECH_EXP=[
   {t:"大氣壓力",slug:"大氣壓力",lab:"mech-atmosphere",src:"92 學年度 屏東區複賽",d:"用針筒封住一段空氣，掛上或壓上已知質量改變活塞受力，依波以耳定律由 1/V 對外加質量 m 的直線求出大氣壓力。過程中要先校正針筒刻度，並處理活塞摩擦、死體積與壓縮時的熱效應。",f:["由斜率 k 與截距 b 求大氣壓","P₀ = | g·b / (A·k) |"],tabs:["原理推導","針筒校正","裝置組裝","加載量測","迴歸分析","誤差與真值"],rnd:true}
 ];
 
+const OSC_EXP=[
+  {t:"阻尼震盪系統",slug:"阻尼震盪系統",lab:"osc-damped",src:"105 學年度 北四區",d:"金屬線直立固定、上端吸著磁鐵，就是一個彈簧振子。先用游標尺量磁鐵求平均質量，再改變磁鐵數量量週期、由 T²–m 圖求金屬線的彈力常數 k，最後在後方放金屬板，讀每個週期的振幅衰減，求渦電流造成的阻尼係數 b。",f:["振幅衰減取常用對數","log A = log A₀ − 0.4343·(b / 2m)·t"],tabs:["實驗一：游標尺量磁鐵求平均質量","實驗二：T²–m 迴歸求彈力常數 k","實驗三：振幅衰減求阻尼係數 b","試題勘誤與說明"],rnd:true},
+  {t:"耦合擺的能量傳遞",slug:"耦合擺虛擬實驗室",lab:"osc-coupled",src:"105 學年度 第 6 區（臺南區）複賽 實驗第二題",d:"兩個單擺掛在同一條拉緊的繩上，放開擺 A，能量會慢慢轉移到擺 B。先探討擺長差、螺帽數、張力如何影響最大轉移率；再分別量同相與反相兩個簡正模的週期，算出能量轉移時間，並以 ΔL 對 1/F 迴歸檢驗理論。",f:["由兩個簡正模週期求能量轉移時間","t = T同 · T反 ⁄ [2 (T同 − T反)]"],tabs:["實驗台","一、共振條件","二、轉移時間與迴歸","理論與核對"],rnd:true},
+  {t:"大角度單擺",slug:"大角度單擺虛擬實驗室",lab:"osc-pendulum",src:"98 學年度 第 10 區複賽 實驗一",d:"擺角不夠小時，T = 2π√(ℓ/g) 需要修正。先在小擺角以 T² 對 ℓ 迴歸得到 T₀，再固定擺長改變釋放角，量 T/T₀ 與題目給的四個候選公式比較，讓數據決定哪一個能描述單擺，也要準備面對四個都不夠好的可能。",f:["小角度基準（大角度時要修正的公式）","T₀ = 2π √(ℓ / g)"],tabs:["題目與設計","實驗操作","數據記錄","分析作圖","揭曉與討論"],rnd:true},
+  {t:"繩波與駐波",slug:"繩波與駐波",lab:"osc-string",src:"90 學年度 桃竹苗區",d:"用電動刮鬍刀當振盪器，在縫衣線上產生駐波。改變墊片數改變張力，量波長，作 λ²–T 迴歸求出刮鬍刀的頻率；第二部分把粗細兩條繩相接，讓接點成為波節，找出兩段駐波個數、長度與線密度的關係。",f:["駐波的迴歸關係","λ² = (1 / μf²) · T"],tabs:["原理推導","器材組裝與 μ 測定","第一部分：駐波量測","λ²–T 迴歸求 f","第二部分：粗細繩","誤差與真值揭曉"],rnd:true}
+];
+
 /* 每一章一個物件；ready:true 的章才會排進書頁 */
 const CHAPTERS=[
   {no:"一",num:1,name:"基礎能力",path:"基礎能力/",ready:true,color:"var(--c1)",art:"fit",
@@ -255,7 +269,9 @@ const CHAPTERS=[
     {id:"lens",no:"3.3",name:"透鏡與面鏡",color:"var(--w-lens)",blurb:"焦距與曲率半徑：從成像、放大率到雷射光路。"},
     {id:"pol", no:"3.4",name:"偏振",color:"var(--w-pol)",blurb:"光是橫波：找出反射光最弱的那個角度。"}],
    exps:OPTICS_EXP},
-  {no:"四",num:4,name:"震盪",path:"主題分類/震盪/"},
+  {no:"四",num:4,name:"震盪",path:"主題分類/震盪/",ready:true,color:"var(--c4)",art:"wave",
+   intro:"四個會擺動的系統：磁鐵吸在金屬線上的阻尼振子、互相交換能量的耦合擺、擺角太大的單擺，以及刮鬍刀帶動的駐波。共同的功夫是量週期、把關係式線性化，再用迴歸把物理量找出來。",
+   sections:null,exps:OSC_EXP},
   {no:"五",num:5,name:"質量",path:"主題分類/質量/"},
   {no:"六",num:6,name:"轉動",path:"主題分類/轉動/"},
   {no:"七",num:7,name:"重力加速度 g",path:"主題分類/g值/"},

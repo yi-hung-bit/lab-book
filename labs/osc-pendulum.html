@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大角度單擺虛擬實驗室｜98 學年度第 10 區複賽 實驗一</title>
+<style>
+:root{
+  --paper:#F6F8F4; --panel:#FFFFFF; --ink:#1F3A5F; --text:#23282E; --muted:#5E666E;
+  --grid:#D3E3DC; --grid-strong:#A9C8BC; --red:#C2362F; --brass:#B08D3C; --brass-d:#7D6224;
+  --line:#C9D3D0; --ok:#2E7D4F; --warn:#B25E00;
+  --c-exact:#2E7D4F; --c-m1:#2F6DB5; --c-m2:#C2362F; --c-m3:#7B4FA8; --c-m4:#7A7F86;
+  --focus:#2F6DB5;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#161B1F; --panel:#1E252A; --ink:#9CC1E8; --text:#E3E7EA; --muted:#9AA3AA;
+    --grid:#26343A; --grid-strong:#35505A; --red:#F07167; --brass:#D4B25E; --brass-d:#9C8038;
+    --line:#35434A; --ok:#6CCB93; --warn:#F2A541;
+    --c-exact:#6CCB93; --c-m1:#7FB2F0; --c-m2:#F07167; --c-m3:#B994E0; --c-m4:#A9AFB6;
+    --focus:#7FB2F0;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--paper); color:var(--text);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  font-size:15px; line-height:1.65;
+}
+h1,h2,h3{font-family:"Noto Serif TC","Songti TC","PMingLiU","MingLiU",serif;color:var(--ink);font-weight:700;margin:0}
+header{padding:22px 24px 10px;max-width:1240px;margin:0 auto}
+header h1{font-size:1.9rem;letter-spacing:.02em}
+header p{margin:4px 0 0;color:var(--muted)}
+nav{max-width:1240px;margin:0 auto;padding:0 24px;display:flex;gap:2px;flex-wrap:wrap;border-bottom:2px solid var(--ink)}
+nav button{
+  font:inherit;background:transparent;border:1px solid transparent;border-bottom:none;color:var(--muted);
+  padding:8px 16px;cursor:pointer;border-radius:6px 6px 0 0;margin-bottom:-2px
+}
+nav button[aria-selected="true"]{background:var(--panel);color:var(--ink);border-color:var(--ink);border-bottom:2px solid var(--panel);font-weight:700}
+main{max-width:1240px;margin:0 auto;padding:18px 24px 60px}
+section.tab{display:none}
+section.tab.active{display:block}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:16px}
+.box h2{font-size:1.25rem;margin-bottom:8px}
+.box h3{font-size:1.05rem;margin:12px 0 6px}
+.prose{max-width:78ch}
+.lab{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.lab{grid-template-columns:1fr}}
+.stage{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:14px 14px;border:1px solid var(--grid-strong);border-radius:8px;padding:6px
+}
+.stage svg{width:100%;height:auto;display:block}
+.ctl{border-top:1px dashed var(--line);padding:10px 0}
+.ctl:first-of-type{border-top:none;padding-top:0}
+.ctl h3{margin-top:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+label{color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--ink)}
+input[type=number],select,.cell{
+  font:inherit;color:var(--text);background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:3px 6px
+}
+input[type=number]{width:80px}
+button.btn{
+  font:inherit;cursor:pointer;border-radius:6px;padding:5px 12px;border:1px solid var(--ink);
+  background:var(--panel);color:var(--ink)
+}
+button.btn.primary{background:var(--ink);color:var(--panel)}
+button.btn.danger{border-color:var(--red);color:var(--red)}
+button.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.readout{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+.watch{
+  font-variant-numeric:tabular-nums;font-size:2.4rem;font-weight:700;color:var(--ink);
+  border:2px solid var(--ink);border-radius:10px;padding:2px 14px;min-width:170px;text-align:right;background:var(--paper)
+}
+.status{min-height:1.6em;color:var(--muted)}
+.status.warn{color:var(--warn)}
+.note{color:var(--muted);font-size:.9rem}
+.redpen{color:var(--red)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:var(--paper);color:var(--ink);font-weight:700}
+td input.cell{width:84px;text-align:right}
+.scroll{overflow-x:auto}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+svg.plot{width:100%;height:auto;display:block;background:var(--paper);border:1px solid var(--grid-strong);border-radius:6px}
+svg.plot .grid{stroke:var(--grid);stroke-width:1}
+svg.plot .frame{fill:none;stroke:var(--ink);stroke-width:1.2}
+svg.plot text{fill:var(--muted);font-size:12px;font-family:inherit}
+svg.plot .axl{fill:var(--ink);font-size:13px}
+.formula{font-family:"Times New Roman","Noto Serif TC",serif;font-size:1.08rem;color:var(--ink);margin:6px 0 6px 1.2em}
+.hints{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px 18px}
+.chk{display:flex;gap:14px;flex-wrap:wrap}
+.chk label{color:var(--text)}
+.swatch{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:4px}
+.verdict-ok{color:var(--ok);font-weight:700}
+.verdict-bad{color:var(--red);font-weight:700}
+.muted{color:var(--muted)}
+.hidden{display:none}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header>
+  <h1>大角度單擺虛擬實驗室</h1>
+  <p>98 學年度高中數理及資訊學科能力競賽第 10 區複賽｜物理科實驗試題第一題</p>
+</header>
+<nav role="tablist" id="tabs">
+  <button role="tab" data-tab="t-task" aria-selected="true">題目與設計</button>
+  <button role="tab" data-tab="t-lab" aria-selected="false">實驗操作</button>
+  <button role="tab" data-tab="t-data" aria-selected="false">數據記錄</button>
+  <button role="tab" data-tab="t-ana" aria-selected="false">分析作圖</button>
+  <button role="tab" data-tab="t-rev" aria-selected="false">揭曉與討論</button>
+</nav>
+<main>
+
+<!-- ============ 題目 ============ -->
+<section class="tab active" id="t-task">
+  <div class="box prose">
+    <h2>題目</h2>
+    <p>單擺在小角度擺動時，週期 T 與擺長 ℓ 遵守 T = 2π√(ℓ/g)。擺角 θ 不夠小時，此公式需要修正。請利用下列器材設計實驗，修正此公式。</p>
+    <p>題目提示：下列四個公式中，有一個是較適當的可能。</p>
+    <div class="hints">
+      <div class="formula">(1)　T = 2π √( ℓ cosθ / g )</div>
+      <div class="formula">(2)　T = 2π √( ℓ / (g cosθ) )</div>
+      <div class="formula">(3)　T = 2π √( ℓ sinθ / g )</div>
+      <div class="formula">(4)　T = 2π √( ℓ / (g sinθ) )</div>
+    </div>
+    <p class="note">提示只是「可能」。你的數據才是判斷的依據——請讓實驗結果決定哪個公式能描述單擺，也要準備好面對「四個都不夠好」的可能。</p>
+  </div>
+  <div class="box prose">
+    <h2>器材</h2>
+    <p>螺絲帽（約 20～25 g）一個、棉線一卷、免洗竹筷一雙（夾住棉線，固定懸點）、透明膠帶、量角器、卷尺（最小刻度 1 mm）、支架（橫桿可在 120 cm 範圍內調整）、碼表（最小刻度 0.01 s）、天平（最小刻度 0.01 g）。</p>
+  </div>
+  <div class="box prose">
+    <h2>設計思路</h2>
+    <p>週期受擺長和擺角兩個因素影響，實驗需要把兩者分開處理。</p>
+    <p>第一步，在小擺角（例如 5° 以下）測不同擺長的週期，以 T² 對 ℓ 作最小平方法回歸，得到小角度週期 T₀(ℓ)。回歸的截距能告訴你擺長量測是否有系統誤差，例如是否量到螺絲帽的質心。</p>
+    <p>第二步，固定擺長，改變釋放角（例如 10° 到 80°），量測週期 T，計算比值 T/T₀。四個提示公式分別預測：</p>
+    <div class="hints">
+      <div class="formula">(1)　T/T₀ = √cosθ</div>
+      <div class="formula">(2)　T/T₀ = 1/√cosθ</div>
+      <div class="formula">(3)　T/T₀ = √sinθ</div>
+      <div class="formula">(4)　T/T₀ = 1/√sinθ</div>
+    </div>
+    <p>把 T/T₀ 對 θ 作圖，與四條曲線比較，並以量測不確定度評估每個公式的偏差有多少個標準差。</p>
+    <h3>操作上要注意的地方</h3>
+    <p>一次量多個週期再平均，可降低按碼表反應時間造成的相對誤差。空氣阻力會讓振幅逐漸變小，大角度時尤其明顯，所以要記錄開始與結束時的振幅。按下「釋放擺錘」時碼表會同步開始，數滿 N 個週期、擺錘回到釋放側最高點時按停止。最高點附近擺錘移動很慢，停止的瞬間較難判斷，請仔細觀察。</p>
+  </div>
+</section>
+
+<!-- ============ 實驗操作 ============ -->
+<section class="tab" id="t-lab">
+  <div class="lab">
+    <div class="stage">
+      <svg id="app" viewBox="0 0 660 440" aria-label="單擺裝置示意圖">
+        <!-- table -->
+        <line x1="0" y1="414" x2="660" y2="414" stroke="var(--muted)" stroke-width="2"/>
+        <!-- stand -->
+        <rect x="30" y="402" width="110" height="12" rx="2" fill="var(--muted)"/>
+        <rect x="66" y="18" width="8" height="386" fill="var(--muted)"/>
+        <rect x="60" y="30" width="22" height="20" rx="3" fill="var(--ink)"/>
+        <rect x="74" y="37" width="262" height="6" fill="var(--muted)"/>
+        <!-- chopsticks clamp -->
+        <rect x="316" y="41" width="30" height="3.5" rx="1" fill="var(--brass)" transform="rotate(-8 330 44)"/>
+        <rect x="316" y="46" width="30" height="3.5" rx="1" fill="var(--brass)" transform="rotate(8 330 48)"/>
+        <!-- protractor -->
+        <g id="prot"></g>
+        <line id="vref" x1="330" y1="48" x2="330" y2="380" stroke="var(--grid-strong)" stroke-dasharray="4 4"/>
+        <line id="guide" x1="330" y1="48" x2="330" y2="300" stroke="var(--red)" stroke-width="1.2" stroke-dasharray="6 4"/>
+        <line id="string" x1="330" y1="48" x2="330" y2="300" stroke="var(--text)" stroke-width="1.2"/>
+        <g id="nut">
+          <polygon points="-11,0 11,0 13,9 11,18 -11,18 -13,9" fill="var(--brass)" stroke="var(--brass-d)" stroke-width="1.2"/>
+          <circle cx="0" cy="9" r="4.2" fill="var(--paper)" stroke="var(--brass-d)"/>
+          <circle cx="0" cy="9" r="1.6" fill="var(--red)"/>
+        </g>
+        <text x="646" y="432" text-anchor="end" font-size="12" fill="var(--muted)">螺絲帽已放大示意；紅點為質心</text>
+        <text id="lenHint" x="14" y="432" font-size="12" fill="var(--muted)"></text>
+      </svg>
+    </div>
+
+    <div class="box">
+      <div class="ctl">
+        <h3>擺長</h3>
+        <label for="Lsl">調整棉線長度（懸點到綁線點）</label>
+        <input type="range" id="Lsl" min="20" max="110" step="0.1" value="80">
+        <div class="note" id="Lrough"></div>
+        <div class="row">
+          <button class="btn" id="bMeasL">卷尺量棉線長 L</button>
+          <span>L = <span class="readout" id="oL">—</span> cm</span>
+        </div>
+        <div class="row">
+          <button class="btn" id="bMeasD">量綁線點到質心距離 d</button>
+          <span>d = <span class="readout" id="oD">—</span> cm</span>
+        </div>
+        <div class="row">
+          <span>擺長 ℓ = L + d = <span class="readout" id="oEll">—</span> cm</span>
+        </div>
+        <div class="row">
+          <button class="btn" id="bMass">天平秤螺絲帽</button>
+          <span>m = <span class="readout" id="oM">—</span> g</span>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <h3>釋放角</h3>
+        <label for="Tsl">用量角器對準釋放位置</label>
+        <input type="range" id="Tsl" min="2" max="85" step="0.5" value="20">
+        <div>量角器讀數 θ₀ = <span class="readout" id="oTh">20.0</span>°</div>
+        <div class="note">手放開時難免有視差和手抖，實際釋放角與讀數會有些許差異。</div>
+      </div>
+
+      <div class="ctl">
+        <h3>計時</h3>
+        <div class="row" role="radiogroup">
+          <label><input type="radio" name="mode" value="manual" checked> 手動按碼表</label>
+          <label><input type="radio" name="mode" value="auto"> 自動量測（含模擬反應誤差）</label>
+        </div>
+        <div class="row">
+          <label for="nPer">量測週期數 N</label>
+          <input type="number" id="nPer" min="1" max="50" step="1" value="10">
+          <span id="spdWrap" class="hidden">
+            <label for="spd">播放速度</label>
+            <select id="spd"><option value="1">1×</option><option value="2">2×</option><option value="5" selected>5×</option><option value="10">10×</option></select>
+          </span>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="bRelease">釋放擺錘</button>
+          <button class="btn" id="bHalt">停止並歸位</button>
+        </div>
+        <div id="manualBox">
+          <div class="row">
+            <div class="watch" id="watch">0.00</div>
+            <div>
+              <div class="row"><button class="btn primary" id="bSW">開始／停止</button><button class="btn" id="bSWr">歸零</button></div>
+              <div class="note">空白鍵也可以開始／停止</div>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn" id="bAmp">讀取目前振幅</button>
+            <span>θ_末 = <span class="readout" id="oAmp">—</span>°</span>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="bRec">記錄這次量測</button>
+          </div>
+        </div>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 數據記錄 ============ -->
+<section class="tab" id="t-data">
+  <div class="box">
+    <h2>數據記錄</h2>
+    <p class="note">淺色欄位可直接修改。T = t/N；θ̄ 為開始與結束振幅的平均，若未記錄結束振幅則以 θ₀ 代替。</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>#</th><th>ℓ (cm)</th><th>θ₀ (°)</th><th>θ_末 (°)</th><th>N</th><th>t (s)</th><th>T (s)</th><th>θ̄ (°)</th><th></th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="bAddRow">新增空白列</button>
+      <button class="btn" id="bCSV">下載 CSV</button>
+      <button class="btn danger" id="bClear">清除全部數據</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 分析 ============ -->
+<section class="tab" id="t-ana">
+  <div class="box">
+    <div class="row">
+      <button class="btn primary" id="bAna">更新分析</button>
+      <label for="angBasis">擺角採用</label>
+      <select id="angBasis"><option value="bar">平均振幅 θ̄</option><option value="start">釋放角 θ₀</option></select>
+      <label for="smallTh">小角度門檻</label>
+      <input type="number" id="smallTh" value="6" min="1" max="15" step="0.5"> °
+    </div>
+    <div class="status" id="anaMsg"></div>
+  </div>
+
+  <div class="box">
+    <h2>一、小角度：T² 對 ℓ 回歸</h2>
+    <div class="two">
+      <div id="p1"></div>
+      <div id="r1" class="prose"></div>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>二、大角度：T/T₀ 對 θ</h2>
+    <div class="chk" id="modelChk"></div>
+    <div class="two">
+      <div id="p2"></div>
+      <div id="r2"></div>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>三、線性化嘗試：T/T₀ 對 sin²(θ/2)</h2>
+    <p class="note prose">若週期修正量與 sin²(θ/2) 成正比，這張圖應是一條截距為 1 的直線。試比較你得到的斜率，與提示公式在同樣角度點上所對應的斜率。</p>
+    <div class="two">
+      <div id="p3"></div>
+      <div id="r3" class="prose"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 揭曉 ============ -->
+<section class="tab" id="t-rev">
+  <div class="box">
+    <h2>揭曉隱藏參數</h2>
+    <p class="note">揭曉後，分析頁會加入精確理論曲線。建議先完成自己的結論再按。</p>
+    <div class="row">
+      <button class="btn primary" id="bReveal">揭曉真實值</button>
+      <button class="btn danger" id="bNew">開始新實驗（重新隨機）</button>
+    </div>
+    <div id="revBox"></div>
+  </div>
+
+  <div class="box prose hidden" id="theory">
+    <h2>理論：大角度單擺的精確週期</h2>
+    <p>單擺的運動方程式是 d²θ/dt² = −(g/ℓ) sinθ。小角度時 sinθ ≈ θ，才得到簡諧運動與 T₀ = 2π√(ℓ/g)。振幅為 θ₀ 時，由能量守恆積分可得精確週期：</p>
+    <div class="formula">T = T₀ · (2/π) · K(k)，　k = sin(θ₀/2)</div>
+    <p>K 是第一類完全橢圓積分。展開成級數：</p>
+    <div class="formula">T = T₀ [ 1 + (1/4) sin²(θ₀/2) + (9/64) sin⁴(θ₀/2) + … ]<br>　≈ T₀ [ 1 + θ₀²/16 + 11θ₀⁴/3072 + … ]</div>
+    <p>本模擬器即以此非線性方程式（加上空氣阻力）做數值積分；分析頁的精確曲線由算術幾何平均計算：T/T₀ = 1 / AGM(1, cos(θ₀/2))。</p>
+
+    <h3>四個提示公式的問題</h3>
+    <p class="redpen">四個提示公式都不是正確的修正式。</p>
+    <p>公式 (3)、(4) 在 θ → 0 時分別趨近 0 與無限大，無法回到小角度公式，可以直接排除。公式 (1) 預測週期隨擺角變短，與實驗趨勢相反。</p>
+    <p>公式 (2) 的趨勢正確，但展開後為 T₀(1 + θ₀²/4 + …)，二次項係數是正確值 1/16 的 4 倍；以 sin²(θ₀/2) 表示時，斜率約為 1，而正確值約為 0.25。在 30° 時它已高估約 5.6%，擺長 1 m、量 10 個週期時相當於 1 秒以上，用碼表就能分辨。</p>
+    <p>公式 (2) 常見的來由是「擺錘在 θ 處受的等效重力為 g cosθ」，但這個論證有兩個錯誤：切線方向的回復力是 mg sinθ 而非 mg cosθ，而且擺角在整個週期中不斷變化，不能用最大擺角處的值代表整個運動。</p>
+    <div class="scroll" id="cmpTable"></div>
+
+    <h3>討論題</h3>
+    <p>1. 空氣阻力使振幅隨時間變小，你量到的週期對應的是哪一個擺角？用 θ₀ 與用 θ̄ 作圖，結果有什麼差別？</p>
+    <p>2. 小角度回歸的截距代表什麼？如果只量棉線長而忽略質心位置，g 的結果會受影響嗎？</p>
+    <p>3. 本實驗從釋放瞬間開始計時、在擺錘回到最高點時停止。若改成在擺錘通過最低點時開始與停止，計時誤差會變大還是變小？為什麼？</p>
+    <p>4. 螺絲帽有大小，嚴格來說是物理擺。估算這個修正對週期的影響有多大，與擺角修正相比是否可忽略？</p>
+    <p>5. 支架高度限制擺長不超過約 110 cm。若要更準確地驗證 θ₀²/16 項，應如何選擇擺長、週期數與擺角？</p>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+/* ---------- 工具 ---------- */
+const $ = s => document.querySelector(s);
+const rad = d => d * Math.PI / 180;
+const deg = r => r * 180 / Math.PI;
+const rnd = (a, b) => a + Math.random() * (b - a);
+function gauss() { let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const roundTo = (x, s) => Math.round(x / s) * s;
+const fmt = (x, d) => (x === null || x === undefined || !isFinite(x)) ? "—" : Number(x).toFixed(d);
+function agm(a, b) { for (let i = 0; i < 40; i++) { const an = (a + b) / 2, bn = Math.sqrt(a * b); a = an; b = bn; if (Math.abs(a - b) < 1e-15) break; } return a; }
+const Rexact = th => 1 / agm(1, Math.cos(rad(th) / 2));
+
+function linreg(xs, ys) {
+  const n = xs.length; if (n < 2) return null;
+  let sx = 0, sy = 0, sxx = 0, sxy = 0;
+  for (let i = 0; i < n; i++) { sx += xs[i]; sy += ys[i]; sxx += xs[i] * xs[i]; sxy += xs[i] * ys[i]; }
+  const D = n * sxx - sx * sx; if (Math.abs(D) < 1e-18) return null;
+  const a = (n * sxy - sx * sy) / D, b = (sy - a * sx) / n;
+  let ss = 0, syy = 0; const my = sy / n;
+  for (let i = 0; i < n; i++) { const r = ys[i] - (a * xs[i] + b); ss += r * r; syy += (ys[i] - my) ** 2; }
+  const s = n > 2 ? Math.sqrt(ss / (n - 2)) : NaN;
+  return { a, b, s, sa: s * Math.sqrt(n / D), sb: s * Math.sqrt(sxx / D), r2: syy > 0 ? 1 - ss / syy : 1, n };
+}
+
+/* ---------- 隱藏參數 ---------- */
+let H;
+function newHidden() {
+  H = {
+    g: rnd(9.74, 9.84),
+    d: rnd(0.65, 0.95),          // 綁線點到質心 (cm)
+    m: rnd(20, 25),              // g
+    kq: rnd(0.0035, 0.0075),     // 二次阻力 k/m (1/m)
+    bl: rnd(0.001, 0.004),       // 線性阻尼 (1/s)
+    sr: rnd(0.05, 0.10),         // 按碼表反應時間標準差 (s)
+    sAng: 0.8, sL: 0.08, sD: 0.12
+  };
+}
+
+/* ---------- 狀態 ---------- */
+const S = {
+  L: 80, th: 20, meas: { L: null, d: null, m: null },
+  mode: "manual", speed: 5, N: 10,
+  run: null, sw: { on: false, t0: 0, val: 0 },
+  lastAmp: null, ampReading: null,
+  rows: [], revealed: false,
+  show: { m1: true, m2: true, m3: true, m4: true, exact: true }
+};
+
+/* ---------- 裝置繪圖 ---------- */
+const PX = 330, PY = 48, SC = 2.8, DPX = 9;
+(function drawProt() {
+  const g = $("#prot"), R = 64; let s = `<path d="M ${PX - R} ${PY} A ${R} ${R} 0 0 0 ${PX + R} ${PY} Z" fill="var(--panel)" fill-opacity=".55" stroke="var(--ink)" stroke-width="1"/>`;
+  for (let a = -90; a <= 90; a += 5) {
+    const long = a % 10 === 0, r1 = long ? R - 9 : R - 5;
+    const x1 = PX + R * Math.sin(rad(a)), y1 = PY + R * Math.cos(rad(a));
+    const x2 = PX + r1 * Math.sin(rad(a)), y2 = PY + r1 * Math.cos(rad(a));
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--ink)" stroke-width="${long ? 1 : .6}"/>`;
+    if (a % 30 === 0) {
+      const xr = PX + (R - 18) * Math.sin(rad(a)), yr = PY + (R - 18) * Math.cos(rad(a)) + 3;
+      s += `<text x="${xr}" y="${yr}" font-size="9" text-anchor="middle" fill="var(--ink)">${Math.abs(a)}</text>`;
+    }
+  }
+  g.innerHTML = s;
+})();
+
+function drawPendulum(thRad) {
+  const Lp = S.L * SC;
+  const ax = PX + Lp * Math.sin(thRad), ay = PY + Lp * Math.cos(thRad);
+  $("#string").setAttribute("x2", ax); $("#string").setAttribute("y2", ay);
+  $("#nut").setAttribute("transform", `translate(${ax} ${ay}) rotate(${-deg(thRad)}) translate(0 0)`);
+  const gr = rad(S.th), gl = Lp + 30;
+  $("#guide").setAttribute("x2", PX + gl * Math.sin(gr)); $("#guide").setAttribute("y2", PY + gl * Math.cos(gr));
+  $("#guide").style.display = (S.run && S.run.active) ? "none" : "";
+}
+
+/* ---------- 物理積分 ---------- */
+function ellTrue() { return (S.L + H.d) / 100; }
+function deriv(th, om, r) { return -(H.g / r.ell) * Math.sin(th) - r.kq * r.ell * om * Math.abs(om) - H.bl * om; }
+function step(r, h) {
+  const k1t = r.om, k1o = deriv(r.th, r.om, r);
+  const k2t = r.om + .5 * h * k1o, k2o = deriv(r.th + .5 * h * k1t, r.om + .5 * h * k1o, r);
+  const k3t = r.om + .5 * h * k2o, k3o = deriv(r.th + .5 * h * k2t, r.om + .5 * h * k2o, r);
+  const k4t = r.om + h * k3o, k4o = deriv(r.th + h * k3t, r.om + h * k3o, r);
+  const th0 = r.th, om0 = r.om;
+  r.th += h / 6 * (k1t + 2 * k2t + 2 * k3t + k4t);
+  r.om += h / 6 * (k1o + 2 * k2o + 2 * k3o + k4o);
+  const t0 = r.t; r.t += h;
+  if (om0 !== 0 && Math.sign(om0) !== Math.sign(r.om)) {
+    S.lastAmp = deg(Math.abs(r.th));
+    if (r.auto && om0 > 0 && r.om <= 0) onTurn(r, t0 + h * om0 / (om0 - r.om));
+  }
+}
+
+function release() {
+  halt(false);
+  const thTrue = Math.min(88, Math.max(0.5, S.th + gauss() * H.sAng));
+  S.run = {
+    active: true, th: rad(thTrue), om: 0, t: 0, ell: ellTrue(),
+    kq: H.kq * (1 + 0.05 * gauss()), thTrue,
+    auto: S.mode === "auto" ? { N: S.N, c: [] } : null,
+    thReading: S.th, LmeasAt: S.meas.L, dmeasAt: S.meas.d
+  };
+  S.lastAmp = thTrue; S.ampReading = null; $("#oAmp").textContent = "—";
+  if (S.mode === "manual") { swReset(); S.sw.on = true; S.sw.t0 = 0; }
+  setStatus(S.mode === "auto" ? `自動量測中：釋放同時開始計時，共 ${S.N} 個週期…` : `碼表已隨釋放開始計時。數滿 ${S.N} 個週期、擺錘回到釋放側最高點時按停止。`);
+}
+function halt(msg = true) {
+  if (S.sw.on) {
+    S.sw.on = false;
+    if (S.run) S.sw.val = S.run.t - S.sw.t0;
+    $("#watch").textContent = (Math.floor(S.sw.val * 100) / 100).toFixed(2);
+  }
+  if (S.run) S.run.active = false;
+  S.run = null; drawPendulum(0);
+  if (msg) setStatus("已停止，擺錘靜止於最低點。");
+}
+
+function onTurn(r, tc) {
+  const a = r.auto; a.c.push(tc);
+  setStatus(`自動量測中：已完成 ${a.c.length} / ${a.N} 個週期…`);
+  if (a.c.length === a.N) {
+    // 釋放同時按下碼表（反應誤差 sr）；停止於最高點，擺錘慢、判斷較難，誤差取 1.5 sr
+    const raw = a.c[a.N - 1];
+    const t = Math.max(0, roundTo(raw + 1.5 * H.sr * gauss() - H.sr * gauss(), 0.01));
+    const thE = roundTo(S.lastAmp + gauss() * 1.0, 0.5);
+    const ell = (r.LmeasAt !== null && r.dmeasAt !== null) ? +(r.LmeasAt + r.dmeasAt).toFixed(2) : null;
+    S.rows.push({ L: ell, th0: r.thReading, thE, N: a.N, t: +t.toFixed(2) });
+    renderTable();
+    r.active = false; S.run = null; drawPendulum(0);
+    setStatus(`完成：${a.N} 個週期共 ${t.toFixed(2)} s，結束振幅約 ${thE.toFixed(1)}°，已寫入第 ${S.rows.length} 列。` + (ell === null ? "（尚未量擺長，ℓ 欄空白，請補上）" : ""), ell === null);
+  }
+}
+
+let lastFrame = null;
+function loop(ts) {
+  if (lastFrame === null) lastFrame = ts;
+  const dt = Math.min(0.05, (ts - lastFrame) / 1000); lastFrame = ts;
+  const r = S.run;
+  if (r && r.active) {
+    const sp = S.mode === "auto" ? S.speed : 1;
+    let adv = dt * sp; const h = 0.0005;
+    while (adv > 1e-9 && r.active) { const hh = Math.min(h, adv); step(r, hh); adv -= hh; }
+    if (S.run) drawPendulum(r.th);
+  } else if (!S.run) {
+    drawPendulum(rad(S.th) * 0); // 靜止
+    showIdle();
+  }
+  if (S.sw.on) {
+    const now = S.run ? S.run.t : S.sw.lastT;
+    S.sw.val = now - S.sw.t0;
+    $("#watch").textContent = (Math.floor(S.sw.val * 100) / 100).toFixed(2);
+  }
+  requestAnimationFrame(loop);
+}
+function showIdle() {
+  const Lp = S.L * SC, gr = rad(S.th), gl = Lp + 30;
+  $("#guide").style.display = "";
+  $("#guide").setAttribute("x2", PX + gl * Math.sin(gr)); $("#guide").setAttribute("y2", PY + gl * Math.cos(gr));
+}
+
+/* ---------- 碼表 ---------- */
+function swToggle() {
+  if (S.mode !== "manual") return;
+  if (!S.sw.on) {
+    if (!S.run) { setStatus("請先釋放擺錘再開始計時。", true); return; }
+    S.sw.on = true; S.sw.t0 = S.run.t;
+  } else {
+    S.sw.on = false;
+    S.sw.val = (S.run ? S.run.t : S.sw.t0 + S.sw.val) - S.sw.t0;
+    $("#watch").textContent = (Math.floor(S.sw.val * 100) / 100).toFixed(2);
+  }
+}
+function swReset() { S.sw.on = false; S.sw.val = 0; $("#watch").textContent = "0.00"; }
+
+/* ---------- UI 事件 ---------- */
+function setStatus(t, warn = false) { const e = $("#status"); e.textContent = t; e.classList.toggle("warn", warn); }
+function invalidateLen() {
+  S.meas.L = null; S.meas.d = null;
+  $("#oL").textContent = "—"; $("#oD").textContent = "—"; $("#oEll").textContent = "—";
+}
+function updEll() { $("#oEll").textContent = (S.meas.L !== null && S.meas.d !== null) ? (S.meas.L + S.meas.d).toFixed(2) : "—"; }
+function roughL() { $("#Lrough").textContent = `支架上的粗略位置：約 ${Math.round(S.L / 5) * 5} cm（請用卷尺實際量測）`; }
+
+$("#Lsl").addEventListener("input", e => { S.L = +e.target.value; if (S.run) halt(); invalidateLen(); roughL(); });
+$("#Tsl").addEventListener("input", e => { S.th = +e.target.value; $("#oTh").textContent = S.th.toFixed(1); if (S.run) halt(); });
+$("#bMeasL").onclick = () => { S.meas.L = roundTo(S.L + gauss() * H.sL, 0.05); $("#oL").textContent = S.meas.L.toFixed(2); updEll(); };
+$("#bMeasD").onclick = () => { S.meas.d = Math.max(0, roundTo(H.d + gauss() * H.sD, 0.05)); $("#oD").textContent = S.meas.d.toFixed(2); updEll(); };
+$("#bMass").onclick = () => { S.meas.m = roundTo(H.m + gauss() * 0.01, 0.01); $("#oM").textContent = S.meas.m.toFixed(2); };
+document.querySelectorAll("input[name=mode]").forEach(r => r.addEventListener("change", e => {
+  S.mode = e.target.value; halt(false); swReset();
+  $("#manualBox").classList.toggle("hidden", S.mode !== "manual");
+  $("#spdWrap").classList.toggle("hidden", S.mode !== "auto");
+  setStatus(S.mode === "auto" ? "自動模式：按「釋放擺錘」後自動計時並寫入表格。" : "手動模式：釋放後自己按碼表計時。");
+}));
+$("#nPer").addEventListener("change", e => { S.N = Math.max(1, Math.min(50, Math.round(+e.target.value || 10))); e.target.value = S.N; });
+$("#spd").addEventListener("change", e => S.speed = +e.target.value);
+$("#bRelease").onclick = release;
+$("#bHalt").onclick = () => { halt(); if (S.sw.on) swToggle(); };
+$("#bSW").onclick = swToggle;
+$("#bSWr").onclick = swReset;
+document.addEventListener("keydown", e => {
+  if (e.code !== "Space") return;
+  const tag = (document.activeElement || {}).tagName;
+  if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+  if (!$("#t-lab").classList.contains("active")) return;
+  e.preventDefault(); swToggle();
+});
+$("#bAmp").onclick = () => {
+  if (!S.run || S.lastAmp === null) { setStatus("擺錘沒有在擺動。", true); return; }
+  S.ampReading = roundTo(S.lastAmp + gauss() * 1.0, 0.5);
+  $("#oAmp").textContent = S.ampReading.toFixed(1);
+};
+$("#bRec").onclick = () => {
+  if (S.sw.on) { setStatus("請先停止碼表。", true); return; }
+  if (S.sw.val <= 0) { setStatus("碼表沒有讀數。", true); return; }
+  const ell = (S.meas.L !== null && S.meas.d !== null) ? +(S.meas.L + S.meas.d).toFixed(2) : null;
+  const th0 = S.run ? S.run.thReading : S.th;
+  S.rows.push({ L: ell, th0, thE: S.ampReading, N: S.N, t: +(Math.floor(S.sw.val * 100) / 100).toFixed(2) });
+  renderTable(); swReset();
+  setStatus(`已寫入第 ${S.rows.length} 列。請確認 N 與你實際數到的週期數相同。` + (ell === null ? "（尚未量擺長，ℓ 欄空白）" : ""), ell === null);
+};
+
+/* ---------- 表格 ---------- */
+function thBar(r) { return (r.thE !== null && r.thE !== undefined && r.thE !== "" && isFinite(r.thE)) ? (r.th0 + r.thE) / 2 : r.th0; }
+function Tof(r) { return (r.t > 0 && r.N > 0) ? r.t / r.N : NaN; }
+function renderTable() {
+  const tb = $("#tbody");
+  if (!S.rows.length) { tb.innerHTML = `<tr><td colspan="9" class="muted">尚無數據。到「實驗操作」頁量測，或按「新增空白列」手動輸入。</td></tr>`; return; }
+  tb.innerHTML = S.rows.map((r, i) => `<tr>
+    <td>${i + 1}</td>
+    <td><input class="cell" data-i="${i}" data-k="L" value="${r.L ?? ""}"></td>
+    <td><input class="cell" data-i="${i}" data-k="th0" value="${r.th0 ?? ""}"></td>
+    <td><input class="cell" data-i="${i}" data-k="thE" value="${r.thE ?? ""}"></td>
+    <td><input class="cell" data-i="${i}" data-k="N" value="${r.N ?? ""}" style="width:52px"></td>
+    <td><input class="cell" data-i="${i}" data-k="t" value="${r.t ?? ""}"></td>
+    <td>${fmt(Tof(r), 4)}</td><td>${fmt(thBar(r), 2)}</td>
+    <td><button class="btn danger" data-del="${i}" aria-label="刪除第 ${i + 1} 列">刪除</button></td></tr>`).join("");
+}
+$("#tbody").addEventListener("change", e => {
+  const el = e.target; if (!el.dataset.k) return;
+  const v = el.value.trim(); S.rows[+el.dataset.i][el.dataset.k] = v === "" ? null : +v;
+  renderTable();
+});
+$("#tbody").addEventListener("click", e => {
+  const d = e.target.dataset.del; if (d === undefined) return;
+  S.rows.splice(+d, 1); renderTable();
+});
+$("#bAddRow").onclick = () => { S.rows.push({ L: null, th0: null, thE: null, N: 10, t: null }); renderTable(); };
+$("#bClear").onclick = () => { if (confirm("確定清除全部數據？")) { S.rows = []; renderTable(); } };
+$("#bCSV").onclick = () => {
+  const lines = ["ell_cm,theta0_deg,thetaEnd_deg,N,t_s,T_s,thetaBar_deg"];
+  S.rows.forEach(r => lines.push([r.L, r.th0, r.thE, r.N, r.t, fmt(Tof(r), 4), fmt(thBar(r), 2)].map(x => x ?? "").join(",")));
+  const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "大角度單擺數據.csv"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+/* ---------- 作圖 ---------- */
+function ticks(a, b, n = 6) {
+  const step0 = (b - a) / n, mag = Math.pow(10, Math.floor(Math.log10(step0))), r = step0 / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, out = [];
+  for (let v = Math.ceil(a / step - 1e-9) * step; v <= b + 1e-9 * step; v += step) out.push(+v.toFixed(12));
+  return { out, dec: Math.max(0, -Math.floor(Math.log10(step) + 1e-9)) };
+}
+let clipN = 0;
+function plot(host, o) {
+  const W = 600, Hh = 380, m = { l: 66, r: 14, t: 14, b: 50 }, pw = W - m.l - m.r, ph = Hh - m.t - m.b;
+  const X = x => m.l + (x - o.xmin) / (o.xmax - o.xmin) * pw;
+  const Y = y => m.t + ph - (y - o.ymin) / (o.ymax - o.ymin) * ph;
+  const id = "cp" + (++clipN);
+  let s = `<svg class="plot" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${o.ylabel} 對 ${o.xlabel}">`;
+  s += `<defs><clipPath id="${id}"><rect x="${m.l}" y="${m.t}" width="${pw}" height="${ph}"/></clipPath></defs>`;
+  const tx = ticks(o.xmin, o.xmax), ty = ticks(o.ymin, o.ymax);
+  tx.out.forEach(v => { s += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${m.t}" y2="${m.t + ph}"/><text x="${X(v)}" y="${m.t + ph + 16}" text-anchor="middle">${v.toFixed(tx.dec)}</text>`; });
+  ty.out.forEach(v => { s += `<line class="grid" y1="${Y(v)}" y2="${Y(v)}" x1="${m.l}" x2="${m.l + pw}"/><text x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end">${v.toFixed(ty.dec)}</text>`; });
+  s += `<g clip-path="url(#${id})">`;
+  (o.curves || []).forEach(c => {
+    let d = "", pen = false;
+    for (let i = 0; i <= 240; i++) {
+      const x = o.xmin + (o.xmax - o.xmin) * i / 240, y = c.f(x);
+      if (!isFinite(y)) { pen = false; continue; }
+      const yy = Math.max(-4000, Math.min(4000, Y(y)));
+      d += (pen ? "L" : "M") + X(x).toFixed(1) + " " + yy.toFixed(1); pen = true;
+    }
+    s += `<path d="${d}" fill="none" stroke="${c.color}" stroke-width="2" ${c.dash ? `stroke-dasharray="${c.dash}"` : ""}/>`;
+  });
+  (o.points || []).forEach(p => {
+    if (p.ey) s += `<line x1="${X(p.x)}" x2="${X(p.x)}" y1="${Y(p.y - p.ey)}" y2="${Y(p.y + p.ey)}" stroke="var(--text)" stroke-width="1"/>`;
+    s += `<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4" fill="var(--panel)" stroke="var(--text)" stroke-width="1.6"/>`;
+  });
+  s += `</g><rect class="frame" x="${m.l}" y="${m.t}" width="${pw}" height="${ph}"/>`;
+  s += `<text class="axl" x="${m.l + pw / 2}" y="${Hh - 10}" text-anchor="middle">${o.xlabel}</text>`;
+  s += `<text class="axl" transform="translate(16 ${m.t + ph / 2}) rotate(-90)" text-anchor="middle">${o.ylabel}</text>`;
+  const leg = (o.curves || []).filter(c => c.label);
+  leg.forEach((c, i) => {
+    const ly = m.t + 14 + i * 17, lx = m.l + 12;
+    s += `<line x1="${lx}" x2="${lx + 22}" y1="${ly - 4}" y2="${ly - 4}" stroke="${c.color}" stroke-width="2" ${c.dash ? `stroke-dasharray="${c.dash}"` : ""}/><text x="${lx + 28}" y="${ly}" style="fill:var(--text)">${c.label}</text>`;
+  });
+  s += "</svg>";
+  host.innerHTML = s;
+}
+function range(vals, padFrac = 0.08, forceMin) {
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (forceMin !== undefined) lo = Math.min(lo, forceMin);
+  if (hi - lo < 1e-9) { hi += 1; lo -= 1; }
+  const p = (hi - lo) * padFrac; return [lo - p, hi + p];
+}
+
+/* ---------- 分析 ---------- */
+const MODELS = [
+  { id: "m1", name: "提示 (1)", tex: "√cosθ", f: th => Math.sqrt(Math.cos(rad(th))), color: "var(--c-m1)", dash: "" },
+  { id: "m2", name: "提示 (2)", tex: "1/√cosθ", f: th => 1 / Math.sqrt(Math.cos(rad(th))), color: "var(--c-m2)", dash: "" },
+  { id: "m3", name: "提示 (3)", tex: "√sinθ", f: th => Math.sqrt(Math.sin(rad(th))), color: "var(--c-m3)", dash: "6 4" },
+  { id: "m4", name: "提示 (4)", tex: "1/√sinθ", f: th => 1 / Math.sqrt(Math.sin(rad(th))), color: "var(--c-m4)", dash: "6 4" },
+  { id: "exact", name: "精確解", tex: "1/AGM(1, cos(θ/2))", f: Rexact, color: "var(--c-exact)", dash: "", secret: true }
+];
+function renderChecks() {
+  $("#modelChk").innerHTML = MODELS.filter(M => !M.secret || S.revealed).map(M =>
+    `<label><input type="checkbox" data-m="${M.id}" ${S.show[M.id] ? "checked" : ""}> <span class="swatch" style="background:${M.color}"></span>${M.name}：T/T₀ = ${M.tex}</label>`).join("");
+}
+$("#modelChk").addEventListener("change", e => { S.show[e.target.dataset.m] = e.target.checked; analyze(); });
+
+let LAST = null;
+function analyze() {
+  const msg = $("#anaMsg"); msg.textContent = ""; msg.classList.remove("warn");
+  const basis = $("#angBasis").value, thr = +$("#smallTh").value || 6;
+  const good = S.rows.filter(r => r.L > 0 && r.th0 > 0 && isFinite(Tof(r)))
+    .map(r => ({ ell: r.L / 100, th: basis === "bar" ? thBar(r) : r.th0, T: Tof(r) }));
+  const small = good.filter(p => p.th <= thr), large = good.filter(p => p.th > thr);
+  ["#p1", "#p2", "#p3"].forEach(s => $(s).innerHTML = "");
+  ["#r1", "#r2", "#r3"].forEach(s => $(s).innerHTML = "");
+  LAST = null;
+
+  // 一、小角度
+  const nL = new Set(small.map(p => p.ell.toFixed(3))).size;
+  if (small.length < 3 || nL < 2) {
+    $("#r1").innerHTML = `<p class="warn">需要至少 3 筆擺角 ≤ ${thr}° 的數據，且至少包含 2 種擺長（目前 ${small.length} 筆、${nL} 種擺長）。</p>`;
+    msg.textContent = "資料不足，無法求出 T₀(ℓ)，第二、三部分暫時無法分析。"; msg.classList.add("warn");
+    return;
+  }
+  const f1 = linreg(small.map(p => p.ell), small.map(p => p.T * p.T));
+  const g = 4 * Math.PI ** 2 / f1.a, sg = g * f1.sa / f1.a;
+  const delta = f1.b / f1.a, sdelta = Math.abs(delta) * Math.hypot(f1.sb / f1.b, f1.sa / f1.a);
+  const xr = range(small.map(p => p.ell), .1, 0), yr = range(small.map(p => p.T * p.T), .1, 0);
+  plot($("#p1"), {
+    xmin: 0, xmax: xr[1], ymin: Math.min(0, yr[0]), ymax: yr[1], xlabel: "ℓ (m)", ylabel: "T² (s²)",
+    points: small.map(p => ({ x: p.ell, y: p.T * p.T })),
+    curves: [{ f: x => f1.a * x + f1.b, color: "var(--ink)", label: "最小平方法回歸線" }]
+  });
+  $("#r1").innerHTML = `
+    <p>T² = a ℓ + b，共 ${f1.n} 筆</p>
+    <p>斜率 a = <b>${f1.a.toFixed(4)} ± ${fmt(f1.sa, 4)}</b> s²/m<br>
+       截距 b = <b>${f1.b.toFixed(4)} ± ${fmt(f1.sb, 4)}</b> s²<br>
+       R² = ${f1.r2.toFixed(5)}</p>
+    <p>g = 4π²/a = <b>${g.toFixed(3)} ± ${fmt(sg, 3)}</b> m/s²</p>
+    <p>擺長系統偏差 δ = b/a = <b>${(delta * 100).toFixed(2)} ± ${fmt(sdelta * 100, 2)}</b> cm<br>
+       <span class="note">δ 顯著大於 0，代表你量的 ℓ 比實際等效擺長短；δ 顯著小於 0 則代表量長了。</span></p>`;
+
+  // 二、大角度
+  const s2 = f1.s; // T² 殘差標準差
+  const pts = good.filter(p => p.th > 0).map(p => {
+    const T0sq = f1.a * p.ell + f1.b, T0 = Math.sqrt(T0sq), R = p.T / T0;
+    const sig = R * (s2 / (2 * T0sq)) * Math.sqrt(1 + 1 / f1.n);
+    return { ...p, T0, R, sig, x: Math.sin(rad(p.th) / 2) ** 2 };
+  });
+  const lp = pts.filter(p => p.th > thr);
+  const thMax = Math.max(90, ...pts.map(p => p.th));
+  const Rvals = pts.map(p => p.R);
+  const yr2 = [Math.min(0.85, ...Rvals) - 0.02, Math.max(1.3, ...Rvals) + 0.03];
+  const curves = MODELS.filter(M => (!M.secret || S.revealed) && S.show[M.id])
+    .map(M => ({ f: M.f, color: M.color, dash: M.dash, label: `${M.name}` }));
+  plot($("#p2"), {
+    xmin: 0, xmax: Math.min(90, thMax), ymin: yr2[0], ymax: yr2[1], xlabel: "擺角 θ (°)", ylabel: "T / T₀",
+    points: pts.map(p => ({ x: p.th, y: p.R, ey: isFinite(p.sig) ? p.sig : 0 })), curves
+  });
+  if (!lp.length) {
+    $("#r2").innerHTML = `<p class="warn">還沒有擺角大於 ${thr}° 的數據，請到實驗頁量測不同釋放角。</p>`;
+  } else {
+    const rows = MODELS.filter(M => !M.secret || S.revealed).map(M => {
+      let chi = 0, sum = 0, ok = true;
+      lp.forEach(p => { const r = p.R - M.f(p.th); if (!isFinite(r)) ok = false; sum += r; chi += (r / p.sig) ** 2; });
+      const chin = chi / lp.length, zMean = (sum / lp.length) / (Math.sqrt(lp.reduce((a, p) => a + p.sig ** 2, 0)) / lp.length);
+      const verdict = !ok || !isFinite(chin) ? "—" : chin < 4 ? `<span class="verdict-ok">與數據相容</span>` : `<span class="verdict-bad">明顯不符</span>`;
+      return `<tr><td style="text-align:left"><span class="swatch" style="background:${M.color}"></span>${M.name}</td>
+        <td>${fmt(sum / lp.length, 4)}</td><td>${fmt(zMean, 1)}</td><td>${fmt(chin, 1)}</td><td>${verdict}</td></tr>`;
+    }).join("");
+    $("#r2").innerHTML = `
+      <p>以擺角 &gt; ${thr}° 的 ${lp.length} 筆數據比較。T₀ 取自第一部分的回歸線；每點誤差 σ 由小角度回歸的殘差估計，約 ${fmt(lp[0].sig, 4)}。</p>
+      <div class="scroll"><table><thead><tr><th>公式</th><th>平均偏差 ΔR</th><th>平均偏差 (σ 倍數)</th><th>χ²/n</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="note">χ²/n 接近 1 代表公式與數據的差異可用量測誤差解釋；遠大於 1 代表公式本身與數據不符。以 χ²/n &lt; 4 作為相容的粗略判準。</p>`;
+  }
+
+  // 三、線性化
+  if (pts.length >= 3) {
+    const f3 = linreg(pts.map(p => p.x), pts.map(p => p.R));
+    const xm = Math.max(...pts.map(p => p.x)) * 1.1 + 0.01;
+    const lin = [{ f: x => f3.a * x + f3.b, color: "var(--ink)", label: "數據回歸線" }];
+    if (S.show.m2) lin.push({ f: x => 1 / Math.sqrt(1 - 2 * x), color: "var(--c-m2)", label: "提示 (2)" });
+    if (S.revealed && S.show.exact) lin.push({ f: x => 1 / agm(1, Math.sqrt(1 - x)), color: "var(--c-exact)", label: "精確解" });
+    const yr3 = range(pts.map(p => p.R), .15, 1);
+    plot($("#p3"), {
+      xmin: 0, xmax: xm, ymin: Math.min(yr3[0], 0.98), ymax: Math.max(yr3[1], 1.05), xlabel: "sin²(θ/2)", ylabel: "T / T₀",
+      points: pts.map(p => ({ x: p.x, y: p.R, ey: isFinite(p.sig) ? p.sig : 0 })), curves: lin
+    });
+    const xs = pts.map(p => p.x);
+    const s2m = linreg(xs, xs.map(x => 1 / Math.sqrt(1 - 2 * x)));
+    let html = `<p>T/T₀ = s · sin²(θ/2) + c</p>
+      <p>斜率 s = <b>${f3.a.toFixed(3)} ± ${fmt(f3.sa, 3)}</b><br>截距 c = <b>${f3.b.toFixed(4)} ± ${fmt(f3.sb, 4)}</b></p>
+      <p>若公式 (2) 正確，在同樣的角度點上預期斜率為 <b>${s2m ? s2m.a.toFixed(3) : "—"}</b>。你的斜率與它相差 ${s2m && isFinite(f3.sa) && f3.sa > 0 ? ((f3.a - s2m.a) / f3.sa).toFixed(1) : "—"} 個標準差。</p>`;
+    if (S.revealed) {
+      const sEx = linreg(xs, xs.map(x => 1 / agm(1, Math.sqrt(1 - x))));
+      html += `<p>精確理論在同樣角度點上的預期斜率為 <b>${sEx.a.toFixed(3)}</b>（純一階近似為 0.25，大角度的高階項使等效斜率略增）。你的斜率與它相差 ${isFinite(f3.sa) && f3.sa > 0 ? ((f3.a - sEx.a) / f3.sa).toFixed(1) : "—"} 個標準差。</p>`;
+    }
+    $("#r3").innerHTML = html;
+  } else {
+    $("#r3").innerHTML = `<p class="warn">至少需要 3 筆數據。</p>`;
+  }
+  LAST = { g, sg, delta, sdelta };
+}
+$("#bAna").onclick = analyze;
+$("#angBasis").onchange = analyze;
+$("#smallTh").onchange = analyze;
+
+/* ---------- 揭曉 ---------- */
+function renderReveal() {
+  if (!S.revealed) { $("#revBox").innerHTML = ""; $("#theory").classList.add("hidden"); return; }
+  analyze();
+  let cmp = "";
+  if (LAST) {
+    const z = (LAST.g - H.g) / LAST.sg, dStu = S.meas.d;
+    cmp = `<h3>你的結果與真實值</h3>
+      <table><thead><tr><th>量</th><th>你的結果</th><th>真實值</th><th>差異</th></tr></thead><tbody>
+      <tr><td>重力加速度 g (m/s²)</td><td>${LAST.g.toFixed(3)} ± ${fmt(LAST.sg, 3)}</td><td>${H.g.toFixed(3)}</td><td>${isFinite(z) ? z.toFixed(1) + " σ" : "—"}</td></tr>
+      <tr><td>擺長系統偏差 δ (cm)</td><td>${(LAST.delta * 100).toFixed(2)} ± ${fmt(LAST.sdelta * 100, 2)}</td><td>約 0（若 d 量準）</td><td class="note">真實 d 與你量的 d 差 ${dStu !== null ? (H.d - dStu).toFixed(2) + " cm" : "—"}</td></tr>
+      </tbody></table>`;
+  } else {
+    cmp = `<p class="note">分析頁資料不足，暫時無法比較 g。</p>`;
+  }
+  $("#revBox").innerHTML = `
+    <h3>隱藏參數</h3>
+    <table><tbody>
+      <tr><td>重力加速度 g</td><td>${H.g.toFixed(4)} m/s²</td><td class="note">（台中實際值約 9.79 m/s²，此處隨機化以供自我評量）</td></tr>
+      <tr><td>綁線點到螺絲帽質心 d</td><td>${H.d.toFixed(3)} cm</td><td></td></tr>
+      <tr><td>螺絲帽質量</td><td>${H.m.toFixed(2)} g</td><td class="note">週期與質量無關</td></tr>
+      <tr><td>二次空氣阻力係數 k/m</td><td>${H.kq.toFixed(4)} m⁻¹</td><td class="note">60°、ℓ = 1 m 時每週期振幅約減少 ${deg((8 / 3) * H.kq * 1 * rad(60) ** 2).toFixed(1)}°</td></tr>
+      <tr><td>線性阻尼係數</td><td>${H.bl.toFixed(4)} s⁻¹</td><td></td></tr>
+      <tr><td>按碼表反應時間標準差（停止時再乘 1.5）</td><td>${H.sr.toFixed(3)} s</td><td class="note">僅用於自動量測</td></tr>
+      <tr><td>釋放角視差標準差</td><td>${H.sAng}°</td><td></td></tr>
+    </tbody></table>${cmp}`;
+  const angs = [10, 20, 30, 40, 50, 60, 70, 80];
+  $("#cmpTable").innerHTML = `<table><thead><tr><th>θ₀</th>${angs.map(a => `<th>${a}°</th>`).join("")}</tr></thead><tbody>
+    <tr><td>精確 T/T₀</td>${angs.map(a => `<td>${Rexact(a).toFixed(4)}</td>`).join("")}</tr>
+    <tr><td>級數 1 + θ²/16</td>${angs.map(a => `<td>${(1 + rad(a) ** 2 / 16).toFixed(4)}</td>`).join("")}</tr>
+    <tr><td class="redpen">提示 (2) 1/√cosθ</td>${angs.map(a => `<td class="redpen">${(1 / Math.sqrt(Math.cos(rad(a)))).toFixed(4)}</td>`).join("")}</tr>
+    </tbody></table>`;
+  $("#theory").classList.remove("hidden");
+}
+$("#bReveal").onclick = () => {
+  if (S.revealed) return;
+  if (!confirm("揭曉後就看得到真實值與正確理論，確定要揭曉嗎？")) return;
+  S.revealed = true; renderChecks(); renderReveal();
+};
+$("#bNew").onclick = () => {
+  if (!confirm("將重新隨機隱藏參數並清除所有數據，確定？")) return;
+  newHidden(); S.rows = []; S.revealed = false; halt(false); swReset(); invalidateLen();
+  S.meas.m = null; $("#oM").textContent = "—";
+  renderTable(); renderChecks(); renderReveal();
+  ["#p1", "#p2", "#p3", "#r1", "#r2", "#r3"].forEach(s => $(s).innerHTML = "");
+  setStatus("新實驗已建立。");
+};
+
+/* ---------- 分頁 ---------- */
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#tabs button").forEach(x => x.setAttribute("aria-selected", x === b));
+  document.querySelectorAll("section.tab").forEach(s => s.classList.toggle("active", s.id === b.dataset.tab));
+  if (b.dataset.tab === "t-ana") analyze();
+  if (b.dataset.tab === "t-rev") renderReveal();
+});
+
+/* ---------- 初始化 ---------- */
+newHidden(); roughL(); renderTable(); renderChecks(); drawPendulum(0);
+setStatus("手動模式：先量擺長，設定釋放角，再釋放擺錘並按碼表。");
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>繩波駐波虛擬實驗室</title>
+<style>
+:root{--bg:#f4f2ec;--panel:#ffffff;--ink:#1f2a33;--sub:#5b6770;--line:#d9d4c7;--accent:#0f6e8c;--accent2:#c2562b;--ok:#2f7d32;--warn:#a55f00;--paper:#fbfaf5;--soft:#eef5f7}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;font-size:15.5px}
+header{background:#18323f;color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:20px;font-weight:700}
+header .meta{font-size:13px;opacity:.8}
+.hbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 16px;background:#e6e1d4;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;color:var(--ink)}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+nav button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1180px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+h2{font-size:18px;margin:0 0 8px;color:#18323f}
+h3{font-size:16px;margin:14px 0 6px;color:#18323f}
+.eq{display:inline-block;font-family:"Cambria Math","Times New Roman",serif;font-size:17px;background:var(--soft);padding:2px 10px;border-radius:6px;margin:2px 0}
+.eqb{display:block;text-align:center;font-family:"Cambria Math","Times New Roman",serif;font-size:19px;background:var(--soft);padding:8px;border-radius:8px;margin:8px 0}
+.rad{border-top:1.4px solid currentColor;padding:0 3px}
+.note{font-size:14px;color:var(--sub)}
+.warn{background:#fff4e2;border-left:4px solid var(--warn);padding:8px 12px;border-radius:6px;font-size:14px;margin:8px 0}
+.ok{background:#e9f5ea;border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:14px;margin:8px 0}
+.info{background:var(--soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;font-size:14px;margin:8px 0}
+details{background:#faf8f3;border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0}
+summary{cursor:pointer;font-weight:600;color:var(--accent)}
+svg{width:100%;height:auto;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}
+.ctl label{font-weight:600;font-size:14px;min-width:92px}
+button.b{border:1px solid var(--accent);background:#fff;color:var(--accent);padding:5px 11px;border-radius:7px;cursor:pointer;font:inherit;font-size:14px}
+button.b:hover{background:var(--soft)}
+button.p{background:var(--accent);color:#fff}
+button.p:hover{background:#0c5a73}
+button.r{border-color:var(--accent2);color:var(--accent2)}
+button.pw{min-width:110px;font-weight:700}
+button.pw.on{background:#c62828;border-color:#c62828;color:#fff}
+input[type=range]{flex:1;min-width:160px}
+input[type=number],input.cell,select{font:inherit;font-size:14px;padding:4px 6px;border:1px solid var(--line);border-radius:6px}
+input.cell{width:84px;text-align:right}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:5px 7px;text-align:center}
+th{background:#f0ece2}
+.tw{overflow-x:auto}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border-radius:10px;background:#e3edf0;color:#18323f}
+.stat{font-weight:700;color:var(--accent)}
+.chk{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px dashed var(--line)}
+.chk input{margin-top:5px;transform:scale(1.2)}
+.num{display:inline-block;width:22px;height:22px;border-radius:50%;background:var(--accent2);color:#fff;text-align:center;font-size:13px;line-height:22px;font-weight:700;flex:none}
+.num.done{background:var(--ok)}
+.balbox{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+@media(max-width:800px){.balbox{grid-template-columns:1fr}}
+.small{font-size:13px}
+.mono{font-family:Consolas,"Courier New",monospace}
+</style>
+</head>
+<body>
+<header>
+<div class="hbar">
+<div>
+<h1>繩波與駐波虛擬實驗室（電動刮鬍刀振盪器）</h1>
+<div class="meta">九十學年度 台灣省桃竹苗地區 高級中學數學、資訊與自然學科能力競賽｜物理科實驗試題｜競賽日期 90.11.7</div>
+</div>
+<button class="b" style="background:#fff" onclick="resetAll()">重新開始（產生新的隱藏真值）</button>
+</div>
+</header>
+<nav id="nav">
+<button data-t="t1" class="on">① 原理推導</button>
+<button data-t="t2">② 器材組裝與 μ 測定</button>
+<button data-t="t3">③ 第一部分：駐波量測</button>
+<button data-t="t4">④ λ²–T 迴歸求 f</button>
+<button data-t="t5">⑤ 第二部分：粗細繩</button>
+<button data-t="t6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ================= ① 原理 ================= -->
+<section id="t1" class="tab on">
+<div class="card">
+<h2>實驗目標</h2>
+<p><b>第一部分</b>：以電動刮鬍刀（頻率 f）在縫衣線上產生駐波，驗證 <span class="eq">λf = √<span class="rad">T/μ</span></span>，並求出刮鬍刀的頻率。<br>
+<b>第二部分</b>：將細繩與粗繩相接，使接點為波節，找出兩段駐波個數 n₁、n₂、長度 l₁、l₂ 與線密度 μ₁、μ₂ 的關係，並設計實驗驗證。</p>
+<div class="info">器材限制：量長度只有一把 <b>30 cm 塑膠直尺</b>（最小刻度 1 mm）；張力靠 <b>6 片墊片</b>與鐵絲掛鉤；兩顆三號電池是刮鬍刀電源。題目允許使用「實驗室環境」，本模擬提供一台可讀到 <b>0.01 g</b> 的電子天平。</div>
+</div>
+
+<div class="card">
+<h2>1. 弦上的波速</h2>
+<p>任何週期波都滿足 <span class="eq">v = fλ</span>。拉緊的弦上，橫波波速只由張力 T 與線密度 μ（每單位長度的質量）決定：</p>
+<div class="eqb">v = √<span class="rad">T / μ</span></div>
+<p class="note">因次檢查：T 的單位 kg·m/s²，μ 的單位 kg/m，T/μ 的單位 m²/s²，開根號得 m/s。</p>
+<p>本實驗張力來自滑輪另一端懸掛的質量 m：<span class="eq">T = mg</span>（本地 g ≈ 9.79 m/s²）。</p>
+</div>
+
+<div class="card">
+<h2>2. Melde 式駐波裝置</h2>
+<svg viewBox="0 0 1000 260" aria-label="駐波示意圖">
+<rect x="0" y="0" width="1000" height="260" fill="#fbfaf5"/>
+<rect x="40" y="96" width="70" height="28" rx="8" fill="#56636d"/>
+<rect x="108" y="100" width="16" height="20" fill="#9aa5ad"/>
+<text x="75" y="150" font-size="14" text-anchor="middle" fill="#333">刮鬍刀</text>
+<g id="thWave"></g>
+<circle cx="880" cy="124" r="14" fill="#ccc" stroke="#555"/>
+<line x1="894" y1="124" x2="894" y2="200" stroke="#333" stroke-width="1.5"/>
+<rect x="882" y="200" width="24" height="18" fill="#8d6e63"/>
+<text x="894" y="240" font-size="14" text-anchor="middle">mg</text>
+<text x="880" y="96" font-size="14" text-anchor="middle">定滑輪（節點）</text>
+</svg>
+<p>刮鬍刀刀頭以頻率 f 帶動線的一端，波沿線傳到滑輪後反射。入射波與反射波疊加成<b>駐波</b>：</p>
+<ul>
+<li>滑輪接觸點幾乎不動，是<b>波節</b>。</li>
+<li>刀頭振幅很小（約 0.5 mm），共振時刀頭端<b>接近</b>波節，但不是真正的波節。</li>
+<li>相鄰兩波節的距離是 <b>λ/2</b>。</li>
+<li>只有弦長接近 λ/2 的整數倍時才會共振出大振幅。所以要<b>微調刮鬍刀位置</b>（或張力）才能看到清楚的駐波。</li>
+</ul>
+<div class="info">量測建議：在線下方鋪 A4 白紙，把看到的波節用鉛筆標在紙上，再用直尺量<b>多個</b>相鄰波節間距，取總長 D ÷ 半波數 N。量多段可以把直尺讀數誤差分攤掉。</div>
+</div>
+
+<div class="card">
+<h2>3. 如何求 f：用迴歸而不是單點</h2>
+<p>把 v = fλ 與 v = √(T/μ) 合併，兩邊平方：</p>
+<div class="eqb">λ² = ( 1 / μf² ) · T</div>
+<p>固定 f 與 μ，改變墊片數（改變 T），量對應的 λ。作 <b>λ²–T 圖</b>，應為<b>通過原點的直線</b>：</p>
+<ul>
+<li>直線且截距約為零，就驗證了 λf = √(T/μ) 的函數形式。</li>
+<li>由斜率 s 求頻率：<span class="eq">f = 1 / √<span class="rad">μ · s</span></span></li>
+</ul>
+<p class="note">每一組 (T, λ) 也可以單點算出 f = √(T/μ)/λ 再取平均。但迴歸能同時檢驗截距，看出系統誤差（例如滑輪摩擦、把刀頭端誤當節點）；單點平均則會把這些誤差悄悄吃進結果。第 ④ 頁會把兩種方法並列比較。</p>
+<details><summary>思考題：刮鬍刀要怎麼夾？</summary>
+<p>刀頭是來回往復振動。夾持時可以讓刀頭振動方向<b>垂直於線</b>（橫向驅動），也可以<b>平行於線</b>（縱向驅動）。兩種夾法在第 ③ 頁都能選。</p>
+<p>請實際比較：在相同張力下，兩種夾法量到的 λ 一樣嗎？如果不一樣，差多少倍？你算出的「刮鬍刀頻率」該採用哪一個？（答案在第 ⑥ 頁揭曉）</p>
+</details>
+</div>
+
+<div class="card">
+<h2>4. 第二部分預備：細繩＋粗繩，接點為波節</h2>
+<p>細繩（μ₁、長 l₁）與粗繩（μ₂、長 l₂）相接，由同一振盪器驅動，<b>f 相同</b>；線上各處<b>張力 T 相同</b>。因此兩段波長不同：</p>
+<div class="eqb">λ₁ = (1/f)√<span class="rad">T/μ₁</span>　　λ₂ = (1/f)√<span class="rad">T/μ₂</span></div>
+<details><summary>推導：n₁、n₂、l₁、l₂、μ₁、μ₂ 的關係（試題第二部分第 1 小題）</summary>
+<p>接點與兩端都是波節，所以每一段都恰好容納整數個半波：</p>
+<div class="eqb">l₁ = n₁ · λ₁/2　　l₂ = n₂ · λ₂/2</div>
+<p>兩式相除，並代入 λ₁/λ₂ = √(μ₂/μ₁)：</p>
+<div class="eqb">n₁ / n₂ = ( l₁ / l₂ ) · √<span class="rad">μ₁ / μ₂</span></div>
+<p>等價寫法：<span class="eq">n₁/(l₁√μ₁) = n₂/(l₂√μ₂) = 2f/√T</span></p>
+<p class="note">粗繩若用同一種縫衣線對折成 k 股製成，μ₂ ≈ k·μ₁，於是 n₁/n₂ ≈ (l₁/l₂)/√k。實際扭股會讓線稍微縮短，μ₂ 會略大於 kμ₁，第 ⑤ 頁需另外秤重確認。</p>
+</details>
+</div>
+</section>
+
+<!-- ================= ② 器材 ================= -->
+<section id="t2" class="tab">
+<div class="card">
+<h2>A. 裝置組裝</h2>
+<svg id="asmSvg" viewBox="0 0 1000 330" aria-label="裝置組裝圖"></svg>
+<div id="checklist"></div>
+<div id="asmMsg"></div>
+</div>
+
+<div class="card">
+<h2>B. 電子天平（實驗室，可讀 0.01 g）</h2>
+<div class="balbox">
+<div>
+<svg id="balSvg" viewBox="0 0 300 210" aria-label="電子天平">
+<rect x="20" y="120" width="260" height="75" rx="10" fill="#dfe3e6" stroke="#8a959c"/>
+<rect x="60" y="100" width="180" height="16" rx="4" fill="#b8c0c6" stroke="#7d878e"/>
+<rect x="138" y="116" width="24" height="6" fill="#9aa4ab"/>
+<rect x="85" y="140" width="130" height="36" rx="4" fill="#1d2b22"/>
+<text id="balTxt" x="205" y="167" font-size="24" fill="#8cff9e" text-anchor="end" font-family="Consolas,monospace">0.00</text>
+<text x="210" y="167" font-size="13" fill="#8cff9e" font-family="Consolas,monospace">g</text>
+<g id="balLoadG"></g>
+</svg>
+<div class="ctl" style="justify-content:center">
+<button class="b" onclick="tare()">歸零 TARE</button>
+<button class="b r" onclick="unload()">取下秤盤上的物品</button>
+</div>
+<div id="balState" class="small note" style="text-align:center"></div>
+</div>
+<div>
+<h3>(1) 縫衣線的線密度 μ</h3>
+<div class="ctl"><label>剪線長度</label>
+<input type="number" id="cutLen" value="1000" min="50" max="2000" step="10" style="width:90px"> cm
+<button class="b" onclick="cutThread()">用 30 cm 直尺量好並剪下</button></div>
+<div id="cutMsg" class="small note"></div>
+<div class="ctl"><button class="b" onclick="loadThread()">把剪下的線放上秤盤</button>
+<button class="b p" onclick="recordBal()">記錄目前讀數</button></div>
+<div class="warn small">縫衣線很輕：1 m 大約只有 0.03 g。天平只能讀到 0.01 g，線太短時相對誤差會很大。你需要剪多長？</div>
+<div class="tw"><table id="muTab"><thead><tr><th>#</th><th>線長 L (cm)</th><th>質量 m (g)</th><th>μ = m/L<br>(×10⁻⁵ kg/m)</th><th>估計相對誤差</th><th></th></tr></thead><tbody></tbody></table></div>
+<div id="muSum" style="margin-top:6px"></div>
+
+<h3>(2) 掛鉤與墊片質量（決定張力）</h3>
+<div class="ctl"><label>秤盤放上</label>
+<select id="massSel"><option value="0">鐵絲掛鉤（0 片墊片）</option>
+<option value="1">掛鉤＋1 片墊片</option><option value="2">掛鉤＋2 片墊片</option><option value="3">掛鉤＋3 片墊片</option><option value="4">掛鉤＋4 片墊片</option><option value="5">掛鉤＋5 片墊片</option><option value="6">掛鉤＋6 片墊片</option></select>
+<button class="b" onclick="loadMass()">放上秤盤</button>
+<button class="b p" onclick="recordBal()">記錄目前讀數</button></div>
+<div class="tw"><table id="massTab"><thead><tr><th>懸掛物</th><th>讀數 m (g)</th><th>T = mg (N)</th></tr></thead><tbody></tbody></table></div>
+<p class="note small">墊片一律依編號順序掛上（第 1 片、第 2 片……），所以「掛鉤＋n 片」就是第 ③ 頁掛 n 片時的懸掛質量。秤過的讀數會自動帶入第 ③ 頁的數據表。</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ================= ③ 量測 ================= -->
+<section id="t3" class="tab">
+<div id="asmWarn"></div>
+<div class="card">
+<h2>第一部分：產生駐波並標記波節</h2>
+<svg id="mainSvg" viewBox="0 0 1000 360" aria-label="實驗裝置側視圖" style="cursor:crosshair">
+<rect x="0" y="0" width="1000" height="360" fill="#f8f6f0"/>
+<line x1="0" y1="350" x2="1000" y2="350" stroke="#b0a890" stroke-width="2"/>
+<rect x="0" y="200" width="906" height="14" fill="#b98b5e" stroke="#8a6440"/>
+<rect x="30" y="214" width="14" height="136" fill="#a57a50"/>
+<rect x="860" y="214" width="14" height="136" fill="#a57a50"/>
+<g id="paperG"></g>
+<rect x="944" y="96" width="8" height="254" fill="#6f7a82"/>
+<rect x="920" y="342" width="56" height="8" fill="#555f66"/>
+<rect x="900" y="176" width="50" height="8" fill="#7d878e"/>
+<circle cx="900" cy="186" r="14" fill="#d6d9dc" stroke="#555" stroke-width="2"/>
+<circle cx="900" cy="186" r="3" fill="#555"/>
+<line id="hangLine" x1="914" y1="186" x2="914" y2="268" stroke="#333" stroke-width="1.4"/>
+<path d="M914 268 q-6 6 0 12 q6 4 6 -4" fill="none" stroke="#777" stroke-width="2"/>
+<g id="washG"></g>
+<g id="shaverG"></g>
+<path id="envFill" fill="rgba(15,110,140,0.16)" stroke="none"/>
+<path id="envUp" fill="none" stroke="#244f60" stroke-width="1.3" stroke-opacity=".75"/>
+<path id="envLo" fill="none" stroke="#244f60" stroke-width="1.3" stroke-opacity=".75"/>
+<path id="strLine" fill="none" stroke="#222" stroke-width="1.2"/>
+<g id="marksG"></g>
+<line id="curLine" x1="0" y1="140" x2="0" y2="200" stroke="#d32f2f" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="12" y="24" font-size="13" fill="#666">側視圖（振幅放大 4 倍示意）；點擊線附近可移動游標</text>
+<text x="900" y="160" font-size="12" text-anchor="middle" fill="#555">滑輪</text>
+</svg>
+<div class="small note" style="margin:6px 0 2px">近看（實際比例，未放大振幅）：線的振動包絡與紙上的鉛筆記號</div>
+<svg id="insetSvg" viewBox="0 0 1000 185" aria-label="放大觀察" style="border:1px solid var(--line);border-radius:8px">
+<rect x="0" y="0" width="1000" height="185" fill="#fbfaf5"/>
+<g id="inBlock"></g>
+<path id="inFill" fill="rgba(15,110,140,0.14)"/>
+<path id="inUp" fill="none" stroke="#244f60" stroke-width="2" stroke-opacity=".6"/>
+<path id="inLo" fill="none" stroke="#244f60" stroke-width="2" stroke-opacity=".6"/>
+<path id="inStr" fill="none" stroke="#222" stroke-width="3.3"/>
+<g id="inMarks"></g>
+<line x1="500" y1="4" x2="500" y2="181" stroke="#d32f2f" stroke-width="1.2"/>
+<text x="10" y="178" font-size="12" fill="#888">左 ← 往刮鬍刀　　　往滑輪 → 右　　（視窗寬約 9 cm）</text>
+</svg>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h2>操作</h2>
+<div class="ctl"><label>電源</label><button id="pwBtn" class="b pw" onclick="togglePower()">OFF（按下啟動）</button>
+<span id="vibState" class="tag">靜止</span></div>
+<div class="ctl"><label>夾持方向</label>
+<select id="oriSel" onchange="setOrient(this.value)">
+<option value="T">刀頭振動 ⊥ 線（橫向驅動）</option>
+<option value="L">刀頭振動 ∥ 線（縱向驅動）</option></select></div>
+<div class="ctl"><label>墊片數</label>
+<select id="wSel" onchange="setWashers(+this.value)">
+<option value="0">0（只有掛鉤）</option><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select>
+<span class="small note">改變條件後，紙上舊記號會清除</span></div>
+<div class="ctl"><label>刮鬍刀位置</label>
+<button class="b" onclick="nudgeL(1)">← 1</button><button class="b" onclick="nudgeL(0.1)">← 0.1</button>
+<input type="range" id="Lr" min="40" max="125" step="0.1" value="100" oninput="setL(+this.value)" style="direction:rtl">
+<button class="b" onclick="nudgeL(-0.1)">0.1 →</button><button class="b" onclick="nudgeL(-1)">1 →</button></div>
+<div class="small note">刀頭到滑輪約 <span id="Lrough">100</span> cm（桌邊粗略刻度，僅供粗調；微調至振幅最大即達共振）</div>
+<div class="ctl"><label>觀察模式</label><label style="font-weight:400;min-width:0"><input type="checkbox" id="strobe" onchange="S.strobe=this.checked"> 頻閃慢動作（示意：看出相鄰兩段反相）</label></div>
+<h3>標記波節</h3>
+<div class="ctl"><label>游標</label>
+<button class="b" onclick="nudgeC(0.5)">← 0.5</button><button class="b" onclick="nudgeC(0.05)">← 0.05</button>
+<input type="range" id="Cr" min="0" max="100" step="0.01" value="50" oninput="setC(+this.value)" style="direction:rtl">
+<button class="b" onclick="nudgeC(-0.05)">0.05 →</button><button class="b" onclick="nudgeC(-0.5)">0.5 →</button></div>
+<div class="ctl"><button class="b p" onclick="addMark()">✏️ 在紙上標記波節</button>
+<button class="b" onclick="undoMark()">復原上一個</button>
+<button class="b r" onclick="clearMarks()">清除全部記號</button></div>
+<div id="markMsg" class="small"></div>
+</div>
+
+<div class="card">
+<h2>用直尺量記號間距</h2>
+<p class="small note">請在連續的波節上作記號（不可跳過）。按下量測後，會用 30 cm 直尺逐段讀出相鄰記號的距離（讀到 0.1 cm）。超過 30 cm 的間距必須分兩段量。</p>
+<button class="b p" onclick="measureGaps()">📏 量相鄰記號間距</button>
+<div id="gapOut" style="margin-top:8px"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>第一部分數據表</h2>
+<p class="small note">m 會自動帶入第 ② 頁秤得的讀數；沒秤過的請回第 ② 頁秤，或自行填入。m、N、D 欄都可以直接修改。</p>
+<div class="tw"><table id="dataTab"><thead><tr><th>#</th><th>夾持方向</th><th>墊片數</th><th>懸掛質量 m (g)</th><th>T = mg (N)</th><th>半波數 N</th><th>總距離 D (cm)</th><th>λ = 2D/N (cm)</th><th></th></tr></thead><tbody></tbody></table></div>
+<div class="ctl" style="margin-top:8px"><button class="b" onclick="exportCSV()">下載 CSV</button>
+<span class="small note">建議：同一種夾持方向下，0～6 片墊片各做至少一組（T 範圍越大，迴歸越可靠）。縱向驅動的數據也請記錄，第 ④ 頁可分開分析。</span></div>
+</div>
+</section>
+
+<!-- ================= ④ 迴歸 ================= -->
+<section id="t4" class="tab">
+<div class="card">
+<h2>λ²–T 迴歸求刮鬍刀頻率 f</h2>
+<p>由 <span class="eq">λ² = (1/μf²)·T</span>，以第 ③ 頁的數據作 λ²–T 圖。斜率 s（換成 SI 單位 m²/N）代入 <span class="eq">f = 1/√<span class="rad">μ·s</span></span>。</p>
+<div class="ctl"><label>分析哪一組</label>
+<select id="o4" onchange="render4()"><option value="T">橫向驅動（刀頭振動 ⊥ 線）</option><option value="L">縱向驅動（刀頭振動 ∥ 線）</option></select></div>
+<div class="ctl"><label>線密度 μ₁</label><span id="mu4src"></span></div>
+<div class="ctl"><label>手動輸入 μ₁</label>
+<input type="number" id="muMan" step="0.001" style="width:96px" oninput="render4()"> ± <input type="number" id="muManErr" step="0.001" style="width:80px" oninput="render4()"> ×10⁻⁵ kg/m
+<span class="small note">只有第 ② 頁還沒秤出 μ 時才會用這個值</span></div>
+</div>
+<div id="out4"></div>
+</section>
+
+<!-- ================= ⑤ 第二部分 ================= -->
+<section id="t5" class="tab">
+<div class="card">
+<h2>A. 製作粗繩並秤出 μ₂</h2>
+<p>取同一捲縫衣線對折成 <b>k 股</b>後扭在一起當粗繩。理想情況下 μ₂ = kμ₁。但扭股時每一股都會繞成螺旋、長度略縮短，所以<b>實際的 μ₂ 會略大於 kμ₁</b>，必須另外秤。</p>
+<div class="ctl"><label>股數 k</label><select id="k5a"><option value="2">2 股</option><option value="3">3 股</option><option value="4" selected>4 股</option></select>
+<label style="min-width:0">粗繩長度</label><input type="number" id="len5" value="300" min="50" max="1500" step="10" style="width:84px"> cm
+<button class="b" onclick="weighThick()">剪下並放上天平</button></div>
+<p class="small note">天平與第 ② 頁是同一台，零點狀態會沿用：第 ② 頁沒有按 TARE 歸零的話，這裡同樣有零點偏移。</p>
+<div class="tw"><table id="mu2Tab"><thead><tr><th>#</th><th>股數 k</th><th>長度 L (cm)</th><th>讀數 m (g)</th><th>μ₂ (×10⁻⁵ kg/m)</th><th></th></tr></thead><tbody></tbody></table></div>
+<div id="mu2Sum" style="margin-top:6px"></div>
+</div>
+
+<div class="card">
+<h2>B. 細繩＋粗繩：調整到接點成為波節</h2>
+<p class="small note">靠刮鬍刀的一段是細繩（長 l₁），靠滑輪的一段是粗繩（長 l₂），接點是一個小結。第二部分固定使用<b>橫向驅動</b>。</p>
+<svg id="p2Svg" viewBox="0 0 1000 360" aria-label="粗細繩駐波側視圖">
+<rect x="0" y="0" width="1000" height="360" fill="#f8f6f0"/>
+<line x1="0" y1="350" x2="1000" y2="350" stroke="#b0a890" stroke-width="2"/>
+<rect x="0" y="200" width="906" height="14" fill="#b98b5e" stroke="#8a6440"/>
+<rect x="30" y="214" width="14" height="136" fill="#a57a50"/>
+<rect x="860" y="214" width="14" height="136" fill="#a57a50"/>
+<rect x="944" y="96" width="8" height="254" fill="#6f7a82"/>
+<rect x="920" y="342" width="56" height="8" fill="#555f66"/>
+<rect x="900" y="176" width="50" height="8" fill="#7d878e"/>
+<circle cx="900" cy="186" r="14" fill="#d6d9dc" stroke="#555" stroke-width="2"/>
+<circle cx="900" cy="186" r="3" fill="#555"/>
+<line x1="914" y1="186" x2="914" y2="268" stroke="#333" stroke-width="2.6"/>
+<path d="M914 268 q-6 6 0 12 q6 4 6 -4" fill="none" stroke="#777" stroke-width="2"/>
+<g id="p2wash"></g>
+<g id="p2shaver"></g>
+<path id="p2f1" fill="rgba(15,110,140,0.16)"/>
+<path id="p2f2" fill="rgba(194,86,43,0.16)"/>
+<path id="p2s1" fill="none" stroke="#222" stroke-width="1.1"/>
+<path id="p2s2" fill="none" stroke="#5a2a14" stroke-width="2.8"/>
+<g id="p2knot"></g>
+<text x="12" y="24" font-size="13" fill="#666">側視圖（振幅放大 4 倍示意）　藍：細繩 μ₁　橙：粗繩 μ₂</text>
+</svg>
+<div class="small note" style="margin:6px 0 2px">近看接點（實際比例）：接點有沒有在動？</div>
+<svg id="p2In" viewBox="0 0 1000 185" style="border:1px solid var(--line);border-radius:8px" aria-label="接點放大">
+<rect x="0" y="0" width="1000" height="185" fill="#fbfaf5"/>
+<path id="p2iF1" fill="rgba(15,110,140,0.14)"/><path id="p2iF2" fill="rgba(194,86,43,0.14)"/>
+<path id="p2iS1" fill="none" stroke="#222" stroke-width="2.4"/><path id="p2iS2" fill="none" stroke="#5a2a14" stroke-width="6"/>
+<circle cx="500" cy="80" r="6" fill="#333"/>
+<text x="500" y="176" font-size="12" text-anchor="middle" fill="#888">接點（視窗寬約 9 cm）</text>
+<text x="10" y="176" font-size="12" fill="#888">← 細繩，往刮鬍刀</text><text x="990" y="176" font-size="12" fill="#888" text-anchor="end">粗繩，往滑輪 →</text>
+</svg>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h2>操作</h2>
+<div class="ctl"><label>電源</label><button id="pw2" class="b pw" onclick="S.p2.on=!S.p2.on;syncPw2()">OFF（按下啟動）</button><span id="vib2" class="tag">靜止</span></div>
+<div class="ctl"><label>粗繩股數 k</label><select id="k5" onchange="S.p2.k=+this.value;S.p2.meas=null;showMeas5()"><option value="2">2 股</option><option value="3">3 股</option><option value="4" selected>4 股</option></select></div>
+<div class="ctl"><label>墊片數</label><select id="w5" onchange="S.p2.nW=+this.value;S.p2.phi=0.003*gauss();renderW5();S.p2.meas=null;showMeas5()">
+<option value="0">0（只有掛鉤）</option><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="ctl"><label>刮鬍刀位置</label>
+<button class="b" onclick="setL5(S.p2.L+1)">← 1</button><button class="b" onclick="setL5(S.p2.L+0.1)">← 0.1</button>
+<input type="range" id="L5" min="40" max="125" step="0.1" value="100" oninput="setL5(+this.value)" style="direction:rtl">
+<button class="b" onclick="setL5(S.p2.L-0.1)">0.1 →</button><button class="b" onclick="setL5(S.p2.L-1)">1 →</button></div>
+<div class="ctl"><label>接點位置</label>
+<button class="b" onclick="setl25(S.p2.l2+1)">← 1</button><button class="b" onclick="setl25(S.p2.l2+0.1)">← 0.1</button>
+<input type="range" id="l25" min="10" max="90" step="0.1" value="40" oninput="setl25(+this.value)" style="direction:rtl">
+<button class="b" onclick="setl25(S.p2.l2-0.1)">0.1 →</button><button class="b" onclick="setl25(S.p2.l2-1)">1 →</button></div>
+<p class="small note">接點位置由整條線從滑輪上拉過來或放過去決定（改變 l₂）。刮鬍刀位置則改變總長 l₁ + l₂。</p>
+<details><summary>找「接點為節點」的策略</summary>
+<p class="small">單一條件 l₁ = n₁λ₁/2 或 l₂ = n₂λ₂/2 成立時，整條線也可能共振，但這時接點還在振動，<b>不符合題目要求</b>。建議做法：</p>
+<ol class="small"><li>先調接點位置，讓粗繩段（接點到滑輪）看起來像是整數個半波。</li>
+<li>再調刮鬍刀位置，找到振幅最大的共振。</li>
+<li>看下方的近看圖：接點若還有明顯振動，就把接點位置改一點，再重調刮鬍刀位置，反覆逼近。</li></ol>
+</details>
+</div>
+
+<div class="card">
+<h2>量測與記錄</h2>
+<button class="b p" onclick="measure5()">📏 用直尺量 l₁、l₂</button>
+<div id="meas5" style="margin:6px 0"></div>
+<div class="ctl"><label>細繩半波數 n₁</label><input type="number" id="n1in" min="1" step="1" style="width:70px">
+<label style="min-width:0">粗繩半波數 n₂</label><input type="number" id="n2in" min="1" step="1" style="width:70px"></div>
+<p class="small note">請從側視圖數出兩段各有幾個「振動區塊」（半波）。</p>
+<button class="b p" onclick="record5()">加入第二部分數據表</button>
+<div id="rec5msg" class="small"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>C. 第二部分數據與驗證</h2>
+<p class="small note">f₁、f₂ 是用每一筆數據回推的刮鬍刀頻率：f₁ = (n₁/2l₁)√(T/μ₁)，f₂ = (n₂/2l₂)√(T/μ₂)。接點真的是節點時，兩者應相等，也應等於第 ④ 頁的 f。</p>
+<div class="tw"><table id="d5Tab"><thead><tr><th>#</th><th>k</th><th>墊片</th><th>l₁ (cm)</th><th>l₂ (cm)</th><th>n₁</th><th>n₂</th><th>l₁/l₂</th><th>n₁/n₂</th><th>f₁ (Hz)</th><th>f₂ (Hz)</th><th></th></tr></thead><tbody></tbody></table></div>
+<div class="ctl" style="margin-top:8px"><label>分析股數</label><select id="a5k" onchange="render5a()"></select></div>
+<div id="out5"></div>
+</div>
+</section>
+
+<!-- ================= ⑥ 真值 ================= -->
+<section id="t6" class="tab">
+<div class="card">
+<h2>你的實驗結論</h2>
+<div id="sum6"></div>
+<div class="ctl" style="margin-top:10px"><button class="b p" onclick="reveal()">🔓 揭曉隱藏真值</button>
+<span class="small note">揭曉後仍可以回頭補做實驗，這一頁會即時更新比較結果。</span></div>
+</div>
+<div id="out6"></div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+const G=9.79, SC=6.5, XP=900, Y0=172, E=4, Z=110, IY=80;
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const r1=x=>Math.round(x*10)/10, r2=x=>Math.round(x*100)/100;
+
+let S;
+function newState(){
+  const w=[];for(let i=0;i<6;i++)w.push(rnd(2.0,2.6));
+  S={truth:{f0:rnd(110,145),mu1:rnd(2.5e-5,3.5e-5),hook:rnd(0.9,1.3),washers:w,tw:rnd(1.005,1.02),a:0.04},
+    on:false,tOn:0,jit:0,ph:0,orient:'T',nW:2,L:100,phi:0.003*gauss(),cursor:50,marks:[],gaps:null,strobe:false,
+    bal:{off:(Math.random()<.5?-1:1)*rnd(0.02,0.05),load:null,shown:0},cut:null,
+    muRows:[],massRec:{},rows:[],check:[false,false,false,false,false,false],
+    p2:{on:false,k:4,nW:2,L:100,l2:40,phi:0.003*gauss(),meas:null},mu2Rows:[],mu2Meas:{},rows2:[],res4:{},res5:{},revealed:false};
+}
+newState();
+function resetAll(){if(!confirm('重新開始會清除所有數據，並重新產生隱藏的刮鬍刀頻率、線密度與墊片質量。確定嗎？'))return;
+  newState();$('oriSel').value='T';$('wSel').value='2';$('Lr').value=100;$('strobe').checked=false;
+  syncPower();renderChecklist();renderMu();renderMassTab();renderData();renderWashers();renderMarks();$('gapOut').innerHTML='';$('cutMsg').textContent='';setL(100);
+  $('k5').value='4';$('w5').value='2';$('n1in').value='';$('n2in').value='';syncPw2();renderW5();setL5(100);setl25(40);renderMu2();render5();render4();render6();}
+
+/* ---------- tabs ---------- */
+let curTab='t1';
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{if(b.disabled)return;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.t));
+  curTab=b.dataset.t;if(curTab==='t3'){renderAsmWarn();renderData();}if(curTab==='t4')render4();if(curTab==='t5'){renderMu2();render5();}if(curTab==='t6')render6();window.scrollTo(0,0);});
+
+/* ---------- ① theory figure ---------- */
+(function(){let s='',up='',lo='';const x0=124,x1=866,n=3,lam2=(x1-x0)/n;
+  for(let x=x0;x<=x1;x+=2){const a=34*Math.abs(Math.sin(Math.PI*(x1-x)/lam2));up+=(x===x0?'M':'L')+x+' '+(124-a);lo+=(x===x0?'M':'L')+x+' '+(124+a);}
+  s+='<path d="'+up+'" fill="none" stroke="#0f6e8c" stroke-width="2"/><path d="'+lo+'" fill="none" stroke="#0f6e8c" stroke-width="2"/>';
+  s+='<line x1="'+x0+'" y1="124" x2="'+x1+'" y2="124" stroke="#333"/>';
+  for(let i=0;i<=n;i++){const x=x1-i*lam2;s+='<circle cx="'+x+'" cy="124" r="4" fill="#c2562b"/>'+(i<n?'<text x="'+x+'" y="178" font-size="13" text-anchor="middle" fill="#c2562b">節點</text>':'');}
+  const xa=x1-lam2,xb=x1;s+='<line x1="'+xa+'" y1="200" x2="'+xb+'" y2="200" stroke="#333" marker-end="url(#ar)" marker-start="url(#ar)"/><text x="'+(xa+xb)/2+'" y="220" font-size="15" text-anchor="middle">λ/2</text>';
+  s='<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#333"/></marker></defs>'+s;
+  s+='<text x="'+(x0+10)+'" y="178" font-size="12" fill="#666">刀頭端≈節點</text>';
+  $('thWave').innerHTML=s;})();
+
+/* ---------- ② assembly ---------- */
+const STEPS=['用 C 型夾把刮鬍刀固定在桌面，刮鬍刀與夾子間墊泡綿膠帶，減少機身振動傳到桌面。',
+ '用鐵架與鐵夾把定滑輪固定在桌緣外側，使滑輪頂端與刀頭等高，線才會水平。',
+ '縫衣線一端用透明膠帶牢牢黏在刀頭（活動刀片）上。',
+ '線跨過定滑輪，下端綁上用鐵絲彎成的掛鉤。',
+ '刮鬍刀裝入兩顆三號乾電池；墊片依編號順序掛在掛鉤上。',
+ '在線正下方的桌面用透明膠帶貼一排 A4 白紙，方便以鉛筆標記波節位置。'];
+function renderChecklist(){let h='';STEPS.forEach((t,i)=>{h+='<div class="chk"><span class="num'+(S.check[i]?' done':'')+'">'+(i+1)+'</span><input type="checkbox" '+(S.check[i]?'checked':'')+' onchange="S.check['+i+']=this.checked;renderChecklist();"><div>'+t+'</div></div>';});
+  $('checklist').innerHTML=h;const all=S.check.every(x=>x);
+  $('asmMsg').innerHTML=all?'<div class="ok">組裝完成，可以到第 ③ 頁開始量測。</div>':'';drawAsm();}
+function drawAsm(){const c=i=>S.check[i]?'#2f7d32':'#c2562b';let s='<rect width="1000" height="330" fill="#f8f6f0"/>';
+  s+='<rect x="0" y="200" width="880" height="14" fill="#b98b5e"/><rect x="40" y="214" width="12" height="110" fill="#a57a50"/><rect x="830" y="214" width="12" height="110" fill="#a57a50"/>';
+  for(let i=0;i<4;i++)s+='<rect x="'+(240+i*152)+'" y="197" width="150" height="3" fill="#fff" stroke="#ccc"/>';
+  s+='<rect x="100" y="160" width="80" height="26" rx="8" fill="#56636d"/><rect x="178" y="164" width="14" height="18" fill="#9aa5ad"/>';
+  s+='<path d="M120 186 v18 M120 150 v10 M112 150 h40 M112 214 h40 M150 150 v64" stroke="#3b5b8a" stroke-width="5" fill="none"/>';
+  s+='<rect x="100" y="186" width="80" height="4" fill="#f2c94c"/>';
+  s+='<line x1="192" y1="172" x2="880" y2="172" stroke="#222" stroke-width="1.3"/><rect x="186" y="168" width="10" height="8" fill="rgba(180,220,255,.8)" stroke="#6aa"/>';
+  s+='<rect x="924" y="70" width="8" height="250" fill="#6f7a82"/><rect x="900" y="316" width="56" height="8" fill="#555f66"/><rect x="880" y="176" width="50" height="8" fill="#7d878e"/>';
+  s+='<circle cx="880" cy="186" r="14" fill="#d6d9dc" stroke="#555" stroke-width="2"/><line x1="894" y1="186" x2="894" y2="258" stroke="#222"/>';
+  s+='<path d="M894 258 q-6 6 0 12 q6 4 6 -4" fill="none" stroke="#777" stroke-width="2"/>';
+  for(let i=0;i<3;i++)s+='<ellipse cx="894" cy="'+(276+i*6)+'" rx="12" ry="3.5" fill="#9ea7ad" stroke="#555"/>';
+  const lab=[[140,138,'1'],[905,140,'2'],[190,150,'3'],[918,262,'4'],[870,292,'5'],[400,232,'6']];
+  lab.forEach((p,i)=>{s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="12" fill="'+c(i)+'"/><text x="'+p[0]+'" y="'+(p[1]+5)+'" font-size="14" fill="#fff" text-anchor="middle" font-weight="700">'+p[2]+'</text>';});
+  s+='<text x="140" y="245" font-size="12" text-anchor="middle" fill="#666">C 型夾＋泡綿膠帶</text><text x="400" y="190" font-size="12" text-anchor="middle" fill="#666">A4 白紙</text>';
+  $('asmSvg').innerHTML=s;}
+function renderAsmWarn(){$('asmWarn').innerHTML=S.check.every(x=>x)?'':'<div class="warn">第 ② 頁的組裝步驟尚未全部完成。你仍可以操作，但建議先逐項確認裝置。</div>';}
+
+/* ---------- ② balance ---------- */
+function balTrue(){return S.bal.load?S.bal.load.m:0;}
+function balRead(){return r2(balTrue()+S.bal.off+0.004*gauss());}
+setInterval(()=>{S.bal.shown=balRead();$('balTxt').textContent=S.bal.shown.toFixed(2);},650);
+function drawBalLoad(){const L=S.bal.load;let s='';
+  if(L){if(L.kind==='thread')s='<ellipse cx="150" cy="96" rx="34" ry="6" fill="none" stroke="#6b4c9a" stroke-width="1.2"/><ellipse cx="146" cy="94" rx="24" ry="4" fill="none" stroke="#6b4c9a"/><ellipse cx="156" cy="97" rx="28" ry="5" fill="none" stroke="#6b4c9a"/>';
+   else{s='<path d="M130 96 q-6 -8 4 -10 h30" fill="none" stroke="#777" stroke-width="2"/>';for(let i=0;i<L.n;i++)s+='<ellipse cx="160" cy="'+(96-i*5)+'" rx="14" ry="4" fill="#9ea7ad" stroke="#555"/>';}}
+  $('balLoadG').innerHTML=s;
+  $('balState').textContent=L?('秤盤上：'+L.label):'秤盤上：（空）';}
+function tare(){S.bal.off=-balTrue()+0.002*gauss();
+  $('balState').textContent=(S.bal.load?'⚠ 已在「秤盤上有東西」時歸零！':'已歸零。')+(S.bal.load?'　秤盤上：'+S.bal.load.label:'');}
+function unload(){S.bal.load=null;drawBalLoad();}
+function cutThread(){let X=+$('cutLen').value;if(!(X>=50&&X<=2000)){alert('請輸入 50～2000 cm');return;}
+  const n=Math.ceil(X/30);const tru=X+0.05*Math.sqrt(n)*gauss();
+  S.cut={nom:X,tru:tru,n:n,m:S.truth.mu1*tru*10};
+  $('cutMsg').textContent='已用直尺分 '+n+' 段量出 '+X+' cm 並剪下（每次接續定位都會累積約 ±0.5 mm 的誤差）。';}
+function loadThread(){if(!S.cut){alert('請先剪下一段線。');return;}
+  S.bal.load={kind:'thread',m:S.cut.m,label:'縫衣線 '+S.cut.nom+' cm（捲成一團）',nom:S.cut.nom,n:S.cut.n};drawBalLoad();}
+function loadMass(){const n=+$('massSel').value;const t=S.truth;const m=t.hook+t.washers.slice(0,n).reduce((a,b)=>a+b,0);
+  S.bal.load={kind:'mass',n:n,m:m,label:n?('掛鉤＋'+n+' 片墊片'):'鐵絲掛鉤'};drawBalLoad();}
+function recordBal(){const L=S.bal.load;if(!L){alert('秤盤上沒有東西。');return;}
+  const v=balRead();S.bal.shown=v;$('balTxt').textContent=v.toFixed(2);
+  if(L.kind==='thread'){S.muRows.push({L:L.nom,m:v,n:L.n});renderMu();}
+  else{S.massRec[L.n]=v;renderMassTab();}}
+function renderMu(){const tb=$('muTab').querySelector('tbody');let h='';
+  S.muRows.forEach((r,i)=>{const mu=r.m/r.L*0.1;const rel=Math.sqrt((0.01/Math.max(r.m,1e-9))**2+(0.05*Math.sqrt(r.n)/r.L)**2);
+   h+='<tr><td>'+(i+1)+'</td><td>'+r.L.toFixed(1)+'</td><td>'+r.m.toFixed(2)+'</td><td>'+(r.m>0?(mu*1e5).toFixed(3):'—')+'</td><td>'+(r.m>0?(rel*100).toFixed(1)+' %':'—')+'</td><td><button class="b r small" onclick="S.muRows.splice('+i+',1);renderMu()">刪</button></td></tr>';});
+  tb.innerHTML=h||'<tr><td colspan="6" class="note">尚無數據</td></tr>';
+  const ok=S.muRows.filter(r=>r.m>0);
+  if(ok.length){const sm=ok.reduce((a,r)=>a+r.m,0),sL=ok.reduce((a,r)=>a+r.L,0);const mu=sm/sL*0.1;
+    const dm=0.01*Math.sqrt(ok.length);const rel=Math.sqrt((dm/sm)**2+(0.05*Math.sqrt(ok.reduce((a,r)=>a+r.n,0))/sL)**2);
+    S.muMeas={mu:mu,dmu:mu*rel};
+    $('muSum').innerHTML='<div class="info">合併計算 μ̄ = Σm / ΣL = <span class="stat">('+(mu*1e5).toFixed(3)+' ± '+(mu*rel*1e5).toFixed(3)+') ×10⁻⁵ kg/m</span>（相對誤差 '+(rel*100).toFixed(1)+' %）<br><span class="small note">把所有秤過的線合起來算，比逐筆平均更能降低天平 0.01 g 解析度的影響。此值將用於第 ④ 頁。</span></div>';}
+  else{S.muMeas=null;$('muSum').innerHTML='';}}
+function renderMassTab(){let h='';for(let n=0;n<=6;n++){const v=S.massRec[n];h+='<tr><td>'+(n?'掛鉤＋'+n+' 片':'掛鉤')+'</td><td>'+(v!==undefined?v.toFixed(2):'<span class="note">未秤</span>')+'</td><td>'+(v!==undefined?(v*G/1000).toFixed(4):'—')+'</td></tr>';}
+  $('massTab').querySelector('tbody').innerHTML=h;}
+
+/* ---------- ③ physics ---------- */
+function phys(){const t=S.truth;
+  const f=curF();
+  const m=t.hook+t.washers.slice(0,S.nW).reduce((a,b)=>a+b,0);
+  const T=m*1e-3*G*(1+S.phi);const v=Math.sqrt(T/t.mu1);
+  const fs=S.orient==='T'?f:f/2;const lam=v/fs*100;const k=2*Math.PI/lam;
+  const s=Math.abs(Math.sin(k*S.L));let A=0;
+  if(S.on){if(S.orient==='T')A=t.a/Math.sqrt(s*s+0.06*0.06);else{const e=0.15;A=s<e?0.6*Math.sqrt(1-(s/e)**2):0.004;}}
+  return{f,fs,m,T,v,lam,k,A,s};}
+
+/* ---------- ③ controls ---------- */
+function togglePower(){S.on=!S.on;syncPower();}
+function syncPower(){const b=$('pwBtn');b.classList.toggle('on',S.on);b.textContent=S.on?'ON（按下關閉）':'OFF（按下啟動）';}
+function setOrient(v){S.orient=v;clearMarks(true);}
+function setWashers(n){S.nW=n;S.phi=0.003*gauss();renderWashers();clearMarks(true);}
+function setL(v){S.L=Math.max(40,Math.min(125,v));$('Lr').value=S.L;$('Lrough').textContent=Math.round(S.L);
+  $('Cr').max=S.L.toFixed(2);if(S.cursor>S.L)setC(S.L);}
+function nudgeL(d){setL(Math.round((S.L+d)*10)/10);}
+function setC(v){S.cursor=Math.max(0,Math.min(S.L,v));$('Cr').value=S.cursor;}
+function nudgeC(d){setC(S.cursor+d);}
+$('mainSvg').addEventListener('click',ev=>{const sv=$('mainSvg');const pt=sv.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;
+  const p=pt.matrixTransform(sv.getScreenCTM().inverse());if(p.y<120||p.y>215)return;setC((XP-p.x)/SC);});
+function renderWashers(){let s='';for(let i=0;i<S.nW;i++)s+='<ellipse cx="914" cy="'+(286+i*6)+'" rx="12" ry="3.5" fill="#9ea7ad" stroke="#555"/>';$('washG').innerHTML=s;}
+function addMark(){const P=phys();const msg=$('markMsg');
+  if(!S.on||P.A<0.05){msg.innerHTML='<span style="color:#a55f00">線幾乎沒有振動，看不出波節在哪裡。先讓線形成明顯的駐波。</span>';}
+  const d=Math.max(0,Math.min(S.L,S.cursor+0.03*gauss()));
+  if(S.marks.some(x=>Math.abs(x-d)<0.3)){msg.innerHTML='<span style="color:#a55f00">這裡已經有記號了。</span>';return;}
+  S.marks.push(d);S.gaps=null;$('gapOut').innerHTML='';renderMarks();
+  if(S.on&&P.A>=0.05)msg.textContent='已標記，紙上共 '+S.marks.length+' 個記號。';}
+function undoMark(){S.marks.pop();S.gaps=null;$('gapOut').innerHTML='';renderMarks();}
+function clearMarks(auto){S.marks=[];S.gaps=null;$('gapOut').innerHTML='';renderMarks();
+  $('markMsg').textContent=auto===true?'條件已改變，已換上新的白紙（舊記號清除）。':'';}
+function renderMarks(){let s='';S.marks.forEach(d=>{const x=XP-d*SC;s+='<line x1="'+x+'" y1="191" x2="'+x+'" y2="199" stroke="#555" stroke-width="1.6"/>';});$('marksG').innerHTML=s;}
+
+function measureGaps(){const ms=[...S.marks].sort((a,b)=>a-b);const out=$('gapOut');
+  if(ms.length<2){out.innerHTML='<div class="warn">至少需要 2 個記號。</div>';return;}
+  const gaps=[];for(let i=0;i<ms.length-1;i++){const g=ms[i+1]-ms[i];const two=g>29.5;gaps.push({r:r1(g+gauss()*(two?0.06:0.04)),two:two});}
+  S.gaps=gaps;renderGaps();}
+function renderGaps(){const g=S.gaps,out=$('gapOut');if(!g){out.innerHTML='';return;}
+  let h='<div class="tw"><table><tr><th>段</th>'+g.map((x,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr><tr><td>間距 (cm)</td>'+g.map(x=>'<td>'+x.r.toFixed(1)+(x.two?'<br><span class="small note">分兩段量</span>':'')+'</td>').join('')+'</tr></table></div>';
+  const N=g.length,D=r1(g.reduce((a,x)=>a+x.r,0)),lam=2*D/N;
+  const med=[...g.map(x=>x.r)].sort((a,b)=>a-b)[Math.floor(N/2)];
+  let w='';if(g.some(x=>Math.abs(x.r-med)>0.2*med))w+='<div class="warn">各段間距不一致：可能漏標或多標了某個波節，也可能把刀頭端當成波節。請檢查後再記錄。</div>';
+  const ms=[...S.marks].sort((a,b)=>a-b);if(S.L-ms[ms.length-1]<1.2)w+='<div class="warn">最靠近刮鬍刀的記號幾乎就在刀頭上。刀頭本身有振動，並不是真正的波節，這一段的長度可能偏差。</div>';
+  h+='<p>半波數 N = <b>'+N+'</b>，總距離 D = <b>'+D.toFixed(1)+' cm</b>，λ = 2D/N = <b>'+lam.toFixed(2)+' cm</b></p>'+w;
+  h+='<button class="b p" onclick="addRow()">加入數據表</button> <button class="b r" onclick="clearMarks()">換一張新紙（清除記號）</button>';
+  out.innerHTML=h;}
+function addRow(){const g=S.gaps;if(!g)return;const P=phys();const N=g.length,D=r1(g.reduce((a,x)=>a+x.r,0));
+  const mrec=S.massRec[S.nW];
+  S.rows.push({orient:S.orient,nW:S.nW,m:mrec!==undefined?mrec:null,N:N,D:D,hid:{f:P.f,fs:P.fs,T:P.T,lam:P.lam,m:P.m}});
+  renderData();$('gapOut').innerHTML+='<div class="ok">已加入第 '+S.rows.length+' 筆。'+(mrec===undefined?'（注意：掛鉤＋'+S.nW+' 片尚未秤重，m 欄空白）':'')+'</div>';}
+function renderData(){const tb=$('dataTab').querySelector('tbody');let h='';
+  S.rows.forEach((r,i)=>{const T=r.m!=null?r.m*G/1000:null;const lam=(r.N>0&&r.D>0)?2*r.D/r.N:null;
+   h+='<tr><td>'+(i+1)+'</td><td>'+(r.orient==='T'?'橫向':'縱向')+'</td><td>'+r.nW+'</td>'+
+   '<td><input class="cell" value="'+(r.m!=null?r.m.toFixed(2):'')+'" onchange="editRow('+i+',\'m\',this.value)"></td>'+
+   '<td>'+(T!=null?T.toFixed(4):'—')+'</td>'+
+   '<td><input class="cell" style="width:56px" value="'+r.N+'" onchange="editRow('+i+',\'N\',this.value)"></td>'+
+   '<td><input class="cell" value="'+r.D.toFixed(1)+'" onchange="editRow('+i+',\'D\',this.value)"></td>'+
+   '<td>'+(lam!=null?lam.toFixed(2):'—')+'</td><td><button class="b r small" onclick="S.rows.splice('+i+',1);renderData()">刪</button></td></tr>';});
+  tb.innerHTML=h||'<tr><td colspan="9" class="note">尚無數據</td></tr>';}
+function editRow(i,k,v){const x=parseFloat(v);if(k==='m')S.rows[i].m=isNaN(x)?null:x;else if(k==='N')S.rows[i].N=isNaN(x)?0:Math.round(x);else S.rows[i].D=isNaN(x)?0:x;renderData();}
+function exportCSV(){let c='#,夾持方向,墊片數,m(g),T(N),N,D(cm),lambda(cm)\n';
+  S.rows.forEach((r,i)=>{const T=r.m!=null?(r.m*G/1000).toFixed(5):'';const lam=r.N>0?(2*r.D/r.N).toFixed(3):'';c+=[i+1,r.orient==='T'?'橫向':'縱向',r.nW,r.m!=null?r.m:'',T,r.N,r.D,lam].join(',')+'\n';});
+  const b=new Blob(['\ufeff'+c],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='繩波駐波_第一部分數據.csv';a.click();}
+
+/* ---------- ③ rendering ---------- */
+function shaverSVG(Lx,on,orient,t){const xs=XP-Lx*SC;const jig=on?(Math.sin(t*90)*0.9):0;
+  const dx=orient==='L'?jig:0,dy=orient==='T'?jig:0;
+  let s='<rect x="'+(xs-92)+'" y="158" width="78" height="28" rx="9" fill="#56636d"/>';
+  s+='<rect x="'+(xs-60)+'" y="164" width="18" height="6" rx="2" fill="'+(on?'#7CFC00':'#333')+'"/>';
+  s+='<rect x="'+(xs-15+dx)+'" y="'+(162+dy)+'" width="15" height="20" fill="#9aa5ad" stroke="#666"/>';
+  s+='<rect x="'+(xs-5+dx)+'" y="'+(168+dy)+'" width="8" height="8" fill="rgba(180,220,255,.8)" stroke="#6aa"/>';
+  s+='<path d="M'+(xs-70)+' 186 v16 M'+(xs-80)+' 150 h36 M'+(xs-80)+' 216 h36 M'+(xs-46)+' 150 v66 M'+(xs-70)+' 150 v8" stroke="#3b5b8a" stroke-width="5" fill="none"/>';
+  s+='<rect x="'+(xs-92)+'" y="186" width="78" height="4" fill="#f2c94c"/>';
+  if(orient==='T')s+='<path d="M'+(xs-8)+' 140 v-14 m-5 5 l5 -5 l5 5 M'+(xs-8)+' 140 v14 m-5 -5 l5 5 l5 -5" stroke="#c2562b" stroke-width="1.6" fill="none" transform="translate(0,-4)"/>';
+  else s+='<path d="M'+(xs-24)+' 132 h32 m-5 -5 l5 5 l-5 5 M'+(xs-24)+' 132 m5 -5 l-5 5 l5 5" stroke="#c2562b" stroke-width="1.6" fill="none"/>';
+  return s;}
+function drawShaver(P,t){$('shaverG').innerHTML=shaverSVG(S.L,S.on,S.orient,t);}
+function renderMain(P,t){drawShaver(P,t);
+  const L=S.L,Ad=P.A*(1+0.02*gauss());const amp=E*SC;let up='',lo='',st='';const step=2/SC;
+  for(let d=0;d<=L+1e-9;d+=step){const x=(XP-d*SC).toFixed(1);const sn=Math.sin(P.k*d);const a=Ad*Math.abs(sn)*amp;
+    up+=(d===0?'M':'L')+x+' '+(Y0-a).toFixed(2);lo+=(d===0?'M':'L')+x+' '+(Y0+a).toFixed(2);
+    st+=(d===0?'M':'L')+x+' '+(Y0-(S.strobe?Ad*sn*amp*Math.cos(S.ph):0)).toFixed(2);}
+  const xe=(XP-L*SC).toFixed(1);up+='L'+xe+' '+Y0;lo+='L'+xe+' '+Y0;st+='L'+xe+' '+Y0;
+  const visible=S.on&&!S.strobe;
+  $('envUp').setAttribute('d',visible?up:'');$('envLo').setAttribute('d',visible?lo:'');
+  let ef='';if(visible){const pu=up.slice(1).split('L'),pl=lo.slice(1).split('L').reverse();ef='M'+pu.join('L')+'L'+pl.join('L')+'Z';}
+  $('envFill').setAttribute('d',ef);
+  $('strLine').setAttribute('d',(!S.on||S.strobe)?st:'M'+XP+' '+Y0+'L'+xe+' '+Y0);
+  $('strLine').setAttribute('stroke-opacity',visible?0.35:1);
+  $('curLine').setAttribute('x1',XP-S.cursor*SC);$('curLine').setAttribute('x2',XP-S.cursor*SC);
+  const v=$('vibState');const lvl=!S.on?'靜止':(P.A<0.06?'只有微小抖動':(P.A<0.25?'振動明顯但不大':'大振幅、穩定駐波'));v.textContent=lvl;}
+function renderInset(P){const c=S.cursor,L=S.L;const d0=Math.max(0,c-4.6),d1=Math.min(L,c+4.6);
+  const xi=d=>500-(d-c)*Z;const Ad=P.A*(1+0.02*gauss());let up='',lo='',st='';const step=0.02;let first=true;
+  for(let d=d0;d<=d1+1e-9;d+=step){const x=xi(d).toFixed(1);const sn=Math.sin(P.k*d);const a=Ad*Math.abs(sn)*Z;
+    const cmd=first?'M':'L';first=false;up+=cmd+x+' '+(IY-a).toFixed(2);lo+=cmd+x+' '+(IY+a).toFixed(2);
+    st+=cmd+x+' '+(IY-(S.strobe?Ad*sn*Z*Math.cos(S.ph):0)).toFixed(2);}
+  const visible=S.on&&!S.strobe;
+  $('inUp').setAttribute('d',visible?up:'');$('inLo').setAttribute('d',visible?lo:'');
+  let fill='';if(visible){const pu=up.slice(1).split('L'),pl=lo.slice(1).split('L').reverse();fill='M'+pu.join('L')+'L'+pl.join('L')+'Z';}
+  $('inFill').setAttribute('d',fill);
+  $('inStr').setAttribute('d',visible?('M'+xi(d0).toFixed(1)+' '+IY+'L'+xi(d1).toFixed(1)+' '+IY):st);
+  $('inStr').setAttribute('stroke-opacity',visible?0.3:1);
+  let b='';if(c-4.6<0){const x=xi(0);b+='<rect x="'+x+'" y="0" width="'+(1000-x)+'" height="185" fill="#d6d9dc"/><text x="'+(x+10)+'" y="30" font-size="13" fill="#555">滑輪</text>';}
+  if(c+4.6>L){const x=xi(L);b+='<rect x="0" y="0" width="'+x+'" height="185" fill="#9aa5ad"/><text x="'+(x-10)+'" y="30" font-size="13" fill="#333" text-anchor="end">刀頭</text>';}
+  $('inBlock').innerHTML=b;
+  let m='';S.marks.forEach(d=>{if(d>=c-4.8&&d<=c+4.8){const x=xi(d);m+='<line x1="'+x+'" y1="150" x2="'+x+'" y2="168" stroke="#666" stroke-width="2.4"/>';}});$('inMarks').innerHTML=m;}
+
+/* ---------- regression & plotting helpers ---------- */
+function linfit(x,y){const n=x.length;const mx=x.reduce((a,b)=>a+b,0)/n,my=y.reduce((a,b)=>a+b,0)/n;
+  let sxx=0,sxy=0,syy=0;for(let i=0;i<n;i++){sxx+=(x[i]-mx)**2;sxy+=(x[i]-mx)*(y[i]-my);syy+=(y[i]-my)**2;}
+  const s=sxy/sxx,b=my-s*mx;let sse=0;for(let i=0;i<n;i++)sse+=(y[i]-s*x[i]-b)**2;
+  const se=n>2?Math.sqrt(sse/(n-2)):NaN;return{s,b,ss:se/Math.sqrt(sxx),sb:se*Math.sqrt(1/n+mx*mx/sxx),r2:syy>0?1-sse/syy:1,n};}
+function fit0(x,y){const n=x.length;let sxx=0,sxy=0;for(let i=0;i<n;i++){sxx+=x[i]*x[i];sxy+=x[i]*y[i];}
+  const s=sxy/sxx;let sse=0;for(let i=0;i<n;i++)sse+=(y[i]-s*x[i])**2;return{s,ss:n>1?Math.sqrt(sse/(n-1)/sxx):NaN,n};}
+function ticks(lo,hi){const raw=(hi-lo)/5;const p=10**Math.floor(Math.log10(raw));const m=raw/p;const st=(m<1.5?1:m<3.5?2:m<7.5?5:10)*p;
+  const t=[];for(let v=Math.ceil(lo/st-1e-9)*st;v<=hi+1e-9*st;v+=st)t.push(+v.toPrecision(10));return{t,st};}
+function ftk(v,st){return v.toFixed(Math.max(0,-Math.floor(Math.log10(st)+1e-9)));}
+function plotSVG(o){const W=660,H=410,ml=76,mr=20,mt=16,mb=58;
+  const X=v=>ml+(v-o.x0)/(o.x1-o.x0)*(W-ml-mr),Y=v=>H-mb-(v-o.y0)/(o.y1-o.y0)*(H-mt-mb);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" style="max-width:720px;margin:auto"><defs><clipPath id="'+o.id+'"><rect x="'+ml+'" y="'+mt+'" width="'+(W-ml-mr)+'" height="'+(H-mt-mb)+'"/></clipPath></defs>';
+  s+='<rect width="'+W+'" height="'+H+'" fill="#fff"/>';
+  const tx=ticks(o.x0,o.x1),ty=ticks(o.y0,o.y1);
+  tx.t.forEach(v=>{s+='<line x1="'+X(v)+'" y1="'+mt+'" x2="'+X(v)+'" y2="'+(H-mb)+'" stroke="#eee"/><text x="'+X(v)+'" y="'+(H-mb+18)+'" font-size="12" text-anchor="middle" fill="#555">'+ftk(v,tx.st)+'</text>';});
+  ty.t.forEach(v=>{s+='<line x1="'+ml+'" y1="'+Y(v)+'" x2="'+(W-mr)+'" y2="'+Y(v)+'" stroke="#eee"/><text x="'+(ml-6)+'" y="'+(Y(v)+4)+'" font-size="12" text-anchor="end" fill="#555">'+ftk(v,ty.st)+'</text>';});
+  if(o.x0<0&&o.x1>0)s+='<line x1="'+X(0)+'" y1="'+mt+'" x2="'+X(0)+'" y2="'+(H-mb)+'" stroke="#999"/>';
+  if(o.y0<0&&o.y1>0)s+='<line x1="'+ml+'" y1="'+Y(0)+'" x2="'+(W-mr)+'" y2="'+Y(0)+'" stroke="#999"/>';
+  s+='<rect x="'+ml+'" y="'+mt+'" width="'+(W-ml-mr)+'" height="'+(H-mt-mb)+'" fill="none" stroke="#888"/>';
+  s+='<text x="'+((ml+W-mr)/2)+'" y="'+(H-14)+'" font-size="14" text-anchor="middle">'+o.xl+'</text>';
+  s+='<text transform="translate(18,'+((mt+H-mb)/2)+') rotate(-90)" font-size="14" text-anchor="middle">'+o.yl+'</text>';
+  s+='<g clip-path="url(#'+o.id+')">';
+  (o.lines||[]).forEach(l=>{s+='<line x1="'+X(o.x0)+'" y1="'+Y(l.a*o.x0+l.b)+'" x2="'+X(o.x1)+'" y2="'+Y(l.a*o.x1+l.b)+'" stroke="'+l.c+'" stroke-width="2" '+(l.dash?'stroke-dasharray="'+l.dash+'"':'')+'/>';});
+  (o.pts||[]).forEach(p=>{s+='<circle cx="'+X(p.x)+'" cy="'+Y(p.y)+'" r="5" fill="'+(p.c||'#0f6e8c')+'" stroke="#fff" stroke-width="1.2"/>';});
+  s+='</g>';
+  let ly=mt+16;(o.lines||[]).forEach(l=>{if(!l.label)return;s+='<line x1="'+(ml+12)+'" y1="'+(ly-4)+'" x2="'+(ml+40)+'" y2="'+(ly-4)+'" stroke="'+l.c+'" stroke-width="2" '+(l.dash?'stroke-dasharray="'+l.dash+'"':'')+'/><text x="'+(ml+46)+'" y="'+ly+'" font-size="12.5">'+l.label+'</text>';ly+=18;});
+  return s+'</svg>';}
+const f3=(x,d)=>isFinite(x)?x.toFixed(d):'—';
+function zTag(z){const a=Math.abs(z);if(!isFinite(a))return'—';
+  const c=a<1?'#2f7d32':a<2?'#0f6e8c':a<3?'#a55f00':'#c62828';const t=a<1?'在 1σ 內':a<2?'在 2σ 內':a<3?'偏大':'顯著偏差（有系統誤差）';
+  return '<span style="color:'+c+';font-weight:700">'+z.toFixed(2)+'σ</span> <span class="small" style="color:'+c+'">'+t+'</span>';}
+function getMu1(){if(S.muMeas)return{mu:S.muMeas.mu,dmu:S.muMeas.dmu,src:'第 ② 頁秤得'};
+  const v=parseFloat($('muMan').value),e=parseFloat($('muManErr').value);
+  if(v>0)return{mu:v*1e-5,dmu:(e>0?e:0)*1e-5,src:'手動輸入'};return null;}
+
+/* ---------- ④ λ²–T regression ---------- */
+function render4(){const o=$('o4').value;const mu=getMu1();const out=$('out4');
+  $('mu4src').innerHTML=mu?('<b>('+(mu.mu*1e5).toFixed(3)+' ± '+(mu.dmu*1e5).toFixed(3)+') ×10⁻⁵ kg/m</b>（'+mu.src+'）'):'<span style="color:#a55f00">尚未取得：請回第 ② 頁秤縫衣線，或在下方手動輸入</span>';
+  const rows=S.rows.filter(r=>r.orient===o&&r.m!=null&&r.N>0&&r.D>0);
+  const name=o==='T'?'橫向':'縱向';
+  if(rows.length<3){out.innerHTML='<div class="card"><div class="warn">'+name+'驅動的有效數據只有 '+rows.length+' 筆（m、N、D 都要有值）。至少要 3 筆才能作迴歸；最好有 5 筆以上，而且涵蓋不同的墊片數。</div></div>';S.res4[o]=null;return;}
+  const T=rows.map(r=>r.m*G/1000),lam=rows.map(r=>2*r.D/r.N),L2=lam.map(l=>l*l);
+  const F=linfit(T,L2),F0=fit0(T,L2),LL=linfit(T.map(Math.log),lam.map(Math.log));
+  let h='<div class="card"><h2>數據整理（'+name+'驅動）</h2><div class="tw"><table><tr><th>#</th><th>墊片</th><th>T (N)</th><th>λ (cm)</th><th>λ² (cm²)</th><th>單點 f = √(T/μ)/λ (Hz)</th></tr>';
+  const fi=[];rows.forEach((r,i)=>{const f=mu?Math.sqrt(T[i]/mu.mu)/(lam[i]/100):NaN;fi.push(f);
+    h+='<tr><td>'+(S.rows.indexOf(r)+1)+'</td><td>'+r.nW+'</td><td>'+T[i].toFixed(4)+'</td><td>'+lam[i].toFixed(2)+'</td><td>'+L2[i].toFixed(1)+'</td><td>'+f3(f,1)+'</td></tr>';});
+  h+='</table></div></div>';
+  const xm=Math.max(...T)*1.12,ymx=Math.max(...L2)*1.12,ymn=Math.min(0,F.b*1.3);
+  h+='<div class="card"><h2>λ²–T 圖</h2>'+plotSVG({id:'pl4',x0:0,x1:xm,y0:ymn,y1:ymx,xl:'張力 T (N)',yl:'λ² (cm²)',
+    pts:T.map((x,i)=>({x,y:L2[i]})),lines:[{a:F.s,b:F.b,c:'#c2562b',label:'最小平方直線（含截距）'},{a:F0.s,b:0,c:'#0f6e8c',dash:'6 4',label:'過原點直線'}]});
+  const zb=F.b/F.sb;
+  h+='<h3>迴歸結果</h3><table><tr><th>項目</th><th>含截距 y = sT + b</th><th>過原點 y = sT</th></tr>'+
+   '<tr><td>斜率 s (cm²/N)</td><td>'+F.s.toFixed(1)+' ± '+F.ss.toFixed(1)+'</td><td>'+F0.s.toFixed(1)+' ± '+F0.ss.toFixed(1)+'</td></tr>'+
+   '<tr><td>截距 b (cm²)</td><td>'+F.b.toFixed(1)+' ± '+F.sb.toFixed(1)+'</td><td>0（強制）</td></tr>'+
+   '<tr><td>R²</td><td>'+F.r2.toFixed(5)+'</td><td>—</td></tr></table>';
+  h+=Math.abs(zb)<2?'<div class="ok">截距 b 與 0 相差 '+Math.abs(zb).toFixed(1)+'σ，在誤差範圍內與零一致，λ² ∝ T 成立。</div>':
+    (()=>{const dT=-F.b/F.s;return '<div class="warn">截距 b 偏離 0 達 '+Math.abs(zb).toFixed(1)+'σ。直線與 T 軸交在 T = '+dT.toFixed(4)+' N，好像每一筆的張力都'+(dT>0?'多':'少')+'算了 '+Math.abs(dT/G*1000).toFixed(2)+' g 的懸掛質量。常見原因：天平沒有歸零（每一筆 m 都帶著同一個零點偏移）、滑輪摩擦、掛鉤質量漏算。<b>迴歸斜率不受這種固定偏移影響，單點計算則會被帶偏。</b></div>';})();
+  h+='<div class="info">函數形式檢驗：ln λ 對 ln T 的斜率 = <b>'+LL.s.toFixed(3)+' ± '+LL.ss.toFixed(3)+'</b>（理論值 0.5，相差 '+Math.abs((LL.s-0.5)/LL.ss).toFixed(1)+'σ）</div></div>';
+  if(!mu){out.innerHTML=h+'<div class="card"><div class="warn">需要 μ₁ 才能換算頻率。</div></div>';S.res4[o]=null;return;}
+  const rm=mu.dmu/mu.mu;
+  const fOf=(s,ss)=>{const f=1/Math.sqrt(mu.mu*s*1e-4);return{f,df:f*0.5*Math.sqrt((ss/s)**2+rm**2)};};
+  const A=fOf(F.s,F.ss),B=fOf(F0.s,F0.ss);
+  const fm=fi.reduce((a,b)=>a+b,0)/fi.length,sd=Math.sqrt(fi.reduce((a,b)=>a+(b-fm)**2,0)/(fi.length-1)),se=sd/Math.sqrt(fi.length);
+  const Cm={f:fm,df:fm*Math.sqrt((se/fm)**2+(0.5*rm)**2)};
+  S.res4[o]={reg:A,org:B,avg:Cm,b:F.b,sb:F.sb,idx:rows.map(r=>S.rows.indexOf(r))};
+  h+='<div class="card"><h2>求頻率 f</h2><p>換成 SI 單位：s (m²/N) = s (cm²/N) × 10⁻⁴。代入 f = 1/√(μ·s)，不確定度 δf/f = ½√[(δs/s)² + (δμ/μ)²]。</p>'+
+   '<table><tr><th>方法</th><th>f (Hz)</th><th>說明</th></tr>'+
+   '<tr><td><b>λ²–T 迴歸斜率（含截距）</b></td><td class="stat">'+A.f.toFixed(1)+' ± '+A.df.toFixed(1)+'</td><td class="small">建議採用：斜率不受 T 或 λ² 的固定偏移影響</td></tr>'+
+   '<tr><td>過原點迴歸</td><td>'+B.f.toFixed(1)+' ± '+B.df.toFixed(1)+'</td><td class="small">截距確定與 0 一致時才適用，誤差較小</td></tr>'+
+   '<tr><td>單點計算後平均</td><td>'+Cm.f.toFixed(1)+' ± '+Cm.df.toFixed(1)+'</td><td class="small">固定偏移會直接帶進每一筆，張力小的點被影響最多</td></tr></table>'+
+   '<p class="small note">'+(o==='L'?'這是縱向驅動的結果。跟橫向驅動的結果比一比，差多少倍？':'也可以切換到「縱向驅動」看那一組數據算出來的 f。')+'</p></div>';
+  out.innerHTML=h;}
+
+/* ---------- complex numbers for composite string ---------- */
+const cx=(r,i)=>({r,i}),cmu=(a,b)=>cx(a.r*b.r-a.i*b.i,a.r*b.i+a.i*b.r),cad=(a,b)=>cx(a.r+b.r,a.i+b.i),csb=(a,b)=>cx(a.r-b.r,a.i-b.i),
+  cdv=(a,b)=>{const d=b.r*b.r+b.i*b.i;return cx((a.r*b.r+a.i*b.i)/d,(a.i*b.r-a.r*b.i)/d);},
+  csn=z=>cx(Math.sin(z.r)*Math.cosh(z.i),Math.cos(z.r)*Math.sinh(z.i)),ccs=z=>cx(Math.cos(z.r)*Math.cosh(z.i),-Math.sin(z.r)*Math.sinh(z.i)),
+  cab=z=>Math.hypot(z.r,z.i),csc=(z,s)=>cx(z.r*s,z.i*s);
+const ETA=0.006;
+function curF(){return S.truth.f0*(1-Math.min(0.15,0.0008*S.tOn/60))*(1+S.jit);}
+function phys2(){const t=S.truth,p=S.p2;const f=curF();
+  const m=t.hook+t.washers.slice(0,p.nW).reduce((a,b)=>a+b,0);const T=m*1e-3*G*(1+p.phi);
+  const mu2=p.k*t.mu1*t.tw;const v1=Math.sqrt(T/t.mu1),v2=Math.sqrt(T/mu2);
+  const k1r=2*Math.PI*f/v1/100,k2r=2*Math.PI*f/v2/100;
+  const k1=cx(k1r,-k1r*ETA),k2=cx(k2r,-k2r*ETA);
+  const L=p.L,l2=p.l2,l1=L-l2;
+  const s1=csn(csc(k1,l1)),c1=ccs(csc(k1,l1)),s2=csn(csc(k2,l2)),c2=ccs(csc(k2,l2));
+  const D=cad(cmu(k2,cmu(s1,c2)),cmu(k1,cmu(s2,c1)));
+  const Cc=cdv(csc(csb(cmu(k1,cmu(s1,s2)),cmu(k2,cmu(c1,c2))),t.a),D);
+  const B=cdv(csc(k1,t.a),D);
+  const y=x=>x<=l1?cab(cad(csc(ccs(csc(k1,x)),t.a),cmu(Cc,csn(csc(k1,x))))):cab(cmu(B,csn(csc(k2,L-x))));
+  return{f,T,m,mu2,lam1:2*Math.PI/k1r,lam2:2*Math.PI/k2r,l1,l2,L,y};}
+
+/* ---------- ⑤ controls ---------- */
+function syncPw2(){const b=$('pw2');b.classList.toggle('on',S.p2.on);b.textContent=S.p2.on?'ON（按下關閉）':'OFF（按下啟動）';}
+function setL5(v){const p=S.p2;p.L=Math.round(Math.max(40,Math.min(125,v))*10)/10;$('L5').value=p.L;
+  const mx=p.L-10;$('l25').max=Math.min(90,mx);if(p.l2>mx)p.l2=mx;$('l25').value=p.l2;p.meas=null;showMeas5();}
+function setl25(v){const p=S.p2;p.l2=Math.round(Math.max(10,Math.min(Math.min(90,p.L-10),v))*10)/10;$('l25').value=p.l2;p.meas=null;showMeas5();}
+function renderW5(){let s='';for(let i=0;i<S.p2.nW;i++)s+='<ellipse cx="914" cy="'+(286+i*6)+'" rx="12" ry="3.5" fill="#9ea7ad" stroke="#555"/>';$('p2wash').innerHTML=s;}
+function weighThick(){const k=+$('k5a').value,X=+$('len5').value;if(!(X>=50&&X<=1500)){alert('請輸入 50～1500 cm');return;}
+  const n=Math.ceil(X/30);const tru=X+0.05*Math.sqrt(n)*gauss();const m=k*S.truth.mu1*S.truth.tw*tru*10;
+  const v=r2(m+S.bal.off+0.004*gauss());S.mu2Rows.push({k,L:X,m:v,n});renderMu2();}
+function renderMu2(){let h='';S.mu2Rows.forEach((r,i)=>{h+='<tr><td>'+(i+1)+'</td><td>'+r.k+'</td><td>'+r.L.toFixed(1)+'</td><td>'+r.m.toFixed(2)+'</td><td>'+(r.m>0?(r.m/r.L*0.1*1e5).toFixed(3):'—')+'</td><td><button class="b r small" onclick="S.mu2Rows.splice('+i+',1);renderMu2()">刪</button></td></tr>';});
+  $('mu2Tab').querySelector('tbody').innerHTML=h||'<tr><td colspan="6" class="note">尚無數據</td></tr>';
+  S.mu2Meas={};let s='';const mu1=getMu1();
+  [2,3,4].forEach(k=>{const ok=S.mu2Rows.filter(r=>r.k===k&&r.m>0);if(!ok.length)return;
+    const sm=ok.reduce((a,r)=>a+r.m,0),sL=ok.reduce((a,r)=>a+r.L,0);const mu=sm/sL*0.1;
+    const rel=Math.sqrt((0.01*Math.sqrt(ok.length)/sm)**2+(0.05*Math.sqrt(ok.reduce((a,r)=>a+r.n,0))/sL)**2);
+    S.mu2Meas[k]={mu,dmu:mu*rel};
+    s+='<div class="info">'+k+' 股：μ₂ = Σm/ΣL = <span class="stat">('+(mu*1e5).toFixed(3)+' ± '+(mu*rel*1e5).toFixed(3)+') ×10⁻⁵ kg/m</span>'+
+      (mu1?'　→ μ₂/μ₁ = <b>'+(mu/mu1.mu).toFixed(3)+'</b>（理想值 '+k+'）':'')+'</div>';});
+  $('mu2Sum').innerHTML=s;}
+function measure5(){const p=S.p2;const l1=p.L-p.l2,l2=p.l2;
+  const rd=l=>r1(l+0.05*Math.sqrt(Math.ceil(l/30))*gauss()+0.08*gauss());
+  p.meas={l1:rd(l1),l2:rd(l2)};showMeas5();}
+function showMeas5(){const m=S.p2.meas;$('meas5').innerHTML=m?('l₁（刀頭→接點）= <b>'+m.l1.toFixed(1)+' cm</b>　l₂（接點→滑輪頂）= <b>'+m.l2.toFixed(1)+' cm</b><br><span class="small note">長度超過 30 cm 時直尺要分段量；接點的結本身約有 2 mm 大小。</span>'):'<span class="small note">條件改變後要重新量 l₁、l₂。</span>';}
+function sampleMax(P){let mx=0;for(let i=0;i<=600;i++){const y=P.y(P.L*i/600);if(y>mx)mx=y;}return mx;}
+function record5(){const p=S.p2;const msg=$('rec5msg');
+  if(!p.meas){msg.innerHTML='<span style="color:#a55f00">請先用直尺量 l₁、l₂。</span>';return;}
+  const n1=parseInt($('n1in').value),n2=parseInt($('n2in').value);
+  if(!(n1>0&&n2>0)){msg.innerHTML='<span style="color:#a55f00">請輸入 n₁、n₂（正整數）。</span>';return;}
+  const P=phys2();const mx=sampleMax(P);const jr=p.on&&mx>0?P.y(P.l1)/mx:NaN;
+  const mrec=S.massRec[p.nW];
+  S.rows2.push({k:p.k,nW:p.nW,m:mrec!==undefined?mrec:null,l1:p.meas.l1,l2:p.meas.l2,n1,n2,
+    hid:{jr,amp:p.on?mx:0,n1t:P.l1/(P.lam1/2),n2t:P.l2/(P.lam2/2),f:P.f,on:p.on}});
+  msg.innerHTML='<span style="color:#2f7d32">已加入第 '+S.rows2.length+' 筆。</span>'+(mrec===undefined?'<span style="color:#a55f00">（掛鉤＋'+p.nW+' 片尚未在第 ② 頁秤重，f₁、f₂ 無法計算）</span>':'');
+  render5();}
+function edit5(i,k,v){const x=parseFloat(v);const r=S.rows2[i];if(k==='n1'||k==='n2')r[k]=isNaN(x)?0:Math.round(x);else r[k]=isNaN(x)?0:x;render5();}
+function render5(){const mu1=getMu1();let h='';
+  S.rows2.forEach((r,i)=>{const T=r.m!=null?r.m*G/1000:null;const mu2=S.mu2Meas&&S.mu2Meas[r.k];
+    const f1=(T&&mu1&&r.l1>0)?r.n1/(2*r.l1/100)*Math.sqrt(T/mu1.mu):NaN,f2=(T&&mu2&&r.l2>0)?r.n2/(2*r.l2/100)*Math.sqrt(T/mu2.mu):NaN;
+    const inp=(k,w)=>'<input class="cell" style="width:'+w+'px" value="'+r[k]+'" onchange="edit5('+i+',\''+k+'\',this.value)">';
+    h+='<tr><td>'+(i+1)+'</td><td>'+r.k+'</td><td>'+r.nW+'</td><td>'+inp('l1',70)+'</td><td>'+inp('l2',70)+'</td><td>'+inp('n1',48)+'</td><td>'+inp('n2',48)+'</td><td>'+f3(r.l1/r.l2,3)+'</td><td>'+f3(r.n1/r.n2,3)+'</td><td>'+f3(f1,1)+'</td><td>'+f3(f2,1)+'</td><td><button class="b r small" onclick="S.rows2.splice('+i+',1);render5()">刪</button></td></tr>';});
+  $('d5Tab').querySelector('tbody').innerHTML=h||'<tr><td colspan="12" class="note">尚無數據</td></tr>';
+  const ks=[...new Set(S.rows2.map(r=>r.k))].sort();const sel=$('a5k'),cur=sel.value;
+  sel.innerHTML=ks.map(k=>'<option value="'+k+'">'+k+' 股</option>').join('')||'<option value="">（無數據）</option>';
+  if(ks.includes(+cur))sel.value=cur;render5a();}
+function render5a(){const out=$('out5');const k=+$('a5k').value;S.res5=S.res5||{};
+  const rows=S.rows2.filter(r=>r.k===k&&r.l1>0&&r.l2>0&&r.n1>0&&r.n2>0);
+  if(rows.length<3){out.innerHTML='<div class="warn">這個股數的有效數據只有 '+rows.length+' 筆。至少要 3 筆，而且 l₁/l₂ 要有明顯不同（換墊片數或不同的 n₁、n₂ 組合），才能作迴歸。</div>';S.res5[k]=null;return;}
+  const x=rows.map(r=>r.l1/r.l2),y=rows.map(r=>r.n1/r.n2);const F0=fit0(x,y),F=linfit(x,y);
+  const mu1=getMu1(),mu2=S.mu2Meas&&S.mu2Meas[k];
+  let pred=null;if(mu1&&mu2){const s=Math.sqrt(mu1.mu/mu2.mu);pred={s,ds:s*0.5*Math.sqrt((mu1.dmu/mu1.mu)**2+(mu2.dmu/mu2.mu)**2)};}
+  const lines=[{a:F0.s,b:0,c:'#c2562b',label:'過原點迴歸 斜率 '+F0.s.toFixed(4)}];
+  if(pred)lines.push({a:pred.s,b:0,c:'#0f6e8c',dash:'6 4',label:'由秤重預測 √(μ₁/μ₂) = '+pred.s.toFixed(4)});
+  lines.push({a:1/Math.sqrt(k),b:0,c:'#888',dash:'2 4',label:'理想 1/√k = '+(1/Math.sqrt(k)).toFixed(4)});
+  let h=plotSVG({id:'pl5',x0:0,x1:Math.max(...x)*1.15,y0:0,y1:Math.max(...y,...x.map(v=>v/Math.sqrt(k)))*1.15,xl:'l₁ / l₂',yl:'n₁ / n₂',pts:x.map((v,i)=>({x:v,y:y[i]})),lines});
+  h+='<table><tr><th>項目</th><th>數值</th></tr>'+
+    '<tr><td>過原點迴歸斜率（理論要求直線通過原點）</td><td class="stat">'+F0.s.toFixed(4)+' ± '+F0.ss.toFixed(4)+'</td></tr>'+
+    '<tr><td>含截距迴歸（檢驗用）</td><td>斜率 '+F.s.toFixed(4)+' ± '+f3(F.ss,4)+'，截距 '+F.b.toFixed(4)+' ± '+f3(F.sb,4)+'</td></tr>';
+  let z=NaN;if(pred){z=(F0.s-pred.s)/Math.sqrt(F0.ss**2+pred.ds**2);
+    h+='<tr><td>由秤重預測 √(μ₁/μ₂)</td><td>'+pred.s.toFixed(4)+' ± '+pred.ds.toFixed(4)+'</td></tr><tr><td>迴歸斜率與預測值的差</td><td>'+zTag(z)+'</td></tr>';}
+  else h+='<tr><td>由秤重預測 √(μ₁/μ₂)</td><td><span style="color:#a55f00">需要 μ₁（第 ② 頁）與 '+k+' 股的 μ₂（本頁 A 區）</span></td></tr>';
+  h+='</table>';
+  h+='<div class="info small">結論的寫法：若斜率與 √(μ₁/μ₂) 在誤差內一致，就驗證了 n₁/n₂ = (l₁/l₂)√(μ₁/μ₂)。注意：<b>拿來比較的是秤出的 μ₂，而不是 k·μ₁</b>，因為扭股會讓實際的 μ₂ 略大於 kμ₁。</div>';
+  S.res5[k]={s:F0.s,ss:F0.ss,pred,z,n:rows.length};out.innerHTML=h;}
+
+/* ---------- ⑤ rendering ---------- */
+function renderP2(t){const p=S.p2;const P=phys2();$('p2shaver').innerHTML=shaverSVG(p.L,p.on,'T',t);
+  const seg=(a,b,st)=>{const r=[];const n=Math.max(2,Math.ceil((b-a)/st));for(let i=0;i<=n;i++)r.push(a+(b-a)*i/n);return r;};
+  const xs1=seg(0,P.l1,0.2),xs2=seg(P.l1,P.L,0.2);
+  const y1=xs1.map(x=>p.on?P.y(x):0),y2=xs2.map(x=>p.on?P.y(x):0);
+  const mx=Math.max(...y1,...y2);const sc=mx>0?1/Math.sqrt(1+(mx/0.9)**2):0;const fl=1+0.02*gauss();
+  const amp=E*SC*sc*fl;const X=x=>(XP-x*SC).toFixed(1);
+  const env=(xs,ys,A,Xf,y0)=>{let u='',l='';xs.forEach((x,i)=>{u+=(i?'L':'M')+Xf(x)+' '+(y0-ys[i]*A).toFixed(2);});
+    for(let i=xs.length-1;i>=0;i--)l+='L'+Xf(xs[i])+' '+(y0+ys[i]*A).toFixed(2);return p.on?u+l+'Z':'';};
+  $('p2f1').setAttribute('d',env(xs1,y1,amp,X,Y0));$('p2f2').setAttribute('d',env(xs2,y2,amp,X,Y0));
+  $('p2s1').setAttribute('d','M'+X(0)+' '+Y0+'L'+X(P.l1)+' '+Y0);$('p2s2').setAttribute('d','M'+X(P.l1)+' '+Y0+'L'+XP+' '+Y0);
+  $('p2s1').setAttribute('stroke-opacity',p.on?0.35:1);$('p2s2').setAttribute('stroke-opacity',p.on?0.35:1);
+  const jy=(p.on?P.y(P.l1):0)*amp*Math.cos(S.ph*9);
+  $('p2knot').innerHTML='<circle cx="'+X(P.l1)+'" cy="'+(Y0-jy).toFixed(2)+'" r="3.2" fill="#333"/><text x="'+X(P.l1)+'" y="'+(Y0+42)+'" font-size="12" text-anchor="middle" fill="#555">接點</text>';
+  const A=mx*sc;$('vib2').textContent=!p.on?'靜止':(A<0.06?'只有微小抖動':(A<0.25?'振動明顯但不大':'大振幅、穩定駐波'));
+  // inset around junction
+  const Xi=x=>(500-(x-P.l1)*Z).toFixed(1);const ia=Z*sc*fl;
+  const xi1=seg(Math.max(0,P.l1-4.6),P.l1,0.02),xi2=seg(P.l1,Math.min(P.L,P.l1+4.6),0.02);
+  const yi1=xi1.map(x=>p.on?P.y(x):0),yi2=xi2.map(x=>p.on?P.y(x):0);
+  $('p2iF1').setAttribute('d',env(xi1,yi1,ia,Xi,IY));$('p2iF2').setAttribute('d',env(xi2,yi2,ia,Xi,IY));
+  $('p2iS1').setAttribute('d','M'+Xi(xi1[0])+' '+IY+'L500 '+IY);$('p2iS2').setAttribute('d','M500 '+IY+'L'+Xi(xi2[xi2.length-1])+' '+IY);
+  $('p2iS1').setAttribute('stroke-opacity',p.on?0.3:1);$('p2iS2').setAttribute('stroke-opacity',p.on?0.3:1);}
+
+/* ---------- ⑥ reveal ---------- */
+function reveal(){if(S.revealed||confirm('揭曉後就知道答案了。確定你已經寫下自己的結論了嗎？')){S.revealed=true;render6();}}
+function render6(){const r4=S.res4||{},r5=S.res5||{},mu1=getMu1();
+  let s='<table><tr><th>量</th><th>你的結果</th></tr>';
+  s+='<tr><td>縫衣線 μ₁</td><td>'+(mu1?'('+(mu1.mu*1e5).toFixed(3)+' ± '+(mu1.dmu*1e5).toFixed(3)+') ×10⁻⁵ kg/m':'—')+'</td></tr>';
+  s+='<tr><td>f（橫向，λ²–T 迴歸）</td><td>'+(r4.T?r4.T.reg.f.toFixed(1)+' ± '+r4.T.reg.df.toFixed(1)+' Hz':'— 請先完成第 ④ 頁')+'</td></tr>';
+  s+='<tr><td>f（縱向驅動算出的值）</td><td>'+(r4.L?r4.L.reg.f.toFixed(1)+' ± '+r4.L.reg.df.toFixed(1)+' Hz':'—（沒有做縱向驅動）')+'</td></tr>';
+  Object.keys(r5).forEach(k=>{if(r5[k])s+='<tr><td>第二部分 '+k+' 股：n₁/n₂–l₁/l₂ 斜率</td><td>'+r5[k].s.toFixed(4)+' ± '+r5[k].ss.toFixed(4)+'</td></tr>';});
+  $('sum6').innerHTML=s+'</table>';
+  const out=$('out6');if(!S.revealed){out.innerHTML='';return;}
+  const t=S.truth;const row=(n,me,sg,tv,u,d)=>{const z=(me-tv)/sg;return '<tr><td>'+n+'</td><td>'+me.toFixed(d)+' ± '+sg.toFixed(d)+'</td><td>'+tv.toFixed(d)+'</td><td>'+(me-tv>=0?'+':'')+(me-tv).toFixed(d)+'</td><td>'+zTag(z)+'</td><td>'+u+'</td></tr>';};
+  let h='<div class="card"><h2>真值對照</h2><div class="tw"><table><tr><th>量</th><th>你的結果 ± σ</th><th>隱藏真值</th><th>偏差</th><th>偏差 / σ</th><th>單位</th></tr>';
+  if(mu1)h+=row('縫衣線 μ₁',mu1.mu*1e5,mu1.dmu*1e5,t.mu1*1e5,'×10⁻⁵ kg/m',3);
+  const fr=o=>{const R=r4[o];if(!R)return null;const fs=R.idx.map(i=>S.rows[i].hid.f);return{mean:fs.reduce((a,b)=>a+b,0)/fs.length,min:Math.min(...fs),max:Math.max(...fs)};};
+  const FT=fr('T'),FL=fr('L');
+  if(r4.T){h+=row('f 橫向・迴歸（含截距）',r4.T.reg.f,r4.T.reg.df,FT.mean,'Hz',1)+row('f 橫向・過原點',r4.T.org.f,r4.T.org.df,FT.mean,'Hz',1)+row('f 橫向・單點平均',r4.T.avg.f,r4.T.avg.df,FT.mean,'Hz',1);}
+  if(r4.L){h+=row('縱向數據當成 f',r4.L.reg.f,r4.L.reg.df,FL.mean,'Hz',1)+row('縱向數據當成 f/2',r4.L.reg.f,r4.L.reg.df,FL.mean/2,'Hz',1);}
+  [2,3,4].forEach(k=>{const m2=S.mu2Meas&&S.mu2Meas[k],R=r5[k];const mu2t=k*t.mu1*t.tw;
+    if(m2)h+=row(k+' 股粗繩 μ₂',m2.mu*1e5,m2.dmu*1e5,mu2t*1e5,'×10⁻⁵ kg/m',3);
+    if(R)h+=row(k+' 股：n₁/n₂–l₁/l₂ 斜率',R.s,R.ss,Math.sqrt(t.mu1/mu2t),'（無因次）',4);});
+  h+='</table></div>';
+  h+='<p class="small note">f 的「真值」是你記錄那幾筆數據當下刮鬍刀的實際頻率平均。刮鬍刀裝新電池時是 <b>'+t.f0.toFixed(1)+' Hz</b>。</p>';
+  if(FT)h+='<p class="small">你記錄橫向數據的期間，刮鬍刀頻率在 '+FT.min.toFixed(1)+'～'+FT.max.toFixed(1)+' Hz 之間變化（'+((FT.max-FT.min)/FT.mean*100).toFixed(2)+' %）。這是電池持續放電造成的。</p>';
+  h+='</div>';
+  // balance & masses
+  h+='<div class="card"><h2>天平與張力</h2><p>天平目前的零點偏移：<b>'+(S.bal.off>=0?'+':'')+S.bal.off.toFixed(3)+' g</b>'+(Math.abs(S.bal.off)>0.008?'（<span style="color:#c62828">沒有歸零</span>：每一次讀數都多了這個量）':'（已歸零）')+'</p>';
+  const ks=Object.keys(S.massRec);
+  if(ks.length){h+='<div class="tw"><table><tr><th>懸掛物</th><th>你的讀數 (g)</th><th>真實質量 (g)</th><th>差 (g)</th></tr>';
+    ks.forEach(n=>{const tv=t.hook+t.washers.slice(0,+n).reduce((a,b)=>a+b,0);h+='<tr><td>'+(+n?'掛鉤＋'+n+' 片':'掛鉤')+'</td><td>'+S.massRec[n].toFixed(2)+'</td><td>'+tv.toFixed(3)+'</td><td>'+(S.massRec[n]-tv>=0?'+':'')+(S.massRec[n]-tv).toFixed(3)+'</td></tr>';});
+    h+='</table></div><p class="small">每一片墊片的真實質量（g）：'+t.washers.map((w,i)=>'#'+(i+1)+' '+w.toFixed(3)).join('、')+'；掛鉤 '+t.hook.toFixed(3)+' g。</p>';}
+  h+='<p class="small note">天平的零點偏移會讓每一個 m 都加上同一個常數，等於張力每次都多（或少）算了固定的量。在 λ²–T 圖上，這只會把直線左右平移，斜率不變，所以迴歸得到的 f 不受影響；單點計算的 f 則會被帶偏，張力越小的點偏得越多。但秤縫衣線求 μ 時，偏移會直接進入 μ，兩種方法都逃不掉：<b>一定要先歸零。</b></p></div>';
+  // part 2 checks
+  if(S.rows2.length){h+='<div class="card"><h2>第二部分：每一筆數據的檢查</h2><p class="small note">「接點相對振幅」是接點的振幅除以整條線的最大振幅。真正的節點應該接近 0；超過約 0.15，就表示記錄時接點還在振動。</p><div class="tw"><table><tr><th>#</th><th>k</th><th>接點相對振幅</th><th>你記錄的 n₁, n₂</th><th>實際 l₁/(λ₁/2), l₂/(λ₂/2)</th><th>判定</th></tr>';
+    S.rows2.forEach((r,i)=>{const H=r.hid;const bad=[];if(!H.on)bad.push('記錄時電源沒開');else{if(H.jr>0.15)bad.push('接點不是節點');if(H.amp<0.1)bad.push('沒有達到共振');}
+      if(Math.abs(H.n1t-r.n1)>0.3||Math.abs(H.n2t-r.n2)>0.3)bad.push('半波數數錯或不是整數個半波');
+      h+='<tr><td>'+(i+1)+'</td><td>'+r.k+'</td><td>'+(isFinite(H.jr)?H.jr.toFixed(3):'—')+'</td><td>'+r.n1+', '+r.n2+'</td><td>'+H.n1t.toFixed(2)+', '+H.n2t.toFixed(2)+'</td><td style="color:'+(bad.length?'#c62828':'#2f7d32')+'">'+(bad.length?bad.join('；'):'✓ 良好')+'</td></tr>';});
+    h+='</table></div></div>';}
+  // f/2 explanation
+  h+='<div class="card"><h2>思考題解答：為什麼縱向驅動量到的是 f/2？</h2>'+
+   '<p>橫向驅動時，刀頭直接左右推動線，線被迫以<b>刀頭的頻率 f</b> 振動。</p>'+
+   '<p>縱向驅動時，刀頭沿著線的方向前後移動，並沒有直接推線左右擺。它做的是<b>以頻率 f 週期性地改變線的張力</b>：刀頭往外時線被拉緊，往內時放鬆。這種靠「週期性改變系統參數」來激發振動的方式叫做<b>參數共振</b>（數學上是 Mathieu 方程式）。最容易被激發的情況，是線的橫向振動頻率恰好為 <b>f/2</b>：</p>'+
+   '<ul><li>線往上擺到最高點、再往下擺到最低點，這兩個位置張力都應該最大，才能每次都把線「拉回來」並注入能量。</li><li>所以線每完成一次完整的上下振動（一個週期），刀頭要完成兩次拉緊，也就是 f_線 = f/2。</li></ul>'+
+   '<p>因此縱向驅動時，同樣的 T 之下 λ 會變成橫向驅動的 2 倍。若直接把 λ 代入 λf = √(T/μ)，算出的「刮鬍刀頻率」只有真值的一半。這正是 Melde（1859）的經典觀察。另外，參數共振有門檻：只有非常接近共振時才起振，一偏離就停，這和你在第 ③ 頁看到的現象一致。</p></div>';
+  // error sources
+  h+='<div class="card"><h2>誤差來源總整理</h2><table><tr><th>來源</th><th>性質</th><th>影響與對策</th></tr>'+
+   '<tr><td>天平零點沒歸零</td><td>系統誤差</td><td>μ 偏差直接傳到 f（δf/f = ½ δμ/μ）；m 的固定偏移只影響 λ²–T 截距。對策：先按 TARE。</td></tr>'+
+   '<tr><td>天平解析度 0.01 g</td><td>隨機誤差</td><td>線太短時 μ 的相對誤差大。對策：剪長一點的線，或把好幾段合起來秤。</td></tr>'+
+   '<tr><td>電池放電造成 f 下降</td><td>緩慢漂移</td><td>早、晚量的數據對應不同的 f，迴歸殘差會變大。對策：量測要快、裝新電池，或把各組墊片數打亂順序量。</td></tr>'+
+   '<tr><td>滑輪摩擦</td><td>隨機／系統誤差</td><td>實際張力和 mg 有約 ±0.3 % 的差。對策：換墊片後輕敲滑輪再量。</td></tr>'+
+   '<tr><td>把刀頭端當成波節</td><td>系統誤差</td><td>刀頭本身有振動，並不是真正的波節。對策：只量線中間相鄰節點之間的距離。</td></tr>'+
+   '<tr><td>節點位置判讀（約 ±0.3 mm）與直尺 0.1 cm</td><td>隨機誤差</td><td>一次量多個半波，取 D/N，把誤差分攤掉。</td></tr>'+
+   '<tr><td>第二部分接點不是節點</td><td>系統誤差</td><td>這時 l = nλ/2 不成立，數據點會偏離直線。對策：用近看圖確認接點靜止。</td></tr>'+
+   '<tr><td>用 kμ₁ 代替秤出的 μ₂</td><td>系統誤差</td><td>扭股使 μ₂ 比 kμ₁ 大約 0.5～2 %。對策：實際秤 μ₂。</td></tr></table></div>';
+  out.innerHTML=h;}
+
+/* ---------- loop ---------- */
+let last=performance.now();
+function loop(now){const dt=Math.min(0.1,(now-last)/1000);last=now;
+  if(S.on||S.p2.on){S.tOn+=dt;S.jit+=-S.jit*0.4*dt+0.0007*Math.sqrt(dt)*gauss();S.jit=Math.max(-0.003,Math.min(0.003,S.jit));}
+  S.ph+=dt*2*Math.PI*1.1;
+  if(curTab==='t3'){const P=phys();renderMain(P,now/1000);renderInset(P);}
+  if(curTab==='t5')renderP2(now/1000);
+  requestAnimationFrame(loop);}
+
+/* ---------- init ---------- */
+(function(){let s='';for(let i=0;i<4;i++){const x=XP-(i+1)*29.7*SC-2;s+='<rect x="'+x.toFixed(1)+'" y="197" width="'+(29.7*SC).toFixed(1)+'" height="3" fill="#fff" stroke="#ccc"/>';}$('paperG').innerHTML=s;})();
+renderChecklist();renderMu();renderMassTab();renderData();renderWashers();drawBalLoad();syncPower();setL(100);setC(50);
+syncPw2();renderW5();setL5(100);setl25(40);renderMu2();render5();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

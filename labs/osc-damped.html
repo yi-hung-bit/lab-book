@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>阻尼震盪系統 虛擬實驗室（105 北四區）</title>
+<style>
+:root{
+  --paper:#EEF1EA; --grid:#DCE3D6; --surface:#F9FBF7; --line:#B8C2B3;
+  --text:#1F2622; --muted:#5A675F; --ink:#1E3A6E;
+  --beam:#D3D9DD; --beam-edge:#8A949B; --tick:#20262A;
+  --magnet:#50575C; --signal:#D99A00; --bad:#B3261E; --good:#2B7A4B;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#151E22; --grid:#1F2B30; --surface:#1B262B; --line:#35464D;
+    --text:#E2E8E4; --muted:#9AA9A1; --ink:#9FBBEB;
+    --beam:#3A464D; --beam-edge:#77858D; --tick:#E6ECEF;
+    --magnet:#8B949A; --signal:#F2C230; --bad:#F08A80; --good:#6FCF97;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#151E22; --grid:#1F2B30; --surface:#1B262B; --line:#35464D;
+  --text:#E2E8E4; --muted:#9AA9A1; --ink:#9FBBEB;
+  --beam:#3A464D; --beam-edge:#77858D; --tick:#E6ECEF;
+  --magnet:#8B949A; --signal:#F2C230; --bad:#F08A80; --good:#6FCF97;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; color:var(--text); background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC","Heiti TC",sans-serif;
+  line-height:1.6;
+}
+header{max-width:1180px;margin:0 auto;padding:28px 20px 8px}
+h1{font-family:"Songti TC","Noto Serif TC","PMingLiU",serif;font-size:1.9rem;margin:0;color:var(--ink);letter-spacing:.04em}
+header p{margin:4px 0 0;color:var(--muted)}
+nav{max-width:1180px;margin:14px auto 0;padding:0 20px;display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto}
+nav button{
+  flex:0 0 auto;white-space:nowrap;font:inherit;padding:8px 16px;border:1px solid var(--line);border-bottom:none;
+  background:var(--paper);color:var(--muted);cursor:pointer;border-radius:6px 6px 0 0
+}
+nav button[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600}
+nav button:disabled{cursor:not-allowed;opacity:.55}
+main{max-width:1180px;margin:0 auto;padding:0 20px 40px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:0 6px 6px 6px;padding:20px}
+.hidden{display:none}
+h2{font-family:"Songti TC","Noto Serif TC","PMingLiU",serif;color:var(--ink);font-size:1.3rem;margin:0 0 6px}
+h3{font-size:1.02rem;margin:18px 0 8px}
+.lead{color:var(--muted);margin:0 0 14px;max-width:72ch}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:10px 0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;border:none;background:transparent;color:var(--text);padding:6px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.btn{font:inherit;padding:7px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:focus-visible,.seg button:focus-visible,nav button:focus-visible,input:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--muted);cursor:pointer}
+.caliper-wrap{max-width:620px}
+.caliper-wrap svg{width:100%;height:auto;display:block}
+.status{font-weight:600;color:var(--ink);margin:4px 0}
+.scale-box{
+  overflow-x:auto;border:2px solid var(--beam-edge);border-radius:8px;background:var(--paper);
+  margin-top:8px;position:relative
+}
+.scale-box svg{display:block}
+.scale-cap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:.9rem;color:var(--muted);margin-top:4px}
+.reading{font-variant-numeric:tabular-nums;color:var(--signal);font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:var(--paper);font-weight:600}
+td input{width:5.6em;font:inherit;text-align:center;padding:3px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--text)}
+td input.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+td input.warn{border-color:var(--signal)}
+td.mean{color:var(--muted)}
+.answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
+.answers label{display:flex;align-items:center;gap:6px}
+.answers input{width:7em;font:inherit;padding:4px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--text)}
+.calc,.reveal{margin-top:14px;padding:14px;border-left:4px solid var(--ink);background:var(--paper);border-radius:0 6px 6px 0}
+.reveal{border-left-color:var(--signal)}
+.calc p,.reveal p{margin:4px 0}
+.good{color:var(--good);font-weight:600}.bad-t{color:var(--bad);font-weight:600}
+.errata ol{max-width:78ch}
+.errata li{margin-bottom:10px}
+.soon{padding:30px;color:var(--muted)}
+.mono{font-variant-numeric:tabular-nums}
+
+.sim{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:20px;align-items:start}
+@media (max-width:760px){.sim{grid-template-columns:1fr}}
+.sim svg.rig{width:100%;height:auto;display:block;background:var(--paper);border:1px solid var(--line);border-radius:6px}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0}
+.row input[type=range]{width:180px}
+.watch{font-size:2rem;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:700;min-width:6.5em;display:inline-block}
+.aid{color:var(--muted);font-variant-numeric:tabular-nums}
+.plot{width:100%;max-width:640px;height:auto;display:block;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.strip{overflow-x:auto;border:2px solid var(--beam-edge);border-radius:8px;background:#fff;margin-top:8px}
+.strip svg{display:block;margin:0 auto}
+.warnbox{color:var(--bad);font-weight:600}
+td.auto{color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>阻尼震盪系統 虛擬實驗室</h1>
+  <p>依 105 學年度數理及資訊學科能力競賽（北四區）物理科實驗改編</p>
+</header>
+
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="t1">實驗一 基本量測</button>
+  <button role="tab" aria-selected="false" data-tab="t2">實驗二 彈力常數 k</button>
+  <button role="tab" aria-selected="false" data-tab="t3">實驗三 阻尼係數 b</button>
+  <button role="tab" aria-selected="false" data-tab="t4">試題勘誤</button>
+</nav>
+
+<main>
+<!-- ============ 實驗一 ============ -->
+<section id="t1" class="panel">
+  <h2>實驗一：以游標尺求磁鐵的平均質量</h2>
+  <p class="lead">磁鐵的平均密度為 7.62 g/cm³。請用游標尺（精度 0.05 mm）把每顆磁鐵的直徑與厚度各量 3 次，自行讀出刻度並填入表格，再算出平均體積與平均質量。每按一次「夾住量測」，都等於把磁鐵重新放進夾爪，讀數可能略有不同。</p>
+
+  <div class="controls">
+    <span>磁鐵：</span>
+    <span class="seg" id="magSel"></span>
+    <span>量測：</span>
+    <span class="seg" id="dimSel">
+      <button data-dim="D" aria-pressed="true">直徑</button>
+      <button data-dim="H" aria-pressed="false">厚度</button>
+    </span>
+  </div>
+  <div class="controls">
+    <button class="btn" id="btnMeasure">夾住量測</button>
+    <button class="btn ghost" id="btnZero">閉合夾爪（檢查零點）</button>
+    <label class="chk"><input type="checkbox" id="chkAlign">標示對齊刻線</label>
+    <label class="chk"><input type="checkbox" id="chkValue">顯示數值讀數</label>
+  </div>
+
+  <div class="caliper-wrap"><svg id="caliper" viewBox="0 0 600 190" role="img" aria-label="游標尺示意圖"></svg></div>
+  <p class="status" id="status">請選擇磁鐵與量測項目，再按「夾住量測」。</p>
+
+  <div class="scale-box" id="scaleBox"><svg id="scale" height="170"></svg></div>
+  <div class="scale-cap">
+    <span>上方為主尺（單位 cm，每小格 1 mm）；下方為 20 格游標（刻 0–10，每格代表 0.05 mm）。讀數 = 游標 0 線左側的主尺 mm 數 + 對齊的游標格數 × 0.05 mm。</span>
+    <span id="valueShow" class="reading"></span>
+  </div>
+
+  <h3>1–2. 量測紀錄（單位 mm）</h3>
+  <div class="grid2">
+    <div class="tbl-wrap"><table id="tblD"></table></div>
+    <div class="tbl-wrap"><table id="tblH"></table></div>
+  </div>
+
+  <h3>3. 綜合以上</h3>
+  <div class="answers">
+    <label>零點誤差 <input id="zeroIn" type="number" step="0.05" placeholder="0.00"> mm</label>
+    <label>平均直徑 <input id="ansD" type="number" step="0.001"> mm</label>
+    <label>平均厚度 <input id="ansH" type="number" step="0.001"> mm</label>
+    <label>平均體積 <input id="ansV" type="number" step="0.0001"> cm³</label>
+    <label>平均質量 <input id="ansM" type="number" step="0.001"> g</label>
+  </div>
+  <p class="lead" style="margin-top:8px">零點誤差：夾爪閉合時的讀數（游標 0 線在主尺 0 線右側為正、左側為負）。修正後的長度 = 讀數 − 零點誤差。</p>
+
+  <div class="controls">
+    <label class="chk"><input type="checkbox" id="chkCalc">顯示自動計算（先自己算再打開）</label>
+    <button class="btn" id="btnReveal">揭曉真值</button>
+    <button class="btn ghost" id="btnNew">換一組新磁鐵</button>
+  </div>
+
+  <div class="calc hidden" id="calcBox"></div>
+  <div class="reveal hidden" id="revealBox"></div>
+</section>
+
+<!-- ============ 實驗二 ============ -->
+<section id="t2" class="panel hidden">
+  <h2>實驗二：固定長度金屬線的彈力常數 k</h2>
+  <p class="lead">金屬線以金屬線夾直立固定，磁鐵吸在上端。先把磁鐵質心到下方固定處的長度調到 52.0 cm，扳開尾端約 5 cm 後釋放，釋放的瞬間碼表會自動從 0 開始計時，數到 N 次時按「停止」。逐次增加磁鐵（前後盡量一樣多），每次都要確認長度仍為 52.0 cm。停止碼表由你自己按，反應時間是真實的。</p>
+  <div class="sim">
+    <svg class="rig" id="rig2" viewBox="0 0 320 470" role="img" aria-label="直立金屬線與磁鐵"></svg>
+    <div>
+      <div class="row"><span>磁鐵數量：</span><span class="seg" id="n2Sel"></span></div>
+      <div class="row"><label for="L2">質心到固定處長度</label><input type="range" id="L2" min="45" max="60" step="0.1" value="55.0"><span class="mono" id="L2v"></span></div>
+      <div class="row"><label for="A2">扳開距離</label><input type="range" id="A2" min="3" max="8" step="0.5" value="5"><span class="mono" id="A2v"></span></div>
+      <div class="row">
+        <button class="btn" id="rel2">扳開並釋放</button>
+        <button class="btn ghost" id="stop2">用手停住</button>
+      </div>
+      <div class="row"><span class="watch" id="sw2Disp">0.00 s</span><button class="btn" id="sw2Start">開始</button><button class="btn ghost" id="sw2Reset">歸零</button></div>
+      <div class="row"><label class="chk"><input type="checkbox" id="aid2">顯示擺盪計數輔助</label><span class="aid" id="aid2v"></span></div>
+      <p class="status" id="st2">目前長度不是 52.0 cm，請先調整。</p>
+      <p class="warnbox" id="warn2"></p>
+    </div>
+  </div>
+
+  <h3>3–5. 改變質量測週期</h3>
+  <div class="row">
+    <label>每次記錄的擺盪次數 N <input type="number" id="N2" value="20" min="1" step="1" style="width:4em"></label>
+    <button class="btn ghost" id="fill2">以實驗一平均質量帶入質量欄</button>
+  </div>
+  <div class="tbl-wrap"><table id="tbl2" style="max-width:760px"></table></div>
+
+  <h3>6–7. T²–m 圖與最小平方回歸</h3>
+  <svg class="plot" id="plot2" viewBox="0 0 640 360" role="img" aria-label="T 平方對質量關係圖"></svg>
+  <div class="calc" id="fit2"></div>
+  <div class="answers">
+    <label>你的斜率 <input id="ans2s" type="number" step="any"> s²/kg</label>
+    <label>你的 k <input id="ans2k" type="number" step="any"> N/m</label>
+  </div>
+  <p class="lead" style="margin-top:8px">正確關係：T = 2π√(m/k)，T² = (4π²/k)·m，所以 k = 4π²/斜率（斜率需換成 s²/kg）。</p>
+  <h3>8. 討論</h3>
+  <p class="lead">觀察資料點是否落在直線上、殘差是否有系統性的彎曲、直線是否通過原點，再想想原因。寫好你的看法後再揭曉。</p>
+  <div class="controls"><button class="btn" id="rev2">揭曉真值</button><button class="btn ghost" id="clr2">清除本實驗資料</button></div>
+  <div class="reveal hidden" id="revBox2"></div>
+</section>
+
+<!-- ============ 實驗三 ============ -->
+<section id="t3" class="panel hidden">
+  <h2>實驗三：磁鐵和金屬板間的阻尼係數 b</h2>
+  <p class="lead">6 顆磁鐵（三前三後）固定在金屬線尾端，金屬板豎立在後方，與磁鐵保持約 1 cm。金屬板上貼有方格紙。每次都從相同位置 A₀ 釋放，分別讀出完成第 1、2、…、5 個週期時的振幅 A₁–A₅。釋放時碼表自動從 0 開始；可用慢動作與暫停協助判讀，碼表跟著模擬時間走。</p>
+  <div class="sim">
+    <svg class="rig" id="rig3" viewBox="0 0 320 470" role="img" aria-label="磁鐵與金屬板阻尼裝置"></svg>
+    <div>
+      <div class="row"><label for="d3">磁鐵與金屬板距離</label><input type="range" id="d3" min="0.8" max="3" step="0.1" value="2.0"><span class="mono" id="d3v"></span></div>
+      <div class="row"><label for="A3">扳開距離 A₀</label><input type="range" id="A3" min="50" max="100" step="1" value="80"><span class="mono" id="A3v"></span></div>
+      <div class="row"><span>播放速度：</span><span class="seg" id="spd3">
+        <button data-s="1" aria-pressed="true">1×</button><button data-s="0.25" aria-pressed="false">0.25×</button><button data-s="0.1" aria-pressed="false">0.1×</button></span>
+        <button class="btn ghost" id="pause3">暫停</button></div>
+      <div class="row">
+        <button class="btn" id="rel3">扳開並釋放</button>
+        <button class="btn ghost" id="stop3">用手停住</button>
+      </div>
+      <div class="row"><span class="watch" id="sw3Disp">0.00 s</span><button class="btn" id="sw3Start">開始</button><button class="btn ghost" id="sw3Reset">歸零</button></div>
+      <div class="row"><label class="chk"><input type="checkbox" id="aid3">顯示模擬時間與週期數</label><span class="aid" id="aid3v"></span></div>
+      <p class="status" id="st3">請把距離調到約 1 cm，再扳開並釋放。</p>
+    </div>
+  </div>
+  <p class="lead" style="margin:10px 0 0">下方為金屬板上的方格紙放大圖（粗線 1 cm、細線 1 mm，0 為平衡位置）。請讀磁鐵中心線的位置。</p>
+  <div class="strip" id="strip3box"><svg id="strip3" width="660" height="120"></svg></div>
+
+  <h3>1–3. 數據紀錄</h3>
+  <div class="answers">
+    <label>磁鐵與金屬板距離 <input id="in3d" type="number" step="0.1"> cm</label>
+    <label>10 個週期的時間 <input id="in3t10" type="number" step="0.01"> s</label>
+    <label>週期 T <span class="mono" id="out3T">—</span></label>
+    <label>磁鐵總質量 m <input id="in3m" type="number" step="0.01"> g</label>
+  </div>
+  <div class="row"><button class="btn ghost" id="fill3">以 6 × 實驗一平均質量帶入</button></div>
+  <div class="tbl-wrap"><table id="tbl3" style="max-width:560px"></table></div>
+
+  <h3>5–6. log(Aₙ)–t 圖與阻尼係數</h3>
+  <svg class="plot" id="plot3" viewBox="0 0 640 360" role="img" aria-label="log An 對時間關係圖"></svg>
+  <div class="calc" id="fit3"></div>
+  <div class="answers">
+    <label>你的斜率 <input id="ans3s" type="number" step="any"> s⁻¹</label>
+    <label>你的 b <input id="ans3b" type="number" step="any"> kg/s</label>
+  </div>
+  <p class="lead" style="margin-top:8px">A(t) = A₀e^(−bt/2m)，取常用對數：log A = log A₀ − 0.4343·(b/2m)·t，所以 b = −2m·斜率 / 0.4343（m 以 kg 代入）。</p>
+  <div class="controls"><button class="btn" id="rev3">揭曉真值</button><button class="btn ghost" id="clr3">清除本實驗資料</button></div>
+  <div class="reveal hidden" id="revBox3"></div>
+</section>
+
+<!-- ============ 勘誤 ============ -->
+<section id="t4" class="panel hidden errata">
+  <h2>試題勘誤與說明</h2>
+  <ol>
+    <li><b>週期公式。</b>原題寫成 T = (1/2π)√(m/k)，正確為 <b>T = 2π√(m/k)</b>。因此 T² = (4π²/k)·m，T²–m 圖的斜率應為 <b>4π²/k</b>，即 k = 4π²/斜率；原題「斜率 = 1/(4π²k)」是由錯誤公式推得。本模擬一律採用正確關係。</li>
+    <li><b>計時次數不一致。</b>實驗二題本寫「擺盪 20 次」，答案卷欄位為「10 次震盪時間」。</li>
+    <li><b>舊版殘字。</b>實驗三出現「長尺尾端」「直尺」「長尾夾和兩顆磁鐵」，但本版器材為粗金屬線與 6 顆磁鐵；實驗一答案卷的厚度表表頭誤植為「測週期」，且漏印密度 7.62 g/cm³。</li>
+    <li><b>實驗二的非線性（第 8 題討論重點）。</b>磁鐵位於直立金屬線上端，形成倒立擺，重力使有效回復係數下降（約為 k − c·mg/L），質量越大，T² 越往上彎；金屬線本身的質量則使直線不過原點。</li>
+    <li><b>實驗三的阻尼。</b>阻尼主要來自磁鐵在鋁板中感應的渦電流，與速度成正比，符合題目模型，但對間距非常敏感。題目以磁鐵質量代入 m，忽略金屬線的有效質量，會使 b 產生系統性偏差。</li>
+  </ol>
+</section>
+</main>
+
+<script>
+/* Google 協作平台的嵌入框會擋掉 alert/confirm，改用按鈕上的文字提示 */
+window.twiceConfirm = function(btn, msg){
+  if(btn.dataset.armed === "1"){ btn.dataset.armed = ""; btn.textContent = btn.dataset.orig; clearTimeout(btn._tm); return true; }
+  btn.dataset.orig = btn.dataset.orig || btn.textContent;
+  btn.dataset.armed = "1"; btn.textContent = msg || "再按一次確認";
+  btn._tm = setTimeout(() => { btn.dataset.armed = ""; btn.textContent = btn.dataset.orig; }, 3000);
+  return false;
+};
+window.flashMsg = function(btn, msg){
+  btn.dataset.orig = btn.dataset.orig || btn.textContent;
+  btn.textContent = msg; clearTimeout(btn._tm);
+  btn._tm = setTimeout(() => { btn.textContent = btn.dataset.orig; }, 2500);
+};
+</script>
+<script>
+(function(){
+"use strict";
+const RHO = 7.62;          // g/cm^3
+const RES = 0.05;          // 游標尺精度 mm
+const N_MAG = 6, N_REP = 3;
+
+let truth, log, cur = {mag:0, dim:"D", R:null, mode:"idle"};
+let revealed = false;
+
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const $ = id => document.getElementById(id);
+const fmt = (x,d) => (isFinite(x)? x.toFixed(d) : "—");
+const NS = "http://www.w3.org/2000/svg";
+
+/* ---------- 隱藏真值 ---------- */
+function newTruth(){
+  const D0 = 12 + Math.random()*4;      // 12–16 mm
+  const H0 = 3 + Math.random()*2;       // 3–5 mm
+  const zs = [-0.05, 0, 0, 0.05];
+  truth = {
+    D0, H0,
+    zero: zs[Math.floor(Math.random()*zs.length)],
+    mags: Array.from({length:N_MAG}, () => ({D: D0 + 0.04*randn(), H: H0 + 0.03*randn()}))
+  };
+  truth.mags.forEach(m => m.mass = RHO*Math.PI*m.D*m.D*m.H/4/1000);
+  window.__magnetTruth = truth;   // 供之後的實驗二、三使用
+  log = {D:[...Array(N_MAG)].map(()=>[]), H:[...Array(N_MAG)].map(()=>[])};
+}
+
+/* 一次量測：回傳以 0.05 mm 為單位的整數讀數 */
+function takeReading(i, dim){
+  const m = truth.mags[i];
+  let x;
+  if(dim === "D") x = m.D + (Math.random()-0.5)*0.06 + 0.012*randn(); // 真圓度 ±0.03 mm + 夾持
+  else            x = m.H + 0.015*randn();
+  const R = Math.round((x + truth.zero)/RES);
+  log[dim][i].push(R);
+  return R;
+}
+
+/* ---------- 游標尺示意圖 ---------- */
+function el(tag, attrs, parent, text){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(text !== undefined) e.textContent = text;
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function drawCaliper(){
+  const svg = $("caliper"); svg.innerHTML = "";
+  const p = 6, x0 = 76, cy = 125;
+  let open;
+  if(cur.mode === "idle") open = 26;
+  else open = cur.R*RES;
+  const xs = x0 + open*p;
+  // 主尺
+  el("rect",{x:40,y:40,width:540,height:22,fill:"var(--beam)",stroke:"var(--beam-edge)"},svg);
+  for(let mm=0; mm<=80; mm++){
+    const x = x0 + mm*p; if(x>575) break;
+    el("line",{x1:x,y1:62,x2:x,y2:62-(mm%10===0?9:mm%5===0?6:3),stroke:"var(--tick)","stroke-width":0.7},svg);
+  }
+  // 固定爪
+  el("path",{d:`M44 30 H${x0} V175 H${x0-10} L60 62 H44 Z`,fill:"var(--beam)",stroke:"var(--beam-edge)"},svg);
+  // 磁鐵
+  if(cur.mode === "measure"){
+    const m = truth.mags[cur.mag];
+    if(cur.dim === "D"){
+      const r = open*p/2;
+      el("circle",{cx:x0+r,cy:cy,r:r,fill:"var(--magnet)"},svg);
+      el("circle",{cx:x0+r*0.8,cy:cy-r*0.25,r:r*0.35,fill:"#fff","fill-opacity":0.12},svg);
+    }else{
+      const h = m.D*p;
+      el("rect",{x:x0,y:cy-h/2,width:open*p,height:h,fill:"var(--magnet)"},svg);
+    }
+  }
+  // 滑動爪
+  el("path",{d:`M${xs} 34 H${xs+70} V70 H${xs+14} L${xs+10} 175 H${xs} Z`,fill:"var(--beam)",stroke:"var(--beam-edge)","fill-opacity":0.95},svg);
+  el("rect",{x:xs+6,y:62,width:58,height:8,fill:"none",stroke:"var(--signal)"},svg);
+  const cap = cur.mode==="idle" ? "夾爪張開" : cur.mode==="zero" ? "夾爪閉合（零點檢查）"
+            : `磁鐵 #${cur.mag+1}　${cur.dim==="D"?"直徑（正面夾持）":"厚度（夾住兩平面）"}`;
+  el("text",{x:44,y:22,fill:"var(--muted)","font-size":13},svg,cap);
+  el("text",{x:xs+72,y:88,fill:"var(--signal)","font-size":11},svg,"← 放大讀數區");
+}
+
+/* ---------- 放大刻度 ---------- */
+function drawScale(){
+  const svg = $("scale"); svg.innerHTML = "";
+  const box = $("scaleBox");
+  if(cur.R === null){ svg.setAttribute("width",600); el("text",{x:20,y:90,fill:"var(--muted)","font-size":15},svg,"尚未量測"); $("valueShow").textContent=""; return; }
+  const s = 30;
+  const R = cur.R, r = R*RES;
+  const n = Math.floor(R/20), k = R - 20*n;
+  const xStart = Math.min(n-3, -3), xEnd = r + 21;
+  const W = Math.ceil((xEnd - xStart)*s + 40);
+  const px = mm => 20 + (mm - xStart)*s;
+  svg.setAttribute("width", W);
+  svg.setAttribute("viewBox", `0 0 ${W} 170`);
+  const hl = $("chkAlign").checked;
+
+  // 主尺尺身
+  el("rect",{x:px(Math.max(xStart,-2)),y:14,width:W,height:66,fill:"var(--beam)",stroke:"var(--beam-edge)"},svg);
+  for(let mm=Math.max(0,Math.ceil(xStart)); mm<=Math.floor(xEnd); mm++){
+    const x = px(mm);
+    const len = mm%10===0 ? 32 : mm%5===0 ? 22 : 14;
+    const isHL = hl && mm === n + k;
+    el("line",{x1:x,y1:80,x2:x,y2:80-len,stroke:isHL?"var(--signal)":"var(--tick)","stroke-width":isHL?3:1.3},svg);
+    if(mm%10===0) el("text",{x:x,y:40,"text-anchor":"middle",fill:"var(--tick)","font-size":16,"font-weight":600},svg,String(mm/10));
+  }
+  el("text",{x:px(Math.max(0,Math.ceil(xStart)))-14,y:30,"text-anchor":"end",fill:"var(--muted)","font-size":12},svg,"cm");
+
+  // 游標
+  const vx0 = px(r) - 22, vx1 = px(r + 19) + 30;
+  el("rect",{x:vx0,y:82,width:vx1-vx0,height:74,fill:"var(--beam)",stroke:"var(--beam-edge)",rx:4},svg);
+  for(let i=0;i<=20;i++){
+    const x = px(r + i*0.95);
+    const len = i%2===0 ? 22 : 13;
+    const isHL = hl && i === k;
+    el("line",{x1:x,y1:82,x2:x,y2:82+len,stroke:isHL?"var(--signal)":"var(--tick)","stroke-width":isHL?3:1.3},svg);
+    if(i%2===0) el("text",{x:x,y:124,"text-anchor":"middle",fill:"var(--tick)","font-size":14},svg,String(i/2));
+  }
+  el("text",{x:vx1-6,y:148,"text-anchor":"end",fill:"var(--muted)","font-size":12},svg,"0.05 mm");
+  box.scrollLeft = Math.max(0, px(r) - 140);
+  $("valueShow").textContent = $("chkValue").checked ? `讀數 = ${fmt(r,2)} mm` : "";
+}
+
+/* ---------- 表格 ---------- */
+function buildTables(){
+  for(const dim of ["D","H"]){
+    const t = $("tbl"+dim);
+    let h = `<caption style="caption-side:top;text-align:left;font-weight:600;padding-bottom:4px">${dim==="D"?"直徑":"厚度"}</caption>`;
+    h += `<tr><th>磁鐵編號</th><th>測量 1</th><th>測量 2</th><th>測量 3</th><th>平均</th></tr>`;
+    for(let i=0;i<N_MAG;i++){
+      h += `<tr><th>#${i+1}</th>`;
+      for(let j=0;j<N_REP;j++) h += `<td><input type="number" step="0.05" id="in-${dim}-${i}-${j}" aria-label="${dim==="D"?"直徑":"厚度"} 磁鐵${i+1} 測量${j+1}"></td>`;
+      h += `<td class="mean" id="mean-${dim}-${i}">—</td></tr>`;
+    }
+    t.innerHTML = h;
+  }
+  document.querySelectorAll("td input").forEach(inp => inp.addEventListener("input", update));
+}
+
+function cellVal(dim,i,j){
+  const v = parseFloat($(`in-${dim}-${i}-${j}`).value);
+  return isFinite(v) ? v : null;
+}
+function stats(arr){
+  const n = arr.length;
+  if(!n) return {n:0,mean:NaN,s:NaN,se:NaN};
+  const mean = arr.reduce((a,b)=>a+b,0)/n;
+  const s = n>1 ? Math.sqrt(arr.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)) : NaN;
+  return {n,mean,s,se:s/Math.sqrt(n)};
+}
+function dimStats(dim){
+  const all = [];
+  for(let i=0;i<N_MAG;i++){
+    const row = [];
+    for(let j=0;j<N_REP;j++){
+      const v = cellVal(dim,i,j);
+      const inp = $(`in-${dim}-${i}-${j}`);
+      inp.classList.remove("warn");
+      if(v!==null){
+        row.push(v); all.push(v);
+        if(Math.abs(v/RES - Math.round(v/RES)) > 1e-6){ inp.classList.add("warn"); inp.title = "游標尺讀數應為 0.05 mm 的整數倍"; }
+        else inp.title = "";
+      }
+    }
+    $(`mean-${dim}-${i}`).textContent = row.length ? fmt(stats(row).mean,3) : "—";
+  }
+  return stats(all);
+}
+
+function computeAll(){
+  const z = parseFloat($("zeroIn").value) || 0;
+  const sd = dimStats("D"), sh = dimStats("H");
+  const res = RES/Math.sqrt(12);                 // 刻度解析度造成的不確定度
+  const D = sd.mean - z, H = sh.mean - z;
+  const uD = Math.sqrt((isFinite(sd.se)?sd.se:0)**2 + res**2);
+  const uH = Math.sqrt((isFinite(sh.se)?sh.se:0)**2 + res**2);
+  const V = Math.PI*D*D*H/4/1000;                // cm^3
+  const relV = Math.sqrt((2*uD/D)**2 + (uH/H)**2);
+  const M = RHO*V;
+  return {z,sd,sh,D,H,uD,uH,V,uV:V*relV,M,uM:M*relV,ok: sd.n>1 && sh.n>1};
+}
+
+function update(){
+  const c = computeAll();
+  const box = $("calcBox");
+  if($("chkCalc").checked){
+    box.classList.remove("hidden");
+    if(!c.ok){ box.innerHTML = "<p>每個項目至少需要 2 筆讀數才能計算。</p>"; }
+    else box.innerHTML = `
+      <p>直徑：${c.sd.n} 筆，平均 ${fmt(c.sd.mean,3)} mm，標準差 s = ${fmt(c.sd.s,3)} mm，平均值標準誤 s/√n = ${fmt(c.sd.se,3)} mm</p>
+      <p>厚度：${c.sh.n} 筆，平均 ${fmt(c.sh.mean,3)} mm，標準差 s = ${fmt(c.sh.s,3)} mm，平均值標準誤 s/√n = ${fmt(c.sh.se,3)} mm</p>
+      <p>零點修正（減去 ${fmt(c.z,2)} mm）後：D = ${fmt(c.D,3)} ± ${fmt(c.uD,3)} mm，H = ${fmt(c.H,3)} ± ${fmt(c.uH,3)} mm</p>
+      <p>V = πD²H/4 = ${fmt(c.V,4)} ± ${fmt(c.uV,4)} cm³　（δV/V = √[(2δD/D)² + (δH/H)²]）</p>
+      <p>m = ρV = ${fmt(c.M,3)} ± ${fmt(c.uM,3)} g</p>
+      <p style="color:var(--muted);font-size:.9rem">不確定度 = √(標準誤² + 解析度²)，解析度取 0.05/√12 mm。</p>`;
+  } else box.classList.add("hidden");
+  if(revealed) showReveal();
+}
+
+/* ---------- 揭曉 ---------- */
+function showReveal(){
+  const c = computeAll();
+  const T = truth;
+  const trueMean = T.mags.reduce((a,m)=>a+m.mass,0)/N_MAG;
+  const trueD = T.mags.reduce((a,m)=>a+m.D,0)/N_MAG;
+  const trueH = T.mags.reduce((a,m)=>a+m.H,0)/N_MAG;
+
+  // 讀錯的格子
+  let misread = 0;
+  for(const dim of ["D","H"]) for(let i=0;i<N_MAG;i++) for(let j=0;j<N_REP;j++){
+    const inp = $(`in-${dim}-${i}-${j}`); const v = cellVal(dim,i,j);
+    inp.classList.remove("bad");
+    if(v===null) continue;
+    if(!log[dim][i].includes(Math.round(v/RES))){ inp.classList.add("bad"); inp.title = "這個數值不是本磁鐵出現過的讀數，請檢查讀法"; misread++; }
+  }
+
+  let rows = T.mags.map((m,i)=>`<tr><th>#${i+1}</th><td>${fmt(m.D,3)}</td><td>${fmt(m.H,3)}</td><td>${fmt(m.mass,3)}</td></tr>`).join("");
+  const studentM = parseFloat($("ansM").value);
+  const useM = isFinite(studentM) ? studentM : c.M;
+  let judge = "";
+  if(c.ok && isFinite(useM)){
+    const zsc = (useM - trueMean)/c.uM;
+    const cls = Math.abs(zsc) <= 2 ? "good" : "bad-t";
+    judge = `<p>${isFinite(studentM)?"你填寫的":"自動計算的"}平均質量 ${fmt(useM,3)} g，與真值相差 ${fmt(useM-trueMean,3)} g，
+      約為 <span class="${cls}">${fmt(zsc,1)} 個標準差</span>（以 δm = ${fmt(c.uM,3)} g 計）。${Math.abs(zsc)<=2?"在誤差範圍內。":"超出 2σ，請檢查零點修正、讀數或計算。"}</p>`;
+  } else judge = "<p>資料不足，無法比較（每項至少 2 筆讀數）。</p>";
+
+  const zIn = parseFloat($("zeroIn").value) || 0;
+  const zMsg = Math.abs(zIn - T.zero) < 1e-9 ? `<span class="good">你的零點修正正確</span>` : `<span class="bad-t">你填的零點誤差是 ${fmt(zIn,2)} mm</span>`;
+
+  const box = $("revealBox");
+  box.classList.remove("hidden");
+  box.innerHTML = `
+    <p><b>游標尺零點誤差：</b>${T.zero>0?"+":""}${fmt(T.zero,2)} mm　${zMsg}</p>
+    <div class="tbl-wrap"><table style="max-width:480px;margin:8px 0">
+      <tr><th>磁鐵</th><th>真實直徑 (mm)</th><th>真實厚度 (mm)</th><th>真實質量 (g)</th></tr>${rows}
+      <tr><th>平均</th><td>${fmt(trueD,3)}</td><td>${fmt(trueH,3)}</td><td>${fmt(trueMean,3)}</td></tr>
+    </table></div>
+    ${judge}
+    <p>${misread ? `<span class="bad-t">有 ${misread} 格讀數不曾在量測中出現（已用紅框標出）。</span>` : `<span class="good">所有填入的讀數都與實際刻度相符。</span>`}</p>
+    <p style="color:var(--muted);font-size:.9rem">註：每顆磁鐵的尺寸略有差異，直徑也不是完美的圓，所以重複量測本來就會有 0.05 mm 等級的起伏。這組磁鐵的質量會沿用到實驗二、三。</p>`;
+}
+
+/* ---------- 事件 ---------- */
+function buildMagSel(){
+  const seg = $("magSel"); seg.innerHTML = "";
+  for(let i=0;i<N_MAG;i++){
+    const b = document.createElement("button");
+    b.textContent = "#"+(i+1); b.setAttribute("aria-pressed", i===cur.mag);
+    b.onclick = () => { cur.mag=i; seg.querySelectorAll("button").forEach((x,j)=>x.setAttribute("aria-pressed", j===i)); cur.mode="idle"; cur.R=null; redraw("已選擇磁鐵 #"+(i+1)+"，請按「夾住量測」。"); };
+    seg.appendChild(b);
+  }
+}
+function redraw(msg){ if(msg) $("status").textContent = msg; drawCaliper(); drawScale(); }
+
+$("dimSel").querySelectorAll("button").forEach(b => b.onclick = () => {
+  cur.dim = b.dataset.dim;
+  $("dimSel").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x===b));
+  cur.mode="idle"; cur.R=null;
+  redraw(`改為量測${cur.dim==="D"?"直徑":"厚度"}，請按「夾住量測」。`);
+});
+$("btnMeasure").onclick = () => {
+  cur.mode = "measure"; cur.R = takeReading(cur.mag, cur.dim);
+  const nth = log[cur.dim][cur.mag].length;
+  redraw(`磁鐵 #${cur.mag+1} 的${cur.dim==="D"?"直徑":"厚度"}：第 ${nth} 次夾持。請讀出刻度並填入表格。`);
+};
+$("btnZero").onclick = () => {
+  cur.mode = "zero"; cur.R = Math.round(truth.zero/RES);
+  redraw("夾爪已閉合。若讀數不為 0，這就是零點誤差。");
+};
+$("chkAlign").onchange = drawScale;
+$("chkValue").onchange = drawScale;
+$("chkCalc").onchange = update;
+$("zeroIn").addEventListener("input", update);
+$("ansM").addEventListener("input", () => { if(revealed) showReveal(); });
+$("btnReveal").onclick = () => { revealed = true; showReveal(); $("revealBox").scrollIntoView({behavior:"smooth",block:"nearest"}); };
+$("btnNew").onclick = () => {
+  if(!twiceConfirm($("btnNew"),"會清空全部紀錄，再按一次確認")) return;
+  init();
+};
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  if(b.disabled) return;
+  document.querySelectorAll("nav button").forEach(x => x.setAttribute("aria-selected", x===b));
+  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== b.dataset.tab));
+});
+
+function init(){
+  newTruth(); revealed = false;
+  cur = {mag:0, dim:cur.dim||"D", R:null, mode:"idle"};
+  buildMagSel(); buildTables();
+  ["zeroIn","ansD","ansH","ansV","ansM"].forEach(id => $(id).value = "");
+  $("revealBox").classList.add("hidden");
+  redraw("請選擇磁鐵與量測項目，再按「夾住量測」。");
+  update();
+}
+init();
+})();
+</script>
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const G = 9.8;
+const fmt = (x,d) => (isFinite(x) ? x.toFixed(d) : "—");
+function el(tag, attrs, parent, text){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(text !== undefined) e.textContent = text;
+  if(parent) parent.appendChild(e);
+  return e;
+}
+
+/* ================= 隱藏的金屬線與金屬板參數 ================= */
+const wire = {
+  k52:  2.5 + Math.random()*2.0,          // 52 cm 時的彎曲彈力常數 (N/m)
+  meff: (3 + Math.random()*3)/1000,       // 金屬線（含 U 形彎頭）的等效質量 (kg)
+  gAir: 0.03,                              // 空氣阻尼率 (1/s)
+  bPlate1: 0.02 + Math.random()*0.03,      // 間距 1 cm 時的渦電流阻尼 (kg/s)
+  pw: 3.5                                  // 阻尼隨間距的冪次
+};
+const C_GRAV = 1.2;   // 懸臂梁三次曲線形狀下，頂端重物的重力去穩定係數
+
+const kBend  = Lm => wire.k52*Math.pow(0.52/Lm, 3);
+const bPlate = dcm => wire.bPlate1*Math.pow(1/dcm, wire.pw);
+function mags(){ return window.__magnetTruth.mags; }
+function magMass(n){ return mags().slice(0,n).reduce((a,m)=>a+m.mass,0)/1000; }  // kg
+function magD(){ return window.__magnetTruth.D0; }  // mm
+
+function osc(n, Lm, bExtra){
+  const m = magMass(n), M = m + wire.meff;
+  const keff = kBend(Lm) - C_GRAV*m*G/Lm;
+  if(keff <= 0.05) return {collapse:true, m, M, keff};
+  const bAir = 2*wire.gAir*M;
+  const btot = bAir + (bExtra||0);
+  const gamma = btot/(2*M);
+  const w0 = Math.sqrt(keff/M);
+  const wd = Math.sqrt(Math.max(w0*w0 - gamma*gamma, 1e-9));
+  return {m, M, keff, bAir, btot, gamma, w0, wd, Td: 2*Math.PI/wd};
+}
+// 靜止釋放的欠阻尼解
+function xAt(p, A, t){
+  if(t <= 0) return A;
+  return A*Math.exp(-p.gamma*t)*(Math.cos(p.wd*t) + p.gamma/p.wd*Math.sin(p.wd*t));
+}
+
+/* ================= 共用：回歸、作圖、碼表 ================= */
+function linfit(xs, ys){
+  const n = xs.length;
+  if(n < 2) return null;
+  const mx = xs.reduce((a,b)=>a+b,0)/n, my = ys.reduce((a,b)=>a+b,0)/n;
+  let sxx=0, sxy=0;
+  for(let i=0;i<n;i++){ sxx += (xs[i]-mx)**2; sxy += (xs[i]-mx)*(ys[i]-my); }
+  if(sxx === 0) return null;
+  const slope = sxy/sxx, icpt = my - slope*mx;
+  let sse = 0; const res = [];
+  for(let i=0;i<n;i++){ const r = ys[i]-(icpt+slope*xs[i]); res.push(r); sse += r*r; }
+  const s2 = n>2 ? sse/(n-2) : NaN;
+  const seS = Math.sqrt(s2/sxx);
+  const seI = Math.sqrt(s2*(1/n + mx*mx/sxx));
+  const syy = ys.reduce((a,b)=>a+(b-my)**2,0);
+  return {n, slope, icpt, seS, seI, res, r2: syy>0 ? 1 - sse/syy : 1};
+}
+function niceStep(range){
+  const raw = range/6, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw/p;
+  return p*(f<1.5?1:f<3.5?2:f<7.5?5:10);
+}
+function plot(svg, pts, o){
+  svg.innerHTML = "";
+  const W=640, H=360, l=70, r=20, t=20, b=50;
+  if(!pts.length){ el("text",{x:W/2,y:H/2,"text-anchor":"middle",fill:"var(--muted)"},svg,"尚無資料"); return; }
+  const xs = pts.map(p=>p[0]), ys = pts.map(p=>p[1]);
+  let x0 = o.x0 !== undefined ? Math.min(o.x0, ...xs) : Math.min(...xs);
+  let x1 = Math.max(...xs); if(x1===x0) x1 = x0+1; x1 += (x1-x0)*0.08;
+  let yLo = Math.min(...ys), yHi = Math.max(...ys);
+  if(o.y0 !== undefined) yLo = Math.min(o.y0, yLo);
+  if(o.line){ yLo = Math.min(yLo, o.line.icpt + o.line.slope*x0); }
+  if(yHi===yLo){ yHi += 1; yLo -= 1; }
+  const pad = (yHi-yLo)*0.1; yHi += pad; if(o.y0 === undefined) yLo -= pad;
+  const X = v => l + (v-x0)/(x1-x0)*(W-l-r);
+  const Y = v => H-b - (v-yLo)/(yHi-yLo)*(H-t-b);
+  const sx = niceStep(x1-x0), sy = niceStep(yHi-yLo);
+  for(let v=Math.ceil(x0/sx)*sx; v<=x1+1e-12; v+=sx){
+    el("line",{x1:X(v),y1:t,x2:X(v),y2:H-b,stroke:"var(--grid)"},svg);
+    el("text",{x:X(v),y:H-b+18,"text-anchor":"middle","font-size":12,fill:"var(--muted)"},svg,+v.toFixed(6)+"");
+  }
+  for(let v=Math.ceil(yLo/sy)*sy; v<=yHi+1e-12; v+=sy){
+    el("line",{x1:l,y1:Y(v),x2:W-r,y2:Y(v),stroke:"var(--grid)"},svg);
+    el("text",{x:l-6,y:Y(v)+4,"text-anchor":"end","font-size":12,fill:"var(--muted)"},svg,+v.toFixed(6)+"");
+  }
+  el("rect",{x:l,y:t,width:W-l-r,height:H-t-b,fill:"none",stroke:"var(--line)"},svg);
+  el("text",{x:(l+W-r)/2,y:H-10,"text-anchor":"middle","font-size":13,fill:"var(--text)"},svg,o.xlab);
+  el("text",{x:16,y:(t+H-b)/2,"text-anchor":"middle","font-size":13,fill:"var(--text)",transform:`rotate(-90 16 ${(t+H-b)/2})`},svg,o.ylab);
+  if(o.curve){
+    let d = "";
+    for(let i=0;i<=80;i++){ const v = x0+(x1-x0)*i/80; const y = o.curve(v); if(!isFinite(y)||y>yHi||y<yLo) continue; d += (d?"L":"M")+X(v).toFixed(1)+" "+Y(y).toFixed(1); }
+    if(d) el("path",{d,fill:"none",stroke:"var(--signal)","stroke-width":2,"stroke-dasharray":"6 4"},svg);
+  }
+  if(o.line){
+    const L = o.line;
+    el("line",{x1:X(x0),y1:Y(L.icpt+L.slope*x0),x2:X(x1),y2:Y(L.icpt+L.slope*x1),stroke:"var(--ink)","stroke-width":1.8},svg);
+  }
+  pts.forEach(p => el("circle",{cx:X(p[0]),cy:Y(p[1]),r:4.5,fill:"var(--surface)",stroke:"var(--ink)","stroke-width":2},svg));
+  if(o.legend) el("text",{x:l+10,y:t+18,"font-size":12,fill:"var(--muted)"},svg,o.legend);
+}
+
+// 以模擬時間為準的碼表
+function Stopwatch(prefix, clock){
+  let running=false, t0=0, acc=0;
+  const btn = $(prefix+"Start"), disp = $(prefix+"Disp");
+  function toggle(){
+    if(running){ acc += clock()-t0; running=false; btn.textContent="開始"; }
+    else { t0 = clock(); running=true; btn.textContent="停止"; }
+  }
+  btn.onclick = toggle;
+  $(prefix+"Reset").onclick = () => { running=false; acc=0; btn.textContent="開始"; };
+  return {
+    tick(){ disp.textContent = (Math.floor((running ? acc+clock()-t0 : acc)*100)/100).toFixed(2)+" s"; },
+    restart(){ acc=0; t0=clock(); running=true; btn.textContent="停止"; }
+  };
+}
+
+/* ======================================================== */
+/* 裝置繪圖（正面視角）：夾具在下，金屬線直立，磁鐵在上端 */
+function drawRig(svg, o){
+  svg.innerHTML = "";
+  const s = 7, baseY = 440, cx = 150;
+  const Lcm = o.Lcm, tipY = baseY - Lcm*s;
+  // 鐵架與底座
+  el("rect",{x:40,y:452,width:250,height:14,rx:3,fill:"var(--beam-edge)"},svg);
+  el("rect",{x:262,y:16,width:7,height:438,fill:"var(--beam-edge)"},svg);
+  el("rect",{x:cx-14,y:baseY-4,width:132,height:10,fill:"var(--beam)",stroke:"var(--beam-edge)"},svg);
+  // 金屬板（實驗三）
+  if(o.plate){
+    el("rect",{x:cx-80,y:tipY-40,width:160,height:90,fill:"#fff",stroke:"var(--line)"},svg);
+    for(let i=0;i<=16;i++) el("line",{x1:cx-80+i*10,y1:tipY-40,x2:cx-80+i*10,y2:tipY+50,stroke:"#b9d3c3","stroke-width":i%8===0?1.4:0.6},svg);
+    for(let j=0;j<=9;j++) el("line",{x1:cx-80,y1:tipY-40+j*10,x2:cx+80,y2:tipY-70+j*10,stroke:"#b9d3c3","stroke-width":0.6},svg);
+    el("text",{x:cx+78,y:tipY+64,"text-anchor":"end","font-size":11,fill:"var(--muted)"},svg,"金屬板（在磁鐵後方）");
+  }
+  // 長尺（量 L）
+  el("rect",{x:18,y:baseY-62*s,width:26,height:62*s,fill:"#F3E7C4",stroke:"#B59B55"},svg);
+  for(let c=0;c<=62;c++){
+    const y = baseY - c*s, len = c%10===0 ? 14 : c%5===0 ? 10 : 6;
+    el("line",{x1:44,y1:y,x2:44-len,y2:y,stroke:"#3a3320","stroke-width":0.8},svg);
+    if(c%10===0) el("text",{x:22,y:y+4,"font-size":9,fill:"#3a3320"},svg,String(c));
+  }
+  el("line",{x1:44,y1:tipY,x2:cx,y2:tipY,stroke:"var(--signal)","stroke-dasharray":"3 3"},svg);
+  // 金屬線（懸臂三次曲線）
+  const xt = o.xcm*s;
+  let d = `M${cx} ${baseY}`;
+  for(let i=1;i<=24;i++){
+    const h = Lcm*i/24, u = h/Lcm;
+    d += ` L${(cx + xt*(3*u*u - u*u*u)/2).toFixed(2)} ${(baseY - h*s).toFixed(2)}`;
+  }
+  el("path",{d,fill:"none",stroke:"var(--tick)","stroke-width":1.8},svg);
+  // 磁鐵（正面看到的是圓形端面）
+  const rpx = Math.max(6, magD()/10*s/2);
+  if(o.n > 0){
+    el("circle",{cx:cx+xt,cy:tipY,r:rpx,fill:"var(--magnet)","fill-opacity":o.plate?0.85:1},svg);
+    el("line",{x1:cx+xt,y1:tipY-rpx-3,x2:cx+xt,y2:tipY+rpx+3,stroke:"var(--signal)","stroke-width":1},svg);
+  }
+  const front = Math.ceil(o.n/2), back = Math.floor(o.n/2);
+  el("text",{x:cx+20,y:14,"text-anchor":"middle","font-size":12,fill:"var(--text)"},svg,
+     o.collapse ? "金屬線撐不住，倒向一側！" : `磁鐵 ${o.n} 顆（前 ${front}／後 ${back}）`);
+  if(o.plate) el("text",{x:cx+20,y:29,"text-anchor":"middle","font-size":12,fill:"var(--muted)"},svg,`磁鐵與金屬板間距 ${o.dcm.toFixed(1)} cm`);
+}
+
+/* ======================================================== */
+/* 實驗二 */
+const e2 = {n:2, t:0, rel:null, A:5, p:null, fallen:false};
+const sw2 = Stopwatch("sw2", () => e2.t);
+const L2 = () => parseFloat($("L2").value);
+
+(function(){
+  const seg = $("n2Sel");
+  for(let i=1;i<=6;i++){
+    const b = document.createElement("button");
+    b.textContent = i; b.setAttribute("aria-pressed", i===e2.n);
+    b.onclick = () => { e2.n = i; seg.querySelectorAll("button").forEach((x,j)=>x.setAttribute("aria-pressed", j+1===i)); stop2(); };
+    seg.appendChild(b);
+  }
+})();
+function stop2(){ e2.rel = null; e2.fallen = false; refresh2(); }
+function refresh2(){
+  $("L2v").textContent = L2().toFixed(1)+" cm";
+  $("A2v").textContent = parseFloat($("A2").value).toFixed(1)+" cm";
+  const ok = Math.abs(L2()-52) < 0.05;
+  $("st2").textContent = ok ? `長度 52.0 cm，磁鐵 ${e2.n} 顆，可以釋放。` : `目前長度為 ${L2().toFixed(1)} cm，題目要求 52.0 cm。`;
+  $("st2").style.color = ok ? "var(--ink)" : "var(--bad)";
+}
+$("L2").oninput = stop2;
+$("A2").oninput = refresh2;
+$("stop2").onclick = stop2;
+$("rel2").onclick = () => {
+  const p = osc(e2.n, L2()/100, 0);
+  e2.A = parseFloat($("A2").value);
+  if(p.collapse){ e2.fallen = true; e2.rel = null; $("warn2").textContent = "有效回復力不足以對抗重力，金屬線倒下了。請減少磁鐵或縮短長度。"; return; }
+  $("warn2").textContent = e2.A > 6.5 ? "扳開距離偏大：小角度近似較差，也更容易造成磁鐵鬆脫或晃動。" : "";
+  e2.p = p; e2.rel = e2.t; e2.fallen = false;
+  sw2.restart();
+};
+function frame2(){
+  let x = 0;
+  if(e2.fallen) x = 25;
+  else if(e2.rel !== null) x = xAt(e2.p, e2.A, e2.t - e2.rel);
+  drawRig($("rig2"), {Lcm:L2(), xcm:x, n:e2.n, collapse:e2.fallen});
+  if($("aid2").checked && e2.rel !== null){
+    $("aid2v").textContent = `已擺盪 ${Math.floor((e2.t-e2.rel)/e2.p.Td)} 次`;
+  } else $("aid2v").textContent = "";
+  sw2.tick();
+}
+
+// 實驗二資料表
+function build2(){
+  let h = `<tr><th>磁鐵數量</th><th>質量 (g)</th><th>N 次擺盪時間 (s)</th><th>週期 T (s)</th><th>T² (s²)</th></tr>`;
+  for(let i=1;i<=6;i++) h += `<tr><th>${i}</th><td><input id="m2-${i}" type="number" step="any"></td><td><input id="t2-${i}" type="number" step="0.01"></td><td class="auto" id="T2-${i}">—</td><td class="auto" id="TT2-${i}">—</td></tr>`;
+  $("tbl2").innerHTML = h;
+  $("tbl2").querySelectorAll("input").forEach(x => x.addEventListener("input", calc2));
+}
+$("N2").addEventListener("input", calc2);
+$("fill2").onclick = () => {
+  const mbar = parseFloat($("ansM").value);
+  if(!isFinite(mbar)){ flashMsg($("fill2"),"請先在實驗一填入平均質量"); return; }
+  for(let i=1;i<=6;i++) $("m2-"+i).value = (i*mbar).toFixed(3);
+  calc2();
+};
+function data2(){
+  const N = parseInt($("N2").value) || 0, pts = [];
+  for(let i=1;i<=6;i++){
+    const m = parseFloat($("m2-"+i).value), tt = parseFloat($("t2-"+i).value);
+    if(N>0 && isFinite(tt) && tt>0){
+      const T = tt/N;
+      $("T2-"+i).textContent = fmt(T,4); $("TT2-"+i).textContent = fmt(T*T,4);
+      if(isFinite(m)) pts.push([m, T*T, i]);
+    } else { $("T2-"+i).textContent = "—"; $("TT2-"+i).textContent = "—"; }
+  }
+  return pts;
+}
+function calc2(truthCurve){
+  const pts = data2();
+  const f = linfit(pts.map(p=>p[0]), pts.map(p=>p[1]));
+  const opts = {xlab:"磁鐵質量 m (g)", ylab:"T² (s²)", x0:0, y0:0, line:f};
+  if(truthCurve === true || e2.revealed){
+    opts.curve = mg => { const m = mg/1000; const k = kBend(0.52) - C_GRAV*m*G/0.52; return k>0 ? 4*Math.PI**2*(m+wire.meff)/k : NaN; };
+    opts.legend = "實線：你的回歸直線　虛線：真實模型（52.0 cm）";
+  }
+  plot($("plot2"), pts, opts);
+  const box = $("fit2");
+  if(!f){ box.innerHTML = "<p>至少需要 2 組（質量、時間）資料才能回歸。</p>"; return null; }
+  const sKg = f.slope*1000, seKg = f.seS*1000;
+  const k = 4*Math.PI**2/sKg, sek = k*seKg/sKg;
+  const meffFit = f.icpt/f.slope;
+  const resTxt = f.res.map((r,i)=>`${pts[i][2]} 顆：${r>=0?"+":""}${fmt(r*1000,1)}`).join("，");
+  box.innerHTML = `
+    <p>回歸直線：T² = (${fmt(f.slope,5)} ± ${fmt(f.seS,5)}) s²/g × m + (${fmt(f.icpt,4)} ± ${fmt(f.seI,4)}) s²　（n = ${f.n}，R² = ${fmt(f.r2,4)}）</p>
+    <p>斜率 = ${fmt(sKg,3)} ± ${fmt(seKg,3)} s²/kg　→　k = 4π²/斜率 = <b>${fmt(k,3)} ± ${fmt(sek,3)} N/m</b></p>
+    <p>截距換算成質量：截距/斜率 = ${fmt(meffFit,2)} g（若為正，代表還有一部分未計入的振動質量）</p>
+    <p style="color:var(--muted)">殘差（×10⁻³ s²）：${resTxt}</p>`;
+  return {f, k, sek, sKg, meffFit};
+}
+$("clr2").onclick = () => { if(twiceConfirm($("clr2"))){ build2(); e2.revealed=false; $("revBox2").classList.add("hidden"); calc2(); } };
+$("rev2").onclick = () => {
+  e2.revealed = true;
+  const r = calc2(true);
+  const box = $("revBox2"); box.classList.remove("hidden");
+  const kb = kBend(0.52);
+  let rows = "";
+  for(let n=1;n<=6;n++){
+    const p = osc(n, 0.52, 0);
+    const mg = magMass(n)*1000;
+    rows += `<tr><td>${n}</td><td>${fmt(mg,3)}</td><td>${p.collapse?"—":fmt(p.keff,3)}</td><td>${p.collapse?"倒下":fmt(p.Td,4)}</td><td>${p.collapse?"—":fmt(p.Td**2,4)}</td></tr>`;
+  }
+  let judge = "<p>資料不足，無法比較。</p>";
+  if(r){
+    const kStu = parseFloat($("ans2k").value);
+    const kUse = isFinite(kStu) ? kStu : r.k;
+    const z = (kUse - kb)/r.sek;
+    judge = `<p>${isFinite(kStu)?"你填寫的":"回歸得到的"} k = ${fmt(kUse,3)} N/m，金屬線本身的彎曲彈力常數為 ${fmt(kb,3)} N/m，
+      相差 ${fmt((kUse-kb)/kb*100,1)}%，約 <span class="${Math.abs(z)<=2?"good":"bad-t"}">${fmt(z,1)} 個標準差</span>。</p>`;
+  }
+  const Lwarn = Math.abs(L2()-52) >= 0.05 ? `<p class="bad-t">注意：目前長度滑桿停在 ${L2().toFixed(1)} cm。若量測時長度不是 52.0 cm，k 會依 1/L³ 大幅改變。</p>` : "";
+  box.innerHTML = `
+    <p><b>隱藏真值：</b>52.0 cm 時金屬線的彎曲彈力常數 k = ${fmt(kb,3)} N/m；金屬線（含彎頭）的等效質量 = ${fmt(wire.meff*1000,2)} g。</p>
+    ${judge}
+    ${Lwarn}
+    <div class="tbl-wrap"><table style="max-width:560px;margin:8px 0">
+      <tr><th>磁鐵數</th><th>真實磁鐵質量 (g)</th><th>有效回復係數 (N/m)</th><th>真實週期 (s)</th><th>T² (s²)</th></tr>${rows}</table></div>
+    <p><b>為什麼不是直線？</b>磁鐵在直立金屬線的上端，是一個「倒立擺」：偏離平衡時，重力會幫忙把它推得更遠。對懸臂形狀而言，有效回復係數約為 k − 1.2·mg/L，所以
+      T² = 4π²(m + m<sub>線</sub>)/(k − 1.2mg/L)。質量越大，分母越小，T² 往上彎；圖中的虛線就是這條真實曲線。用直線硬套時，斜率會被後段拉大，求得的 k 偏小。</p>
+    <p><b>為什麼不過原點？</b>金屬線本身也在振動，等效質量約 ${fmt(wire.meff*1000,1)} g，使截距為正。</p>
+    <p><b>如何改善：</b>用較小的質量範圍或較短的線長，讓 1.2mg/L 相對於 k（∝1/L³）變得很小；或把資料改畫成 4π²(m+m<sub>線</sub>)/T² 對 m，其截距為 k、斜率為 −1.2g/L，就能把重力效應分離出來。另外，計時時多數幾次擺盪、在通過平衡點時按碼表，都能降低反應時間的影響。</p>`;
+};
+
+/* ======================================================== */
+/* 實驗三 */
+const e3 = {t:0, rel:null, A:80, p:null, speed:1, paused:false};
+const sw3 = Stopwatch("sw3", () => e3.t);
+const d3 = () => parseFloat($("d3").value);
+function p3(){ return osc(6, 0.52, bPlate(d3())); }
+function stop3(){ e3.rel = null; refresh3(); }
+function refresh3(){
+  $("d3v").textContent = d3().toFixed(1)+" cm";
+  $("A3v").textContent = $("A3").value+" mm";
+}
+$("d3").oninput = stop3;
+$("A3").oninput = stop3;
+$("stop3").onclick = stop3;
+$("rel3").onclick = () => {
+  const p = p3();
+  if(p.collapse){ $("st3").textContent = "金屬線撐不住 6 顆磁鐵。"; return; }
+  e3.p = p; e3.A = parseFloat($("A3").value); e3.rel = e3.t;
+  $("st3").textContent = `已釋放（間距 ${d3().toFixed(1)} cm）。可以慢動作或暫停來讀振幅。`;
+  sw3.restart();
+};
+$("spd3").querySelectorAll("button").forEach(b => b.onclick = () => {
+  e3.speed = parseFloat(b.dataset.s);
+  $("spd3").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x===b));
+});
+$("pause3").onclick = () => { e3.paused = !e3.paused; $("pause3").textContent = e3.paused ? "繼續" : "暫停"; };
+
+function drawStrip(xmm){
+  const svg = $("strip3"); svg.innerHTML = "";
+  const s = 3, c = 330, W = 660, H = 120;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  for(let v=-105; v<=105; v++){
+    const x = c + v*s;
+    const w = v%10===0 ? 1.3 : v%5===0 ? 0.8 : 0.4;
+    el("line",{x1:x,y1:10,x2:x,y2:100,stroke:v===0?"#2f7a55":"#8fbfa3","stroke-width":w},svg);
+    if(v%20===0) el("text",{x:x,y:114,"text-anchor":"middle","font-size":11,fill:"#35524a"},svg,String(v));
+  }
+  for(let j=0;j<=9;j++) el("line",{x1:c-105*s,y1:10+j*10,x2:c+105*s,y2:10+j*10,stroke:"#8fbfa3","stroke-width":j%5===0?1.1:0.4},svg);
+  const r = magD()/2*s;
+  const x = c + xmm*s;
+  el("circle",{cx:x,cy:55,r:r,fill:"#50575C","fill-opacity":0.55},svg);
+  el("line",{x1:x,y1:4,x2:x,y2:106,stroke:"#C62828","stroke-width":1.2},svg);
+}
+function frame3(){
+  let x = 0;
+  if(e3.rel === null) x = 0;
+  else x = xAt(e3.p, e3.A/10, e3.t - e3.rel);   // cm
+  drawRig($("rig3"), {Lcm:52, xcm:x, n:6, plate:true, dcm:d3()});
+  drawStrip(x*10);
+  if($("aid3").checked && e3.rel !== null){
+    const tt = e3.t - e3.rel;
+    $("aid3v").textContent = `t = ${tt.toFixed(3)} s，第 ${(tt/e3.p.Td).toFixed(2)} 個週期`;
+  } else $("aid3v").textContent = "";
+  sw3.tick();
+}
+
+function build3(){
+  let h = `<tr><th>週期數 n</th><th>t = nT (s)</th><th>振幅 Aₙ (mm)</th><th>log(Aₙ)</th></tr>`;
+  for(let n=0;n<=5;n++) h += `<tr><th>A<sub>${n}</sub></th><td class="auto" id="tt3-${n}">—</td><td><input id="a3-${n}" type="number" step="0.5"></td><td class="auto" id="lg3-${n}">—</td></tr>`;
+  $("tbl3").innerHTML = h;
+  $("tbl3").querySelectorAll("input").forEach(x => x.addEventListener("input", calc3));
+}
+["in3t10","in3m","in3d"].forEach(id => $(id).addEventListener("input", calc3));
+$("fill3").onclick = () => {
+  const mbar = parseFloat($("ansM").value);
+  if(!isFinite(mbar)){ flashMsg($("fill3"),"請先在實驗一填入平均質量"); return; }
+  $("in3m").value = (6*mbar).toFixed(3); calc3();
+};
+function calc3(){
+  const T = parseFloat($("in3t10").value)/10;
+  $("out3T").textContent = isFinite(T) ? T.toFixed(4)+" s" : "—";
+  const pts = [];
+  for(let n=0;n<=5;n++){
+    const A = parseFloat($("a3-"+n).value);
+    $("tt3-"+n).textContent = isFinite(T) ? (n*T).toFixed(3) : "—";
+    $("lg3-"+n).textContent = A>0 ? Math.log10(A).toFixed(4) : "—";
+    if(isFinite(T) && A>0) pts.push([n*T, Math.log10(A)]);
+  }
+  const f = linfit(pts.map(p=>p[0]), pts.map(p=>p[1]));
+  plot($("plot3"), pts, {xlab:"時間 t (s)", ylab:"log(Aₙ)  （Aₙ 以 mm 計）", x0:0, line:f});
+  const box = $("fit3");
+  const mg = parseFloat($("in3m").value);
+  if(!f){ box.innerHTML = "<p>至少需要 2 組（時間、振幅）資料才能回歸；請先填入 10 個週期的時間。</p>"; return null; }
+  let out = `<p>回歸直線：log(A) = (${fmt(f.slope,5)} ± ${fmt(f.seS,5)}) s⁻¹ × t + ${fmt(f.icpt,4)}　（n = ${f.n}，R² = ${fmt(f.r2,4)}）</p>`;
+  let b = NaN, seb = NaN;
+  if(isFinite(mg)){
+    b = -2*(mg/1000)*f.slope/0.4343; seb = Math.abs(2*(mg/1000)*f.seS/0.4343);
+    out += `<p>b = −2m·斜率/0.4343 = <b>${fmt(b,4)} ± ${fmt(seb,4)} kg/s</b>　（m = ${fmt(mg,2)} g）</p>`;
+  } else out += `<p>請填入磁鐵總質量以計算 b。</p>`;
+  box.innerHTML = out;
+  return {f, b, seb, mg};
+}
+$("clr3").onclick = () => { if(twiceConfirm($("clr3"))){ build3(); ["in3t10","in3m","in3d","ans3s","ans3b"].forEach(i=>$(i).value=""); $("revBox3").classList.add("hidden"); calc3(); } };
+$("rev3").onclick = () => {
+  const r = calc3();
+  const p = p3();
+  const mMag = magMass(6);
+  const bExam = 2*mMag*p.gamma;              // 題目公式（m 只用磁鐵）在完美數據下會得到的值
+  const bTrue = p.btot;                      // 真實的速度比例阻尼係數（渦電流 + 空氣）
+  const A0 = parseFloat($("A3").value);
+  let rows = "";
+  for(let n=0;n<=5;n++){ const A = A0*Math.exp(-p.gamma*n*p.Td); rows += `<tr><td>A<sub>${n}</sub></td><td>${fmt(n*p.Td,3)}</td><td>${fmt(A,1)}</td></tr>`; }
+  let judge = "<p>資料不足，無法比較。</p>";
+  if(r && isFinite(r.b)){
+    const bStu = parseFloat($("ans3b").value);
+    const bUse = isFinite(bStu) ? bStu : r.b;
+    const z = (bUse - bExam)/r.seb;
+    judge = `<p>${isFinite(bStu)?"你填寫的":"回歸得到的"} b = ${fmt(bUse,4)} kg/s；依題目公式的理想值為 ${fmt(bExam,4)} kg/s，
+      約差 <span class="${Math.abs(z)<=2?"good":"bad-t"}">${fmt(z,1)} 個標準差</span>。</p>`;
+  }
+  const dIn = parseFloat($("in3d").value);
+  const dMsg = Math.abs(d3()-1) > 0.15 ? `<p class="bad-t">目前間距為 ${d3().toFixed(1)} cm，題目要求約 1 cm。阻尼約與間距的 ${wire.pw} 次方成反比，間距差一點，b 就差很多。</p>` : "";
+  const dRec = isFinite(dIn) && Math.abs(dIn - d3()) > 0.05 ? `<p class="bad-t">你記錄的間距 ${fmt(dIn,1)} cm 與實際設定 ${d3().toFixed(1)} cm 不符。</p>` : "";
+  const box = $("revBox3"); box.classList.remove("hidden");
+  box.innerHTML = `
+    <p><b>隱藏真值（間距 ${d3().toFixed(1)} cm）：</b>週期 T = ${fmt(p.Td,4)} s；衰減率 γ = b/2M = ${fmt(p.gamma,4)} s⁻¹。</p>
+    <p>渦電流阻尼 ${fmt(bPlate(d3()),4)} kg/s ＋ 空氣阻尼 ${fmt(p.bAir,4)} kg/s ＝ 真實阻尼係數 <b>${fmt(bTrue,4)} kg/s</b>。</p>
+    <p>磁鐵總質量 ${fmt(mMag*1000,2)} g，金屬線等效質量 ${fmt(wire.meff*1000,2)} g。題目公式只用磁鐵質量，所以即使數據完美，也只會得到 b = 2m<sub>磁</sub>γ = <b>${fmt(bExam,4)} kg/s</b>，比真實值小約 ${fmt((1-bExam/bTrue)*100,1)}%。</p>
+    ${judge}${dMsg}${dRec}
+    <div class="tbl-wrap"><table style="max-width:380px;margin:8px 0">
+      <tr><th>週期數</th><th>t (s)</th><th>真實振幅 (mm)</th></tr>${rows}</table></div>
+    <p style="color:var(--muted);font-size:.9rem">渦電流阻力與速度成正比，符合 A(t) = A₀e^(−bt/2m) 的模型；log(Aₙ) 對 t 的資料若明顯彎曲，通常是讀數時沒有停在正確的時刻或位置。</p>`;
+};
+
+/* ================= 共用動畫迴圈 ================= */
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now-last)/1000); last = now;
+  e2.t += dt;
+  if(!e3.paused) e3.t += dt*e3.speed;
+  frame2(); frame3();
+  requestAnimationFrame(loop);
+}
+build2(); build3(); refresh2(); refresh3(); calc2(); calc3();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

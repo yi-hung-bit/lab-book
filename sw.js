@@ -1,5 +1,5 @@
 // 實驗培訓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v4";
+const VERSION="v5";
 const CACHE="lab-book-"+VERSION;
 const FILES=[
  "./",
@@ -29,7 +29,11 @@ const FILES=[
  "labs/refr-acrylic.html",
  "labs/refr-cyl.html",
  "labs/refr-glycerin.html",
- "labs/refr-liquid.html"
+ "labs/refr-liquid.html",
+ "labs/osc-coupled.html",
+ "labs/osc-damped.html",
+ "labs/osc-pendulum.html",
+ "labs/osc-string.html"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE&&k.startsWith("lab-book-")).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});

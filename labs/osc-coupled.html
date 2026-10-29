@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>耦合擺能量傳遞　虛擬實驗室｜105 學年度第 6 區複賽物理科實驗第二題</title>
+<style>
+:root{
+  --paper:#F3F4F1; --card:#FFFFFF; --ink:#182234; --ink-soft:#5A6577;
+  --rule:#D6D9D2; --brass:#B08829; --A:#0E7B70; --B:#B03060;
+  --A-soft:#DCEFEC; --B-soft:#F7E1E9; --warn:#9A3412;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:15px; line-height:1.65; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:1220px;margin:0 auto;padding:20px 18px 64px}
+
+/* masthead */
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;
+  border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:18px}
+header.top h1{margin:0;font-size:25px;font-weight:650;letter-spacing:.01em}
+header.top .meta{color:var(--ink-soft);font-size:13.5px;margin-left:auto;text-align:right}
+
+/* tabs */
+nav.tabs{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:18px}
+nav.tabs button{
+  font:inherit;font-size:14.5px;border:1px solid var(--rule);border-bottom:none;
+  background:#E9EAE5;color:var(--ink-soft);padding:8px 16px;border-radius:6px 6px 0 0;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--card);color:var(--ink);font-weight:600;
+  box-shadow:inset 0 3px 0 var(--brass)}
+nav.tabs button:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
+.panel{display:none}
+.panel.on{display:block}
+
+.card{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;margin-bottom:16px}
+.card h2{margin:0 0 10px;font-size:17px;font-weight:650}
+.card h3{margin:16px 0 6px;font-size:15px;font-weight:650}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:16px;align-items:start}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+
+/* controls */
+.ctl{margin-bottom:11px}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;color:var(--ink-soft)}
+.ctl label b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.ctl input[type=range]{width:100%;margin:2px 0 0;accent-color:var(--brass)}
+.ctl.a label b{color:var(--A)} .ctl.b label b{color:var(--B)}
+fieldset{border:1px solid var(--rule);border-radius:6px;padding:10px 12px 6px;margin:0 0 12px}
+legend{font-size:12.5px;color:var(--ink-soft);padding:0 5px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button.act{font:inherit;font-size:14px;background:var(--ink);color:#fff;border:1px solid var(--ink);
+  border-radius:6px;padding:7px 13px;cursor:pointer}
+button.act.ghost{background:transparent;color:var(--ink)}
+button.act.brass{background:var(--brass);border-color:var(--brass)}
+button.act:disabled{opacity:.4;cursor:not-allowed}
+button.act:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+select,input[type=number]{font:inherit;font-size:14px;padding:5px 7px;border:1px solid var(--rule);
+  border-radius:5px;background:#fff;color:var(--ink)}
+
+/* readouts */
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:4px}
+.read div{border:1px solid var(--rule);border-radius:6px;padding:7px 10px;background:#FAFAF8}
+.read span{display:block;font-size:12px;color:var(--ink-soft)}
+.read strong{font-size:19px;font-weight:650;font-variant-numeric:tabular-nums}
+.big{font-variant-numeric:tabular-nums}
+
+svg.bench{width:100%;height:auto;display:block;background:#FBFBF9;border:1px solid var(--rule);border-radius:8px}
+canvas.trace{width:100%;height:190px;display:block;border:1px solid var(--rule);border-radius:8px;background:#FBFBF9;margin-top:12px}
+
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--rule);padding:5px 7px;text-align:right}
+th{background:#EFF0EC;font-weight:600;text-align:center;color:var(--ink-soft)}
+td:first-child,th:first-child{text-align:center}
+td input{width:100%;border:none;background:transparent;font:inherit;text-align:right;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+td input:focus{outline:1.5px solid var(--brass);border-radius:3px}
+tbody tr:nth-child(even){background:#FAFAF8}
+.tiny{font-size:12.5px;color:var(--ink-soft)}
+.note{border-left:3px solid var(--brass);padding:2px 0 2px 12px;margin:12px 0;color:var(--ink-soft);font-size:13.5px}
+.warnbox{border-left:3px solid var(--warn);padding:2px 0 2px 12px;margin:12px 0;color:var(--warn);font-size:13.5px}
+.chip{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12.5px;border:1px solid}
+.chip.a{color:var(--A);border-color:var(--A);background:var(--A-soft)}
+.chip.b{color:var(--B);border-color:var(--B);background:var(--B-soft)}
+.eq{font-family:"Latin Modern Math",Cambria,Georgia,serif;font-size:16px}
+.hidden{display:none}
+.seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid var(--ink);
+  border-radius:7px;overflow:hidden;margin:4px 0 8px}
+.seg .segbtn{font:inherit;font-size:14px;min-height:42px;padding:8px 4px;cursor:pointer;
+  background:#fff;color:var(--ink);border:none;border-right:1px solid var(--rule);
+  white-space:nowrap;touch-action:manipulation}
+.seg .segbtn:last-child{border-right:none}
+.seg .segbtn[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
+.seg .segbtn:focus-visible{outline:2px solid var(--brass);outline-offset:-3px}
+.relstat{font-size:13px;color:var(--ink-soft);margin-bottom:6px}
+.relstat b{color:var(--ink)}
+.vrule{width:1px;align-self:stretch;background:var(--rule)}
+.swstate{font-size:12.5px;padding:2px 9px;border-radius:99px;border:1px solid;white-space:nowrap}
+.swstate.run{color:var(--A);border-color:var(--A);background:var(--A-soft)}
+.swstate.held{color:var(--ink-soft);border-color:var(--rule);background:#F0F1ED}
+.swstate.paused{color:var(--warn);border-color:var(--warn);background:#FBEAE1}
+.stopwatch.dim{opacity:.45}
+button.act{min-height:40px;touch-action:manipulation}
+
+ul.tight{margin:6px 0;padding-left:20px} ul.tight li{margin:3px 0}
+.stopwatch{font-variant-numeric:tabular-nums;font-size:30px;font-weight:600;letter-spacing:.01em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>耦合擺的能量傳遞</h1>
+  <div class="meta">105 學年度普通型高中數理及資訊學科能力競賽<br>第 6 區（臺南區）複賽　物理科實驗試題第二題</div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button type="button" role="tab" aria-selected="true" data-p="bench">實驗台</button>
+  <button type="button" role="tab" aria-selected="false" data-p="cond">一、共振條件</button>
+  <button type="button" role="tab" aria-selected="false" data-p="tens">二、轉移時間與迴歸</button>
+  <button type="button" role="tab" aria-selected="false" data-p="theory">理論與核對</button>
+</nav>
+
+<!-- ============ BENCH ============ -->
+<section class="panel on" id="p-bench">
+<div class="grid">
+  <div>
+    <div class="card" style="padding:10px">
+      <svg class="bench" id="bench" viewBox="0 0 780 440" aria-label="耦合擺裝置示意"></svg>
+      <canvas class="trace" id="trace" width="1560" height="380"></canvas>
+      <div class="tiny" style="margin-top:6px">
+        擺動方向垂直於連接繩。連接繩的側向變形已放大
+        <b id="exagLbl">30</b> 倍以便觀察，實際只有零點幾公釐。
+      </div>
+    </div>
+    <div class="card">
+      <h2>碼表與讀數</h2>
+      <div class="row" style="align-items:center;gap:12px">
+        <div class="stopwatch" id="swDisp">0.00 s</div>
+        <span class="swstate" id="swState">計時中</span>
+        <button type="button" class="act brass" id="swBtn">停止計時</button>
+        <button type="button" class="act ghost" id="swReset">碼表歸零</button>
+        <span class="vrule"></span>
+        <button type="button" class="act ghost" id="pause">暫停</button>
+        <label class="tiny">速度
+          <select id="spd"><option value="1">×1</option><option value="2">×2</option><option value="4">×4</option></select>
+        </label>
+      </div>
+      <div class="tiny" style="margin-top:9px">
+        按任一顆釋放鈕會自動起錶（一手放擺、一手按錶）。起錶有同步偏差、停錶有延遲，與真實操作相同。
+        暫停時碼表一起停住；「碼表歸零」只清掉讀數，不會重設模擬。
+      </div>
+      <div class="read" style="margin-top:12px">
+        <div><span>擺 A 能量占比</span><strong id="rE1" style="color:var(--A)">—</strong></div>
+        <div><span>擺 B 能量占比</span><strong id="rE2" style="color:var(--B)">—</strong></div>
+        <div><span>本次最大轉移率</span><strong id="rMax">—</strong></div>
+        <div><span>模擬時間</span><strong id="rT">0.0 s</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>裝置設定</h2>
+      <fieldset><legend>擺 A　<span class="chip a">左</span></legend>
+        <div class="ctl a"><label>擺長設定 <b id="vl1">30.0 cm</b></label>
+          <input type="range" id="l1" min="8" max="60" step="0.1" value="30"></div>
+        <div class="ctl a"><label>螺帽數 <b id="vn1">3 個</b></label>
+          <input type="range" id="n1" min="1" max="5" step="1" value="3"></div>
+      </fieldset>
+      <fieldset><legend>擺 B　<span class="chip b">右</span></legend>
+        <div class="ctl b"><label>擺長設定 <b id="vl2">30.0 cm</b></label>
+          <input type="range" id="l2" min="8" max="60" step="0.1" value="30"></div>
+        <div class="ctl b"><label>螺帽數 <b id="vn2">3 個</b></label>
+          <input type="range" id="n2" min="1" max="5" step="1" value="3"></div>
+      </fieldset>
+      <fieldset><legend>連接繩</legend>
+        <div class="ctl"><label>張力（彈簧秤設定） <b id="vF">200 gw</b></label>
+          <input type="range" id="F" min="40" max="250" step="5" value="200"></div>
+        <div class="ctl"><label>兩懸掛點間距 L <b id="vL">40.0 cm</b></label>
+          <input type="range" id="L" min="10" max="70" step="0.5" value="40"></div>
+        <div class="ctl"><label>兩側繩段長 d <b id="vd">30.0 cm</b></label>
+          <input type="range" id="d" min="10" max="60" step="0.5" value="30"></div>
+      </fieldset>
+      <fieldset><legend>釋放</legend>
+        <div class="ctl"><label>初始擺角 <b id="vth">10.0°</b></label>
+          <input type="range" id="th0" min="2" max="16" step="0.5" value="10"></div>
+        <div class="seg" role="group" aria-label="釋放方式">
+          <button type="button" class="segbtn" data-rel="single" aria-pressed="true">只放擺 A</button>
+          <button type="button" class="segbtn" data-rel="in" aria-pressed="false">同相釋放</button>
+          <button type="button" class="segbtn" data-rel="out" aria-pressed="false">反相釋放</button>
+        </div>
+        <div class="relstat" id="relStat">目前：只放擺 A</div>
+      </fieldset>
+    </div>
+
+    <div class="card">
+      <h2>量測工具</h2>
+      <div class="row">
+        <button type="button" class="act ghost" id="mLen">長尺量擺長</button>
+        <button type="button" class="act ghost" id="mF">彈簧秤量張力</button>
+        <button type="button" class="act ghost" id="mM">彈簧秤量擺錘</button>
+      </div>
+      <div class="tiny" id="measOut" style="margin-top:10px;min-height:3.2em">
+        量到的值會列在這裡。長尺最小刻度 1 mm、彈簧秤最小刻度 5 gw，讀數本身就有誤差。
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============ CONDITION ============ -->
+<section class="panel" id="p-cond">
+<div class="card">
+  <h2>一、探討發生耦合共振的條件</h2>
+  <p class="tiny" style="margin-top:0">
+    在實驗台上調好一組參數，用「只放擺 A」釋放，等到擺 A 第一次幾乎停下來為止，
+    再回來按「記錄這一組」。系統會把當時的最大能量轉移率存進表中。</p>
+  <div class="row" style="margin-bottom:12px">
+    <button type="button" class="act brass" id="recCond">記錄這一組</button>
+    <button type="button" class="act ghost" id="delCond">刪除最後一列</button>
+    <button type="button" class="act ghost" id="sweepCond">自動掃描擺長 B（12 組）</button>
+  </div>
+  <div style="overflow-x:auto">
+  <table id="tCond">
+    <thead><tr><th>#</th><th>l<sub>A</sub> (cm)</th><th>l<sub>B</sub> (cm)</th><th>螺帽 A</th><th>螺帽 B</th>
+      <th>張力 (gw)</th><th>L (cm)</th><th>最大轉移率</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <canvas class="trace" id="condChart" width="1560" height="420" style="height:230px;margin-top:14px"></canvas>
+  <div class="tiny" id="condHint" style="margin-top:6px">橫軸為擺長差 l<sub>B</sub> − l<sub>A</sub>，縱軸為最大能量轉移率。</div>
+  <div class="note">
+    要回答的問題：轉移率對擺長差有多敏感？兩擺螺帽數不同時，最高轉移率出現在等長處嗎？
+    改變張力或間距 L，共振的「位置」會移動嗎？「寬度」呢？
+  </div>
+</div>
+</section>
+
+<!-- ============ TENSION ============ -->
+<section class="panel" id="p-tens">
+<div class="card">
+  <h2>二、量測能量傳遞的時間</h2>
+  <p class="tiny" style="margin-top:0">
+    直接用碼表量「擺 A 完全停下」的時間誤差很大。較準的做法是分別量兩個簡正模的週期：
+    同相釋放得 T<sub>同</sub>，反相釋放得 T<sub>反</sub>（各計 20 週期），能量轉移時間即
+    <span class="eq">t = T<sub>同</sub>T<sub>反</sub> ⁄ [2(T<sub>同</sub> − T<sub>反</sub>)]</span>。</p>
+  <div class="row" style="margin-bottom:10px;align-items:center">
+    <span class="tiny">兩擺請設為等長、螺帽數相同，且 d 左右對稱。目前狀態：<b id="symOK">—</b></span>
+  </div>
+  <div class="row" style="margin-bottom:12px">
+    <button type="button" class="act brass" id="recTens">新增一列（帶入目前張力）</button>
+    <button type="button" class="act ghost" id="delTens">刪除最後一列</button>
+    <button type="button" class="act ghost" id="autoTens">自動量測 6 組張力</button>
+  </div>
+  <div style="overflow-x:auto">
+  <table id="tTens">
+    <thead><tr><th>#</th><th>張力 (gw)</th><th>20T<sub>同</sub> (s)</th><th>20T<sub>反</sub> (s)</th>
+      <th>L<sub>同</sub> (m)</th><th>L<sub>反</sub> (m)</th><th>ΔL (mm)</th><th>1/F (N⁻¹)</th><th>預測 t (s)</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <div class="tiny" style="margin-top:6px">20T 兩欄可直接手動輸入你自己用碼表量到的秒數。計 20 週期而非 10 週期，是為了把反應時間誤差對週期的影響減半。</div>
+
+  <h3>線性迴歸：ΔL 對 1/F</h3>
+  <p class="tiny" style="margin-top:0">
+    理論給出 <span class="eq">ΔL = 2mgd² ⁄ [F(L+2d)]</span>，所以 ΔL 對 1/F 應為過原點的直線，
+    由斜率可反推擺錘質量 <span class="eq">m = 斜率 × (L+2d) ⁄ (2gd²)</span>。
+    這比用最小刻度 5 gw 的彈簧秤直接秤 20 g 的擺錘準得多。</p>
+  <canvas class="trace" id="regChart" width="1560" height="420" style="height:230px"></canvas>
+  <div class="read" style="margin-top:12px">
+    <div><span>斜率</span><strong id="rSlope" style="font-size:16px">—</strong></div>
+    <div><span>截距</span><strong id="rInt" style="font-size:16px">—</strong></div>
+    <div><span>相關係數 r</span><strong id="rR" style="font-size:16px">—</strong></div>
+    <div><span>推得擺錘質量</span><strong id="rM" style="font-size:16px">—</strong></div>
+  </div>
+  <div class="note" id="regNote">至少需要 3 列資料才能做迴歸。</div>
+</div>
+</section>
+
+<!-- ============ THEORY ============ -->
+<section class="panel" id="p-theory">
+<div class="card">
+  <h2>物理模型</h2>
+  <p>設連接繩張力 F，左端到 A 點長 d₁、A 到 B 長 L、B 到右端長 d₂，令
+    <span class="eq">a = F/d₁，b = F/d₂，c = F/L</span>。懸掛點沒有質量，橫向受力平衡給出</p>
+  <p class="eq" style="text-align:center">(a+c)y₁ − c y₂ = m₁g θ₁　，　(b+c)y₂ − c y₁ = m₂g θ₂</p>
+  <p>也就是說懸掛點位移 y 只由擺角決定。代回擺的運動方程
+    <span class="eq">l θ̈ = −g sinθ − ÿ cosθ</span>，得到一個 2×2 的質量矩陣，每個時間步解一次即可，
+    不需要小角度近似。</p>
+  <h3>對稱情形的簡正模</h3>
+  <p>當 d₁ = d₂ = d、兩擺等長等重時，兩個簡正模的等效擺長為</p>
+  <p class="eq" style="text-align:center">L<sub>同</sub> = l + mgd/F　，　L<sub>反</sub> = l + mgdL / [F(L+2d)]</p>
+  <p>兩者相差 <span class="eq">ΔL = 2mgd² / [F(L+2d)]</span>。同相模等效擺長較長、頻率較低——
+    兩擺同向擺時整串一起晃，等於把擺加長了。能量完全轉移一次所需時間</p>
+  <p class="eq" style="text-align:center">t = π/(ω<sub>反</sub> − ω<sub>同</sub>) ≈ T<sub>平均</sub> · L<sub>平均</sub> / ΔL</p>
+  <div class="warnbox">
+    注意這裡的趨勢：<b>繩子拉得越緊，ΔL 越小，能量轉移越慢</b>。多數人的直覺剛好相反。
+    極限情況是張力無限大時懸掛點完全不動，兩擺就毫無耦合。
+  </div>
+  <h3>共振條件不只是「等長」</h3>
+  <p>把另一擺固定住時，單擺的等效擺長分別是 l₁ + m₁g(b+c)/D 與 l₂ + m₂g(a+c)/D，
+    其中 D = (a+c)(b+c) − c²。兩者相等才共振，所以</p>
+  <ul class="tight">
+    <li>兩擺質量不同時，等長反而<b>不是</b>共振點，較重的一擺要配較短的擺長。</li>
+    <li>但即使補償到頻率相等，質量不等時能量也無法 100% 轉移（數值上約 96%），
+      完全轉移仍需要 m₁ = m₂。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>核對真值</h2>
+  <p class="tiny" style="margin-top:0">寫完報告、做完迴歸再按。每次重新整理頁面，隱藏參數都會重新隨機。</p>
+  <button type="button" class="act brass" id="revealBtn">揭曉本次的真實參數</button>
+  <div id="revealBox" class="hidden" style="margin-top:14px"></div>
+</div>
+</section>
+
+</div>
+
+<script>
+"use strict";
+/* ===================== 隱藏真值（每次載入隨機） ===================== */
+const R=(a,b)=>a+Math.random()*(b-a);
+const gauss=(mu,s)=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();
+  return mu+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+
+const TRUE={
+  g: 9.7890 + gauss(0,0.0008),          // 臺灣重力加速度
+  mNut: R(0.0042,0.0068),               // 每顆螺帽真實質量 (kg)
+  mRig: R(0.0016,0.0026),               // 竹籤+膠帶的質量 (kg)
+  off1: gauss(0,0.0018),                // 擺 A 懸掛點位置系統偏移 (m)
+  off2: gauss(0,0.0018),                // 擺 B
+  Fbias: R(0.975,1.025),                // 彈簧秤刻度偏差
+  react: 0.155                          // 平均反應時間 (s)
+};
+
+/* ===================== 參數狀態 ===================== */
+const P={l1:.30,l2:.30,n1:3,n2:3,Fgw:200,L:.40,d:.30,th0:10*Math.PI/180};
+const st={t:0,th1:0,th2:0,w1:0,w2:0,E0:1,maxRatio:0,running:true,speed:1,mode:"single"};
+
+function mass(n){return TRUE.mRig + n*TRUE.mNut;}
+function trueLen(set,off){return Math.max(0.05,set+off);}
+function trueF(){return P.Fgw*TRUE.Fbias*9.80665/1000;}   // gw -> N
+
+/* 係數：a,b,c,D,p,q,r,s */
+function coef(){
+  const F=trueF(), d1=P.d, d2=P.d, L=P.L;
+  const m1=mass(P.n1), m2=mass(P.n2), g=TRUE.g;
+  const a=F/d1, b=F/d2, c=F/L, D=(a+c)*(b+c)-c*c;
+  return {a,b,c,D,m1,m2,g,
+    p:(b+c)*m1*g/D, q:c*m2*g/D, r:c*m1*g/D, s:(a+c)*m2*g/D,
+    l1:trueLen(P.l1,TRUE.off1), l2:trueLen(P.l2,TRUE.off2)};
+}
+let C=coef();
+function refresh(){C=coef();}
+
+/* ===================== 運動方程 ===================== */
+function accel(th1,th2){
+  const c1=Math.cos(th1), c2=Math.cos(th2);
+  const m11=C.l1+C.p*c1, m12=C.q*c1, m21=C.r*c2, m22=C.l2+C.s*c2;
+  const b1=-C.g*Math.sin(th1), b2=-C.g*Math.sin(th2);
+  const det=m11*m22-m12*m21;
+  return [(b1*m22-m12*b2)/det, (m11*b2-m21*b1)/det];
+}
+function deriv(y){const a=accel(y[0],y[1]);return [y[2],y[3],a[0],a[1]];}
+function step(dt){
+  let y=[st.th1,st.th2,st.w1,st.w2];
+  const k1=deriv(y),
+        k2=deriv(y.map((v,i)=>v+dt/2*k1[i])),
+        k3=deriv(y.map((v,i)=>v+dt/2*k2[i])),
+        k4=deriv(y.map((v,i)=>v+dt*k3[i]));
+  for(let i=0;i<4;i++) y[i]+=dt/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i]);
+  [st.th1,st.th2,st.w1,st.w2]=y; st.t+=dt;
+}
+function pivots(){
+  const y1=((C.b+C.c)*C.m1*C.g*st.th1 + C.c*C.m2*C.g*st.th2)/C.D;
+  const y2=(C.c*C.m1*C.g*st.th1 + (C.a+C.c)*C.m2*C.g*st.th2)/C.D;
+  return [y1,y2];
+}
+function energies(){
+  const e1=.5*C.m1*C.l1*C.l1*st.w1*st.w1 + C.m1*C.g*C.l1*(1-Math.cos(st.th1));
+  const e2=.5*C.m2*C.l2*C.l2*st.w2*st.w2 + C.m2*C.g*C.l2*(1-Math.cos(st.th2));
+  return [e1,e2];
+}
+function release(mode){
+  refresh(); st.mode=mode; st.t=0; st.maxRatio=0; st.w1=st.w2=0; trace.length=0;
+  const A=P.th0;
+  if(mode==="single"){st.th1=A;st.th2=0;}
+  else if(mode==="in"){st.th1=A;st.th2=A;}
+  else {st.th1=A;st.th2=-A;}
+  const e=energies(); st.E0=Math.max(e[0]+e[1],1e-12);
+  swVal=0; swStart=syncErr(); swRunning=true;
+  swBtn.textContent="停止計時"; swDisp.textContent="0.00 s";
+}
+
+/* ===================== 簡正模解析（給自動量測與揭曉用） ===================== */
+function modes(){
+  refresh();
+  const M=[[C.l1+C.p,C.q],[C.r,C.l2+C.s]];
+  const det=M[0][0]*M[1][1]-M[0][1]*M[1][0];
+  const Ainv=[[M[1][1]/det,-M[0][1]/det],[-M[1][0]/det,M[0][0]/det]];
+  // 特徵值 of g * Ainv
+  const A=Ainv[0][0]*C.g,B=Ainv[0][1]*C.g,Cc=Ainv[1][0]*C.g,Dd=Ainv[1][1]*C.g;
+  const tr=A+Dd, dt2=A*Dd-B*Cc, disc=Math.sqrt(Math.max(tr*tr-4*dt2,0));
+  const w2a=(tr-disc)/2, w2b=(tr+disc)/2;
+  return {wIn:Math.sqrt(w2a), wOut:Math.sqrt(w2b)};
+}
+function transferTime(){const m=modes();return Math.PI/(m.wOut-m.wIn);}
+
+/* ===================== 繪圖：實驗台 ===================== */
+const bench=document.getElementById("bench");
+const S=430, KZ=0.46, CX=Math.cos(Math.PI/6), CY=Math.sin(Math.PI/6);
+const X0=210, Y0=96, EXAG=30;
+const PX=(x,z)=>X0 + x*S + z*S*KZ*CX;
+const PY=(y,z)=>Y0 + y*S - z*S*KZ*CY;
+const NS="http://www.w3.org/2000/svg";
+function el(n,at){const e=document.createElementNS(NS,n);for(const k in at)e.setAttribute(k,at[k]);return e;}
+
+function drawBench(){
+  const [y1,y2]=pivots();
+  const ey1=y1*EXAG, ey2=y2*EXAG;
+  const zA=0, zB=P.L, zL=-P.d, zR=P.L+P.d;
+  const b1=PX(ey1+C.l1*Math.sin(st.th1),zA), b1y=PY(C.l1*Math.cos(st.th1),zA);
+  const b2=PX(ey2+C.l2*Math.sin(st.th2),zB), b2y=PY(C.l2*Math.cos(st.th2),zB);
+  const p1=PX(ey1,zA), p1y=PY(0,zA), p2=PX(ey2,zB), p2y=PY(0,zB);
+  const pl=PX(0,zL), ply=PY(0,zL), pr=PX(0,zR), pry=PY(0,zR);
+  const GND=420;
+  let s="";
+  const nut=(cx,cy,col,k)=>{
+    const rr=6.2, pts=[];
+    for(let i=0;i<6;i++){const an=Math.PI/6+i*Math.PI/3;pts.push((cx+rr*Math.cos(an))+","+(cy+k+rr*Math.sin(an)*0.62));}
+    return `<polygon points="${pts.join(" ")}" fill="${col}" stroke="#0d1520" stroke-width=".8"/>`;
+  };
+  // 地面
+  s+=`<line x1="30" y1="${GND}" x2="750" y2="${GND}" stroke="#C8CBC3" stroke-width="2"/>`;
+  // 支架
+  for(const [px,py] of [[pl,ply],[pr,pry]]){
+    s+=`<line x1="${px}" y1="${py}" x2="${px}" y2="${GND}" stroke="#6B7280" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="${px}" cy="${GND}" rx="26" ry="8" fill="#9AA0A6" opacity=".55"/>`;
+  }
+  // 連接繩
+  s+=`<polyline points="${pl},${ply} ${p1},${p1y} ${p2},${p2y} ${pr},${pry}"
+       fill="none" stroke="var(--brass)" stroke-width="2.4" stroke-linejoin="round"/>`;
+  // 未變形基準線
+  s+=`<line x1="${pl}" y1="${ply}" x2="${pr}" y2="${pry}" stroke="#C8CBC3" stroke-width="1" stroke-dasharray="4 4"/>`;
+  // 彈簧秤
+  s+=`<rect x="${pr+8}" y="${pry-11}" width="34" height="22" rx="4" fill="#fff" stroke="#6B7280"/>`;
+  s+=`<text x="${pr+25}" y="${pry+4}" font-size="10.5" text-anchor="middle" fill="#182234">${P.Fgw}</text>`;
+  // 擺 B（較遠，先畫）
+  s+=`<line x1="${p2}" y1="${p2y}" x2="${b2}" y2="${b2y}" stroke="#8B93A1" stroke-width="1.4"/>`;
+  for(let k=0;k<P.n2;k++) s+=nut(b2,b2y,"var(--B)",k*7.4);
+  s+=`<circle cx="${p2}" cy="${p2y}" r="3.4" fill="var(--B)"/>`;
+  // 擺 A
+  s+=`<line x1="${p1}" y1="${p1y}" x2="${b1}" y2="${b1y}" stroke="#8B93A1" stroke-width="1.4"/>`;
+  for(let k=0;k<P.n1;k++) s+=nut(b1,b1y,"var(--A)",k*7.4);
+  s+=`<circle cx="${p1}" cy="${p1y}" r="3.4" fill="var(--A)"/>`;
+  // 標示
+  s+=`<text x="${b1-16}" y="${b1y+26}" font-size="13" fill="var(--A)" font-weight="600">A</text>`;
+  s+=`<text x="${b2+12}" y="${b2y+26}" font-size="13" fill="var(--B)" font-weight="600">B</text>`;
+  s+=`<text x="${(p1+p2)/2}" y="${(p1y+p2y)/2-9}" font-size="11.5" fill="#5A6577" text-anchor="middle">L</text>`;
+  bench.innerHTML=s;
+}
+
+/* ===================== 繪圖：波形 ===================== */
+const trCv=document.getElementById("trace"), trCtx=trCv.getContext("2d");
+const trace=[]; const TRW=70; // 顯示最近 70 秒
+function drawTrace(){
+  const W=trCv.width,H=trCv.height,ctx=trCtx;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle="#E2E4DE";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+  if(trace.length<2)return;
+  const t1=trace[trace.length-1][0], t0=Math.max(0,t1-TRW);
+  const xs=t=>(t-t0)/TRW*W;
+  const amp=Math.max(P.th0,0.02);
+  for(const [idx,col] of [[1,"#0E7B70"],[2,"#B03060"]]){
+    ctx.strokeStyle=col;ctx.lineWidth=2.2;ctx.beginPath();let first=true;
+    for(const pt of trace){ if(pt[0]<t0)continue;
+      const x=xs(pt[0]), y=H/2-pt[idx]/amp*(H/2-14);
+      if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);}
+    ctx.stroke();
+  }
+  ctx.fillStyle="#5A6577";ctx.font="22px system-ui";
+  ctx.fillText(t0.toFixed(0)+" s",8,H-10);
+  ctx.textAlign="right";ctx.fillText(t1.toFixed(0)+" s",W-8,H-10);ctx.textAlign="left";
+  ctx.fillStyle="#0E7B70";ctx.fillText("擺 A 擺角",8,26);
+  ctx.fillStyle="#B03060";ctx.fillText("擺 B 擺角",8,52);
+}
+
+/* ===================== 主迴圈 ===================== */
+let last=performance.now(), acc=0;
+const DT=0.002;
+function loop(now){
+  const dtReal=Math.min((now-last)/1000,0.12); last=now;
+  if(st.running){
+    acc+=dtReal*st.speed;
+    let guard=0;
+    while(acc>DT && guard++<4000){ step(DT); acc-=DT;
+      const e=energies(); const ratio=e[1]/st.E0;
+      if(ratio>st.maxRatio) st.maxRatio=ratio;
+      if(trace.length===0 || st.t-trace[trace.length-1][0]>0.02) trace.push([st.t,st.th1,st.th2]);
+      while(trace.length>6000) trace.shift();
+    }
+  }
+  drawBench(); drawTrace(); updateRead();
+  requestAnimationFrame(loop);
+}
+function updateRead(){
+  const e=energies(), tot=e[0]+e[1];
+  document.getElementById("rE1").textContent=(e[0]/st.E0*100).toFixed(1)+"%";
+  document.getElementById("rE2").textContent=(e[1]/st.E0*100).toFixed(1)+"%";
+  document.getElementById("rMax").textContent=(st.maxRatio*100).toFixed(1)+"%";
+  document.getElementById("rT").textContent=st.t.toFixed(1)+" s";
+  if(swRunning) swDisp.textContent=Math.max(0,st.t-swStart).toFixed(2)+" s";
+  const stEl=document.getElementById("swState");
+  const mode = !st.running ? "paused" : (swRunning ? "run" : "held");
+  stEl.className="swstate "+mode;
+  stEl.textContent = mode==="paused" ? "模擬已暫停" : (mode==="run" ? "計時中" : "已停錶");
+  swDisp.classList.toggle("dim", mode!=="run");
+}
+
+/* ===================== 控制項 ===================== */
+function bind(id,key,fmt,scale){
+  const inp=document.getElementById(id), lab=document.getElementById("v"+id);
+  const upd=()=>{const v=parseFloat(inp.value); P[key]=scale?v*scale:v; lab.textContent=fmt(v); refresh(); checkSym();};
+  inp.addEventListener("input",upd); upd();
+}
+bind("l1","l1",v=>v.toFixed(1)+" cm",0.01);
+bind("l2","l2",v=>v.toFixed(1)+" cm",0.01);
+bind("n1","n1",v=>v+" 個");
+bind("n2","n2",v=>v+" 個");
+bind("F","Fgw",v=>v+" gw");
+bind("L","L",v=>v.toFixed(1)+" cm",0.01);
+bind("d","d",v=>v.toFixed(1)+" cm",0.01);
+document.getElementById("th0").addEventListener("input",e=>{
+  P.th0=parseFloat(e.target.value)*Math.PI/180;
+  document.getElementById("vth").textContent=parseFloat(e.target.value).toFixed(1)+"°";});
+document.getElementById("exagLbl").textContent=EXAG;
+
+const REL_TXT={single:"只放擺 A —— 能量會在兩擺間來回傳遞，這是量轉移時間用的",
+  in:"同相釋放 —— 純簡正模，兩擺等幅同向擺動，<b>不會</b>有能量交換，用來量 T<sub>同</sub>",
+  out:"反相釋放 —— 純簡正模，兩擺等幅反向擺動，<b>不會</b>有能量交換，用來量 T<sub>反</sub>"};
+document.querySelectorAll("[data-rel]").forEach(b=>b.addEventListener("click",()=>{
+  release(b.dataset.rel);
+  document.querySelectorAll("[data-rel]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+  document.getElementById("relStat").innerHTML=REL_TXT[b.dataset.rel];
+}));
+document.getElementById("pause").addEventListener("click",e=>{
+  st.running=!st.running; e.target.textContent=st.running?"暫停":"繼續";});
+document.getElementById("spd").addEventListener("change",e=>st.speed=parseFloat(e.target.value));
+
+/* 分頁 */
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.p));
+  if(b.dataset.p==="cond") drawCond();
+  if(b.dataset.p==="tens") drawReg();
+}));
+
+/* ===================== 碼表 ===================== */
+const swDisp=document.getElementById("swDisp"), swBtn=document.getElementById("swBtn");
+let swRunning=false, swStart=0, swVal=0;
+function reaction(){return Math.max(0.03,gauss(TRUE.react,0.055));}   // 未預期事件：純反應時間
+function syncErr(){return gauss(0,0.050);}                            // 與釋放同步：可能早也可能晚
+function stopErr(){return gauss(0.080,0.070);}                        // 可預期事件：略偏晚
+swBtn.addEventListener("click",()=>{
+  if(!swRunning){ swStart=st.t+reaction(); swRunning=true; swBtn.textContent="停止計時"; }
+  else { const stop=st.t+stopErr(); swVal=Math.max(0,stop-swStart); swRunning=false;
+    swDisp.textContent=swVal.toFixed(2)+" s"; swBtn.textContent="開始計時"; }
+});
+function swStop(){swRunning=false;swBtn.textContent="開始計時";}
+document.getElementById("swReset").addEventListener("click",()=>{swStop();swVal=0;swDisp.textContent="0.00 s";});
+
+/* ===================== 量測工具 ===================== */
+const measOut=document.getElementById("measOut");
+function ruler(trueVal){ // 長尺：1 mm 刻度 + 讀數誤差
+  return Math.round((trueVal*1000+gauss(0,0.45)))/1000;
+}
+function scale5(trueN){ // 彈簧秤：5 gw 最小刻度
+  const gw=trueN/9.80665*1000;
+  return Math.round((gw+gauss(0,2.2))/5)*5;
+}
+document.getElementById("mLen").addEventListener("click",()=>{
+  refresh();
+  measOut.innerHTML=`長尺讀數：擺 A <b>${(ruler(C.l1)*100).toFixed(1)} cm</b>　／　`+
+    `擺 B <b>${(ruler(C.l2)*100).toFixed(1)} cm</b><br>`+
+    `<span class="tiny">量的是懸掛點到螺帽重心的距離，和滑桿設定值未必相同。</span>`;
+});
+document.getElementById("mF").addEventListener("click",()=>{
+  measOut.innerHTML=`彈簧秤讀數：<b>${scale5(trueF())} gw</b>　`+
+    `<span class="tiny">（設定值 ${P.Fgw} gw）</span>`;
+});
+document.getElementById("mM").addEventListener("click",()=>{
+  const g=9.80665;
+  measOut.innerHTML=`擺錘 A：<b>${scale5(mass(P.n1)*g)} gw</b>　／　擺錘 B：<b>${scale5(mass(P.n2)*g)} gw</b><br>`+
+    `<span class="tiny">最小刻度 5 gw，秤 20 g 左右的東西只有 4 格，精度很差——這正是要改用迴歸的理由。</span>`;
+});
+
+/* ===================== 表一：共振條件 ===================== */
+const condRows=[];
+const tCondBody=document.querySelector("#tCond tbody");
+function renderCond(){
+  tCondBody.innerHTML=condRows.map((r,i)=>
+    `<tr><td>${i+1}</td><td>${(r.l1*100).toFixed(1)}</td><td>${(r.l2*100).toFixed(1)}</td>
+     <td>${r.n1}</td><td>${r.n2}</td><td>${r.F}</td><td>${(r.L*100).toFixed(1)}</td>
+     <td><b>${(r.ratio*100).toFixed(1)}%</b></td></tr>`).join("");
+  drawCond();
+}
+document.getElementById("recCond").addEventListener("click",()=>{
+  condRows.push({l1:P.l1,l2:P.l2,n1:P.n1,n2:P.n2,F:P.Fgw,L:P.L,ratio:st.maxRatio});
+  renderCond();
+});
+document.getElementById("delCond").addEventListener("click",()=>{condRows.pop();renderCond();});
+document.getElementById("sweepCond").addEventListener("click",()=>{
+  const base=P.l2, saved={...P};
+  for(let i=0;i<12;i++){
+    P.l2=base-0.04+i*0.008; refresh();
+    const ratio=peakRatio();
+    condRows.push({l1:P.l1,l2:P.l2,n1:P.n1,n2:P.n2,F:P.Fgw,L:P.L,ratio});
+  }
+  Object.assign(P,saved); refresh();
+  document.getElementById("l2").value=(P.l2*100).toFixed(1);
+  document.getElementById("vl2").textContent=(P.l2*100).toFixed(1)+" cm";
+  renderCond();
+});
+/* 用解析法快速求最大轉移率（不干擾畫面） */
+function peakRatio(){
+  const save=[st.th1,st.th2,st.w1,st.w2,st.t];
+  st.th1=P.th0;st.th2=0;st.w1=st.w2=0;
+  const E0=energies()[0]; let mx=0;
+  const T=Math.min(4*Math.abs(transferTime())+8,400);
+  const n=Math.round(T/0.004);
+  for(let i=0;i<n;i++){ step(0.004);
+    const r=energies()[1]/E0; if(r>mx)mx=r; }
+  [st.th1,st.th2,st.w1,st.w2,st.t]=save;
+  return mx;
+}
+const condCv=document.getElementById("condChart"), condCtx=condCv.getContext("2d");
+function drawCond(){
+  const W=condCv.width,H=condCv.height,ctx=condCtx,PAD=54;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle="#C8CBC3";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(PAD,12);ctx.lineTo(PAD,H-PAD);ctx.lineTo(W-14,H-PAD);ctx.stroke();
+  ctx.fillStyle="#5A6577";ctx.font="22px system-ui";
+  ctx.fillText("轉移率",6,26); ctx.textAlign="right";ctx.fillText("l_B − l_A (cm)",W-14,H-14);ctx.textAlign="left";
+  if(!condRows.length)return;
+  const xs=condRows.map(r=>(r.l2-r.l1)*100);
+  let lo=Math.min(...xs,-1), hi=Math.max(...xs,1); if(hi-lo<2){lo-=1;hi+=1;}
+  const X=v=>PAD+(v-lo)/(hi-lo)*(W-PAD-18), Y=v=>H-PAD-v*(H-PAD-18);
+  for(let f=0;f<=1.0001;f+=0.25){
+    ctx.strokeStyle="#EDEEE9";ctx.beginPath();ctx.moveTo(PAD,Y(f));ctx.lineTo(W-14,Y(f));ctx.stroke();
+    ctx.fillStyle="#8B93A1";ctx.fillText((f*100).toFixed(0)+"%",4,Y(f)+8);
+  }
+  ctx.strokeStyle="#C8CBC3";ctx.setLineDash([6,6]);
+  ctx.beginPath();ctx.moveTo(X(0),12);ctx.lineTo(X(0),H-PAD);ctx.stroke();ctx.setLineDash([]);
+  const sorted=[...condRows].map((r,i)=>({x:(r.l2-r.l1)*100,y:r.ratio})).sort((a,b)=>a.x-b.x);
+  ctx.strokeStyle="#B0882988";ctx.lineWidth=2;ctx.beginPath();
+  sorted.forEach((p,i)=>i?ctx.lineTo(X(p.x),Y(p.y)):ctx.moveTo(X(p.x),Y(p.y)));ctx.stroke();
+  ctx.fillStyle="#B03060";
+  sorted.forEach(p=>{ctx.beginPath();ctx.arc(X(p.x),Y(p.y),5,0,7);ctx.fill();});
+}
+
+/* ===================== 表二：張力與迴歸 ===================== */
+const tensRows=[];
+const tTensBody=document.querySelector("#tTens tbody");
+function symCheck(){
+  return Math.abs(P.l1-P.l2)<1e-9 && P.n1===P.n2;
+}
+function checkSym(){
+  const s=document.getElementById("symOK"); if(!s)return;
+  const ok=symCheck();
+  s.textContent=ok?"對稱，可以進行":"兩擺不對稱，理論式不適用";
+  s.style.color=ok?"var(--A)":"var(--warn)";
+}
+/* 模擬用碼表量 10 個週期（含反應時間） */
+function measure10T(mode){
+  const m=modes();
+  const w=(mode==="in")?m.wIn:m.wOut;
+  const T=2*Math.PI/w;
+  return 20*T + stopErr() - syncErr();   // 起錶隨釋放同步，停錶有預期但略偏晚
+}
+function pushTens(Fgw){
+  const saved=P.Fgw; P.Fgw=Fgw; refresh();
+  tensRows.push({F:Fgw, t10in:measure10T("in"), t10out:measure10T("out")});
+  P.Fgw=saved; refresh();
+}
+function renderTens(){
+  const g=9.7890, d=P.d, L=P.L;
+  tTensBody.innerHTML=tensRows.map((r,i)=>{
+    const Ti=r.t10in/20, To=r.t10out/20;
+    const Li=g*Ti*Ti/(4*Math.PI*Math.PI), Lo=g*To*To/(4*Math.PI*Math.PI);
+    const dL=Li-Lo, FN=r.F*9.80665/1000;
+    const tt=(Ti*To)/(2*Math.max(Ti-To,1e-9));
+    return `<tr><td>${i+1}</td><td>${r.F}</td>
+      <td><input data-i="${i}" data-k="t10in" value="${r.t10in.toFixed(2)}"></td>
+      <td><input data-i="${i}" data-k="t10out" value="${r.t10out.toFixed(2)}"></td>
+      <td>${Li.toFixed(5)}</td><td>${Lo.toFixed(5)}</td>
+      <td>${(dL*1000).toFixed(2)}</td><td>${(1/FN).toFixed(4)}</td><td>${tt.toFixed(1)}</td></tr>`;
+  }).join("");
+  tTensBody.querySelectorAll("input").forEach(inp=>inp.addEventListener("change",e=>{
+    const v=parseFloat(e.target.value);
+    if(isFinite(v)) tensRows[+e.target.dataset.i][e.target.dataset.k]=v;
+    renderTens();
+  }));
+  drawReg();
+}
+document.getElementById("recTens").addEventListener("click",()=>{pushTens(P.Fgw);renderTens();});
+document.getElementById("delTens").addEventListener("click",()=>{tensRows.pop();renderTens();});
+document.getElementById("autoTens").addEventListener("click",()=>{
+  [80,110,140,170,200,240].forEach(f=>pushTens(f)); renderTens();
+});
+
+function fit(pts){
+  const n=pts.length; if(n<3)return null;
+  let sx=0,sy=0,sxx=0,sxy=0,syy=0;
+  for(const [x,y] of pts){sx+=x;sy+=y;sxx+=x*x;sxy+=x*y;syy+=y*y;}
+  const den=n*sxx-sx*sx;
+  const m=(n*sxy-sx*sy)/den, b=(sxx*sy-sx*sxy)/den;
+  let ss=0; for(const [x,y] of pts) ss+=(y-(m*x+b))**2;
+  const se=Math.sqrt(ss/(n-2)), sm=se*Math.sqrt(n/den);
+  const r=(n*sxy-sx*sy)/Math.sqrt(den*(n*syy-sy*sy));
+  return {m,b,r,sm,se};
+}
+const regCv=document.getElementById("regChart"), regCtx=regCv.getContext("2d");
+let lastFit=null;
+function drawReg(){
+  const g=9.7890,d=P.d,L=P.L;
+  const pts=tensRows.map(r=>{
+    const Ti=r.t10in/20,To=r.t10out/20, FN=r.F*9.80665/1000;
+    return [1/FN, g*(Ti*Ti-To*To)/(4*Math.PI*Math.PI)];
+  });
+  const W=regCv.width,H=regCv.height,ctx=regCtx,PAD=64;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle="#C8CBC3";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(PAD,12);ctx.lineTo(PAD,H-PAD);ctx.lineTo(W-14,H-PAD);ctx.stroke();
+  ctx.fillStyle="#5A6577";ctx.font="22px system-ui";
+  ctx.fillText("ΔL (m)",6,26); ctx.textAlign="right";ctx.fillText("1/F (N⁻¹)",W-14,H-14);ctx.textAlign="left";
+  const f=fit(pts); lastFit=f;
+  const out=(id,v)=>document.getElementById(id).textContent=v;
+  if(!f){ out("rSlope","—");out("rInt","—");out("rR","—");out("rM","—");
+    document.getElementById("regNote").textContent="至少需要 3 列資料才能做迴歸。"; }
+  if(pts.length){
+    const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+    const x0=0,x1=Math.max(...xs)*1.1,y0=0,y1=Math.max(...ys)*1.15||1;
+    const X=v=>PAD+(v-x0)/(x1-x0)*(W-PAD-18), Y=v=>H-PAD-(v-y0)/(y1-y0)*(H-PAD-18);
+    if(f){ctx.strokeStyle="#182234";ctx.lineWidth=2;ctx.beginPath();
+      ctx.moveTo(X(x0),Y(f.m*x0+f.b));ctx.lineTo(X(x1),Y(f.m*x1+f.b));ctx.stroke();}
+    ctx.fillStyle="#0E7B70";
+    pts.forEach(p=>{ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),5.5,0,7);ctx.fill();});
+  }
+  if(f){
+    const mDer=f.m*(L+2*d)/(2*9.7890*d*d);
+    const sM=f.sm*(L+2*d)/(2*9.7890*d*d);
+    out("rSlope",f.m.toFixed(5)+" m·N");
+    out("rInt",f.b.toExponential(2)+" m");
+    out("rR",f.r.toFixed(5));
+    out("rM",(mDer*1000).toFixed(2)+" ± "+(sM*1000).toFixed(2)+" g");
+    const mTrue=mass(P.n1);
+    const sigma=Math.abs(mDer-mTrue)/Math.max(sM,1e-12);
+    document.getElementById("regNote").innerHTML=
+      `迴歸得擺錘質量 <b>${(mDer*1000).toFixed(2)} g</b>，標準差 ${(sM*1000).toFixed(2)} g。`+
+      `　核對後可在「理論與核對」分頁看到真值與偏差（目前偏離 ${sigma.toFixed(2)} σ）。`;
+  }
+}
+checkSym();
+
+/* ===================== 揭曉 ===================== */
+document.getElementById("revealBtn").addEventListener("click",()=>{
+  const box=document.getElementById("revealBox");
+  refresh();
+  const mTrue=mass(P.n1);
+  let extra="";
+  if(lastFit){
+    const mDer=lastFit.m*(P.L+2*P.d)/(2*9.7890*P.d*P.d);
+    const sM=lastFit.sm*(P.L+2*P.d)/(2*9.7890*P.d*P.d);
+    const sig=Math.abs(mDer-mTrue)/Math.max(sM,1e-12);
+    extra=`<tr><td style="text-align:left">迴歸推得擺錘質量</td><td>${(mDer*1000).toFixed(2)} g</td>
+      <td>${(mTrue*1000).toFixed(2)} g</td><td><b>${sig.toFixed(2)} σ</b></td></tr>`;
+  }
+  const m=modes();
+  box.innerHTML=`<table><thead><tr><th>項目</th><th>你得到的</th><th>真值</th><th>偏差</th></tr></thead><tbody>
+    <tr><td style="text-align:left">重力加速度</td><td>—</td><td>${TRUE.g.toFixed(4)} m/s²</td><td>—</td></tr>
+    <tr><td style="text-align:left">每顆螺帽質量</td><td>—</td><td>${(TRUE.mNut*1000).toFixed(2)} g</td><td>—</td></tr>
+    <tr><td style="text-align:left">竹籤＋膠帶質量</td><td>—</td><td>${(TRUE.mRig*1000).toFixed(2)} g</td><td>—</td></tr>
+    <tr><td style="text-align:left">擺 A 實際長度</td><td>設定 ${(P.l1*100).toFixed(1)} cm</td><td>${(C.l1*100).toFixed(2)} cm</td><td>${((C.l1-P.l1)*1000).toFixed(1)} mm</td></tr>
+    <tr><td style="text-align:left">擺 B 實際長度</td><td>設定 ${(P.l2*100).toFixed(1)} cm</td><td>${(C.l2*100).toFixed(2)} cm</td><td>${((C.l2-P.l2)*1000).toFixed(1)} mm</td></tr>
+    <tr><td style="text-align:left">實際張力</td><td>刻度 ${P.Fgw} gw</td><td>${(trueF()/9.80665*1000).toFixed(1)} gw</td><td>${((TRUE.Fbias-1)*100).toFixed(1)}%</td></tr>
+    <tr><td style="text-align:left">同相模週期</td><td>—</td><td>${(2*Math.PI/m.wIn).toFixed(4)} s</td><td>—</td></tr>
+    <tr><td style="text-align:left">反相模週期</td><td>—</td><td>${(2*Math.PI/m.wOut).toFixed(4)} s</td><td>—</td></tr>
+    <tr><td style="text-align:left">能量完全轉移時間</td><td>碼表 ${swVal.toFixed(2)} s</td><td>${transferTime().toFixed(2)} s</td><td>—</td></tr>
+    ${extra}</tbody></table>
+    <p class="tiny">擺長偏移來自懸掛點與螺帽重心位置的不確定，彈簧秤刻度偏差則是系統誤差——
+    這兩項在真實實驗裡都存在，也是為什麼要靠迴歸的斜率而不是單點計算。</p>`;
+  box.classList.remove("hidden");
+});
+
+/* ===================== 啟動 ===================== */
+release("single");
+document.getElementById("relStat").innerHTML=REL_TXT.single;
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
