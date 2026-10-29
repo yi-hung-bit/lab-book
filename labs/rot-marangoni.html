@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>珍珠浮盤旋轉實驗　線上模擬實驗室</title>
+<style>
+:root{
+  --bg:#f4f6f8; --panel:#ffffff; --ink:#1b2430; --muted:#5d6b7a;
+  --line:#dde3ea; --accent:#0d6e8c; --accent2:#12897f; --warn:#c2410c;
+  --danger:#b91c1c; --ok:#15803d; --water:#cfe6f2;
+  --shadow:0 1px 3px rgba(16,32,48,.08),0 6px 18px rgba(16,32,48,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
+  font-size:15px; line-height:1.65; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 16px 60px}
+header.top{margin-bottom:14px}
+header.top h1{font-size:20px;margin:0 0 4px;letter-spacing:.5px}
+header.top p{margin:0;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:14px;margin-bottom:14px}
+.card h2{font-size:14px;margin:0 0 10px;letter-spacing:1px;color:var(--accent);
+  border-bottom:1px solid var(--line);padding-bottom:7px;font-weight:700}
+.card h3{font-size:13px;margin:14px 0 6px;color:var(--ink)}
+canvas{display:block;width:100%;border-radius:8px}
+#sim{background:#eef3f6;border:1px solid var(--line);aspect-ratio:1/1;max-height:470px;margin-inline:auto}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.row.tight{gap:6px;margin:6px 0}
+label.lab{font-size:12px;color:var(--muted);min-width:66px}
+button{
+  font-family:inherit;font-size:13px;padding:6px 12px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--line);background:#fff;color:var(--ink);transition:.12s;
+}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button:active{transform:translateY(1px)}
+button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+button.pri:hover{background:#0b5e78;color:#fff}
+button.warn{background:#fff7ed;border-color:#fdba74;color:var(--warn)}
+button.ghost{background:#f8fafb}
+button:disabled{opacity:.42;cursor:not-allowed;transform:none}
+button.chip{padding:5px 11px;border-radius:99px;font-size:12.5px}
+button.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+button.chip.unk{border-style:dashed;border-color:#b08968;color:#8a5a2b}
+button.chip.unk.on{background:#8a5a2b;border-color:#8a5a2b;color:#fff;border-style:solid}
+input[type=number]{font-family:inherit;font-size:13px;padding:5px 7px;width:70px;
+  border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink)}
+input[type=range]{flex:1;min-width:130px;accent-color:var(--accent)}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.meter{background:#f8fafb;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.meter .k{font-size:11px;color:var(--muted);letter-spacing:.5px}
+.meter .v{font-size:17px;font-variant-numeric:tabular-nums;font-weight:600}
+.bar{height:6px;background:#e5ebf0;border-radius:99px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--accent2);transition:width .2s}
+.bar.alc>i{background:linear-gradient(90deg,#84cc16,#f59e0b,#dc2626)}
+.clock{font-variant-numeric:tabular-nums;font-size:40px;font-weight:600;letter-spacing:1px;
+  text-align:center;padding:4px 0 0;line-height:1.1}
+.clock small{display:block;font-size:12px;font-weight:400;color:var(--muted);letter-spacing:2px}
+.laps{text-align:center;font-size:14px;color:var(--muted);margin-bottom:8px}
+.laps b{font-size:24px;color:var(--ink);font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:right;white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11.5px;text-align:right;background:#f8fafb}
+th:first-child,td:first-child{text-align:left}
+.scroll{max-height:250px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+td .del{border:none;background:none;color:#b91c1c;padding:0 4px;font-size:14px;cursor:pointer}
+.empty{color:var(--muted);font-size:12.5px;text-align:center;padding:18px 0}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.note{font-size:12px;color:var(--muted);margin:8px 0 0}
+.note.warnbox{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:8px 10px;border-radius:6px}
+.tasks{font-size:13px;margin:0;padding-left:1.2em}
+.tasks li{margin-bottom:6px}
+.tasks b{color:var(--accent)}
+details{border-top:1px solid var(--line);padding-top:8px;margin-top:10px}
+summary{cursor:pointer;font-size:13px;color:var(--accent);font-weight:600;outline:none}
+details p,details li{font-size:12.5px;color:#3d4a58}
+.kbd{background:#eef2f5;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:11.5px}
+.switch{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
+.switch input{accent-color:var(--accent);width:15px;height:15px}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;background:#eef2f5;color:var(--muted)}
+.badge.teach{background:#fdf2f8;color:#9d174d}
+.avgtab td:first-child{font-weight:600}
+hr.sep{border:none;border-top:1px dashed var(--line);margin:12px 0}
+.footnote{font-size:11.5px;color:var(--muted);text-align:center;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>珍珠浮盤旋轉實驗　線上模擬實驗室</h1>
+  <p>酒精水溶液的表面張力梯度（Marangoni 效應）驅動浮盤旋轉　·　可量測角速度隨濃度與浮盤邊長的變化</p>
+</header>
+
+<div class="grid">
+
+<!-- ============ 左欄：模擬與操作 ============ -->
+<div>
+  <div class="card">
+    <h2>實驗裝置（俯視）</h2>
+    <canvas id="sim"></canvas>
+
+    <div class="meters">
+      <div class="meter">
+        <div class="k">漏斗餘量</div>
+        <div class="v"><span id="mFunnel">0.00</span> mL</div>
+        <div class="bar"><i id="bFunnel" style="width:0%"></i></div>
+      </div>
+      <div class="meter">
+        <div class="k">水盆酒精濃度</div>
+        <div class="v"><span id="mBath">0.00</span> %</div>
+        <div class="bar alc"><i id="bBath" style="width:0%"></i></div>
+      </div>
+    </div>
+    <div id="bathWarn" class="note warnbox" style="display:none">
+      水盆內已累積酒精，水面本身的表面張力下降，推力會變小、轉速偏低。請按「換水」重置。
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="btnFill" class="ghost">裝填漏斗（2.0 mL）</button>
+      <button id="btnDrip" class="pri">開始滴入</button>
+      <button id="btnWater" class="warn">換水</button>
+      <button id="btnStopAll" class="ghost">全部重置</button>
+    </div>
+    <div id="trueOmega" class="note" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <h2>實驗條件</h2>
+
+    <div class="row tight"><label class="lab">滴入溶液</label></div>
+    <div class="row tight" id="concChips"></div>
+    <div class="row tight">
+      <label class="lab">自訂濃度</label>
+      <input type="number" id="cCustom" min="0" max="95" step="1" value="20">
+      <span style="font-size:12.5px;color:var(--muted)">%</span>
+      <button id="btnCustom" class="chip">套用</button>
+    </div>
+
+    <hr class="sep">
+
+    <div class="row tight"><label class="lab">浮盤邊長</label></div>
+    <div class="row tight" id="sizeChips"></div>
+    <div class="row tight">
+      <input type="range" id="sizeRange" min="4" max="12" step="0.5" value="9">
+      <span style="font-size:13px;font-variant-numeric:tabular-nums"><b id="sizeVal">9.0</b> cm</span>
+    </div>
+
+    <div class="note">
+      第二題固定邊長 90 mm，改變濃度；第四題固定 20% 酒精，改變邊長 5 / 7 / 9 / 11 cm。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>本次實驗任務</h2>
+    <ol class="tasks">
+      <li><b>第二題（15%）</b>　邊長固定 90 mm，測 0%～95% 各濃度的平均角速度，每條件至少 5 次取平均，作 ω–log₁₀(濃度) 圖。</li>
+      <li><b>第三題（10%）</b>　量測未知溶液 A、B 的轉動週期，對照第二題結果推論其濃度。</li>
+      <li><b>第四題（5%）</b>　20% 酒精下，測邊長 5、7、9、11 cm 的平均週期，作 T–邊長 圖。</li>
+      <li><b>第五題（5%）</b>　描述現象並解釋轉動成因（見下方「物理原理」）。</li>
+    </ol>
+    <div class="note">量測時請至少等系統轉過半圈、轉速穩定後再開始計時。</div>
+  </div>
+</div>
+
+<!-- ============ 右欄：量測與數據 ============ -->
+<div>
+  <div class="card">
+    <h2>碼錶與計圈</h2>
+    <div class="clock"><span id="clk">0.00</span><small>秒</small></div>
+    <div class="laps">已完成圈數　<b id="lapN">0</b></div>
+    <div class="row" style="justify-content:center">
+      <button id="btnClk" class="pri">開始計時</button>
+      <button id="btnClkReset" class="ghost">歸零</button>
+      <button id="btnRec" class="ghost" disabled>記錄此次數據</button>
+    </div>
+    <div class="row" style="justify-content:center">
+      <label class="switch"><input type="checkbox" id="autoClock" checked> 開始滴入即自動計時（轉過半圈後起算）</label>
+    </div>
+    <div class="row" style="justify-content:center">
+      <label class="switch"><input type="checkbox" id="autoStop" checked> 轉滿
+        <input type="number" id="autoLaps" min="1" max="20" step="1" value="3" style="width:52px"> 圈自動停錶</label>
+    </div>
+    <div class="row" style="justify-content:center">
+      <label class="switch"><input type="checkbox" id="humanErr" checked> 模擬人為計時誤差</label>
+      <label class="switch"><input type="checkbox" id="teachMode"> 教師模式</label>
+    </div>
+    <div id="recHint" class="note" style="text-align:center"></div>
+  </div>
+
+  <div class="card">
+    <h2>數據記錄</h2>
+    <div class="scroll">
+      <table id="tbl">
+        <thead><tr>
+          <th>#</th><th>溶液</th><th>邊長<br>(cm)</th><th>時間<br>(s)</th><th>圈數</th>
+          <th>週期 T<br>(s)</th><th>ω<br>(rad/s)</th><th>水盆<br>(%)</th><th></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div id="tblEmpty" class="empty">尚無數據。設定條件 → 滴入溶液 → 待轉速穩定 → 計時 → 記錄。</div>
+    </div>
+    <div class="row">
+      <button id="btnCSV" class="ghost">匯出 CSV</button>
+      <button id="btnClear" class="ghost">清除全部數據</button>
+      <span class="badge" id="nRec">0 筆</span>
+    </div>
+
+    <h3>各條件平均值</h3>
+    <div class="scroll" style="max-height:200px">
+      <table class="avgtab">
+        <thead><tr><th>條件</th><th>次數</th><th>T 平均<br>(s)</th><th>標準差</th><th>ω 平均<br>(rad/s)</th></tr></thead>
+        <tbody id="avgBody"></tbody>
+      </table>
+      <div id="avgEmpty" class="empty">每一條件至少量測 5 次才具代表性。</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>數據作圖</h2>
+    <div class="tabs">
+      <button class="chip on" data-chart="A">ω – log₁₀(濃度)</button>
+      <button class="chip" data-chart="B">T – 浮盤邊長</button>
+    </div>
+    <canvas id="chart" style="aspect-ratio:4/3;background:#fff"></canvas>
+    <div id="chartNote" class="note"></div>
+  </div>
+
+  <div class="card">
+    <h2>物理原理與模型說明</h2>
+    <details open>
+      <summary>為什麼系統會轉動？（第五題）</summary>
+      <p>小舟漏斗流出的酒精水溶液，使小舟<b>後方</b>水面的表面張力降低（純水約 72 mN/m，20% 酒精約 38 mN/m）。
+      小舟前後所受的水面張力不再平衡，淨力指向表面張力較<b>高</b>的一側，也就是把小舟往前推，這就是
+      <b>Marangoni 效應</b>。小舟位於正方形浮盤的一角，此推力對中心大頭針形成力矩，系統便持續旋轉。</p>
+      <p>穩定轉速由「推力矩 = 阻力矩」決定：浮盤底面的黏滯剪力與小舟本身的形狀阻力隨轉速增加，直到與推力矩平衡。</p>
+    </details>
+    <details>
+      <summary>本模擬採用的定量模型</summary>
+      <p><b>1. 表面張力</b>　γ(c) 取乙醇–水混合液 25 °C 實測值內插：0%→72.0、5%→56.4、10%→48.1、20%→38.0、50%→27.9、95%→22.2 mN/m。低濃度段下降極陡，是 ω 對 log(c) 呈近似線性的主因。</p>
+      <p><b>2. 推力</b>　F = (γ<sub>水盆</sub> − γ<sub>滴入液</sub>) × w，w 為小舟有效寬度（12 mm）。水盆酒精濃度上升會使 γ<sub>水盆</sub> 下降、推力變小；若滴入液比水盆還「乾淨」，推力甚至反向。</p>
+      <p><b>3. 阻力矩</b>　浮盤底面用旋轉盤層流解 τ<sub>盤</sub> = 1.935 ρ√ν R<sup>4</sup> ω<sup>3/2</sup>（R 為等面積半徑 L/√π）；小舟形狀阻力 τ<sub>舟</sub> = ½C<sub>D</sub>ρA r³ω²；另加轉軸靜摩擦門檻。</p>
+      <p><b>4. 邊長效應</b>　若只有浮盤黏滯阻力，T ∝ L²；加入小舟阻力後實際約 T ∝ L<sup>1.5</sup>。這個偏離正是第四題值得討論之處。</p>
+      <p><b>簡化之處</b>　假設漏斗流量足以維持後方液膜、忽略溫度變化與水盆邊界效應，浮盤轉動慣量在此尺度下可忽略（啟動時間 ≪ 1 s，模擬中以 0.5 s 弛豫時間呈現流場建立過程）。</p>
+    </details>
+  </div>
+</div>
+</div>
+
+<div class="footnote">單檔離線可用　·　可直接嵌入 Google Sites 或放上 Google Classroom</div>
+</div>
+
+<script>
+"use strict";
+/* ============================ 物理模型 ============================ */
+const GT=[[0,72.0],[1,67.0],[2,63.5],[3,60.8],[5,56.4],[7.5,51.8],[10,48.1],[15,42.2],
+          [20,38.0],[25,35.3],[30,33.2],[40,30.2],[50,27.9],[60,26.2],[70,25.0],
+          [80,23.8],[90,22.6],[95,22.2],[100,22.0]];
+function gammaOf(c){                       // mN/m
+  c=Math.max(0,Math.min(100,c));
+  for(let i=1;i<GT.length;i++){
+    const[x0,y0]=GT[i-1],[x1,y1]=GT[i];
+    if(c<=x1) return y0+(y1-y0)*(c-x0)/(x1-x0);
+  }
+  return 22.0;
+}
+const RHO=1000, NU=1e-6, W_EFF=0.012, CD=1.0, A_BOAT=4.5e-5, TAU_PIN=2.0e-7;
+
+function omegaSteady(cDrop,cBath,Lm){
+  const dg=(gammaOf(cBath)-gammaOf(cDrop))*1e-3;       // N/m，可為負
+  const r=Lm/Math.SQRT2, Req=Lm/Math.sqrt(Math.PI);
+  const drive=dg*W_EFF*r;
+  const kP=1.935*RHO*Math.sqrt(NU)*Math.pow(Req,4);
+  const kB=0.5*CD*RHO*A_BOAT*Math.pow(r,3);
+  const mag=Math.abs(drive);
+  if(mag<=TAU_PIN) return 0;
+  const net=mag-TAU_PIN;
+  let lo=0,hi=60;
+  for(let i=0;i<70;i++){const m=(lo+hi)/2;
+    (kP*Math.pow(m,1.5)+kB*m*m < net)?lo=m:hi=m;}
+  return Math.sign(drive)*(lo+hi)/2;
+}
+function gauss(s){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();
+  return s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* ============================ 狀態 ============================ */
+const UNK_A=Math.round(8+Math.random()*16);      // 8–24 %
+const UNK_B=Math.round(42+Math.random()*36);     // 42–78 %
+const BATH_ML0=1200;
+
+const S={
+  cSel:20, cLabel:'20%', isUnknown:null,
+  L:9,                       // cm
+  funnel:0, dripping:false,
+  bathEth:0, bathVol:BATH_ML0,
+  angle:0, omega:0, trialNoise:1,
+  clkRun:false, clkT:0, clkLaps:0, clkAngle0:0, lastRec:null,
+  warmup:false, warmAngle0:0,
+  trail:[], t:0
+};
+const FLOW=0.030, FUNNEL_CAP=2.0, TAU_RELAX=0.5;
+const bathC=()=>S.bathEth/S.bathVol*100;
+const dropC=()=> S.isUnknown==='A'?UNK_A : S.isUnknown==='B'?UNK_B : S.cSel;
+
+/* ============================ DOM ============================ */
+const $=id=>document.getElementById(id);
+const CONCS=[0,1,2,5,10,20,30,50,70,95];
+const SIZES=[5,7,9,11];
+
+(function buildChips(){
+  const cc=$('concChips');
+  CONCS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='chip'+(c===20?' on':''); b.textContent=c+'%';
+    b.onclick=()=>setConc(c,c+'%',null); cc.appendChild(b);
+  });
+  ['A','B'].forEach(k=>{
+    const b=document.createElement('button');
+    b.className='chip unk'; b.textContent='未知 '+k;
+    b.onclick=()=>setConc(null,'未知 '+k,k); cc.appendChild(b);
+  });
+  const sc=$('sizeChips');
+  SIZES.forEach(L=>{
+    const b=document.createElement('button');
+    b.className='chip'+(L===9?' on':''); b.textContent=L+' cm';
+    b.onclick=()=>setSize(L); sc.appendChild(b);
+  });
+})();
+
+function setConc(c,label,unk){
+  S.cSel=(c===null?0:c); S.cLabel=label; S.isUnknown=unk;
+  [...$('concChips').children].forEach(b=>b.classList.toggle('on',b.textContent===label));
+  newTrial(); render();
+}
+function setSize(L){
+  S.L=L; $('sizeRange').value=L; $('sizeVal').textContent=L.toFixed(1);
+  [...$('sizeChips').children].forEach(b=>b.classList.toggle('on',parseFloat(b.textContent)===L));
+  newTrial(); render();
+}
+$('btnCustom').onclick=()=>{
+  let v=Math.max(0,Math.min(95,parseFloat($('cCustom').value)||0));
+  setConc(v,v+'%',null);
+};
+$('sizeRange').oninput=e=>{
+  S.L=parseFloat(e.target.value); $('sizeVal').textContent=S.L.toFixed(1);
+  [...$('sizeChips').children].forEach(b=>b.classList.toggle('on',parseFloat(b.textContent)===S.L));
+  newTrial();
+};
+function newTrial(){ S.trialNoise=1+gauss(0.030); }
+
+$('btnFill').onclick=()=>{ S.funnel=FUNNEL_CAP; newTrial(); };
+$('btnDrip').onclick=()=>{
+  if(!S.dripping && S.funnel<=0) S.funnel=FUNNEL_CAP;
+  S.dripping=!S.dripping;
+  $('btnDrip').textContent=S.dripping?'暫停滴入':'開始滴入';
+  if(S.dripping){
+    newTrial();
+    if($('autoClock').checked){
+      clkReset(); S.warmup=true; S.warmAngle0=S.angle;
+    }
+  }else{
+    S.warmup=false;
+    if(S.clkRun) stopClock(); else $('recHint').textContent='';
+  }
+};
+$('btnWater').onclick=()=>{ S.bathEth=0; S.bathVol=BATH_ML0; S.trail=[]; };
+$('btnStopAll').onclick=()=>{
+  S.dripping=false; $('btnDrip').textContent='開始滴入';
+  S.funnel=0; S.omega=0; S.angle=0; S.trail=[];
+  S.bathEth=0; S.bathVol=BATH_ML0; clkReset();
+};
+
+/* ---------- 碼錶 ---------- */
+function clkReset(){
+  S.clkRun=false; S.warmup=false; S.clkT=0; S.clkLaps=0; S.clkAngle0=S.angle; S.lastRec=null;
+  $('btnClk').textContent='開始計時'; $('btnClk').classList.add('pri');
+  $('btnRec').disabled=true; $('recHint').textContent='';
+  $('clk').textContent='0.00'; $('lapN').textContent='0';
+}
+$('btnClkReset').onclick=clkReset;
+function startClock(){
+  S.warmup=false;
+  S.clkRun=true; S.clkT=0; S.clkLaps=0; S.clkAngle0=S.angle; S.lastRec=null;
+  $('btnClk').textContent='停止計時'; $('btnClk').classList.remove('pri');
+  $('btnRec').disabled=true; $('recHint').textContent='';
+}
+$('btnClk').onclick=()=>{ S.clkRun?stopClock():startClock(); };
+function stopClock(){
+  S.clkRun=false;
+  $('btnClk').textContent='開始計時'; $('btnClk').classList.add('pri');
+  const err=$('humanErr').checked?gauss(0.17):0;
+  const t=Math.max(0.01,S.clkT+err);
+  $('clk').textContent=t.toFixed(2);
+  if(S.clkLaps<1){
+    $('recHint').textContent='未完成任何整圈，無法計算週期。';
+    $('btnRec').disabled=true; return;
+  }
+  S.lastRec={t:t,laps:S.clkLaps,c:S.cLabel,cVal:(S.isUnknown?null:S.cSel),
+             unk:S.isUnknown,L:S.L,bath:bathC()};
+  $('btnRec').disabled=false;
+  $('recHint').textContent='T = '+(t/S.clkLaps).toFixed(3)+' s，按「記錄此次數據」存入表格。';
+}
+
+/* ============================ 數據 ============================ */
+const DATA=[];
+$('btnRec').onclick=()=>{
+  if(!S.lastRec) return;
+  const r=S.lastRec; r.T=r.t/r.laps; r.w=2*Math.PI/r.T; r.id=DATA.length+1;
+  DATA.push(r); S.lastRec=null; $('btnRec').disabled=true;
+  $('recHint').textContent='已記錄第 '+r.id+' 筆。';
+  renderTable(); drawChart();
+};
+$('btnClear').onclick=()=>{ if(confirm('確定清除全部數據？')){DATA.length=0;renderTable();drawChart();} };
+$('btnCSV').onclick=()=>{
+  if(!DATA.length){alert('尚無數據');return;}
+  let s='編號,溶液,邊長(cm),計時(s),圈數,週期T(s),角速度(rad/s),水盆酒精濃度(%)\n';
+  DATA.forEach(r=>{s+=[r.id,r.c,r.L,r.t.toFixed(2),r.laps,r.T.toFixed(3),
+    r.w.toFixed(4),r.bath.toFixed(3)].join(',')+'\n';});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(["\ufeff"+s],{type:'text/csv;charset=utf-8'}));
+  a.download='珍珠浮盤旋轉實驗_數據.csv'; a.click();
+};
+
+function renderTable(){
+  const tb=$('tbody'); tb.innerHTML='';
+  $('tblEmpty').style.display=DATA.length?'none':'block';
+  $('nRec').textContent=DATA.length+' 筆';
+  DATA.slice().reverse().forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+r.id+'</td><td>'+r.c+'</td><td>'+r.L.toFixed(1)+'</td><td>'+
+      r.t.toFixed(2)+'</td><td>'+r.laps+'</td><td>'+r.T.toFixed(3)+'</td><td>'+
+      r.w.toFixed(3)+'</td><td>'+r.bath.toFixed(2)+'</td>'+
+      '<td><button class="del" title="刪除">✕</button></td>';
+    tr.querySelector('.del').onclick=()=>{
+      const i=DATA.indexOf(r); if(i>=0)DATA.splice(i,1);
+      DATA.forEach((d,k)=>d.id=k+1); renderTable(); drawChart();
+    };
+    tb.appendChild(tr);
+  });
+  renderAvg();
+}
+function groups(){
+  const g={};
+  DATA.forEach(r=>{
+    const k=r.c+' ｜ '+r.L.toFixed(1)+' cm';
+    (g[k]=g[k]||{key:k,c:r.c,cVal:r.cVal,unk:r.unk,L:r.L,T:[],w:[]});
+    g[k].T.push(r.T); g[k].w.push(r.w);
+  });
+  return Object.values(g).map(o=>{
+    const n=o.T.length, mT=o.T.reduce((a,b)=>a+b,0)/n, mw=o.w.reduce((a,b)=>a+b,0)/n;
+    const sd=n>1?Math.sqrt(o.T.reduce((a,b)=>a+(b-mT)**2,0)/(n-1)):0;
+    return {...o,n,mT,mw,sd};
+  });
+}
+function renderAvg(){
+  const gs=groups(), tb=$('avgBody'); tb.innerHTML='';
+  $('avgEmpty').style.display=gs.length?'none':'block';
+  gs.sort((a,b)=>a.L-b.L||((a.cVal??999)-(b.cVal??999)));
+  gs.forEach(o=>{
+    const tr=document.createElement('tr');
+    const warn=o.n<5?' style="color:var(--warn)"':'';
+    tr.innerHTML='<td>'+o.key+'</td><td'+warn+'>'+o.n+'</td><td>'+o.mT.toFixed(3)+
+      '</td><td>'+o.sd.toFixed(3)+'</td><td>'+o.mw.toFixed(3)+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+/* ============================ 作圖 ============================ */
+let chartMode='A';
+document.querySelectorAll('[data-chart]').forEach(b=>{
+  b.onclick=()=>{
+    chartMode=b.dataset.chart;
+    document.querySelectorAll('[data-chart]').forEach(x=>x.classList.toggle('on',x===b));
+    drawChart();
+  };
+});
+function fitCanvas(cv){
+  const dpr=window.devicePixelRatio||1, r=cv.getBoundingClientRect();
+  cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+  const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx:c,W:r.width,H:r.height};
+}
+function drawChart(){
+  const cv=$('chart'); if(!cv.getBoundingClientRect().width) return;
+  const {ctx,W,H}=fitCanvas(cv);
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+  const m={l:52,r:14,t:26,b:42}, pw=W-m.l-m.r, ph=H-m.t-m.b;
+  const gs=groups(), teach=$('teachMode').checked;
+  const axis=(xt,yt,title)=>{
+    ctx.strokeStyle='#c9d2da'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(m.l,m.t); ctx.lineTo(m.l,m.t+ph); ctx.lineTo(m.l+pw,m.t+ph); ctx.stroke();
+    ctx.fillStyle='#1b2430'; ctx.font='600 12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(title,m.l+pw/2,16);
+    ctx.font='11px sans-serif'; ctx.fillStyle='#5d6b7a';
+    ctx.fillText(xt,m.l+pw/2,H-8);
+    ctx.save(); ctx.translate(13,m.t+ph/2); ctx.rotate(-Math.PI/2); ctx.fillText(yt,0,0); ctx.restore();
+  };
+  if(chartMode==='A'){
+    const pts=gs.filter(o=>o.cVal!==null&&o.cVal!==undefined&&o.cVal>0&&Math.abs(o.L-9)<0.01);
+    let ymax=2.2; pts.forEach(o=>ymax=Math.max(ymax,o.mw*1.15));
+    const X=c=>m.l+(Math.log10(c)/2)*pw, Y=w=>m.t+ph-(w/ymax)*ph;
+    axis('濃度（對數尺度，%）','平均角速度 ω（rad/s）','ω – log₁₀(濃度)　邊長 90 mm');
+    ctx.strokeStyle='#eef2f5'; ctx.fillStyle='#5d6b7a'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+    [1,2,5,10,20,50,100].forEach(c=>{
+      const x=X(c); ctx.beginPath(); ctx.moveTo(x,m.t); ctx.lineTo(x,m.t+ph); ctx.stroke();
+      ctx.fillText(c,x,m.t+ph+14);
+    });
+    ctx.textAlign='right';
+    for(let k=0;k<=5;k++){const w=ymax*k/5,y=Y(w);
+      ctx.strokeStyle='#eef2f5'; ctx.beginPath(); ctx.moveTo(m.l,y); ctx.lineTo(m.l+pw,y); ctx.stroke();
+      ctx.fillStyle='#5d6b7a'; ctx.fillText(w.toFixed(1),m.l-6,y+3);}
+    if(teach){
+      ctx.strokeStyle='#f0a5a5'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]); ctx.beginPath();
+      for(let i=0;i<=200;i++){
+        const c=Math.pow(10,i/100), w=omegaSteady(c,0,0.09);
+        const x=X(c),y=Y(w); i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    pts.forEach(o=>{
+      const x=X(o.cVal),y=Y(o.mw);
+      ctx.fillStyle='#0d6e8c'; ctx.beginPath(); ctx.arc(x,y,4.5,0,7); ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+    });
+    ['A','B'].forEach((k,i)=>{
+      const o=gs.find(g=>g.unk===k&&Math.abs(g.L-9)<0.01); if(!o)return;
+      const y=Y(o.mw); if(y<m.t||y>m.t+ph)return;
+      ctx.strokeStyle=i?'#8a5a2b':'#b45309'; ctx.lineWidth=1.3; ctx.setLineDash([6,4]);
+      ctx.beginPath(); ctx.moveTo(m.l,y); ctx.lineTo(m.l+pw,y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=i?'#8a5a2b':'#b45309'; ctx.font='600 11px sans-serif'; ctx.textAlign='left';
+      ctx.fillText('未知 '+k+'　ω='+o.mw.toFixed(3),m.l+6,y-5);
+    });
+    $('chartNote').textContent=pts.length
+      ? '橫軸為對數尺度。未知溶液以虛線標出其平均角速度，與資料點連成的曲線相交處即為推論濃度。'
+      : '在邊長 9.0 cm 下量測不同濃度並記錄，資料點會自動出現在此圖。';
+  }else{
+    const pts=gs.filter(o=>o.cVal===20);
+    let ymax=8; pts.forEach(o=>ymax=Math.max(ymax,o.mT*1.15));
+    const X=L=>m.l+((L-3)/10)*pw, Y=T=>m.t+ph-(T/ymax)*ph;
+    axis('浮盤邊長 L（cm）','平均週期 T（s）','T – 邊長　20% 酒精溶液');
+    ctx.font='10px sans-serif'; ctx.textAlign='center';
+    for(let L=3;L<=13;L++){const x=X(L);
+      ctx.strokeStyle='#eef2f5'; ctx.beginPath(); ctx.moveTo(x,m.t); ctx.lineTo(x,m.t+ph); ctx.stroke();
+      ctx.fillStyle='#5d6b7a'; ctx.fillText(L,x,m.t+ph+14);}
+    ctx.textAlign='right';
+    for(let k=0;k<=5;k++){const T=ymax*k/5,y=Y(T);
+      ctx.strokeStyle='#eef2f5'; ctx.beginPath(); ctx.moveTo(m.l,y); ctx.lineTo(m.l+pw,y); ctx.stroke();
+      ctx.fillStyle='#5d6b7a'; ctx.fillText(T.toFixed(1),m.l-6,y+3);}
+    if(teach){
+      ctx.strokeStyle='#f0a5a5'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]); ctx.beginPath();
+      for(let i=0;i<=100;i++){
+        const L=3+i/10, w=omegaSteady(20,0,L/100), T=w>0?2*Math.PI/w:0;
+        const x=X(L),y=Y(T); i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    pts.sort((a,b)=>a.L-b.L).forEach(o=>{
+      const x=X(o.L),y=Y(o.mT);
+      ctx.fillStyle='#12897f'; ctx.beginPath(); ctx.arc(x,y,4.5,0,7); ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+    });
+    $('chartNote').textContent=pts.length
+      ? '若阻力僅來自浮盤底面，理論上 T ∝ L²；實測若偏小，代表小舟本身的阻力也佔了一部分。'
+      : '固定 20% 酒精，量測邊長 5、7、9、11 cm 並記錄，資料點會自動出現在此圖。';
+  }
+}
+
+/* ============================ 動畫 ============================ */
+const sim=$('sim');
+function drawSim(){
+  const {ctx,W,H}=fitCanvas(sim);
+  const cx=W/2, cy=H/2, SCALE=Math.min(W,H)/0.28;   // 畫面對應 28 cm
+  ctx.clearRect(0,0,W,H);
+
+  // 水盆
+  const bc=bathC(), tint=Math.min(1,bc/3);
+  ctx.fillStyle='#eef3f6'; ctx.fillRect(0,0,W,H);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,Math.min(W,H)*0.455,0,7);
+  ctx.fillStyle='rgb('+Math.round(207+18*tint)+','+Math.round(230-16*tint)+','+Math.round(242-24*tint)+')';
+  ctx.fill();
+  ctx.strokeStyle='#b6c6d2'; ctx.lineWidth=3; ctx.stroke();
+  ctx.clip();
+
+  // 酒精痕跡
+  const now=S.t;
+  S.trail=S.trail.filter(p=>now-p.t<3.2);
+  S.trail.forEach(p=>{
+    const age=(now-p.t)/3.2, R=(0.004+age*0.020)*SCALE;
+    ctx.fillStyle='rgba(255,255,255,'+(0.30*(1-age)).toFixed(3)+')';
+    ctx.beginPath(); ctx.arc(cx+p.x*SCALE,cy+p.y*SCALE,R,0,7); ctx.fill();
+  });
+
+  const Lm=S.L/100, half=Lm/2*SCALE, a=S.angle;
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(a);
+
+  // 浮盤
+  ctx.fillStyle='rgba(15,40,60,.13)';
+  ctx.fillRect(-half+3,-half+5,2*half,2*half);
+  ctx.fillStyle='#fbfcfd'; ctx.strokeStyle='#9fb0bd'; ctx.lineWidth=1.4;
+  ctx.fillRect(-half,-half,2*half,2*half); ctx.strokeRect(-half,-half,2*half,2*half);
+  ctx.strokeStyle='#dbe3ea'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(-half,-half); ctx.lineTo(half,half);
+  ctx.moveTo(half,-half); ctx.lineTo(-half,half); ctx.stroke();
+
+  // 小舟（在右下角）
+  ctx.save(); ctx.translate(half,half); ctx.rotate(Math.PI/4);
+  const bw=0.022*SCALE, bh=0.013*SCALE;
+  ctx.fillStyle='#cfd8e0'; ctx.strokeStyle='#8d9aa6'; ctx.lineWidth=1.2;
+  ctx.fillRect(-bw/2,-bh/2,bw,bh); ctx.strokeRect(-bw/2,-bh/2,bw,bh);
+  ctx.beginPath(); ctx.arc(bw*0.16,0,bh*0.42,0,7);
+  ctx.fillStyle=S.dripping&&S.funnel>0?'#7dd3fc':'#e2e8f0'; ctx.fill();
+  ctx.strokeStyle='#64748b'; ctx.lineWidth=1; ctx.stroke();
+  ctx.restore();
+
+  // 大頭針
+  ctx.beginPath(); ctx.arc(0,0,5,0,7);
+  ctx.fillStyle='#f472b6'; ctx.fill();
+  ctx.strokeStyle='#be185d'; ctx.lineWidth=1.2; ctx.stroke();
+  ctx.restore();
+
+  // 轉向箭頭
+  if(Math.abs(S.omega)>0.02){
+    const R=half*0.42, dir=Math.sign(S.omega);
+    ctx.strokeStyle='rgba(13,110,140,.55)'; ctx.lineWidth=2.4;
+    ctx.beginPath(); ctx.arc(cx,cy,R,a,a+dir*1.5,dir<0); ctx.stroke();
+    const e=a+dir*1.5, ex=cx+R*Math.cos(e), ey=cy+R*Math.sin(e);
+    ctx.save(); ctx.translate(ex,ey); ctx.rotate(e+dir*Math.PI/2);
+    ctx.fillStyle='rgba(13,110,140,.75)';
+    ctx.beginPath(); ctx.moveTo(0,-7); ctx.lineTo(5,4); ctx.lineTo(-5,4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+
+  // 參考標記線（計圈基準）
+  ctx.strokeStyle='#e11d48'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.min(W,H)*0.455,cy); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#e11d48'; ctx.font='11px sans-serif'; ctx.textAlign='right';
+  ctx.fillText('計圈基準線',cx+Math.min(W,H)*0.45,cy-7);
+
+  // 比例尺
+  ctx.strokeStyle='#8fa0ae'; ctx.lineWidth=2; const s5=0.05*SCALE;
+  ctx.beginPath(); ctx.moveTo(14,H-16); ctx.lineTo(14+s5,H-16);
+  ctx.moveTo(14,H-21); ctx.lineTo(14,H-11); ctx.moveTo(14+s5,H-21); ctx.lineTo(14+s5,H-11); ctx.stroke();
+  ctx.fillStyle='#5d6b7a'; ctx.font='11px sans-serif'; ctx.textAlign='left';
+  ctx.fillText('5 cm',14,H-22);
+}
+
+/* ============================ 主迴圈 ============================ */
+let last=performance.now();
+function loop(now){
+  let dt=(now-last)/1000; last=now; dt=Math.min(dt,0.05); S.t+=dt;
+
+  if(S.dripping&&S.funnel>0){
+    const dv=Math.min(FLOW*dt,S.funnel);
+    S.funnel-=dv; S.bathEth+=dv*dropC()/100; S.bathVol+=dv;
+    if(S.funnel<=0){S.funnel=0;}
+  }
+  const active=S.dripping&&S.funnel>0;
+  const tgt=active?omegaSteady(dropC(),bathC(),S.L/100)*S.trialNoise:0;
+  S.omega+=(tgt-S.omega)*Math.min(1,dt/TAU_RELAX);
+  const prev=S.angle; S.angle+=S.omega*dt;
+
+  if(S.warmup){
+    if(!active){
+      S.warmup=false; $('recHint').textContent='溶液已流盡或停止滴入，未開始計時。';
+    }else{
+      const frac=Math.abs(S.angle-S.warmAngle0)/(2*Math.PI);
+      $('clk').textContent='––';
+      $('lapN').textContent='0';
+      $('recHint').textContent='穩定中…已轉 '+frac.toFixed(2)+' 圈，滿 0.50 圈後自動開始計時。';
+      if(frac>=0.5){ startClock(); $('recHint').textContent='轉速已穩定，計時開始。'; }
+    }
+  }
+  if(S.clkRun){
+    S.clkT+=dt;
+    S.clkLaps=Math.floor(Math.abs(S.angle-S.clkAngle0)/(2*Math.PI));
+    $('clk').textContent=S.clkT.toFixed(2);
+    $('lapN').textContent=S.clkLaps;
+    const n=parseInt($('autoLaps').value)||3;
+    if($('autoStop').checked&&S.clkLaps>=n) stopClock();
+    else if(!active) stopClock();
+  }
+  if(active&&Math.abs(S.angle-prev)>0.0001&&Math.random()<dt*22){
+    const r=(S.L/100)/Math.SQRT2;
+    S.trail.push({x:r*Math.cos(S.angle+Math.PI/4),y:r*Math.sin(S.angle+Math.PI/4),t:S.t});
+  }
+  render(); drawSim();
+  requestAnimationFrame(loop);
+}
+function render(){
+  $('mFunnel').textContent=S.funnel.toFixed(2);
+  $('bFunnel').style.width=(S.funnel/FUNNEL_CAP*100)+'%';
+  const bc=bathC();
+  $('mBath').textContent=bc.toFixed(2);
+  $('bBath').style.width=Math.min(100,bc/3*100)+'%';
+  $('bathWarn').style.display=bc>0.25?'block':'none';
+  const teach=$('teachMode').checked, el=$('trueOmega');
+  if(teach){
+    el.style.display='block';
+    const w=omegaSteady(dropC(),bc,S.L/100);
+    el.innerHTML='<span class="badge teach">教師模式</span>　真實 ω = '+w.toFixed(4)+
+      ' rad/s　·　T = '+(Math.abs(w)>1e-4?(2*Math.PI/Math.abs(w)).toFixed(3):'∞')+
+      ' s　·　γ(滴入)='+gammaOf(dropC()).toFixed(1)+'、γ(水盆)='+gammaOf(bc).toFixed(1)+' mN/m'+
+      '　·　未知 A = '+UNK_A+'%、未知 B = '+UNK_B+'%';
+  } else el.style.display='none';
+}
+$('teachMode').onchange=()=>{render();drawChart();};
+window.addEventListener('resize',()=>{drawChart();});
+clkReset(); renderTable(); requestAnimationFrame(t=>{last=t;drawChart();loop(t);});
+</script>
+</body>
+</html>

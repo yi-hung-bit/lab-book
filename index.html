@@ -27,7 +27,7 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 :root{
   --desk:#dfe2e6; --paper:#fbfaf7; --paper-2:#f2f0ea; --ink:#1d2333; --muted:#5f6576; --rule:#d9d6cd;
   --cover:#25306b; --cover-ink:#f3f1ea; --accent:#2f3f94;
-  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a; --c4:#1d6f8a;
+  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a; --c4:#1d6f8a; --c5:#6b6a1f; --c6:#3f4fa8;
   --shadow:0 18px 40px rgba(29,35,51,.18);
   --f-display:"LXGW WenKai TC","Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
   --f-body:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
@@ -36,12 +36,12 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}
 
 body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75}
@@ -187,6 +187,30 @@ html.lab-open,html.lab-open body{overflow:hidden}
 const SITE="https://sites.google.com/ms.mingdao.edu.tw/sim/";
 const SPEC=["#e5484d","#f08c2e","#e9c22b","#3fa65b","#2f78d6","#6a4fc6"];
 const ART={
+  balance:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <line x1="150" y1="104" x2="150" y2="34" stroke="var(--ink)" stroke-width="2.5"/>
+        <polygon points="138,110 162,110 150,98" fill="var(--ink)"/>
+        <line x1="44" y1="44" x2="256" y2="24" stroke="var(--c5)" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="150" cy="34" r="4" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <line x1="62" y1="42" x2="62" y2="66" stroke="var(--muted)" stroke-width="1.2"/>
+        <rect x="48" y="66" width="28" height="22" rx="3" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="62" y="81" text-anchor="middle" font-size="12" fill="var(--ink)" font-style="italic">m</text>
+        <line x1="226" y1="27" x2="226" y2="52" stroke="var(--muted)" stroke-width="1.2"/>
+        <ellipse cx="226" cy="64" rx="14" ry="12" fill="var(--c5)" opacity=".75"/>
+        <text x="226" y="68" text-anchor="middle" font-size="12" fill="var(--paper)" font-style="italic">M</text>
+        <text x="106" y="30" font-size="12" fill="var(--muted)" font-style="italic">a</text>
+        <text x="190" y="16" font-size="12" fill="var(--muted)" font-style="italic">x</text>
+      </svg>`,
+  roll:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <line x1="16" y1="106" x2="290" y2="106" stroke="var(--muted)" stroke-width="1.5"/>
+        <polygon points="20,106 250,106 20,24" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="90" cy="32" r="16" fill="var(--paper)" stroke="var(--c6)" stroke-width="3"/>
+        <line x1="90" y1="32" x2="101" y2="21" stroke="var(--c6)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M110 14 A 24 24 0 0 1 114 40" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+        <polygon points="114,40 108,35 117,33" fill="var(--ink)"/>
+        <text x="120" y="24" font-size="14" fill="var(--ink)" font-style="italic">ω</text>
+        <text x="178" y="52" font-size="13" fill="var(--ink)" font-style="italic">v = ω · r</text>
+      </svg>`,
   wave:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
         <line x1="20" y1="60" x2="290" y2="60" stroke="var(--muted)" stroke-width="1.2"/>
         <polyline points="20,16.0 30,19.8 40,23.3 50,26.5 60,29.4 70,32.1 80,34.5 90,36.7 100,38.7 110,40.6 120,42.3 130,43.8 140,45.2 150,46.5 160,47.7 170,48.7 180,49.7 190,50.6 200,51.4 210,52.2 220,52.9 230,53.5 240,54.0 250,54.6 260,55.0 270,55.5 280,55.9" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 4"/>
@@ -253,6 +277,21 @@ const OSC_EXP=[
   {t:"繩波與駐波",slug:"繩波與駐波",lab:"osc-string",src:"90 學年度 桃竹苗區",d:"用電動刮鬍刀當振盪器，在縫衣線上產生駐波。改變墊片數改變張力，量波長，作 λ²–T 迴歸求出刮鬍刀的頻率；第二部分把粗細兩條繩相接，讓接點成為波節，找出兩段駐波個數、長度與線密度的關係。",f:["駐波的迴歸關係","λ² = (1 / μf²) · T"],tabs:["原理推導","器材組裝與 μ 測定","第一部分：駐波量測","λ²–T 迴歸求 f","第二部分：粗細繩","誤差與真值揭曉"],rnd:true}
 ];
 
+const MASS_EXP=[
+  {t:"質量測定（排水法）",slug:"質量測定虛擬實驗室",lab:"mass-displacement",src:"102 學年度 第七屆全國高中物理科能力競賽",d:"沒有天平，只有封瓶、玻璃杯、水和直尺。依阿基米德原理，讓待測物排開水，量杯徑與水面上升的高度，算出排水體積，再由水的密度換算質量，並估計不確定度。",f:["排水量換算質量","m = ρ水 · V = ρ水 · π (D/2)² · Δh"],tabs:["實驗說明","器材準備","測量與數據","數據分析","實驗報告"],rnd:true},
+  {t:"自製彈簧秤",slug:"自製彈簧測重",lab:"mass-spring-scale",src:"93 學年度 屏東區複賽 實驗第一題",d:"用所給器材自製彈簧秤量待測物重量，並回答它能不能量超過 110 gw 或小於 10 gw 的物體。關鍵是密繞彈簧有初張力：外力不夠大時完全不伸長，所以要用直線段迴歸做校正線，再反推重量。",f:["密繞彈簧的初張力","x = (mg − F₀) / k　（mg > F₀）"],tabs:["題目回顧","虎克定律與初張力","校正線：x–m 圖","用校正線反推重量"],rnd:true},
+  {t:"彈簧力常數與壓克力質量",slug:"94台南實驗一-彈簧力常數-壓克力質量",lab:"mass-spring-buoyancy",src:"94 學年度 臺南區複賽 實驗第一題",d:"沒有天平也沒有砝碼。把壓克力圓柱掛在彈簧下慢慢浸入水中，浮力 ρAhg 就成了可調、已知的力。以浸入長度 h 對彈簧伸長量 ΔL 作圖，斜率求彈力係數 k，截距求圓柱質量 m。",f:["彈力與浮力平衡","ΔL = (mg / k) − (ρAg / k) · h"],tabs:["原理","器材準備","浸入量測","作圖迴歸","誤差分析","真值揭曉"],rnd:true},
+  {t:"釣魚線重量",slug:"釣魚線重量",lab:"mass-fishing-line",src:"106 學年度 臺灣省第 9 區（屏東區）複賽 實驗第一題",d:"整條 4 號釣魚線只有約 0.1–0.2 g，比電子秤的解析度還小。要把低於儀器解析度的量「放大」或「換算」出來：竹筷槓桿放大、糖鹽水密度匹配、用水滴當砝碼的天平，三種方法比較誤差。",f:["槓桿放大（對支點 P 取力矩）","N·d = M筷 g · x_cm + W · x"],tabs:["原理與量級","前置量測","方法 A：槓桿放大","方法 B：密度匹配","方法 C：水滴天平","綜合比較","誤差與真值揭曉"],rnd:true},
+  {t:"黏土質量",slug:"黏土質量",lab:"mass-clay",src:"96 學年度 屏東區複賽 實驗第一題",d:"至少用兩種方法求黏土質量，器材只有掛碼、滑輪、竹筷和布尺。竹筷槓桿以 M·x 對 a 作圖，竹筷偏心的影響全落在截距；另有三力平衡法，以及用碼表量 Atwood 機加速度的動力學方法。",f:["槓桿迴歸（斜率即黏土質量）","M·x = m·a − W·c"],tabs:["原理推導","器材組裝","方法 A：槓桿","方法 B：三力平衡","迴歸分析與方法 C（Atwood 機）","誤差與真值揭曉"],rnd:true}
+];
+
+const ROT_EXP=[
+  {t:"球體滾動與轉動慣量",slug:"球體滾動與轉動慣量",lab:"rot-ball-groove",src:"96 學年度 屏東區複賽 實驗第二題",d:"鋼球沿兩根木條間的凹槽滾下，再從桌緣拋出落到複寫紙上。球卡在細縫上，接觸點不在赤道，滾動半徑比球半徑小，所以 v = ωr 而不是 ωR。改變斜面角度量落點，求鋼球轉動慣量的係數。",f:["凹槽使轉動動能變大","½Iω² = ½ m v² · K / [1 − (D/2R)²]"],tabs:["凹槽軌道的幾何","器材與架設","釋放鋼球與量落點","數據表與分析","揭示隱藏真值"],rnd:true},
+  {t:"珍珠浮盤旋轉實驗",slug:"珍珠浮盤旋轉實驗",lab:"rot-marangoni",src:"102 學年度 北三區（酒精濃度與週期）",d:"在浮盤一側滴入酒精水溶液，表面張力梯度（Marangoni 效應）推動浮盤旋轉。改變酒精濃度量平均角速度，作 ω–log₁₀(濃度) 圖，再推論未知溶液 A、B 的濃度；最後固定濃度改變浮盤邊長，作 T–邊長圖。",f:["由週期求角速度","ω = 2π / T"],tabs:["實驗裝置與滴入溶液","碼錶與計圈","數據記錄","ω–log₁₀(濃度) 圖","T–邊長 圖"]},
+  {t:"V 型軌道滾球",slug:"v-型軌道滾球虛擬實驗室",lab:"rot-v-track",src:"106 學年度 花蓮區",d:"空心塑膠球與實心金屬球在 V 型軌道上滾下。接觸點不在球的正下方，有效滾動半徑 r·sinα 比球半徑小，轉動動能變大。量高度差與時間，作 h–v² 迴歸，再數旋轉圈數，分析力學能如何分配。",f:["V 型軌道的能量守恆（β = I/mr²）","mgh = ½ m v² (1 + β / sin²α)"],tabs:["器材與裝置","第一部分：量測 h、t","第二部分：v 與 h–v²","第三部分：旋轉圈數","第四部分：能量分析"]},
+  {t:"簡諧運動求轉動慣量",slug:"簡諧運動求出物體之轉動慣量",lab:"rot-physical-pendulum",src:"106 學年度 中區第五區（彰雲嘉）複賽",d:"用物理擺量銅環與金屬條的轉動慣量，器材裡沒有秤，量長度的尺也被收走。質量在公式中會消掉，真正的難點是先用時間「造出一把尺」，再以 d² 對 gT²d/4π² 作圖，斜率應為 1，截距即轉動慣量項。",f:["物理擺（質量 M 消去）","gT²d / 4π² = β(R₁² + R₂²) + d²"],tabs:["原理與規劃","長度校準實驗室","待測物尺寸量測","銅環物理擺","金屬條物理擺","數據分析"]}
+];
+
 /* 每一章一個物件；ready:true 的章才會排進書頁 */
 const CHAPTERS=[
   {no:"一",num:1,name:"基礎能力",path:"基礎能力/",ready:true,color:"var(--c1)",art:"fit",
@@ -272,8 +311,12 @@ const CHAPTERS=[
   {no:"四",num:4,name:"震盪",path:"主題分類/震盪/",ready:true,color:"var(--c4)",art:"wave",
    intro:"四個會擺動的系統：磁鐵吸在金屬線上的阻尼振子、互相交換能量的耦合擺、擺角太大的單擺，以及刮鬍刀帶動的駐波。共同的功夫是量週期、把關係式線性化，再用迴歸把物理量找出來。",
    sections:null,exps:OSC_EXP},
-  {no:"五",num:5,name:"質量",path:"主題分類/質量/"},
-  {no:"六",num:6,name:"轉動",path:"主題分類/轉動/"},
+  {no:"五",num:5,name:"質量",path:"主題分類/質量/",ready:true,color:"var(--c5)",art:"balance",
+   intro:"五道題有一個共同點：器材裡沒有天平。要把質量換算成別的量來測，例如排開的水、彈簧的伸長、浮力、力矩，甚至一滴水。重點在設計，以及判斷哪種方法誤差最小。",
+   sections:null,exps:MASS_EXP},
+  {no:"六",num:6,name:"轉動",path:"主題分類/轉動/",ready:true,color:"var(--c6)",art:"roll",
+   intro:"球在凹槽、V 型軌道上滾動時，接觸點不在球的正下方，滾動半徑跟著改變，轉動動能的比例也不同。另外還有靠表面張力自己轉起來的浮盤，以及用物理擺量轉動慣量。",
+   sections:null,exps:ROT_EXP},
   {no:"七",num:7,name:"重力加速度 g",path:"主題分類/g值/"},
   {no:"八",num:8,name:"流體",path:"主題分類/流體/"},
   {no:"九",num:9,name:"黏滯",path:"主題分類/黏滯/"},

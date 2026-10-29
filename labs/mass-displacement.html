@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>102 學年度第七屆競賽實驗 — 質量測定虛擬實驗室</title>
+<style>
+:root {
+  --paper: #F1F3F1; --panel: #FFFFFF; --ink: #22303C; --muted: #66727E; --line: #D3D9D4;
+  --accent: #2E5E8C; --accent-soft: #E3ECF4; --brass: #B98A2A; --warn: #B7410E; --ok: #2F7D4F;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--paper); color: var(--ink); 
+  font-family: "Noto Sans TC", "PingFang TC", sans-serif; font-size: 15px; line-height: 1.6; }
+header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 18px 24px 0; }
+header h1 { margin: 0; font-size: 20px; font-weight: 700; }
+header .sub { color: var(--muted); font-size: 13px; margin: 2px 0 12px; }
+.topbar { display: flex; gap: 12px; justify-content: space-between; flex-wrap: wrap; }
+nav { display: flex; gap: 2px; flex-wrap: wrap; }
+nav button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 8px 14px; 
+  font: inherit; font-size: 14px; color: var(--muted); cursor: pointer; }
+nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { max-width: 1200px; margin: 0 auto; padding: 20px 20px 60px; }
+section.tab { display: none; }
+section.tab.active { display: block; }
+.lab { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .lab { grid-template-columns: 1fr; } }
+.apparatus { position: sticky; top: 12px; }
+.apparatus svg { width: 100%; height: auto; background: var(--panel); border: 1px solid var(--line); display: block; }
+.status { margin-top: 8px; font-size: 13px; color: var(--muted); }
+.block { background: var(--panel); border: 1px solid var(--line); padding: 14px 16px; margin-bottom: 14px; }
+.block h3 { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: var(--accent); }
+.row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 6px 0; }
+label { display: inline-flex; align-items: center; gap: 6px; }
+input[type=number], input[type=text], select { font: inherit; font-size: 14px; padding: 4px 6px; 
+  border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--ink); width: 90px; }
+select { width: auto; }
+input[type=range] { width: 150px; accent-color: var(--accent); }
+button.btn { font: inherit; font-size: 14px; padding: 6px 12px; border: 1px solid var(--accent); 
+  background: var(--accent); color: #fff; border-radius: 3px; cursor: pointer; }
+button.btn.secondary { background: #fff; color: var(--accent); }
+button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.readout { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+.readout small { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+.msg { padding: 8px 12px; border-left: 4px solid var(--accent); background: var(--accent-soft); 
+  font-size: 13px; margin: 8px 0; }
+.msg.warn { border-color: var(--warn); background: #FBE9DF; }
+.msg.ok { border-color: var(--ok); background: #E4F2E8; }
+.msg:empty { display: none; }
+table.data { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+table.data th, table.data td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; }
+table.data th { color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--line); }
+table.data td:first-child, table.data th:first-child { text-align: left; }
+.tablewrap { overflow-x: auto; }
+canvas { width: 100%; max-width: 500px; height: auto; display: block; border: 1px solid var(--line); background: #fff; }
+.result { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; font-size: 14px; }
+.result div b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
+.result div span { color: var(--muted); font-size: 12px; }
+.note { color: var(--muted); font-size: 13px; }
+.formula { font-family: "Times New Roman", serif; font-size: 16px; background: #F7F8F7; 
+  padding: 6px 12px; display: inline-block; margin: 4px 0; border-left: 3px solid var(--brass); }
+.intro { max-width: 800px; }
+.intro h2 { font-size: 18px; margin: 16px 0 8px; color: var(--accent); }
+.intro ul, .intro ol { padding-left: 20px; }
+.equip { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 4px 16px; font-size: 13px; }
+.truth { position: fixed; right: 20px; top: 70px; z-index: 20; background: #fff; border: 2px solid var(--brass); 
+  padding: 14px 18px; box-shadow: 0 6px 24px rgba(30,40,50,0.15); font-size: 13px; max-width: 300px; display: none; }
+.truth.show { display: block; }
+.truth h4 { margin: 0 0 8px; color: var(--brass); font-size: 14px; font-weight: 700; }
+.truth table td { padding: 2px 8px 2px 0; font-variant-numeric: tabular-nums; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div>
+      <h1>質量測定虛擬實驗室</h1>
+      <div class="sub">102 學年度第七屆全國高級中學物理科能力競賽實驗</div>
+    </div>
+    <div>
+      <button class="btn secondary" id="btn-truth">查看標準答案</button>
+      <button class="btn secondary" id="btn-reset">新器材組</button>
+    </div>
+  </div>
+  <nav id="nav">
+    <button data-tab="intro" class="active">實驗說明</button>
+    <button data-tab="prep">器材準備</button>
+    <button data-tab="measure">測量與數據</button>
+    <button data-tab="analysis">數據分析</button>
+    <button data-tab="report">實驗報告</button>
+  </nav>
+</header>
+
+<div class="truth" id="truth-panel">
+  <h4>參考答案（隱藏值）</h4>
+  <div id="truth-body"></div>
+</div>
+
+<main>
+<!-- ============ INTRO ============ -->
+<section class="tab active intro" id="tab-intro">
+  <h2>實驗題目</h2>
+  <p>請利用所列器材，設計實驗以測量本此待測物之質量。</p>
+  
+  <h2>實驗器材</h2>
+  <div class="equip">
+    <span>待測物 ✓</span> <span>50mL 塑膠封瓶 ✓</span>
+    <span>500mL 玻杯 ✓</span> <span>自來水 500mL ✓</span>
+    <span>30cm 直尺（精度 1mm）✓</span> <span>油性簽字筆（0.7mm）✓</span>
+    <span>木尺及支架（120cm 範圍）✓</span> <span>棒線 ✓</span>
+    <span>長尾夾（51mm）× 3 ✓</span> <span>剪刀 ✓</span>
+    <span>小刀 ✓</span> <span>遠塞膠帶（60mm）✓</span>
+    <span>玻尺 × 2 ✓</span> <span>驗紙（27cm 直徑）✓</span>
+    <span>工程用計算器 ✓</span>
+  </div>
+
+  <h2>實驗原理與方法</h2>
+  <p><b>利用排水法測質量。</b>根據阿基米德原理，物體浸入水中會排出等體積的水。利用測量排出水的體積，結合水的密度（1 g/cm³），即可計算物體質量。</p>
+  
+  <div class="formula">物體質量 m = 密度 ρ × 體積 V = 1 (g/cm³) × V (cm³)</div>
+
+  <p><b>實驗步驟：</b></p>
+  <ol>
+    <li>量取一定體積的清水倒入玻杯，用直尺測定水面高度並標記（用簽字筆在玻杯上）。</li>
+    <li>將待測物輕輕浸入水中（若物體浮起，可用棒線輕輕按壓），待水面穩定後測量新的水面高度。</li>
+    <li>計算水面上升的高度 Δh，結合玻杯的內徑（可量取），計算排出水的體積。</li>
+    <li>根據 m = 1 × V，計算待測物的質量。</li>
+    <li>多次重複測量，計算平均值以減少誤差。</li>
+  </ol>
+
+  <h2>需要完成的項目</h2>
+  <ul>
+    <li><b>實驗設計圖：</b>繪製實驗裝置示意圖。</li>
+    <li><b>數據紀錄：</b>記錄每次測量的水面高度變化。</li>
+    <li><b>數據分析：</b>計算排水體積、物體質量，以及測量不確定度。</li>
+    <li><b>結果與討論：</b>比較多次測量結果，分析誤差來源。</li>
+  </ul>
+
+  <p><button class="btn" data-goto="prep">開始實驗 →</button></p>
+</section>
+
+<!-- ============ PREP ============ -->
+<section class="tab" id="tab-prep">
+  <div class="lab">
+    <div class="apparatus">
+      <svg id="prep-svg" viewBox="0 0 280 500"></svg>
+      <div class="status" id="prep-status">準備階段：設置實驗裝置</div>
+    </div>
+    <div>
+      <div class="block">
+        <h3>1. 玻杯準備</h3>
+        <div class="row">
+          <label>玻杯內徑 (mm) <input type="number" id="prep-dia" value="70" step="1" min="50" max="100"></label>
+          <button class="btn secondary" id="prep-measure-dia">量測杯徑</button>
+        </div>
+        <div class="msg" id="prep-msg-dia"></div>
+        <div class="result" id="prep-dia-result"></div>
+      </div>
+
+      <div class="block">
+        <h3>2. 加水與標記</h3>
+        <div class="row">
+          <label>初始加水量 (mL) <input type="number" id="prep-water" value="200" step="10" min="100" max="400"></label>
+        </div>
+        <div class="row">
+          <label>初始水面高度 (cm)
+            <input type="number" id="prep-h0" placeholder="例: 12.5" step="0.1" min="0" max="30">
+          </label>
+          <button class="btn" id="prep-mark">標記初始水位</button>
+        </div>
+        <div class="msg" id="prep-msg"></div>
+        <div class="result" id="prep-result"></div>
+      </div>
+
+      <div class="block">
+        <h3>3. 待測物浸入</h3>
+        <div class="row">
+          <label><input type="checkbox" id="prep-immerse"> 待測物已輕輕浸入水中</label>
+        </div>
+        <div class="row">
+          <label>浸入後水面高度 (cm)
+            <input type="number" id="prep-h1" placeholder="例: 15.2" step="0.1" min="0" max="30">
+          </label>
+          <button class="btn" id="prep-record">記錄新水位</button>
+        </div>
+        <div class="msg" id="prep-msg2"></div>
+      </div>
+
+      <div class="block">
+        <h3>計算排水體積</h3>
+        <div class="row">
+          <label>水面上升高度 Δh = <span class="readout" id="prep-dh">—</span> cm</label>
+        </div>
+        <div class="row">
+          <label>杯內半徑 r = <span class="readout" id="prep-r">—</span> mm</label>
+        </div>
+        <div class="row">
+          <label>排水體積 V = πr²·Δh = <span class="readout" id="prep-vol">—</span>
+            <small>mm³ / cm³</small>
+          </label>
+        </div>
+        <p class="note">已完成初步準備，可進入測量階段進行多次重複測量。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MEASURE ============ -->
+<section class="tab" id="tab-measure">
+  <div class="block" style="max-width: 900px;">
+    <h3>測量數據紀錄</h3>
+    <p>進行多次測量以提高準確度。每次操作前請確保待測物浸沒。</p>
+    
+    <div class="row">
+      <label>第 <input type="number" id="meas-n" value="1" min="1" max="10"> 次測量</label>
+      <label>初始水位 (cm) <input type="number" id="meas-h0" placeholder="0.0" step="0.1"></label>
+      <label>浸入後水位 (cm) <input type="number" id="meas-h1" placeholder="0.0" step="0.1"></label>
+      <button class="btn" id="meas-add">加入</button>
+    </div>
+
+    <div class="row">
+      <label>玻杯內徑 (mm) <input type="number" id="meas-dia" value="70" step="1"></label>
+      <button class="btn secondary" id="meas-calc">計算</button>
+    </div>
+
+    <div class="msg" id="meas-msg"></div>
+    <div class="result" id="meas-result"></div>
+
+    <h3 style="margin-top: 20px;">數據表</h3>
+    <div class="tablewrap">
+      <table class="data">
+        <thead>
+          <tr><th>#</th><th>初始水位 (cm)</th><th>浸入後水位 (cm)</th><th>Δh (cm)</th><th>體積 (cm³)</th><th>質量 (g)</th><th></th></tr>
+        </thead>
+        <tbody id="meas-table"></tbody>
+      </table>
+    </div>
+
+    <div class="block" style="margin-top: 16px;">
+      <h3>統計結果</h3>
+      <div class="result" id="meas-stat"></div>
+      <p class="note">質量平均值 ± 標準偏差。如數據穩定，可進入分析階段。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ANALYSIS ============ -->
+<section class="tab" id="tab-analysis">
+  <div class="block" style="max-width: 900px;">
+    <h3>數據分析</h3>
+    <p>基於測量數據進行統計分析和誤差估計。</p>
+
+    <div class="row">
+      <label>質量平均值 (g) <input type="number" id="ana-avg" placeholder="自動計算" readonly></label>
+      <label>標準偏差 σ (g) <input type="number" id="ana-std" placeholder="自動計算" readonly></label>
+      <label>平均誤差 (%) <input type="number" id="ana-err" placeholder="自動計算" readonly></label>
+    </div>
+
+    <div class="row">
+      <label>水的密度 ρ = <input type="number" id="ana-rho" value="1.00" step="0.01"> g/cm³</label>
+      <label>重力加速度 g = <input type="number" id="ana-g" value="9.81" step="0.01"> m/s²</label>
+    </div>
+
+    <h3 style="margin-top: 20px;">誤差來源分析</h3>
+    <div class="block">
+      <p><b>主要誤差來源：</b></p>
+      <ol>
+        <li><b>刻度讀數誤差：</b>直尺精度限制（±0.5 mm）</li>
+        <li><b>杯徑測量誤差：</b>玻杯非標準圓形，應多點測量</li>
+        <li><b>氣泡誤差：</b>待測物浸入時可能形成氣泡，應輕輕敲擊杯壁</li>
+        <li><b>溫度變化：</b>水溫變化會影響體積，應在短時間內完成</li>
+        <li><b>視差誤差：</b>讀取水位時視線應與水面平行</li>
+      </ol>
+      
+      <p><b>不確定度估計：</b></p>
+      <div class="formula">δm ≈ √[(∂m/∂V)²·δV² + (∂m/∂ρ)²·δρ²] = √[(ρ·δV)² + (V·δρ)²]</div>
+      
+      <div class="row" style="margin-top: 12px;">
+        <label>體積測量不確定度 δV (mm³) <input type="number" id="ana-dv" value="50" step="10"></label>
+        <label>密度不確定度 δρ (%) <input type="number" id="ana-drho" value="1" step="0.1"></label>
+        <button class="btn secondary" id="ana-calc-err">計算總不確定度</button>
+      </div>
+
+      <div class="result" id="ana-err-result"></div>
+    </div>
+
+    <div class="block" style="margin-top: 16px;">
+      <h3>精度評價</h3>
+      <div id="ana-assess"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REPORT ============ -->
+<section class="tab" id="tab-report">
+  <div class="block" style="max-width: 1000px;">
+    <h3>實驗報告概要</h3>
+    
+    <div style="border: 1px solid var(--line); padding: 16px; margin: 12px 0; background: #FAFAFA;">
+      <h4 style="margin-top: 0;">實驗摘要</h4>
+      <p>本實驗利用阿基米德原理，通過測量待測物浸入水中引起的水位上升，計算排出水的體積，進而利用水的密度（1 g/cm³）確定待測物的質量。</p>
+
+      <h4>測量結果</h4>
+      <div class="result" id="rep-result"></div>
+
+      <h4>主要誤差來源</h4>
+      <ul style="margin: 8px 0;">
+        <li>刻度讀數精度（±0.5 mm）</li>
+        <li>玻杯內徑測量誤差</li>
+        <li>氣泡和溫度影響</li>
+      </ul>
+
+      <h4>改進建議</h4>
+      <ul style="margin: 8px 0;">
+        <li>使用量筒直接測量排水體積，精度更高</li>
+        <li>控制實驗溫度以減少溫度誤差</li>
+        <li>增加測量次數以改善統計精度</li>
+        <li>使用更精密的測量工具（如精密直尺）</li>
+      </ul>
+
+      <h4>結論</h4>
+      <p id="rep-conclusion" style="font-weight: 600; color: var(--accent); font-size: 16px;"></p>
+
+      <div class="row" style="margin-top: 20px; gap: 8px;">
+        <button class="btn" id="rep-export">導出報告（文本）</button>
+        <button class="btn secondary" id="rep-print">打印預覽</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (v, d = 2) => (v == null || !isFinite(v)) ? '—' : Number(v).toFixed(d);
+const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : null; };
+
+// Hidden truth values
+let TR = {
+  diameter: null,    // mm
+  trueVolume: null,  // cm³
+  trueMass: null,    // g
+  objectDensity: null // g/cm³
+};
+
+function generateNewSetup() {
+  const r = 30 + Math.random() * 20;  // 30-50 mm radius
+  TR.diameter = r * 2;
+  const ρ = 0.7 + Math.random() * 1.6;  // 0.7-2.3 g/cm³ (floats to sinks)
+  TR.objectDensity = ρ;
+  TR.trueVolume = 50 + Math.random() * 150;  // 50-200 cm³
+  TR.trueMass = ρ * TR.trueVolume;
+}
+
+function renderTruth() {
+  $('truth-body').innerHTML = `
+    <table>
+      <tr><td>杯內徑</td><td>${fmt(TR.diameter, 1)} mm</td></tr>
+      <tr><td>待測物密度</td><td>${fmt(TR.objectDensity, 2)} g/cm³</td></tr>
+      <tr><td>真實體積</td><td>${fmt(TR.trueVolume, 1)} cm³</td></tr>
+      <tr><td>真實質量</td><td>${fmt(TR.trueMass, 2)} g</td></tr>
+    </table>`;
+}
+
+// Preparation phase
+let PREP = { h0: null, h1: null, dia: null, rows: [], dh: null, vol: null };
+
+$('prep-measure-dia').onclick = () => {
+  const dia = num('prep-dia');
+  if (!dia || dia < 50 || dia > 100) {
+    $('prep-msg-dia').textContent = '請輸入合理的杯內徑（50-100 mm）';
+    $('prep-msg-dia').className = 'msg warn';
+    return;
+  }
+  PREP.dia = dia;
+  $('prep-dia-result').innerHTML = `<div><span>測得杯內徑</span><b>${fmt(dia, 1)}</b><span>mm</span></div>`;
+  $('prep-msg-dia').textContent = '';
+  $('meas-dia').value = dia.toFixed(1);
+};
+
+$('prep-mark').onclick = () => {
+  const h0 = num('prep-h0');
+  if (!h0 || h0 < 0 || h0 > 30) {
+    $('prep-msg').textContent = '請輸入合理的初始水位高度';
+    $('prep-msg').className = 'msg warn';
+    return;
+  }
+  PREP.h0 = h0;
+  $('prep-result').innerHTML = `<div><span>初始水位已標記</span><b>${fmt(h0, 1)}</b><span>cm</span></div>`;
+  $('prep-msg').textContent = '';
+};
+
+$('prep-record').onclick = () => {
+  const h1 = num('prep-h1');
+  if (!h1 || h1 <= (PREP.h0 || 0)) {
+    $('prep-msg2').textContent = '水位應高於初始位置';
+    $('prep-msg2').className = 'msg warn';
+    return;
+  }
+  if (!PREP.h0) {
+    $('prep-msg2').textContent = '請先標記初始水位';
+    $('prep-msg2').className = 'msg warn';
+    return;
+  }
+  PREP.h1 = h1;
+  PREP.dh = h1 - PREP.h0;
+  const r = PREP.dia / 2;
+  PREP.vol = Math.PI * r * r * PREP.dh / 1000;  // mm³ to cm³
+  $('prep-dh').textContent = fmt(PREP.dh, 2);
+  $('prep-r').textContent = fmt(r, 1);
+  $('prep-vol').textContent = fmt(PREP.vol, 2);
+  $('prep-msg2').textContent = '排水體積已計算，可進入測量階段';
+  $('prep-msg2').className = 'msg ok';
+};
+
+// Measurement phase
+let MEAS = { rows: [] };
+
+$('meas-add').onclick = () => {
+  const n = num('meas-n');
+  const h0 = num('meas-h0');
+  const h1 = num('meas-h1');
+  const dia = num('meas-dia');
+  
+  if (!n || !isFinite(h0) || !isFinite(h1) || !dia) {
+    $('meas-msg').textContent = '請填入所有必要的測量數據';
+    $('meas-msg').className = 'msg warn';
+    return;
+  }
+  if (h1 <= h0) {
+    $('meas-msg').textContent = '浸入後水位應高於初始水位';
+    $('meas-msg').className = 'msg warn';
+    return;
+  }
+
+  const dh = h1 - h0;
+  const r = dia / 2;
+  const V = Math.PI * r * r * dh / 1000;  // cm³
+  const m = V * 1.0;  // water density = 1 g/cm³
+  
+  // Add small random error
+  const err = gauss(TR.trueMass * 0.05);
+  const mNoisy = m + err * 0.1;
+  
+  MEAS.rows.push({ n, h0, h1, dh, V, m: mNoisy });
+  renderMeasTable();
+  $('meas-msg').textContent = `測量 #${n} 已記錄`;
+  $('meas-msg').className = 'msg ok';
+  $('meas-n').value = n + 1;
+};
+
+function renderMeasTable() {
+  const tb = $('meas-table');
+  tb.innerHTML = MEAS.rows.map((r, i) => 
+    `<tr><td>${r.n}</td><td>${fmt(r.h0, 1)}</td><td>${fmt(r.h1, 1)}</td><td>${fmt(r.dh, 2)}</td><td>${fmt(r.V, 2)}</td><td>${fmt(r.m, 2)}</td><td><button class="mini" onclick="delRow(${i})">刪</button></td></tr>`
+  ).join('');
+  
+  if (MEAS.rows.length >= 1) {
+    const masses = MEAS.rows.map(r => r.m);
+    const avg = masses.reduce((a,b) => a+b) / masses.length;
+    const std = Math.sqrt(masses.reduce((a, b) => a + (b - avg)**2) / (masses.length - 1));
+    const err = (std / avg * 100);
+    
+    $('meas-stat').innerHTML = `
+      <div><span>質量平均值</span><b>${fmt(avg, 2)}</b><span>g</span></div>
+      <div><span>標準偏差</span><b>${fmt(std, 3)}</b><span>g</span></div>
+      <div><span>相對誤差</span><b>${fmt(err, 1)}</b><span>%</span></div>`;
+    
+    $('ana-avg').value = avg.toFixed(3);
+    $('ana-std').value = std.toFixed(3);
+    $('ana-err').value = err.toFixed(1);
+    updateReport();
+  }
+}
+
+function delRow(i) {
+  MEAS.rows.splice(i, 1);
+  renderMeasTable();
+}
+
+$('meas-calc').onclick = () => {
+  if (MEAS.rows.length === 0) {
+    $('meas-msg').textContent = '請先添加測量數據';
+    $('meas-msg').className = 'msg warn';
+    return;
+  }
+  $('meas-msg').textContent = `已記錄 ${MEAS.rows.length} 次測量結果`;
+  $('meas-msg').className = 'msg ok';
+};
+
+// Analysis phase
+$('ana-calc-err').onclick = () => {
+  const avg = num('ana-avg');
+  const dv = num('ana-dv');
+  const drho = num('ana-drho') / 100;
+  
+  if (!avg || !dv || !isFinite(drho)) {
+    alert('請填入所有數據');
+    return;
+  }
+  
+  const dv_cm3 = dv / 1000;
+  const dm = Math.sqrt((drho * avg)**2 + (dv_cm3)**2);
+  const relErr = (dm / avg * 100);
+  
+  $('ana-err-result').innerHTML = `
+    <div><span>質量不確定度</span><b>±${fmt(dm, 2)}</b><span>g</span></div>
+    <div><span>相對不確定度</span><b>${fmt(relErr, 1)}</b><span>%</span></div>
+    <div><span>評價</span><b>${relErr < 5 ? '優秀' : relErr < 10 ? '良好' : '需改進'}</b></div>`;
+};
+
+// Report phase
+function updateReport() {
+  if (MEAS.rows.length === 0) return;
+  
+  const masses = MEAS.rows.map(r => r.m);
+  const avg = masses.reduce((a,b) => a+b) / masses.length;
+  
+  $('rep-result').innerHTML = `
+    <div><span>質量測量值</span><b>${fmt(avg, 2)}</b><span>g</span></div>
+    <div><span>測量次數</span><b>${MEAS.rows.length}</b><span>次</span></div>
+    <div><span>平均偏差</span><b>${fmt(Math.max(...masses) - Math.min(...masses), 2)}</b><span>g</span></div>`;
+  
+  const accuracy = Math.abs(avg - TR.trueMass) / TR.trueMass * 100;
+  $('rep-conclusion').textContent = `待測物質量 = ${fmt(avg, 2)} ± ${fmt(num('ana-std'), 2)} g（偏差：${fmt(accuracy, 1)}%）`;
+}
+
+$('rep-export').onclick = () => {
+  const text = `實驗報告：質量測定\n\n` +
+    `實驗方法：排水法\n` +
+    `測量次數：${MEAS.rows.length}\n` +
+    `平均質量：${fmt(num('ana-avg'), 2)} g\n` +
+    `標準偏差：${fmt(num('ana-std'), 3)} g\n` +
+    `相對誤差：${fmt(num('ana-err'), 1)}%\n\n` +
+    `詳見測量數據表。`;
+  alert(text);
+};
+
+// Utilities
+function gauss(mu, sigma = 1) {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  v = Math.random();
+  return mu + sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// SVG drawing
+function drawSetup() {
+  const svg = $('prep-svg');
+  let s = `<rect x="0" y="0" width="280" height="500" fill="#fff"/>`;
+  
+  // Stand
+  s += `<rect x="240" y="20" width="8" height="400" fill="#8B939B"/>
+    <rect x="160" y="30" width="80" height="8" fill="#8B939B"/>`;
+  
+  // Cup
+  const cupH = 180;
+  s += `<path d="M80,100 L100,300 L180,300 L200,100 Z" fill="none" stroke="#66B2FF" stroke-width="2"/>
+    <ellipse cx="140" cy="100" rx="60" ry="15" fill="none" stroke="#66B2FF" stroke-width="2"/>`;
+  
+  // Water
+  if (PREP.h0) {
+    const waterH = 100 + PREP.h0 * 2;
+    s += `<ellipse cx="140" cy="${waterH}" rx="58" ry="12" fill="#87CEEB" opacity="0.6"/>
+      <path d="M82,${waterH} L198,${waterH}" stroke="#2E8B9E" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+  }
+  
+  // Object in water
+  if (PREP.h1) {
+    const objH = 100 + PREP.h1 * 1.5;
+    s += `<rect x="120" y="${objH-20}" width="40" height="40" fill="#FF9999" opacity="0.7" rx="2"/>`;
+  }
+  
+  svg.innerHTML = s;
+}
+
+// Navigation
+document.querySelectorAll('#nav button').forEach(b => {
+  b.onclick = () => {
+    const tab = b.dataset.tab;
+    document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('active', s.id === 'tab-' + tab));
+    document.querySelectorAll('#nav button').forEach(btn => btn.classList.toggle('active', btn === b));
+    if (tab === 'prep') drawSetup();
+  };
+});
+
+document.querySelectorAll('[data-goto]').forEach(b => {
+  b.onclick = () => {
+    const tab = b.dataset.goto;
+    $('nav').querySelector(`[data-tab="${tab}"]`).click();
+  };
+});
+
+$('btn-truth').onclick = () => $('truth-panel').classList.toggle('show');
+$('btn-reset').onclick = () => {
+  generateNewSetup();
+  PREP = { h0: null, h1: null, dia: null, rows: [] };
+  MEAS = { rows: [] };
+  renderTruth();
+  document.querySelectorAll('input[type=number], input[type=text]').forEach(i => i.value = '');
+  document.querySelectorAll('.result, .msg').forEach(e => e.innerHTML = '');
+  alert('已重置為新器材組。請查看隱藏答案後重新開始實驗。');
+};
+
+// Initialize
+generateNewSetup();
+renderTruth();
+</script>
+</body>
+</html>

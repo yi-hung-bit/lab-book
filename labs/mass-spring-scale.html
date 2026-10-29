@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>自製彈簧秤虛擬實驗室</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1c2230;--mut:#5b6475;--line:#d6dbe4;--acc:#1f6feb;--acc2:#d9480f;--ok:#2b8a3e;--warn:#c92a2a;--soft:#eef3ff;--wood:#b08040;--metal:#7a8594;--paper:#fffdf5;--grid:#9fd3a8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e6e9ef;--mut:#9aa3b2;--line:#353c49;--acc:#6ea8fe;--acc2:#ff922b;--ok:#69db7c;--warn:#ff6b6b;--soft:#22304a;--wood:#c8995a;--metal:#9aa5b4;--paper:#2a2a22;--grid:#4f7a57}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;line-height:1.6}
+header{padding:14px 16px 6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+header h1{font-size:1.2rem;margin:0}
+header .sub{color:var(--mut);font-size:.85rem}
+nav{display:flex;gap:4px;flex-wrap:wrap;padding:0 16px;border-bottom:1px solid var(--line)}
+nav button{border:1px solid var(--line);border-bottom:none;background:var(--bg);color:var(--mut);padding:8px 12px;border-radius:8px 8px 0 0;cursor:pointer;font-size:.9rem}
+nav button.on{background:var(--card);color:var(--ink);font-weight:700}
+nav button.lock{opacity:.5}
+main{padding:16px;max-width:1200px;margin:0 auto}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:1.05rem;margin:0 0 8px}
+.card h3{font-size:.98rem;margin:12px 0 6px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.grid3{display:grid;grid-template-columns:460px minmax(0,1fr);gap:14px}
+@media (max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.eq{background:var(--soft);border-radius:8px;padding:8px 12px;font-family:"Cambria Math","Times New Roman",serif;font-size:1.05rem;margin:6px 0;overflow-x:auto}
+.note{color:var(--mut);font-size:.88rem}
+.warn{color:var(--warn)}
+.ok{color:var(--ok)}
+button.b{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.9rem;margin:2px}
+button.b2{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:.9rem;margin:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+input[type=number],input[type=text]{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 7px;width:92px;font-size:.92rem}
+input[type=range]{width:220px;max-width:100%}
+textarea{width:100%;min-height:90px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:.92rem;font-family:inherit}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:var(--soft)}
+td input[type=number]{width:78px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line)}
+.step .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.step.done .n{background:var(--ok);color:#fff}
+.step.cur .n{background:var(--acc);color:#fff}
+.step .body{flex:1}
+.step.fut{opacity:.45}
+svg{max-width:100%;height:auto;display:block}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.8rem;border:1px solid var(--line)}
+.pill.up{background:#e7f5ff;color:#1864ab;border-color:#a5d8ff}
+.pill.down{background:#fff4e6;color:#d9480f;border-color:#ffd8a8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.up{background:#1c3350;color:#a5d8ff}:root:not([data-theme="light"]) .pill.down{background:#402a14;color:#ffc078}}
+.status{font-weight:700}
+.lockmsg{padding:30px;text-align:center;color:var(--mut)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:.93rem}
+.kv b{font-weight:600}
+.big{font-size:1.15rem;font-weight:700}
+.sig1{color:var(--ok);font-weight:700}.sig2{color:#e67700;font-weight:700}.sig3{color:var(--warn);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>自製彈簧秤虛擬實驗室</h1>
+    <div class="sub">九十三學年度 高級中學自然學科競賽 屏東區複賽 物理實驗試題第一題</div>
+  </div>
+  <button class="b2" id="btnNew">重新開始（換新彈簧與待測物）</button>
+</header>
+<nav id="nav"></nav>
+<main>
+
+<!-- ① 原理 -->
+<section class="tab" id="t1">
+  <div class="card">
+    <h2>題目回顧</h2>
+    <ol>
+      <li>利用所給器材自製彈簧秤，並量出待測物的重量。</li>
+      <li>自製彈簧秤能量測重量大於 110 公克重的物體嗎？為什麼？</li>
+      <li>自製彈簧秤能量測重量小於 10 公克重的物體嗎？為什麼？</li>
+    </ol>
+    <p class="note">可用砝碼：10 g × 1、20 g × 5。能組合出的載重為 10、20、30、…、110 g，每隔 10 g 一點，總共 11 個校正點（加上空載共 12 點）。</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h2>虎克定律與「初張力」</h2>
+      <p>理想彈簧的回復力與伸長量成正比：</p>
+      <div class="eq">F = k x</div>
+      <p>實驗室常用的<b>密繞彈簧</b>，在繞製時線圈之間就互相壓緊，存在一個<b>初張力 F₀</b>。外力小於 F₀ 時，線圈仍然貼合，彈簧<b>完全不伸長</b>；外力超過 F₀ 之後，才開始依虎克定律伸長：</p>
+      <div class="eq">x = 0　　　（mg ≤ F₀）<br>x = (mg − F₀) / k　（mg &gt; F₀）</div>
+      <p>秤鉤、指針與膠帶本身也有質量 m<sub>h</sub>，它們一直掛在彈簧上。所以「還需要再加多少砝碼才會開始伸長」的門檻是：</p>
+      <div class="eq">m₀ = F₀/g − m<sub>h</sub></div>
+      <p class="note">線圈並不是完美貼合，所以在門檻附近，x–m 曲線會有一小段圓滑的轉折，而不是尖銳的折角。</p>
+    </div>
+    <div class="card">
+      <h2>校正線：x–m 圖</h2>
+      <svg viewBox="0 0 420 300" id="svgPrin"></svg>
+      <p class="note">實線：真實彈簧的 x–m 關係。虛線：以直線段做最小平方法迴歸，再往回延伸。它和 m 軸交在 m₀，和 x 軸交在負截距。上下兩條細線表示指針摩擦造成的加載、卸載讀數差。</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h2>用校正線反推重量</h2>
+      <p>把直線段的數據以最小平方法擬合：</p>
+      <div class="eq">x = a·m + b　　（a = g/k，b = −a·m₀）</div>
+      <p>掛上待測物，讀到伸長量 x<sub>X</sub> 之後，反推它的質量：</p>
+      <div class="eq">m<sub>X</sub> = (x<sub>X</sub> − b) / a</div>
+      <p>也可以把每個砝碼組合的指針位置直接畫在方格紙刻度條上，標成公克。這樣就成了一支「直讀式」彈簧秤，量測時在兩條刻度線之間內插讀值。本實驗室兩種方法都做，並在 ⑤、⑥ 頁比較兩者的誤差。</p>
+    </div>
+    <div class="card">
+      <h2>讀數誤差的三個來源</h2>
+      <h3>1. 刻度與估讀</h3>
+      <p>直尺最小刻度 1 mm，應估讀到 0.1 mm，也就是記錄到 0.01 cm。</p>
+      <h3>2. 視差</h3>
+      <p>指針尖端與尺面相距 d。若眼睛高度 y<sub>e</sub> 和指針高度 y 不同（觀看距離 D），讀數會偏移：</p>
+      <div class="eq">Δy = d·(y − y<sub>e</sub>) / D</div>
+      <p class="note">指針每次移動之後，眼睛都要重新對齊到指針高度。</p>
+      <h3>3. 指針摩擦（遲滯）</h3>
+      <p>牙籤指針穿過吸管切縫，會受到最大靜摩擦 f。指針停住的位置，可能落在平衡點上下 f/k 的範圍內任何一處。慢慢加載時，指針停在平衡點<b>上方</b>；慢慢卸載時，停在平衡點<b>下方</b>。因此要同時記錄加載和卸載的讀數再取平均，或輕敲吸管讓指針落回平衡點附近。</p>
+    </div>
+  </div>
+  <div class="card">
+    <h2>思考（在 ⑤、⑥ 頁以實驗回答）</h2>
+    <ul>
+      <li><b>大於 110 g：</b>校正線只涵蓋到 110 g。超出這個範圍的外插還可靠嗎？彈簧有沒有彈性限度？超過之後會發生什麼事？</li>
+      <li><b>小於 10 g：</b>最小的校正點是 10 g；而且只掛 10 g 時，彈簧可能根本還沒開始伸長。比起指針摩擦造成的死區 f/k，一公克造成的位移有多大？</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ② 器材組裝 -->
+<section class="tab" id="t2">
+  <div class="grid3">
+    <div class="card"><h2>裝置圖</h2><svg id="svgAsm" viewBox="0 0 440 700"></svg></div>
+    <div>
+      <div class="card">
+        <h2>組裝步驟</h2>
+        <div id="steps"></div>
+      </div>
+      <div class="card" id="plumbCard" style="display:none">
+        <h2 id="plumbTitle">鉛垂線比對</h2>
+        <p class="note" id="plumbNote"></p>
+        <svg id="svgPlumb" viewBox="0 0 440 170"></svg>
+        <div class="row"><span>微調傾角</span><button class="b2" data-tilt="-0.5">◀◀</button><button class="b2" data-tilt="-0.05">◀</button><input type="range" id="tiltSl" min="-6" max="6" step="0.05"><button class="b2" data-tilt="0.05">▶</button><button class="b2" data-tilt="0.5">▶▶</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ 校正量測 -->
+<section class="tab" id="t3">
+  <div id="t3lock" class="card lockmsg">請先在 ② 完成器材組裝。</div>
+  <div id="t3body" style="display:none">
+  <div id="t3slot">
+  <div class="grid3" id="rigPanel">
+    <div class="card"><h2>彈簧秤全景</h2><svg id="svgRig" viewBox="0 0 440 700"></svg>
+      <p class="note">右側的眼睛與虛線表示你的視線高度。拖曳滑桿，讓虛線對準指針尖端，再讀數。</p></div>
+    <div>
+      <div class="card">
+        <h2>掛上砝碼</h2>
+        <div class="row">
+          <span>放置方式：</span>
+          <label><input type="radio" name="rel" value="hand" checked> 手托緩放（準靜態）</label>
+          <label><input type="radio" name="rel" value="drop"> 直接放手</label>
+        </div>
+        <div class="row">
+          <button class="b" id="bX" style="display:none">掛上待測物</button>
+          <button class="b" id="b10">掛上 10 g</button>
+          <button class="b" id="b20p">加一個 20 g</button>
+          <button class="b2" id="b20m">取下一個 20 g</button>
+          <button class="b2" id="btap">輕敲吸管</button>
+        </div>
+        <div class="row">目前掛載：<b id="loadTxt">無</b>　上次操作：<span id="dirTxt"></span>　狀態：<span class="status" id="stTxt"></span></div>
+        <div class="note" id="dmgTxt"></div>
+      </div>
+      <div class="card">
+        <h2>讀數放大鏡（直尺）</h2>
+        <div class="grid2" style="grid-template-columns:260px 1fr">
+          <svg id="svgZoom" viewBox="0 0 260 260"></svg>
+          <div>
+            <div>眼睛高度（直尺刻度，cm）</div>
+            <div class="row"><button class="b2" data-eye="-1">−1</button><button class="b2" data-eye="-0.1">−0.1</button><input type="range" id="eyeSl" min="-5" max="40" step="0.1"><button class="b2" data-eye="0.1">+0.1</button><button class="b2" data-eye="1">+1</button></div>
+            <div class="note">目前眼睛高度：<span id="eyeTxt"></span> cm</div>
+            <div class="row" style="margin-top:10px">讀數 y =<input type="number" id="rdIn" step="0.01"> cm</div>
+            <div class="row"><button class="b" id="bRec">記錄到表格</button><button class="b2" id="bMark">在刻度條畫記</button></div>
+            <div class="note" id="recMsg"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="stripCard" style="display:none">
+        <h2>讀數放大鏡（方格紙刻度條）</h2>
+        <div class="grid2" style="grid-template-columns:260px 1fr">
+          <svg id="svgStrip" viewBox="0 0 260 260"></svg>
+          <div>
+            <p class="note">紅線是你在 ③ 畫下的公克刻度，淡綠格線是 1 mm 方格。在相鄰兩條刻度線之間按比例內插，估讀出質量。</p>
+            <div class="row">直讀 m =<input type="number" id="dirIn" step="0.1"> g</div>
+            <div class="row"><button class="b" id="bDir">記錄直讀值</button></div>
+            <div class="note" id="dirMsg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="card">
+    <h2>校正數據表</h2>
+    <p class="note">讀數請估讀到 0.01 cm。「記錄到表格」會依照目前載重與上次操作方向（加載 ↑／卸載 ↓）填入對應欄位；表格也可以直接編輯。伸長量 x = ȳ − ȳ(0)。</p>
+    <div style="overflow-x:auto"><table id="tbl"></table></div>
+    <div class="row"><button class="b2" id="bCSV">匯出 CSV</button><button class="b2" id="bClr">清除表格</button></div>
+    <div class="note">刻度條畫記：<span id="markTxt">（尚無）</span></div>
+  </div>
+  </div>
+</section>
+
+<!-- ④ 作圖迴歸 -->
+<section class="tab" id="t4">
+  <div id="t4lock" class="card lockmsg">請先在 ② 完成組裝、在 ③ 記錄校正數據。</div>
+  <div id="t4body" style="display:none">
+  <div class="card">
+    <h2>x–m 關係圖與最小平方法迴歸</h2>
+    <p class="note">在右表勾選要納入迴歸的點。初張力區的點（彈簧還沒伸長或剛開始伸長）不在直線段上，應該排除。預設排除 0 g 與 10 g，請根據圖形自行判斷是否合理。</p>
+    <div class="row"><button class="b2" id="bDemo">填入示範數據（教師測試用）</button><span class="note">會以本組隱藏參數產生一組合理的讀數與刻度畫記，並覆蓋 ③ 的表格。</span></div>
+    <div class="grid2">
+      <div>
+        <svg id="svgFit" viewBox="0 0 520 380"></svg>
+        <svg id="svgRes" viewBox="0 0 520 170"></svg>
+        <p class="note">▲ 加載讀數　▼ 卸載讀數　● 平均（實心＝納入迴歸，空心＝排除）　下圖為平均點對迴歸線的殘差，灰帶為 ±s。</p>
+      </div>
+      <div>
+        <div style="overflow-x:auto"><table id="tblFit"></table></div>
+        <div id="fitOut" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>對照：單點法（k = mg / x）</h2>
+    <p class="note">若忽略初張力，把每一點都當作通過原點，就會得到下表的「單點 k」。比較它與迴歸 k 的差異，並說明原因。</p>
+    <div style="overflow-x:auto"><table id="tblSingle"></table></div>
+    <div id="singleNote" class="note" style="margin-top:8px"></div>
+  </div>
+  </div>
+</section>
+
+<!-- ⑤ 待測物與量程 -->
+<section class="tab" id="t5">
+  <div id="t5lock" class="card lockmsg">請先在 ④ 完成迴歸（至少 3 個納入的數據點）。</div>
+  <div id="t5body" style="display:none">
+  <div class="card">
+    <h2>操作說明</h2>
+    <ol>
+      <li><b>量測待測物（第 1 題）：</b>取下所有砝碼，只掛待測物。建議加載、卸載方向各讀 2–3 次（可先掛 20 g 再取下，讓指針從下方回到待測物的位置）。直尺讀數會以 ④ 的迴歸線反推質量；另外在刻度條放大鏡直接讀出公克數。</li>
+      <li><b>大於 110 g（第 2 題）：</b>掛著待測物時加掛砝碼，使總重超過 110 g，記錄讀數。之後全部取下，再讀一次零點，看指針有沒有回到原位。<span class="warn">超過彈性限度會讓彈簧永久變形，之前的校正就作廢了，所以請先完成第 1 題再做。</span></li>
+      <li><b>小於 10 g（第 3 題）：</b>只掛 10 g，與空載比較；並參考下方由你的數據算出的門檻 m₀ 與摩擦死區。</li>
+    </ol>
+  </div>
+  <div id="t5slot"></div>
+  <div class="card">
+    <h2>量測紀錄</h2>
+    <p class="note">在本頁按「記錄」會把直尺讀數存進這裡，並依掛載內容自動分類。</p>
+    <div style="overflow-x:auto"><table id="tblLog"></table></div>
+    <div class="row"><button class="b2" id="bLogClr">清除紀錄</button></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>第 1 題：待測物的重量</h2><div id="q1Out"></div></div>
+    <div class="card"><h2>第 2 題：能量大於 110 g 的物體嗎？</h2><div id="q2Out"></div>
+      <h3>你的回答</h3><textarea id="q2Txt" placeholder="根據上面的數據，寫下你的結論與理由……"></textarea></div>
+  </div>
+  <div class="card"><h2>第 3 題：能量小於 10 g 的物體嗎？</h2><div id="q3Out"></div>
+    <h3>你的回答</h3><textarea id="q3Txt" placeholder="根據上面的數據，寫下你的結論與理由……"></textarea></div>
+  </div>
+</section>
+
+<!-- ⑥ 誤差與真值 -->
+<section class="tab" id="t6">
+  <div class="card">
+    <h2>真值揭曉</h2>
+    <p class="note">揭曉後會顯示本組彈簧、砝碼與待測物的隱藏參數，並把你的量測結果以標準差為單位做比較。建議完成 ④、⑤ 之後再按。</p>
+    <button class="b" id="bReveal">揭曉真值</button>
+  </div>
+  <div id="revOut"></div>
+</section>
+</main>
+
+<script>
+"use strict";
+const G=9.79;               // 屏東地區 g ≈ 9.79 m/s²
+const D_VIEW=25;            // 觀看距離 cm
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+const $=id=>document.getElementById(id);
+const sgnR=()=>Math.random()<.5?-1:1;
+const fx=(v,n)=>(v===null||v===undefined||!isFinite(v))?'—':v.toFixed(n);
+
+/* ---------- 隱藏真值與狀態 ---------- */
+let H,S,A,L,Dt,eyeY,marks,logs,directs,revealed;
+function newAll(){
+  H={k:rnd(8,13), mT:rnd(6,13), mh:rnd(1.6,2.4), ms:rnd(6,12), mE:rnd(140,190),
+     m10:10+0.05*gauss(), m20:[0,1,2,3,4].map(()=>20+0.08*gauss()),
+     X:rnd(28,96), y0:rnd(4.2,6.8), f0g:rnd(0.25,0.5),
+     sTilt0:sgnR()*rnd(2,5), rTilt0:sgnR()*rnd(1.5,4)};
+  A={stage:0, slit:null, sTilt:H.sTilt0, rTilt:H.rTilt0, gap:0.8, done:false, fs:0, wob:0, y0:H.y0};
+  L={m10:false,n20:0,X:false,dir:null};
+  Dt={rows:[...Array(12)].map(()=>({up:null,dn:null})), use:[...Array(12)].map((_,i)=>i>=2), demo:false};
+  marks=[]; logs=[]; directs=[]; revealed=false;
+  eyeY=2.0;
+  resetSpring();
+  if($('revOut'))$('revOut').innerHTML='';
+}
+function resetSpring(){
+  S={k:H.k,F0:H.mT*G/1000,Fsoft:0.35*H.mT*G/1000,dp:0,dmax:0,d:0,v:0,stuck:true,mode:'idle',tapT:0,droop:0,excess:0,damaged:false,damageSeq:null};
+}
+
+/* ---------- 彈簧力學模型 ---------- */
+const DC=0.0004; // 初張力轉折寬度 (m)
+// 彈性限度對應的伸長量；超過後沿「硬化包絡線」（斜率 0.6k）伸長，卸載則沿斜率 k 的彈性線回來
+function dE(){return (H.mE-H.mT)*G/1000/H.k;}
+function Fenv(d){const e=dE();return H.mT*G/1000+H.k*e+0.6*H.k*(d-e);}
+function Fspr(d){
+  if(d>dE()&&d>=S.dmax)return Fenv(d);
+  const u=d-S.dp;return S.F0+S.k*u-S.Fsoft*Math.exp(-u/DC);
+}
+function massOfNom(nom){let m=0;if(nom%20===10)m+=H.m10;const n=Math.floor(nom/20);for(let i=0;i<n;i++)m+=H.m20[i];return m;}
+function loadG(){let m=0;if(L.m10)m+=H.m10;for(let i=0;i<L.n20;i++)m+=H.m20[i];if(L.X)m+=H.X;return m;}
+function Mtot(){return loadG()+H.mh;}
+function nominal(){return (L.m10?10:0)+20*L.n20;}
+function loadDesc(){const a=[];if(L.X)a.push('待測物');if(L.m10)a.push('10 g');if(L.n20)a.push(L.n20+'×20 g');return a.length?a.join(' ＋ '):'無';}
+function checkPlastic(){
+  if(S.d<=S.dmax)return; S.dmax=S.d;
+  const e=dE();
+  if(S.dmax>e){
+    const exc=(S.dmax-e)*H.k*1000/G;          // 超出彈性限度的「公克當量」
+    S.excess=exc;
+    if(exc>0.5&&!S.damaged){S.damaged=true;S.damageSeq=logs.length;}
+    S.F0=H.mT*G/1000*Math.max(0.2,1-exc/80);   // 線圈被拉開，初張力部分喪失
+    S.Fsoft=0.35*S.F0;
+    S.dp=Math.max(0,S.dmax-(Fenv(S.dmax)-S.F0)/S.k); // 彈性卸載線與新初張力交點 → 永久伸長
+  }
+}
+function settle(){S.droop=(Math.random()-.5)*2*A.wob;}
+function physStep(dt){
+  const m=(Mtot()+H.ms/3)/1000, W=Mtot()*G/1000;
+  const fs=A.fs*(S.tapT>0?0.15:1), fk=0.8*fs;
+  if(S.tapT>0)S.tapT-=dt;
+  if(S.mode==='lower'){
+    const net=W-Fspr(S.d);
+    if(Math.abs(net)<=fs||(S.d<=S.dp&&net<0)){S.mode='idle';S.stuck=true;S.v=0;settle();return;}
+    S.d+=0.015*Math.sign(net)*dt; if(S.d<S.dp)S.d=S.dp; S.v=0; checkPlastic(); return;
+  }
+  const Fs=Fspr(S.d);
+  if(S.stuck){
+    const net=W-Fs;
+    if(Math.abs(net)>fs&&!(S.d<=S.dp+1e-9&&net<0)){S.stuck=false;S.droop=0;} else return;
+  }
+  const dir=S.v!==0?Math.sign(S.v):Math.sign(W-Fs);
+  const c=2*0.02*Math.sqrt(S.k*m);
+  const a=(W-Fs-c*S.v-fk*dir)/m;
+  const pv=S.v;
+  S.v+=a*dt; S.d+=S.v*dt;
+  if(S.d<S.dp){S.d=S.dp; if(S.v<0)S.v=0;}
+  checkPlastic();
+  if(pv*S.v<=0){ // 轉折點：檢查是否被靜摩擦卡住
+    const nf=W-Fspr(S.d);
+    if(Math.abs(nf)<=fs||(S.d<=S.dp+1e-9&&nf<0)){S.v=0;S.stuck=true;settle();}
+  }
+}
+function eqW(W){ // 給定向下總力 W 的平衡伸長量
+  if(W<=Fspr(S.dp))return S.dp;
+  let lo=S.dp,hi=S.dp+2; for(let i=0;i<70;i++){const c=(lo+hi)/2; if(Fspr(c)<W)lo=c; else hi=c;} return (lo+hi)/2;
+}
+const cosR=()=>Math.cos(A.rTilt*Math.PI/180);
+function trueReading(){return A.y0+S.d*100/cosR()+S.droop;}
+function pointerVis(){return A.y0+S.d*100+S.droop;}
+function apparent(){const R=trueReading();return R+(R-eyeY)*A.gap/D_VIEW;}
+
+/* ---------- 統計 ---------- */
+function linfit(P){
+  const N=P.length; if(N<3)return null;
+  const mx=P.reduce((s,p)=>s+p[0],0)/N, my=P.reduce((s,p)=>s+p[1],0)/N;
+  let Sxx=0,Sxy=0,Syy=0; P.forEach(p=>{Sxx+=(p[0]-mx)**2;Sxy+=(p[0]-mx)*(p[1]-my);Syy+=(p[1]-my)**2;});
+  if(Sxx===0)return null;
+  const a=Sxy/Sxx,b=my-a*mx; let SS=0;P.forEach(p=>SS+=(p[1]-a*p[0]-b)**2);
+  const s=Math.sqrt(SS/(N-2)), sa=s/Math.sqrt(Sxx), sb=s*Math.sqrt(1/N+mx*mx/Sxx), cov=-mx*sa*sa;
+  return {a,b,sa,sb,s,N,mx,my,Sxx,cov,R2:Syy>0?1-SS/Syy:1,P};
+}
+const mean=a=>a.reduce((p,q)=>p+q,0)/a.length;
+const sd=a=>a.length<2?0:Math.sqrt(a.reduce((p,q)=>p+(q-mean(a))**2,0)/(a.length-1));
+function rowsAvg(){return Dt.rows.map(r=>{const a=[r.up,r.dn].filter(v=>v!==null&&!isNaN(v));return a.length?mean(a):null;});}
+function getFit(){
+  const av=rowsAvg(), base=av[0]; if(base===null)return null;
+  const P=[]; av.forEach((v,i)=>{if(v!==null&&Dt.use[i])P.push([i*10,v-base]);});
+  const f=linfit(P); if(!f||f.a<=0)return null;
+  f.base=base; f.av=av;
+  f.k=G/(10*f.a); f.sk=f.k*f.sa/f.a;
+  f.m0=-f.b/f.a;
+  f.sm0=Math.sqrt(Math.max(0,f.sb**2/f.a**2+f.b**2*f.sa**2/f.a**4-2*f.b*f.cov/f.a**3));
+  return f;
+}
+function invPred(f,xX,nX){ // 由伸長量反推質量與其標準差（校正線反推公式）
+  const m=(xX-f.b)/f.a;
+  const sm=(f.s/f.a)*Math.sqrt(1/nX+1/f.N+(xX-f.my)**2/(f.a**2*f.Sxx));
+  return {m,sm};
+}
+const MASS_TOL=0.004; // 砝碼標示公差的相對標準不確定度（約 0.4 %）
+function sigCls(z){z=Math.abs(z);return z<=1?'sig1':(z<=2?'sig2':'sig3');}
+
+/* ---------- 繪圖：裝置 ---------- */
+const PX=9.5; const Y=c=>16+(c+9)*PX;
+function springPath(x,y1,y2,n,amp){
+  let p=`M${x} ${y1}`; const h=(y2-y1)/n;
+  for(let i=0;i<n;i++){p+=` L${x+amp} ${y1+h*(i+0.25)} L${x-amp} ${y1+h*(i+0.75)}`;}
+  return p+` L${x} ${y2}`;
+}
+function renderRig(stage,showEye){
+  const y0=A.y0, yp=pointerVis();
+  const rx=300, gapPx=A.gap*PX, xc=rx-gapPx-14;
+  const sTop=y0-5.5, sBot=yp-0.5;
+  const strawTop=y0-3, strawBot=y0+18, slitTop=y0-1, slitBot=y0+17.5;
+  let s='';
+  s+=`<rect x="10" y="${Y(61)}" width="420" height="8" fill="var(--wood)" opacity=".5"/>`;
+  if(stage>=1){
+    s+=`<rect x="20" y="${Y(60)}" width="70" height="${PX}" rx="3" fill="var(--metal)"/>`;
+    s+=`<rect x="50" y="${Y(-9)}" width="8" height="${Y(60)-Y(-9)}" fill="var(--metal)"/>`;
+    s+=`<rect x="50" y="${Y(-8.4)}" width="${xc-40}" height="6" fill="var(--metal)"/>`;
+    s+=`<rect x="46" y="${Y(-9)}" width="18" height="16" rx="3" fill="#495057"/>`;
+  }
+  if(stage>=2){
+    s+=`<path d="M${xc} ${Y(-8)} L${xc} ${Y(sTop)}" stroke="#b5651d" stroke-width="1.6" fill="none"/>`;
+    s+=`<circle cx="${xc}" cy="${Y(-8)+2}" r="3" fill="none" stroke="#b5651d" stroke-width="1.6"/>`;
+    s+=`<path d="${springPath(xc,Y(sTop),Y(sBot),18,4.5)}" stroke="var(--ink)" stroke-width="1.3" fill="none"/>`;
+  }
+  const yh=yp+20;
+  if(stage>=3){
+    s+=`<path d="M${xc} ${Y(sBot)} L${xc} ${Y(yh)-4} q0 7 -5 5" stroke="#b5651d" stroke-width="1.6" fill="none"/>`;
+    let yy=yh;
+    const hang=(w,h,lab,col)=>{s+=`<line x1="${xc}" y1="${Y(yy)}" x2="${xc}" y2="${Y(yy+0.4)}" stroke="var(--metal)" stroke-width="1.5"/>`;
+      s+=`<rect x="${xc-w*PX/2}" y="${Y(yy+0.4)}" width="${w*PX}" height="${h*PX}" rx="3" fill="${col}" stroke="var(--ink)" stroke-width=".6"/>`;
+      s+=`<text x="${xc+w*PX/2+4}" y="${Y(yy+0.4+h/2)+4}" font-size="10" fill="var(--mut)">${lab}</text>`; yy+=0.4+h;};
+    if(L.X)hang(2.6,2.4,'待測物','#e8b04b');
+    if(L.m10)hang(1.4,1.0,'10 g','#adb5bd');
+    for(let i=0;i<L.n20;i++)hang(1.8,1.5,'20 g','#868e96');
+  }
+  if(stage>=4){
+    const t=A.sTilt, top=Y(strawTop), bot=Y(strawBot);
+    s+=`<g transform="rotate(${t} ${xc} ${top})"><rect x="${xc-7}" y="${top}" width="14" height="${bot-top}" fill="#a5d8ff" fill-opacity=".25" stroke="#4dabf7" stroke-width="1"/>`;
+    s+=`<line x1="${xc+7}" y1="${Y(slitTop)}" x2="${xc+7}" y2="${Y(slitBot)}" stroke="var(--bg)" stroke-width="1.6"/>`;
+    s+=`<line x1="${xc-7}" y1="${Y(slitTop)}" x2="${xc-7}" y2="${Y(slitBot)}" stroke="var(--bg)" stroke-width="1.6"/>`;
+    if(stage>=8){
+      s+=`<rect x="${xc-31}" y="${Y(slitTop)}" width="22" height="${Y(slitBot)-Y(slitTop)}" fill="var(--paper)" stroke="var(--grid)" stroke-width=".8"/>`;
+      for(let c=-1;c<=17.5;c+=0.5)s+=`<line x1="${xc-31}" x2="${xc-9}" y1="${Y(y0+c)}" y2="${Y(y0+c)}" stroke="var(--grid)" stroke-width=".4"/>`;
+      marks.forEach(mk=>{s+=`<line x1="${xc-31}" x2="${xc-9}" y1="${Y(mk.yv)}" y2="${Y(mk.yv)}" stroke="#c92a2a" stroke-width="1"/><text x="${xc-34}" y="${Y(mk.yv)+3}" font-size="8" text-anchor="end" fill="#c92a2a">${mk.lab}</text>`;});
+    }
+    s+=`</g>`;
+  }
+  if(stage>=5){
+    s+=`<polygon points="${xc-24},${Y(yp)-1.5} ${xc-24},${Y(yp)+1.5} ${rx-gapPx-1},${Y(yp)}" fill="#c08a3e"/>`;
+    s+=`<polygon points="${xc-24},${Y(yp)-1.5} ${xc-24},${Y(yp)+1.5} ${xc-31},${Y(yp)}" fill="#c08a3e"/>`;
+  }
+  if(stage>=7){
+    const t=A.rTilt;
+    s+=`<g transform="rotate(${t} ${rx} ${Y(0)})"><rect x="${rx}" y="${Y(-0.6)}" width="30" height="${Y(30.6)-Y(-0.6)}" fill="#f8f0d8" stroke="var(--ink)" stroke-width=".7"/>`;
+    for(let c=0;c<=30;c+=0.5){const L2=c%5===0?12:(c%1===0?8:5);s+=`<line x1="${rx}" x2="${rx+L2}" y1="${Y(c)}" y2="${Y(c)}" stroke="#222" stroke-width=".6"/>`;if(c%5===0)s+=`<text x="${rx+14}" y="${Y(c)+3.5}" font-size="9" fill="#222">${c}</text>`;}
+    s+=`</g>`;
+  }
+  if(showEye){
+    const ye=Y(eyeY);
+    s+=`<line x1="${rx+32}" x2="428" y1="${ye}" y2="${ye}" stroke="var(--acc)" stroke-dasharray="4 3" stroke-width="1"/>`;
+    s+=`<path d="M398 ${ye} q12 -9 24 0 q-12 9 -24 0z" fill="var(--card)" stroke="var(--acc)" stroke-width="1.3"/><circle cx="410" cy="${ye}" r="3" fill="var(--acc)"/>`;
+  }
+  return s;
+}
+function renderZoom(){
+  const Ra=apparent(), c=130, sc=100;
+  let s=`<rect x="0" y="0" width="260" height="260" fill="var(--card)"/>`;
+  const rTop=Math.max(0,c+(-0.6-Ra)*sc), rBot=Math.min(260,c+(30.6-Ra)*sc);
+  if(rBot>rTop)s+=`<rect x="120" y="${rTop}" width="140" height="${rBot-rTop}" fill="#f8f0d8" stroke="#555" stroke-width="1"/>`;
+  const lo=Math.max(0,Math.floor((Ra-1.4)*10)), hi=Math.min(300,Math.ceil((Ra+1.4)*10));
+  for(let t=lo;t<=hi;t++){
+    const yy=c+(t/10-Ra)*sc; if(yy<-5||yy>265)continue;
+    const len=t%10===0?44:(t%5===0?30:18);
+    s+=`<line x1="120" x2="${120+len}" y1="${yy}" y2="${yy}" stroke="#222" stroke-width="${t%10===0?1.4:1}"/>`;
+    if(t%10===0)s+=`<text x="${120+50}" y="${yy+6}" font-size="17" fill="#222">${t/10}</text>`;
+  }
+  if(Ra>30.8)s+=`<text x="190" y="40" text-anchor="middle" font-size="13" fill="var(--warn)">超出直尺範圍</text>`;
+  s+=`<polygon points="0,${c-9} 0,${c+9} 116,${c}" fill="#c08a3e" stroke="#8a5a1e" stroke-width=".8"/>`;
+  s+=`<rect x="0" y="0" width="260" height="260" fill="none" stroke="var(--line)"/>`;
+  $('svgZoom').innerHTML=s;
+}
+function renderStrip(){
+  const yp=pointerVis(), c=130, sc=100, y0=A.y0;
+  let s=`<rect x="0" y="0" width="260" height="260" fill="var(--card)"/>`;
+  const top=Math.max(0,c+(y0-1-yp)*sc), bot=Math.min(260,c+(y0+17.5-yp)*sc);
+  if(bot>top){
+    s+=`<rect x="10" y="${top}" width="140" height="${bot-top}" fill="var(--paper)" stroke="var(--grid)"/>`;
+    const g0=y0-1; // 方格紙起點
+    const k0=Math.ceil((yp-1.4-g0)*10), k1=Math.floor((yp+1.4-g0)*10);
+    for(let k=k0;k<=k1;k++){const yy=c+(g0+k/10-yp)*sc; if(yy<top||yy>bot)continue;
+      s+=`<line x1="10" x2="150" y1="${yy}" y2="${yy}" stroke="var(--grid)" stroke-width="${k%10===0?1.2:(k%5===0?.8:.4)}"/>`;}
+    for(let x=10;x<=150;x+=10)s+=`<line x1="${x}" x2="${x}" y1="${top}" y2="${bot}" stroke="var(--grid)" stroke-width=".4"/>`;
+    marks.forEach(mk=>{const yy=c+(mk.yv-yp)*sc; if(yy<top-2||yy>bot+2)return;
+      s+=`<line x1="40" x2="150" y1="${yy}" y2="${yy}" stroke="#c92a2a" stroke-width="1.6"/><text x="36" y="${yy+5}" font-size="14" text-anchor="end" fill="#c92a2a">${mk.m}</text>`;});
+  }
+  s+=`<polygon points="260,${c-9} 260,${c+9} 154,${c}" fill="#c08a3e" stroke="#8a5a1e" stroke-width=".8"/>`;
+  s+=`<rect x="0" y="0" width="260" height="260" fill="none" stroke="var(--line)"/>`;
+  $('svgStrip').innerHTML=s;
+}
+function renderPrinciple(){
+  const x0=50,y0=250,sx=3,sy=18;
+  const mT=9,mh=2,a=0.1,m0=mT-mh;
+  let s=`<line x1="${x0}" y1="20" x2="${x0}" y2="285" stroke="var(--mut)"/><line x1="30" y1="${y0}" x2="410" y2="${y0}" stroke="var(--mut)"/>`;
+  s+=`<text x="400" y="${y0+18}" font-size="12" fill="var(--mut)" text-anchor="end">m（g）</text><text x="${x0+6}" y="30" font-size="12" fill="var(--mut)">x（cm）</text>`;
+  for(let m=0;m<=120;m+=20)s+=`<text x="${x0+m*sx}" y="${y0+14}" font-size="10" text-anchor="middle" fill="var(--mut)">${m}</text>`;
+  const f=m=>{const w=1.5,M=m+mh;return a*w*Math.log(1+Math.exp((M-mT)/w));};
+  let p='';for(let m=0;m<=120;m+=1)p+=(m?'L':'M')+(x0+m*sx)+' '+(y0-f(m)*sy);
+  s+=`<path d="${p}" stroke="var(--acc)" stroke-width="2.4" fill="none"/>`;
+  const up=m=>y0-(f(m)-0.25)*sy, dn=m=>y0-(f(m)+0.25)*sy;
+  let pu='',pd='';for(let m=m0+4;m<=120;m+=2){pu+=(pu?'L':'M')+(x0+m*sx)+' '+up(m);pd+=(pd?'L':'M')+(x0+m*sx)+' '+dn(m);}
+  s+=`<path d="${pu}" stroke="#4dabf7" stroke-width="1" fill="none"/><path d="${pd}" stroke="#ff922b" stroke-width="1" fill="none"/>`;
+  s+=`<line x1="${x0}" y1="${y0+m0*a*sy}" x2="${x0+120*sx}" y2="${y0-(120-m0)*a*sy}" stroke="var(--acc2)" stroke-dasharray="5 4" stroke-width="1.3"/>`;
+  s+=`<circle cx="${x0+m0*sx}" cy="${y0}" r="3.5" fill="var(--acc2)"/><text x="${x0+m0*sx+6}" y="${y0-8}" font-size="12" fill="var(--acc2)">m₀</text>`;
+  s+=`<circle cx="${x0}" cy="${y0+m0*a*sy}" r="3.5" fill="var(--acc2)"/><text x="${x0+6}" y="${y0+m0*a*sy+16}" font-size="12" fill="var(--acc2)">截距 b &lt; 0</text>`;
+  s+=`<text x="${x0+75*sx}" y="${y0-9.5*sy}" font-size="11" fill="#4dabf7">加載 ↑（停在較上方）</text><text x="${x0+60*sx}" y="${y0-4*sy}" font-size="11" fill="#ff922b">卸載 ↓（停在較下方）</text>`;
+  $('svgPrin').innerHTML=s;
+}
+
+/* ---------- ② 組裝 ---------- */
+const STEPS=[
+ {t:'架設支架',d:'把萬用夾固定在支架上，夾出一支水平橫桿作為吊點。'},
+ {t:'吊掛彈簧',d:'取一段漆包線彎成吊環，上端掛在橫桿，下端鉤住彈簧上端。'},
+ {t:'製作秤鉤',d:'另一段漆包線（約 25 cm）上端鉤住彈簧下端，下端彎成秤鉤。秤鉤要伸出吸管下口，掛碼才掛得上去。'},
+ {t:'割吸管切縫',d:'用小刀在吸管相對的兩側各割一道縱向切縫，讓牙籤指針可以上下滑動。牙籤直徑約 2.0 mm，請選擇縫寬：',slit:true},
+ {t:'安裝指針',d:'牙籤橫穿兩道切縫，用透明膠帶固定在秤鉤線上，緊貼彈簧下端。牙籤一端指向直尺，另一端指向方格紙刻度條。吸管套住彈簧下段與秤鉤線，以膠帶固定在支架上。'},
+ {t:'吸管鉛直',d:'用棉線綁 10 g 掛碼做成鉛垂線，比對吸管與鉛垂線在上端、下端的距離，調到兩者相等。',plumb:'s'},
+ {t:'直尺鉛直、靠近指針',d:'以同樣的方法把直尺調成鉛直，再決定指針尖端與尺面的距離 d。d 越大，視差越明顯；太小則指針容易擦到尺面。',plumb:'r',gap:true},
+ {t:'貼方格紙刻度條',d:'剪一條約 2 cm 寬的方格紙，貼在吸管另一側。之後可以在上面畫出公克刻度。'}
+];
+function renderSteps(){
+  let h='';
+  STEPS.forEach((st,i)=>{
+    const cls=i<A.stage?'done':(i===A.stage?'cur':'fut');
+    h+=`<div class="step ${cls}"><div class="n">${i+1}</div><div class="body"><b>${st.t}</b><div class="note">${st.d}</div>`;
+    if(i===A.stage){
+      if(st.slit){h+=`<div class="row">${[1.5,2.5,4.0].map(w=>`<label><input type="radio" name="slit" value="${w}" ${A.slit===w?'checked':''}> ${w.toFixed(1)} mm</label>`).join('')}</div>`;}
+      if(st.gap){h+=`<div class="row">指針尖端到尺面距離 d：<input type="range" id="gapSl" min="0.2" max="1.5" step="0.1" value="${A.gap}"> <b id="gapTxt">${A.gap.toFixed(1)} cm</b></div>`;}
+      h+=`<button class="b" id="stepDo">完成此步驟</button>`;
+    }
+    if(i<A.stage&&st.slit)h+=`<div class="note">已選縫寬：${A.slit.toFixed(1)} mm</div>`;
+    if(i<A.stage&&st.gap)h+=`<div class="note">d = ${A.gap.toFixed(1)} cm</div>`;
+    h+=`</div></div>`;
+  });
+  if(A.stage>=STEPS.length)h+=`<p class="ok"><b>組裝完成！</b>請到 ③ 進行校正量測。若回來修改組裝，已記錄的數據就不再適用。</p><button class="b2" id="reAsm">重新組裝</button>`;
+  $('steps').innerHTML=h;
+  const sd=$('stepDo'); if(sd)sd.onclick=doStep;
+  document.querySelectorAll('input[name=slit]').forEach(r=>r.onchange=()=>{A.slit=parseFloat(r.value);});
+  const gs=$('gapSl'); if(gs)gs.oninput=()=>{A.gap=parseFloat(gs.value);$('gapTxt').textContent=A.gap.toFixed(1)+' cm';};
+  const ra=$('reAsm'); if(ra)ra.onclick=()=>{if(!confirm('重新組裝會清除 ③–⑤ 的數據與刻度畫記，確定嗎？'))return;
+    A.stage=0;A.done=false;A.slit=null;Dt.rows.forEach(r=>{r.up=null;r.dn=null;});Dt.demo=false;marks=[];logs=[];directs=[];L={m10:false,n20:0,X:false,dir:null};resetSpring();renderSteps();updateNav();};
+  const st=STEPS[A.stage];
+  $('plumbCard').style.display=(st&&st.plumb)?'block':'none';
+  if(st&&st.plumb){$('plumbTitle').textContent=st.plumb==='s'?'鉛垂線比對：吸管':'鉛垂線比對：直尺';
+    $('plumbNote').textContent=st.plumb==='s'?'放大鏡分別看吸管上端與下端（相距 21 cm）左緣到鉛垂線的距離，方格為 1 mm。':'放大鏡分別看直尺上端與下端（相距 30 cm）左緣到鉛垂線的距離，方格為 1 mm。';
+    $('tiltSl').value=st.plumb==='s'?A.sTilt:A.rTilt;}
+}
+function doStep(){
+  const st=STEPS[A.stage];
+  if(st.slit&&A.slit===null){alert('請先選擇縫寬。');return;}
+  A.stage++;
+  if(A.stage>=STEPS.length)finishAsm();
+  renderSteps(); updateNav();
+}
+function frictionFactors(){
+  const sf={1.5:6,2.5:1,4:0.45}[A.slit], tf=1+0.35*Math.pow(Math.abs(A.sTilt),1.3);
+  return {sf,tf};
+}
+function finishAsm(){
+  A.done=true;
+  const {sf,tf}=frictionFactors();
+  A.fs=H.f0g*G/1000*sf*tf;
+  A.wob={1.5:0.003,2.5:0.012,4:0.07}[A.slit];
+  resetSpring(); eyeY=2.0;
+}
+function renderPlumb(){
+  const st=STEPS[A.stage]; if(!st||!st.plumb)return;
+  const isS=st.plumb==='s', th=isS?A.sTilt:A.rTilt, Lmm=isS?210:300;
+  const dTop=5.0, dBot=dTop+Lmm*Math.tan(th*Math.PI/180);
+  const box=(ox,lab,d)=>{let s=`<g transform="translate(${ox},10)"><rect width="200" height="130" fill="var(--paper)" stroke="var(--line)"/>`;
+    for(let i=0;i<=200;i+=12)s+=`<line x1="${i}" x2="${i}" y1="0" y2="130" stroke="var(--grid)" stroke-width="${(i/12)%5===0?1:.4}"/>`;
+    const px=30; s+=`<line x1="${px}" x2="${px}" y1="0" y2="130" stroke="#e03131" stroke-width="1.5"/>`;
+    const ex=px+d*12; s+=`<rect x="${ex}" y="0" width="${Math.max(0,200-ex)}" height="130" fill="${isS?'#a5d8ff':'#f8f0d8'}" fill-opacity=".55"/><line x1="${ex}" x2="${ex}" y1="0" y2="130" stroke="${isS?'#1c7ed6':'#555'}" stroke-width="1.6"/>`;
+    s+=`<text x="100" y="150" text-anchor="middle" font-size="12" fill="var(--mut)">${lab}</text></g>`;return s;};
+  $('svgPlumb').innerHTML=box(10,'上端',dTop)+box(230,'下端',dBot)+`<text x="40" y="8" font-size="10" fill="#e03131">鉛垂線</text>`;
+}
+
+/* ---------- ③ 量測 ---------- */
+function changeLoad(fn){
+  const before=loadG(); fn(); const after=loadG();
+  if(Math.abs(after-before)<1e-9)return;
+  L.dir=after>before?'up':'dn';
+  const mode=document.querySelector('input[name=rel]:checked').value;
+  S.stuck=false; S.droop=0; S.v=0; S.mode=mode==='hand'?'lower':'idle';
+  updateLoadUI();
+}
+function updateLoadUI(){
+  $('loadTxt').textContent=loadDesc()+(L.X?'':`（${nominal()} g）`);
+  $('b10').textContent=L.m10?'取下 10 g':'掛上 10 g';
+  $('bX').textContent=L.X?'取下待測物':'掛上待測物';
+  $('b20p').disabled=L.n20>=5; $('b20m').disabled=L.n20<=0;
+  $('dirTxt').innerHTML=L.dir==='up'?'<span class="pill up">加載 ↑</span>':(L.dir==='dn'?'<span class="pill down">卸載 ↓</span>':'—');
+}
+function renderTable(){
+  let h='<tr><th>標示載重 m (g)</th><th>加載讀數 y↑ (cm)</th><th>卸載讀數 y↓ (cm)</th><th>平均 ȳ (cm)</th><th>伸長量 x (cm)</th><th>y↓ − y↑ (cm)</th></tr>';
+  const av=rowsAvg(), base=av[0];
+  Dt.rows.forEach((r,i)=>{
+    const m=av[i], x=(m!==null&&base!==null)?m-base:null, hy=(r.up!==null&&r.dn!==null)?r.dn-r.up:null;
+    h+=`<tr><td>${i*10}</td><td><input type="number" step="0.01" data-i="${i}" data-c="up" value="${r.up??''}"></td><td><input type="number" step="0.01" data-i="${i}" data-c="dn" value="${r.dn??''}"></td><td>${m!==null?m.toFixed(3):''}</td><td>${x!==null?x.toFixed(3):''}</td><td>${hy!==null?hy.toFixed(2):''}</td></tr>`;
+  });
+  $('tbl').innerHTML=h;
+  $('tbl').querySelectorAll('input').forEach(inp=>inp.onchange=()=>{const v=inp.value===''?null:parseFloat(inp.value);Dt.rows[+inp.dataset.i][inp.dataset.c]=(v===null||isNaN(v))?null:v;renderTable();});
+  $('markTxt').textContent=marks.length?marks.slice().sort((a,b)=>a.m-b.m).map(m=>m.lab).join('、'):'（尚無）';
+}
+function moving(){return !S.stuck||S.mode==='lower';}
+function record(){
+  const v=parseFloat($('rdIn').value);
+  if(isNaN(v)){$('recMsg').innerHTML='<span class="warn">請先輸入讀數。</span>';return;}
+  if(cur===4){recordLog(v);return;}
+  if(L.X){$('recMsg').innerHTML='<span class="warn">目前掛著待測物，不能記錄為校正點。</span>';return;}
+  const i=nominal()/10, c=L.dir==='dn'?'dn':'up';
+  Dt.rows[i][c]=v; Dt.demo=false;
+  let msg=`已記錄：m = ${nominal()} g，${c==='up'?'加載':'卸載'}讀數 ${v.toFixed(2)} cm`;
+  if(moving())msg+='　<span class="warn">（注意：指針仍在移動！）</span>';
+  if(S.damaged)msg+='　<span class="warn">（彈簧已永久變形！）</span>';
+  $('recMsg').innerHTML=msg; renderTable();
+}
+function addMark(){
+  if(L.X){$('recMsg').innerHTML='<span class="warn">掛著待測物時不要畫校正刻度。</span>';return;}
+  const lab=nominal()+' g';
+  const yv=pointerVis()+0.015*gauss();
+  const k=marks.findIndex(m=>m.lab===lab);
+  if(k>=0){if(!confirm(lab+' 已經畫記過，要擦掉重畫嗎？'))return;marks.splice(k,1);}
+  marks.push({lab,yv,m:nominal()});
+  $('recMsg').innerHTML=`已在刻度條上畫記 ${lab}${moving()?'　<span class="warn">（指針仍在移動！）</span>':''}`;
+  renderTable();
+}
+function exportCSV(){
+  let t='m(g),y_up(cm),y_down(cm)\n';
+  Dt.rows.forEach((r,i)=>t+=`${i*10},${r.up??''},${r.dn??''}\n`);
+  if(logs.length){t+='\n#,掛載,方向,y(cm),類型\n';logs.forEach((g,i)=>t+=`${i+1},${g.desc},${g.dir==='dn'?'卸載':'加載'},${g.y},${typeName(g)}\n`);}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+t],{type:'text/csv'}));a.download='彈簧秤數據.csv';a.click();
+}
+
+/* ---------- ④ 作圖迴歸 ---------- */
+function fillDemo(){
+  if(!confirm('以示範數據覆蓋 ③ 的校正表格與刻度畫記？'))return;
+  const noise=()=>0.012*gauss();
+  marks=[];
+  for(let i=0;i<12;i++){
+    const W=(massOfNom(i*10)+H.mh)*G/1000;
+    const du=eqW(W-A.fs), dd=eqW(W+A.fs);
+    Dt.rows[i].up=Math.round((A.y0+du*100/cosR()+noise())*100)/100;
+    Dt.rows[i].dn=Math.round((A.y0+dd*100/cosR()+noise())*100)/100;
+    marks.push({lab:(i*10)+' g',m:i*10,yv:A.y0+(du+dd)/2*100+0.015*gauss()});
+  }
+  Dt.demo=true; renderFit(); updateNav();
+}
+function renderFit(){
+  const av=rowsAvg(), base=av[0], f=getFit();
+  // 表格
+  let h='<tr><th>m (g)</th><th>x (cm)</th><th>納入迴歸</th><th>殘差 (cm)</th></tr>';
+  av.forEach((v,i)=>{const x=(v!==null&&base!==null)?v-base:null;
+    const r=(f&&x!==null)?x-(f.a*i*10+f.b):null;
+    h+=`<tr><td>${i*10}</td><td>${fx(x,3)}</td><td><input type="checkbox" data-u="${i}" ${Dt.use[i]?'checked':''} ${x===null?'disabled':''}></td><td>${r!==null?(Dt.use[i]?'':'(')+r.toFixed(3)+(Dt.use[i]?'':')'):'—'}</td></tr>`;});
+  $('tblFit').innerHTML=h;
+  $('tblFit').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{Dt.use[+cb.dataset.u]=cb.checked;renderFit();updateNav();});
+  // 結果
+  if(!f){$('fitOut').innerHTML='<p class="warn">需要 ȳ(0) 以及至少 3 個納入迴歸的點。</p>';}
+  else{
+    $('fitOut').innerHTML=`<div class="eq">x = (${f.a.toFixed(5)} ± ${f.sa.toFixed(5)}) m + (${f.b.toFixed(3)} ± ${f.sb.toFixed(3)})</div>
+    <div class="kv"><b>斜率 a</b><span>${f.a.toFixed(5)} ± ${f.sa.toFixed(5)} cm/g</span>
+    <b>截距 b</b><span>${f.b.toFixed(3)} ± ${f.sb.toFixed(3)} cm</span>
+    <b>力常數 k = g/a</b><span class="big">${f.k.toFixed(3)} ± ${f.sk.toFixed(3)} N/m</span>
+    <b>起伸門檻 m₀ = −b/a</b><span class="big">${f.m0.toFixed(2)} ± ${f.sm0.toFixed(2)} g</span>
+    <b>殘差標準差 s</b><span>${f.s.toFixed(4)} cm（N = ${f.N}）</span>
+    <b>決定係數 R²</b><span>${f.R2.toFixed(6)}</span></div>
+    <p class="note">k 的換算：1 g 重 = g/1000 N，a (cm/g) = a/100 (m/g)，所以 k = (g/1000)/(a/100) = g/(10a)，取 g = 9.79 m/s²。${Dt.demo?'<br><span class="warn">目前為示範數據。</span>':''}</p>`;
+  }
+  // 主圖
+  const W=520,Hh=380,l=58,r=505,t=18,b=340;
+  const xs=[]; Dt.rows.forEach(rw=>{[rw.up,rw.dn].forEach(v=>{if(v!==null&&base!==null)xs.push(v-base);});});
+  let ymin=Math.min(-0.5,f?f.b-0.3:0,...xs), ymax=Math.max(1,...xs)*1.06+0.2;
+  const mx=m=>l+(m/120)*(r-l), my=x=>b-(x-ymin)/(ymax-ymin)*(b-t);
+  let s=`<rect x="${l}" y="${t}" width="${r-l}" height="${b-t}" fill="none" stroke="var(--line)"/>`;
+  const stepY=ymax-ymin>12?2:1;
+  for(let v=Math.ceil(ymin/stepY)*stepY;v<=ymax;v+=stepY){s+=`<line x1="${l}" x2="${r}" y1="${my(v)}" y2="${my(v)}" stroke="var(--line)" stroke-width=".5"/><text x="${l-6}" y="${my(v)+4}" font-size="11" text-anchor="end" fill="var(--mut)">${v}</text>`;}
+  for(let m=0;m<=120;m+=10){s+=`<line x1="${mx(m)}" x2="${mx(m)}" y1="${t}" y2="${b}" stroke="var(--line)" stroke-width=".5"/><text x="${mx(m)}" y="${b+15}" font-size="11" text-anchor="middle" fill="var(--mut)">${m}</text>`;}
+  s+=`<line x1="${l}" x2="${r}" y1="${my(0)}" y2="${my(0)}" stroke="var(--mut)" stroke-width="1"/>`;
+  s+=`<text x="${(l+r)/2}" y="${b+32}" font-size="12" text-anchor="middle" fill="var(--ink)">標示載重 m（g）</text><text x="16" y="${(t+b)/2}" font-size="12" text-anchor="middle" fill="var(--ink)" transform="rotate(-90 16 ${(t+b)/2})">伸長量 x（cm）</text>`;
+  if(f){
+    const used=f.P.map(p=>p[0]), m1=Math.min(...used), m2=Math.max(...used);
+    s+=`<line x1="${mx(0)}" y1="${my(f.b)}" x2="${mx(120)}" y2="${my(f.a*120+f.b)}" stroke="var(--acc2)" stroke-width="1.2" stroke-dasharray="5 4"/>`;
+    s+=`<line x1="${mx(m1)}" y1="${my(f.a*m1+f.b)}" x2="${mx(m2)}" y2="${my(f.a*m2+f.b)}" stroke="var(--acc2)" stroke-width="2"/>`;
+    if(f.m0>0&&f.m0<120)s+=`<circle cx="${mx(f.m0)}" cy="${my(0)}" r="4" fill="none" stroke="var(--acc2)" stroke-width="1.5"/><text x="${mx(f.m0)+6}" y="${my(0)-6}" font-size="11" fill="var(--acc2)">m₀</text>`;
+  }
+  Dt.rows.forEach((rw,i)=>{const X=mx(i*10);
+    if(rw.up!==null&&base!==null){const Yv=my(rw.up-base);s+=`<polygon points="${X-4},${Yv+3} ${X+4},${Yv+3} ${X},${Yv-4}" fill="#4dabf7"/>`;}
+    if(rw.dn!==null&&base!==null){const Yv=my(rw.dn-base);s+=`<polygon points="${X-4},${Yv-3} ${X+4},${Yv-3} ${X},${Yv+4}" fill="#ff922b"/>`;}
+    if(av[i]!==null&&base!==null){const Yv=my(av[i]-base);s+=`<circle cx="${X}" cy="${Yv}" r="3.6" fill="${Dt.use[i]?'var(--ink)':'var(--card)'}" stroke="var(--ink)" stroke-width="1.2"/>`;}
+  });
+  $('svgFit').innerHTML=s;
+  // 殘差圖
+  let rs='';
+  const rl=58,rr=505,rt=12,rb=140;
+  if(f){
+    const res=[]; av.forEach((v,i)=>{if(v!==null)res.push([i*10,v-base-(f.a*i*10+f.b),Dt.use[i]]);});
+    const R=Math.max(3*f.s,...res.filter(q=>q[2]).map(q=>Math.abs(q[1])),0.02)*1.25;
+    const ry=v=>(rt+rb)/2-v/R*(rb-rt)/2, rxm=m=>rl+(m/120)*(rr-rl);
+    rs+=`<rect x="${rl}" y="${ry(f.s)}" width="${rr-rl}" height="${ry(-f.s)-ry(f.s)}" fill="var(--soft)"/>`;
+    rs+=`<rect x="${rl}" y="${rt}" width="${rr-rl}" height="${rb-rt}" fill="none" stroke="var(--line)"/><line x1="${rl}" x2="${rr}" y1="${ry(0)}" y2="${ry(0)}" stroke="var(--mut)"/>`;
+    rs+=`<text x="${rl-6}" y="${ry(R*0.8)+4}" font-size="10" text-anchor="end" fill="var(--mut)">${(R*0.8).toFixed(3)}</text><text x="${rl-6}" y="${ry(-R*0.8)+4}" font-size="10" text-anchor="end" fill="var(--mut)">${(-R*0.8).toFixed(3)}</text>`;
+    for(let m=0;m<=120;m+=20)rs+=`<text x="${rxm(m)}" y="${rb+14}" font-size="10" text-anchor="middle" fill="var(--mut)">${m}</text>`;
+    rs+=`<text x="${rl+4}" y="${rt+12}" font-size="11" fill="var(--mut)">殘差 (cm)</text>`;
+    res.forEach(q=>{const yy=Math.max(rt+3,Math.min(rb-3,ry(q[1])));rs+=`<circle cx="${rxm(q[0])}" cy="${yy}" r="3.4" fill="${q[2]?'var(--ink)':'var(--card)'}" stroke="var(--ink)"/>`;});
+  }
+  $('svgRes').innerHTML=rs;
+  // 單點法
+  let sh='<tr><th>m (g)</th><th>x (cm)</th><th>x/m (cm/g)</th><th>單點 k = mg/x (N/m)</th><th>與迴歸 k 相差</th></tr>';
+  av.forEach((v,i)=>{if(i===0||v===null||base===null)return;const x=v-base;const ks=x>0?G*i*10/1000/(x/100):null;
+    sh+=`<tr><td>${i*10}</td><td>${x.toFixed(3)}</td><td>${fx(x/(i*10),5)}</td><td>${ks!==null?ks.toFixed(2):'（未伸長）'}</td><td>${(ks!==null&&f)?((ks-f.k)/f.k*100).toFixed(1)+' %':'—'}</td></tr>`;});
+  $('tblSingle').innerHTML=sh;
+  $('singleNote').innerHTML=f?`單點法把 x = a·m + b 當成 x = a·m，所以 x/m = a + b/m。因為 b &lt; 0（初張力），x/m 比 a 小，得到的 k 偏大，而且 m 越小偏得越多，m 增大時才逐漸逼近迴歸值 ${f.k.toFixed(2)} N/m。迴歸同時求出斜率與截距，把初張力的影響分離出來。`:'';
+}
+
+/* ---------- ⑤ 待測物與量程 ---------- */
+function typeOf(g){if(g.X&&g.nom===0)return 'X';if(g.X)return 'over';if(g.nom===0)return 'zero';return 'mass';}
+function typeName(g){return {X:'待測物',over:'超過 110 g 試驗',zero:'空載零點',mass:'砝碼'}[typeOf(g)];}
+function recordLog(v){
+  logs.push({desc:loadDesc(),X:L.X,nom:nominal(),dir:L.dir,y:v,moving:moving(),dmg:S.damaged});
+  $('recMsg').innerHTML=`已記錄到量測紀錄：${loadDesc()}，y = ${v.toFixed(2)} cm${moving()?'　<span class="warn">（指針仍在移動！）</span>':''}`;
+  renderT5();
+}
+function recordDirect(){
+  const v=parseFloat($('dirIn').value);
+  if(isNaN(v)){$('dirMsg').innerHTML='<span class="warn">請先輸入直讀值。</span>';return;}
+  if(!(L.X&&nominal()===0)){$('dirMsg').innerHTML='<span class="warn">直讀值請在「只掛待測物」時記錄。</span>';return;}
+  directs.push({v,dmg:S.damaged,moving:moving()});
+  $('dirMsg').innerHTML=`已記錄直讀值 ${v.toFixed(1)} g（共 ${directs.length} 筆）`;
+  renderT5();
+}
+function q1Result(){
+  const f=getFit(); if(!f)return null;
+  const Xs=logs.filter(g=>typeOf(g)==='X'&&!g.dmg);
+  if(!Xs.length)return {f};
+  const ys=Xs.map(g=>g.y), yb=mean(ys), xX=yb-f.base;
+  const ip=invPred(f,xX,ys.length);
+  const ups=Xs.filter(g=>g.dir!=='dn').map(g=>g.y), dns=Xs.filter(g=>g.dir==='dn').map(g=>g.y);
+  const smFit=ip.sm, smMass=MASS_TOL*Math.abs(ip.m);
+  return {f,n:ys.length,yb,sdy:sd(ys),xX,m:ip.m,sm:Math.hypot(smFit,smMass),smFit,smMass,ups,dns};
+}
+function directResult(){
+  const d=directs.filter(q=>!q.dmg).map(q=>q.v); if(!d.length)return null;
+  const m=mean(d), s=d.length>1?sd(d)/Math.sqrt(d.length):null;
+  return {m,sm:Math.hypot(s!==null?Math.max(s,0.3):0.5,MASS_TOL*m),n:d.length,est:s===null};
+}
+function renderT5(){
+  // 紀錄表
+  let h='<tr><th>#</th><th>掛載內容</th><th>方向</th><th>y (cm)</th><th>類型</th><th></th></tr>';
+  logs.forEach((g,i)=>{h+=`<tr><td>${i+1}</td><td>${g.desc}</td><td>${g.dir==='dn'?'<span class="pill down">卸載 ↓</span>':'<span class="pill up">加載 ↑</span>'}</td><td>${g.y.toFixed(2)}${g.moving?' <span class="warn">*</span>':''}</td><td>${typeName(g)}${g.dmg?' <span class="warn">（變形後）</span>':''}</td><td><button class="b2" data-del="${i}">刪除</button></td></tr>`;});
+  if(!logs.length)h+='<tr><td colspan="6" class="note">尚無紀錄</td></tr>';
+  $('tblLog').innerHTML=h;
+  $('tblLog').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{logs.splice(+b.dataset.del,1);renderT5();});
+  const q=q1Result(); if(!q)return;
+  const f=q.f;
+  // 第 1 題
+  let o='';
+  if(q.n){
+    o+=`<div class="kv"><b>讀數筆數</b><span>${q.n}（加載 ${q.ups.length}、卸載 ${q.dns.length}）</span>
+      <b>平均讀數 ȳ<sub>X</sub></b><span>${q.yb.toFixed(3)} cm（標準差 ${q.sdy.toFixed(3)} cm）</span>
+      <b>伸長量 x<sub>X</sub> = ȳ<sub>X</sub> − ȳ(0)</b><span>${q.xX.toFixed(3)} cm</span></div>
+      <div class="eq">m<sub>X</sub> = (x<sub>X</sub> − b)/a = (${q.xX.toFixed(3)} − (${f.b.toFixed(3)})) / ${f.a.toFixed(5)}</div>
+      <p class="big">迴歸反推：m<sub>X</sub> = ${q.m.toFixed(1)} ± ${q.sm.toFixed(1)} g 重</p>
+      <p class="note">不確定度由兩部分合成：① 校正線反推 σ<sub>fit</sub> = (s/a)·√[1/n + 1/N + (x<sub>X</sub> − x̄)²/(a²·Σ(m−m̄)²)] = ${q.smFit.toFixed(2)} g，包含讀數散布與校正線本身；② 砝碼標示公差（約 0.4 %）造成的系統不確定度 ${q.smMass.toFixed(2)} g。校正時用的是「標示值」，砝碼真實質量的偏差會整體轉移到反推結果上，重複讀數無法消除。</p>`;
+    if(q.ups.length&&q.dns.length)o+=`<p class="note">待測物的加載平均 ${mean(q.ups).toFixed(3)} cm、卸載平均 ${mean(q.dns).toFixed(3)} cm，相差 ${(mean(q.dns)-mean(q.ups)).toFixed(3)} cm，這就是指針摩擦造成的遲滯。</p>`;
+    else o+=`<p class="note warn">建議加載與卸載方向都要讀，平均後才能抵消摩擦造成的系統偏差。</p>`;
+    if(q.xX>f.a*110+f.b+0.3||q.m<10)o+=`<p class="warn">待測物落在校正範圍（10–110 g）之外，反推值屬於外插。</p>`;
+  }else o+='<p class="note">尚未記錄「只掛待測物」的直尺讀數。</p>';
+  const dr=directResult();
+  if(dr)o+=`<p class="big">刻度條直讀：m = ${dr.m.toFixed(1)} ± ${dr.sm.toFixed(1)} g 重</p><p class="note">${dr.n} 筆直讀值${dr.est?'，只有 1 筆，不確定度以刻度條估讀解析度約 0.5 g 估計':'，不確定度取平均值標準誤（下限 0.3 g）'}。</p>`;
+  else o+='<p class="note">尚未記錄刻度條直讀值（需在 ③ 先畫好刻度）。</p>';
+  if(logs.some(g=>typeOf(g)==='X'&&g.dmg)||directs.some(d=>d.dmg))o+=`<p class="warn">彈簧永久變形之後的待測物讀數已自動排除。</p>`;
+  $('q1Out').innerHTML=o;
+  // 第 2 題
+  let o2='';
+  const overs=logs.filter(g=>typeOf(g)==='over');
+  const firstOver=logs.findIndex(g=>typeOf(g)==='over');
+  const zAfter=firstOver>=0?logs.slice(firstOver).filter(g=>typeOf(g)==='zero'):[];
+  o2+=`<p>校正範圍：0–110 g。直線段的預測在範圍外只是外插，是否仍成立必須用實驗檢驗。</p>`;
+  if(overs.length&&q.n){
+    o2+='<table><tr><th>掛載</th><th>預期總質量 (g)</th><th>依校正線換算 (g)</th><th>差 (g)</th></tr>';
+    overs.forEach(g=>{const exp=q.m+g.nom, got=(g.y-f.base-f.b)/f.a;o2+=`<tr><td>${g.desc}</td><td>${exp.toFixed(1)}</td><td>${got.toFixed(1)}</td><td>${(got-exp).toFixed(1)}</td></tr>`;});
+    o2+='</table><p class="note">預期總質量 = 第 1 題的 m<sub>X</sub> ＋ 加掛砝碼標示值。若差值明顯大於第 1 題的不確定度，代表超過 110 g 後 x–m 已不再是同一條直線。</p>';
+  }else if(overs.length)o2+='<p class="note">請先完成第 1 題的待測物讀數，才能比較預期值。</p>';
+  else o2+='<p class="note">尚未做超過 110 g 的試驗。</p>';
+  if(zAfter.length){
+    const z=mean(zAfter.map(g=>g.y)), dz=z-f.base;
+    o2+=`<p>超載後卸下的零點：${z.toFixed(2)} cm，原零點 ${f.base.toFixed(2)} cm，差 <b>${dz.toFixed(2)} cm</b>（約相當於 ${(dz/f.a).toFixed(1)} g）。</p>`;
+    o2+=Math.abs(dz)>Math.max(0.06,3*f.s)?`<p class="warn">指針回不到原位：彈簧已超過彈性限度而永久變形，原本的校正線作廢。</p>`:`<p class="ok">零點在誤差範圍內回到原位，這次沒有超過彈性限度。</p>`;
+  }else if(overs.length)o2+='<p class="note">記得全部取下後再讀一次零點，檢查彈簧有沒有永久變形。</p>';
+  if(S.damaged)o2+=`<p class="warn">⚠ 模擬中的彈簧目前已永久變形。</p>`;
+  $('q2Out').innerHTML=o2;
+  // 第 3 題
+  let o3='';
+  const av=f.av, x10=av[1]!==null?av[1]-f.base:null;
+  const hy=[]; Dt.rows.forEach((r,i)=>{if(Dt.use[i]&&r.up!==null&&r.dn!==null)hy.push(r.dn-r.up);});
+  const hyM=hy.length?mean(hy):null;
+  o3+=`<div class="kv"><b>起伸門檻 m₀</b><span>${f.m0.toFixed(1)} ± ${f.sm0.toFixed(1)} g（由 ④ 迴歸）</span>
+    <b>10 g 的實測伸長</b><span>${x10!==null?x10.toFixed(3)+' cm':'—'}；直線外插預測 ${(f.a*10+f.b).toFixed(3)} cm</span>
+    <b>每 1 g 造成的位移 a</b><span>${(f.a*10).toFixed(3)} mm/g</span>
+    <b>加載–卸載平均差</b><span>${hyM!==null?hyM.toFixed(3)+' cm，相當於 '+(hyM/f.a).toFixed(1)+' g':'（需同時有加載、卸載讀數）'}</span>
+    <b>估讀解析度 0.01 cm</b><span>相當於 ${(0.01/f.a).toFixed(2)} g</span></div>`;
+  const tenLog=logs.filter(g=>typeOf(g)==='mass'&&g.nom===10&&!g.dmg);
+  if(tenLog.length)o3+=`<p class="note">⑤ 頁只掛 10 g 的讀數：${tenLog.map(g=>g.y.toFixed(2)).join('、')} cm（空載 ${f.base.toFixed(2)} cm）。</p>`;
+  o3+=`<p class="note">思考方向：小於 m₀ 時彈簧根本不伸長；即使超過 m₀，也要比較「1 g 造成的位移」與「摩擦死區」「估讀解析度」的大小。另外想一想：能不能先掛一個 20 g 的砝碼當預載，讓彈簧離開初張力區，再量加上小物體之後的差值？</p>`;
+  $('q3Out').innerHTML=o3;
+}
+
+/* ---------- ⑥ 真值揭曉 ---------- */
+function zRow(name,val,sig,tru,unit,dec){
+  if(val===null||val===undefined)return `<tr><td>${name}</td><td>—</td><td>${tru.toFixed(dec)} ${unit}</td><td>—</td><td>—</td></tr>`;
+  const z=(val-tru)/sig;
+  return `<tr><td>${name}</td><td>${val.toFixed(dec)} ± ${sig.toFixed(dec)} ${unit}</td><td>${tru.toFixed(dec)} ${unit}</td><td>${(val-tru).toFixed(dec)} ${unit}（${((val-tru)/tru*100).toFixed(1)} %）</td><td class="${sigCls(z)}">${z.toFixed(2)} σ</td></tr>`;
+}
+function renderReveal(){
+  if(!revealed){$('revOut').innerHTML='';return;}
+  const f=getFit(), q=q1Result(), dr=directResult();
+  const kEff=S.k*cosR();
+  const m0T=H.mT-H.mh; // 與變形前（校正當時）的真值比較
+  const aT=G/(10*kEff);
+  const {sf,tf}=A.done?frictionFactors():{sf:1,tf:1};
+  const fg=A.fs*1000/G;
+  let o=`<div class="card"><h2>你的結果與真值比較</h2>
+  <table><tr><th>物理量</th><th>你的量測值</th><th>真值</th><th>差（相對誤差）</th><th>差 / σ</th></tr>`;
+  o+=q&&q.n?zRow('待測物 m<sub>X</sub>（迴歸反推）',q.m,q.sm,H.X,'g',1):zRow('待測物 m<sub>X</sub>（迴歸反推）',null,0,H.X,'g',1);
+  o+=dr?zRow('待測物 m<sub>X</sub>（刻度條直讀）',dr.m,dr.sm,H.X,'g',1):zRow('待測物 m<sub>X</sub>（刻度條直讀）',null,0,H.X,'g',1);
+  o+=f?zRow('力常數 k（與「尺上等效值」比）',f.k,f.sk,kEff,'N/m',3):zRow('力常數 k',null,0,kEff,'N/m',3);
+  o+=f?zRow('起伸門檻 m₀（校正當時）',f.m0,f.sm0,m0T,'g',2):zRow('起伸門檻 m₀',null,0,m0T,'g',2);
+  o+=`</table><p class="note"><span class="sig1">|z| ≤ 1</span>：在一個標準差內；<span class="sig2">1 &lt; |z| ≤ 2</span>：尚可接受；<span class="sig3">|z| &gt; 2</span>：可能有未處理的系統誤差，請對照下方誤差來源找原因。</p>
+  <p class="note">k 的「尺上等效值」= 彈簧真實 k × cos θ<sub>尺</sub> = ${S.k.toFixed(3)} × ${cosR().toFixed(5)} = ${kEff.toFixed(3)} N/m。直尺傾斜時，沿尺讀到的位移是鉛直位移的 1/cos θ 倍，所以量到的 k 會系統性偏小。這個偏差不影響待測物的反推，因為校正與量測用的是同一支尺。</p></div>`;
+  o+=`<div class="grid2"><div class="card"><h2>本組隱藏參數</h2><div class="kv">
+    <b>待測物質量</b><span>${H.X.toFixed(2)} g</span>
+    <b>彈簧力常數 k</b><span>${H.k.toFixed(3)} N/m${S.damaged?'（變形後卸載斜率不變）':''}</span>
+    <b>初張力 F₀</b><span>${(H.mT*G/1000).toFixed(4)} N（相當 ${H.mT.toFixed(2)} g 重）${S.damaged?`→ 變形後剩 ${(S.F0*1000/G).toFixed(2)} g 重`:''}</span>
+    <b>秤鉤＋指針＋膠帶 m<sub>h</sub></b><span>${H.mh.toFixed(2)} g</span>
+    <b>起伸門檻 m₀ = F₀/g − m<sub>h</sub></b><span>${(H.mT-H.mh).toFixed(2)} g${S.damaged?`（變形後 ${(S.F0*1000/G-H.mh).toFixed(2)} g）`:''}</span>
+    <b>彈性限度（含秤鉤的總載重）</b><span>${H.mE.toFixed(1)} g 重，扣除秤鉤可再掛 ${(H.mE-H.mh).toFixed(1)} g</span>
+    <b>10 g 砝碼實際質量</b><span>${H.m10.toFixed(2)} g</span>
+    <b>20 g 砝碼實際質量</b><span>${H.m20.map(v=>v.toFixed(2)).join('、')} g</span>
+    <b>彈簧質量</b><span>${H.ms.toFixed(1)} g（只影響振盪，不影響靜態讀數）</span>
+    <b>零載讀數</b><span>${A.y0.toFixed(3)} cm</span>
+  </div></div>
+  <div class="card"><h2>你的組裝造成的誤差</h2><div class="kv">
+    <b>吸管切縫寬</b><span>${A.slit?A.slit.toFixed(1)+' mm，摩擦倍率 ×'+sf:'—'}</span>
+    <b>吸管傾角 θ<sub>吸管</sub></b><span>${A.sTilt.toFixed(2)}°，摩擦倍率 ×${tf.toFixed(2)}</span>
+    <b>最大靜摩擦 f</b><span>${fg.toFixed(2)} g 重 → 死區 ±f/k = ±${(A.fs/S.k*100).toFixed(3)} cm</span>
+    <b>加載–卸載理論差 2f/k</b><span>${(2*A.fs/S.k*100).toFixed(3)} cm（相當 ${(2*fg).toFixed(2)} g）</span>
+    <b>直尺傾角 θ<sub>尺</sub></b><span>${A.rTilt.toFixed(2)}°，讀數放大 1/cos θ = ${(1/cosR()).toFixed(5)}（${((1/cosR()-1)*100).toFixed(3)} %）</span>
+    <b>指針到尺面 d</b><span>${A.gap.toFixed(1)} cm → 眼睛每偏 1 cm，讀數偏 ${(A.gap/D_VIEW*10).toFixed(2)} mm</span>
+    <b>指針晃動</b><span>±${(A.wob*10).toFixed(2)} mm</span>
+    <b>彈簧狀態</b><span>${S.damaged?`<span class="warn">已永久變形，殘留伸長 ${(S.dp*100).toFixed(2)} cm</span>`:'<span class="ok">未超過彈性限度</span>'}</span>
+  </div>
+  <p class="note">吸管沒調鉛直會增加摩擦；縫太窄會卡住牙籤；縫太寬雖然摩擦小，但指針會晃動。</p></div></div>`;
+  // 參考答案
+  const aTrue=aT, x1g=aTrue*10; // mm/g
+  const dead=2*fg;
+  o+=`<div class="card"><h2>參考討論</h2>
+  <h3>第 2 題：大於 110 g？</h3>
+  <p>不宜直接量測，理由有三：</p>
+  <ol><li><b>超出校正範圍：</b>校正線只由 0–110 g 的數據建立。超過之後使用它屬於外插，無法保證 x–m 仍是同一條直線。</li>
+  <li><b>彈性限度：</b>本組彈簧（含秤鉤）的彈性限度約 ${H.mE.toFixed(0)} g 重，也就是最多再掛約 ${(H.mE-H.mh).toFixed(0)} g。超過之後，彈簧沿較平緩的曲線繼續伸長；卸載後無法回到原長，初張力也部分喪失，原本的校正全部作廢。${S.damaged?`你這次的超載造成了 ${(S.dp*100).toFixed(2)} cm 的殘留伸長。`:''}</li>
+  <li><b>行程限制：</b>直尺只有 30 cm，吸管切縫也有長度限制，伸長太多時指針會超出可讀範圍。</li></ol>
+  <p>如果一定要量，而且確定未超過彈性限度，可以把待測物與已知砝碼一起掛，用已知的部分延伸校正；或者改用兩條彈簧並聯分擔負載，再重新校正。</p>
+  <h3>第 3 題：小於 10 g？</h3>
+  <p>直接掛上去，多半量不出來：</p>
+  <ol><li><b>初張力門檻：</b>本組的 m₀ ≈ ${(H.mT-H.mh).toFixed(1)} g。載重小於 m₀ 時線圈仍然貼合，彈簧根本不伸長，指針不動${H.mT-H.mh>10?'（本組甚至連 10 g 都還在門檻以下）':''}。</li>
+  <li><b>解析度與摩擦死區：</b>每 1 g 只讓指針移動約 ${x1g.toFixed(2)} mm；而指針摩擦的加載–卸載差約 ${(2*A.fs/S.k*1000).toFixed(2)} mm，相當於 ${dead.toFixed(1)} g。小質量造成的位移，和摩擦死區、估讀誤差（約 0.1 mm）是同一個量級。</li>
+  <li><b>沒有校正點：</b>最小的校正點是 10 g，10 g 以下沒有任何校正數據可以依靠。</li></ol>
+  <p><b>改善方法：</b>先掛一個 20 g 砝碼當作預載，讓彈簧離開初張力區進入線性段，再比較加上小物體前後的讀數差 Δx，以 Δm = Δx/a 求質量。讀數時要輕敲吸管、取加載與卸載的平均來減少摩擦影響。即使如此，量測下限仍約為摩擦死區相當的 ${Math.max(1,dead/2).toFixed(1)}–${dead.toFixed(1)} g；若想量得更精確，應改用更軟的彈簧（a 較大）或降低指針摩擦。</p>
+  </div>`;
+  o+=`<div class="card"><h2>誤差來源總覽</h2><table>
+   <tr><th>來源</th><th>類型</th><th>影響</th><th>對策</th></tr>
+   <tr><td>初張力</td><td>系統</td><td>直線不過原點；單點法的 k 偏大</td><td>用迴歸同時求斜率與截距，並排除初張力區的點</td></tr>
+   <tr><td>指針摩擦</td><td>系統＋隨機</td><td>加載讀數偏小、卸載讀數偏大</td><td>兩方向取平均；輕敲；吸管鉛直；切縫寬度適中</td></tr>
+   <tr><td>視差</td><td>隨機（也可能是系統）</td><td>Δy = d(y − y<sub>e</sub>)/D</td><td>每次讀數都讓眼睛和指針等高；縮小 d</td></tr>
+   <tr><td>直尺傾斜</td><td>系統</td><td>a 放大 1/cos θ，k 偏小</td><td>用鉛垂線校直；反推質量時此效應會自動抵消</td></tr>
+   <tr><td>砝碼公差</td><td>系統</td><td>本組 20 g 砝碼偏差 ${Math.max(...H.m20.map(v=>Math.abs(v-20))).toFixed(2)} g 以內；以標示值校正，偏差會整體轉移到反推結果，重複量測無法消除</td><td>用電子天平校正砝碼</td></tr>
+   <tr><td>超過彈性限度</td><td>災難性</td><td>永久變形，校正作廢</td><td>先估算最大伸長，不超過量程</td></tr>
+   <tr><td>刻度條畫記</td><td>隨機</td><td>筆畫粗約 0.15 mm；內插假設刻度間等距</td><td>畫細線；直讀法與迴歸法互相比對</td></tr>
+  </table></div>`;
+  $('revOut').innerHTML=o;
+}
+
+/* ---------- 分頁 ---------- */
+const TABS=['① 原理','② 器材組裝','③ 校正量測','④ 作圖迴歸','⑤ 待測物與量程','⑥ 誤差與真值'];
+let cur=0;
+function updateNav(){
+  const fitOK=A.done&&!!getFit();
+  const locked=i=>(i===2||i===3)?!A.done:(i===4?!fitOK:false);
+  $('nav').innerHTML=TABS.map((t,i)=>`<button class="${i===cur?'on':''} ${locked(i)?'lock':''}" data-t="${i}">${t}</button>`).join('');
+  $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{cur=+b.dataset.t;showTab();});
+  $('t3lock').style.display=A.done?'none':'block'; $('t3body').style.display=A.done?'block':'none';
+  $('t4lock').style.display=A.done?'none':'block'; $('t4body').style.display=A.done?'block':'none';
+  $('t5lock').style.display=fitOK?'none':'block'; $('t5body').style.display=fitOK?'block':'none';
+}
+function showTab(){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===cur));
+  updateNav();
+  const rp=$('rigPanel');
+  if(cur===4){$('t5slot').appendChild(rp);}else{$('t3slot').appendChild(rp);}
+  const on5=cur===4;
+  $('bX').style.display=on5?'':'none'; $('stripCard').style.display=on5?'block':'none';
+  $('bMark').style.display=on5?'none':''; $('bRec').textContent=on5?'記錄到量測紀錄':'記錄到表格';
+  $('recMsg').innerHTML='';
+  if(cur===1)renderSteps();
+  if(cur===2||cur===4){updateLoadUI();$('eyeSl').value=eyeY;}
+  if(cur===2)renderTable();
+  if(cur===3&&A.done)renderFit();
+  if(cur===4)renderT5();
+  if(cur===5)renderReveal();
+}
+
+/* ---------- 事件 ---------- */
+$('b10').onclick=()=>changeLoad(()=>{L.m10=!L.m10;});
+$('bX').onclick=()=>changeLoad(()=>{L.X=!L.X;});
+$('b20p').onclick=()=>changeLoad(()=>{if(L.n20<5)L.n20++;});
+$('b20m').onclick=()=>changeLoad(()=>{if(L.n20>0)L.n20--;});
+$('btap').onclick=()=>{if(S.mode==='lower')return;S.tapT=0.3;S.stuck=false;S.droop=0;S.v+=(Math.random()-.5)*0.02;};
+$('bRec').onclick=record; $('bMark').onclick=addMark; $('bCSV').onclick=exportCSV; $('bDir').onclick=recordDirect;
+$('bClr').onclick=()=>{if(confirm('清除全部表格數據？')){Dt.rows.forEach(r=>{r.up=null;r.dn=null;});Dt.demo=false;renderTable();updateNav();}};
+$('bLogClr').onclick=()=>{if(confirm('清除全部量測紀錄與直讀值？')){logs=[];directs=[];renderT5();}};
+$('bDemo').onclick=fillDemo;
+$('bReveal').onclick=()=>{revealed=true;renderReveal();};
+$('eyeSl').oninput=()=>{eyeY=parseFloat($('eyeSl').value);};
+document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{eyeY=Math.max(-5,Math.min(40,Math.round((eyeY+parseFloat(b.dataset.eye))*10)/10));$('eyeSl').value=eyeY;});
+function setTilt(v){const st=STEPS[A.stage];if(!st||!st.plumb)return;v=Math.max(-6,Math.min(6,v));if(st.plumb==='s')A.sTilt=v;else A.rTilt=v;$('tiltSl').value=v;}
+$('tiltSl').oninput=()=>setTilt(parseFloat($('tiltSl').value));
+document.querySelectorAll('[data-tilt]').forEach(b=>b.onclick=()=>{const st=STEPS[A.stage];if(!st||!st.plumb)return;setTilt((st.plumb==='s'?A.sTilt:A.rTilt)+parseFloat(b.dataset.tilt));});
+$('btnNew').onclick=()=>{if(!confirm('重新開始會換一支新彈簧與新的待測物，並清除所有數據。確定嗎？'))return;newAll();cur=1;showTab();};
+
+/* ---------- 主迴圈 ---------- */
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  if(A.done){const n=Math.max(1,Math.ceil(dt/0.0005));for(let i=0;i<n;i++)physStep(dt/n);}
+  if(cur===1){$('svgAsm').innerHTML=renderRig(A.stage===6?7:A.stage,false);renderPlumb();}
+  if((cur===2||cur===4)&&A.done){
+    $('svgRig').innerHTML=renderRig(99,true); renderZoom();
+    if(cur===4)renderStrip();
+    $('eyeTxt').textContent=eyeY.toFixed(1);
+    $('stTxt').innerHTML=(S.mode==='lower')?'<span class="warn">手托緩放中…</span>':(S.stuck?'<span class="ok">靜止</span>':'<span class="warn">擺動中</span>');
+    $('dmgTxt').innerHTML=S.damaged?'<span class="warn">⚠ 彈簧曾被拉超過彈性限度，已經永久變形，先前的校正已不適用。</span>':'';
+  }
+  requestAnimationFrame(loop);
+}
+newAll(); renderPrinciple(); showTab(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

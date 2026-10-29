@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>106 學年度高中科學能力競賽物理科實驗 — V 型軌道滾球虛擬實驗室</title>
+<style>
+:root{
+  --bg:#0f1420; --panel:#18203040; --card:#1b2334; --line:#2c3850;
+  --ink:#e8edf6; --dim:#93a2bd; --acc:#4fa3ff; --acc2:#ffb648;
+  --ok:#3ddc97; --warn:#ff7a7a; --plastic:#ffb648; --metal:#7fd0ff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#0c111b,#131a28 40%,#0f1420);
+  color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  font-size:15px;line-height:1.65;-webkit-text-size-adjust:100%}
+header{padding:18px 16px 10px;border-bottom:1px solid var(--line);background:#0d1220}
+h1{margin:0;font-size:19px;letter-spacing:.5px}
+.sub{color:var(--dim);font-size:13px;margin-top:3px}
+nav{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:#0d1220;border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:20}
+nav button{background:#1a2234;color:var(--dim);border:1px solid var(--line);border-radius:8px;
+  padding:7px 13px;font-size:14px;cursor:pointer;font-family:inherit}
+nav button.on{background:var(--acc);color:#07101f;border-color:var(--acc);font-weight:700}
+main{max-width:1180px;margin:0 auto;padding:16px 14px 80px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 14px}
+.card h2{margin:0 0 10px;font-size:16px;color:var(--acc)}
+.card h3{margin:14px 0 6px;font-size:14px;color:var(--acc2)}
+.row{display:flex;flex-wrap:wrap;gap:14px}
+.col{flex:1 1 320px;min-width:290px}
+label.f{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px;flex-wrap:wrap}
+label.f span.n{color:var(--dim);min-width:120px}
+input[type=range]{flex:1 1 150px;accent-color:var(--acc)}
+input[type=number],select{background:#101726;color:var(--ink);border:1px solid var(--line);
+  border-radius:6px;padding:5px 8px;font-family:inherit;font-size:14px;width:90px}
+button.b{background:var(--acc);color:#07101f;border:0;border-radius:8px;padding:8px 14px;
+  font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin:4px 6px 4px 0}
+button.b.alt{background:#28334a;color:var(--ink)}
+button.b.warn{background:var(--acc2);color:#2a1a00}
+button.b.ghost{background:transparent;border:1px solid var(--line);color:var(--dim)}
+button.b:disabled{opacity:.4;cursor:not-allowed}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+th,td{border:1px solid var(--line);padding:4px 7px;text-align:center}
+th{background:#131b2b;color:var(--dim);font-weight:600}
+td.l,th.l{text-align:left}
+.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.note{background:#121a2a;border-left:3px solid var(--acc);padding:9px 12px;border-radius:0 8px 8px 0;
+  font-size:13px;color:#c3d0e6;margin:10px 0}
+.note.w{border-color:var(--acc2)}
+.note.e{border-color:var(--warn)}
+.pill{display:inline-block;background:#222d44;border-radius:20px;padding:2px 10px;font-size:12px;color:var(--dim);margin-right:6px}
+.big{font-size:20px;font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+.sw{font-size:34px;font-weight:700;letter-spacing:2px;color:var(--ok);font-variant-numeric:tabular-nums;
+  font-family:ui-monospace,monospace}
+.eq{background:#0e1524;border:1px solid var(--line);border-radius:8px;padding:10px 13px;margin:8px 0;
+  font-family:ui-monospace,monospace;font-size:13.5px;color:#d8e3f5;overflow-x:auto;white-space:pre}
+.tag{font-size:11px;padding:1px 6px;border-radius:4px}
+.tag.p{background:#4a3410;color:var(--plastic)}
+.tag.m{background:#0e3448;color:var(--metal)}
+.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sc{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.sc table{margin:0}
+.sc th{position:sticky;top:0;z-index:2}
+svg{max-width:100%;height:auto;display:block}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13.5px}
+.kv div:nth-child(odd){color:var(--dim)}
+.hide{display:none}
+.chk{display:inline-flex;align-items:center;gap:6px;background:#121a2a;border:1px solid var(--line);
+  border-radius:8px;padding:6px 11px;margin:4px 8px 4px 0;font-size:13.5px;cursor:pointer}
+.chk input{accent-color:var(--acc2);width:16px;height:16px}
+.bar{height:22px;border-radius:5px;display:flex;overflow:hidden;background:#101726;border:1px solid var(--line)}
+.bar i{display:block;font-style:normal;font-size:11px;line-height:22px;text-align:center;color:#07101f;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>106 學年度高中科學能力競賽物理科實驗 — V 型軌道滾球虛擬實驗室</h1>
+  <div class="sub">空心塑膠球 vs 實心金屬球｜質心速率、h–v² 迴歸、旋轉圈數、力學能分配</div>
+</header>
+
+<nav>
+  <button class="on" data-t="0">① 器材與裝置</button>
+  <button data-t="1">② 第一部分：量測 h、t</button>
+  <button data-t="2">③ 第二部分：v 與 h–v²</button>
+  <button data-t="3">④ 第三部分：旋轉圈數</button>
+  <button data-t="4">⑤ 第四部分：能量分析</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB 0 ============ -->
+<section class="on" id="s0">
+  <div class="card">
+    <h2>實驗裝置</h2>
+    <div class="row">
+      <div class="col" style="flex:2 1 520px">
+        <svg id="rig" viewBox="0 0 640 330"></svg>
+      </div>
+      <div class="col">
+        <label class="f"><span class="n">軌道傾角 θ</span>
+          <input type="range" id="tilt" min="5" max="55" step="0.1" value="20">
+          <b class="mono" id="tiltv">20.0°</b></label>
+        <div class="kv">
+          <div>量角器讀數（±0.5°）</div><div class="mono" id="protr">—</div>
+          <div>起終點軌道距離 d</div><div class="mono">1.000 m（固定）</div>
+          <div>真實高度差 d·sinθ</div><div class="mono" id="htrue">—</div>
+        </div>
+        <div class="note" id="rangenote">試題規定的作答範圍是 <b>5°–40°</b>；滑桿可拉到 55°，40° 以上屬<b>超出試題範圍的探索區</b>（見下方打滑說明）。實際實驗是調整棉線長度來改變傾角，這裡直接以傾角呈現，量角器讀數仍保留 0.5° 的最小刻度限制。</div>
+
+        <h3>V 型軌道截面</h3>
+        <label class="f"><span class="n">軌道頂角 2α</span>
+          <input type="range" id="apex" min="60" max="120" step="1" value="90">
+          <b class="mono" id="apexv">90°</b></label>
+        <svg id="xsec" viewBox="0 0 300 220"></svg>
+      </div>
+    </div>
+
+    <h3>關鍵幾何：有效滾動半徑</h3>
+    <div class="eq">球心到轉軸距離 = 0，接觸點到轉軸的垂直距離：
+    r_eff = r · sin α      （α = 頂角的一半）
+
+    頂角 90° → r_eff = r·sin45° = r/√2 ≈ 0.707 r
+    平面  180° → r_eff = r·sin90° = r        （退化為一般斜面）</div>
+    <div class="note w"><b>這是本題最容易錯的地方。</b>滾動條件是 v = ω·r_eff，不是 v = ωr。頂角 90° 時 ω 比平面斜面大 √2 倍，<b>轉動動能變成兩倍</b>：
+    <div class="eq">mgh = ½mv² + ½Iω² = ½mv²(1 + β/sin²α)   ，β ≡ I/mr²
+頂角90°： mgh = ½mv²(1 + 2β) = ½mv² + βmv²</div>
+    若誤用平面斜面的 (1+β)，第四部分整題會系統性偏掉。</div>
+  </div>
+
+  <div class="card">
+    <h2>器材清單</h2>
+    <table>
+      <tr><th>器材</th><th>本模擬中的用途</th><th>精度限制</th></tr>
+      <tr><td>空心塑膠球（桌球）</td><td>理想均勻球殼，β = I/mr² ≈ 2/3</td><td>—</td></tr>
+      <tr><td>實心金屬球</td><td>理想均勻實心球，β = 2/5</td><td>—</td></tr>
+      <tr><td>V 型軌道＋軌道底座</td><td>滾動軌道，頂角朝下</td><td>頂角可調 60°–120°</td></tr>
+      <tr><td>鐵架（含鐵爪）＋棉線</td><td>懸吊軌道一端，控制傾角</td><td>—</td></tr>
+      <tr><td>直尺</td><td>量測起終點高度差 h</td><td>最小刻度 0.1 cm，估讀 0.01 cm</td></tr>
+      <tr><td>量角器</td><td>傾角讀數（輔助）</td><td>0.5°</td></tr>
+      <tr><td>游標尺</td><td>量測兩球半徑</td><td>0.002 cm</td></tr>
+      <tr><td>碼錶</td><td>量測滾動時間 t</td><td>0.01 s＋人為反應時間</td></tr>
+      <tr><td>箭頭型檔板／萬用黏土</td><td>標定起點與終點（相距 1 公尺）</td><td>—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>真實效應開關</h2>
+    <div class="flex">
+      <label class="chk"><input type="checkbox" id="o_react" checked> 碼錶人為反應時間</label>
+      <label class="chk"><input type="checkbox" id="o_read" checked> 量具讀數誤差與最小刻度</label>
+      <label class="chk"><input type="checkbox" id="o_drag" checked> 桌球空氣阻力</label>
+      <label class="chk"><input type="checkbox" id="o_slip" checked> 大角度打滑</label>
+    </div>
+    <div class="note e"><b>兩個真實失效模式的物理：</b><br>
+    <b>① 打滑（試題範圍內幾乎不會發生）</b>：維持純滾動的條件是
+    <span class="mono">tanθ ≤ μ·sinα·(1+β/sin²α)/β</span>。V 槽有兩個接觸面，法向力總和被放大成 <span class="mono">mg·cosθ/sinα</span>，所以<b>比平面斜面更不容易打滑</b>。代入真實材料（鋼球／賽璐珞球對鋁軌，μ≈0.26–0.44），臨界角約落在 <b>40°–47°</b>——<b>這正是試題把角度上限訂在 40° 的原因</b>。想看到打滑，要把傾角拉到 45° 以上的探索區。打滑後轉動分配變少、球變快，該點會落到 h–v² 直線<b>下方</b>，使斜率偏小、截距變正。<br>
+    <b>② 空氣阻力（只對桌球顯著）</b>：桌球約 2.7 g、半徑 2 cm，單位質量阻力是金屬球的 <b>61 倍</b>；終點附近阻力約佔淨驅動力的 <b>11%</b>。淨效果是讓塑膠球反推的 β <b>偏高約 3.5%</b>（金屬球僅 +0.3%）。注意此時運動已<b>不是等加速度</b>，而題目要求的 v = 2d/t̄ 正是建立在等加速度假設上——這是誤差的真正來源。</div>
+  </div>
+</section>
+
+<!-- ============ TAB 1 ============ -->
+<section id="s1">
+  <div class="card">
+    <h2>第一部分（10 分）：每個角度量 10 次 h、每球各量 10 次 t</h2>
+    <div class="note">試題要求：至少 8 個角度，每個角度量 10 次高度差 h、每球各量 10 次滾動時間 t，全部求平均與標準差。</div>
+    <div class="flex">
+      <button class="b" id="mk8">建立標準 8 個角度（5°–40°）</button>
+      <button class="b alt" id="addang">以目前傾角新增角度</button>
+      <label class="f" style="margin:0"><span class="n" style="min-width:auto">目前傾角</span>
+        <input type="range" id="tilt2" min="5" max="55" step="0.1" value="20"><b class="mono" id="tilt2v">20.0°</b></label>
+      <button class="b ghost" id="clearall">清除全部數據</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>量測台</h2>
+    <div class="row">
+      <div class="col" style="flex:2 1 540px">
+        <svg id="lane" viewBox="0 0 640 260"></svg>
+        <div class="flex" style="margin-top:8px">
+          <div class="sw" id="swatch">0.00</div>
+          <div>
+            <button class="b" id="release">放開球（同時啟動碼錶）</button>
+            <button class="b warn" id="stopw" disabled>停錶</button>
+          </div>
+        </div>
+        <div class="note" style="margin-top:6px">依照慣例：<b>放開球的瞬間碼錶同步啟動</b>，所以只剩「停錶」的反應時間會進入誤差。手動計時用的是你自己的反應；批次量測則用模擬的人為反應時間模型。</div>
+      </div>
+      <div class="col">
+        <label class="f"><span class="n">量測角度</span><select id="angsel"></select></label>
+        <label class="f"><span class="n">使用球體</span>
+          <select id="ballsel"><option value="p">空心塑膠球（桌球）</option><option value="m">實心金屬球</option></select></label>
+        <h3>高度差 h（直尺）</h3>
+        <div class="flex">
+          <button class="b alt" id="h1">量一次 h</button>
+          <button class="b" id="h10">量 10 次</button>
+        </div>
+        <div class="mono" id="hstat" style="margin-top:6px;color:var(--dim)">—</div>
+        <h3>滾動時間 t（碼錶）</h3>
+        <div class="flex">
+          <button class="b" id="t10">自動跑 10 次（本球）</button>
+        </div>
+        <div class="mono" id="tstat" style="margin-top:6px;color:var(--dim)">—</div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
+        <button class="b warn" id="autoall">一鍵完成所有角度（h×10、兩球各 t×10）</button>
+        <div class="note w" style="font-size:12.5px">一鍵量測是給時間不夠時用的捷徑，誤差模型完全相同。建議至少手動跑幾趟，體會反應時間的影響。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>原始數據</h2>
+    <div class="flex">
+      <label class="f" style="margin:0"><span class="n" style="min-width:auto">檢視</span>
+        <select id="rawsel"><option value="sum">各角度摘要</option><option value="h">高度差 h 明細</option><option value="p">塑膠球 t 明細</option><option value="m">金屬球 t 明細</option></select></label>
+      <button class="b ghost" id="csv">匯出 CSV</button>
+    </div>
+    <div class="sc" id="rawtbl"></div>
+  </div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section id="s2">
+  <div class="card">
+    <h2>第二部分 (1)：質心速率 v</h2>
+    <div class="eq">質心作等加速度運動、由靜止出發：
+    平均速率 = d / t̄ ，末速 v = 2d / t̄        （d = 1.000 m）
+    標準差傳遞： σ_v = 2d·σ_t / t̄²   ，  σ_(v²) = 2v·σ_v</div>
+    <div class="sc" id="vtbl"></div>
+  </div>
+
+  <div class="card">
+    <h2>第二部分 (2)：h–v² 關係圖與斜率</h2>
+    <div class="flex">
+      <label class="chk"><input type="checkbox" id="showp" checked> 空心塑膠球</label>
+      <label class="chk"><input type="checkbox" id="showm" checked> 實心金屬球</label>
+      <label class="chk"><input type="checkbox" id="fitzero"> 迴歸強制過原點</label>
+    </div>
+    <svg id="plot" viewBox="0 0 660 430"></svg>
+    <div class="row" style="margin-top:6px">
+      <div class="col"><div id="fitp"></div></div>
+      <div class="col"><div id="fitm"></div></div>
+    </div>
+    <div class="note">斜率單位為 <b>s²/m</b>（h 為 m、v² 為 m²/s²）。理論上截距應為 0；若截距明顯不為零，通常來自碼錶反應時間的系統性偏差。</div>
+  </div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section id="s3">
+  <div class="card">
+    <h2>第三部分 (1)：旋轉圈數 N 的推導</h2>
+    <div class="row">
+      <div class="col"><svg id="geo" viewBox="0 0 320 260"></svg></div>
+      <div class="col">
+        <div class="eq">球在 V 槽中與兩斜面各接觸一點。
+轉軸通過質心、垂直軌道與重力方向。
+接觸點到轉軸的垂直距離（有效滾動半徑）：
+
+    r_eff = r·sin α       （2α = 軌道頂角）
+    頂角為直角 → r_eff = r/√2
+
+純滾動（不滑動）：滾動距離 d 對應總轉角
+
+    φ = d / r_eff = √2·d / r
+
+    N = φ/2π = ─────────  = √2·d / (2πr)
+                2π·r/√2
+
+球上距離轉軸最遠的點（距軸 r），相對質心的速率：
+
+    v_max = ω·r = (v/r_eff)·r = √2·v</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>第三部分 (2)：游標尺量測球半徑（各 10 次）</h2>
+    <div class="flex">
+      <button class="b" id="cal10p">量塑膠球 10 次</button>
+      <button class="b" id="cal10m">量金屬球 10 次</button>
+      <button class="b ghost" id="calclr">清除</button>
+    </div>
+    <div class="sc" id="caltbl" style="margin-top:8px"></div>
+    <div id="nres" style="margin-top:10px"></div>
+    <div class="note w">游標尺夾量桌球時會輕微壓扁球殼，量到的直徑會略為偏小——這是真實實驗會發生的系統誤差，模擬中已納入。</div>
+  </div>
+
+  <div class="card">
+    <h2>各角度的圈數與最遠點速率</h2>
+    <div class="sc" id="ntbl"></div>
+  </div>
+</section>
+
+<!-- ============ TAB 4 ============ -->
+<section id="s4">
+  <div class="card">
+    <h2>第四部分 (1)：減少的重力位能 ÷ 增加的質心平移動能</h2>
+    <div class="eq">由斜率 k = h / v²  ：
+
+    ΔU/ΔK_平移 = mgh / (½mv²) = 2g·k = 1 + β/sin²α
+
+    頂角 90° → ΔU/ΔK = 1 + 2β
+      實心球 β=2/5 → 1.800
+      球殼   β=2/3 → 2.333</div>
+    <div id="ratio"></div>
+    <div class="note">兩者<b>不相等</b>。減少的重力位能同時轉換成質心平移動能與繞質心的轉動動能；在 V 型軌道中 ω = v/(r·sinα) 比平面斜面大，轉動動能佔比再被放大，所以比值遠大於 1。</div>
+  </div>
+
+  <div class="card">
+    <h2>第四部分 (2)：兩球差異的來源</h2>
+    <div id="bars"></div>
+    <div class="note">兩球比例<b>不同</b>，且與質量、半徑<b>完全無關</b>——只取決於無因次的轉動慣量係數 β = I/mr²。空心球殼質量集中在外緣（β=2/3），實心球質量分布較靠近轉軸（β=2/5），所以球殼把更大比例的位能存進轉動動能，滾到終點時質心較慢。</div>
+  </div>
+
+  <div class="card">
+    <h2>反推 β 與真值揭曉</h2>
+    <div class="eq">β = (2g·k − 1)·sin²α      （分析中取 g = 9.8 m/s²）</div>
+    <div id="beta"></div>
+    <button class="b warn" id="reveal">揭曉隱藏真值</button>
+    <div id="truth" class="hide" style="margin-top:12px"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ===================== 物理常數與隱藏真值 ===================== */
+const G_TRUE = 9.789;            // 臺中實際重力加速度
+const G_ANA  = 9.8;              // 學生分析時使用
+const D_ROLL = 1.000;            // m，起終點沿軌道距離
+const RHO_AIR = 1.20, CD = 0.47;
+
+const rnd = (a,b)=>a+Math.random()*(b-a);
+const gauss = ()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+
+const TRUTH = {
+  rp: rnd(1.985,2.015),                 // cm 半徑（桌球 ~40mm 直徑）
+  rm: rnd(1.250,1.290),                 // cm 半徑（實心鋼球）
+  betaP: rnd(0.6500,0.6580),            // 薄球殼（壁厚有限 → 略小於 2/3）
+  betaM: rnd(0.3985,0.4010),            // 均勻實心球
+  muP: rnd(0.34,0.44),                  // 賽璐珞/ABS 對鋁軌，靜摩擦（臨界角 40.1°–47.4°）
+  muM: rnd(0.26,0.34),                  // 鋼球對鋁軌，靜摩擦（臨界角 39.6°–47.3°）
+  reactMean: rnd(-0.035,0.045),         // s，停錶系統性偏差；預判終點會提早停錶（負），遲滯則為正
+  reactSd: 0.045,                       // s，反應的隨機散佈
+  caliperBiasP: rnd(-0.008,-0.003),     // cm，夾量桌球壓扁造成的偏小
+  hBias: rnd(-0.06,0.06)                // cm，直尺架設的系統偏差
+};
+TRUTH.mP = 0.0027;
+TRUTH.mM = 7800*(4/3)*Math.PI*Math.pow(TRUTH.rm/100,3);
+
+const BALL = {
+  p:{key:'p',name:'空心塑膠球',short:'塑膠球',cls:'p',col:'#ffb648',
+     r:()=>TRUTH.rp/100, m:()=>TRUTH.mP, beta:()=>TRUTH.betaP, mu:()=>TRUTH.muP, betaIdeal:2/3, drag:true},
+  m:{key:'m',name:'實心金屬球',short:'金屬球',cls:'m',col:'#7fd0ff',
+     r:()=>TRUTH.rm/100, m:()=>TRUTH.mM, beta:()=>TRUTH.betaM, mu:()=>TRUTH.muM, betaIdeal:2/5, drag:true}
+};
+
+/* ===================== 狀態 ===================== */
+const ST = {
+  apex:90,
+  tilt:20,
+  angles:[],           // {id, th(deg), h:[cm], p:{t:[]}, m:{t:[]}}
+  cal:{p:[],m:[]},
+  opts:{react:true,read:true,drag:true,slip:true},
+  revealed:false,
+  run:null
+};
+let nextId=1;
+
+const alphaRad = ()=>ST.apex/2*Math.PI/180;
+const sin2a = ()=>Math.pow(Math.sin(alphaRad()),2);
+
+/* ===================== 運動模擬 ===================== */
+// 回傳 {t, vEnd, slipped, traj:[{t,s}]}
+function simulate(thDeg, bk, wantTraj){
+  const b=BALL[bk], th=thDeg*Math.PI/180, al=alphaRad(), s2=Math.pow(Math.sin(al),2);
+  const beta=b.beta(), r=b.r(), m=b.m(), mu=b.mu();
+  const factor = 1 + beta/s2;
+  const tanCrit = mu*Math.sin(al)*factor/beta;
+  const slipping = ST.opts.slip && (Math.tan(th) > tanCrit);
+  const muK = 0.82*mu;
+  const kDrag = (ST.opts.drag && b.drag) ? 0.5*RHO_AIR*CD*Math.PI*r*r/m : 0;
+
+  const dt=2e-4; let v=0,s=0,t=0; const traj=wantTraj?[{t:0,s:0}]:null;
+  let guard=0;
+  while(s<D_ROLL && guard++<200000){
+    let a;
+    if(slipping){
+      a = G_TRUE*(Math.sin(th) - muK*Math.cos(th)/Math.sin(al)) - kDrag*v*v;
+    }else{
+      a = (G_TRUE*Math.sin(th) - kDrag*v*v)/factor;
+    }
+    if(a<0) a=0;
+    v += a*dt; s += v*dt; t += dt;
+    if(traj && guard%25===0) traj.push({t:t,s:s});
+  }
+  // 線性內插至恰好 s = D
+  if(v>0){ const over=(s-D_ROLL)/v; t-=over; s=D_ROLL; }
+  if(traj) traj.push({t:t,s:D_ROLL});
+  return {t:t, vEnd:v, slipped:slipping, traj:traj};
+}
+
+// 碼錶讀數（含人為反應）
+function measureTime(thDeg,bk){
+  const tr = simulate(thDeg,bk,false).t;
+  let t = tr;
+  if(ST.opts.react) t += TRUTH.reactMean + TRUTH.reactSd*gauss();
+  if(t<0.05) t=0.05;
+  return Math.round(t*100)/100;          // 碼錶 0.01 s
+}
+// 直尺量 h（cm）
+function measureH(thDeg){
+  let h = D_ROLL*Math.sin(thDeg*Math.PI/180)*100;
+  if(ST.opts.read){ h += TRUTH.hBias + 0.08*gauss(); return Math.round(h*100)/100; }
+  return Math.round(h*100)/100;
+}
+// 游標尺量半徑（cm）
+function measureR(bk){
+  let r = (bk==='p'?TRUTH.rp:TRUTH.rm);
+  if(ST.opts.read){
+    r += (bk==='p'? TRUTH.caliperBiasP + 0.006*gauss() : 0.0020*gauss());
+    return Math.round(r/0.002)*0.002;    // 游標尺 0.002 cm
+  }
+  return r;
+}
+
+/* ===================== 統計工具 ===================== */
+const mean = a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:NaN;
+function sd(a){ if(a.length<2)return NaN; const m=mean(a);
+  return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1)); }
+const f=(x,n)=>(x===null||x===undefined||!isFinite(x))?'—':x.toFixed(n);
+
+function linfit(pts, thruZero){   // pts:[{x,y}]
+  const n=pts.length; if(n<2) return null;
+  if(thruZero){
+    let sxx=0,sxy=0; pts.forEach(p=>{sxx+=p.x*p.x;sxy+=p.x*p.y;});
+    const k=sxy/sxx; let ss=0; pts.forEach(p=>{const d=p.y-k*p.x; ss+=d*d;});
+    const se=n>1?Math.sqrt(ss/(n-1)/sxx):NaN;
+    return {k:k,b:0,sk:se,sb:0,r2:r2of(pts,k,0)};
+  }
+  const mx=mean(pts.map(p=>p.x)), my=mean(pts.map(p=>p.y));
+  let sxx=0,sxy=0; pts.forEach(p=>{sxx+=(p.x-mx)*(p.x-mx);sxy+=(p.x-mx)*(p.y-my);});
+  const k=sxy/sxx, b=my-k*mx;
+  let ss=0; pts.forEach(p=>{const d=p.y-(k*p.x+b); ss+=d*d;});
+  const s2=ss/(n-2), sk=Math.sqrt(s2/sxx), sb=Math.sqrt(s2*(1/n+mx*mx/sxx));
+  return {k:k,b:b,sk:sk,sb:sb,r2:r2of(pts,k,b)};
+}
+function r2of(pts,k,b){ const my=mean(pts.map(p=>p.y));
+  let sr=0,st=0; pts.forEach(p=>{sr+=Math.pow(p.y-(k*p.x+b),2); st+=Math.pow(p.y-my,2);});
+  return st>0?1-sr/st:NaN; }
+
+/* ===================== 分頁 ===================== */
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('s'+btn.dataset.t).classList.add('on');
+    refreshAll();
+  };
+});
+
+/* ===================== 裝置圖 ===================== */
+function drawRig(){
+  const th=ST.tilt, sv=document.getElementById('rig');
+  const L=420, x0=90, y0=270;                       // 左端（低端）
+  const rad=th*Math.PI/180;
+  const x1=x0+L*Math.cos(rad), y1=y0-L*Math.sin(rad);
+  // 起點/終點（沿軌道 1 m；軌道總長設 1.2 m）
+  const px = s=>({x:x0+(s/1.2)*L*Math.cos(rad), y:y0-(s/1.2)*L*Math.sin(rad)});
+  const A=px(0.08), B=px(1.08);
+  const standX=x1+30;
+  sv.innerHTML=`
+  <rect x="0" y="0" width="640" height="330" fill="none"/>
+  <rect x="30" y="278" width="580" height="14" fill="#1d2637" stroke="#2c3850"/>
+  <text x="36" y="305" fill="#6f7e99" font-size="11">實驗桌面</text>
+  <rect x="${standX-4}" y="${Math.min(y1-120,60)}" width="8" height="${278-Math.min(y1-120,60)}" fill="#303d57"/>
+  <rect x="${standX-40}" y="268" width="80" height="12" rx="3" fill="#303d57"/>
+  <rect x="${standX-16}" y="${y1-64}" width="32" height="9" rx="2" fill="#4a5a7a"/>
+  <line x1="${standX}" y1="${y1-56}" x2="${x1}" y2="${y1}" stroke="#c9b48a" stroke-width="1.6"/>
+  <text x="${standX+8}" y="${y1-30}" fill="#c9b48a" font-size="11">棉線</text>
+  <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#7f8ea8" stroke-width="9" stroke-linecap="round"/>
+  <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#aab8d0" stroke-width="3" stroke-linecap="round"/>
+  <rect x="${x0-22}" y="${y0-6}" width="30" height="14" rx="3" fill="#303d57"/>
+  <line x1="${x0}" y1="${y0}" x2="${x0+170}" y2="${y0}" stroke="#4a5a7a" stroke-dasharray="4 4"/>
+  <path d="M ${x0+70} ${y0} A 70 70 0 0 0 ${x0+70*Math.cos(rad)} ${y0-70*Math.sin(rad)}" fill="none" stroke="var(--acc2)" stroke-width="1.6"/>
+  <text x="${x0+80}" y="${y0-14}" fill="var(--acc2)" font-size="13">θ=${th.toFixed(1)}°</text>
+  <circle cx="${B.x}" cy="${B.y}" r="11" fill="#ffb648" stroke="#7a5310" stroke-width="1.5"/>
+  <line x1="${A.x}" y1="${A.y}" x2="${A.x+14*Math.sin(rad)}" y2="${A.y+14*Math.cos(rad)}" stroke="#ff7a7a" stroke-width="3"/>
+  <line x1="${B.x}" y1="${B.y}" x2="${B.x+22*Math.sin(rad)}" y2="${B.y+22*Math.cos(rad)}" stroke="#3ddc97" stroke-width="3"/>
+  <text x="${B.x-4}" y="${B.y-18}" fill="#3ddc97" font-size="11">起點</text>
+  <text x="${A.x-14}" y="${A.y+30}" fill="#ff7a7a" font-size="11">終點</text>
+  <line x1="${A.x-40}" y1="${A.y}" x2="${A.x-40}" y2="${B.y}" stroke="var(--acc)" stroke-width="1.4"/>
+  <line x1="${A.x-46}" y1="${A.y}" x2="${A.x-34}" y2="${A.y}" stroke="var(--acc)" stroke-width="1.4"/>
+  <line x1="${A.x-46}" y1="${B.y}" x2="${A.x-34}" y2="${B.y}" stroke="var(--acc)" stroke-width="1.4"/>
+  <text x="${A.x-78}" y="${(A.y+B.y)/2}" fill="var(--acc)" font-size="12">h</text>
+  <text x="${(A.x+B.x)/2-24}" y="${(A.y+B.y)/2+34}" fill="#93a2bd" font-size="11" transform="rotate(${-th} ${(A.x+B.x)/2-24} ${(A.y+B.y)/2+34})">d = 1.000 m</text>`;
+  const tv=document.getElementById('tiltv');
+  tv.textContent=th.toFixed(1)+'°'+(th>40?' ⚠超出試題範圍':'');
+  tv.style.color = th>40 ? 'var(--warn)' : '';
+  const t2v=document.getElementById('tilt2v');
+  if(t2v){ t2v.textContent=th.toFixed(1)+'°'+(th>40?' ⚠':''); t2v.style.color=th>40?'var(--warn)':''; }
+  document.getElementById('protr').textContent=(Math.round(th*2)/2).toFixed(1)+'°';
+  document.getElementById('htrue').textContent=(100*D_ROLL*Math.sin(rad)).toFixed(2)+' cm';
+}
+function drawXsec(){
+  const sv=document.getElementById('xsec'), al=alphaRad();
+  const cx=150, apexY=190, R=52;
+  const d=R/Math.sin(al);                   // 球心到頂點距離
+  const cy=apexY-d;
+  const arm=140;
+  const lx=cx-arm*Math.sin(al), ly=apexY-arm*Math.cos(al);
+  const rx=cx+arm*Math.sin(al), ry=apexY-arm*Math.cos(al);
+  // 接觸點
+  const c1x=cx-R*Math.cos(al), c1y=cy+R*Math.sin(al);
+  const c2x=cx+R*Math.cos(al), c2y=cy+R*Math.sin(al);
+  sv.innerHTML=`
+  <line x1="${lx}" y1="${ly}" x2="${cx}" y2="${apexY}" stroke="#7f8ea8" stroke-width="6" stroke-linecap="round"/>
+  <line x1="${cx}" y1="${apexY}" x2="${rx}" y2="${ry}" stroke="#7f8ea8" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="${R}" fill="#ffb64822" stroke="#ffb648" stroke-width="2"/>
+  <line x1="${cx-70}" y1="${cy}" x2="${cx+70}" y2="${cy}" stroke="#3ddc97" stroke-width="1.6" stroke-dasharray="5 4"/>
+  <text x="${cx+74}" y="${cy+4}" fill="#3ddc97" font-size="11">轉軸</text>
+  <line x1="${cx}" y1="${cy}" x2="${c2x}" y2="${c2y}" stroke="#e8edf6" stroke-width="1.4"/>
+  <text x="${cx+R*0.42}" y="${cy+R*0.36}" fill="#e8edf6" font-size="12">r</text>
+  <line x1="${c2x}" y1="${cy}" x2="${c2x}" y2="${c2y}" stroke="var(--acc)" stroke-width="2"/>
+  <line x1="${cx}" y1="${cy}" x2="${c2x}" y2="${cy}" stroke="var(--acc)" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="${c2x+5}" y="${(cy+c2y)/2+4}" fill="var(--acc)" font-size="12">r_eff</text>
+  <circle cx="${c1x}" cy="${c1y}" r="3.5" fill="#ff7a7a"/>
+  <circle cx="${c2x}" cy="${c2y}" r="3.5" fill="#ff7a7a"/>
+  <circle cx="${cx}" cy="${cy}" r="2.5" fill="#e8edf6"/>
+  <path d="M ${cx-26*Math.sin(al)} ${apexY-26*Math.cos(al)} A 26 26 0 0 1 ${cx+26*Math.sin(al)} ${apexY-26*Math.cos(al)}" fill="none" stroke="var(--acc2)" stroke-width="1.5"/>
+  <text x="${cx-14}" y="${apexY-32}" fill="var(--acc2)" font-size="12">${ST.apex}°</text>
+  <text x="8" y="18" fill="#93a2bd" font-size="12">截面（頂角朝下）</text>
+  <text x="8" y="36" fill="#e8edf6" font-size="12">r_eff = r·sin(${(ST.apex/2)}°) = ${Math.sin(al).toFixed(4)} r</text>`;
+  document.getElementById('apexv').textContent=ST.apex+'°';
+}
+
+/* ===================== 賽道（量測台） ===================== */
+let anim=null;
+function drawLane(pos){
+  const sv=document.getElementById('lane');
+  const a=curAngle(); const th=a?a.th:ST.tilt;
+  const rad=th*Math.PI/180;
+  const L=480, x1=560, y1=60;                     // 高端（起點側）
+  const x0=x1-L*Math.cos(rad), y0=y1+L*Math.sin(rad);
+  const bk=document.getElementById('ballsel').value;
+  const col=BALL[bk].col, rr=bk==='p'?12:8;
+  const s=pos===undefined?0:pos;                  // 0..1
+  const bx=x1-(s*0.86+0.07)*L*Math.cos(rad), by=y1+(s*0.86+0.07)*L*Math.sin(rad);
+  const S=(f)=>({x:x1-(f)*L*Math.cos(rad), y:y1+(f)*L*Math.sin(rad)});
+  const A=S(0.07), B=S(0.93);
+  sv.innerHTML=`
+  <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#7f8ea8" stroke-width="11" stroke-linecap="round"/>
+  <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#96a5bf" stroke-width="4" stroke-linecap="round"/>
+  <line x1="${A.x}" y1="${A.y}" x2="${A.x+18*Math.sin(rad)}" y2="${A.y+18*Math.cos(rad)}" stroke="#3ddc97" stroke-width="3"/>
+  <line x1="${B.x}" y1="${B.y}" x2="${B.x+18*Math.sin(rad)}" y2="${B.y+18*Math.cos(rad)}" stroke="#ff7a7a" stroke-width="3"/>
+  <text x="${A.x-10}" y="${A.y-12}" fill="#3ddc97" font-size="12">起點</text>
+  <text x="${B.x-10}" y="${B.y-12}" fill="#ff7a7a" font-size="12">終點</text>
+  <text x="${(A.x+B.x)/2-30}" y="${(A.y+B.y)/2+34}" fill="#93a2bd" font-size="11">1.000 m</text>
+  <circle cx="${bx}" cy="${by-rr*0.7}" r="${rr}" fill="${col}" stroke="#0b1220" stroke-width="1.5"/>
+  <text x="14" y="24" fill="#93a2bd" font-size="12">θ = ${th.toFixed(1)}°　${BALL[bk].name}</text>`;
+}
+function curAngle(){ const v=document.getElementById('angsel').value;
+  return ST.angles.find(a=>a.id==v)||null; }
+
+let swT0=null, swTimer=null, swActive=false;
+function release(){
+  const a=curAngle(); if(!a){alert('請先建立並選擇一個量測角度');return;}
+  const bk=document.getElementById('ballsel').value;
+  const sim=simulate(a.th,bk,true);
+  ST.run={sim:sim,bk:bk,a:a};
+  swT0=performance.now(); swActive=true;
+  document.getElementById('release').disabled=true;
+  document.getElementById('stopw').disabled=false;
+  if(anim) cancelAnimationFrame(anim);
+  const step=()=>{
+    const el=(performance.now()-swT0)/1000;
+    document.getElementById('swatch').textContent=el.toFixed(2);
+    let s = el>=sim.t ? 1 : (()=>{ // 由軌跡內插
+        const tr=sim.traj; let lo=0,hi=tr.length-1;
+        while(lo<hi-1){const mid=(lo+hi)>>1; if(tr[mid].t<el) lo=mid; else hi=mid;}
+        const p=(el-tr[lo].t)/Math.max(1e-9,tr[hi].t-tr[lo].t);
+        return (tr[lo].s+p*(tr[hi].s-tr[lo].s))/D_ROLL; })();
+    if(s>1)s=1;
+    drawLane(s);
+    if(swActive) anim=requestAnimationFrame(step);
+  };
+  anim=requestAnimationFrame(step);
+}
+function stopw(){
+  if(!swActive) return;
+  swActive=false; if(anim) cancelAnimationFrame(anim);
+  const el=(performance.now()-swT0)/1000;
+  const t=Math.round(el*100)/100;
+  document.getElementById('swatch').textContent=t.toFixed(2);
+  const {a,bk}=ST.run; a[bk].t.push(t);
+  document.getElementById('release').disabled=false;
+  document.getElementById('stopw').disabled=true;
+  refreshAll();
+}
+
+/* ===================== 角度與數據 ===================== */
+function addAngle(th){
+  ST.angles.push({id:nextId++, th:Math.round(th*10)/10, h:[], p:{t:[]}, m:{t:[]}});
+  ST.angles.sort((x,y)=>x.th-y.th);
+}
+function fillAngSel(){
+  const sel=document.getElementById('angsel'), keep=sel.value;
+  sel.innerHTML=ST.angles.map(a=>`<option value="${a.id}">θ = ${a.th.toFixed(1)}°</option>`).join('');
+  if(ST.angles.some(a=>a.id==keep)) sel.value=keep;
+}
+
+/* ===================== 表格 ===================== */
+function renderRaw(){
+  const mode=document.getElementById('rawsel').value, el=document.getElementById('rawtbl');
+  if(!ST.angles.length){el.innerHTML='<div style="padding:16px;color:#93a2bd">尚無數據。請先建立角度並開始量測。</div>';return;}
+  if(mode==='sum'){
+    let h='<table><tr><th>θ (°)</th><th>n(h)</th><th>h̄ (cm)</th><th>σ_h (cm)</th>'+
+      '<th>n(塑膠)</th><th>t̄_p (s)</th><th>σ_t,p (s)</th><th>n(金屬)</th><th>t̄_m (s)</th><th>σ_t,m (s)</th></tr>';
+    ST.angles.forEach(a=>{
+      const ob=a.th>40?' <span class="tag" style="background:#4a1616;color:#ff7a7a">超範圍</span>':'';
+      h+=`<tr><td class="mono">${a.th.toFixed(1)}${ob}</td><td>${a.h.length}</td>
+      <td class="mono">${f(mean(a.h),2)}</td><td class="mono">${f(sd(a.h),3)}</td>
+      <td>${a.p.t.length}</td><td class="mono">${f(mean(a.p.t),3)}</td><td class="mono">${f(sd(a.p.t),3)}</td>
+      <td>${a.m.t.length}</td><td class="mono">${f(mean(a.m.t),3)}</td><td class="mono">${f(sd(a.m.t),3)}</td></tr>`;
+    });
+    el.innerHTML=h+'</table>'; return;
+  }
+  const key=mode;
+  let h='<table><tr><th>θ (°)</th>';
+  for(let i=1;i<=10;i++) h+=`<th>${i}</th>`;
+  h+='<th>平均</th><th>標準差</th></tr>';
+  ST.angles.forEach(a=>{
+    const arr = key==='h'?a.h:a[key].t;
+    h+=`<tr><td class="mono">${a.th.toFixed(1)}</td>`;
+    for(let i=0;i<10;i++) h+=`<td class="mono">${arr[i]!==undefined?arr[i].toFixed(key==='h'?2:2):''}</td>`;
+    h+=`<td class="mono"><b>${f(mean(arr),3)}</b></td><td class="mono">${f(sd(arr),3)}</td></tr>`;
+  });
+  el.innerHTML=h+'</table>';
+  const stat=(arr,u,n)=>arr.length?`n=${arr.length}　平均 ${mean(arr).toFixed(n)} ${u}　標準差 ${arr.length>1?sd(arr).toFixed(n):'—'} ${u}`:'尚未量測';
+  const a=curAngle();
+  document.getElementById('hstat').textContent=a?stat(a.h,'cm',2):'—';
+  document.getElementById('tstat').textContent=a?stat(a[document.getElementById('ballsel').value].t,'s',3):'—';
+}
+function updateStatLines(){
+  const a=curAngle(); if(!a){document.getElementById('hstat').textContent='—';
+    document.getElementById('tstat').textContent='—';return;}
+  const bk=document.getElementById('ballsel').value;
+  const st=(arr,u,n)=>arr.length?`n=${arr.length}　平均 ${mean(arr).toFixed(n)} ${u}　標準差 ${arr.length>1?sd(arr).toFixed(n):'—'} ${u}`:'尚未量測';
+  document.getElementById('hstat').textContent=st(a.h,'cm',2);
+  document.getElementById('tstat').textContent=st(a[bk].t,'s',3);
+}
+
+/* ===================== 第二部分 ===================== */
+function dataFor(bk){
+  const out=[];
+  ST.angles.forEach(a=>{
+    const ts=a[bk].t; if(ts.length<2||a.h.length<1) return;
+    const tb=mean(ts), st=sd(ts);
+    const v=2*D_ROLL/tb, sv=2*D_ROLL*st/(tb*tb);
+    const hb=mean(a.h)/100, sh=(a.h.length>1?sd(a.h):0)/100;
+    out.push({th:a.th, n:ts.length, tb:tb, st:st, v:v, sv:sv,
+              v2:v*v, sv2:2*v*sv, h:hb, sh:sh});
+  });
+  return out;
+}
+function renderV(){
+  const el=document.getElementById('vtbl');
+  const P=dataFor('p'), M=dataFor('m');
+  if(!P.length&&!M.length){el.innerHTML='<div style="padding:16px;color:#93a2bd">尚無足夠數據（每個角度至少需 1 筆 h 與 2 筆 t）。</div>';return;}
+  let h='<table><tr><th rowspan="2">θ (°)</th><th rowspan="2">h̄ (m)</th><th rowspan="2">σ_h (m)</th>'+
+    '<th colspan="4" style="background:#4a341044">空心塑膠球</th><th colspan="4" style="background:#0e344844">實心金屬球</th></tr>'+
+    '<tr><th>t̄ (s)</th><th>v (m/s)</th><th>σ_v</th><th>v² (m²/s²)</th>'+
+    '<th>t̄ (s)</th><th>v (m/s)</th><th>σ_v</th><th>v² (m²/s²)</th></tr>';
+  ST.angles.forEach(a=>{
+    const p=P.find(x=>x.th===a.th), m=M.find(x=>x.th===a.th);
+    const ref=p||m; if(!ref) return;
+    h+=`<tr><td class="mono">${a.th.toFixed(1)}</td><td class="mono">${f(ref.h,4)}</td><td class="mono">${f(ref.sh,4)}</td>`;
+    [p,m].forEach(d=>{ h+= d?`<td class="mono">${f(d.tb,3)}</td><td class="mono">${f(d.v,3)}</td>
+      <td class="mono">${f(d.sv,3)}</td><td class="mono">${f(d.v2,3)}±${f(d.sv2,3)}</td>`
+      :'<td colspan="4" style="color:#5a6880">—</td>'; });
+    h+='</tr>';
+  });
+  el.innerHTML=h+'</table>';
+}
+function fitOf(bk){
+  const d=dataFor(bk); if(d.length<2) return null;
+  const fit=linfit(d.map(p=>({x:p.v2,y:p.h})), document.getElementById('fitzero').checked);
+  return {d:d, fit:fit};
+}
+function drawPlot(){
+  const sv=document.getElementById('plot');
+  const showP=document.getElementById('showp').checked, showM=document.getElementById('showm').checked;
+  const sets=[]; if(showP){const r=fitOf('p'); if(r) sets.push({bk:'p',...r});}
+  if(showM){const r=fitOf('m'); if(r) sets.push({bk:'m',...r});}
+  const L=70,R=630,T=24,B=372;
+  if(!sets.length){ sv.innerHTML=`<text x="24" y="60" fill="#93a2bd" font-size="13">尚無足夠數據作圖（至少需要 2 個角度的完整量測）。</text>`;
+    document.getElementById('fitp').innerHTML=''; document.getElementById('fitm').innerHTML=''; return; }
+  let xmax=0,ymax=0;
+  sets.forEach(s=>s.d.forEach(p=>{xmax=Math.max(xmax,p.v2+p.sv2); ymax=Math.max(ymax,p.h+p.sh);}));
+  xmax*=1.08; ymax*=1.08;
+  const X=v=>L+(v/xmax)*(R-L), Y=v=>B-(v/ymax)*(B-T);
+  let g=`<rect x="${L}" y="${T}" width="${R-L}" height="${B-T}" fill="#0d1421" stroke="#2c3850"/>`;
+  for(let i=0;i<=5;i++){
+    const xv=xmax*i/5, yv=ymax*i/5;
+    g+=`<line x1="${X(xv)}" y1="${T}" x2="${X(xv)}" y2="${B}" stroke="#1d2739"/>
+        <line x1="${L}" y1="${Y(yv)}" x2="${R}" y2="${Y(yv)}" stroke="#1d2739"/>
+        <text x="${X(xv)}" y="${B+16}" fill="#93a2bd" font-size="11" text-anchor="middle">${xv.toFixed(2)}</text>
+        <text x="${L-8}" y="${Y(yv)+4}" fill="#93a2bd" font-size="11" text-anchor="end">${yv.toFixed(3)}</text>`;
+  }
+  g+=`<text x="${(L+R)/2}" y="${B+36}" fill="#c3d0e6" font-size="13" text-anchor="middle">v² (m²/s²)</text>
+      <text x="18" y="${(T+B)/2}" fill="#c3d0e6" font-size="13" text-anchor="middle" transform="rotate(-90 18 ${(T+B)/2})">h (m)</text>`;
+  sets.forEach(s=>{
+    const c=BALL[s.bk].col;
+    s.d.forEach(p=>{
+      g+=`<line x1="${X(p.v2-p.sv2)}" y1="${Y(p.h)}" x2="${X(p.v2+p.sv2)}" y2="${Y(p.h)}" stroke="${c}" stroke-width="1.3" opacity=".8"/>
+          <line x1="${X(p.v2)}" y1="${Y(p.h-p.sh)}" x2="${X(p.v2)}" y2="${Y(p.h+p.sh)}" stroke="${c}" stroke-width="1.3" opacity=".8"/>
+          <circle cx="${X(p.v2)}" cy="${Y(p.h)}" r="4" fill="${c}" stroke="#0b1220" stroke-width="1"/>`;
+    });
+    // 把直線 y = k x + b 裁切進繪圖框 [0,xmax]×[0,ymax] 後再畫，避免斜率失真
+    const seg=(k,b)=>{
+      let xa=0, xb=xmax;
+      if(Math.abs(k)>1e-12){
+        const xAt=y=>(y-b)/k;
+        const cand=[xAt(0),xAt(ymax)].filter(x=>isFinite(x)).sort((p,q)=>p-q);
+        xa=Math.max(0,Math.min(xmax,cand[0])); xb=Math.max(0,Math.min(xmax,cand[1]));
+        if(k<0){ xa=0; xb=Math.max(0,Math.min(xmax,xAt(0))); }
+      }else{ if(b<0||b>ymax) return null; }
+      if(xb<=xa) return null;
+      return {x1:xa,y1:k*xa+b,x2:xb,y2:k*xb+b};
+    };
+    if(s.fit){
+      const L1=seg(s.fit.k,s.fit.b);
+      if(L1) g+=`<line x1="${X(L1.x1)}" y1="${Y(L1.y1)}" x2="${X(L1.x2)}" y2="${Y(L1.y2)}" stroke="${c}" stroke-width="2" stroke-dasharray="7 4" opacity=".9"/>`;
+    }
+    // 理論線
+    const kTh=(1+BALL[s.bk].betaIdeal/sin2a())/(2*G_ANA);
+    const L2=seg(kTh,0);
+    if(L2) g+=`<line x1="${X(L2.x1)}" y1="${Y(L2.y1)}" x2="${X(L2.x2)}" y2="${Y(L2.y2)}" stroke="${c}" stroke-width="1.2" opacity=".45"/>`;
+  });
+  let ly=T+18;
+  sets.forEach(s=>{ const c=BALL[s.bk].col;
+    g+=`<circle cx="${L+16}" cy="${ly-4}" r="4" fill="${c}"/><text x="${L+26}" y="${ly}" fill="${c}" font-size="12">${BALL[s.bk].name}</text>`; ly+=18;});
+  g+=`<text x="${L+16}" y="${ly}" fill="#93a2bd" font-size="11">虛線＝實驗迴歸　細實線＝理想理論線</text>`;
+  sv.innerHTML=g;
+
+  ['p','m'].forEach(bk=>{
+    const box=document.getElementById(bk==='p'?'fitp':'fitm');
+    const s=sets.find(x=>x.bk===bk);
+    if(!s||!s.fit){box.innerHTML='';return;}
+    const kTh=(1+BALL[bk].betaIdeal/sin2a())/(2*G_ANA);
+    box.innerHTML=`<div class="card" style="margin:0;background:#141c2c">
+      <b style="color:${BALL[bk].col}">${BALL[bk].name}　迴歸結果</b>
+      <div class="kv" style="margin-top:6px">
+        <div>斜率 k</div><div class="mono big" style="font-size:16px">${f(s.fit.k,4)} ± ${f(s.fit.sk,4)} s²/m</div>
+        <div>截距</div><div class="mono">${f(s.fit.b,4)} m</div>
+        <div>R²</div><div class="mono">${f(s.fit.r2,5)}</div>
+        <div>理想理論值</div><div class="mono">${f(kTh,4)} s²/m（β=${bk==='p'?'2/3':'2/5'}）</div>
+        <div>相對偏差</div><div class="mono">${f((s.fit.k/kTh-1)*100,2)} %</div>
+      </div></div>`;
+  });
+}
+
+/* ===================== 第三部分 ===================== */
+function drawGeo(){
+  const sv=document.getElementById('geo'), al=alphaRad();
+  const cx=160, apexY=215, R=62, d=R/Math.sin(al), cy=apexY-d, arm=150;
+  const c2x=cx+R*Math.cos(al), c2y=cy+R*Math.sin(al);
+  const c1x=cx-R*Math.cos(al), c1y=cy+R*Math.sin(al);
+  sv.innerHTML=`
+  <line x1="${cx-arm*Math.sin(al)}" y1="${apexY-arm*Math.cos(al)}" x2="${cx}" y2="${apexY}" stroke="#7f8ea8" stroke-width="6"/>
+  <line x1="${cx}" y1="${apexY}" x2="${cx+arm*Math.sin(al)}" y2="${apexY-arm*Math.cos(al)}" stroke="#7f8ea8" stroke-width="6"/>
+  <circle cx="${cx}" cy="${cy}" r="${R}" fill="#7fd0ff18" stroke="#7fd0ff" stroke-width="2"/>
+  <line x1="${cx-80}" y1="${cy}" x2="${cx+92}" y2="${cy}" stroke="#3ddc97" stroke-width="1.6" stroke-dasharray="5 4"/>
+  <text x="${cx+96}" y="${cy+4}" fill="#3ddc97" font-size="11">轉軸</text>
+  <line x1="${cx}" y1="${cy}" x2="${c2x}" y2="${c2y}" stroke="#e8edf6" stroke-width="1.5"/>
+  <text x="${cx+R*0.5}" y="${cy+R*0.34}" fill="#e8edf6" font-size="13">r</text>
+  <line x1="${c2x}" y1="${cy}" x2="${c2x}" y2="${c2y}" stroke="var(--acc)" stroke-width="2.5"/>
+  <text x="${c2x+6}" y="${(cy+c2y)/2+4}" fill="var(--acc)" font-size="12">r·sinα</text>
+  <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${apexY}" stroke="#4a5a7a" stroke-width="1" stroke-dasharray="3 3"/>
+  <path d="M ${cx-30*Math.sin(al)} ${apexY-30*Math.cos(al)} A 30 30 0 0 1 ${cx}   ${apexY-30}" fill="none" stroke="var(--acc2)" stroke-width="1.5"/>
+  <text x="${cx-34}" y="${apexY-34}" fill="var(--acc2)" font-size="12">α</text>
+  <circle cx="${c1x}" cy="${c1y}" r="4" fill="#ff7a7a"/><circle cx="${c2x}" cy="${c2y}" r="4" fill="#ff7a7a"/>
+  <text x="8" y="18" fill="#93a2bd" font-size="12">接觸點到轉軸的垂直距離 = r·sinα</text>`;
+}
+function renderCal(){
+  const el=document.getElementById('caltbl');
+  const P=ST.cal.p, M=ST.cal.m;
+  let h='<table><tr><th>次數</th>';
+  for(let i=1;i<=10;i++)h+=`<th>${i}</th>`;
+  h+='<th>平均 (cm)</th><th>標準差</th></tr>';
+  [['p','空心塑膠球 r_p',P],['m','實心金屬球 r_m',M]].forEach(([k,nm,arr])=>{
+    h+=`<tr><td class="l">${nm}</td>`;
+    for(let i=0;i<10;i++)h+=`<td class="mono">${arr[i]!==undefined?arr[i].toFixed(3):''}</td>`;
+    h+=`<td class="mono"><b>${f(mean(arr),4)}</b></td><td class="mono">${f(sd(arr),4)}</td></tr>`;
+  });
+  el.innerHTML=h+'</table>';
+
+  const al=alphaRad(), sa=Math.sin(al);
+  const rp=mean(P)/100, rm=mean(M)/100;
+  const Np=rp?D_ROLL/(2*Math.PI*rp*sa):NaN, Nm=rm?D_ROLL/(2*Math.PI*rm*sa):NaN;
+  document.getElementById('nres').innerHTML=
+   (P.length||M.length)?`<div class="kv">
+    <div>有效滾動半徑 r_eff = r·sin${(ST.apex/2)}°</div><div class="mono">係數 ${sa.toFixed(4)}</div>
+    <div>塑膠球 N_p = d / (2π·r_p·sinα)</div><div class="mono big" style="font-size:17px">${f(Np,2)} 圈</div>
+    <div>金屬球 N_m = d / (2π·r_m·sinα)</div><div class="mono big" style="font-size:17px">${f(Nm,2)} 圈</div>
+    </div>`:'';
+}
+function renderN(){
+  const el=document.getElementById('ntbl');
+  const al=alphaRad(), sa=Math.sin(al);
+  const rp=mean(ST.cal.p)/100, rm=mean(ST.cal.m)/100;
+  const P=dataFor('p'), M=dataFor('m');
+  if(!P.length&&!M.length){el.innerHTML='<div style="padding:16px;color:#93a2bd">尚無數據。</div>';return;}
+  let h='<table><tr><th>θ (°)</th><th>球</th><th>t̄ (s)</th><th>v (m/s)</th><th>ω = v/(r·sinα) (rad/s)</th>'+
+    '<th>最遠點相對質心速率 = v/sinα (m/s)</th><th>總圈數 N</th></tr>';
+  ST.angles.forEach(a=>{
+    [['p',P,rp],['m',M,rm]].forEach(([bk,arr,r])=>{
+      const d=arr.find(x=>x.th===a.th); if(!d) return;
+      const w=r?d.v/(r*sa):NaN, N=r?D_ROLL/(2*Math.PI*r*sa):NaN;
+      h+=`<tr><td class="mono">${a.th.toFixed(1)}</td><td><span class="tag ${bk}">${BALL[bk].short}</span></td>
+      <td class="mono">${f(d.tb,3)}</td><td class="mono">${f(d.v,3)}</td><td class="mono">${f(w,1)}</td>
+      <td class="mono">${f(d.v/sa,3)}</td><td class="mono">${f(N,2)}</td></tr>`;
+    });
+  });
+  el.innerHTML=h+'</table>';
+}
+
+/* ===================== 第四部分 ===================== */
+function renderEnergy(){
+  const s2=sin2a();
+  const out=[];
+  ['p','m'].forEach(bk=>{
+    const r=fitOf(bk); if(!r||!r.fit) return;
+    const k=r.fit.k, sk=r.fit.sk;
+    const ratio=2*G_ANA*k, sratio=2*G_ANA*sk;
+    const beta=(ratio-1)*s2, sbeta=sratio*s2;
+    out.push({bk:bk,k:k,sk:sk,ratio:ratio,sratio:sratio,beta:beta,sbeta:sbeta,
+      ratioTh:1+BALL[bk].betaIdeal/s2, betaTh:BALL[bk].betaIdeal});
+  });
+  const rd=document.getElementById('ratio');
+  if(!out.length){rd.innerHTML='<div style="color:#93a2bd">尚無迴歸結果，請先完成第一、二部分。</div>';
+    document.getElementById('bars').innerHTML=''; document.getElementById('beta').innerHTML=''; return;}
+  let h='<table><tr><th>球體</th><th>斜率 k (s²/m)</th><th>ΔU/ΔK<sub>平移</sub> = 2gk</th><th>理想理論值</th><th>偏差</th></tr>';
+  out.forEach(o=>{
+    h+=`<tr><td><span class="tag ${o.bk}">${BALL[o.bk].name}</span></td>
+    <td class="mono">${f(o.k,4)} ± ${f(o.sk,4)}</td>
+    <td class="mono big" style="font-size:16px">${f(o.ratio,3)} ± ${f(o.sratio,3)}</td>
+    <td class="mono">${f(o.ratioTh,3)}</td>
+    <td class="mono">${f((o.ratio/o.ratioTh-1)*100,2)} %</td></tr>`;
+  });
+  rd.innerHTML=h+'</table>';
+
+  let b='';
+  out.forEach(o=>{
+    const fTrans=1/o.ratio, fRot=1-fTrans;
+    b+=`<div style="margin:12px 0"><b style="color:${BALL[o.bk].col}">${BALL[o.bk].name}</b>
+    <span class="pill">ΔU/ΔK平移 = ${f(o.ratio,3)}</span>
+    <div class="bar" style="margin-top:5px">
+      <i style="width:${(fTrans*100).toFixed(1)}%;background:#3ddc97">平移 ${(fTrans*100).toFixed(1)}%</i>
+      <i style="width:${(fRot*100).toFixed(1)}%;background:#ffb648">轉動 ${(fRot*100).toFixed(1)}%</i>
+    </div></div>`;
+  });
+  if(out.length===2){
+    b+=`<div class="note">同一角度下兩球的位能減少量相同（h 相同），但球殼把 ${((1-1/out.find(o=>o.bk==='p').ratio)*100).toFixed(1)}% 的位能存進轉動，實心球只存 ${((1-1/out.find(o=>o.bk==='m').ratio)*100).toFixed(1)}%，所以球殼到終點時質心明顯較慢、滾動時間較長。</div>`;
+  }
+  document.getElementById('bars').innerHTML=b;
+
+  let e='<table><tr><th>球體</th><th>實驗反推 β</th><th>理想值</th><th>偏差</th><th>偏差 / σ</th></tr>';
+  out.forEach(o=>{
+    const dev=(o.beta-o.betaTh)/o.sbeta;
+    e+=`<tr><td><span class="tag ${o.bk}">${BALL[o.bk].name}</span></td>
+    <td class="mono big" style="font-size:16px">${f(o.beta,4)} ± ${f(o.sbeta,4)}</td>
+    <td class="mono">${f(o.betaTh,4)}</td>
+    <td class="mono">${f((o.beta/o.betaTh-1)*100,2)} %</td>
+    <td class="mono" style="color:${Math.abs(dev)<2?'var(--ok)':(Math.abs(dev)<5?'var(--acc2)':'var(--warn)')}">${f(dev,1)} σ</td></tr>`;
+  });
+  document.getElementById('beta').innerHTML=e+'</table>';
+  window.__betaOut=out;
+}
+function doReveal(){
+  const s2=sin2a(), out=window.__betaOut||[];
+  const cmp=bk=>{const o=out.find(x=>x.bk===bk); if(!o)return '—';
+    const t=(bk==='p'?TRUTH.betaP:TRUTH.betaM);
+    return `${f(o.beta,4)}（真值 ${f(t,4)}，差 ${f((o.beta-t)/o.sbeta,1)}σ）`;};
+  const el=document.getElementById('truth');
+  el.classList.remove('hide');
+  el.innerHTML=`<div class="card" style="background:#14202c;border-color:#2b6a4a;margin:0">
+  <h2 style="color:var(--ok)">隱藏真值</h2>
+  <table>
+    <tr><th class="l">項目</th><th>真值</th><th>你的量測／推算</th></tr>
+    <tr><td class="l">塑膠球半徑 r_p</td><td class="mono">${TRUTH.rp.toFixed(4)} cm</td><td class="mono">${f(mean(ST.cal.p),4)} cm</td></tr>
+    <tr><td class="l">金屬球半徑 r_m</td><td class="mono">${TRUTH.rm.toFixed(4)} cm</td><td class="mono">${f(mean(ST.cal.m),4)} cm</td></tr>
+    <tr><td class="l">塑膠球 β（薄球殼）</td><td class="mono">${TRUTH.betaP.toFixed(4)}</td><td class="mono">${cmp('p')}</td></tr>
+    <tr><td class="l">金屬球 β（實心球）</td><td class="mono">${TRUTH.betaM.toFixed(4)}</td><td class="mono">${cmp('m')}</td></tr>
+    <tr><td class="l">重力加速度 g</td><td class="mono">${G_TRUE} m/s²</td><td class="mono">分析用 ${G_ANA}</td></tr>
+    <tr><td class="l">你的停錶系統性偏差</td><td class="mono">${TRUTH.reactMean>0?'+':''}${(TRUTH.reactMean*1000).toFixed(0)} ms（隨機散佈 σ ${(TRUTH.reactSd*1000).toFixed(0)} ms）</td><td>—</td></tr>
+    <tr><td class="l">直尺架設系統偏差</td><td class="mono">${TRUTH.hBias>0?'+':''}${TRUTH.hBias.toFixed(3)} cm</td><td>—</td></tr>
+    <tr><td class="l">游標尺夾桌球壓扁量</td><td class="mono">${TRUTH.caliperBiasP.toFixed(4)} cm</td><td>—</td></tr>
+    <tr><td class="l">靜摩擦係數 μ（塑膠／金屬）</td><td class="mono">${TRUTH.muP.toFixed(3)} ／ ${TRUTH.muM.toFixed(3)}</td><td>—</td></tr>
+  </table>
+  <h3>誤差來源檢核（各效應單獨作用時的量級，已數值驗證）</h3>
+  <table>
+    <tr><th class="l">誤差源</th><th>對斜率 k</th><th>對截距</th><th>對反推 β</th></tr>
+    <tr><td class="l">停錶偏移 +30 ms</td><td>偏大</td><td>略負</td><td>塑膠 +14%、金屬 <b>+21%</b></td></tr>
+    <tr><td class="l">停錶偏移 −30 ms</td><td>偏小</td><td>略正</td><td>塑膠 −13%、金屬 −19%</td></tr>
+    <tr><td class="l">空氣阻力（僅桌球）</td><td>偏大</td><td>≈0</td><td>塑膠 <b>+3.5%</b>、金屬 +0.3%</td></tr>
+    <tr><td class="l">打滑（θ &gt; 臨界角）</td><td><b>偏小</b></td><td><b>明顯正</b></td><td>大幅偏小</td></tr>
+  </table>
+  <ul style="font-size:13.5px;color:#c3d0e6;margin:8px 0 0;padding-left:20px">
+    <li><b>停錶是最大的誤差源。</b>金屬球對它特別敏感（t 較短），30 ms 的系統性遲滯就能造成 21% 的 β 偏差。你這次的偏差是 <b>${TRUTH.reactMean>0?'+':''}${(TRUTH.reactMean*1000).toFixed(0)} ms</b>（正=遲滯，負=預判提早）。</li>
+    <li><b>如何診斷打滑：</b>看<b>截距</b>。理論上截距必須為 0；若迴歸出現明顯的<b>正截距</b>且高角度點落在線下方，就是打滑。本次設定的純滾動臨界角：塑膠球 <b>${(Math.atan(TRUTH.muP*Math.sin(alphaRad())*(1+TRUTH.betaP/s2)/TRUTH.betaP)*180/Math.PI).toFixed(1)}°</b>、金屬球 <b>${(Math.atan(TRUTH.muM*Math.sin(alphaRad())*(1+TRUTH.betaM/s2)/TRUTH.betaM)*180/Math.PI).toFixed(1)}°</b>——都在 40° 以上，所以只要守住試題範圍就不會打滑。</li>
+    <li><b>空氣阻力的真正機制：</b>不只是「變慢」。有阻力時加速度不再固定，而 v = 2d/t̄ 這條公式本身就假設等加速度，所以是<b>公式失效</b>造成偏差，不是量測不準。</li>
+    <li><b>桌球薄殼</b>壁厚有限（約 0.4 mm），理論 β = (2/5)(r₂⁵−r₁⁵)/[(r₂³−r₁³)r₂²] ≈ 0.653，略小於理想薄殼的 0.6667。</li>
+    <li><b>為什麼偏差會高達好幾個 σ？</b>迴歸給的 σ 只反映<b>隨機散佈</b>，對<b>系統誤差</b>完全無感。停錶偏移、空氣阻力都是系統性的，多測 10 次或 100 次都不會變小，但 σ 會隨 √n 縮小——於是誤差棒看起來越來越漂亮，真值卻越跑越遠。<b>統計誤差小 ≠ 結果準確</b>，這是本實驗最重要的一課。</li>
+    <li><b>改進建議：</b>① 練習預判終點以消除停錶遲滯，或改用光電閘；② 塑膠球的 3.5% 阻力偏差無法靠多測幾次消除，只能承認為系統誤差並在報告中討論；③ 若曾拉到 45° 以上，務必把那些點從迴歸中剔除。</li>
+  </ul></div>`;
+  ST.revealed=true;
+}
+
+/* ===================== 事件綁定 ===================== */
+const $=id=>document.getElementById(id);
+$('tilt').oninput=e=>{ST.tilt=+e.target.value; $('tilt2').value=ST.tilt; drawRig(); drawLane();};
+$('tilt2').oninput=e=>{ST.tilt=+e.target.value; $('tilt').value=ST.tilt; drawRig(); drawLane();};
+$('apex').oninput=e=>{ST.apex=+e.target.value; drawXsec(); drawGeo(); refreshAll();};
+['o_react','o_read','o_drag','o_slip'].forEach(id=>{
+  $(id).onchange=()=>{ST.opts={react:$('o_react').checked,read:$('o_read').checked,
+    drag:$('o_drag').checked,slip:$('o_slip').checked};};
+});
+$('mk8').onclick=()=>{ if(ST.angles.length&&!confirm('將清除現有角度與數據，確定？'))return;
+  ST.angles=[]; nextId=1; [5,10,15,20,25,30,35,40].forEach(t=>addAngle(t)); fillAngSel(); refreshAll();};
+$('addang').onclick=()=>{ if(ST.angles.some(a=>Math.abs(a.th-ST.tilt)<0.05)){alert('此角度已存在');return;}
+  addAngle(ST.tilt); fillAngSel(); refreshAll();};
+$('clearall').onclick=()=>{ if(!confirm('清除全部量測數據？'))return;
+  ST.angles=[]; ST.cal={p:[],m:[]}; nextId=1; fillAngSel(); refreshAll();};
+$('angsel').onchange=()=>{drawLane(); refreshAll();};
+$('ballsel').onchange=()=>{drawLane(); refreshAll();};
+$('h1').onclick=()=>{const a=curAngle(); if(!a)return; a.h.push(measureH(a.th)); refreshAll();};
+$('h10').onclick=()=>{const a=curAngle(); if(!a)return; for(let i=0;i<10;i++)a.h.push(measureH(a.th)); refreshAll();};
+$('t10').onclick=()=>{const a=curAngle(); if(!a)return; const bk=$('ballsel').value;
+  for(let i=0;i<10;i++)a[bk].t.push(measureTime(a.th,bk)); refreshAll();};
+$('release').onclick=release;
+$('stopw').onclick=stopw;
+$('autoall').onclick=()=>{ if(!ST.angles.length){alert('請先建立角度');return;}
+  ST.angles.forEach(a=>{ a.h=[]; a.p.t=[]; a.m.t=[];
+    for(let i=0;i<10;i++) a.h.push(measureH(a.th));
+    for(let i=0;i<10;i++){ a.p.t.push(measureTime(a.th,'p')); a.m.t.push(measureTime(a.th,'m')); }});
+  refreshAll(); };
+$('rawsel').onchange=renderRaw;
+$('csv').onclick=()=>{
+  let s='角度(度),量測項目,'+Array.from({length:10},(_,i)=>'第'+(i+1)+'次').join(',')+',平均,標準差\n';
+  ST.angles.forEach(a=>{
+    const rows=[['h(cm)',a.h],['t_塑膠(s)',a.p.t],['t_金屬(s)',a.m.t]];
+    rows.forEach(([nm,arr])=>{ s+=a.th.toFixed(1)+','+nm+',';
+      for(let i=0;i<10;i++)s+=(arr[i]!==undefined?arr[i]:'')+',';
+      s+=(arr.length?mean(arr).toFixed(4):'')+','+(arr.length>1?sd(arr).toFixed(4):'')+'\n'; });
+  });
+  const blob=new Blob(['\ufeff'+s],{type:'text/csv;charset=utf-8'});
+  const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u; a.download='V型軌道滾球_數據.csv'; a.click(); URL.revokeObjectURL(u);
+};
+$('showp').onchange=drawPlot; $('showm').onchange=drawPlot; $('fitzero').onchange=()=>{drawPlot();renderEnergy();};
+$('cal10p').onclick=()=>{for(let i=0;i<10;i++)ST.cal.p.push(measureR('p')); ST.cal.p=ST.cal.p.slice(-10); refreshAll();};
+$('cal10m').onclick=()=>{for(let i=0;i<10;i++)ST.cal.m.push(measureR('m')); ST.cal.m=ST.cal.m.slice(-10); refreshAll();};
+$('calclr').onclick=()=>{ST.cal={p:[],m:[]}; refreshAll();};
+$('reveal').onclick=doReveal;
+
+/* ===================== 更新 ===================== */
+function refreshAll(){
+  drawRig(); drawXsec(); drawGeo(); drawLane();
+  fillAngSel(); renderRaw(); updateStatLines();
+  renderV(); drawPlot(); renderCal(); renderN(); renderEnergy();
+  if(ST.revealed) doReveal();
+}
+addAngle(20); fillAngSel(); refreshAll();
+</script>
+</body>
+</html>

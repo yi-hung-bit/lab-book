@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>106學年度中區第五區（彰雲嘉）複賽 — 物理擺轉動慣量 虛擬實驗室</title>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --ink:#1d2731; --muted:#63727f;
+  --line:#dde4ea; --accent:#0f6d8c; --accent2:#c2601a; --ok:#1d7a4c; --warn:#b3341f;
+  --shadow:0 1px 3px rgba(20,40,60,.10),0 6px 18px rgba(20,40,60,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  line-height:1.75;font-size:15px}
+header{background:linear-gradient(135deg,#0f4c60,#12788f);color:#fff;padding:18px 20px 14px}
+header h1{margin:0;font-size:19px;letter-spacing:.5px}
+header p{margin:4px 0 0;font-size:13px;opacity:.85}
+nav{display:flex;gap:2px;background:#0c3d4d;padding:0 12px;overflow-x:auto}
+nav button{background:transparent;border:0;color:#bcd7e0;padding:11px 15px;font-size:14px;
+  cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;font-family:inherit}
+nav button:hover:not(:disabled){color:#fff}
+nav button.active{color:#fff;border-bottom-color:#f0a35e;font-weight:700}
+nav button:disabled{color:#5c7f8c;cursor:not-allowed}
+main{max-width:1080px;margin:0 auto;padding:20px 16px 60px}
+section{display:none}
+section.show{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;
+  margin-bottom:16px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;font-size:17px;color:var(--accent);
+  border-left:4px solid var(--accent);padding-left:9px}
+.card h3{margin:16px 0 6px;font-size:15px;color:#0d4f66}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.eq{font-family:"Cambria Math","Times New Roman",Georgia,serif;font-size:17px;
+  text-align:center;margin:12px 0;color:#123}
+.frac{display:inline-block;vertical-align:-.55em;text-align:center;margin:0 3px}
+.frac .num{border-bottom:1.3px solid currentColor;display:block;padding:0 7px}
+.frac .den{display:block;padding:2px 7px 0}
+.sqrt{border-top:1.3px solid currentColor;padding:1px 4px 0;margin-left:-2px}
+.note{background:#eef6f9;border-left:4px solid var(--accent);padding:10px 14px;
+  border-radius:0 6px 6px 0;margin:12px 0;font-size:14px}
+.warnbox{background:#fdf1ec;border-left:4px solid var(--accent2);padding:10px 14px;
+  border-radius:0 6px 6px 0;margin:12px 0;font-size:14px}
+.qtag{display:inline-block;background:var(--accent2);color:#fff;font-size:12px;
+  padding:1px 9px;border-radius:10px;margin-left:8px;vertical-align:2px}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+th{background:#eef3f6;font-weight:600;color:#2a4150}
+td.num{font-family:"SF Mono",Consolas,monospace}
+tr.ghost td{color:#aab6bf}
+tr.hi td{background:#fff8ef}
+button.act{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:9px 16px;
+  font-size:14px;cursor:pointer;font-family:inherit;margin:3px 4px 3px 0}
+button.act:hover{background:#0c5972}
+button.act:disabled{background:#b6c3ca;cursor:not-allowed}
+button.act.alt{background:var(--accent2)}
+button.act.alt:hover{background:#a34f11}
+button.act.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+button.mini{background:#fff;color:var(--warn);border:1px solid #e4c4bb;border-radius:5px;
+  padding:2px 8px;font-size:12px;cursor:pointer;font-family:inherit}
+label.field{display:block;margin:10px 0 3px;font-size:13px;color:var(--muted)}
+input[type=range]{width:100%}
+select,input[type=number]{padding:6px 8px;border:1px solid var(--line);border-radius:6px;
+  font-family:inherit;font-size:14px}
+.readout{font-family:"SF Mono",Consolas,monospace;font-size:26px;text-align:center;
+  background:#10242e;color:#7fe3b0;border-radius:8px;padding:10px;letter-spacing:1px}
+.readout small{display:block;font-size:12px;color:#8fa9b5;letter-spacing:0}
+.pill{display:inline-block;background:#eef3f6;border:1px solid var(--line);border-radius:14px;
+  padding:2px 11px;font-size:13px;margin:3px 5px 3px 0}
+.pill b{color:var(--accent)}
+.pill.warn b{color:var(--warn)}
+.status{font-size:13px;margin-top:8px;min-height:20px}
+.status.ok{color:var(--ok)} .status.bad{color:var(--warn)}
+.lock{text-align:center;color:var(--muted);padding:40px 20px}
+svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.cap{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
+ol.steps{padding-left:20px} ol.steps li{margin:6px 0}
+ul.tight{padding-left:20px;margin:6px 0} ul.tight li{margin:4px 0}
+.kv{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.stepbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.stepbar div{flex:1;min-width:120px;background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;font-size:13px}
+.stepbar div.done{border-color:var(--ok);background:#f0f9f4}
+.stepbar div b{display:block;font-size:12px;color:var(--muted)}
+.axbox{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:14px}
+.axbox.cur{border-color:var(--accent2);background:#fffaf5}
+.axbox h4{margin:0 0 4px;font-size:14px;color:#0d4f66}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>利用簡諧運動求出物體之轉動慣量 — 虛擬實驗室</h1>
+  <p>106 學年度普通型高級中等學校數理及資訊學科能力競賽　臺灣省中區第五區（彰雲嘉）複賽　物理科實驗試題</p>
+</header>
+
+<nav id="nav">
+  <button class="active" data-t="1">① 原理與規劃</button>
+  <button data-t="2">② 長度校準實驗室</button>
+  <button data-t="3">③ 待測物尺寸量測</button>
+  <button data-t="4" disabled>④ 銅環物理擺</button>
+  <button data-t="5" disabled>⑤ 金屬條物理擺</button>
+  <button data-t="6" disabled>⑥ 數據分析</button>
+</nav>
+
+<main>
+
+<!-- ================= TAB 1 ================= -->
+<section id="tab1" class="show">
+  <div class="card">
+    <h2>實驗核心：為什麼沒有秤也能做</h2>
+    <p>物理擺（複擺）以 P 點為軸做小角度擺動時，週期為</p>
+    <div class="eq">T = 2π<span class="sqrt">
+      <span class="frac"><span class="num">I<sub>P</sub></span><span class="den">M g d</span></span></span>
+      ，　I<sub>P</sub> = I<sub>m</sub> + M d<sup>2</sup>（平行軸定理）</div>
+    <p>題目給定兩個待測形式：圓環 I<sub>m</sub> = βM(R<sub>1</sub><sup>2</sup>+R<sub>2</sub><sup>2</sup>)、長條 I<sub>m</sub> = γML<sup>2</sup>。代入後把 M 約掉：</p>
+    <div class="eq" style="background:#eef6f9;padding:12px;border-radius:8px">
+      <span class="frac"><span class="num">g T<sup>2</sup> d</span><span class="den">4π<sup>2</sup></span></span>
+      = β(R<sub>1</sub><sup>2</sup>+R<sub>2</sub><sup>2</sup>) + d<sup>2</sup>　　│
+      <span class="frac"><span class="num">g T<sup>2</sup> d</span><span class="den">4π<sup>2</sup></span></span>
+      = γL<sup>2</sup> + d<sup>2</sup>
+    </div>
+    <div class="note"><b>質量 M 完全消失。</b>這正是本題敢在「沒有秤」的條件下考轉動慣量的原因——你只需要量到「長度」與「時間」。而器材表中唯一能量時間的是碼錶，唯一能量長度的⋯⋯被監考老師收走了（注意事項 4）。所以本實驗真正的難點是：<b>先用時間造出一把尺</b>。</div>
+
+    <h3>兩種取值方式</h3>
+    <ol class="steps">
+      <li><b>逐軸心計算</b>（題目要求）：每個軸心量出 d 與 T，直接代入上式解出該軸心的 β 或 γ，最後對 ≥3 個軸心求平均值與標準差。</li>
+      <li><b>線性迴歸</b>（推薦併用）：以 d<sup>2</sup> 為橫軸、gT<sup>2</sup>d/4π<sup>2</sup> 為縱軸作圖，理論斜率恆為 1、截距即 β(R<sub>1</sub><sup>2</sup>+R<sub>2</sub><sup>2</sup>) 或 γL<sup>2</sup>。</li>
+    </ol>
+    <div class="warnbox"><b>為什麼要兩種都做？</b>設你的紙標尺有 δ 的比例誤差（例如長了 1%）。令 Y = gT<sup>2</sup>d/4π<sup>2</sup>，則逐軸心法解出的 β 相對誤差約為 <span style="font-family:Consolas,monospace">−[Y/(Y−d<sup>2</sup>)]·δ</span>：<b>d 越大放大越兇</b>，因為 β(R<sub>1</sub><sup>2</sup>+R<sub>2</sub><sup>2</sup>) 只有十幾 cm<sup>2</sup>，d<sup>2</sup> 一大就把它淹沒，等於用兩個大數相減去求一個小數。而迴歸截距求出的 β 只放大 <b>約 1 倍</b>，並且<b>斜率偏離 1 的期望值就是 −δ</b>（斜率本身有統計誤差，軸心數少、βS 又小時這個推估會很粗，要連同誤差棒一起看）。換句話說，迴歸不只比較準，還會順便告訴你校準做得好不好。分頁 ④⑤ 會即時顯示每個軸心的放大倍率，請據此挑選軸心。</div>
+  </div>
+
+  <div class="card">
+    <h2>器材與系統示意</h2>
+    <div class="grid2">
+      <div>
+        <svg viewBox="0 0 320 250" aria-label="單擺示意">
+          <rect x="30" y="215" width="120" height="10" fill="#8b949b"/>
+          <rect x="82" y="35" width="8" height="185" fill="#8b949b"/>
+          <rect x="82" y="35" width="150" height="7" fill="#8b949b"/>
+          <line x1="225" y1="42" x2="248" y2="160" stroke="#333" stroke-width="1.2"/>
+          <line x1="225" y1="42" x2="225" y2="175" stroke="#aab" stroke-width="1" stroke-dasharray="4 3"/>
+          <circle cx="250" cy="171" r="11" fill="#b06a2c"/>
+          <path d="M225 110 A 70 70 0 0 0 238 112" fill="none" stroke="#c2601a" stroke-width="1.2"/>
+          <text x="243" y="108" font-size="12" fill="#c2601a">θ</text>
+          <text x="196" y="105" font-size="12" fill="#123">ℓ</text>
+        </svg>
+        <div class="cap">圖一：單擺 — 本實驗用來「把時間換成長度」的標準器</div>
+      </div>
+      <div>
+        <svg viewBox="0 0 320 250" aria-label="物理擺示意">
+          <path d="M70 60 C 40 110, 60 190, 140 205 C 230 220, 275 150, 245 90 C 220 40, 110 25, 70 60 Z"
+                fill="#f3f6f8" stroke="#33454f" stroke-width="1.4"/>
+          <circle cx="120" cy="70" r="3.5" fill="#123"/>
+          <text x="104" y="64" font-size="13" fill="#123">P</text>
+          <circle cx="175" cy="135" r="3.5" fill="#c2601a"/>
+          <text x="184" y="133" font-size="13" fill="#c2601a">C</text>
+          <line x1="120" y1="70" x2="175" y2="135" stroke="#33454f" stroke-width="1.1" stroke-dasharray="5 4"/>
+          <text x="134" y="110" font-size="12" fill="#33454f">d</text>
+          <line x1="120" y1="70" x2="120" y2="205" stroke="#aab" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="175" y1="135" x2="175" y2="200" stroke="#c2601a" stroke-width="1.4"/>
+          <polygon points="175,208 171,198 179,198" fill="#c2601a"/>
+          <text x="181" y="196" font-size="12" fill="#c2601a">Mg</text>
+          <path d="M120 125 A 55 55 0 0 0 141 118" fill="none" stroke="#0f6d8c" stroke-width="1.2"/>
+          <text x="126" y="140" font-size="12" fill="#0f6d8c">θ</text>
+        </svg>
+        <div class="cap">圖二：物理擺 — P 為軸心、C 為質心、d = PC</div>
+      </div>
+    </div>
+    <div class="warnbox"><b>試題注意事項摘要：</b>每一待測物至少需以 3 個以上不同軸心量測，每一軸心測 5 次，且必須列出原始數據；重力加速度取 g = 976.516 cm/s<sup>2</sup>；不得使用直尺或任何非實驗器材取得長度；請勿刮損或使待測物變形。</div>
+  </div>
+
+  <div class="card">
+    <h2>實驗流程與待答問題對照</h2>
+    <table>
+      <tr><th style="width:90px">分頁</th><th>工作內容</th><th style="width:130px">對應待答問題</th></tr>
+      <tr><td>②</td><td>單擺計時 → 求出標準長度 Δℓ；用 A3 紙條對折製作刻度尺</td><td>問題 1（前置）</td></tr>
+      <tr><td>③</td><td>以繞線 n 圈 / 連續比對 n 次的「倍數放大法」量出 R<sub>1</sub>、R<sub>2</sub>、L、寬厚、<b>鐵桿半徑 r</b></td><td><b>問題 1</b>（20 分）</td></tr>
+      <tr><td>④</td><td>銅環架設為物理擺（直接掛桿／V 形吊索），3 個以上軸心 × 5 次計時</td><td><b>問題 2、3</b>（40 分）</td></tr>
+      <tr><td>⑤</td><td>金屬條架設為物理擺（V 形吊索／Ω 管夾），3 個以上軸心 × 5 次計時</td><td><b>問題 4、5</b>（40 分）</td></tr>
+      <tr><td>⑥</td><td>求 β、γ 之平均值與標準差、迴歸驗證、與真值比較</td><td>問題 3、5</td></tr>
+    </table>
+    <div class="note">每次重新整理頁面，銅環、金屬條與鐵桿的真實尺寸會重新亂數產生，且<b>畫面上的圖形比例與真實尺寸無關</b>（比例尺亦為隱藏亂數），無法用螢幕量測取巧。真值會在分頁 ⑥ 揭曉。</div>
+  </div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section id="tab2">
+  <div class="stepbar" id="sb2">
+    <div id="sbA"><b>步驟 1</b>設定 A 線長並計時 5 次</div>
+    <div id="sbB"><b>步驟 2</b>設定 B 線長並計時 5 次</div>
+    <div id="sbC"><b>步驟 3</b>求標準長度 Δℓ</div>
+    <div id="sbD"><b>步驟 4</b>製作 A3 紙標尺</div>
+  </div>
+
+  <div class="card">
+    <h2>原理：用時間造一把尺</h2>
+    <p>單擺週期 T = 2π√(ℓ/g)，其中 ℓ 是<b>懸點到擺錘質心</b>的距離。但鐵球的半徑與掛鉤長度是未知的偏移量 δ，若直接用單一次量測，得到的是 ℓ = ℓ<sub>線</sub> + δ，而你沒辦法在線上標出「球心」的位置。</p>
+    <p>解法是<b>取兩個線長作差</b>：在線上做 A、B 兩個記號，分別量週期，則</p>
+    <div class="eq">Δℓ = ℓ<sub>B</sub> − ℓ<sub>A</sub> =
+      <span class="frac"><span class="num">g (T<sub>B</sub><sup>2</sup> − T<sub>A</sub><sup>2</sup>)</span><span class="den">4π<sup>2</sup></span></span>
+    </div>
+    <p>偏移量 δ 在相減時完全消掉，而 Δℓ 正是<b>線上 A、B 兩記號之間那一段</b>的長度 — 一段長度已知的實體線段，這就是本實驗的標準器。</p>
+    <div class="note">誤差策略：Δℓ 取得越長，相對誤差越小；但之後要把它標到 A3 紙條上，太長會放不下。計時一律以多個週期（建議 20 次以上）平均，把碼錶反應時間攤薄。擺角務必小於約 10°，否則 T ≈ T<sub>0</sub>(1 + θ<sub>0</sub><sup>2</sup>/16) 的大角度修正會造成系統性高估。</div>
+    <div class="note"><b>放手的同時就按下碼錶。</b>按「釋放擺錘」會自動起算，模擬的就是這個動作。理由是：手動「起、停」兩次按鍵各帶一次反應誤差，合成後是單次的 √2 倍；放手與起算同步則只剩停錶那一次。本模擬如實反映這個差異——放手起算的計時雜訊為 0.09 s，擺動中途手動起算則為 0.13 s。若你想避開釋放瞬間的擾動而選擇中途起算，就要多計幾個週期把差距補回來。</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>單擺與碼錶</h2>
+      <svg id="pendSvg" viewBox="0 0 360 330"></svg>
+      <label class="field">放線長度（線軸刻度，無長度單位）：<span id="slVal">40</span></label>
+      <input type="range" id="lenSlider" min="0" max="100" value="40">
+      <label class="field">釋放角度 <span id="ampVal">8</span>°（可調 3°–25°）</label>
+      <input type="range" id="ampSlider" min="3" max="25" value="8">
+      <label class="field">時間流速</label>
+      <select id="speed"><option value="1">×1（真實速度）</option><option value="4">×4</option><option value="10">×10</option></select>
+      <div style="margin-top:10px">
+        <button class="act" id="btnFixA">固定為設定 A（做記號）</button>
+        <button class="act" id="btnFixB">固定為設定 B（做記號）</button>
+      </div>
+      <div class="kv" id="setInfo"></div>
+      <div style="margin-top:10px">
+        <button class="act alt" id="btnRelease">釋放擺錘（碼錶同步起算）</button>
+        <button class="act ghost" id="btnMount">切換掛載：<span id="mountLbl">—</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>計時</h2>
+      <div class="readout" id="swRead">0.00 s<small>已完成週期數 0</small></div>
+      <div style="margin-top:10px">
+        <button class="act" id="btnSw">碼錶：開始</button>
+        <button class="act ghost" id="btnDrop">捨棄本次</button>
+      </div>
+      <div class="status" id="swMsg">先固定設定 A → 按「釋放擺錘」（碼錶會同步起算）→ 待週期數到 20 以上按「停止」。</div>
+
+      <h3>設定 A 數據（需 ≥5 筆）</h3>
+      <table id="tblA"><thead><tr><th>#</th><th>週期數 N</th><th>總時間 t (s)</th><th>T = t/N (s)</th></tr></thead><tbody></tbody></table>
+      <h3>設定 B 數據（需 ≥5 筆）</h3>
+      <table id="tblB"><thead><tr><th>#</th><th>週期數 N</th><th>總時間 t (s)</th><th>T = t/N (s)</th></tr></thead><tbody></tbody></table>
+      <button class="act ghost" id="btnClearRows">清空全部計時數據</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>路徑一：由 Δℓ 得到標準長度</h2>
+    <div id="calcOut" class="kv"></div>
+    <button class="act" id="btnCalc">計算 Δℓ</button>
+    <div class="status" id="calcMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>路徑二：製作 A3 紙標尺（對折法）</h2>
+    <p>把 Δℓ 這段線平貼到 A3 紙裁下的長紙條上，兩端做記號，再將<b>這一段反覆對折</b>（實務上是折尼龍線 — 線可以一直折下去，紙條折到第六、七次就厚得對不準了 — 折好再把折點轉寫到紙條上）。折 k 次後最小刻度為 Δℓ/2<sup>k</sup>，目視可再內插到半格。</p>
+    <div class="note"><b>這裡有一個真正的最佳點。</b>刻度以 2<sup>−k</sup> 幾何遞減，但每折一次的對不準（約 0.1 mm）會<b>線性累積</b>。兩者相加後，總誤差通常在 k ≈ 8 附近最小；再折下去只是把折痕誤差疊上去，刻度再細也沒有意義。下面兩個數字請一起看。</div>
+    <label class="field">對折次數 k = <span id="foldVal">8</span></label>
+    <input type="range" id="foldSlider" min="1" max="9" value="8">
+    <div id="rulerBox"></div>
+    <div class="kv" id="rulerOut"></div>
+    <button class="act" id="btnMakeRuler">製作標尺並鎖定校準</button>
+    <div class="status" id="rulerMsg"></div>
+  </div>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section id="tab3">
+  <div id="tab3lock" class="card lock">請先完成分頁 ②「長度校準實驗室」並鎖定校準，才能開始量測。</div>
+  <div id="tab3body" style="display:none">
+    <div class="card">
+      <h2>量測方法：倍數放大法<span class="qtag">待答問題 1</span></h2>
+      <p>你的紙標尺最小刻度約 <b id="resShow">—</b>，直接拿去量金屬條的寬度（約 1 cm 量級）相對誤差會大到不可接受。實際考場的標準做法是把待測量「放大 n 倍」再除回去：</p>
+      <ul class="tight">
+        <li><b>圓周長</b>：尼龍線沿銅環外緣（或內緣、或鐵桿）<b>並排纏繞 n 圈</b>，剪斷後拉直量總長 S，則 R = S/(2πn)。</li>
+        <li><b>長度、寬度、厚度</b>：把待測邊沿紙條<b>連續比對 n 次</b>（step-and-mark），量總長 S，則該邊長 = S/n。</li>
+      </ul>
+      <div class="warnbox">n 不是越大越好：纏繞時的鬆緊、每次落筆的對位誤差會隨 n 累積，而讀數誤差則被 n 稀釋。此外總長不得超過標尺長度 Δℓ。自己試著找出最佳的 n。</div>
+      <div class="warnbox"><b>繞線法有一個內建的系統誤差。</b>線繞在環外緣時，線本身的中心線走的是半徑 R<sub>2</sub> + （線徑/2）的圓；繞在內緣時則是 R<sub>1</sub> − （線徑/2）。所以直接用 S/(2πn) 會把 R<sub>2</sub> 高估、把 R<sub>1</sub> 低估，各約半個線徑。這個偏差不會因為多量幾次而消失，而且它會讓 β 系統性偏低。想拿滿分的話，請設法量出線徑並修正（提示：把線並排纏繞 n 圈後量總寬度）。</div>
+      <div class="note"><b>為什麼要量鐵桿半徑 r？</b>銅環直接掛在鐵桿上時，接觸點不是一個理想的刀口支點，環心到轉軸的距離是 R<sub>1</sub> − r，而且環會在桿面上<b>滾動</b>而非純轉動（見分頁 ④）。沒有 r 就無法正確分析這個軸心。</div>
+      <div class="grid2">
+        <div><svg id="ringSvg" viewBox="0 0 320 210"></svg><div class="cap">銅環：外緣／內緣纏繞尼龍線</div></div>
+        <div><svg id="barSvg" viewBox="0 0 320 210"></svg><div class="cap">金屬條：沿紙標尺連續比對</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>量測操作</h2>
+      <label class="field">量測項目</label>
+      <select id="itemSel">
+        <option value="outC">銅環外周長（纏繞 n 圈）→ R₂</option>
+        <option value="inC">銅環內周長（纏繞 n 圈）→ R₁</option>
+        <option value="barL">金屬條長度 L（比對 n 次）</option>
+        <option value="barW">金屬條寬度 w（比對 n 次）</option>
+        <option value="barT">金屬條厚度 t（比對 n 次）</option>
+        <option value="rodC">鐵桿外周長（纏繞 n 圈）→ r</option>
+      </select>
+      <label class="field">重複倍數 n = <span id="nVal">3</span></label>
+      <input type="range" id="nSlider" min="1" max="20" value="3">
+      <button class="act" id="btnMeasure">量測一次並記錄</button>
+      <button class="act ghost" id="btnClearItem">清空本項目數據</button>
+      <div class="status" id="measMsg"></div>
+      <table id="tblItem"><thead><tr><th>#</th><th>n</th><th>總讀數 S (cm)</th><th>換算值 (cm)</th></tr></thead><tbody></tbody></table>
+      <div class="kv" id="itemStat"></div>
+    </div>
+
+    <div class="card">
+      <h2>尺寸彙整</h2>
+      <table id="tblSum"><thead><tr><th>物理量</th><th>筆數</th><th>平均值 (cm)</th><th>標準差 (cm)</th><th>平均值標準差 (cm)</th></tr></thead><tbody></tbody></table>
+      <div class="status" id="sumMsg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 4 ================= -->
+<section id="tab4">
+  <div id="tab4lock" class="card lock">請先在分頁 ③ 完成 R₁、R₂、鐵桿半徑 r 的量測（各 ≥5 筆）。</div>
+  <div id="tab4body" style="display:none">
+    <div class="card">
+      <h2>兩種架設方式，兩套公式<span class="qtag">待答問題 2</span></h2>
+      <div class="grid2">
+        <div>
+          <h3>甲、直接掛在鐵桿上（會滾動）</h3>
+          <svg viewBox="0 0 300 220" aria-label="直接掛桿">
+            <rect x="20" y="180" width="110" height="9" fill="#8b949b"/>
+            <rect x="68" y="20" width="8" height="162" fill="#8b949b"/>
+            <rect x="68" y="20" width="130" height="7" fill="#8b949b"/>
+            <circle cx="196" cy="52" r="9" fill="#9aa3ab" stroke="#6d757c"/>
+            <circle cx="196" cy="112" r="52" fill="#d99b52" stroke="#8a5a20" stroke-width="1.2"/>
+            <circle cx="196" cy="112" r="43" fill="#f4f6f8" stroke="#8a5a20" stroke-width="1.2"/>
+            <line x1="196" y1="112" x2="196" y2="164" stroke="#8a5a20" stroke-width="1.6"/>
+            <circle cx="196" cy="61" r="2.6" fill="#b3341f"/>
+            <text x="150" y="56" font-size="11" fill="#b3341f">接觸點</text>
+            <text x="204" y="140" font-size="11" fill="#33454f">記號</text>
+          </svg>
+          <p style="font-size:14px">環心到桿心距離為 R<sub>1</sub> − r。桿固定不動、接觸處摩擦足夠，因此環是<b>滾動</b>：環自轉角 ψ 與繞桿公轉角 φ 滿足 ψ = φ(R<sub>1</sub>−r)/R<sub>1</sub>。以能量法可得</p>
+          <div class="eq" style="font-size:15px">T = 2π<span class="sqrt"><span class="frac"><span class="num">(R<sub>1</sub>−r)[1 + β(R<sub>1</sub><sup>2</sup>+R<sub>2</sub><sup>2</sup>)/R<sub>1</sub><sup>2</sup>]</span><span class="den">g</span></span></span></div>
+          <p style="font-size:14px">反解：β = <span class="frac"><span class="num">R<sub>1</sub><sup>2</sup></span><span class="den">R<sub>1</sub><sup>2</sup>+R<sub>2</sub><sup>2</sup></span></span>
+            [ <span class="frac"><span class="num">gT<sup>2</sup></span><span class="den">4π<sup>2</sup>(R<sub>1</sub>−r)</span></span> − 1 ]</p>
+        </div>
+        <div>
+          <h3>乙、V 形尼龍線吊索（純轉動）</h3>
+          <svg viewBox="0 0 300 220" aria-label="V形吊索">
+            <rect x="20" y="180" width="110" height="9" fill="#8b949b"/>
+            <rect x="68" y="20" width="8" height="162" fill="#8b949b"/>
+            <rect x="68" y="20" width="130" height="7" fill="#8b949b"/>
+            <circle cx="196" cy="52" r="9" fill="#9aa3ab" stroke="#6d757c"/>
+            <circle cx="196" cy="145" r="38" fill="#d99b52" stroke="#8a5a20" stroke-width="1.2"/>
+            <circle cx="196" cy="145" r="30" fill="#f4f6f8" stroke="#8a5a20" stroke-width="1.2"/>
+            <line x1="196" y1="61" x2="167" y2="120" stroke="#2a6f8a" stroke-width="1.3"/>
+            <line x1="196" y1="61" x2="225" y2="120" stroke="#2a6f8a" stroke-width="1.3"/>
+            <line x1="196" y1="61" x2="196" y2="145" stroke="#c2601a" stroke-width="1" stroke-dasharray="4 3"/>
+            <text x="200" y="100" font-size="11" fill="#c2601a">d</text>
+            <text x="120" y="80" font-size="11" fill="#2a6f8a">兩條線</text>
+            <text x="120" y="95" font-size="11" fill="#2a6f8a">同一頂點</text>
+            <text x="150" y="196" font-size="11" fill="#63727f">s = 桿下緣到環頂的間距</text>
+          </svg>
+          <p style="font-size:14px">兩條線從桿上<b>同一點</b>連到環上<b>兩個不同點</b>，三角形三邊全被固定 → 整組繞頂點做剛體轉動，是乾淨的物理擺。線跨過圓桿時，一階近似的等效支點就落在<b>桿的下緣切點</b>，所以</p>
+          <div class="eq" style="font-size:15px">d = s + R<sub>2</sub>　，　T = 2π<span class="sqrt"><span class="frac"><span class="num">β(R<sub>1</sub><sup>2</sup>+R<sub>2</sub><sup>2</sup>) + d<sup>2</sup></span><span class="den">g d</span></span></span></div>
+          <p style="font-size:14px">只要量出間距 s，再加上分頁 ③ 的 R<sub>2</sub> 就得到 d，<b>不需要 r</b>。</p>
+        </div>
+      </div>
+      <div class="warnbox"><b>單條線吊掛是錯的。</b>只用一條線打結掛上去，環仍能繞結點自轉，那是雙擺（兩個自由度），週期不服從上面任何一式。必須用兩條線或直接掛桿。</div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>架設與擺動</h2>
+        <svg id="ringRigSvg" viewBox="0 0 360 300"></svg>
+        <label class="field">架設方式</label>
+        <select id="ringMode">
+          <option value="sling">乙、V 形尼龍線吊索</option>
+          <option value="direct">甲、直接掛在鐵桿上</option>
+        </select>
+        <div id="ringSlingCtl">
+          <label class="field">吊索長度設定（無刻度，須自行量測間距 s）</label>
+          <input type="range" id="ringS" min="0" max="100" value="30">
+        </div>
+        <label class="field">釋放角度 <span id="ringAmpVal">8</span>°</label>
+        <input type="range" id="ringAmp" min="3" max="20" value="8">
+        <label class="field">時間流速</label>
+        <select id="ringSpeed"><option value="1">×1</option><option value="4" selected>×4</option><option value="10">×10</option><option value="20">×20</option></select>
+        <div style="margin-top:10px">
+          <button class="act" id="ringNewAx">架設新軸心</button>
+          <button class="act alt" id="ringRel">釋放（碼錶同步起算）</button>
+        </div>
+        <div class="status" id="ringMsg">先按「架設新軸心」。</div>
+        <div class="warnbox" style="margin-top:12px">按「釋放」時碼錶會<b>同步起算</b>（放手即計時，少掉一次按鍵反應誤差）。銅環尺寸小、週期只有 0.4–0.7 秒，碼錶反應時間相對變得很大，<b>每次請計滿 30–50 個週期</b>再按停止；只計 10 個週期的數據幾乎不可用。右側會顯示每個軸心的<b>誤差放大倍率</b>，倍率越小的軸心越值得做。</div>
+      </div>
+
+      <div class="card">
+        <h2>量測與計時</h2>
+        <div class="readout" id="ringRead">0.00 s<small>已完成週期數 0</small></div>
+        <div style="margin-top:10px">
+          <button class="act ghost" id="ringMeasD">量測間距 s</button>
+          <button class="act" id="ringSw">碼錶：開始</button>
+          <button class="act ghost" id="ringDrop">捨棄本次</button>
+        </div>
+        <div class="kv" id="ringCurInfo"></div>
+        <table id="ringTbl"><thead><tr><th>#</th><th>N</th><th>t (s)</th><th>T (s)</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>已架設之軸心（需 ≥3 個，每個 ≥5 次計時）<span class="qtag">待答問題 3</span></h2>
+      <div id="ringAxList"></div>
+      <div class="status" id="ringAxMsg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 5 ================= -->
+<section id="tab5">
+  <div id="tab5lock" class="card lock">請先在分頁 ③ 完成金屬條長度 L 的量測（≥5 筆）。</div>
+  <div id="tab5body" style="display:none">
+    <div class="card">
+      <h2>兩種架設方式，涵蓋 d 的兩側<span class="qtag">待答問題 4</span></h2>
+      <div class="grid2">
+        <div>
+          <h3>甲、V 形尼龍線吊索（d &gt; L/2）</h3>
+          <svg viewBox="0 0 300 230" aria-label="金屬條吊索">
+            <rect x="20" y="196" width="110" height="9" fill="#8b949b"/>
+            <rect x="68" y="16" width="8" height="180" fill="#8b949b"/>
+            <rect x="68" y="16" width="130" height="7" fill="#8b949b"/>
+            <circle cx="196" cy="46" r="9" fill="#9aa3ab" stroke="#6d757c"/>
+            <rect x="188" y="100" width="16" height="118" rx="2" fill="#b9c0c6" stroke="#6d757c"/>
+            <line x1="196" y1="55" x2="188" y2="106" stroke="#2a6f8a" stroke-width="1.3"/>
+            <line x1="196" y1="55" x2="204" y2="122" stroke="#2a6f8a" stroke-width="1.3"/>
+            <line x1="240" y1="55" x2="240" y2="159" stroke="#c2601a" stroke-width="1"/>
+            <line x1="204" y1="55" x2="246" y2="55" stroke="#c2601a" stroke-width=".8" stroke-dasharray="3 2"/>
+            <line x1="204" y1="159" x2="246" y2="159" stroke="#c2601a" stroke-width=".8" stroke-dasharray="3 2"/>
+            <text x="244" y="110" font-size="11" fill="#c2601a">d</text>
+            <text x="120" y="104" font-size="11" fill="#63727f">s</text>
+            <circle cx="196" cy="159" r="2.6" fill="#c2601a"/>
+            <text x="150" y="176" font-size="11" fill="#c2601a">質心 L/2</text>
+          </svg>
+          <p style="font-size:14px">膠帶把兩條線黏在條上兩點、同頂點吊起 → 剛體轉動。量出頂點到條<b>上端</b>的間距 s，則</p>
+          <div class="eq" style="font-size:15px">d = s + L/2</div>
+        </div>
+        <div>
+          <h3>乙、Ω 型金屬管夾（d &lt; L/2）</h3>
+          <svg viewBox="0 0 300 230" aria-label="管夾懸掛">
+            <rect x="20" y="196" width="110" height="9" fill="#8b949b"/>
+            <rect x="68" y="16" width="8" height="180" fill="#8b949b"/>
+            <rect x="68" y="16" width="130" height="7" fill="#8b949b"/>
+            <circle cx="196" cy="46" r="9" fill="#9aa3ab" stroke="#6d757c"/>
+            <path d="M188 46 a8 8 0 1 1 16 0 l0 10 l-16 0 z" fill="none" stroke="#7d868d" stroke-width="2"/>
+            <rect x="188" y="26" width="16" height="170" rx="2" fill="#b9c0c6" stroke="#6d757c"/>
+            <rect x="185" y="41" width="22" height="10" rx="4" fill="none" stroke="#7d868d" stroke-width="2"/>
+            <line x1="240" y1="46" x2="240" y2="111" stroke="#c2601a" stroke-width="1"/>
+            <line x1="206" y1="46" x2="246" y2="46" stroke="#c2601a" stroke-width=".8" stroke-dasharray="3 2"/>
+            <line x1="206" y1="111" x2="246" y2="111" stroke="#c2601a" stroke-width=".8" stroke-dasharray="3 2"/>
+            <text x="244" y="82" font-size="11" fill="#c2601a">d</text>
+            <text x="140" y="34" font-size="11" fill="#63727f">a（上端到夾）</text>
+            <circle cx="196" cy="111" r="2.6" fill="#c2601a"/>
+          </svg>
+          <p style="font-size:14px">管夾夾在距上端 a 處、夾環掛在鐵桿上，支點落在條身上，因此</p>
+          <div class="eq" style="font-size:15px">d = L/2 − a</div>
+          <p style="font-size:14px">管夾本身有質量，但它幾乎就位在支點上，對週期的影響僅約 0.2%（質量在支點對 I<sub>P</sub> 無貢獻，只微幅拉近質心）。</p>
+        </div>
+      </div>
+      <div class="note">兩式都服從同一條直線 <b>gT<sup>2</sup>d/4π<sup>2</sup> = γL<sup>2</sup> + d<sup>2</sup></b>，所以兩種軸心可以混在同一張迴歸圖裡。這是金屬條比銅環好處理的地方（銅環直接掛桿是滾動，不能放進同一張圖）。</div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>架設與擺動</h2>
+        <svg id="barRigSvg" viewBox="0 0 360 300"></svg>
+        <label class="field">架設方式</label>
+        <select id="barMode">
+          <option value="sling">甲、V 形尼龍線吊索</option>
+          <option value="clamp">乙、Ω 型金屬管夾</option>
+        </select>
+        <label class="field" id="barSLbl">吊索長度設定（無刻度，須自行量測 s）</label>
+        <input type="range" id="barS" min="0" max="100" value="25">
+        <label class="field">釋放角度 <span id="barAmpVal">8</span>°</label>
+        <input type="range" id="barAmp" min="3" max="20" value="8">
+        <label class="field">時間流速</label>
+        <select id="barSpeed"><option value="1">×1</option><option value="4" selected>×4</option><option value="10">×10</option><option value="20">×20</option></select>
+        <div style="margin-top:10px">
+          <button class="act" id="barNewAx">架設新軸心</button>
+          <button class="act alt" id="barRel">釋放（碼錶同步起算）</button>
+        </div>
+        <div class="status" id="barMsg">先按「架設新軸心」。</div>
+        <div class="warnbox" style="margin-top:12px">按「釋放」時碼錶會<b>同步起算</b>。同樣請計滿 30–50 個週期。<b>Ω 管夾軸心的誤差放大倍率明顯小於長吊索</b>（支點越靠近質心，d² 越不會淹沒 γL²），但 d 太小時週期會拉長、振幅也更難維持——自己找出平衡點。</div>
+      </div>
+
+      <div class="card">
+        <h2>量測與計時</h2>
+        <div class="readout" id="barRead">0.00 s<small>已完成週期數 0</small></div>
+        <div style="margin-top:10px">
+          <button class="act ghost" id="barMeasD">量測長度</button>
+          <button class="act" id="barSw">碼錶：開始</button>
+          <button class="act ghost" id="barDrop">捨棄本次</button>
+        </div>
+        <div class="kv" id="barCurInfo"></div>
+        <table id="barTbl"><thead><tr><th>#</th><th>N</th><th>t (s)</th><th>T (s)</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>已架設之軸心（需 ≥3 個，每個 ≥5 次計時）<span class="qtag">待答問題 5</span></h2>
+      <div id="barAxList"></div>
+      <div class="status" id="barAxMsg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 6 ================= -->
+<section id="tab6">
+  <div id="tab6lock" class="card lock">請先在分頁 ④ 與 ⑤ 各完成 3 個以上軸心、每軸心 5 次以上計時。</div>
+  <div id="tab6body" style="display:none">
+    <div class="card">
+      <h2>一、尺寸量測結果</h2>
+      <table id="anaDim"><thead><tr><th>物理量</th><th>平均值 (cm)</th><th>平均值標準差</th><th>筆數</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div class="card">
+      <h2>二、銅環：逐軸心求 β<span class="qtag">待答問題 3</span></h2>
+      <table id="anaRing"><thead><tr>
+        <th>軸心</th><th>方式</th><th>d (cm)</th><th>T̄ (s)</th><th>σ<sub>T</sub></th>
+        <th>β（純轉動式）</th><th>β（滾動式）</th></tr></thead><tbody></tbody></table>
+      <div class="kv" id="anaRingStat"></div>
+      <div class="note" id="anaRingNote"></div>
+    </div>
+
+    <div class="card">
+      <h2>三、銅環：迴歸驗證</h2>
+      <p>僅取 V 形吊索軸心（純轉動），作 y = gT<sup>2</sup>d/4π<sup>2</sup> 對 x = d<sup>2</sup> 之最小平方直線。理論斜率 = 1、截距 = β(R<sub>1</sub><sup>2</sup>+R<sub>2</sub><sup>2</sup>)。</p>
+      <div id="ringPlot"></div>
+      <div class="kv" id="ringFit"></div>
+    </div>
+
+    <div class="card">
+      <h2>四、金屬條：逐軸心求 γ<span class="qtag">待答問題 5</span></h2>
+      <table id="anaBar"><thead><tr>
+        <th>軸心</th><th>方式</th><th>d (cm)</th><th>T̄ (s)</th><th>σ<sub>T</sub></th><th>γ</th></tr></thead><tbody></tbody></table>
+      <div class="kv" id="anaBarStat"></div>
+    </div>
+
+    <div class="card">
+      <h2>五、金屬條：迴歸驗證</h2>
+      <div id="barPlot"></div>
+      <div class="kv" id="barFit"></div>
+    </div>
+
+    <div class="card">
+      <h2>六、與真值比較</h2>
+      <p>按下按鈕才揭曉本次亂數產生的真實參數。請先把上面的 β、γ 填進你的實驗報告，再來對答案。</p>
+      <button class="act alt" id="btnReveal">揭曉真值</button>
+      <div id="revealBox"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ============ 基本工具 ============ */
+var G = 976.516;                    // cm/s^2（試題給定）
+var PI = Math.PI;
+function rnd(a,b){return a+Math.random()*(b-a);}
+function gauss(){var u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*PI*v);}
+function mean(a){return a.reduce(function(x,y){return x+y;},0)/a.length;}
+function sd(a){if(a.length<2)return 0;var m=mean(a);
+  return Math.sqrt(a.reduce(function(s,x){return s+(x-m)*(x-m);},0)/(a.length-1));}
+function f(x,n){return Number(x).toFixed(n);}
+function $(id){return document.getElementById(id);}
+function pill(box,label,val,warn){
+  var e=document.createElement("span"); e.className="pill"+(warn?" warn":"");
+  e.innerHTML=label+"：<b>"+val+"</b>"; box.appendChild(e);
+}
+
+/* ============ 隱藏真值（每次重新整理重新產生） ============ */
+var TV = {
+  R1: rnd(1.75,2.30),                 // 銅環內半徑
+  ringT: rnd(0.40,0.80),              // 環寬（徑向）
+  L: rnd(16,24),                      // 金屬條長
+  w: rnd(0.95,1.55),                  // 金屬條寬
+  bt: rnd(0.15,0.32),                 // 金屬條厚
+  rRod: rnd(0.42,0.56),               // 鐵桿半徑
+  pOff: rnd(1.15,1.85),               // 單擺：掛鉤+球半徑之未知偏移
+  threadD: rnd(0.035,0.065),          // 尼龍線線徑
+  paperLong: 42.0,                    // A3 長邊
+  pxRing: rnd(20,27), pxBar: rnd(9,13), pxPend: rnd(4.2,5.4)
+};
+TV.R2 = TV.R1 + TV.ringT;
+TV.beta = 0.5;                                  // 圓環面內：I=½M(R1²+R2²)
+TV.gamma = (1 + (TV.w*TV.w)/(TV.L*TV.L))/12;    // 長條含寬度修正
+TV.S = TV.R1*TV.R1 + TV.R2*TV.R2;
+
+/* ============ 全域狀態 ============ */
+var CAL = {done:false, dlMeas:0, dlTrue:0, s:1, folds:8, div:0, res:0, foldErr:0};
+var DIM = {outC:[], inC:[], barL:[], barW:[], barT:[], rodC:[]};
+
+/* ============ 分頁切換 ============ */
+Array.prototype.forEach.call(document.querySelectorAll("#nav button"),function(b){
+  b.addEventListener("click",function(){
+    if(b.disabled) return;
+    Array.prototype.forEach.call(document.querySelectorAll("#nav button"),function(x){x.classList.remove("active");});
+    b.classList.add("active");
+    Array.prototype.forEach.call(document.querySelectorAll("main section"),function(s){s.classList.remove("show");});
+    $("tab"+b.dataset.t).classList.add("show");
+    if(b.dataset.t==="6") buildAnalysis();
+    window.scrollTo(0,0);
+  });
+});
+function enableTab(n){ document.querySelector('#nav button[data-t="'+n+'"]').disabled=false; }
+
+/* ============ 分頁 2：單擺 ============ */
+var P = {
+  slider:40, amp:8, sets:{A:null,B:null}, mounted:null,
+  t:0, ts:1, running:false, theta:0, T:1,
+  sw:{run:false,t0:0,count:0,auto:false}, rows:{A:[],B:[]}, released:false
+};
+var TAU = 190;
+function sliderToLen(v){ return 12 + 0.46*v; }
+function effLen(){ return (P.mounted? P.sets[P.mounted] : sliderToLen(P.slider)) + TV.pOff; }
+function periodOf(l,ampRad){ return 2*PI*Math.sqrt(l/G)*(1+ampRad*ampRad/16); }
+
+var lenSlider=$("lenSlider"), ampSlider=$("ampSlider");
+lenSlider.addEventListener("input",function(){
+  P.slider=+lenSlider.value; $("slVal").textContent=P.slider;
+  if(P.mounted){ P.mounted=null; $("mountLbl").textContent="—"; }
+  P.released=false; P.sw.run=false; updateSetInfo();
+});
+ampSlider.addEventListener("input",function(){P.amp=+ampSlider.value;$("ampVal").textContent=P.amp;});
+$("speed").addEventListener("change",function(e){P.ts=+e.target.value;});
+
+function updateSetInfo(){
+  var box=$("setInfo"); box.innerHTML="";
+  ["A","B"].forEach(function(k){
+    pill(box,"設定 "+k,(P.sets[k]===null?"未設定":"已做記號")+"　筆數 "+P.rows[k].length);
+  });
+  pill(box,"目前掛載",(P.mounted||"未固定"));
+  $("sbA").className = (P.sets.A!==null&&P.rows.A.length>=5)?"done":"";
+  $("sbB").className = (P.sets.B!==null&&P.rows.B.length>=5)?"done":"";
+}
+$("btnFixA").addEventListener("click",function(){fixSet("A");});
+$("btnFixB").addEventListener("click",function(){fixSet("B");});
+function fixSet(k){
+  P.sets[k]=sliderToLen(P.slider);
+  P.mounted=k; $("mountLbl").textContent=k;
+  P.released=false; P.sw.run=false; P.sw.count=0;
+  $("swMsg").textContent="設定 "+k+" 已固定並掛載，請按「釋放擺錘」開始擺動。";
+  $("swMsg").className="status ok";
+  updateSetInfo();
+}
+$("btnMount").addEventListener("click",function(){
+  var other = P.mounted==="A" ? "B" : "A";
+  if(P.sets[other]===null){ $("swMsg").textContent="設定 "+other+" 尚未固定。"; $("swMsg").className="status bad"; return; }
+  P.mounted=other; $("mountLbl").textContent=other;
+  lenSlider.value = Math.round((P.sets[other]-12)/0.46); P.slider=+lenSlider.value;
+  $("slVal").textContent=P.slider;
+  P.released=false; P.sw.run=false; P.sw.count=0; updateSetInfo();
+});
+$("btnRelease").addEventListener("click",function(){
+  if(!P.mounted){ $("swMsg").textContent="請先把目前線長固定為設定 A 或 B（在線上做記號）。"; $("swMsg").className="status bad"; return; }
+  P.amp=+ampSlider.value;
+  P.T = periodOf(effLen(), P.amp*PI/180);
+  P.t=0; P.released=true; P.running=true;
+  P.sw.run=true; P.sw.t0=0; P.sw.count=0; P.sw.auto=true;   // 放手同時起算
+  $("btnSw").textContent="碼錶：停止";
+  $("swMsg").textContent="已釋放，碼錶同步起算。待週期數累積到 20 次以上再按「停止」。";
+  $("swMsg").className="status";
+});
+$("btnSw").addEventListener("click",function(){
+  if(!P.released){ $("swMsg").textContent="擺錘尚未釋放。"; $("swMsg").className="status bad"; return; }
+  if(!P.sw.run){ P.sw.run=true; P.sw.t0=P.t; P.sw.count=0; P.sw.auto=false;
+                 $("btnSw").textContent="碼錶：停止";
+                 $("swMsg").textContent="手動起算（擺動中途按下）：起停各有一次反應誤差。";
+                 $("swMsg").className="status"; }
+  else{
+    P.sw.run=false; $("btnSw").textContent="碼錶：開始";
+    var N=P.sw.count;
+    if(N<1){ $("swMsg").textContent="未完成任何完整週期，本次不記錄。"; $("swMsg").className="status bad"; return; }
+    // 停錶的時機是「擺錘第 N 次通過參考點」，故總時間為整數個週期，誤差只剩反應時間
+    var elapsed = N*P.T;
+    var sig = P.sw.auto ? 0.09 : 0.13;     // 放手同時起算只剩停錶一次反應誤差
+    var tMeas = elapsed + gauss()*sig;
+    P.rows[P.mounted].push({N:N,t:tMeas,T:tMeas/N});
+    renderRows();
+    $("swMsg").innerHTML = "已記錄："+(P.sw.auto?"放手起算":"手動起算")+"　N = "+N+"，t = "+f(tMeas,2)+
+      " s，T = "+f(tMeas/N,4)+" s"+
+      (N<10?"　<span style='color:#b3341f'>（週期數偏少，反應時間未被充分攤薄）</span>":"");
+    $("swMsg").className="status ok";
+  }
+});
+$("btnDrop").addEventListener("click",function(){
+  if(!P.mounted||!P.rows[P.mounted].length) return;
+  P.rows[P.mounted].pop(); renderRows();
+});
+$("btnClearRows").addEventListener("click",function(){P.rows.A=[];P.rows.B=[];renderRows();});
+
+function renderRows(){
+  ["A","B"].forEach(function(k){
+    var tb=document.querySelector("#tbl"+k+" tbody"); tb.innerHTML="";
+    P.rows[k].forEach(function(r,i){
+      var tr=document.createElement("tr");
+      tr.innerHTML="<td>"+(i+1)+"</td><td class='num'>"+r.N+"</td><td class='num'>"+f(r.t,2)+
+        "</td><td class='num'>"+f(r.T,4)+"</td>";
+      tb.appendChild(tr);
+    });
+    if(P.rows[k].length){
+      var Ts=P.rows[k].map(function(r){return r.T;});
+      var tr2=document.createElement("tr"); tr2.style.background="#f5f9fb";
+      tr2.innerHTML="<td colspan='3'><b>平均 T</b></td><td class='num'><b>"+f(mean(Ts),4)+
+        "</b> ± "+f(sd(Ts)/Math.sqrt(Ts.length),4)+"</td>";
+      tb.appendChild(tr2);
+    }else{
+      var tr3=document.createElement("tr"); tr3.className="ghost";
+      tr3.innerHTML="<td colspan='4'>尚無數據</td>"; tb.appendChild(tr3);
+    }
+  });
+  updateSetInfo();
+}
+
+function drawPend(){
+  var px=TV.pxPend, ox=190, oy=48;
+  var L=(P.mounted?P.sets[P.mounted]:sliderToLen(P.slider));
+  var Lp=L*px, rb=TV.pOff*px*0.55;
+  var bx=ox+Lp*Math.sin(P.theta), by=oy+Lp*Math.cos(P.theta);
+  $("pendSvg").innerHTML=
+    '<rect x="40" y="300" width="130" height="11" rx="2" fill="#8b949b"/>'+
+    '<rect x="96" y="40" width="9" height="262" fill="#8b949b"/>'+
+    '<rect x="96" y="40" width="130" height="8" rx="2" fill="#8b949b"/>'+
+    '<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="#33454f"/>'+
+    '<line x1="'+ox+'" y1="'+oy+'" x2="'+ox+'" y2="'+(oy+Lp+18)+'" stroke="#c8d2d8" stroke-width="1" stroke-dasharray="4 4"/>'+
+    '<line x1="'+ox+'" y1="'+oy+'" x2="'+bx+'" y2="'+by+'" stroke="#3a3a3a" stroke-width="1.3"/>'+
+    '<circle cx="'+(bx+rb*Math.sin(P.theta))+'" cy="'+(by+rb*Math.cos(P.theta))+'" r="'+rb+'" fill="#a9662c" stroke="#7c4a1d"/>'+
+    '<text x="12" y="20" font-size="12" fill="#63727f">畫面比例為隱藏亂數，無法由螢幕量測</text>';
+}
+
+/* 計算 Δℓ */
+$("btnCalc").addEventListener("click",function(){
+  var msg=$("calcMsg"), out=$("calcOut"); out.innerHTML="";
+  if(P.rows.A.length<5||P.rows.B.length<5){
+    msg.textContent="A、B 兩組各需至少 5 筆計時數據。"; msg.className="status bad"; return; }
+  var TA=mean(P.rows.A.map(function(r){return r.T;})), TB=mean(P.rows.B.map(function(r){return r.T;}));
+  var lA=G*TA*TA/(4*PI*PI), lB=G*TB*TB/(4*PI*PI);
+  var dl=lB-lA;
+  if(dl<=2){ msg.textContent="Δℓ 太小（"+f(dl,2)+" cm）。請讓 B 的線長明顯大於 A，才能得到夠長的標準段。";
+    msg.className="status bad"; return; }
+  var sA=sd(P.rows.A.map(function(r){return r.T;})), sB=sd(P.rows.B.map(function(r){return r.T;}));
+  var uA=2*lA*sA/TA/Math.sqrt(P.rows.A.length), uB=2*lB*sB/TB/Math.sqrt(P.rows.B.length);
+  var u=Math.sqrt(uA*uA+uB*uB);
+  CAL.dlMeas=dl; CAL.dlTrue=P.sets.B-P.sets.A;
+  pill(out,"T̄ₐ",f(TA,4)+" s"); pill(out,"T̄ᵦ",f(TB,4)+" s");
+  pill(out,"ℓₐ",f(lA,2)+" cm"); pill(out,"ℓᵦ",f(lB,2)+" cm");
+  pill(out,"標準段 Δℓ",f(dl,2)+" ± "+f(u,2)+" cm");
+  pill(out,"相對不確定度",f(100*u/dl,2)+" %",(u/dl>0.006));
+  msg.innerHTML="已取得標準長度。若此值與真實線段有偏差，之後所有長度都會等比例偏移 — 這是本實驗最大的系統誤差來源。";
+  msg.className="status ok";
+  $("sbC").className="done";
+  drawRuler();
+});
+
+/* 標尺 */
+$("foldSlider").addEventListener("input",function(e){CAL.folds=+e.target.value;$("foldVal").textContent=CAL.folds;drawRuler();});
+function drawRuler(){
+  var box=$("rulerBox"), out=$("rulerOut"); out.innerHTML="";
+  if(!CAL.dlMeas){ box.innerHTML="<div class='cap'>請先計算 Δℓ</div>"; return; }
+  var k=CAL.folds, div=CAL.dlMeas/Math.pow(2,k), res=div/2;
+  var ticks=Math.min(Math.pow(2,k),128);
+  var s='<svg viewBox="0 0 640 70"><rect x="20" y="20" width="600" height="30" fill="#fdfcf7" stroke="#cbb"/>';
+  for(var i=0;i<=ticks;i++){
+    var x=20+600*i/ticks, major=(i%(ticks/Math.min(ticks,8))===0);
+    s+='<line x1="'+x.toFixed(1)+'" y1="20" x2="'+x.toFixed(1)+'" y2="'+(major?50:38)+'" stroke="#556" stroke-width="'+(major?1.2:0.6)+'"/>';
+  }
+  s+='<text x="20" y="64" font-size="11" fill="#63727f">0</text>'+
+     '<text x="560" y="64" font-size="11" fill="#63727f">Δℓ = '+f(CAL.dlMeas,2)+' cm</text></svg>'+
+     (Math.pow(2,k)>128?'<div class="cap">（圖上僅畫出 128 格，實際為 '+Math.pow(2,k)+' 格）</div>':'');
+  box.innerHTML=s;
+  var tot=Math.sqrt(res*res/3+0.012*k*0.012*k);
+  pill(out,"對折次數",k+" 次（"+Math.pow(2,k)+" 格）");
+  pill(out,"最小刻度",f(div,3)+" cm");
+  pill(out,"內插判讀",f(res,3)+" cm");
+  pill(out,"對折累積誤差",f(0.012*k,3)+" cm");
+  pill(out,"單次讀數總誤差 ≈",f(tot,3)+" cm");
+  if(CAL.dlTrue>TV.paperLong-1) pill(out,"警告","紙條長度不足以容納此標準段",true);
+}
+$("btnMakeRuler").addEventListener("click",function(){
+  var msg=$("rulerMsg");
+  if(!CAL.dlMeas){msg.textContent="請先計算 Δℓ。";msg.className="status bad";return;}
+  if(CAL.dlTrue>TV.paperLong-1){
+    msg.textContent="標準段超出 A3 紙條可用長度，無法完整標記。請改用較短的 Δℓ（縮小 A、B 線長差）。";
+    msg.className="status bad";return;}
+  CAL.s=CAL.dlMeas/CAL.dlTrue;
+  CAL.div=CAL.dlMeas/Math.pow(2,CAL.folds);
+  CAL.res=CAL.div/2;
+  CAL.foldErr=0.012*CAL.folds;
+  CAL.done=true;
+  msg.textContent="標尺已完成並鎖定。可前往分頁 ③ 進行尺寸量測。（如需重做，請重新計算 Δℓ 後再次製作）";
+  msg.className="status ok";
+  $("sbD").className="done";
+  $("tab3lock").style.display="none"; $("tab3body").style.display="block";
+  $("resShow").textContent=f(CAL.res,3)+" cm";
+  drawShapes();
+});
+
+/* ============ 分頁 3：尺寸量測 ============ */
+function drawShapes(){
+  var R2=TV.R2*TV.pxRing, R1=TV.R1*TV.pxRing;
+  $("ringSvg").innerHTML=
+    '<circle cx="160" cy="105" r="'+R2.toFixed(1)+'" fill="#d99b52" stroke="#8a5a20"/>'+
+    '<circle cx="160" cy="105" r="'+R1.toFixed(1)+'" fill="#f4f6f8" stroke="#8a5a20"/>'+
+    '<circle cx="160" cy="105" r="'+(R2+3).toFixed(1)+'" fill="none" stroke="#2a6f8a" stroke-width="1.6" stroke-dasharray="3 2"/>'+
+    '<circle cx="160" cy="105" r="'+(R2+6).toFixed(1)+'" fill="none" stroke="#2a6f8a" stroke-width="1.6" stroke-dasharray="3 2"/>'+
+    '<text x="10" y="18" font-size="12" fill="#63727f">尼龍線並排纏繞（示意，比例非真值）</text>';
+  var L=TV.L*TV.pxBar, W=TV.w*TV.pxBar*2.2;
+  var ticks="";
+  for(var i=0;i<17;i++) ticks+='<line x1="'+(30+i*16.25)+'" y1="140" x2="'+(30+i*16.25)+'" y2="'+(i%4?152:162)+'" stroke-width="'+(i%4?0.6:1.2)+'"/>';
+  $("barSvg").innerHTML=
+    '<rect x="'+(160-L/2).toFixed(1)+'" y="'+(95-W/2).toFixed(1)+'" width="'+L.toFixed(1)+'" height="'+W.toFixed(1)+
+      '" rx="2" fill="#b9c0c6" stroke="#6d757c"/>'+
+    '<rect x="30" y="140" width="260" height="22" fill="#fdfcf7" stroke="#cbb"/>'+
+    '<g stroke="#556">'+ticks+'</g>'+
+    '<text x="10" y="18" font-size="12" fill="#63727f">金屬條與 A3 紙標尺（示意，比例非真值）</text>';
+}
+
+var ITEM = {
+  outC:{label:"銅環外周長",conv:function(S,n){return S/(2*PI*n);},out:"R₂",wrap:true},
+  inC :{label:"銅環內周長",conv:function(S,n){return S/(2*PI*n);},out:"R₁",wrap:true},
+  barL:{label:"金屬條長度",conv:function(S,n){return S/n;},out:"L",wrap:false},
+  barW:{label:"金屬條寬度",conv:function(S,n){return S/n;},out:"w",wrap:false},
+  barT:{label:"金屬條厚度",conv:function(S,n){return S/n;},out:"t",wrap:false},
+  rodC:{label:"鐵桿外周長",conv:function(S,n){return S/(2*PI*n);},out:"r",wrap:true}
+};
+$("nSlider").addEventListener("input",function(e){$("nVal").textContent=e.target.value;});
+$("itemSel").addEventListener("change",renderItem);
+$("btnClearItem").addEventListener("click",function(){DIM[$("itemSel").value]=[];renderItem();renderSummary();});
+
+function truePhys(item,n){
+  switch(item){
+    case "outC": return n*2*PI*(TV.R2+TV.threadD/2);
+    case "inC" : return n*2*PI*(TV.R1-TV.threadD/2);
+    case "barL": return n*TV.L;
+    case "barW": return n*TV.w;
+    case "barT": return n*TV.bt;
+    case "rodC": return n*2*PI*(TV.rRod+TV.threadD/2);
+  }
+  return 0;
+}
+$("btnMeasure").addEventListener("click",function(){
+  var item=$("itemSel").value, n=+$("nSlider").value, msg=$("measMsg");
+  var phys=truePhys(item,n);
+  var slack = ITEM[item].wrap ? gauss()*0.010*n : gauss()*0.020*Math.sqrt(n);
+  var S=(phys+slack)*CAL.s + gauss()*CAL.foldErr;
+  if(S>CAL.dlMeas){
+    msg.textContent="總長 "+f(S,1)+" cm 已超過標尺長度 "+f(CAL.dlMeas,1)+" cm，無法一次讀完。請減少 n。";
+    msg.className="status bad"; return;
+  }
+  S=Math.round(S/CAL.res)*CAL.res;
+  DIM[item].push({n:n,S:S,v:ITEM[item].conv(S,n)});
+  msg.textContent="已記錄一筆："+ITEM[item].label+"，n = "+n+"，S = "+f(S,3)+" cm";
+  msg.className="status ok";
+  renderItem(); renderSummary();
+});
+function renderItem(){
+  var item=$("itemSel").value, rows=DIM[item];
+  var tb=document.querySelector("#tblItem tbody"); tb.innerHTML="";
+  rows.forEach(function(r,i){
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+(i+1)+"</td><td class='num'>"+r.n+"</td><td class='num'>"+f(r.S,3)+
+      "</td><td class='num'>"+f(r.v,4)+"</td>";
+    tb.appendChild(tr);
+  });
+  if(!rows.length){var tr0=document.createElement("tr");tr0.className="ghost";
+    tr0.innerHTML="<td colspan='4'>尚無數據</td>";tb.appendChild(tr0);}
+  var st=$("itemStat"); st.innerHTML="";
+  if(rows.length){
+    var v=rows.map(function(r){return r.v;});
+    pill(st,ITEM[item].out+" 平均",f(mean(v),4)+" cm");
+    pill(st,"標準差",f(sd(v),4)+" cm");
+    pill(st,"平均值標準差",f(sd(v)/Math.sqrt(v.length),4)+" cm");
+    pill(st,"筆數",rows.length);
+  }
+}
+var SUMORDER=[["inC","R₁ 內半徑",true],["outC","R₂ 外半徑",true],["rodC","r 鐵桿半徑",true],
+              ["barL","L 金屬條長",true],["barW","w 金屬條寬",false],["barT","t 金屬條厚",false]];
+function renderSummary(){
+  var tb=document.querySelector("#tblSum tbody"); tb.innerHTML="";
+  var okRing=true, okBar=true;
+  SUMORDER.forEach(function(row){
+    var k=row[0], lab=row[1];
+    var v=DIM[k].map(function(r){return r.v;});
+    var tr=document.createElement("tr");
+    if(v.length){
+      tr.innerHTML="<td>"+lab+"</td><td class='num'>"+v.length+"</td><td class='num'>"+f(mean(v),4)+
+        "</td><td class='num'>"+f(sd(v),4)+"</td><td class='num'>"+f(sd(v)/Math.sqrt(v.length),4)+"</td>";
+    }else{
+      tr.className="ghost";
+      tr.innerHTML="<td>"+lab+"</td><td>0</td><td>—</td><td>—</td><td>—</td>";
+    }
+    if(["inC","outC","rodC"].indexOf(k)>=0 && v.length<5) okRing=false;
+    if(k==="barL" && v.length<5) okBar=false;
+    tb.appendChild(tr);
+  });
+  var m=$("sumMsg"), parts=[];
+  if(okRing){ $("tab4lock").style.display="none"; $("tab4body").style.display="block"; enableTab(4); parts.push("分頁 ④ 已解鎖"); }
+  if(okBar){ $("tab5lock").style.display="none"; $("tab5body").style.display="block"; enableTab(5); parts.push("分頁 ⑤ 已解鎖"); }
+  if(parts.length){ m.textContent=parts.join("；")+"。"; m.className="status ok"; }
+  else{ m.textContent="R₁、R₂、r 各需 ≥5 筆可解鎖分頁 ④；L 需 ≥5 筆可解鎖分頁 ⑤。"; m.className="status"; }
+}
+function estVal(k){ var v=DIM[k].map(function(r){return r.v;}); return v.length? mean(v) : null; }
+function estErr(k){ var v=DIM[k].map(function(r){return r.v;}); return v.length>1? sd(v)/Math.sqrt(v.length) : 0; }
+
+/* ============ 通用擺動平台（分頁 4、5） ============ */
+function Rig(kind){
+  return {kind:kind, t:0, ts:4, amp:8, theta:0, T:1, released:false, ampNow:0,
+          sw:{run:false,t0:0,count:0,auto:false}, tau:220, axes:[], cur:-1, nextId:1};
+}
+var RG = {ring:Rig("ring"), bar:Rig("bar")};
+
+function rulerRead(trueLen,sigma){
+  var S=(trueLen+gauss()*sigma)*CAL.s + gauss()*CAL.foldErr;
+  return Math.round(S/CAL.res)*CAL.res;
+}
+
+/* --- 真實週期 --- */
+function ringTrueT(ax){
+  if(ax.mode==="direct"){
+    var r=TV.rRod;
+    return 2*PI*Math.sqrt((TV.R1-r)*(1+TV.beta*TV.S/(TV.R1*TV.R1))/G);
+  }
+  var d=ax.sTrue+TV.R2;
+  return 2*PI*Math.sqrt((TV.beta*TV.S+d*d)/(G*d));
+}
+function barTrueT(ax){
+  var gL2=TV.gamma*TV.L*TV.L, d;
+  if(ax.mode==="sling"){
+    d=ax.sTrue+TV.L/2;
+    return 2*PI*Math.sqrt((gL2+d*d)/(G*d));
+  }
+  d=TV.L/2-ax.sTrue;
+  var mu=0.04, p=0.25;
+  return 2*PI*Math.sqrt((gL2+d*d+mu*p*p)/(G*(d+mu*p)));
+}
+
+/* --- 測得的 d --- */
+function axD(kind,ax){
+  var R2=estVal("outC"), R1=estVal("inC"), r=estVal("rodC"), L=estVal("barL");
+  if(kind==="ring"){
+    if(ax.mode==="direct") return (R1!==null&&r!==null)? (R1-r) : null;
+    if(!ax.meas.length) return null;
+    return mean(ax.meas)+R2;
+  }
+  if(!ax.meas.length) return null;
+  if(ax.mode==="sling") return mean(ax.meas)+L/2;
+  return L/2-mean(ax.meas);
+}
+function axLabel(kind,ax){
+  if(kind==="ring") return ax.mode==="direct" ? "直接掛桿（滾動）" : "V 形吊索";
+  return ax.mode==="sling" ? "V 形吊索" : "Ω 管夾";
+}
+/* 誤差放大倍率：長度量測若有 δ 的比例誤差，係數誤差約為 (放大倍率)×δ。
+   純轉動軸心：Y/(Y−d²)　　滾動軸心：A/(A−1)，其中 A = gT²/[4π²(R₁−r)] */
+function axAmp(kind,ax){
+  var d=axD(kind,ax); if(d===null||!ax.rows.length) return null;
+  var Tb=mean(ax.rows.map(function(x){return x.T;}));
+  if(kind==="ring"&&ax.mode==="direct"){
+    var R1=estVal("inC"), r=estVal("rodC");
+    var A=G*Tb*Tb/(4*PI*PI*(R1-r));
+    if(A<=1) return null;
+    return A/(A-1);
+  }
+  var Y=G*Tb*Tb*d/(4*PI*PI);
+  if(Y-d*d<=0) return null;
+  return Y/(Y-d*d);
+}
+
+/* --- 架設新軸心 --- */
+function newAxis(kind){
+  var R=RG[kind], mode, sTrue=null;
+  if(kind==="ring"){
+    mode=$("ringMode").value;
+    if(mode==="sling") sTrue = 0.5 + 0.050*(+$("ringS").value);   // 0.5–5.5 cm
+  }else{
+    mode=$("barMode").value;
+    var v=+$("barS").value;
+    if(mode==="sling") sTrue = 0.5 + 0.055*v;                     // 0.5–6.0 cm
+    else sTrue = 0.6 + (TV.L/2 - 2.6)*v/100;                      // 夾具距上端 a
+  }
+  var ax={id:R.nextId++, mode:mode, sTrue:sTrue, meas:[], rows:[]};
+  ax.Ttrue = (kind==="ring")? ringTrueT(ax) : barTrueT(ax);
+  R.axes.push(ax); R.cur=R.axes.length-1;
+  R.released=false; R.sw.run=false; R.sw.count=0; R.t=0;
+  R.tau = (mode==="direct")?45:(mode==="clamp"?35:140);
+  var msg=$(kind+"Msg");
+  msg.textContent="軸心 #"+ax.id+"（"+axLabel(kind,ax)+"）已架設。"+
+    (ax.mode==="direct" ? "此軸心的 d 由 R₁ − r 直接算出，不需另量。" : "請先按「量測」取得長度，再釋放計時。");
+  msg.className="status ok";
+  renderAxes(kind); renderCur(kind);
+}
+
+/* --- 量測 --- */
+function measureAxis(kind){
+  var R=RG[kind], msg=$(kind+"Msg");
+  if(R.cur<0){ msg.textContent="請先架設軸心。"; msg.className="status bad"; return; }
+  var ax=R.axes[R.cur];
+  if(kind==="ring"&&ax.mode==="direct"){
+    msg.textContent="直接掛桿的軸心距離由 R₁ − r 決定，無須量測間距。"; msg.className="status bad"; return;
+  }
+  var val=rulerRead(ax.sTrue, 0.035);
+  if(val>CAL.dlMeas){ msg.textContent="待量長度超過標尺長度。"; msg.className="status bad"; return; }
+  ax.meas.push(val);
+  msg.textContent="量得 "+(kind==="bar"&&ax.mode==="clamp"?"a":"s")+" = "+f(val,3)+" cm（第 "+ax.meas.length+" 次）";
+  msg.className="status ok";
+  renderCur(kind); renderAxes(kind);
+}
+
+/* --- 釋放與碼錶 --- */
+function releaseRig(kind){
+  var R=RG[kind], msg=$(kind+"Msg");
+  if(R.cur<0){ msg.textContent="請先架設軸心。"; msg.className="status bad"; return; }
+  var ax=R.axes[R.cur];
+  R.amp=+$(kind+"Amp").value;
+  R.T = ax.Ttrue*(1+Math.pow(R.amp*PI/180,2)/16);
+  R.t=0; R.released=true;
+  R.sw.run=true; R.sw.t0=0; R.sw.count=0; R.sw.auto=true;   // 放手同時起算
+  $(kind+"Sw").textContent="碼錶：停止";
+  msg.textContent="軸心 #"+ax.id+" 已釋放，碼錶同步起算。待週期數累積到 30 次以上再按「停止」。";
+  msg.className="status";
+}
+function swRig(kind){
+  var R=RG[kind], msg=$(kind+"Msg");
+  if(!R.released){ msg.textContent="尚未釋放。"; msg.className="status bad"; return; }
+  var ax=R.axes[R.cur];
+  if(!R.sw.run){ R.sw.run=true; R.sw.t0=R.t; R.sw.count=0; R.sw.auto=false;
+                 $(kind+"Sw").textContent="碼錶：停止";
+                 msg.textContent="手動起算（擺動中途按下）：起停各有一次反應誤差，精度略低於放手起算。";
+                 msg.className="status"; return; }
+  else{
+    R.sw.run=false; $(kind+"Sw").textContent="碼錶：開始";
+    var N=R.sw.count;
+    if(N<1){ msg.textContent="未完成任何完整週期，本次不記錄。"; msg.className="status bad"; return; }
+    // 停錶的時機是「待測物第 N 次通過參考點」，故總時間為整數個週期，誤差只剩反應時間
+    var elapsed = N*R.T;
+    var noise = R.sw.auto ? 0.09 : 0.13;      // 放手同時起算只剩停錶一次反應誤差
+    if(R.ampNow*180/PI < 1.5) noise *= 2;     // 振幅過小，判讀困難
+    var tMeas = elapsed + gauss()*noise;
+    ax.rows.push({N:N,t:tMeas,T:tMeas/N});
+    msg.innerHTML="軸心 #"+ax.id+" 記錄（"+(R.sw.auto?"放手起算":"手動起算")+"）：N = "+N+"，t = "+f(tMeas,2)+" s，T = "+f(tMeas/N,4)+" s"+
+      (R.ampNow*180/PI<1.5?"　<span style='color:#b3341f'>（振幅已衰減至 1.5° 以下，讀數品質下降，建議重新釋放）</span>":"");
+    msg.className="status ok";
+    renderCur(kind); renderAxes(kind);
+  }
+}
+function dropRig(kind){
+  var R=RG[kind]; if(R.cur<0) return;
+  R.axes[R.cur].rows.pop(); renderCur(kind); renderAxes(kind);
+}
+
+/* --- 表格 --- */
+function renderCur(kind){
+  var R=RG[kind], tb=document.querySelector("#"+kind+"Tbl tbody"), info=$(kind+"CurInfo");
+  tb.innerHTML=""; info.innerHTML="";
+  if(R.cur<0){ tb.innerHTML="<tr class='ghost'><td colspan='4'>尚未架設軸心</td></tr>"; return; }
+  var ax=R.axes[R.cur];
+  pill(info,"目前軸心","#"+ax.id+"　"+axLabel(kind,ax));
+  var d=axD(kind,ax);
+  pill(info,"d",d===null?"待量測":f(d,3)+" cm");
+  if(ax.meas.length) pill(info,(kind==="bar"&&ax.mode==="clamp")?"a 量測次數":"s 量測次數",ax.meas.length);
+  pill(info,"計時筆數",ax.rows.length,(ax.rows.length<5));
+  var amp=axAmp(kind,ax);
+  if(amp!==null) pill(info,"誤差放大倍率","×"+f(amp,1),(amp>12));
+  ax.rows.forEach(function(r,i){
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+(i+1)+"</td><td class='num'>"+r.N+"</td><td class='num'>"+f(r.t,2)+
+      "</td><td class='num'>"+f(r.T,4)+"</td>";
+    tb.appendChild(tr);
+  });
+  if(!ax.rows.length){ tb.innerHTML="<tr class='ghost'><td colspan='4'>尚無計時數據</td></tr>"; }
+  else{
+    var Ts=ax.rows.map(function(r){return r.T;});
+    var tr=document.createElement("tr"); tr.style.background="#f5f9fb";
+    tr.innerHTML="<td colspan='3'><b>平均 T</b></td><td class='num'><b>"+f(mean(Ts),4)+"</b> ± "+
+      f(sd(Ts)/Math.sqrt(Ts.length),4)+"</td>";
+    tb.appendChild(tr);
+  }
+}
+function renderAxes(kind){
+  var R=RG[kind], box=$(kind+"AxList"); box.innerHTML="";
+  if(!R.axes.length){ box.innerHTML="<div class='cap'>尚未架設任何軸心</div>"; }
+  R.axes.forEach(function(ax,i){
+    var div=document.createElement("div");
+    div.className="axbox"+(i===R.cur?" cur":"");
+    var d=axD(kind,ax);
+    var Ts=ax.rows.map(function(r){return r.T;});
+    div.innerHTML="<h4>軸心 #"+ax.id+"　"+axLabel(kind,ax)+(i===R.cur?"　（目前）":"")+"</h4>"+
+      "<span class='pill'>d：<b>"+(d===null?"待量測":f(d,3)+" cm")+"</b></span>"+
+      "<span class='pill'>計時 <b>"+ax.rows.length+"</b> 筆</span>"+
+      (Ts.length?"<span class='pill'>T̄：<b>"+f(mean(Ts),4)+"</b> s</span>":"")+
+      (Ts.length>1?"<span class='pill'>σ<sub>T</sub>：<b>"+f(sd(Ts),4)+"</b> s</span>":"")+
+      (function(){var a=axAmp(kind,ax);return a===null?"":
+        "<span class='pill"+(a>12?" warn":"")+"'>誤差放大：<b>×"+f(a,1)+"</b></span>";})();
+    var b1=document.createElement("button"); b1.className="mini"; b1.textContent="設為目前軸心";
+    b1.style.marginRight="6px";
+    b1.addEventListener("click",function(){R.cur=i;R.released=false;R.sw.run=false;
+      R.tau=(ax.mode==="direct")?45:(ax.mode==="clamp"?35:140);
+      renderAxes(kind);renderCur(kind);});
+    var b2=document.createElement("button"); b2.className="mini"; b2.textContent="刪除";
+    b2.addEventListener("click",function(){R.axes.splice(i,1);
+      R.cur=Math.min(R.cur,R.axes.length-1); renderAxes(kind);renderCur(kind);checkUnlock6();});
+    div.appendChild(document.createElement("br"));
+    div.appendChild(b1); div.appendChild(b2);
+    box.appendChild(div);
+  });
+  var good=R.axes.filter(function(a){return a.rows.length>=5 && axD(kind,a)!==null;}).length;
+  var m=$(kind+"AxMsg");
+  if(good>=3){ m.textContent="已有 "+good+" 個合格軸心（d 已知且計時 ≥5 筆），符合試題要求。"; m.className="status ok"; }
+  else{ m.textContent="目前合格軸心 "+good+" 個，至少需要 3 個。"; m.className="status"; }
+  checkUnlock6();
+}
+function checkUnlock6(){
+  var a=RG.ring.axes.filter(function(x){return x.rows.length>=5&&axD("ring",x)!==null;}).length;
+  var b=RG.bar.axes.filter(function(x){return x.rows.length>=5&&axD("bar",x)!==null;}).length;
+  if(a>=3&&b>=3){ $("tab6lock").style.display="none"; $("tab6body").style.display="block"; enableTab(6); }
+}
+
+/* --- 繪圖 --- */
+function drawRingRig(){
+  var R=RG.ring, svg=$("ringRigSvg");
+  if(R.cur<0){ svg.innerHTML='<text x="70" y="150" font-size="13" fill="#63727f">請先架設軸心</text>'; return; }
+  var ax=R.axes[R.cur], Ox=180, Oy=60, deg=R.theta*180/PI, g="";
+  var armY=Oy-16;
+  var stand='<rect x="30" y="278" width="120" height="10" rx="2" fill="#8b949b"/>'+
+            '<rect x="84" y="'+armY+'" width="9" height="'+(278-armY)+'" fill="#8b949b"/>'+
+            '<rect x="84" y="'+armY+'" width="105" height="8" rx="2" fill="#8b949b"/>';
+  if(ax.mode==="direct"){
+    var sc=Math.min(150/((TV.R1-TV.rRod)+TV.R2), 46);
+    var rr=TV.rRod*sc, R1=TV.R1*sc, R2=TV.R2*sc;
+    var Cy=Oy+(TV.R1-TV.rRod)*sc;
+    var psi=R.theta*(TV.R1-TV.rRod)/TV.R1, rel=(psi-R.theta)*180/PI;
+    g='<g transform="rotate('+deg.toFixed(3)+','+Ox+','+Oy+')">'+
+       '<circle cx="'+Ox+'" cy="'+Cy.toFixed(1)+'" r="'+R2.toFixed(1)+'" fill="#d99b52" stroke="#8a5a20" stroke-width="1.2"/>'+
+       '<circle cx="'+Ox+'" cy="'+Cy.toFixed(1)+'" r="'+R1.toFixed(1)+'" fill="#f4f6f8" stroke="#8a5a20" stroke-width="1.2"/>'+
+       '<g transform="rotate('+rel.toFixed(3)+','+Ox+','+Cy.toFixed(1)+')">'+
+         '<line x1="'+Ox+'" y1="'+Cy.toFixed(1)+'" x2="'+Ox+'" y2="'+(Cy+R2).toFixed(1)+'" stroke="#8a5a20" stroke-width="2"/>'+
+       '</g>'+
+       '<circle cx="'+Ox+'" cy="'+Cy.toFixed(1)+'" r="2.5" fill="#c2601a"/>'+
+      '</g>'+
+      '<circle cx="'+Ox+'" cy="'+Oy+'" r="'+rr.toFixed(1)+'" fill="#9aa3ab" stroke="#6d757c"/>';
+    svg.innerHTML=stand+g+
+      '<text x="8" y="16" font-size="11" fill="#63727f">示意圖，比例為隱藏亂數</text>'+
+      '<text x="8" y="32" font-size="11" fill="#b3341f">環上記號會相對轉動 → 這是滾動，不是純轉動</text>';
+    return;
+  }
+  var d=ax.sTrue+TV.R2, sc2=Math.min(215/(d+TV.R2), 34);
+  var Cy2=Oy+d*sc2, R2b=TV.R2*sc2, R1b=TV.R1*sc2;
+  var a1=50*PI/180;
+  var ax1=Ox+R2b*Math.sin(a1), ay1=Cy2-R2b*Math.cos(a1);
+  var ax2=Ox-R2b*Math.sin(a1), ay2=Cy2-R2b*Math.cos(a1);
+  g='<g transform="rotate('+deg.toFixed(3)+','+Ox+','+Oy+')">'+
+     '<line x1="'+Ox+'" y1="'+Oy+'" x2="'+ax1.toFixed(1)+'" y2="'+ay1.toFixed(1)+'" stroke="#2a6f8a" stroke-width="1.3"/>'+
+     '<line x1="'+Ox+'" y1="'+Oy+'" x2="'+ax2.toFixed(1)+'" y2="'+ay2.toFixed(1)+'" stroke="#2a6f8a" stroke-width="1.3"/>'+
+     '<circle cx="'+Ox+'" cy="'+Cy2.toFixed(1)+'" r="'+R2b.toFixed(1)+'" fill="#d99b52" stroke="#8a5a20" stroke-width="1.2"/>'+
+     '<circle cx="'+Ox+'" cy="'+Cy2.toFixed(1)+'" r="'+R1b.toFixed(1)+'" fill="#f4f6f8" stroke="#8a5a20" stroke-width="1.2"/>'+
+     '<circle cx="'+Ox+'" cy="'+Cy2.toFixed(1)+'" r="2.5" fill="#c2601a"/>'+
+    '</g>'+
+    '<circle cx="'+Ox+'" cy="'+(Oy-6)+'" r="6" fill="#9aa3ab" stroke="#6d757c"/>';
+  svg.innerHTML=stand+g+'<text x="8" y="16" font-size="11" fill="#63727f">示意圖，比例為隱藏亂數</text>';
+}
+function drawBarRig(){
+  var R=RG.bar, svg=$("barRigSvg");
+  if(R.cur<0){ svg.innerHTML='<text x="70" y="150" font-size="13" fill="#63727f">請先架設軸心</text>'; return; }
+  var ax=R.axes[R.cur], Ox=180, deg=R.theta*180/PI;
+  var Oy=(ax.mode==="clamp")?96:48, armY=Oy-16;
+  var stand='<rect x="30" y="278" width="120" height="10" rx="2" fill="#8b949b"/>'+
+            '<rect x="84" y="'+armY+'" width="9" height="'+(278-armY)+'" fill="#8b949b"/>'+
+            '<rect x="84" y="'+armY+'" width="105" height="8" rx="2" fill="#8b949b"/>';
+  var g,sc,halfW;
+  if(ax.mode==="sling"){
+    var d=ax.sTrue+TV.L/2;
+    sc=Math.min(215/(d+TV.L/2), 11);
+    var top=Oy+ax.sTrue*sc, len=TV.L*sc;
+    halfW=Math.max(4,TV.w*sc*1.6);
+    g='<g transform="rotate('+deg.toFixed(3)+','+Ox+','+Oy+')">'+
+       '<line x1="'+Ox+'" y1="'+Oy+'" x2="'+(Ox-halfW).toFixed(1)+'" y2="'+(top+len*0.06).toFixed(1)+'" stroke="#2a6f8a" stroke-width="1.3"/>'+
+       '<line x1="'+Ox+'" y1="'+Oy+'" x2="'+(Ox+halfW).toFixed(1)+'" y2="'+(top+len*0.20).toFixed(1)+'" stroke="#2a6f8a" stroke-width="1.3"/>'+
+       '<rect x="'+(Ox-halfW).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+(2*halfW).toFixed(1)+'" height="'+len.toFixed(1)+
+         '" rx="2" fill="#b9c0c6" stroke="#6d757c"/>'+
+       '<circle cx="'+Ox+'" cy="'+(top+len/2).toFixed(1)+'" r="2.5" fill="#c2601a"/>'+
+      '</g>';
+  }else{
+    var a=ax.sTrue;
+    sc=Math.min(185/(TV.L-a), (Oy-16)/Math.max(a,0.2), 10);
+    var top2=Oy-a*sc, len2=TV.L*sc;
+    halfW=Math.max(4,TV.w*sc*1.6);
+    g='<g transform="rotate('+deg.toFixed(3)+','+Ox+','+Oy+')">'+
+       '<rect x="'+(Ox-halfW).toFixed(1)+'" y="'+top2.toFixed(1)+'" width="'+(2*halfW).toFixed(1)+'" height="'+len2.toFixed(1)+
+         '" rx="2" fill="#b9c0c6" stroke="#6d757c"/>'+
+       '<rect x="'+(Ox-halfW-3).toFixed(1)+'" y="'+(Oy-4).toFixed(1)+'" width="'+(2*halfW+6).toFixed(1)+
+         '" height="9" rx="3" fill="none" stroke="#7d868d" stroke-width="2"/>'+
+       '<circle cx="'+Ox+'" cy="'+(top2+len2/2).toFixed(1)+'" r="2.5" fill="#c2601a"/>'+
+      '</g>';
+  }
+  svg.innerHTML=stand+g+
+    '<circle cx="'+Ox+'" cy="'+Oy+'" r="6" fill="#9aa3ab" stroke="#6d757c"/>'+
+    '<text x="8" y="16" font-size="11" fill="#63727f">示意圖，比例為隱藏亂數（寬度已放大）</text>';
+}
+
+/* --- 動畫主迴圈 --- */
+var lastTs=null;
+function loop(ts){
+  if(lastTs===null) lastTs=ts;
+  var dtReal=Math.min(0.05,(ts-lastTs)/1000); lastTs=ts;
+  if(P.running&&P.released){
+    P.t+=dtReal*P.ts;
+    var a0=P.amp*PI/180;
+    P.theta=a0*Math.exp(-P.t/(2*TAU))*Math.cos(2*PI*P.t/P.T);
+    if(P.sw.run) P.sw.count=Math.floor((P.t-P.sw.t0)/P.T);
+  }else P.theta=0;
+  ["ring","bar"].forEach(function(k){
+    var R=RG[k];
+    if(R.released){
+      R.t+=dtReal*R.ts;
+      var amp0=R.amp*PI/180;
+      R.ampNow=amp0*Math.exp(-R.t/(2*R.tau));
+      R.theta=R.ampNow*Math.cos(2*PI*R.t/R.T);
+      if(R.sw.run) R.sw.count=Math.floor((R.t-R.sw.t0)/R.T);
+    }else{ R.theta=0; R.ampNow=0; }
+  });
+  if($("tab2").classList.contains("show")){
+    drawPend();
+    if(P.sw.run||P.released){
+      var el=P.sw.run?(P.t-P.sw.t0):0;
+      $("swRead").innerHTML=f(el,2)+" s<small>已完成週期數 "+(P.sw.run?P.sw.count:0)+"</small>";
+    }
+  }
+  if($("tab4").classList.contains("show")){
+    drawRingRig();
+    var Rr=RG.ring, elr=Rr.sw.run?(Rr.t-Rr.sw.t0):0;
+    $("ringRead").innerHTML=f(elr,2)+" s<small>週期數 "+(Rr.sw.run?Rr.sw.count:0)+
+      "　｜　目前振幅 "+f(Rr.ampNow*180/PI,1)+"°</small>";
+  }
+  if($("tab5").classList.contains("show")){
+    drawBarRig();
+    var Rb=RG.bar, elb=Rb.sw.run?(Rb.t-Rb.sw.t0):0;
+    $("barRead").innerHTML=f(elb,2)+" s<small>週期數 "+(Rb.sw.run?Rb.sw.count:0)+
+      "　｜　目前振幅 "+f(Rb.ampNow*180/PI,1)+"°</small>";
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* --- 分頁 4、5 事件 --- */
+$("ringMode").addEventListener("change",function(){
+  $("ringSlingCtl").style.display = this.value==="sling" ? "block":"none";
+});
+$("ringS").addEventListener("input",function(){});
+$("ringAmp").addEventListener("input",function(){$("ringAmpVal").textContent=this.value;});
+$("ringSpeed").addEventListener("change",function(){RG.ring.ts=+this.value;});
+$("ringNewAx").addEventListener("click",function(){newAxis("ring");});
+$("ringRel").addEventListener("click",function(){releaseRig("ring");});
+$("ringSw").addEventListener("click",function(){swRig("ring");});
+$("ringDrop").addEventListener("click",function(){dropRig("ring");});
+$("ringMeasD").addEventListener("click",function(){measureAxis("ring");});
+
+$("barMode").addEventListener("change",function(){
+  $("barSLbl").textContent = this.value==="sling"
+    ? "吊索長度設定（無刻度，須自行量測 s）"
+    : "管夾位置設定（無刻度，須自行量測 a）";
+  $("barMeasD").textContent = this.value==="sling" ? "量測間距 s" : "量測夾距 a";
+});
+$("barAmp").addEventListener("input",function(){$("barAmpVal").textContent=this.value;});
+$("barSpeed").addEventListener("change",function(){RG.bar.ts=+this.value;});
+$("barNewAx").addEventListener("click",function(){newAxis("bar");});
+$("barRel").addEventListener("click",function(){releaseRig("bar");});
+$("barSw").addEventListener("click",function(){swRig("bar");});
+$("barDrop").addEventListener("click",function(){dropRig("bar");});
+$("barMeasD").addEventListener("click",function(){measureAxis("bar");});
+
+/* ============ 分頁 6：分析 ============ */
+function linreg(xs,ys){
+  var n=xs.length;
+  var sx=0,sy=0,sxx=0,sxy=0;
+  for(var i=0;i<n;i++){sx+=xs[i];sy+=ys[i];sxx+=xs[i]*xs[i];sxy+=xs[i]*ys[i];}
+  var den=n*sxx-sx*sx;
+  var m=(n*sxy-sx*sy)/den, c=(sxx*sy-sx*sxy)/den;
+  var ss=0;
+  for(var j=0;j<n;j++){var e=ys[j]-(m*xs[j]+c); ss+=e*e;}
+  var s2 = n>2 ? ss/(n-2) : 0;
+  return {m:m,c:c,sm:Math.sqrt(s2*n/den),sc:Math.sqrt(s2*sxx/den),n:n};
+}
+function scatterSVG(xs,ys,fit,xlab,ylab){
+  var W=620,H=300,L=64,B=44,Tp=16,Rr=16;
+  var xmin=Math.min.apply(null,xs), xmax=Math.max.apply(null,xs);
+  var ymin=Math.min.apply(null,ys), ymax=Math.max.apply(null,ys);
+  var padx=(xmax-xmin)*0.12+0.001, pady=(ymax-ymin)*0.12+0.001;
+  xmin=Math.min(0,xmin-padx); xmax+=padx; ymin=Math.min(fit.c,ymin-pady); ymax+=pady;
+  function X(v){return L+(v-xmin)/(xmax-xmin)*(W-L-Rr);}
+  function Y(v){return H-B-(v-ymin)/(ymax-ymin)*(H-B-Tp);}
+  var s='<svg viewBox="0 0 '+W+' '+H+'">';
+  s+='<rect x="'+L+'" y="'+Tp+'" width="'+(W-L-Rr)+'" height="'+(H-B-Tp)+'" fill="#fbfdfe" stroke="#dde4ea"/>';
+  var i,gx,gy;
+  for(i=0;i<=4;i++){
+    gx=xmin+(xmax-xmin)*i/4; gy=ymin+(ymax-ymin)*i/4;
+    s+='<line x1="'+X(gx).toFixed(1)+'" y1="'+Tp+'" x2="'+X(gx).toFixed(1)+'" y2="'+(H-B)+'" stroke="#eef3f6"/>';
+    s+='<line x1="'+L+'" y1="'+Y(gy).toFixed(1)+'" x2="'+(W-Rr)+'" y2="'+Y(gy).toFixed(1)+'" stroke="#eef3f6"/>';
+    s+='<text x="'+X(gx).toFixed(1)+'" y="'+(H-B+16)+'" font-size="11" fill="#63727f" text-anchor="middle">'+gx.toFixed(1)+'</text>';
+    s+='<text x="'+(L-6)+'" y="'+(Y(gy)+4).toFixed(1)+'" font-size="11" fill="#63727f" text-anchor="end">'+gy.toFixed(1)+'</text>';
+  }
+  s+='<line x1="'+X(xmin).toFixed(1)+'" y1="'+Y(fit.m*xmin+fit.c).toFixed(1)+'" x2="'+X(xmax).toFixed(1)+
+     '" y2="'+Y(fit.m*xmax+fit.c).toFixed(1)+'" stroke="#c2601a" stroke-width="1.6"/>';
+  for(i=0;i<xs.length;i++){
+    s+='<circle cx="'+X(xs[i]).toFixed(1)+'" cy="'+Y(ys[i]).toFixed(1)+'" r="4.5" fill="#0f6d8c" stroke="#fff" stroke-width="1.2"/>';
+  }
+  s+='<text x="'+((L+W-Rr)/2)+'" y="'+(H-8)+'" font-size="12" fill="#2a4150" text-anchor="middle">'+xlab+'</text>';
+  s+='<text x="14" y="'+((Tp+H-B)/2)+'" font-size="12" fill="#2a4150" text-anchor="middle" transform="rotate(-90,14,'+((Tp+H-B)/2)+')">'+ylab+'</text>';
+  s+='</svg>';
+  return s;
+}
+
+var REV={ringBeta:null,ringSd:null,ringReg:null,ringRegSe:0,
+         barGam:null,barSd:null,barReg:null,barRegSe:0};
+
+function buildAnalysis(){
+  var R1=estVal("inC"), R2=estVal("outC"), r=estVal("rodC"), L=estVal("barL");
+  var Sm=R1*R1+R2*R2;
+
+  var tb=document.querySelector("#anaDim tbody"); tb.innerHTML="";
+  SUMORDER.forEach(function(row){
+    var k=row[0], lab=row[1], v=DIM[k].map(function(x){return x.v;});
+    var tr=document.createElement("tr");
+    if(v.length) tr.innerHTML="<td>"+lab+"</td><td class='num'>"+f(mean(v),4)+"</td><td class='num'>"+
+      f(sd(v)/Math.sqrt(v.length),4)+"</td><td>"+v.length+"</td>";
+    else { tr.className="ghost"; tr.innerHTML="<td>"+lab+"</td><td>—</td><td>—</td><td>0</td>"; }
+    tb.appendChild(tr);
+  });
+
+  /* 銅環 */
+  var tbr=document.querySelector("#anaRing tbody"); tbr.innerHTML="";
+  var betas=[], regx=[], regy=[];
+  RG.ring.axes.forEach(function(ax){
+    if(ax.rows.length<5) return;
+    var d=axD("ring",ax); if(d===null) return;
+    var Ts=ax.rows.map(function(x){return x.T;}), Tb=mean(Ts), sT=sd(Ts);
+    var Y=G*Tb*Tb*d/(4*PI*PI);
+    var bRot=(Y-d*d)/Sm;
+    var bRoll=null;
+    if(ax.mode==="direct"){
+      bRoll=(G*Tb*Tb/(4*PI*PI*(R1-r))-1)*R1*R1/Sm;
+      betas.push(bRoll);
+    }else{
+      betas.push(bRot); regx.push(d*d); regy.push(Y);
+    }
+    var tr=document.createElement("tr");
+    if(ax.mode==="direct") tr.className="hi";
+    tr.innerHTML="<td>#"+ax.id+"</td><td>"+axLabel("ring",ax)+"</td><td class='num'>"+f(d,3)+
+      "</td><td class='num'>"+f(Tb,4)+"</td><td class='num'>"+f(sT,4)+"</td>"+
+      "<td class='num'>"+f(bRot,4)+"</td><td class='num'>"+(bRoll===null?"—":"<b>"+f(bRoll,4)+"</b>")+"</td>";
+    tbr.appendChild(tr);
+  });
+  var st=$("anaRingStat"); st.innerHTML="";
+  if(betas.length){
+    REV.ringBeta=mean(betas); REV.ringSd=sd(betas);
+    pill(st,"β 平均值",f(mean(betas),4));
+    pill(st,"標準差 σ",f(sd(betas),4));
+    pill(st,"平均值標準差",f(sd(betas)/Math.sqrt(betas.length),4));
+    pill(st,"軸心數",betas.length);
+  }
+  var trend="";
+  if(regy.length>=3){
+    var first=(regy[0]-regx[0])/Sm, last=(regy[regy.length-1]-regx[regx.length-1])/Sm;
+    trend="<br><br><b>請檢查逐點 β 是否隨 d 單調變化。</b>本次最小 d 的軸心給 β = "+f(first,4)+
+      "，最大 d 的軸心給 β = "+f(last,4)+"。若有明顯趨勢，代表長度量測帶有比例或偏移誤差——"+
+      "d 越大，β = (Y − d²)/S 就越是「兩個大數相減求小數」，誤差被放大得越厲害。"+
+      "這時<b>逐點平均不會解決問題（趨勢不是隨機誤差）</b>，但迴歸截距可以。";
+  }
+  $("anaRingNote").innerHTML="表中<b>直接掛桿</b>那一列（底色標示）請採用「滾動式」的 β；"+
+    "「純轉動式」欄位是刻意保留的<b>錯誤示範</b>——它把滾動當成繞接觸點純轉動，"+
+    "會系統性低估 β。兩欄差距的大小正比於 r/R₁，這就是試題注意事項 (a) 所說的「不當之固定方式」。"+trend;
+
+  if(regx.length>=3){
+    var fit=linreg(regx,regy);
+    $("ringPlot").innerHTML=scatterSVG(regx,regy,fit,"d² (cm²)","gT²d/4π² (cm²)");
+    var fb=$("ringFit"); fb.innerHTML="";
+    pill(fb,"斜率",f(fit.m,4)+" ± "+f(fit.sm,4),(Math.abs(fit.m-1)>3*fit.sm&&fit.sm>0));
+    pill(fb,"截距",f(fit.c,3)+" ± "+f(fit.sc,3)+" cm²");
+    REV.ringReg=fit.c/Sm; REV.ringRegSe=fit.sc/Sm;
+    pill(fb,"β（迴歸）",f(fit.c/Sm,4)+" ± "+f(fit.sc/Sm,4));
+    pill(fb,"校準比例誤差推估 δ ≈ 1 − 斜率",f(100*(1-fit.m),2)+" ± "+f(100*fit.sm,2)+" %");
+    if(fit.n<5) pill(fb,"注意","僅 "+fit.n+" 點（自由度 "+(fit.n-2)+"），誤差棒本身極不可靠，建議再多做幾個吊索軸心",true);
+  }else{
+    $("ringPlot").innerHTML="<div class='cap'>需要 3 個以上的 V 形吊索軸心才能作迴歸（直接掛桿軸心不屬於這條直線）</div>";
+    $("ringFit").innerHTML="";
+  }
+
+  /* 金屬條 */
+  var tbb=document.querySelector("#anaBar tbody"); tbb.innerHTML="";
+  var gams=[], bx=[], by=[];
+  RG.bar.axes.forEach(function(ax){
+    if(ax.rows.length<5) return;
+    var d=axD("bar",ax); if(d===null||d<=0) return;
+    var Ts=ax.rows.map(function(x){return x.T;}), Tb=mean(Ts), sT=sd(Ts);
+    var Y=G*Tb*Tb*d/(4*PI*PI);
+    var gm=(Y-d*d)/(L*L);
+    gams.push(gm); bx.push(d*d); by.push(Y);
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>#"+ax.id+"</td><td>"+axLabel("bar",ax)+"</td><td class='num'>"+f(d,3)+
+      "</td><td class='num'>"+f(Tb,4)+"</td><td class='num'>"+f(sT,4)+"</td><td class='num'><b>"+f(gm,5)+"</b></td>";
+    tbb.appendChild(tr);
+  });
+  var st2=$("anaBarStat"); st2.innerHTML="";
+  if(gams.length){
+    REV.barGam=mean(gams); REV.barSd=sd(gams);
+    pill(st2,"γ 平均值",f(mean(gams),5));
+    pill(st2,"標準差 σ",f(sd(gams),5));
+    pill(st2,"平均值標準差",f(sd(gams)/Math.sqrt(gams.length),5));
+    pill(st2,"軸心數",gams.length);
+  }
+  if(bx.length>=3){
+    var fit2=linreg(bx,by);
+    $("barPlot").innerHTML=scatterSVG(bx,by,fit2,"d² (cm²)","gT²d/4π² (cm²)");
+    var fb2=$("barFit"); fb2.innerHTML="";
+    pill(fb2,"斜率",f(fit2.m,4)+" ± "+f(fit2.sm,4),(Math.abs(fit2.m-1)>3*fit2.sm&&fit2.sm>0));
+    pill(fb2,"截距",f(fit2.c,3)+" ± "+f(fit2.sc,3)+" cm²");
+    REV.barReg=fit2.c/(L*L); REV.barRegSe=fit2.sc/(L*L);
+    pill(fb2,"γ（迴歸）",f(fit2.c/(L*L),5)+" ± "+f(fit2.sc/(L*L),5));
+    pill(fb2,"校準比例誤差推估 δ ≈ 1 − 斜率",f(100*(1-fit2.m),2)+" ± "+f(100*fit2.sm,2)+" %");
+    if(fit2.n<5) pill(fb2,"注意","僅 "+fit2.n+" 點（自由度 "+(fit2.n-2)+"），誤差棒本身極不可靠，建議再多做幾個軸心",true);
+  }else{
+    $("barPlot").innerHTML="<div class='cap'>需要 3 個以上軸心才能作迴歸</div>";
+    $("barFit").innerHTML="";
+  }
+}
+
+$("btnReveal").addEventListener("click",function(){
+  var R1=estVal("inC"), R2=estVal("outC"), r=estVal("rodC"), L=estVal("barL"), w=estVal("barW");
+  function row(lab,meas,tru,dec){
+    var e=(meas===null)?null:100*(meas-tru)/tru;
+    return "<tr><td>"+lab+"</td><td class='num'>"+(meas===null?"—":f(meas,dec))+"</td><td class='num'>"+
+      f(tru,dec)+"</td><td class='num'>"+(e===null?"—":f(e,2)+" %")+"</td></tr>";
+  }
+  var h="<h3>尺寸</h3><table><thead><tr><th>物理量</th><th>量測值</th><th>真值</th><th>誤差</th></tr></thead><tbody>"+
+    row("R₁ (cm)",R1,TV.R1,4)+row("R₂ (cm)",R2,TV.R2,4)+row("r 鐵桿半徑 (cm)",r,TV.rRod,4)+
+    row("L (cm)",L,TV.L,4)+row("w (cm)",w,TV.w,4)+
+    "</tbody></table>";
+
+  h+="<h3>係數</h3><table><thead><tr><th>項目</th><th>你的結果</th><th>真值</th><th>誤差</th><th>偏離量（以平均值標準差為單位）</th></tr></thead><tbody>";
+  function crow(lab,val,se,tru,dec){
+    if(val===null) return "<tr class='ghost'><td>"+lab+"</td><td colspan='4'>未計算</td></tr>";
+    var e=100*(val-tru)/tru;
+    var z=(se>0)? Math.abs(val-tru)/se : null;
+    var zt = z===null ? "—" : (f(z,1)+" σ"+(z<2?"　✓ 一致":(z<4?"　⚠ 略有偏差":"　✗ 顯著偏離")));
+    return "<tr><td>"+lab+"</td><td class='num'>"+f(val,dec)+"</td><td class='num'>"+f(tru,dec)+
+      "</td><td class='num'>"+f(e,2)+" %</td><td>"+zt+"</td></tr>";
+  }
+  var nR=RG.ring.axes.filter(function(a){return a.rows.length>=5;}).length;
+  var nB=RG.bar.axes.filter(function(a){return a.rows.length>=5;}).length;
+  h+=crow("β（逐軸心平均）",REV.ringBeta,(REV.ringSd||0)/Math.sqrt(Math.max(nR,1)),TV.beta,4);
+  h+=crow("β（迴歸截距）",REV.ringReg,REV.ringRegSe,TV.beta,4);
+  h+=crow("γ（逐軸心平均）",REV.barGam,(REV.barSd||0)/Math.sqrt(Math.max(nB,1)),TV.gamma,5);
+  h+=crow("γ（迴歸截距）",REV.barReg,REV.barRegSe,TV.gamma,5);
+  h+="</tbody></table>";
+
+  var delta=100*(CAL.s-1);
+  h+="<div class='note'><b>理論值：</b>圓環繞質心垂直軸 β = 1/2 = 0.5000（精確）。"+
+     "細長條 γ = 1/12 = 0.08333；本次金屬條考慮寬度後為 γ = (1 + w²/L²)/12 = "+f(TV.gamma,5)+
+     "，比 1/12 高 "+f(100*(TV.gamma*12-1),2)+" %，通常被量測誤差蓋過。</div>";
+  h+="<div class='"+(Math.abs(delta)>0.8?"warnbox":"note")+"'><b>你的紙標尺實際比例誤差 δ = "+f(delta,2)+" %</b>"+
+     "（標尺偏長為正）。對照上面迴歸斜率推估的 δ：兩者應該接近，這代表「斜率偏離 1」確實可以當作校準品質的體檢指標。"+
+     "同時可以檢查：逐軸心法的 β 誤差是否明顯大於迴歸法？這就是本實驗最重要的統計教訓。</div>";
+  $("revealBox").innerHTML=h;
+});
+
+/* ============ 初始化 ============ */
+updateSetInfo(); renderRows(); renderItem(); renderSummary(); drawRuler();
+renderAxes("ring"); renderCur("ring"); renderAxes("bar"); renderCur("bar");
+$("barMeasD").textContent="量測間距 s";
+</script>
+</body>
+</html>

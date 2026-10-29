@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>黏土質量虛擬實驗室</title>
+<style>
+:root{
+  --bg:#f5f3ec; --card:#ffffff; --ink:#1d2a33; --muted:#5d6a73; --line:#d8d2c3;
+  --accent:#1f6f8b; --accent-soft:#e3f0f4; --clay:#b5673d; --warn:#b3261e; --ok:#2e7d4f;
+  --grid:#cfe3ea; --grid2:#e9f3f6; --wood:#c9a36a; --metal:#7b8794;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6}
+header{background:#1d2a33;color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:1.25rem}
+header p{margin:2px 0 0;font-size:.88rem;color:#c5d3db}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:10px 16px 0;background:#e9e5da;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);border-bottom:none;background:#f3f0e7;padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:.95rem;color:var(--muted)}
+nav button.on{background:var(--card);color:var(--ink);font-weight:700}
+main{max-width:1080px;margin:0 auto;padding:16px}
+section.tab{display:none}
+section.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:14px}
+h2{font-size:1.15rem;margin:.2em 0 .6em;color:var(--accent)}
+h3{font-size:1.02rem;margin:.9em 0 .4em}
+.eq{background:#f7f6f1;border-left:4px solid var(--accent);padding:8px 12px;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:1.05rem}
+.note{font-size:.88rem;color:var(--muted)}
+.warn{color:var(--warn);font-weight:600}
+.ok{color:var(--ok);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:6px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+button.act{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:.92rem}
+button.act:hover{filter:brightness(1.1)}
+button.sec{background:#fff;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.9rem}
+button.dang{background:var(--warn);color:#fff;border:none;border-radius:6px;padding:7px 14px;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=range]{width:260px}
+input.num{width:78px;padding:3px 5px;border:1px solid var(--line);border-radius:4px;font-size:.9rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#f1eee5}
+td input{width:74px;border:1px solid transparent;background:#fbfaf6;text-align:center;font-size:.9rem}
+td input:focus{border-color:var(--accent);outline:none}
+.pill{display:inline-block;padding:1px 9px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:.84rem;margin-right:4px}
+.massbox label{display:inline-flex;align-items:center;gap:3px;margin-right:10px;font-size:.92rem}
+.readout{font-family:Consolas,monospace;background:#1d2a33;color:#9fe3b6;padding:6px 10px;border-radius:6px;display:inline-block;font-size:1rem}
+.watch{font-family:Consolas,monospace;font-size:2rem;background:#222;color:#ffd866;padding:4px 16px;border-radius:8px;letter-spacing:2px}
+svg{width:100%;height:auto;display:block}
+.step{border-left:3px solid var(--line);padding-left:10px;margin:10px 0}
+.step.done{border-left-color:var(--ok)}
+.hidden{display:none}
+.big{font-size:1.15rem;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>黏土質量虛擬實驗室</h1>
+  <p>九十六學年度高級中學自然學科競賽 屏東區複賽　物理科實驗試題第一題：「請提出至少兩種方法設計實驗求出黏土的質量」</p>
+</header>
+<nav id="nav">
+  <button data-t="t1" class="on">① 原理推導</button>
+  <button data-t="t2">② 器材組裝</button>
+  <button data-t="t3">③ 方法A 槓桿</button>
+  <button data-t="t4">④ 方法B 三力平衡</button>
+  <button data-t="t5">⑤ 迴歸分析＋方法C</button>
+  <button data-t="t6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ ① ============ -->
+<section class="tab on" id="t1">
+  <div class="card">
+    <h2>題目與器材</h2>
+    <p>器材中<b>沒有天平與彈簧</b>，只有已知掛碼（10 g × 5、5 g × 1，合計 55 g）、滑輪、棉線、竹筷一雙、布尺（最小刻度 1 mm）、方格紙、透明膠帶、小刀與碼錶（精確至 0.2 秒）。因此要把黏土的重量「換算」成已知掛碼的重量，常見有三條路：</p>
+    <p><span class="pill">A 靜力：力矩平衡</span><span class="pill">B 靜力：三力平衡</span><span class="pill">C 動力：Atwood 機</span></p>
+    <p class="note">本模擬每次開啟時隨機產生一塊黏土（30–90 g）、竹筷重心偏移、滑輪摩擦與轉動慣量、掛碼的實際質量（標稱值 ±1% 以內）。全部隱藏，於第 ⑥ 頁揭曉。</p>
+  </div>
+
+  <div class="card">
+    <h2>方法 A：竹筷槓桿（力矩平衡）</h2>
+    <div class="grid2">
+      <div>
+        <svg viewBox="0 0 440 210" aria-label="槓桿力圖">
+          <line x1="220" y1="10" x2="220" y2="70" stroke="#555" stroke-width="1.5"/>
+          <rect x="30" y="70" width="380" height="8" rx="3" fill="#c9a36a"/>
+          <polygon points="220,70 214,62 226,62" fill="#555"/>
+          <line x1="90" y1="78" x2="90" y2="130" stroke="#555"/>
+          <ellipse cx="90" cy="145" rx="20" ry="15" fill="#b5673d"/>
+          <text x="90" y="150" text-anchor="middle" fill="#fff" font-size="12">m</text>
+          <line x1="340" y1="78" x2="340" y2="118" stroke="#555"/>
+          <rect x="326" y="118" width="28" height="34" fill="#7b8794"/>
+          <text x="340" y="140" text-anchor="middle" fill="#fff" font-size="12">M</text>
+          <circle cx="238" cy="74" r="4" fill="#1f6f8b"/>
+          <line x1="238" y1="78" x2="238" y2="110" stroke="#1f6f8b" stroke-dasharray="3 2"/>
+          <text x="244" y="108" font-size="11" fill="#1f6f8b">W（重心 G）</text>
+          <line x1="90" y1="185" x2="220" y2="185" stroke="#c0582b" marker-end="url(#ar)" marker-start="url(#ar)"/>
+          <text x="155" y="200" text-anchor="middle" font-size="12" fill="#c0582b">a</text>
+          <line x1="220" y1="185" x2="340" y2="185" stroke="#c0582b"/>
+          <text x="280" y="200" text-anchor="middle" font-size="12" fill="#c0582b">x</text>
+          <text x="226" y="30" font-size="11">支點 P（棉線吊起）</text>
+          <line x1="220" y1="92" x2="238" y2="92" stroke="#1f6f8b"/>
+          <text x="229" y="104" font-size="10" text-anchor="middle" fill="#1f6f8b">c</text>
+          <defs><marker id="ar" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#c0582b"/></marker></defs>
+        </svg>
+      </div>
+      <div>
+        <p>以支點 P 為轉軸，竹筷水平靜止時合力矩為零。兩支竹筷接成的長桿重 W，重心 G 不一定正好落在支點上，設 G 在支點右方 c 處：</p>
+        <div class="eq">m g · a = M g · x + W g · c</div>
+        <div class="eq">⇒　M·x = m·a − W·c</div>
+        <p>固定掛碼 M，改變黏土位置 a 並找出平衡位置 x，以 <b>M·x 對 a 作圖</b>：</p>
+        <div class="eq">斜率 = m　　截距 = −W·c</div>
+        <p>竹筷偏心的影響全部落在截距，不會進入斜率。若只用單點計算 m = Mx/a，就會多出 Wc/a 的系統誤差，且 a 越小誤差越大。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>方法 B：滑輪＋棉線三力平衡</h2>
+    <div class="grid2">
+      <div>
+        <svg viewBox="0 0 440 230" aria-label="三力平衡">
+          <rect x="0" y="40" width="40" height="190" fill="#e1d6bf"/>
+          <rect x="380" y="40" width="60" height="190" fill="#e1d6bf"/>
+          <circle cx="40" cy="40" r="4" fill="#333"/>
+          <text x="10" y="30" font-size="12">固定點 A</text>
+          <circle cx="388" cy="48" r="10" fill="none" stroke="#333" stroke-width="2"/>
+          <text x="360" y="22" font-size="12">滑輪</text>
+          <polyline points="40,40 214,120 388,38" fill="none" stroke="#333" stroke-width="1.5"/>
+          <line x1="398" y1="48" x2="398" y2="150" stroke="#333" stroke-width="1.5"/>
+          <rect x="386" y="150" width="24" height="34" fill="#7b8794"/>
+          <text x="398" y="200" font-size="11" text-anchor="middle">繩端 m端</text>
+          <circle cx="214" cy="122" r="4" fill="none" stroke="#333"/>
+          <line x1="214" y1="126" x2="214" y2="150" stroke="#333"/>
+          <ellipse cx="214" cy="164" rx="16" ry="13" fill="#b5673d"/>
+          <text x="214" y="196" font-size="11" text-anchor="middle">中間 m中（滑動掛環）</text>
+          <line x1="40" y1="40" x2="388" y2="40" stroke="#1f6f8b" stroke-dasharray="4 3"/>
+          <line x1="214" y1="40" x2="214" y2="120" stroke="#c0582b"/>
+          <text x="220" y="84" font-size="12" fill="#c0582b">s</text>
+          <text x="120" y="34" font-size="12" fill="#1f6f8b">D/2</text>
+          <text x="80" y="66" font-size="12" fill="#333">θ</text>
+        </svg>
+      </div>
+      <div>
+        <p>中間物以<b>可滑動的棉線掛環</b>掛在繩上，所以掛環兩側是同一條繩、張力相同 T。水平分量互相抵消，兩側與水平的夾角 θ 相同；鉛直方向：</p>
+        <div class="eq">2T sinθ = m<sub>中</sub> g，　T = m<sub>端</sub> g（滑輪無摩擦時）</div>
+        <div class="eq">sinθ = s / √( s² + (D/2)² )</div>
+        <p><b>配置一（建議）</b>：黏土掛在繩端當配重，中間換掛已知掛碼 m<sub>k</sub> = 5, 10, …, 55 g，可取得多達 11 組數據：</p>
+        <div class="eq">sinθ = m<sub>k</sub> / (2m)　⇒　sinθ 對 m<sub>k</sub> 斜率 = 1/(2m)</div>
+        <p><b>配置二</b>：黏土掛中間、掛碼 M 在繩端：sinθ = m/(2M)，以 sinθ 對 1/M 作圖，斜率 = m/2。黏土較重時 M 必須大於 m/2，可用組數較少。</p>
+        <p class="note">滑輪有摩擦時，繩端張力與跨距段張力不相等。從「往下拉後放手」與「往上托後放手」兩個方向逼近平衡，兩次的 s 取平均，可大致消去摩擦。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>方法 C（對照）：Atwood 機＋碼錶</h2>
+    <div class="grid2">
+      <div>
+        <p>黏土 m 與掛碼 M 跨過滑輪。由靜止釋放，量出下落 h 所需時間 t，得 a = 2h/t²。考慮滑輪等效質量 k = I/r² 與摩擦力 F：</p>
+        <div class="eq">(M − m)g − F = (M + m + k)a　（掛碼下落、黏土上升）</div>
+        <div class="eq">⇒　M(g − a) = (mg + F) + (m + k)·a</div>
+        <p>以 y = M(g − a) 對 a 作圖，截距 = mg + F。改讓黏土下落時截距變為 mg − F，<b>兩方向的截距平均即可消去 F</b>。</p>
+      </div>
+      <div>
+        <p>但碼錶只精確到 0.2 s，加上人的反應時間：</p>
+        <div class="eq">Δa / a ≈ 2 Δt / t</div>
+        <p>當 t ≈ 1.5 s 時，單次量測的 a 誤差就可能達 25%。這正是本題<b>靜力法優於動力法</b>的原因，第 ⑤ 頁可以親自比較。</p>
+        <p class="note">依慣例，按下「釋放」時碼錶同步啟動，你只需在落地瞬間按「停錶」（或按空白鍵）。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>為什麼用迴歸而不用單點平均？</h2>
+    <p>三種方法的關係式都寫成「y = 斜率 × x + 截距」的形式。未知的系統偏差（竹筷偏心、固定點與滑輪不等高、滑輪摩擦）會跑到截距，想求的量則落在斜率（或兩條截距的平均）。單點計算默認截距為零，偏差就會直接混進答案。最小平方法另外提供斜率的標準誤差，第 ⑥ 頁以「偏差是幾個標準誤差」來檢驗結果。</p>
+  </div>
+</section>
+
+<!-- ============ ② ============ -->
+<section class="tab" id="t2">
+  <div class="card">
+    <h2>器材清點</h2>
+    <table>
+      <tr><th>名稱</th><th>規格</th><th>數量</th><th>本實驗用途</th></tr>
+      <tr><td>掛碼</td><td>10 g</td><td>5 個</td><td>已知質量（A、B、C）</td></tr>
+      <tr><td>掛碼</td><td>5 g</td><td>1 個</td><td>細調質量組合（5 g 級距）</td></tr>
+      <tr><td>滑輪</td><td></td><td>1 個</td><td>B 三力平衡、C Atwood 機</td></tr>
+      <tr><td>黏土</td><td></td><td>1 包</td><td>待測物</td></tr>
+      <tr><td>布尺</td><td>150 cm，最小刻度 1 mm</td><td>1 卷</td><td>a、x、s、D、h</td></tr>
+      <tr><td>方格紙</td><td>A4，1 mm</td><td>1 張</td><td>判斷竹筷是否水平、作圖</td></tr>
+      <tr><td>透明膠帶</td><td></td><td>1 卷</td><td>接竹筷、固定支點結、固定點 A</td></tr>
+      <tr><td>小刀</td><td></td><td>1 支</td><td>整形黏土、刻支點記號</td></tr>
+      <tr><td>棉線</td><td></td><td>1 卷</td><td>支點吊線、滑動掛環、跨滑輪</td></tr>
+      <tr><td>竹筷</td><td></td><td>1 雙</td><td>槓桿</td></tr>
+      <tr><td>碼錶</td><td>精確至 0.2 秒</td><td>1 個</td><td>C 計時</td></tr>
+    </table>
+    <p class="note">掛碼的標稱值與實際質量略有差異（±1% 以內），這是真實器材的系統誤差，於第 ⑥ 頁揭曉。</p>
+  </div>
+
+  <div class="card">
+    <h2>方法 A 槓桿組裝</h2>
+    <div class="step done">
+      <b>步驟 1　接桿</b>：兩支竹筷（各長 24.0 cm）頭尾重疊 4.0 cm，以透明膠帶纏緊，得長桿 L = 44.0 cm。以布尺從左端量起標記刻度。
+    </div>
+    <div class="step done" id="stepP">
+      <b>步驟 2　支點位置</b>：在距左端
+      <input class="num" id="inP" type="number" value="22.0" step="0.1" min="15" max="29"> cm 處綁上吊線作為支點 P（建議接近中央）。
+      <span class="note">不需要讓竹筷自己平衡，偏心會由迴歸截距吸收。</span>
+    </div>
+    <div class="step" id="stepTape">
+      <label><input type="checkbox" id="chkTape"> <b>步驟 3　以膠帶把支點線結黏牢在竹筷上</b></label>
+      <div class="note">若未固定，加掛重物時線結會沿竹筷滑動，實際支點與你標記的刻度不一致。</div>
+    </div>
+    <div class="step done">
+      <b>步驟 4　掛環</b>：黏土與掛碼各以棉線打一個可沿竹筷滑動的小環懸掛；讀位置時以環與竹筷接觸處為準。
+    </div>
+    <div class="step done">
+      <b>步驟 5　水平判斷</b>：把方格紙貼在竹筷後方當背景，以格線判斷竹筷兩端是否等高。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>方法 B 三力平衡組裝</h2>
+    <div class="step done">
+      <b>步驟 1　架設</b>：滑輪夾在桌子右緣；棉線一端以膠帶固定在桌子左緣的 A 點，跨過滑輪後垂下。桌面高 76 cm，下垂太深會碰地。
+    </div>
+    <div class="step done">
+      <b>步驟 2　跨距 D</b>：A 點到滑輪頂的水平距離
+      <input class="num" id="inD" type="number" value="100" step="1" min="40" max="140"> cm（40–140 cm）。
+      布尺讀數 D = <span class="readout" id="Dread">—</span> cm
+    </div>
+    <div class="step" id="stepLevel">
+      <label><input type="checkbox" id="chkLevel"> <b>步驟 3　用方格紙比對，把 A 點調到與滑輪頂等高</b></label>
+      <div class="note">若不等高，下垂深度 s 的基準線會歪掉，sinθ 產生系統誤差。</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>方法 C Atwood 機</h2>
+    <p>使用同一個滑輪，棉線兩端分別掛黏土與掛碼。較重的一側由高度 h 處靜止釋放，落地即停錶。實驗操作放在第 ⑤ 頁。</p>
+  </div>
+</section>
+
+<!-- ============ ③ ============ -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>方法 A：竹筷槓桿量測</h2>
+    <svg id="svgA" viewBox="0 0 900 380"></svg>
+    <div class="row">
+      <div>右端相對通過支點的水平線（方格紙讀數）：<span class="readout" id="Aend">—</span></div>
+      <div id="Astate" class="note"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <h3>右側掛碼 M（固定不動）</h3>
+        <div class="massbox" id="massA"></div>
+        <p>M（標稱）= <b id="AMsum">—</b> g</p>
+        <h3>黏土位置 a（支點左方）</h3>
+        <div class="row"><input type="range" id="slA" min="1" max="21" step="0.01" value="8"> <span id="lbA" class="big"></span></div>
+      </div>
+      <div>
+        <h3>掛碼位置 x（支點右方）：移動到竹筷水平</h3>
+        <div class="row"><input type="range" id="slX" min="1" max="21" step="0.01" value="10"> <span id="lbX" class="big"></span></div>
+        <div class="row">
+          <button class="sec" data-dx="-0.5">−0.5</button><button class="sec" data-dx="-0.1">−0.1</button><button class="sec" data-dx="-0.02">−0.02</button>
+          <button class="sec" data-dx="0.02">+0.02</button><button class="sec" data-dx="0.1">+0.1</button><button class="sec" data-dx="0.5">+0.5</button>
+        </div>
+        <div class="row">
+          <button class="sec" id="btnTapA">輕敲竹筷（消除支點靜摩擦）</button>
+          <button class="act" id="btnRecA">以布尺讀取 a、x 並記錄</button>
+        </div>
+        <p class="note">滑桿數值是你把掛環放上去的大約位置，實際讀數以布尺（讀到 0.05 cm）為準，會自動填入表格，也可以手動修改。</p>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>數據紀錄（方法 A）</h3>
+    <table id="tblA"><thead><tr><th>#</th><th>M（g）</th><th>a（cm）</th><th>x（cm）</th><th>M·x（g·cm）</th><th>單點 m = Mx/a（g）</th><th></th></tr></thead><tbody></tbody></table>
+    <p class="note">建議：固定 M，讓 a 從小到大取 6–8 點（例如 3–15 cm），每點都要重新調平衡。第 ⑤ 頁會以 M·x 對 a 作迴歸。</p>
+  </div>
+</section>
+
+<!-- ============ ④ ============ -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>方法 B：滑輪＋棉線三力平衡</h2>
+    <svg id="svgB" viewBox="0 0 900 420"></svg>
+    <div id="Bmsg" class="row"></div>
+  </div>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <h3>配置</h3>
+        <label><input type="radio" name="cfgB" value="clayEnd" checked> 配置一：黏土在繩端，掛碼 m<sub>k</sub> 掛中間（建議）</label><br>
+        <label><input type="radio" name="cfgB" value="clayMid"> 配置二：黏土掛中間，掛碼 M 在繩端</label>
+        <h3 id="Bmlabel">已知掛碼</h3>
+        <div class="massbox" id="massB"></div>
+        <p>已知掛碼（標稱）= <b id="BMsum">—</b> g</p>
+      </div>
+      <div>
+        <h3>放手找平衡（兩方向都要做）</h3>
+        <div class="row">
+          <button class="act" id="btnBdown">中間物輕輕往下拉後放手</button>
+          <button class="act" id="btnBup">中間物輕輕往上托後放手</button>
+        </div>
+        <p>下垂深度 s（A 點水平線量到掛環）布尺讀數：<span class="readout" id="Bs">—</span> cm</p>
+        <div class="row"><button class="act" id="btnRecB" disabled>記錄到表格</button></div>
+        <p class="note">跨距 D 與是否等高請在第 ② 頁設定。表格中 sinθ 由 s 與 D/2 計算。</p>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>數據紀錄（方法 B）</h3>
+    <table id="tblB"><thead><tr><th>配置</th><th>已知掛碼（g）</th><th>s 下拉放手（cm）</th><th>s 上托放手（cm）</th><th>s̄（cm）</th><th>sinθ</th><th></th></tr></thead><tbody></tbody></table>
+    <p class="note">兩次 s 相差越大，表示滑輪摩擦越顯著。只量一個方向時，s̄ 就用該次讀數，但會帶有系統誤差。</p>
+  </div>
+</section>
+
+<!-- ============ ⑤ ============ -->
+<section class="tab" id="t5">
+  <div class="card">
+    <div class="row"><h2 style="margin:0">迴歸分析</h2><button class="act" id="btnAna">更新分析</button></div>
+  </div>
+  <div class="card">
+    <h3>方法 A：M·x 對 a</h3>
+    <div class="grid2">
+      <svg id="plotA" viewBox="0 0 480 320"></svg>
+      <div id="resA"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>方法 B：三力平衡</h3>
+    <div class="grid2">
+      <svg id="plotB" viewBox="0 0 480 320"></svg>
+      <div id="resB"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>方法 C（對照）：Atwood 機＋碼錶</h2>
+    <div class="grid2">
+      <svg id="svgC" viewBox="0 0 460 440"></svg>
+      <div>
+        <h3>掛碼側 M</h3>
+        <div class="massbox" id="massC"></div>
+        <p>M（標稱）= <b id="CMsum">—</b> g</p>
+        <h3>下落高度 h</h3>
+        <div class="row"><input type="range" id="slH" min="30" max="70" step="1" value="60"> <span id="lbH" class="big"></span></div>
+        <p>布尺讀數 h = <span class="readout" id="Chread">—</span> cm</p>
+        <div class="row" style="margin-top:10px">
+          <span class="watch" id="watch">0.0</span>
+        </div>
+        <div class="row">
+          <button class="act" id="btnRel">釋放（碼錶同步啟動）</button>
+          <button class="dang" id="btnStop" disabled>停錶（空白鍵）</button>
+          <button class="sec" id="btnResetC">重置</button>
+        </div>
+        <div class="row"><button class="act" id="btnRecC" disabled>記錄這一次</button></div>
+        <div id="Cmsg" class="note"></div>
+      </div>
+    </div>
+    <table id="tblC"><thead><tr><th>#</th><th>M（g）</th><th>運動方向</th><th>h（cm）</th><th>t（s）</th><th>a = 2h/t²（cm/s²）</th><th>單點 m（g）</th><th></th></tr></thead><tbody></tbody></table>
+    <p class="note">單點公式忽略滑輪摩擦與轉動慣量：掛碼下落時 m = M(g−a)/(g+a)，黏土下落時 m = M(g+a)/(g−a)。g 取 978.8 cm/s²（屏東）。</p>
+    <div class="grid2" style="margin-top:10px">
+      <svg id="plotC" viewBox="0 0 480 320"></svg>
+      <div id="resC"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>三法比較</h2>
+    <div id="resCmp"></div>
+  </div>
+</section>
+
+<!-- ============ ⑥ ============ -->
+<section class="tab" id="t6">
+  <div class="card">
+    <h2>誤差來源討論</h2>
+    <h3>方法 A 竹筷槓桿</h3>
+    <ul>
+      <li><b>竹筷偏心</b>（重心不在支點）：只影響截距 −Wc，迴歸斜率不受影響；單點法卻會產生 Wc/a 的偏差。</li>
+      <li><b>支點線結滑動</b>：若未以膠帶固定，實際支點隨負載移動，a、x 同時產生隨機誤差，使散佈變大。</li>
+      <li><b>支點靜摩擦</b>：竹筷在一小段 x 範圍內都「看起來水平」。輕敲竹筷、從兩側逼近再取中間，可以縮小這個不確定範圍。</li>
+      <li><b>讀數</b>：布尺讀到 0.05 cm，a 越小相對誤差越大，所以 a 應取大範圍。</li>
+      <li><b>掛碼標稱誤差</b>：M 若偏差 +0.5%，m 也同比例偏差 +0.5%，這是迴歸無法消除的系統誤差。</li>
+    </ul>
+    <h3>方法 B 三力平衡</h3>
+    <ul>
+      <li><b>滑輪摩擦</b>：跨距段張力介於 m<sub>端</sub>g(1 ± f) 之間，兩方向逼近取平均可消去一階效應。</li>
+      <li><b>A 點與滑輪頂不等高 Δy</b>：掛環不在跨距正中央，以 D/2 計算 sinθ 會有系統誤差，而且會隨 θ 改變，無法完全被截距吸收。</li>
+      <li><b>小角度</b>：m<sub>k</sub> 很小時 s 只有幾公分，讀數的相對誤差大，迴歸時這些點的權重其實應該較低。</li>
+      <li><b>棉線質量與伸長</b>：本模擬忽略，實際約可忽略到 0.1 g 等級。</li>
+    </ul>
+    <h3>方法 C Atwood 機</h3>
+    <ul>
+      <li><b>碼錶解析度 0.2 s 與反應時間</b>：Δa/a ≈ 2Δt/t，是三法中最大的誤差來源。</li>
+      <li><b>滑輪摩擦 F 與轉動慣量 k</b>：單點公式兩者都忽略，F 使 m 偏差約 F/g；迴歸截距配合兩方向平均才能消去 F，而 k 只進入斜率。</li>
+    </ul>
+    <div id="diag"></div>
+  </div>
+
+  <div class="card">
+    <h2>真值揭曉</h2>
+    <p>完成量測與第 ⑤ 頁分析後再揭曉。揭曉後仍可繼續量測。</p>
+    <div class="row">
+      <button class="dang" id="btnReveal">揭曉真值</button>
+      <button class="sec" id="btnNew">產生新的黏土（清除所有數據）</button>
+    </div>
+    <div id="truth"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ================= 公用 ================= */
+const $ = id => document.getElementById(id);
+const G = 978.8;                       // cm/s^2，屏東（緯度約 22.7°）
+const TABLE_H = 76;                    // 桌面高 cm
+const ROD_L = 44.0;                    // 竹筷接桿總長 cm
+function gauss(){ let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+const r05 = v => Math.round(v*20)/20;
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const fx = (v,d) => (v==null || !isFinite(v)) ? '—' : v.toFixed(d);
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+const MASSES = [
+  {id:'a', nom:10, label:'10 g①'}, {id:'b', nom:10, label:'10 g②'}, {id:'c', nom:10, label:'10 g③'},
+  {id:'d', nom:10, label:'10 g④'}, {id:'e', nom:10, label:'10 g⑤'}, {id:'f', nom:5, label:'5 g'}
+];
+const nomSum = set => MASSES.filter(o=>set.has(o.id)).reduce((s,o)=>s+o.nom,0);
+const actSum = set => MASSES.filter(o=>set.has(o.id)).reduce((s,o)=>s+S.act[o.id],0);
+
+function linreg(xs, ys){
+  const n = xs.length; if(n<2) return null;
+  const mx = xs.reduce((a,b)=>a+b,0)/n, my = ys.reduce((a,b)=>a+b,0)/n;
+  let sxx=0, sxy=0;
+  for(let i=0;i<n;i++){ sxx+=(xs[i]-mx)**2; sxy+=(xs[i]-mx)*(ys[i]-my); }
+  if(sxx===0) return null;
+  const m = sxy/sxx, b = my - m*mx;
+  let ssr=0, sst=0;
+  for(let i=0;i<n;i++){ ssr+=(ys[i]-m*xs[i]-b)**2; sst+=(ys[i]-my)**2; }
+  const sy = n>2 ? Math.sqrt(ssr/(n-2)) : NaN;
+  return { m, b, n, se_m: sy/Math.sqrt(sxx), se_b: sy*Math.sqrt(1/n + mx*mx/sxx), r2: sst>0 ? 1-ssr/sst : 1 };
+}
+
+/* ================= 狀態 ================= */
+let S, setup, A, B, C, dataA, dataB, dataC, revealed;
+
+function newWorld(){
+  S = {
+    m: 30 + 60*Math.random(),                      // 黏土真值 g
+    act: {},
+    rodW: 8 + 4*Math.random(),                     // 竹筷接桿總質量 g
+    rodCOM: ROD_L/2 + (Math.random()*2-1)*1.5,     // 重心距左端 cm
+    dp: 0.25 + 0.15*Math.random(),                 // 支點高於桿軸 cm（產生回復力矩）
+    tauF: 0.3 + 0.4*Math.random(),                 // 支點靜摩擦力矩 g·cm
+    mu: 0.012 + 0.018*Math.random(),               // 滑輪摩擦比例
+    kP: 3 + 5*Math.random(),                       // 滑輪等效質量 I/r^2 g
+    dy: (Math.random()<0.5?-1:1) * (0.8 + 1.7*Math.random()), // 未調等高時滑輪頂比 A 高 cm
+    knot: 0.03*gauss()                             // 支點線結位置偏差 cm
+  };
+  MASSES.forEach(o => { S.act[o.id] = o.nom * (1 + clamp(0.004*gauss(), -0.01, 0.01)); });
+  setup = { Pnom: 22.0, taped:false, Dtrue:100, Dread:null, leveled:false };
+  A = { a:8, x:10, sel:new Set(['a','b','c','d','e']), theta:0, da:0, dx:0, Pact:22 };
+  B = { cfg:'clayEnd', sel:new Set(['a']), eq:null, dir:0, sread:null };
+  C = { sel:new Set(['a','b','c','f']), h:60, hread:null, running:false, t0:0, motion:null, tStop:null, raf:0 };
+  dataA = []; dataB = []; dataC = []; revealed = false;
+  measureD(); measureH(); resamplePivot(); redrawAll();
+}
+function resamplePivot(){
+  A.Pact = setup.taped ? setup.Pnom + S.knot : setup.Pnom + S.knot + 0.25*gauss();
+  A.da = 0.04*gauss(); A.dx = 0.04*gauss();
+}
+function measureD(){ setup.Dread = r05(setup.Dtrue + 0.05*gauss()); }
+function measureH(){ C.hread = r05(C.h + 0.05*gauss()); }
+
+/* ================= 分頁 ================= */
+document.querySelectorAll('#nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('section.tab').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); $(b.dataset.t).classList.add('on');
+  if(b.dataset.t==='t5') analyzeAll();
+  if(b.dataset.t==='t6') renderDiag();
+  window.scrollTo(0,0);
+});
+
+/* ================= 掛碼選擇器 ================= */
+function massPicker(boxId, set, onchange){
+  const box = $(boxId); box.innerHTML = '';
+  MASSES.forEach(o => {
+    const l = document.createElement('label');
+    const c = document.createElement('input'); c.type='checkbox'; c.checked = set.has(o.id);
+    c.onchange = () => { c.checked ? set.add(o.id) : set.delete(o.id); onchange(); };
+    l.appendChild(c); l.appendChild(document.createTextNode(o.label)); box.appendChild(l);
+  });
+}
+
+/* ================= ② 組裝 ================= */
+$('inP').onchange = () => {
+  let v = parseFloat($('inP').value); if(!isFinite(v)) v = 22;
+  v = clamp(Math.round(v*10)/10, 15, 29); $('inP').value = v.toFixed(1);
+  setup.Pnom = v; resamplePivot(); setSliderLimits(); updateA();
+};
+$('chkTape').onchange = () => { setup.taped = $('chkTape').checked; $('stepTape').classList.toggle('done', setup.taped); resamplePivot(); updateA(); };
+$('inD').onchange = () => {
+  let v = parseFloat($('inD').value); if(!isFinite(v)) v = 100;
+  v = clamp(Math.round(v), 40, 140); $('inD').value = v;
+  setup.Dtrue = v; measureD(); $('Dread').textContent = fx(setup.Dread,2); B.eq=null; drawB();
+};
+$('chkLevel').onchange = () => { setup.leveled = $('chkLevel').checked; $('stepLevel').classList.toggle('done', setup.leveled); B.eq=null; drawB(); };
+
+/* ================= ③ 方法 A ================= */
+const SC_A = 18;               // px/cm
+const PIV = {x:450, y:120};
+function setSliderLimits(){
+  $('slA').max = (setup.Pnom - 0.6).toFixed(2);
+  $('slX').max = (ROD_L - setup.Pnom - 0.6).toFixed(2);
+  A.a = clamp(A.a, 1, setup.Pnom-0.6); A.x = clamp(A.x, 1, ROD_L-setup.Pnom-0.6);
+  $('slA').value = A.a; $('slX').value = A.x;
+}
+function leverTorque(){
+  const posClay = setup.Pnom - A.a + A.da;         // 距左端 cm（真實受力點）
+  const posM = setup.Pnom + A.x + A.dx;
+  const M = actSum(A.sel);
+  const tau = S.m*(A.Pact - posClay) - M*(posM - A.Pact) - S.rodW*(S.rodCOM - A.Pact); // 正：左端下沉
+  return { tau, R: (S.m + M + S.rodW)*S.dp };
+}
+const THMAX = 12*Math.PI/180;
+function settleA(fric){
+  const {tau, R} = leverTorque();
+  const net = tau - R*Math.sin(A.theta);
+  if(Math.abs(net) > fric){
+    const target = (tau - Math.sign(net)*fric)/R;
+    A.theta = clamp(Math.asin(clamp(target,-1,1)), -THMAX, THMAX);
+  }
+}
+function updateA(){ settleA(S.tauF); drawA(); }
+function drawA(){
+  const svg = $('svgA');
+  const th = A.theta, cs = Math.cos(-th), sn = Math.sin(-th);
+  const pt = s => ({ x: PIV.x + (s - A.Pact)*SC_A*cs, y: PIV.y + 6 + (s - A.Pact)*SC_A*sn });
+  let h = `<defs><pattern id="gm" width="${SC_A/2}" height="${SC_A/2}" patternUnits="userSpaceOnUse"><path d="M ${SC_A/2} 0 L 0 0 0 ${SC_A/2}" fill="none" stroke="#e9f3f6" stroke-width="0.6"/></pattern>
+  <pattern id="gM" width="${SC_A}" height="${SC_A}" patternUnits="userSpaceOnUse" x="${PIV.x}" y="${PIV.y+6}"><rect width="${SC_A}" height="${SC_A}" fill="url(#gm)"/><path d="M ${SC_A} 0 L 0 0 0 ${SC_A}" fill="none" stroke="#cfe3ea" stroke-width="0.9"/></pattern></defs>
+  <rect x="0" y="0" width="900" height="380" fill="#fbfdfe"/>
+  <rect x="40" y="40" width="820" height="320" fill="url(#gM)"/>
+  <text x="46" y="56" font-size="12" fill="#5d6a73">方格紙背景（大格 1 cm）</text>
+  <line x1="40" y1="${PIV.y+6}" x2="860" y2="${PIV.y+6}" stroke="#1f6f8b" stroke-dasharray="6 4" stroke-width="1"/>
+  <line x1="${PIV.x}" y1="0" x2="${PIV.x}" y2="${PIV.y}" stroke="#444" stroke-width="1.5"/>`;
+  // 竹筷
+  const L0 = pt(0), L1 = pt(ROD_L);
+  h += `<line x1="${L0.x}" y1="${L0.y}" x2="${L1.x}" y2="${L1.y}" stroke="#c9a36a" stroke-width="7" stroke-linecap="round"/>`;
+  const o1 = pt(20), o2 = pt(24);
+  h += `<line x1="${o1.x}" y1="${o1.y}" x2="${o2.x}" y2="${o2.y}" stroke="#e8e2d0" stroke-width="9" opacity=".75"/>`;
+  for(let s=0; s<=ROD_L; s+=2){ const p=pt(s); h += `<circle cx="${p.x}" cy="${p.y}" r="0.9" fill="#6b4f22"/>`; }
+  h += `<circle cx="${PIV.x}" cy="${PIV.y}" r="4" fill="#333"/>`;
+  // 黏土
+  const pc = pt(setup.Pnom - A.a), clayY = pc.y + 70;
+  h += `<line x1="${pc.x}" y1="${pc.y}" x2="${pc.x}" y2="${clayY-18}" stroke="#444"/>
+        <ellipse cx="${pc.x}" cy="${clayY}" rx="${14+S.m*0.12}" ry="${12+S.m*0.1}" fill="#b5673d"/>
+        <text x="${pc.x}" y="${clayY+4}" text-anchor="middle" fill="#fff" font-size="13">黏土</text>`;
+  // 掛碼
+  const pm = pt(setup.Pnom + A.x), ids = MASSES.filter(o=>A.sel.has(o.id));
+  let yy = pm.y + 40;
+  h += `<line x1="${pm.x}" y1="${pm.y}" x2="${pm.x}" y2="${yy}" stroke="#444"/>`;
+  ids.forEach(o => { const hh = o.nom===10?14:8; h += `<rect x="${pm.x-11}" y="${yy}" width="22" height="${hh}" fill="#7b8794" stroke="#555"/>`; yy += hh+1; });
+  if(!ids.length) h += `<text x="${pm.x+6}" y="${pm.y+44}" font-size="12" fill="#b3261e">未掛掛碼</text>`;
+  h += `<text x="${PIV.x+8}" y="20" font-size="12" fill="#333">支點吊線（刻度 ${setup.Pnom.toFixed(1)} cm）</text>`;
+  svg.innerHTML = h;
+  // 讀數
+  const armR = ROD_L - A.Pact;
+  const rise = -armR*Math.sin(th)*10;          // mm，正：右端高於水平線
+  const rr = Math.round(rise*2)/2;
+  $('Aend').textContent = Math.abs(rr)<0.25 ? '與水平線重合（±0.5 mm 內）' : (rr>0 ? `高於水平線 ${rr.toFixed(1)} mm` : `低於水平線 ${(-rr).toFixed(1)} mm`);
+  $('Astate').innerHTML = Math.abs(th) >= THMAX-1e-6 ? '<span class="warn">竹筷一端已碰到桌面，差得太遠。若掛碼移到末端仍無法平衡，請縮小 a 或增加掛碼。</span>' : '';
+  $('lbA').textContent = `a ≈ ${A.a.toFixed(2)} cm`;
+  $('lbX').textContent = `x ≈ ${A.x.toFixed(2)} cm`;
+  $('AMsum').textContent = nomSum(A.sel);
+}
+$('slA').oninput = () => { A.a = parseFloat($('slA').value); updateA(); };
+$('slX').oninput = () => { A.x = parseFloat($('slX').value); updateA(); };
+document.querySelectorAll('[data-dx]').forEach(b => b.onclick = () => {
+  A.x = clamp(A.x + parseFloat(b.dataset.dx), 1, ROD_L - setup.Pnom - 0.6); $('slX').value = A.x; updateA();
+});
+$('btnTapA').onclick = () => { settleA(S.tauF*0.15); drawA(); };
+$('btnRecA').onclick = () => {
+  if(!A.sel.size){ alert('請先掛上掛碼。'); return; }
+  if(Math.abs(A.theta) >= THMAX-1e-6 && !confirm('竹筷一端還靠在桌面上，並沒有平衡。仍要記錄這筆數據嗎？')) return;
+  const aR = r05(A.a + 0.03*gauss()), xR = r05(A.x + 0.03*gauss());
+  dataA.push({ M: nomSum(A.sel), a: aR, x: xR });
+  resamplePivot(); updateA(); renderTblA();
+};
+function renderTblA(){
+  const tb = $('tblA').querySelector('tbody'); tb.innerHTML = '';
+  dataA.forEach((r,i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td><input value="${r.M}" data-k="M"></td><td><input value="${r.a.toFixed(2)}" data-k="a"></td><td><input value="${r.x.toFixed(2)}" data-k="x"></td>
+      <td>${fx(r.M*r.x,1)}</td><td>${fx(r.M*r.x/r.a,2)}</td><td><button class="sec">刪</button></td>`;
+    tr.querySelectorAll('input').forEach(inp => inp.onchange = () => { const v=parseFloat(inp.value); if(isFinite(v)) r[inp.dataset.k]=v; renderTblA(); });
+    tr.querySelector('button').onclick = () => { dataA.splice(i,1); renderTblA(); };
+    tb.appendChild(tr);
+  });
+}
+
+/* ================= ④ 方法 B ================= */
+const SC_B = 4.2;
+function bMasses(){ // 回傳 {mid, end}（實際值）與標稱已知掛碼
+  const k = actSum(B.sel);
+  return B.cfg==='clayEnd' ? {mid:k, end:S.m} : {mid:S.m, end:k};
+}
+function equilibriumB(dir){
+  const {mid, end} = bMasses();
+  if(end<=0 || mid<=0) return {err:'請選擇掛碼。'};
+  const f = 1.4*S.mu*(0.6 + 0.4*Math.random());
+  const Ts = end*(1 + dir*f);                   // 跨距段張力（gf）
+  const sn = mid/(2*Ts);
+  if(sn >= 0.995) return {err:'中間物太重，兩側張力撐不住，直接掉到地上。'};
+  const th = Math.asin(sn), tn = Math.tan(th);
+  const D = setup.Dtrue, dy = setup.leveled ? 0 : S.dy;
+  const xP = (D - dy/tn)/2;                     // 掛環距 A 的水平距離
+  const sA = xP*tn;                             // 距 A 點水平線的下垂深度
+  if(xP <= 1 || xP >= D-1) return {err:'掛環滑到端點，無法平衡（不等高太嚴重）。'};
+  if(sA + 5 > TABLE_H) return {err:'下垂太深，中間物碰到地面。請加大繩端質量或縮短跨距。'};
+  return {th, xP, sA, mid, end};
+}
+function drawB(){
+  const svg = $('svgB');
+  const x0 = 60, y0 = 70, D = setup.Dtrue, dy = setup.leveled ? 0 : S.dy;
+  const px = x0 + D*SC_B, py = y0 - dy*SC_B, pr = 9;
+  let h = `<rect width="900" height="420" fill="#fbfdfe"/>
+    <rect x="0" y="${y0}" width="${x0}" height="350" fill="#e1d6bf"/>
+    <rect x="${px+10}" y="${y0+4}" width="${900-px}" height="350" fill="#e1d6bf"/>
+    <line x1="0" y1="${y0+TABLE_H*SC_B}" x2="900" y2="${y0+TABLE_H*SC_B}" stroke="#8a7a5c" stroke-width="3"/>
+    <text x="8" y="${y0+TABLE_H*SC_B-6}" font-size="12" fill="#6b5c40">地面（桌面下 76 cm）</text>
+    <circle cx="${x0}" cy="${y0}" r="4" fill="#222"/><text x="${x0-40}" y="${y0-12}" font-size="12">A（膠帶固定）</text>
+    <line x1="${x0}" y1="${y0}" x2="${px}" y2="${y0}" stroke="#1f6f8b" stroke-dasharray="5 4"/>
+    <circle cx="${px}" cy="${py+pr}" r="${pr}" fill="none" stroke="#333" stroke-width="2"/><circle cx="${px}" cy="${py+pr}" r="2" fill="#333"/>
+    <text x="${px-14}" y="${py-8}" font-size="12">滑輪</text>`;
+  const eq = B.eq;
+  const endIsClay = B.cfg==='clayEnd';
+  const drawMassStack = (cx, top) => {
+    let s='', yy=top; MASSES.filter(o=>B.sel.has(o.id)).forEach(o=>{ const hh=o.nom===10?12:7; s+=`<rect x="${cx-10}" y="${yy}" width="20" height="${hh}" fill="#7b8794" stroke="#555"/>`; yy+=hh+1; }); return s; };
+  const drawClay = (cx, top) => `<ellipse cx="${cx}" cy="${top+16}" rx="${12+S.m*0.1}" ry="${10+S.m*0.08}" fill="#b5673d"/><text x="${cx}" y="${top+20}" text-anchor="middle" fill="#fff" font-size="11">黏土</text>`;
+  let loopX, loopY, endLen;
+  if(eq && !eq.err){
+    loopX = x0 + eq.xP*SC_B; loopY = y0 + eq.sA*SC_B;
+    endLen = 60 + eq.sA*SC_B*0.4;
+  } else { loopX = (x0+px)/2; loopY = y0 + 6; endLen = 80; }
+  h += `<polyline points="${x0},${y0} ${loopX},${loopY} ${px},${py}" fill="none" stroke="#333" stroke-width="1.4"/>
+        <line x1="${px+pr}" y1="${py+pr}" x2="${px+pr}" y2="${py+pr+endLen}" stroke="#333" stroke-width="1.4"/>
+        <circle cx="${loopX}" cy="${loopY+3}" r="3.5" fill="none" stroke="#333"/>
+        <line x1="${loopX}" y1="${loopY+6}" x2="${loopX}" y2="${loopY+22}" stroke="#333"/>`;
+  h += endIsClay ? drawClay(px+pr, py+pr+endLen) + drawMassStack(loopX, loopY+22) : drawMassStack(px+pr, py+pr+endLen) + drawClay(loopX, loopY+22);
+  if(eq && !eq.err){
+    h += `<line x1="${loopX}" y1="${y0}" x2="${loopX}" y2="${loopY}" stroke="#c0582b" stroke-width="1.2"/>
+          <text x="${loopX+6}" y="${(y0+loopY)/2}" font-size="13" fill="#c0582b">s</text>`;
+  }
+  h += `<text x="${(x0+px)/2}" y="${y0-8}" text-anchor="middle" font-size="12" fill="#1f6f8b">D = ${D} cm</text>`;
+  svg.innerHTML = h;
+  $('BMsum').textContent = nomSum(B.sel);
+  $('Bmlabel').textContent = B.cfg==='clayEnd' ? '中間的已知掛碼 mₖ' : '繩端的已知掛碼 M';
+  if(!eq){ $('Bmsg').innerHTML = '<span class="note">請按「往下拉後放手」或「往上托後放手」讓系統靜止。</span>'; $('Bs').textContent='—'; $('btnRecB').disabled=true; }
+  else if(eq.err){ $('Bmsg').innerHTML = `<span class="warn">${eq.err}</span>`; $('Bs').textContent='—'; $('btnRecB').disabled=true; }
+  else { $('Bmsg').innerHTML = `<span class="ok">已靜止（${B.dir<0?'下拉後放手':'上托後放手'}）</span>`; $('Bs').textContent = fx(B.sread,2); $('btnRecB').disabled=false; }
+  $('Dread').textContent = fx(setup.Dread,2);
+}
+document.querySelectorAll('input[name=cfgB]').forEach(r => r.onchange = () => { B.cfg = r.value; B.eq=null; drawB(); });
+function releaseB(dir){
+  B.dir = dir; B.eq = equilibriumB(dir);
+  B.sread = (B.eq && !B.eq.err) ? r05(B.eq.sA + 0.08*gauss()) : null;
+  drawB();
+}
+$('btnBdown').onclick = () => releaseB(-1);   // 中間物上升後停下：繩端下降，Ts = end(1−f)
+$('btnBup').onclick = () => releaseB(+1);     // 中間物下降後停下：繩端上升，Ts = end(1+f)
+$('btnRecB').onclick = () => {
+  if(!B.eq || B.eq.err) return;
+  const mk = nomSum(B.sel);
+  let row = dataB.find(r => r.cfg===B.cfg && r.mk===mk && r.D===setup.Dread);
+  if(!row){ row = {cfg:B.cfg, mk, D:setup.Dread, sDown:null, sUp:null}; dataB.push(row); dataB.sort((p,q)=>p.cfg.localeCompare(q.cfg)||p.mk-q.mk); }
+  if(B.dir<0) row.sDown = B.sread; else row.sUp = B.sread;
+  $('btnRecB').disabled = true; renderTblB();
+};
+function rowB(r){
+  const ss = [r.sDown, r.sUp].filter(v=>v!=null && isFinite(v));
+  const s = ss.length ? ss.reduce((a,b)=>a+b,0)/ss.length : null;
+  const sn = s!=null ? s/Math.sqrt(s*s + (r.D/2)**2) : null;
+  return {s, sn, both: ss.length===2};
+}
+function renderTblB(){
+  const tb = $('tblB').querySelector('tbody'); tb.innerHTML='';
+  dataB.forEach((r,i) => {
+    const d = rowB(r); const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.cfg==='clayEnd'?'一（黏土在端）':'二（黏土在中）'}</td><td>${r.mk}</td>
+      <td><input value="${r.sDown==null?'':r.sDown.toFixed(2)}" data-k="sDown"></td><td><input value="${r.sUp==null?'':r.sUp.toFixed(2)}" data-k="sUp"></td>
+      <td>${fx(d.s,2)}</td><td>${fx(d.sn,4)}</td><td><button class="sec">刪</button></td>`;
+    tr.querySelectorAll('input').forEach(inp => inp.onchange = () => { const v=parseFloat(inp.value); r[inp.dataset.k] = isFinite(v)?v:null; renderTblB(); });
+    tr.querySelector('button').onclick = () => { dataB.splice(i,1); renderTblB(); };
+    tb.appendChild(tr);
+  });
+}
+
+/* ================= ⑤ 方法 C（Atwood） ================= */
+const SC_C = 4.4, FLOOR_C = 410, PUL = {x:230, y:40, r:22};
+function motionC(){
+  const M = actSum(C.sel), m = S.m, load = M + m;
+  const diff = M - m, Ffric = S.mu*load;      // gf
+  if(Math.abs(diff) <= 1.3*Ffric) return {moves:false, clayDown: diff<0};
+  const a = G*(Math.abs(diff) - Ffric)/(load + S.kP);
+  return {moves:true, a, clayDown: diff<0, tTrue: Math.sqrt(2*C.h/a)};
+}
+function drawC(el){
+  const svg = $('svgC'), mo = C.motion || motionC();
+  const hpx = C.h*SC_C;
+  let yHeavy0 = FLOOR_C - hpx, yLight0 = FLOOR_C;   // 物體底部 y
+  let d = 0;
+  if(C.running || C.tStop!=null){ if(mo.moves) d = Math.min(0.5*mo.a*el*el, C.h)*SC_C; }
+  const clayDown = mo.clayDown;
+  const clayBottom = clayDown ? yHeavy0 + d : yLight0 - d;
+  const massBottom = clayDown ? yLight0 - d : yHeavy0 + d;
+  const lx = PUL.x - PUL.r, rx = PUL.x + PUL.r;
+  let h = `<rect width="460" height="440" fill="#fbfdfe"/>
+    <line x1="0" y1="${FLOOR_C}" x2="460" y2="${FLOOR_C}" stroke="#8a7a5c" stroke-width="3"/>
+    <rect x="${PUL.x-4}" y="0" width="8" height="${PUL.y}" fill="#999"/>
+    <circle cx="${PUL.x}" cy="${PUL.y}" r="${PUL.r}" fill="none" stroke="#333" stroke-width="3"/>
+    <circle cx="${PUL.x}" cy="${PUL.y}" r="3" fill="#333"/>`;
+  // 刻度尺
+  h += `<line x1="400" y1="${FLOOR_C}" x2="400" y2="${FLOOR_C-75*SC_C}" stroke="#c9a36a" stroke-width="10"/>`;
+  for(let c=0;c<=75;c+=5){ const y=FLOOR_C-c*SC_C; h+=`<line x1="395" y1="${y}" x2="405" y2="${y}" stroke="#444"/>${c%10===0?`<text x="410" y="${y+4}" font-size="10">${c}</text>`:''}`; }
+  h += `<line x1="300" y1="${FLOOR_C-hpx}" x2="395" y2="${FLOOR_C-hpx}" stroke="#c0582b" stroke-dasharray="4 3"/><text x="304" y="${FLOOR_C-hpx-4}" font-size="11" fill="#c0582b">h</text>`;
+  // 黏土在左、掛碼在右
+  const clayH = 30, clayTop = clayBottom - clayH;
+  h += `<line x1="${lx}" y1="${PUL.y}" x2="${lx}" y2="${clayTop}" stroke="#333" stroke-width="1.4"/>
+        <ellipse cx="${lx}" cy="${clayTop+clayH/2}" rx="${12+S.m*0.1}" ry="${clayH/2}" fill="#b5673d"/>
+        <text x="${lx}" y="${clayTop+clayH/2+4}" text-anchor="middle" fill="#fff" font-size="11">黏土</text>`;
+  const ids = MASSES.filter(o=>C.sel.has(o.id));
+  const stackH = ids.reduce((s,o)=>s+(o.nom===10?13:8),0) || 10;
+  let yy = massBottom - stackH;
+  h += `<line x1="${rx}" y1="${PUL.y}" x2="${rx}" y2="${yy}" stroke="#333" stroke-width="1.4"/>`;
+  ids.forEach(o=>{ const hh=o.nom===10?12:7; h+=`<rect x="${rx-10}" y="${yy}" width="20" height="${hh}" fill="#7b8794" stroke="#555"/>`; yy+=hh+1; });
+  svg.innerHTML = h;
+}
+function watchText(t){ return (Math.round(t/0.2)*0.2).toFixed(1); }
+function tickC(){
+  if(!C.running) return;
+  const el = (performance.now() - C.t0)/1000;
+  $('watch').textContent = watchText(el);
+  const mo = C.motion;
+  drawC(el);
+  if(mo.moves && el >= mo.tTrue && !C.landedShown){ C.landedShown = true; $('Cmsg').innerHTML = '<b>落地！</b>'; }
+  if(el > (mo.moves ? mo.tTrue : 0) + 6){ stopC(true); return; }
+  C.raf = requestAnimationFrame(tickC);
+}
+function stopC(auto){
+  if(!C.running) return;
+  C.running = false; cancelAnimationFrame(C.raf);
+  const el = (performance.now() - C.t0)/1000;
+  C.tStop = auto ? null : Math.round(el/0.2)*0.2;
+  $('btnStop').disabled = true; $('btnRel').disabled = false;
+  drawC(C.motion.moves ? Math.min(el, C.motion.tTrue) : 0);
+  if(auto){ $('Cmsg').innerHTML = '<span class="warn">太久沒有停錶，本次作廢。</span>'; return; }
+  $('watch').textContent = C.tStop.toFixed(1);
+  if(!C.motion.moves){ $('Cmsg').innerHTML = '<span class="warn">系統完全沒動：兩側重量差小於滑輪靜摩擦。請加大質量差。</span>'; return; }
+  if(el < C.motion.tTrue - 0.05){ $('Cmsg').innerHTML += ' <span class="warn">（還沒落地就停錶了）</span>'; }
+  $('btnRecC').disabled = C.tStop <= 0;
+}
+$('btnRel').onclick = () => {
+  if(!C.sel.size){ alert('請先選擇掛碼。'); return; }
+  C.motion = motionC(); C.running = true; C.tStop = null; C.landedShown = false;
+  C.t0 = performance.now();
+  $('btnRel').disabled = true; $('btnStop').disabled = false; $('btnRecC').disabled = true;
+  $('Cmsg').textContent = C.motion.moves ? (C.motion.clayDown ? '黏土下落中…' : '掛碼下落中…') : '…';
+  C.raf = requestAnimationFrame(tickC);
+};
+$('btnStop').onclick = () => stopC(false);
+document.addEventListener('keydown', e => { if(e.code==='Space' && C.running){ e.preventDefault(); stopC(false); } });
+$('btnResetC').onclick = () => { if(C.running) return; C.tStop=null; C.motion=null; $('watch').textContent='0.0'; $('Cmsg').textContent=''; $('btnRecC').disabled=true; drawC(0); };
+$('slH').oninput = () => { C.h = parseInt($('slH').value); measureH(); $('lbH').textContent = C.h+' cm'; $('Chread').textContent = fx(C.hread,2); if(!C.running){ C.tStop=null; C.motion=null; $('btnRecC').disabled=true; drawC(0);} };
+$('btnRecC').onclick = () => {
+  if(C.tStop==null || !C.motion || !C.motion.moves) return;
+  dataC.push({ M: nomSum(C.sel), h: C.hread, t: C.tStop, clayDown: C.motion.clayDown });
+  $('btnRecC').disabled = true; renderTblC(); analyzeC();
+};
+function rowC(r){
+  const a = 2*r.h/(r.t*r.t);
+  const m1 = r.clayDown ? r.M*(G+a)/(G-a) : r.M*(G-a)/(G+a);
+  return {a, m1: (a<G) ? m1 : NaN};
+}
+function renderTblC(){
+  const tb = $('tblC').querySelector('tbody'); tb.innerHTML='';
+  dataC.forEach((r,i)=>{
+    const d = rowC(r), tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${r.M}</td><td>${r.clayDown?'黏土下落':'掛碼下落'}</td><td>${r.h.toFixed(2)}</td>
+      <td><input value="${r.t.toFixed(1)}" data-k="t"></td><td>${fx(d.a,1)}</td><td>${fx(d.m1,1)}</td><td><button class="sec">刪</button></td>`;
+    tr.querySelector('input').onchange = e => { const v=parseFloat(e.target.value); if(isFinite(v)&&v>0) r.t=v; renderTblC(); analyzeC(); };
+    tr.querySelector('button').onclick = () => { dataC.splice(i,1); renderTblC(); analyzeC(); };
+    tb.appendChild(tr);
+  });
+}
+
+/* ================= 作圖 ================= */
+function niceTicks(lo, hi, n){
+  const span = hi-lo || 1, step0 = span/n, p = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1,2,2.5,5,10].map(k=>k*p).find(s=>s>=step0) || 10*p;
+  const t=[]; for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step) t.push(+v.toFixed(10));
+  return {t, step};
+}
+function plot(svgId, series, opt){
+  // series: [{pts:[[x,y]], color, fit:{m,b}, label}]
+  const svg = $(svgId), W=480, H=320, L=62, R=14, T=16, Bm=48;
+  const all = series.flatMap(s=>s.pts);
+  if(!all.length){ svg.innerHTML = `<rect width="${W}" height="${H}" fill="#fbfaf6"/><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#999">尚無數據</text>`; return; }
+  let xs = all.map(p=>p[0]), ys = all.map(p=>p[1]);
+  if(opt.zeroX) xs.push(0); if(opt.zeroY) ys.push(0);
+  let x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
+  const px=(x1-x0)*0.08||1, py=(y1-y0)*0.1||1; x0-=opt.zeroX?0:px; x1+=px; y0-=opt.zeroY?0:py; y1+=py;
+  if(opt.zeroX) x0=Math.min(x0, -px*0.5); if(opt.zeroY) y0=Math.min(y0,-py*0.5);
+  const X = v => L + (v-x0)/(x1-x0)*(W-L-R), Y = v => H-Bm - (v-y0)/(y1-y0)*(H-Bm-T);
+  let h = `<rect width="${W}" height="${H}" fill="#fff"/>`;
+  const tx = niceTicks(x0,x1,6), ty = niceTicks(y0,y1,5);
+  const dec = s => Math.max(0, -Math.floor(Math.log10(s))+ (s/Math.pow(10,Math.floor(Math.log10(s)))===2.5?1:0));
+  tx.t.forEach(v=>{ h+=`<line x1="${X(v)}" y1="${T}" x2="${X(v)}" y2="${H-Bm}" stroke="#eee"/><text x="${X(v)}" y="${H-Bm+15}" font-size="10" text-anchor="middle">${v.toFixed(dec(tx.step))}</text>`; });
+  ty.t.forEach(v=>{ h+=`<line x1="${L}" y1="${Y(v)}" x2="${W-R}" y2="${Y(v)}" stroke="#eee"/><text x="${L-5}" y="${Y(v)+3}" font-size="10" text-anchor="end">${v.toFixed(dec(ty.step))}</text>`; });
+  if(x0<0&&x1>0) h+=`<line x1="${X(0)}" y1="${T}" x2="${X(0)}" y2="${H-Bm}" stroke="#aaa"/>`;
+  if(y0<0&&y1>0) h+=`<line x1="${L}" y1="${Y(0)}" x2="${W-R}" y2="${Y(0)}" stroke="#aaa"/>`;
+  h += `<rect x="${L}" y="${T}" width="${W-L-R}" height="${H-Bm-T}" fill="none" stroke="#888"/>`;
+  h += `<text x="${(L+W-R)/2}" y="${H-10}" font-size="12" text-anchor="middle">${opt.xl}</text>`;
+  h += `<text x="14" y="${(T+H-Bm)/2}" font-size="12" text-anchor="middle" transform="rotate(-90 14 ${(T+H-Bm)/2})">${opt.yl}</text>`;
+  series.forEach(s=>{
+    if(s.fit){ const a=x0, b=x1; h+=`<line x1="${X(a)}" y1="${Y(s.fit.m*a+s.fit.b)}" x2="${X(b)}" y2="${Y(s.fit.m*b+s.fit.b)}" stroke="${s.color}" stroke-width="1.6" opacity=".8"/>`; }
+    s.pts.forEach(p=>{ h+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4" fill="${s.color}" stroke="#fff"/>`; });
+  });
+  series.forEach((s,i)=>{ if(s.label) h+=`<rect x="${L+8}" y="${T+6+i*16}" width="10" height="10" fill="${s.color}"/><text x="${L+22}" y="${T+15+i*16}" font-size="11">${s.label}</text>`; });
+  svg.innerHTML = h;
+}
+
+/* ================= 分析 ================= */
+let EST = {};
+function analyzeA(){
+  const pts = dataA.filter(r=>r.a>0 && isFinite(r.x)).map(r=>[r.a, r.M*r.x]);
+  const f = linreg(pts.map(p=>p[0]), pts.map(p=>p[1]));
+  plot('plotA', [{pts, color:'#1f6f8b', fit:f}], {xl:'a（cm）', yl:'M·x（g·cm）', zeroX:true});
+  if(!f || f.n<3){ $('resA').innerHTML = '<p class="note">至少需要 3 筆數據（且 a 不可全相同）。</p>'; EST.A=null; return; }
+  const singles = dataA.map(r=>r.M*r.x/r.a), mean = singles.reduce((a,b)=>a+b,0)/singles.length;
+  const sd = Math.sqrt(singles.reduce((s,v)=>s+(v-mean)**2,0)/Math.max(1,singles.length-1));
+  EST.A = {m:f.m, se:f.se_m, b:f.b, n:f.n, single:mean, singleSE: sd/Math.sqrt(singles.length)};
+  $('resA').innerHTML = `<p>最小平方法：M·x = (<b>${fx(f.m,2)}</b> ± ${fx(f.se_m,2)}) a + (${fx(f.b,1)} ± ${fx(f.se_b,1)})</p>
+    <p>R² = ${fx(f.r2,5)}，n = ${f.n}</p>
+    <p class="big">m<sub>A</sub> = ${fx(f.m,2)} ± ${fx(f.se_m,2)} g</p>
+    <p>截距 −Wc = ${fx(f.b,1)} g·cm，代表竹筷重心${f.b<0?'偏向掛碼側':'偏向黏土側'}${Math.abs(f.b)<2*f.se_b?'（與 0 無顯著差異）':''}。</p>
+    <p class="note">對照：單點 Mx/a 平均 = ${fx(mean,2)} ± ${fx(sd/Math.sqrt(singles.length),2)} g。偏心使各點的 Mx/a 隨 a 系統性改變，平均值無法消除這個偏差。</p>`;
+}
+function analyzeB(){
+  const rows = dataB.map(r=>({r, d:rowB(r)})).filter(o=>o.d.sn!=null);
+  const e = rows.filter(o=>o.r.cfg==='clayEnd'), m = rows.filter(o=>o.r.cfg==='clayMid');
+  const pe = e.map(o=>[o.r.mk, o.d.sn]), pm = m.map(o=>[1/o.r.mk, o.d.sn]);
+  const fe = linreg(pe.map(p=>p[0]), pe.map(p=>p[1])), fm = linreg(pm.map(p=>p[0]), pm.map(p=>p[1]));
+  let html = '';
+  EST.B1 = null; EST.B2 = null;
+  if(pe.length){
+    plot('plotB', [{pts:pe, color:'#c0582b', fit:fe, label:'配置一：sinθ 對 mₖ'}], {xl:'中間掛碼 mₖ（g）', yl:'sinθ', zeroX:true, zeroY:true});
+  } else if(pm.length){
+    plot('plotB', [{pts:pm, color:'#6a4c93', fit:fm, label:'配置二：sinθ 對 1/M'}], {xl:'1/M（1/g）', yl:'sinθ', zeroX:true, zeroY:true});
+  } else plot('plotB', [], {});
+  if(fe && fe.n>=3 && fe.m>0){
+    const mB = 1/(2*fe.m), se = fe.se_m/(2*fe.m*fe.m);
+    EST.B1 = {m:mB, se, b:fe.b, n:fe.n};
+    const bothN = e.filter(o=>o.d.both).length;
+    html += `<p><b>配置一</b>：sinθ = (${fx(fe.m,6)} ± ${fx(fe.se_m,6)}) mₖ + (${fx(fe.b,4)} ± ${fx(fe.se_b,4)})，R² = ${fx(fe.r2,5)}</p>
+      <p class="big">m<sub>B</sub> = 1/(2·斜率) = ${fx(mB,2)} ± ${fx(se,2)} g</p>
+      <p class="note">${bothN}/${e.length} 組有兩方向平均。理論截距應為 0，若明顯不為 0，要檢查等高或摩擦。</p>`;
+  } else if(pe.length) html += '<p class="note">配置一至少需要 3 組不同 mₖ。</p>';
+  if(fm && fm.n>=3){
+    const mB = 2*fm.m, se = 2*fm.se_m;
+    EST.B2 = {m:mB, se, b:fm.b, n:fm.n};
+    html += `<p><b>配置二</b>：sinθ = (${fx(fm.m,3)} ± ${fx(fm.se_m,3)})(1/M) + (${fx(fm.b,4)})，R² = ${fx(fm.r2,5)}</p>
+      <p class="big">m<sub>B'</sub> = 2·斜率 = ${fx(mB,2)} ± ${fx(se,2)} g</p>`;
+    if(pe.length) html += '<p class="note">（圖上只畫配置一；配置二的結果列在此。）</p>';
+  } else if(pm.length) html += '<p class="note">配置二至少需要 3 組不同 M。</p>';
+  if(!html) html = '<p class="note">尚無方法 B 數據。</p>';
+  $('resB').innerHTML = html;
+}
+function analyzeC(){
+  const up = [], dn = [];
+  dataC.forEach(r=>{ const {a} = rowC(r); if(!(a>0 && a<G)) return;
+    if(r.clayDown) dn.push([a, r.M*(G+a)]); else up.push([a, r.M*(G-a)]); });
+  const fu = linreg(up.map(p=>p[0]), up.map(p=>p[1])), fd = linreg(dn.map(p=>p[0]), dn.map(p=>p[1]));
+  const ser = [];
+  if(up.length) ser.push({pts:up, color:'#1f6f8b', fit:fu, label:'掛碼下落：M(g−a) 對 a'});
+  if(dn.length) ser.push({pts:dn, color:'#c0582b', fit:fd, label:'黏土下落：M(g+a) 對 a'});
+  plot('plotC', ser, {xl:'a（cm/s²）', yl:'y（g·cm/s²）', zeroX:true});
+  const singles = dataC.map(r=>rowC(r).m1).filter(isFinite);
+  let html = '';
+  if(singles.length){
+    const mean = singles.reduce((a,b)=>a+b,0)/singles.length;
+    const sd = singles.length>1 ? Math.sqrt(singles.reduce((s,v)=>s+(v-mean)**2,0)/(singles.length-1)) : NaN;
+    html += `<p>單點公式平均：${fx(mean,1)} g（標準差 ${fx(sd,1)} g，n = ${singles.length}）</p>`;
+    EST.Cs = {m:mean, se: sd/Math.sqrt(singles.length)};
+  } else EST.Cs = null;
+  const ok = f => f && f.n>=2;
+  EST.C = null;
+  if(ok(fu)) html += `<p>掛碼下落：截距 I₁ = ${fx(fu.b,0)} ${fu.n>2?'± '+fx(fu.se_b,0):''}，m ≈ I₁/g = ${fx(fu.b/G,1)} g（含 +F/g）</p>`;
+  if(ok(fd)) html += `<p>黏土下落：截距 I₂ = ${fx(fd.b,0)} ${fd.n>2?'± '+fx(fd.se_b,0):''}，m ≈ I₂/g = ${fx(fd.b/G,1)} g（含 −F/g）</p>`;
+  if(ok(fu) && ok(fd)){
+    const m = (fu.b+fd.b)/(2*G);
+    const se = (fu.n>2 && fd.n>2) ? Math.sqrt(fu.se_b**2 + fd.se_b**2)/(2*G) : NaN;
+    EST.C = {m, se, F:(fu.b-fd.b)/(2*G)};
+    html += `<p class="big">m<sub>C</sub> = (I₁+I₂)/2g = ${fx(m,1)} ${isFinite(se)?'± '+fx(se,1):''} g</p><p>滑輪摩擦估計 F ≈ (I₁−I₂)/2g = ${fx(EST.C.F,2)} gf</p>`;
+  } else if(ok(fu) || ok(fd)){
+    const f = ok(fu)?fu:fd; EST.C = {m:f.b/G, se: f.n>2 ? f.se_b/G : NaN, oneDir:true};
+    html += '<p class="note">只有單一方向的數據，摩擦無法消去。若質量允許，請另做反方向（黏土較重或較輕）的量測。</p>';
+  }
+  if(!html) html = '<p class="note">尚無方法 C 數據。每個運動方向至少需要 2 種不同的 M。</p>';
+  $('resC').innerHTML = html;
+}
+function analyzeAll(){ analyzeA(); analyzeB(); analyzeC(); renderCmp(); }
+function methodList(){
+  const L = [];
+  if(EST.A) L.push({k:'A', name:'A 槓桿（M·x–a 迴歸）', m:EST.A.m, se:EST.A.se});
+  if(EST.A) L.push({k:'As', name:'A 單點 Mx/a 平均（對照）', m:EST.A.single, se:EST.A.singleSE, ref:true});
+  if(EST.B1) L.push({k:'B1', name:'B 配置一（sinθ–mₖ 迴歸）', m:EST.B1.m, se:EST.B1.se});
+  if(EST.B2) L.push({k:'B2', name:'B 配置二（sinθ–1/M 迴歸）', m:EST.B2.m, se:EST.B2.se});
+  if(EST.C) L.push({k:'C', name: EST.C.oneDir ? 'C Atwood（單方向截距）' : 'C Atwood（雙方向截距平均）', m:EST.C.m, se:EST.C.se});
+  if(EST.Cs) L.push({k:'Cs', name:'C 單點公式平均（對照）', m:EST.Cs.m, se:EST.Cs.se, ref:true});
+  return L;
+}
+function combined(){
+  const main = methodList().filter(o=>!o.ref && isFinite(o.se) && o.se>0 && (o.k==='A'||o.k==='B1'||o.k==='B2'));
+  if(main.length<2) return null;
+  let sw=0, swm=0; main.forEach(o=>{ const w=1/o.se**2; sw+=w; swm+=w*o.m; });
+  return {m:swm/sw, se:1/Math.sqrt(sw), used: main.map(o=>o.k).join('、')};
+}
+function renderCmp(){
+  const L = methodList();
+  if(!L.length){ $('resCmp').innerHTML = '<p class="note">完成方法 A、B 的量測後按「更新分析」。</p>'; return; }
+  let h = '<table><tr><th>方法</th><th>m（g）</th><th>標準誤差（g）</th><th>相對誤差</th></tr>';
+  L.forEach(o=>{ h+=`<tr${o.ref?' style="color:#5d6a73"':''}><td>${o.name}</td><td>${fx(o.m,2)}</td><td>${fx(o.se,2)}</td><td>${isFinite(o.se)?fx(100*o.se/o.m,2)+'%':'—'}</td></tr>`; });
+  h += '</table>';
+  const c = combined();
+  if(c) h += `<p class="big" style="margin-top:10px">加權平均（${c.used}）：m = ${fx(c.m,2)} ± ${fx(c.se,2)} g</p><p class="note">權重 = 1/SE²。兩方法結果在誤差範圍內相符，才可以合併。</p>`;
+  $('resCmp').innerHTML = h;
+}
+$('btnAna').onclick = analyzeAll;
+
+/* ================= ⑥ ================= */
+function renderDiag(){
+  analyzeAll();
+  let h = '<h3>你這次實驗的狀況</h3><ul>';
+  h += setup.taped ? '<li class="ok">支點線結已用膠帶固定。</li>' : '<li class="warn">支點線結沒有固定：每次讀數支點都會滑動約 ±0.25 cm，方法 A 的散佈因此變大。</li>';
+  h += setup.leveled ? '<li class="ok">A 點與滑輪頂已調成等高。</li>' : '<li class="warn">A 點與滑輪頂沒有調成等高：方法 B 的 sinθ 有系統誤差（真實高度差在揭曉時顯示）。</li>';
+  const nb = dataB.length, both = dataB.filter(r=>rowB(r).both).length;
+  if(nb) h += both===nb ? '<li class="ok">方法 B 每組都做了兩方向逼近。</li>' : `<li class="warn">方法 B 有 ${nb-both} 組只做單一方向，滑輪摩擦沒有消去。</li>`;
+  if(EST.A && dataA.length){ const as=dataA.map(r=>r.a); h += `<li>方法 A 的 a 範圍：${fx(Math.min(...as),2)}–${fx(Math.max(...as),2)} cm。範圍越大，斜率越準。</li>`; }
+  h += '</ul>';
+  $('diag').innerHTML = h;
+}
+function renderTruth(){
+  if(!revealed){ $('truth').innerHTML=''; return; }
+  analyzeAll();
+  const T = S.m;
+  let h = `<p class="big">黏土真實質量 m = ${T.toFixed(2)} g</p>
+    <table><tr><th>方法</th><th>量測值（g）</th><th>SE（g）</th><th>偏差（g）</th><th>偏差 %</th><th>z = 偏差/SE</th></tr>`;
+  const all = methodList(); const c = combined(); if(c) all.push({name:'加權平均', m:c.m, se:c.se});
+  all.forEach(o=>{
+    const dev = o.m - T, z = (isFinite(o.se)&&o.se>0) ? dev/o.se : NaN;
+    const col = !isFinite(z) ? '' : (Math.abs(z)<=2 ? 'color:var(--ok)' : 'color:var(--warn)');
+    h += `<tr${o.ref?' style="color:#5d6a73"':''}><td>${o.name}</td><td>${fx(o.m,2)}</td><td>${fx(o.se,2)}</td><td>${fx(dev,2)}</td><td>${fx(100*dev/T,2)}%</td><td style="${col}">${fx(z,2)}</td></tr>`;
+  });
+  h += '</table><p class="note">|z| ≤ 2 表示偏差落在約 95% 的統計範圍內；|z| 明顯大於 2，表示還有未處理的系統誤差（例如掛碼標稱值、不等高、單方向逼近）。</p>';
+  const c0 = S.rodCOM - setup.Pnom;
+  h += `<h3>隱藏參數</h3><table>
+    <tr><th>參數</th><th>真值</th><th>說明</th></tr>
+    <tr><td>竹筷接桿質量 W</td><td>${S.rodW.toFixed(2)} g</td><td rowspan="2">理論截距 −Wc = ${(-S.rodW*c0).toFixed(1)} g·cm${EST.A?`（你的迴歸截距 ${fx(EST.A.b,1)}）`:''}</td></tr>
+    <tr><td>重心 − 支點刻度 c</td><td>${c0.toFixed(2)} cm</td></tr>
+    <tr><td>滑輪摩擦比例 μ</td><td>${S.mu.toFixed(3)}</td><td>方法 B 張力帶 ±${(140*S.mu).toFixed(1)}% 以內；方法 C 摩擦 F ≈ μ(M+m)</td></tr>
+    <tr><td>滑輪等效質量 k = I/r²</td><td>${S.kP.toFixed(2)} g</td><td>只進入方法 C 的斜率</td></tr>
+    <tr><td>A 點與滑輪頂高度差</td><td>${setup.leveled?'0（已調等高）':S.dy.toFixed(2)+' cm（滑輪較'+(S.dy>0?'高':'低')+'）'}</td><td>方法 B 系統誤差來源</td></tr>
+    <tr><td>支點靜摩擦力矩</td><td>${S.tauF.toFixed(2)} g·cm</td><td>方法 A「看起來水平」的範圍</td></tr>
+    <tr><td>跨距 D 真值</td><td>${setup.Dtrue.toFixed(2)} cm</td><td>你的布尺讀數 ${fx(setup.Dread,2)} cm</td></tr>
+  </table>
+  <h3>掛碼實際質量</h3><table><tr>${MASSES.map(o=>`<th>${o.label}</th>`).join('')}</tr><tr>${MASSES.map(o=>`<td>${S.act[o.id].toFixed(3)} g</td>`).join('')}</tr></table>`;
+  $('truth').innerHTML = h;
+}
+$('btnReveal').onclick = () => { if(!revealed && !confirm('確定要揭曉真值嗎？')) return; revealed = true; renderTruth(); };
+$('btnNew').onclick = () => { if(!confirm('產生新的黏土會清除所有數據，確定嗎？')) return;
+  $('chkTape').checked=false; $('chkLevel').checked=false; $('inP').value='22.0'; $('inD').value='100';
+  $('stepTape').classList.remove('done'); $('stepLevel').classList.remove('done');
+  document.querySelector('input[name=cfgB][value=clayEnd]').checked = true;
+  newWorld(); };
+
+/* ================= 初始化 ================= */
+function redrawAll(){
+  massPicker('massA', A.sel, updateA);
+  massPicker('massB', B.sel, () => { B.eq=null; drawB(); });
+  massPicker('massC', C.sel, () => { if(C.running) return; C.tStop=null; C.motion=null; $('btnRecC').disabled=true; $('CMsum').textContent=nomSum(C.sel); drawC(0); });
+  setSliderLimits(); A.theta = 0; updateA();
+  drawB(); renderTblA(); renderTblB(); renderTblC();
+  $('slH').value = C.h; $('lbH').textContent = C.h+' cm'; $('Chread').textContent = fx(C.hread,2);
+  $('CMsum').textContent = nomSum(C.sel); $('watch').textContent='0.0'; $('Cmsg').textContent='';
+  drawC(0); EST = {}; analyzeAll(); $('truth').innerHTML=''; $('diag').innerHTML='';
+}
+newWorld();
+</script>
+</body>
+</html>
