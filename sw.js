@@ -1,5 +1,5 @@
 // 實驗培訓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v8";
+const VERSION="v9";
 const CACHE="lab-book-"+VERSION;
 const FILES=[
  "./",
@@ -48,7 +48,22 @@ const FILES=[
  "labs/fluid-drain.html",
  "labs/fluid-surface-tension.html",
  "labs/fluid-torricelli.html",
- "labs/fluid-hourglass.html"
+ "labs/fluid-hourglass.html",
+ "labs/visc-wall.html",
+ "labs/visc-glycerin.html",
+ "labs/dens-alloy.html",
+ "labs/dens-liquid-syringe.html",
+ "labs/dens-hydrometer.html",
+ "labs/dens-pencil.html",
+ "labs/dens-sugar97.html",
+ "labs/dens-nut.html",
+ "labs/dens-sugar102.html",
+ "labs/dens-bottle-screw.html",
+ "labs/dens-linear.html",
+ "labs/elec-attenuator.html",
+ "labs/elec-105.html",
+ "labs/elec-rod.html",
+ "labs/elec-internal.html"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE&&k.startsWith("lab-book-")).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>91學年度 屏東區 合金密度虛擬實驗室</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1d2433;--mute:#5b6576;--line:#d6dbe3;--acc:#1f6feb;--acc2:#0b7a5a;--warn:#b54708;--bad:#c0262d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;line-height:1.65}
+header{background:#1d2433;color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:1.25rem}
+header p{margin:2px 0 0;font-size:.85rem;color:#c9d1dd}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#e8ecf2;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font:inherit;font-size:.92rem}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1200px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:1.1rem;margin:0 0 8px}
+.card h3{font-size:1rem;margin:12px 0 6px}
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+.grid2e{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:880px){.grid2,.grid2e{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#eef2f7}
+input[type=number],input[type=text]{width:90px;padding:3px 5px;border:1px solid #b9c1cd;border-radius:4px;font:inherit;text-align:center}
+td input[type=number]{width:78px}
+select{font:inherit;padding:3px 6px;border-radius:4px;border:1px solid #b9c1cd}
+.btn{border:1px solid var(--acc);background:var(--acc);color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font:inherit;font-size:.9rem;margin:2px}
+.btn.sec{background:#fff;color:var(--acc)}
+.btn.warn{background:var(--warn);border-color:var(--warn)}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.note{background:#fff8e6;border-left:4px solid #f0b429;padding:8px 12px;border-radius:4px;font-size:.9rem;margin:8px 0}
+.info{background:#eaf2ff;border-left:4px solid var(--acc);padding:8px 12px;border-radius:4px;font-size:.9rem;margin:8px 0}
+.ok{color:var(--acc2);font-weight:600}.bad{color:var(--bad);font-weight:600}
+.formula{font-family:"Cambria Math","Times New Roman",serif;font-size:1.1rem;background:#f7f9fc;padding:10px 14px;border-radius:6px;margin:6px 0;overflow-x:auto;white-space:nowrap}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px}
+.frac>span:first-child{border-bottom:1px solid currentColor;padding:0 3px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+.log{font-size:.84rem;background:#f7f9fc;border:1px solid var(--line);border-radius:6px;padding:6px 10px;height:130px;overflow:auto}
+.small{font-size:.82rem;color:var(--mute)}
+tr.hl td{background:#e3f4ea}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;background:#eef2f7;font-size:.82rem}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0}
+legend{font-size:.85rem;color:var(--mute);padding:0 4px}
+ul{margin:4px 0 4px 1.2em;padding:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>合金密度鑑定虛擬實驗室</h1>
+  <p>九十一學年度 高級中學自然學科競賽 屏東區複賽 物理實驗試題第一題｜天平＋量筒排水法，以 M–V 關係鑑定合金成分</p>
+</header>
+<nav id="nav">
+  <button data-t="1" class="on">① 原理</button>
+  <button data-t="2">② 器材與準備</button>
+  <button data-t="3">③ 量測</button>
+  <button data-t="4">④ 作圖迴歸</button>
+  <button data-t="5">⑤ 鑑定與誤差</button>
+  <button data-t="6">⑥ 真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ ① ============ -->
+<section class="tab on" id="tab1">
+  <div class="card">
+    <h2>① 實驗設計原理：兩金屬混合後的密度</h2>
+    <p>設合金由金屬 A、B 製成，總質量 m、密度 d，其中質量分率 x 為金屬 A（題目給的「重量百分比」就是質量分率）。若<b>混合前後總體積不變</b>（體積可加成），則</p>
+    <div class="formula">
+      d = <span class="frac"><span>m</span><span>V<sub>A</sub> + V<sub>B</sub></span></span>
+      = <span class="frac"><span>m</span><span><span class="frac"><span>m x</span><span>d<sub>A</sub></span></span> + <span class="frac"><span>m(1−x)</span><span>d<sub>B</sub></span></span></span></span>
+      ⇒ <span class="frac"><span>1</span><span>d</span></span> = <span class="frac"><span>x</span><span>d<sub>A</sub></span></span> + <span class="frac"><span>1−x</span><span>d<sub>B</sub></span></span>
+    </div>
+    <p>因為加成的是<b>體積</b>而不是質量，合金密度是兩金屬密度以質量分率加權的<b>調和平均</b>，不是算術平均。下圖可比較兩者。</p>
+    <div class="info">本模擬採用的金屬密度（20 °C 常用值）：鋁 Al 2.70、錫 Sn 7.29（白錫）、鉛 Pb 11.34 g/cm³。本題試題卷未附，此三值代入後與參考解六種合金密度表相符（差 ≤ 0.03）。</div>
+  </div>
+
+  <div class="grid2e">
+    <div class="card">
+      <h3>互動：d 與質量分率 x 的關係</h3>
+      <div class="row">
+        金屬 A <select id="t1A"><option value="Sn" selected>錫 Sn</option><option value="Al">鋁 Al</option><option value="Pb">鉛 Pb</option></select>
+        金屬 B <select id="t1B"><option value="Pb" selected>鉛 Pb</option><option value="Al">鋁 Al</option><option value="Sn">錫 Sn</option></select>
+      </div>
+      <div class="row">x = <input type="range" id="t1x" min="0" max="1" step="0.01" value="0.6" style="width:220px"> <b id="t1xv">0.60</b></div>
+      <div id="t1plot"></div>
+      <div id="t1val" class="small"></div>
+    </div>
+    <div class="card">
+      <h3>練習：計算六種候選合金的密度</h3>
+      <p class="small">依上式自行計算後填入，按「檢查」（容許 ±0.03 g/cm³）。</p>
+      <table id="t1tab"></table>
+      <div class="row"><button class="btn" id="t1chk">檢查</button><button class="btn sec" id="t1show">顯示答案</button></div>
+      <div class="note">合金 A:B = 60:40 與 B:A = 60:40 是不同的合金（例：錫鉛 60:40 為 8.50，鉛錫 60:40 為 9.28）。要先弄清楚比例前後指的是哪一種金屬。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ② ============ -->
+<section class="tab" id="tab2">
+  <div class="card">
+    <h2>② 器材與準備</h2>
+    <div class="grid2e">
+      <div>
+        <h3>器材</h3>
+        <ul>
+          <li>電子天平：解析度 0.01 g（會有零點漂移，使用前要歸零）</li>
+          <li>量筒：可選 10／25／50 mL（下表）</li>
+          <li>清水、待測合金小塊 10 塊（每塊約 0.4–0.6 cm³，質量各不相同）</li>
+        </ul>
+        <h3>選擇量筒</h3>
+        <table>
+          <tr><th></th><th>容量</th><th>最小刻度</th><th>估讀到</th><th>內徑</th><th>每 1 mm 液高 ≈</th></tr>
+          <tr><td><input type="radio" name="cyl" value="10"></td><td>10 mL</td><td>0.2 mL</td><td>0.02 mL</td><td>1.35 cm</td><td>0.14 mL</td></tr>
+          <tr><td><input type="radio" name="cyl" value="25"></td><td>25 mL</td><td>0.5 mL</td><td>0.05 mL</td><td>2.00 cm</td><td>0.31 mL</td></tr>
+          <tr><td><input type="radio" name="cyl" value="50" checked></td><td>50 mL</td><td>1 mL</td><td>0.1 mL</td><td>2.45 cm</td><td>0.47 mL</td></tr>
+        </table>
+        <p class="small">更換量筒會清空量測進度（合金樣品不變）。</p>
+        <div class="info"><b>思考：</b>每塊合金只有約 0.5 mL。50 mL 量筒估讀到 0.1 mL，單塊體積的相對不確定度約 20%。這就是要<b>逐塊累加、以多點迴歸</b>求斜率，而不是只量一塊算 m/V 的原因。小量筒雖然解析度好，但裝得下 10 塊合金又能讓合金完全浸沒嗎？請自行試試看。</div>
+      </div>
+      <div>
+        <h3>操作要點與失敗模式（本模擬全部會發生）</h3>
+        <ul>
+          <li><b>天平歸零</b>：開機時零點不在 0.00；空盤時歸零。若盤上還有東西就按歸零，讀數會整體偏小。</li>
+          <li><b>倒水量</b>：水太少，後放入的合金會露出水面，體積讀數偏小；水太多則超出刻度甚至溢出。</li>
+          <li><b>投入方式</b>：要先<b>傾斜量筒、讓合金沿管壁滑入</b>。直接丟入容易濺出水滴（之後讀數偏小），也較容易夾帶氣泡。</li>
+          <li><b>氣泡</b>：附著在合金表面的氣泡會讓讀數偏大、密度偏小。可以<b>輕敲量筒</b>趕走氣泡，但不一定一次趕得乾淨。</li>
+          <li><b>凹液面</b>：水在玻璃管中呈凹面，量筒按<b>凹液面最低處</b>校正。讀邊緣的話，50 mL 量筒會多讀將近 1 mL。</li>
+          <li><b>視差</b>：視線要與凹液面最低處等高。由上往下看讀數偏大，由下往上看偏小。液面升高時，眼睛也要跟著升高。</li>
+        </ul>
+        <div class="note">每次量測前先在空白處預想：哪一種誤差每塊都會累積（比例誤差、影響斜率），哪一種只發生一次（常數誤差、會被截距吸收）？第 ⑤ 頁會回來檢驗。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ③ ============ -->
+<section class="tab" id="tab3">
+  <div class="grid2">
+    <div class="card">
+      <h2>③ 量測：實驗桌</h2>
+      <div id="bench"></div>
+      <fieldset><legend>1. 量筒加水</legend>
+        <div class="row">倒入清水約 <input type="range" id="pourAmt" min="1" max="50" step="0.5" value="35" style="width:160px"> <b id="pourV">35</b> mL
+          <button class="btn" id="bPour">倒水</button><button class="btn sec" id="bDump">倒掉重來</button></div>
+      </fieldset>
+      <fieldset><legend>2. 電子天平</legend>
+        <div class="row"><button class="btn sec" id="bTare">歸零 TARE</button><button class="btn" id="bPlace">放上下一塊合金</button><button class="btn" id="bRecM">記錄質量</button><button class="btn sec" id="bOff">取下放回</button></div>
+      </fieldset>
+      <fieldset><legend>3. 放入量筒</legend>
+        <div class="row"><button class="btn" id="bSlide">傾斜量筒，沿壁滑入</button><button class="btn warn" id="bDrop">直接投入</button><button class="btn sec" id="bTap">輕敲量筒（趕氣泡）</button></div>
+      </fieldset>
+      <div id="status" class="small"></div>
+    </div>
+    <div class="card">
+      <h2>放大鏡：讀量筒刻度</h2>
+      <div id="zoom"></div>
+      <div class="row">視線高度 <input type="range" id="eye" min="0" max="55" step="0.05" value="15" style="width:170px"> <button class="btn sec" id="bAlign">蹲低對齊液面</button></div>
+      <div id="eyeInfo" class="small"></div>
+      <div class="row">量筒讀數 <input type="number" id="rdIn" step="0.01"> mL <button class="btn" id="bRecR">記錄讀數</button></div>
+      <div class="small" id="rdHint"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>數據記錄表（可直接修改）</h3>
+    <p class="small">第 0 列是放入合金前的初讀數 R₀。累計質量 M = Σmᵢ，累計體積 V = R − R₀。</p>
+    <div style="overflow-x:auto"><table id="dtab"></table></div>
+  </div>
+  <div class="card"><h3>實驗紀錄</h3><div class="log" id="log"></div></div>
+</section>
+
+<!-- ============ ④ ============ -->
+<section class="tab" id="tab4">
+  <div class="card">
+    <h2>④ 作圖與最小平方迴歸</h2>
+    <div class="row">資料來源：
+      <label><input type="radio" name="src" value="mine" checked> 我的量測</label>
+      <label><input type="radio" name="src" value="ref"> 參考解附例數據</label>
+    </div>
+    <div class="grid2e">
+      <div id="t4plot"></div>
+      <div>
+        <table id="t4res"></table>
+        <div class="info" style="margin-top:10px"><b>為什麼主要用 V 對 M 迴歸？</b> 最小平方法假設橫軸沒有誤差、誤差全在縱軸。本實驗質量誤差約 0.01 g（相對 0.2%），體積誤差約 0.1 mL（相對約 20%），所以<b>以 M 為橫軸、V 為縱軸</b>，斜率 = 1/d，最符合假設。參考解用 M 對 V 作圖，兩者的斜率差了 R² 倍（d<sub>M–V</sub> = R²·d<sub>V–M</sub>）。R² 接近 1 時差異很小，但觀念要清楚。</div>
+        <div class="note">單點 M/V 平均與單塊 mᵢ/ΔVᵢ 平均放在一起對照：單塊 ΔV 只有約 5 個最小刻度，讀數誤差被放大，離散度極大。累計點彼此相關（共用 R₀ 與前面的誤差），所以「平均值 ± 標準誤」會低估真正的不確定度。</div>
+      </div>
+    </div>
+    <div id="t4data" style="overflow-x:auto;margin-top:8px"></div>
+  </div>
+</section>
+
+<!-- ============ ⑤ ============ -->
+<section class="tab" id="tab5">
+  <div class="card">
+    <h2>⑤ 鑑定合金與誤差分析</h2>
+    <div class="row">資料來源：<span id="t5src" class="pill"></span>　採用方法：
+      <select id="t5m">
+        <option value="vm">V–M 迴歸（建議）</option>
+        <option value="mv">M–V 迴歸（參考解作法）</option>
+        <option value="o">過原點 M = dV</option>
+        <option value="pt">單點 M/V 平均</option>
+      </select></div>
+    <div id="t5res"></div>
+    <table id="t5tab" style="margin-top:8px"></table>
+    <div id="t5verdict"></div>
+  </div>
+  <div class="grid2e">
+    <div class="card">
+      <h3>誤差模型：哪些誤差會影響斜率？</h3>
+      <p class="small">以 10 塊、每塊體積 v = 0.49 cm³ 的理想樣品為例，加入下列系統誤差，看迴歸結果如何偏移。</p>
+      <div class="row">樣品 <select id="t5alloy"></select></div>
+      <div class="row">每塊附著氣泡 β = <input type="range" id="sB" min="0" max="0.10" step="0.005" value="0.04" style="width:150px"> <b id="sBv"></b> mL</div>
+      <div class="row">初讀數 R₀ 讀錯 c = <input type="range" id="sC" min="-0.5" max="0.5" step="0.05" value="0" style="width:150px"> <b id="sCv"></b> mL</div>
+      <div class="row">天平每次零點偏差 δ = <input type="range" id="sD" min="-0.05" max="0.05" step="0.005" value="0" style="width:150px"> <b id="sDv"></b> g</div>
+      <div id="t5model"></div>
+    </div>
+    <div class="card">
+      <h3>案例：參考解數據的「略小」有多小？</h3>
+      <div id="t5case"></div>
+      <h3>關於「體積不變」的假設</h3>
+      <p class="small">錫鉛合金固溶度低，凝固後主要是兩相混合，體積幾乎可加成；文獻中 60/40 錫鉛銲錫密度約 8.5 g/cm³，與公式值 8.50 相符。若形成金屬間化合物，體積可能收縮或膨脹，公式就要修正。此外，鑄造時的縮孔會使整塊合金的實際密度略小於理論值。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ⑥ ============ -->
+<section class="tab" id="tab6">
+  <div class="card">
+    <h2>⑥ 真值揭曉</h2>
+    <p>完成量測與分析後再揭曉。揭曉後仍可回到前面修改數據，此頁會即時更新。</p>
+    <div class="row"><button class="btn warn" id="bReveal">揭曉真值</button><button class="btn sec" id="bNew">換一份新樣品（全部重來）</button></div>
+    <div id="t6out"></div>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const fx=(x,n=2)=>(x===null||x===undefined||!Number.isFinite(x))?'—':(Math.abs(x)<0.5*10**-n?(0).toFixed(n):x.toFixed(n));
+const sgn=(x,n=2)=>(x>=0?'+':'−')+Math.abs(x).toFixed(n);
+
+/* ---------- 物性 ---------- */
+const MET={Al:{n:'鋁 Al',d:2.70},Sn:{n:'錫 Sn',d:7.29},Pb:{n:'鉛 Pb',d:11.34}};
+const ALLOYS=[['Al','Sn'],['Al','Pb'],['Sn','Pb'],['Sn','Al'],['Pb','Al'],['Pb','Sn']].map((p,i)=>({id:i,A:p[0],B:p[1],name:'合金'+'一二三四五六'[i],label:`${p[0]} : ${p[1]} = 60 : 40`,d:1/(0.6/MET[p[0]].d+0.4/MET[p[1]].d)}));
+const CYL={
+  10:{cap:10,div:0.2,D:1.35,lab:1,mid:null},
+  25:{cap:25,div:0.5,D:2.00,lab:5,mid:1},
+  50:{cap:50,div:1,D:2.45,lab:5,mid:null}};
+for(const k in CYL){CYL[k].A=Math.PI*CYL[k].D**2/4;}
+const PACK=0.6, HM=0.18, VIEW=25, WALL=0.15;
+const REF={M:[4.19,8.37,12.69,16.73,20.95,25.13,29.29,33.53,37.71,41.94],V:[0.6,1.1,1.6,2.0,2.6,3.2,3.8,4.3,4.8,5.3]};
+
+/* ---------- 狀態 ---------- */
+let S;
+function freshRows(){return Array.from({length:11},()=>({m:null,R:null,tm:null,tr:null}));}
+function newSample(){
+  const alloy=ALLOYS[Math.floor(Math.random()*6)];
+  const pieces=[];
+  for(let i=0;i<10;i++){const v=rnd(0.42,0.62);pieces.push({v,m:alloy.d*v,state:'tray',recorded:false});}
+  S={alloy,pieces,cyl:50,revealed:false,log:[]};
+  resetLab();
+  S.balOffset=rnd(0.03,0.12)*(Math.random()<.5?-1:1);
+  S.balDisp=Math.round(S.balOffset*100)/100;
+  addLog('拿到一份新的合金樣品（10 塊）。天平剛開機。');
+}
+function resetLab(){
+  S.pieces.forEach(p=>{p.state='tray';p.recorded=false;});
+  S.water=null;S.splash=0;S.bubbles=[];S.inCyl=0;S.balLoad=null;S.balSettled=true;
+  S.eye=CYL[S.cyl].cap*0.3;S.rows=freshRows();
+  if(S.balOffset!==undefined)S.balDisp=Math.round(S.balOffset*100)/100;
+}
+function addLog(t){const d=new Date();S.log.unshift(`[${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}] ${t}`);const el=$('#log');if(el)el.innerHTML=S.log.map(x=>`<div>${x}</div>`).join('');}
+
+/* ---------- 物理：液面 ---------- */
+function levels(){
+  if(S.water===null)return {L:0,empty:true,exposed:false,Vp:0,Vb:0,W:0};
+  const Vp=S.pieces.filter(p=>p.state==='in').reduce((a,p)=>a+p.v,0);
+  const Vb=S.bubbles.reduce((a,b)=>a+b.v,0);
+  const W=Math.max(0,S.water-S.splash);
+  const bulk=Vp/PACK;
+  let L,exposed=false;
+  if(W+Vp+Vb>=bulk)L=W+Vp+Vb;
+  else{L=(W+Vb)/(1-PACK);exposed=true;}
+  return {L,empty:false,exposed,Vp,Vb,W,bulk};
+}
+function eyeCm(L){return (S.eye-L)/CYL[S.cyl].A;}
+function parallax(L){const c=CYL[S.cyl];const e=eyeCm(L);return e/VIEW*(c.D/2+WALL)*c.A;}
+function checkOverflow(){
+  const c=CYL[S.cyl];const lv=levels();const lim=c.cap*1.12;
+  if(lv.L>lim){const over=lv.exposed?(lv.L-lim)*(1-PACK):lv.L-lim;S.water-=over;addLog(`<span class="bad">水從量筒口溢出約 ${over.toFixed(1)} mL！</span>`);}
+}
+
+/* ---------- 天平 ---------- */
+let balTimer=null;
+function balLoadMass(){return S.balLoad===null?0:S.pieces[S.balLoad].m;}
+function balShow(){
+  S.balOffset+=gauss()*0.004;
+  const target=balLoadMass();
+  const final=Math.round((target+S.balOffset+gauss()*0.003)*100)/100;
+  S.balSettled=false;let n=0;clearInterval(balTimer);
+  balTimer=setInterval(()=>{n++;
+    if(n<9){S.balDisp=Math.round((final+(Math.random()-.5)*0.3*(9-n)/9)*100)/100;}
+    else{S.balDisp=final;S.balSettled=true;clearInterval(balTimer);}
+    drawBench();updButtons();},85);
+}
+
+/* ---------- 繪圖工具 ---------- */
+function niceStep(span,n){const s0=span/n,mag=10**Math.floor(Math.log10(s0)),r=s0/mag;return (r<1.5?1:r<3?2:r<7?5:10)*mag;}
+function axes(o){
+  const W=o.W||560,H=o.H||340,L=62,R=18,T=16,B=48;
+  const X=v=>L+(v-o.xmin)/(o.xmax-o.xmin)*(W-L-R);
+  const Y=v=>H-B-(v-o.ymin)/(o.ymax-o.ymin)*(H-T-B);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;background:#fff">`;
+  const sx=niceStep(o.xmax-o.xmin,6),sy=niceStep(o.ymax-o.ymin,6);
+  const dx=Math.max(0,-Math.floor(Math.log10(sx)+1e-9)),dy=Math.max(0,-Math.floor(Math.log10(sy)+1e-9));
+  for(let v=Math.ceil(o.xmin/sx-1e-9)*sx;v<=o.xmax+1e-9;v+=sx){s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H-B}" stroke="#e6e9ee"/><text x="${X(v)}" y="${H-B+16}" font-size="11" text-anchor="middle" fill="#444">${v.toFixed(dx)}</text>`;}
+  for(let v=Math.ceil(o.ymin/sy-1e-9)*sy;v<=o.ymax+1e-9;v+=sy){s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e6e9ee"/><text x="${L-6}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="#444">${v.toFixed(dy)}</text>`;}
+  s+=`<rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="none" stroke="#888"/>`;
+  s+=`<text x="${(L+W-R)/2}" y="${H-10}" font-size="12" text-anchor="middle">${o.xlabel}</text>`;
+  s+=`<text transform="translate(16 ${(T+H-B)/2}) rotate(-90)" font-size="12" text-anchor="middle">${o.ylabel}</text>`;
+  return {s,X,Y,W,H,L,R,T,B};
+}
+
+/* ============ ① ============ */
+function t1Plot(){
+  const A=$('#t1A').value,B=$('#t1B').value,x=+$('#t1x').value;
+  $('#t1xv').textContent=x.toFixed(2);
+  const dA=MET[A].d,dB=MET[B].d,dx=t=>1/(t/dA+(1-t)/dB);
+  const ax=axes({xmin:0,xmax:1,ymin:0,ymax:12,xlabel:`金屬 A（${MET[A].n}）的質量分率 x`,ylabel:'密度 d (g/cm³)',W:540,H:310});
+  let s=ax.s,p='',q='';
+  for(let i=0;i<=100;i++){const t=i/100;p+=(i?'L':'M')+ax.X(t)+','+ax.Y(dx(t));}
+  s+=`<path d="M${ax.X(0)},${ax.Y(dB)}L${ax.X(1)},${ax.Y(dA)}" stroke="#999" stroke-dasharray="5 4" fill="none"/>`;
+  s+=`<path d="${p}" stroke="#1f6feb" stroke-width="2.4" fill="none"/>`;
+  s+=`<circle cx="${ax.X(x)}" cy="${ax.Y(dx(x))}" r="5" fill="#c0262d"/>`;
+  s+=`<text x="${ax.X(0.03)}" y="${ax.Y(11.3)}" font-size="11" fill="#1f6feb">— 調和平均（正確）</text><text x="${ax.X(0.03)}" y="${ax.Y(10.4)}" font-size="11" fill="#777">- - 算術平均（錯誤）</text>`;
+  $('#t1plot').innerHTML=s+'</svg>';
+  const lin=x*dA+(1-x)*dB,vf=(x/dA)/(x/dA+(1-x)/dB);
+  $('#t1val').innerHTML=`x = ${x.toFixed(2)}：d = <b>${dx(x).toFixed(2)}</b> g/cm³；若誤用算術平均得 ${lin.toFixed(2)}（差 ${(lin-dx(x)).toFixed(2)}）。此時 A 的<b>體積分率</b>為 ${vf.toFixed(3)}，d 正是以體積分率加權的算術平均。`;
+}
+function t1Table(){
+  let h='<tr><th></th><th>重量百分比</th><th>你的計算 (g/cm³)</th><th>結果</th></tr>';
+  ALLOYS.forEach(a=>{h+=`<tr><td>${a.name}</td><td>${a.label}</td><td><input type="number" step="0.01" id="t1in${a.id}"></td><td id="t1ok${a.id}"></td></tr>`;});
+  $('#t1tab').innerHTML=h;
+}
+$('#t1chk').onclick=()=>ALLOYS.forEach(a=>{const v=parseFloat($('#t1in'+a.id).value);const el=$('#t1ok'+a.id);
+  if(!Number.isFinite(v)){el.innerHTML='';return;}
+  el.innerHTML=Math.abs(v-a.d)<=0.03?'<span class="ok">✓</span>':`<span class="bad">✗</span>`;});
+$('#t1show').onclick=()=>ALLOYS.forEach(a=>{$('#t1ok'+a.id).innerHTML=`<span class="small">${a.d.toFixed(2)}</span>`;});
+['#t1A','#t1B','#t1x'].forEach(id=>$(id).addEventListener('input',t1Plot));
+
+/* ============ ② 量筒選擇 ============ */
+$$('input[name=cyl]').forEach(r=>r.onchange=()=>{
+  const c=+r.value;
+  const busy=S.water!==null||S.rows.some(x=>x.m!==null||x.R!==null);
+  if(busy&&!confirm('更換量筒會清空目前的量測進度（合金樣品不變），確定嗎？')){$$('input[name=cyl]').forEach(x=>x.checked=(+x.value===S.cyl));return;}
+  S.cyl=c;S.balLoad=null;resetLab();setupCylUI();addLog(`改用 ${c} mL 量筒。`);updateAll();
+});
+function setupCylUI(){
+  const c=CYL[S.cyl];
+  const pa=$('#pourAmt');pa.max=c.cap;pa.step=c.cap/100;pa.value=(c.cap*0.6).toFixed(1);$('#pourV').textContent=(+pa.value).toFixed(1);
+  const ey=$('#eye');ey.max=(c.cap*1.12).toFixed(2);ey.step=(c.cap/1000).toFixed(3);ey.value=S.eye;
+}
+
+/* ============ ③ 實驗桌 ============ */
+function drawBench(){
+  const c=CYL[S.cyl],W=640,H=380;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="background:#fbfcfd;border:1px solid #e1e5eb;border-radius:8px">`;
+  s+=`<rect x="0" y="335" width="${W}" height="45" fill="#d9cbb3"/>`;
+  // 天平
+  s+=`<rect x="25" y="268" width="180" height="67" rx="8" fill="#e9edf2" stroke="#8a94a3"/>`;
+  s+=`<rect x="52" y="290" width="126" height="32" rx="4" fill="#1b2a1e"/>`;
+  const dtxt=(S.balDisp<0&&Math.abs(S.balDisp)>=0.005?'−':'')+Math.abs(S.balDisp).toFixed(2);
+  s+=`<text x="168" y="314" font-size="21" font-family="Consolas,monospace" text-anchor="end" fill="${S.balSettled?'#7CFC8A':'#c6e8c9'}">${dtxt}</text><text x="174" y="314" font-size="10" fill="#7CFC8A">g</text>`;
+  if(S.balSettled)s+=`<text x="58" y="304" font-size="9" fill="#7CFC8A">●穩定</text>`;
+  s+=`<rect x="110" y="250" width="10" height="18" fill="#8a94a3"/><ellipse cx="115" cy="250" rx="62" ry="8" fill="#cfd5dd" stroke="#8a94a3"/>`;
+  if(S.balLoad!==null){const sz=8+28*Math.cbrt(S.pieces[S.balLoad].v);s+=`<rect x="${115-sz/2}" y="${246-sz}" width="${sz}" height="${sz}" fill="#8e96a3" stroke="#555"/><text x="115" y="${240-sz}" font-size="11" text-anchor="middle">#${S.balLoad+1}</text>`;}
+  s+=`<text x="115" y="350" font-size="11" text-anchor="middle" fill="#555">電子天平 0.01 g</text>`;
+  // 托盤
+  s+=`<rect x="220" y="320" width="150" height="15" rx="3" fill="#bfc6cf"/><text x="295" y="372" font-size="11" text-anchor="middle" fill="#555">待測合金塊</text>`;
+  let tx=226;S.pieces.forEach((p,i)=>{if(p.state==='tray'){const sz=8+14*Math.cbrt(p.v);s+=`<rect x="${tx}" y="${320-sz}" width="${sz}" height="${sz}" fill="#8e96a3" stroke="#555"/>`;tx+=sz+2;}});
+  // 量筒
+  const cx=465,yb=320,ht=250,ppm=ht/c.cap,yT=yb-ht,w=c.D*28,x0=cx-w/2,x1=cx+w/2,yTop=yb-ht*1.12;
+  const Y=v=>yb-v*ppm;
+  s+=`<rect x="${cx-55}" y="${yb}" width="110" height="14" rx="3" fill="#cdd6df" stroke="#8a94a3"/>`;
+  const lv=levels();
+  if(!lv.empty){
+    const yl=Math.max(yTop,Y(lv.L));
+    s+=`<rect x="${x0}" y="${yl}" width="${w}" height="${yb-yl}" fill="#a9d8f5" opacity=".85"/>`;
+    s+=`<path d="M${x0},${yl-4} Q${cx},${yl+3} ${x1},${yl-4}" stroke="#3f7fae" stroke-width="1.5" fill="none"/>`;
+  }
+  // 合金塊堆疊（示意）
+  const pin=S.pieces.map((p,i)=>({p,i})).filter(o=>o.p.state==='in');
+  const vpc=ppm*c.A; // 垂直 px/cm
+  let col=0,rowY=yb,rowH=0;const pos=[];
+  pin.forEach(o=>{const side=Math.cbrt(o.p.v),pw=side*28,ph=side*vpc;const perRow=Math.max(1,Math.floor(w/(pw+1)));
+    if(col>=perRow){col=0;rowY-=rowH;rowH=0;}
+    const px=x0+1+col*(pw+1),py=rowY-ph;pos.push({px,py,pw,ph,i:o.i});rowH=Math.max(rowH,ph);col++;});
+  pos.forEach(q=>{s+=`<rect x="${q.px}" y="${Math.max(yTop,q.py)}" width="${q.pw}" height="${q.ph}" fill="#8e96a3" stroke="#555" stroke-width=".8"/>`;});
+  S.bubbles.forEach((b,k)=>{const q=pos.find(z=>z.i===b.i);if(!q)return;const r=Math.max(1.6,Math.cbrt(3*b.v/4/Math.PI)*28*0.7);
+    s+=`<circle cx="${q.px+q.pw*(0.15+0.7*((k*37)%10)/10)}" cy="${Math.max(yTop,q.py)+1}" r="${r}" fill="#fff" stroke="#6aa9d6" stroke-width=".8"/>`;});
+  s+=`<path d="M${x0},${yTop} L${x0},${yb} L${x1},${yb} L${x1},${yTop}" stroke="#7d8a99" stroke-width="2" fill="none"/>`;
+  for(let v=0;v<=c.cap+1e-9;v+=c.lab){s+=`<line x1="${x0}" x2="${x0+9}" y1="${Y(v)}" y2="${Y(v)}" stroke="#333"/><text x="${x0-4}" y="${Y(v)+4}" font-size="10" text-anchor="end">${v}</text>`;}
+  s+=`<text x="${cx}" y="${yTop-6}" font-size="11" text-anchor="middle" fill="#555">${c.cap} mL 量筒</text>`;
+  if(S.splash>0)s+=`<circle cx="${x1+18}" cy="331" r="3" fill="#a9d8f5"/><circle cx="${x1+30}" cy="333" r="2" fill="#a9d8f5"/><circle cx="${x0-20}" cy="332" r="2.5" fill="#a9d8f5"/>`;
+  if(lv.exposed)s+=`<text x="${cx}" y="${yTop+14}" font-size="11" text-anchor="middle" fill="#c0262d">合金露出水面！</text>`;
+  // 眼睛
+  const ye=Math.min(yb,Math.max(yTop-10,Y(S.eye)));
+  if(!lv.empty)s+=`<line x1="600" y1="${ye}" x2="${cx}" y2="${Math.max(yTop,Y(lv.L))}" stroke="#c0262d" stroke-dasharray="4 3"/>`;
+  s+=`<ellipse cx="608" cy="${ye}" rx="13" ry="7" fill="#fff" stroke="#333"/><circle cx="603" cy="${ye}" r="3.5" fill="#333"/><text x="608" y="${ye-11}" font-size="10" text-anchor="middle">眼</text>`;
+  $('#bench').innerHTML=s+'</svg>';
+}
+function drawZoom(){
+  const c=CYL[S.cyl],W=300,H=360,cyy=H/2,ppd=26,xl=40,xr=260;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:340px;background:#f2f6f9;border:1px solid #cfd8e2;border-radius:50%/12%">`;
+  const lv=levels();
+  if(lv.empty){$('#zoom').innerHTML=s+`<text x="150" y="180" text-anchor="middle" font-size="14" fill="#666">量筒內還沒有水</text></svg>`;$('#eyeInfo').textContent='';return;}
+  const sh=parallax(lv.L),Lapp=lv.L+sh,center=Lapp+0.35*c.div;
+  const Y=v=>cyy-(v-center)/c.div*ppd;
+  const hmPx=HM*c.A/c.div*ppd,lcPx=0.27/(c.D/2)*110;
+  let pts=[];for(let x=xl;x<=xr;x+=4){const dw=Math.min(x-xl,xr-x);pts.push([x,Y(Lapp)-hmPx*Math.exp(-dw/lcPx)]);}
+  const yM=Y(Lapp);
+  if(yM<H+40){
+    s+=`<path d="M${xl},${H} L${pts.map(p=>p.join(',')).join(' L')} L${xr},${H} Z" fill="#b9e0f7" opacity=".9"/>`;
+    const ry=Math.abs(sh)/c.div*ppd;
+    if(ry>1.5)s+=`<ellipse cx="150" cy="${yM-hmPx*0.15}" rx="108" ry="${Math.min(60,ry)}" fill="none" stroke="#7aa9c9" stroke-width="1.2" opacity=".8"/>`;
+    s+=`<path d="M${pts.map(p=>p.join(',')).join(' L')}" stroke="#24506f" stroke-width="3.2" fill="none"/>`;
+  }
+  s+=`<line x1="${xl}" x2="${xl}" y1="0" y2="${H}" stroke="#8a97a6" stroke-width="2"/><line x1="${xr}" x2="${xr}" y1="0" y2="${H}" stroke="#8a97a6" stroke-width="2"/>`;
+  const k0=Math.floor((center-7.5*c.div)/c.div),k1=Math.ceil((center+7.5*c.div)/c.div);
+  for(let k=k0;k<=k1;k++){const v=+(k*c.div).toFixed(4);if(v<0||v>c.cap+1e-9)continue;
+    const isL=Math.abs(v/c.lab-Math.round(v/c.lab))<1e-6,isM=c.mid&&Math.abs(v/c.mid-Math.round(v/c.mid))<1e-6;
+    const len=isL?120:isM?78:48,y=Y(v);
+    s+=`<line x1="${xl}" x2="${xl+len}" y1="${y}" y2="${y}" stroke="#111" stroke-width="${isL?1.8:1.2}"/>`;
+    if(isL)s+=`<text x="${xl+len+6}" y="${y+5}" font-size="15" fill="#111">${+v.toFixed(2)}</text>`;}
+  if(Lapp>c.cap)s+=`<text x="150" y="30" text-anchor="middle" fill="#c0262d" font-size="13">液面超出刻度範圍</text>`;
+  $('#zoom').innerHTML=s+'</svg>';
+  const e=eyeCm(lv.L);
+  $('#eyeInfo').innerHTML=Math.abs(e)<0.25?'視線與凹液面大致等高。':`視線比凹液面<b>${e>0?'高':'低'}</b>約 ${Math.abs(e).toFixed(1)} cm（${e>0?'由上往下看':'由下往上看'}）。`;
+}
+function nextTrayIdx(){return S.pieces.findIndex(p=>p.state==='tray');}
+function updButtons(){
+  const lv=levels(),loaded=S.balLoad!==null,pc=loaded?S.pieces[S.balLoad]:null;
+  $('#bPour').disabled=S.inCyl>0;
+  $('#bDump').disabled=S.water===null||S.inCyl>0;
+  $('#bPlace').disabled=loaded||nextTrayIdx()<0||!S.balSettled;
+  $('#bRecM').disabled=!loaded||!S.balSettled||pc.recorded;
+  $('#bOff').disabled=!loaded;
+  $('#bSlide').disabled=$('#bDrop').disabled=!loaded||!pc.recorded||S.water===null;
+  $('#bTap').disabled=S.water===null;
+  $('#bRecR').disabled=S.water===null;
+  $('#bTare').disabled=!S.balSettled;
+  $('#status').innerHTML=`量筒內合金塊：<b>${S.inCyl}</b> / 10　｜　下一筆讀數會記入第 <b>${S.inCyl}</b> 列`+(S.water===null?'　｜　<span class="bad">尚未加水</span>':'');
+  $('#rdHint').innerHTML=`${S.cyl} mL 量筒最小刻度 ${CYL[S.cyl].div} mL，請估讀到最小刻度的 1/10（${(CYL[S.cyl].div/10)} mL），並讀<b>凹液面最低處</b>。`;
+}
+$('#pourAmt').oninput=e=>{$('#pourV').textContent=(+e.target.value).toFixed(1);};
+$('#bPour').onclick=()=>{
+  const t=+$('#pourAmt').value;
+  S.water=(S.water||0)+t*(1+gauss()*0.025);S.splash=0;S.bubbles=[];
+  checkOverflow();addLog(`倒入清水約 ${t.toFixed(1)} mL（實際量要自己讀）。`);updateAll();};
+$('#bDump').onclick=()=>{S.water=null;S.splash=0;S.bubbles=[];S.rows[0].R=null;S.rows[0].tr=null;addLog('把水倒掉。');updateAll();};
+$('#bTare').onclick=()=>{
+  if(S.balLoad!==null)addLog('<span class="bad">注意：盤上有合金時按了歸零。</span>');
+  S.balOffset=-balLoadMass()+gauss()*0.002;S.balDisp=0;S.balSettled=true;addLog('天平歸零。');drawBench();updButtons();};
+$('#bPlace').onclick=()=>{const i=nextTrayIdx();if(i<0)return;S.balLoad=i;S.pieces[i].state='pan';addLog(`第 ${i+1} 塊放上天平。`);balShow();drawBench();updButtons();};
+$('#bOff').onclick=()=>{const p=S.pieces[S.balLoad];p.state='tray';p.recorded=false;S.balLoad=null;balShow();updateAll();};
+$('#bRecM').onclick=()=>{const i=S.balLoad,p=S.pieces[i];p.recorded=true;
+  S.rows[i+1].m=S.balDisp;S.rows[i+1].tm={err:S.balDisp-p.m};
+  addLog(`記錄第 ${i+1} 塊質量 ${S.balDisp.toFixed(2)} g。`);updateAll();};
+function insert(mode){
+  const i=S.balLoad,p=S.pieces[i];p.state='in';S.balLoad=null;S.inCyl++;
+  let msg=`第 ${i+1} 塊${mode==='slide'?'沿壁滑入':'直接投入'}量筒`;
+  const pB=mode==='slide'?0.45:0.85,bmax=mode==='slide'?0.05:0.10;
+  if(Math.random()<pB){const bv=rnd(0.01,bmax);S.bubbles.push({i,v:bv});msg+='，表面似乎附著了小氣泡';}
+  if(mode==='drop'&&Math.random()<0.5){const loss=rnd(0.05,0.25);S.splash+=loss;msg+='，<span class="bad">水花濺出！</span>';}
+  addLog(msg+'。');checkOverflow();balShow();updateAll();
+}
+$('#bSlide').onclick=()=>insert('slide');
+$('#bDrop').onclick=()=>insert('drop');
+$('#bTap').onclick=()=>{const n0=S.bubbles.length;S.bubbles=S.bubbles.filter(()=>Math.random()<0.3);
+  addLog(n0?`輕敲量筒，看到 ${n0-S.bubbles.length} 個氣泡浮出。`:'輕敲量筒，沒看到氣泡浮出。');updateAll();};
+$('#eye').oninput=e=>{S.eye=+e.target.value;drawBench();drawZoom();};
+$('#bAlign').onclick=()=>{const lv=levels();if(lv.empty)return;S.eye=lv.L+gauss()*0.15*CYL[S.cyl].A;$('#eye').value=S.eye;drawBench();drawZoom();};
+$('#bRecR').onclick=()=>{
+  const v=parseFloat($('#rdIn').value);if(!Number.isFinite(v)){alert('請先輸入讀數');return;}
+  const lv=levels(),c=CYL[S.cyl];
+  if(lv.L+parallax(lv.L)>c.cap){alert('液面超出刻度範圍，無法讀數。');return;}
+  const k=S.inCyl;S.rows[k].R=v;
+  S.rows[k].tr={L:lv.L,Vb:lv.Vb,splash:S.splash,exposed:lv.exposed,e:eyeCm(lv.L),sh:parallax(lv.L),Vp:lv.Vp};
+  addLog(`第 ${k} 列記錄讀數 ${v} mL。`);$('#rdIn').value='';updateAll();};
+
+function cumM(k){let s=0;for(let i=1;i<=k;i++){if(S.rows[i].m===null)return null;s+=S.rows[i].m;}return s;}
+function renderTable(){
+  const R0=S.rows[0].R;
+  let h='<tr><th>列 n</th><th>單塊質量 mᵢ (g)</th><th>累計質量 M (g)</th><th>量筒讀數 R (mL)</th><th>累計體積 V = R − R₀ (cm³)</th><th>M / V (g/cm³)</th></tr>';
+  S.rows.forEach((r,k)=>{
+    const M=k?cumM(k):0,V=(r.R!==null&&R0!==null)?r.R-R0:null;
+    h+=`<tr${k===S.inCyl?' style="outline:2px solid #1f6feb"':''}><td>${k}</td>`+
+      (k?`<td><input type="number" step="0.01" data-k="${k}" data-f="m" value="${r.m??''}"></td>`:'<td>—</td>')+
+      `<td>${k?fx(M):'0'}</td><td><input type="number" step="0.01" data-k="${k}" data-f="R" value="${r.R??''}"></td>`+
+      `<td>${k?fx(V):'0'}</td><td>${k&&M!==null&&V>0?fx(M/V):'—'}</td></tr>`;});
+  $('#dtab').innerHTML=h;
+  $$('#dtab input').forEach(inp=>inp.onchange=e=>{const k=+e.target.dataset.k,f=e.target.dataset.f,v=parseFloat(e.target.value);S.rows[k][f]=Number.isFinite(v)?v:null;renderTable();refreshAnalysis();});
+}
+
+/* ============ ④ 迴歸 ============ */
+function linreg(x,y){const n=x.length;const mx=x.reduce((a,b)=>a+b,0)/n,my=y.reduce((a,b)=>a+b,0)/n;
+  let sxx=0,sxy=0,syy=0;for(let i=0;i<n;i++){sxx+=(x[i]-mx)**2;sxy+=(x[i]-mx)*(y[i]-my);syy+=(y[i]-my)**2;}
+  const b=sxy/sxx,a=my-b*mx;let ss=0;for(let i=0;i<n;i++)ss+=(y[i]-a-b*x[i])**2;
+  const s=n>2?Math.sqrt(ss/(n-2)):NaN;return {n,b,a,R2:sxy*sxy/(sxx*syy),sb:s/Math.sqrt(sxx),sa:s*Math.sqrt(1/n+mx*mx/sxx)};}
+function srcVal(){return $('input[name=src]:checked').value;}
+function getData(src){
+  if(src==='ref'){const pm=[],pv=[];REF.M.forEach((m,i)=>{pm.push(m-(i?REF.M[i-1]:0));pv.push(+(REF.V[i]-(i?REF.V[i-1]:0)).toFixed(2));});return {M:REF.M.slice(),V:REF.V.slice(),pm,pv,n:REF.M.map((_,i)=>i+1)};}
+  const R0=S.rows[0].R,o={M:[],V:[],pm:[],pv:[],n:[]};if(R0===null)return o;
+  for(let k=1;k<=10;k++){const M=cumM(k),R=S.rows[k].R;if(M===null||R===null)continue;o.M.push(M);o.V.push(R-R0);o.n.push(k);
+    const Rp=S.rows[k-1].R;if(Rp!==null&&S.rows[k].m!==null&&R-Rp>0){o.pm.push(S.rows[k].m);o.pv.push(R-Rp);}}
+  return o;}
+function analyze(src){
+  const d=getData(src);if(d.M.length<3)return {d,ok:false};
+  const vm=linreg(d.M,d.V),mv=linreg(d.V,d.M);
+  let sVM=0,sVV=0;d.M.forEach((m,i)=>{sVM+=m*d.V[i];sVV+=d.V[i]**2;});
+  const d0=sVM/sVV;let r0=0;d.M.forEach((m,i)=>r0+=(m-d0*d.V[i])**2);const s0=Math.sqrt(r0/(d.M.length-1)/sVV);
+  const pt=d.M.map((m,i)=>m/d.V[i]).filter(Number.isFinite);const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  const sd=a=>Math.sqrt(a.reduce((x,y)=>x+(y-mean(a))**2,0)/(a.length-1));
+  const pc=d.pm.map((m,i)=>m/d.pv[i]);
+  return {d,ok:true,vm,mv,
+    res:{vm:{d:1/vm.b,s:vm.sb/vm.b**2},mv:{d:mv.b,s:mv.sb},o:{d:d0,s:s0},pt:{d:mean(pt),s:sd(pt)/Math.sqrt(pt.length)},pc:pc.length>1?{d:mean(pc),s:sd(pc)/Math.sqrt(pc.length),sd:sd(pc),n:pc.length}:null}};}
+function renderT4(){
+  const A=analyze(srcVal());
+  if(!A.ok){$('#t4plot').innerHTML='<div class="note">至少需要 R₀ 及 3 組完整的（M, V）數據才能迴歸。請先到第 ③ 頁量測，或改選「參考解附例數據」。</div>';$('#t4res').innerHTML='';$('#t4data').innerHTML='';return;}
+  const d=A.d,xm=Math.max(...d.V)*1.15,ym=Math.max(...d.M)*1.15;
+  const ax=axes({xmin:0,xmax:xm,ymin:0,ymax:ym,xlabel:'累計體積 V (cm³)',ylabel:'累計質量 M (g)',W:540,H:360});
+  let s=ax.s;
+  const vmLine=V=>(V-A.vm.a)/A.vm.b,mvLine=V=>A.mv.a+A.mv.b*V;
+  s+=`<path d="M${ax.X(0)},${ax.Y(mvLine(0))}L${ax.X(xm)},${ax.Y(mvLine(xm))}" stroke="#e08a00" stroke-width="1.6" stroke-dasharray="6 4"/>`;
+  s+=`<path d="M${ax.X(0)},${ax.Y(vmLine(0))}L${ax.X(xm)},${ax.Y(vmLine(xm))}" stroke="#1f6feb" stroke-width="2"/>`;
+  d.M.forEach((m,i)=>{s+=`<circle cx="${ax.X(d.V[i])}" cy="${ax.Y(m)}" r="4" fill="#c0262d"/>`;});
+  s+=`<text x="${ax.L+8}" y="${ax.T+16}" font-size="11" fill="#1f6feb">— V–M 迴歸（d = 1/斜率）</text><text x="${ax.L+8}" y="${ax.T+31}" font-size="11" fill="#e08a00">- - M–V 迴歸（參考解）</text>`;
+  $('#t4plot').innerHTML=s+'</svg>';
+  const r=A.res;
+  $('#t4res').innerHTML=`<tr><th>方法</th><th>d (g/cm³)</th><th>σ<sub>d</sub></th><th>其他</th></tr>
+  <tr class="hl"><td>V–M 迴歸：V = a′ + (1/d)M</td><td><b>${fx(r.vm.d,3)}</b></td><td>${fx(r.vm.s,3)}</td><td>截距 a′ = ${fx(A.vm.a,3)} cm³<br>R² = ${fx(A.vm.R2,5)}</td></tr>
+  <tr><td>M–V 迴歸：M = a + dV（參考解）</td><td>${fx(r.mv.d,3)}</td><td>${fx(r.mv.s,3)}</td><td>截距 a = ${fx(A.mv.a,3)} g</td></tr>
+  <tr><td>過原點 M = dV</td><td>${fx(r.o.d,3)}</td><td>${fx(r.o.s,3)}</td><td>強迫截距 0</td></tr>
+  <tr><td>累計點 M/V 平均</td><td>${fx(r.pt.d,3)}</td><td>${fx(r.pt.s,3)}*</td><td>*點彼此相關，σ 低估</td></tr>
+  <tr><td>單塊 mᵢ/ΔVᵢ 平均</td><td>${r.pc?fx(r.pc.d,3):'—'}</td><td>${r.pc?fx(r.pc.s,3):'—'}</td><td>${r.pc?`單塊離散 SD = ${fx(r.pc.sd,2)}（${r.pc.n} 塊）`:''}</td></tr>`;
+  let h='<table><tr><th>n</th>'+d.n.map(k=>`<th>${k}</th>`).join('')+'</tr><tr><td>M (g)</td>'+d.M.map(v=>`<td>${fx(v)}</td>`).join('')+'</tr><tr><td>V (cm³)</td>'+d.V.map(v=>`<td>${fx(v)}</td>`).join('')+'</tr><tr><td>V–M 殘差 (cm³)</td>'+d.M.map((m,i)=>`<td>${sgn(d.V[i]-A.vm.a-A.vm.b*m,2)}</td>`).join('')+'</tr></table>';
+  $('#t4data').innerHTML=h;
+}
+$$('input[name=src]').forEach(r=>r.onchange=()=>{renderT4();renderT5();});
+
+/* ============ ⑤ 鑑定 ============ */
+function renderT5(){
+  const src=srcVal();$('#t5src').textContent=src==='ref'?'參考解附例數據':'我的量測（可在第 ④ 頁切換）';
+  const A=analyze(src),m=$('#t5m').value;
+  if(!A.ok){$('#t5res').innerHTML='<div class="note">數據不足，請先完成量測（至少 R₀ 與 3 組數據）。</div>';$('#t5tab').innerHTML='';$('#t5verdict').innerHTML='';}
+  else{
+    const r=A.res[m];
+    $('#t5res').innerHTML=`<div class="formula">d = ${r.d.toFixed(3)} ± ${r.s.toFixed(3)} g/cm³</div>`;
+    let best=null,second=null;const rows=ALLOYS.map(a=>({a,z:(r.d-a.d)/r.s})).sort((p,q)=>Math.abs(p.z)-Math.abs(q.z));best=rows[0];second=rows[1];
+    $('#t5tab').innerHTML='<tr><th>候選</th><th>重量百分比</th><th>理論 d (g/cm³)</th><th>d<sub>測</sub> − d<sub>理</sub></th><th>相差幾個 σ</th></tr>'+
+      ALLOYS.map(a=>{const z=(r.d-a.d)/r.s;return `<tr${a===best.a?' class="hl"':''}><td>${a.name}</td><td>${a.label}</td><td>${a.d.toFixed(2)}</td><td>${sgn(r.d-a.d,2)}</td><td>${Math.abs(z)>99?'>99':Math.abs(z).toFixed(1)} σ</td></tr>`;}).join('');
+    let v=`<div class="info">最接近的是 <b>${best.a.name}（${best.a.label}）</b>，相差 ${Math.abs(best.z).toFixed(1)} σ；次接近的 ${second.a.name} 相差 ${Math.abs(second.z).toFixed(1)} σ。`;
+    if(Math.abs(best.z)<=2)v+=' 在 2σ 內，與統計誤差相容。';
+    else if(Math.abs(best.z)<=3)v+=' 介於 2–3σ，略有張力，宜檢查是否有系統誤差。';
+    else v+=` <span class="bad">超過 3σ：單靠隨機誤差無法解釋，量測必有系統誤差</span>（測得值${r.d<best.a.d?'偏小 → 想想氣泡、視差、R₀':'偏大 → 想想濺水、合金露出、天平未歸零'}）。只因其他候選差得更遠，鑑定結論仍可成立。`;
+    if(m==='pt')v+=' （注意：累計點平均的 σ 被低估，σ 倍數會被高估。）';
+    $('#t5verdict').innerHTML=v+'</div>';
+  }
+  renderModel();renderCase();
+}
+$('#t5m').onchange=renderT5;
+function renderModel(){
+  const a=ALLOYS[+$('#t5alloy').value],b=+$('#sB').value,c=+$('#sC').value,dl=+$('#sD').value,v=0.49,m=a.d*v;
+  $('#sBv').textContent=b.toFixed(3);$('#sCv').textContent=sgn(c,2);$('#sDv').textContent=sgn(dl,3);
+  const M=[],V=[];for(let k=1;k<=10;k++){M.push(k*(m+dl));V.push(k*(v+b)-c);}
+  const fit=linreg(M,V),dA=1/fit.b;
+  $('#t5model').innerHTML=`<table><tr><th></th><th>真值</th><th>迴歸結果</th></tr>
+  <tr><td>密度 d (g/cm³)</td><td>${a.d.toFixed(3)}</td><td><b>${dA.toFixed(3)}</b>（${sgn((dA/a.d-1)*100,1)}%）</td></tr>
+  <tr><td>V–M 截距 a′ (cm³)</td><td>0</td><td>${sgn(fit.a,3)}</td></tr></table>
+  <div class="formula" style="font-size:1rem">d<sub>測</sub> = d · <span class="frac"><span>1 + δ/m</span><span>1 + β/v</span></span>　（c 只改變截距）</div>
+  <p class="small">結論：<b>每塊都重複發生</b>的誤差（氣泡 β、每次秤量的零點偏差 δ）會改變斜率，迴歸消不掉；<b>只發生一次</b>的誤差（R₀ 讀錯 c）只會平移直線，由截距吸收，不影響密度。這正是迴歸法優於單點 M/V 的地方：單點 M/V 會被 c 污染。</p>`;
+}
+function renderCase(){
+  const A=analyze('ref');const r=A.res.mv,r2=A.res.vm,a3=ALLOYS[2];
+  const z=(r.d-a3.d)/r.s,v=REF.M[REF.M.length-1]/a3.d/10,vm=REF.V[REF.V.length-1]/10;
+  const beta=v*(a3.d/r2.d-1);
+  $('#t5case').innerHTML=`<p>參考解 10 組數據的 M–V 迴歸斜率為 <b>${r.d.toFixed(2)} ± ${r.s.toFixed(2)}</b> g/cm³（R² = ${A.mv.R2.toFixed(4)}），合金三理論值 ${a3.d.toFixed(2)}，相差 <b class="bad">${Math.abs(z).toFixed(1)} σ</b>（約 ${((1-r.d/a3.d)*100).toFixed(1)}%）。</p>
+  <p>這不是「略小」，而是明確的系統誤差。若全部歸因於每塊附著的氣泡：真實每塊體積約 ${v.toFixed(3)} cm³，量到平均每塊 ${vm.toFixed(3)} cm³，相當於每塊多出 β ≈ <b>${beta.toFixed(3)} mL</b>，也就是一顆直徑約 ${(2*Math.cbrt(3*beta/4/Math.PI)*10).toFixed(1)} mm 的氣泡。這在合金表面粗糙時相當可能發生；視線偏高造成的視差也會有同向的貢獻。</p>
+  <p class="small">鑑定結論仍是合金三：次接近的候選（合金六 9.28、合金五 4.97）相差都超過 10σ。</p>`;
+}
+['#sB','#sC','#sD','#t5alloy'].forEach(id=>$(id).addEventListener('input',renderModel));
+
+/* ============ ⑥ 揭曉 ============ */
+function renderT6(){
+  if(!S.revealed){$('#t6out').innerHTML='<p class="small">尚未揭曉。</p>';return;}
+  const a=S.alloy,A=analyze('mine');
+  let h=`<div class="formula">隱藏樣品：<b>${a.name}（${a.label}）</b>　真實密度 d = ${a.d.toFixed(3)} g/cm³</div>`;
+  if(A.ok){const r=A.res.vm,z=(r.d-a.d)/r.s;
+    const near=ALLOYS.map(x=>({x,z:Math.abs((r.d-x.d)/r.s)})).sort((p,q)=>p.z-q.z)[0].x;
+    h+=`<p>你的 V–M 迴歸結果：d = ${r.d.toFixed(3)} ± ${r.s.toFixed(3)} g/cm³，與真值相差 ${sgn(r.d-a.d,3)}（${sgn((r.d/a.d-1)*100,2)}%），即 <b class="${Math.abs(z)<=2?'ok':'bad'}">${Math.abs(z).toFixed(1)} σ</b>。鑑定結果：${near===a?'<span class="ok">✓ 正確</span>':`<span class="bad">✗ 判為 ${near.name}</span>`}。</p>`;}
+  else h+='<p class="note">你還沒有足夠的數據可以比較。</p>';
+  h+='<h3>逐列對照（真值 vs 你的紀錄）</h3><div style="overflow-x:auto"><table><tr><th>n</th><th>真實 mᵢ (g)</th><th>你記的 mᵢ</th><th>真實液面 (mL)</th><th>你的讀數 R</th><th>R − 真實</th><th>當時氣泡 (mL)</th><th>累計濺失 (mL)</th><th>視線偏差 (cm)</th><th>備註</th></tr>';
+  S.rows.forEach((r,k)=>{const p=k?S.pieces[k-1]:null,t=r.tr;
+    h+=`<tr><td>${k}</td><td>${p?p.m.toFixed(3):'—'}</td><td>${k?fx(r.m):'—'}</td><td>${t?t.L.toFixed(3):'—'}</td><td>${fx(r.R)}</td><td>${t&&r.R!==null?sgn(r.R-t.L,2):'—'}</td><td>${t?t.Vb.toFixed(3):'—'}</td><td>${t?t.splash.toFixed(2):'—'}</td><td>${t?sgn(t.e,1):'—'}</td><td>${t&&t.exposed?'<span class="bad">合金露出</span>':''}</td></tr>`;});
+  h+='</table></div>';
+  // 診斷
+  const tr=S.rows.map(r=>r.tr).filter(Boolean),mErr=S.rows.slice(1).filter(r=>r.tm).map(r=>r.tm.err);
+  const diag=[];
+  if(S.rows[0].R===null)diag.push('沒有記錄初讀數 R₀，無法計算累計體積。');
+  if(tr.length){const last=S.rows.map((r,k)=>({r,k})).filter(o=>o.r.tr).pop();const t=last.r.tr;
+    if(t.Vb>0.02)diag.push(`最後一次讀數時仍有約 ${t.Vb.toFixed(3)} mL 氣泡附著，使讀數偏大、密度偏小。`);
+    if(t.splash>0)diag.push(`累計濺失約 ${t.splash.toFixed(2)} mL 水，使後續讀數偏小、密度偏大。`);
+    if(tr.some(x=>x.exposed))diag.push('有讀數是在合金露出水面時讀的，體積被低估。');
+    const big=tr.filter(x=>Math.abs(x.e)>0.5);if(big.length)diag.push(`有 ${big.length} 次讀數時視線與液面相差超過 0.5 cm，視差造成最多 ${Math.max(...big.map(x=>Math.abs(x.sh))).toFixed(2)} mL 偏差。`);
+    const re=S.rows.filter(r=>r.tr&&r.R!==null).map(r=>r.R-(r.tr.L+r.tr.sh));
+    if(re.length){const mean=re.reduce((x,y)=>x+y,0)/re.length;if(Math.abs(mean)>CYL[S.cyl].div*0.3)diag.push(`扣除視差後，你的讀數平均仍比凹液面最低處${mean>0?'高':'低'} ${Math.abs(mean).toFixed(2)} mL，可能讀到凹液面邊緣或估讀習慣有偏差。`);}}
+  if(mErr.length){const mm=mErr.reduce((x,y)=>x+y,0)/mErr.length;if(Math.abs(mm)>0.02)diag.push(`秤量平均偏差 ${sgn(mm,3)} g/塊（天平零點未確實歸零或漂移），每塊都會累積，影響斜率。`);}
+  if(!diag.length)diag.push('操作很乾淨，沒有偵測到明顯的系統誤差來源。');
+  h+='<h3>誤差診斷</h3><ul>'+diag.map(x=>`<li>${x}</li>`).join('')+'</ul>';
+  h+=`<p class="small">真實合金體積總和 ${S.pieces.reduce((x,p)=>x+p.v,0).toFixed(3)} cm³、質量總和 ${S.pieces.reduce((x,p)=>x+p.m,0).toFixed(3)} g；使用 ${S.cyl} mL 量筒。</p>`;
+  $('#t6out').innerHTML=h;
+}
+$('#bReveal').onclick=()=>{if(!S.revealed&&!confirm('揭曉後就知道答案了，確定已完成量測與分析？'))return;S.revealed=true;renderT6();};
+$('#bNew').onclick=()=>{if(!confirm('會清除所有數據並換新樣品，確定嗎？'))return;const cyl=S.cyl;newSample();S.cyl=cyl;resetLab();setupCylUI();updateAll();};
+
+/* ---------- 共用 ---------- */
+function refreshAnalysis(){renderT4();renderT5();renderT6();}
+function updateAll(){drawBench();drawZoom();updButtons();renderTable();refreshAnalysis();}
+$$('#nav button').forEach(b=>b.onclick=()=>{$$('#nav button').forEach(x=>x.classList.toggle('on',x===b));$$('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab'+b.dataset.t));if(b.dataset.t>=4)refreshAnalysis();window.scrollTo(0,0);});
+
+/* ---------- 初始化 ---------- */
+$('#t5alloy').innerHTML=ALLOYS.map(a=>`<option value="${a.id}"${a.id===2?' selected':''}>${a.name}（${a.label}）d = ${a.d.toFixed(2)}</option>`).join('');
+newSample();setupCylUI();t1Table();t1Plot();updateAll();
+</script>
+</body>
+</html>

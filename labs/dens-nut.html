@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>螺絲帽密度虛擬實驗室</title>
+<style>
+:root{--bg:#f5f6f8;--card:#ffffff;--ink:#1c2331;--mute:#5d6778;--line:#d8dde6;--acc:#1f6feb;--acc2:#0e8a6a;--warn:#c2410c;--soft:#eef3fb;--soft2:#f3f8f5;
+--wood:#d8b07a;--wood2:#a87b42;--steel:#9aa3ae;--steel2:#6e7782;--thread:#7a5c3a;--wire:#b0752e;--grid:#e7eaf0;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141b;--card:#19202a;--ink:#e5e9f0;--mute:#9aa5b5;--line:#2c3542;--acc:#5b9dff;--acc2:#3cc79f;--warn:#fb923c;--soft:#1e2735;--soft2:#1a2924;--grid:#252d39;--thread:#c9a57c;}}
+:root[data-theme="dark"]{--bg:#10141b;--card:#19202a;--ink:#e5e9f0;--mute:#9aa5b5;--line:#2c3542;--acc:#5b9dff;--acc2:#3cc79f;--warn:#fb923c;--soft:#1e2735;--soft2:#1a2924;--grid:#252d39;--thread:#c9a57c;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.65;font-size:15px}
+header{padding:18px 16px 8px;max-width:1180px;margin:0 auto}
+header h1{margin:0;font-size:22px}
+header .sub{color:var(--mute);font-size:13.5px}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .in{max-width:1180px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:6px 16px}
+nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:14px}
+nav button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+main{max-width:1180px;margin:0 auto;padding:14px 16px 60px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:18px}.card h3{margin:10px 0 6px;font-size:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+.fx{background:var(--soft);border-left:4px solid var(--acc);padding:8px 12px;border-radius:6px;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:16px;overflow-x:auto}
+.note{background:var(--soft2);border-left:4px solid var(--acc2);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:14px}
+.warn{background:rgba(194,65,12,.08);border-left:4px solid var(--warn);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:14px}
+.mute{color:var(--mute);font-size:13.5px}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:6px 0}
+label{font-size:14px}
+input[type=number],select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:14px;width:90px}
+input[type=range]{width:220px;max-width:100%}
+button.b{border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:14px}
+button.g{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:7px;padding:5px 10px;cursor:pointer;font-size:13.5px}
+button.w{border:1px solid var(--warn);background:var(--warn);color:#fff;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:14px}
+button:disabled{opacity:.45;cursor:not-allowed}
+table.dt{border-collapse:collapse;width:100%;font-size:13.5px;margin:6px 0}
+table.dt th,table.dt td{border:1px solid var(--line);padding:3px 6px;text-align:center}
+table.dt th{background:var(--soft)}
+table.dt input{width:72px;padding:2px 4px;font-size:13px;text-align:center}
+.tw{overflow-x:auto;max-height:340px;overflow-y:auto}
+svg{max-width:100%;height:auto;display:block}
+.svgbox{background:var(--card);border:1px solid var(--line);border-radius:10px}
+.big{font-size:20px;font-weight:600}
+.watch{font-family:"Consolas","Menlo",monospace;font-size:34px;font-weight:700;background:#111;color:#7dffb0;padding:4px 14px;border-radius:8px;display:inline-block;letter-spacing:1px}
+.res{font-size:15px}.res b{color:var(--acc)}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12.5px;border:1px solid var(--line);background:var(--soft)}
+.ok{color:var(--acc2);font-weight:600}.bad{color:var(--warn);font-weight:600}
+details summary{cursor:pointer;color:var(--acc)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header>
+<h1>螺絲帽密度虛擬實驗室</h1>
+<div class="sub">九十七學年度高級中學自然學科競賽 屏東區複賽 物理科實驗試題第二題 ── 無天平、無量筒：以「金屬線當砝碼、幾何量體積」求螺絲帽密度</div>
+</header>
+<nav><div class="in" id="nav"></div></nav>
+<main>
+
+<!-- ============ ① 原理 ============ -->
+<section class="tab" id="t1">
+<div class="card">
+<h2>① 實驗設計之理論基礎</h2>
+<p>器材清單中<b>沒有天平、沒有量筒、也沒有水</b>，所以密度 ρ = m／V 的兩個量都得「自己造標準」：</p>
+<ul>
+<li><b>質量標準</b>：金屬線單位長度質量 μ = 0.05 g/cm 已知，剪一段量長度 L，就得到已知質量 m<sub>w</sub> = μL 的「砝碼」（整條約 70 cm ≈ 3.5 g）。</li>
+<li><b>體積</b>：沒有水可排，只能用直尺／卷尺量幾何尺寸。50 個螺帽可以疊高、並排，用迴歸把 1 mm 刻度的誤差分攤掉。</li>
+</ul>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h3>法一（主）：竹筷槓桿</h3>
+<svg viewBox="0 0 420 190" id="figLever"></svg>
+<p>竹筷以棉線吊在支架橫桿上。<b>先找筷子自身的平衡點</b>當支點，使筷子自重對支點的力矩為零。左側距支點 a 處掛 n 顆螺帽，右側在 x 處掛已知質量 m<sub>w</sub> 的金屬線，調 x 使筷子水平：</p>
+<div class="fx">n·m·a = m<sub>w</sub>·x　⇒　令 X = n·a，Y = m<sub>w</sub>·x，則 Y = m·X + b</div>
+<p>斜率就是<b>單顆螺帽質量 m</b>。若支點與筷子重心相差 δ，筷子自重 M<sub>c</sub> 會多出力矩 M<sub>c</sub>δ，它只進入截距 b、不影響斜率──這正是用迴歸而不用單點 m = Y／X 的理由。</p>
+</div>
+<div class="card">
+<h3>法二（對照）：定滑輪 Atwood 機</h3>
+<svg viewBox="0 0 420 190" id="figAtw"></svg>
+<p>兩側各掛 N 顆螺帽，右側再加金屬線 Δm，由靜止釋放，量下落高度 h 與時間 t，a = 2h／t²。考慮滑輪轉動慣量 I（半徑 r）與摩擦（等效質量 f）：</p>
+<div class="fx">a = (Δm − f)g ／ (2Nm + Δm + I/r²)</div>
+<div class="fx">忽略 f：1/a = [2m／(Δm·g)]·N + (Δm + I/r²)／(Δm·g)</div>
+<p>作 1/a–N 圖，斜率 s ⇒ <b>m = s·Δm·g／2</b>；截距還可估出滑輪等效質量 I/r²。台灣 g ≈ 979 cm/s²。</p>
+</div>
+</div>
+
+<div class="card">
+<h3>體積：六角柱扣掉螺紋孔</h3>
+<div class="grid2">
+<svg viewBox="0 0 420 230" id="figHex"></svg>
+<div>
+<div class="fx">V = [ (√3/2)·F²·(1 − c) − (π/4)·d<sub>eff</sub>² ]·t</div>
+<ul>
+<li>F：對邊寬（兩平行邊距離），t：厚度。六角形面積 = (√3/2)F²。</li>
+<li>疊 n 顆量總高 H、並排 n 顆（平邊相貼）量總寬 W，作 <b>H–n、W–n 迴歸</b>，斜率即 t、F，零點讀數誤差落在截距。</li>
+<li><b>螺紋修正</b>：孔壁是內螺紋，直接量到的是小徑 D₁（牙頂）。牙在 D₁～D（大徑）之間大約一半是實心，故 d<sub>eff</sub>² ≈ (D₁² + D²)/2；公制粗牙螺紋 D₁ ≈ 0.83 D。</li>
+<li><b>倒角修正 c</b>：市售六角螺帽兩面都有 30° 倒角，邊角被削掉，體積比理想六角柱少約 2～4%。並排量「對角寬」e 並與理想值 2F/√3 比較，可看出邊角被削的程度。</li>
+</ul>
+</div></div>
+</div>
+
+<div class="card">
+<h3>誤差傳遞</h3>
+<div class="fx">(σ<sub>ρ</sub>/ρ)² = (σ<sub>m</sub>/m)² + (σ<sub>V</sub>/V)²，　σ<sub>V</sub>² = (∂V/∂F·σ<sub>F</sub>)² + (∂V/∂t·σ<sub>t</sub>)² + (∂V/∂d·σ<sub>d</sub>)²</div>
+<p class="mute">∂V/∂F = √3·F·t·(1−c) 是最大的一項，所以 F 要量得最準（並排越多顆越好）；孔徑 d 雖然只用直尺量很粗，但孔面積只佔六角形約 25～30%，影響被壓小。最後以 (測量值 − 真值)／σ 檢驗結果是否在誤差範圍內。</p>
+</div>
+
+<div class="card">
+<h3>本實驗室的流程</h3>
+<p>② 剪金屬線、量長度、找筷子平衡點 → ③ 槓桿 Y–X 迴歸求 m → ④ Atwood 1/a–N 迴歸求 m（對照）→ ⑤ 疊高／並排／孔徑求 V → ⑥ ρ、誤差傳遞、材質判斷、真值揭曉。</p>
+<p class="mute">每次開啟都會隨機抽出一組「隱藏真值」：螺帽規格（M6／M8／M10 其中之一）、材質、每顆螺帽的尺寸與質量散佈、金屬線實際 μ、筷子重心、滑輪轉動慣量與摩擦。真值只在 ⑥ 揭曉。</p>
+<div class="row"><button class="w" id="btnNew">重新抽一組螺帽（清除全部數據）</button></div>
+</div>
+</section>
+
+<!-- ============ ② 器材與標準質量 ============ -->
+<section class="tab" id="t2">
+<div class="card">
+<h2>② 器材組裝與標準質量</h2>
+<p>先準備兩件事：<b>(1) 把金屬線變成已知質量的砝碼</b>；<b>(2) 找出竹筷的平衡點當支點</b>。</p>
+</div>
+<div class="grid2">
+<div class="card">
+<h3>待測物：螺絲帽（50 顆）</h3>
+<svg viewBox="0 0 420 200" id="nutView"></svg>
+<p class="mute">俯視圖，下方為 1 mm 刻度直尺（僅供目測大小；正式量測在 ⑤）。</p>
+</div>
+<div class="card">
+<h3>金屬線（μ = 0.05 g/cm）</h3>
+<svg viewBox="0 0 420 110" id="wireView"></svg>
+<div class="row"><button class="g" id="btnWireTot">以卷尺量整條長度</button><span id="wireTot" class="res"></span></div>
+<div class="row"><label>剪下 A 段，目標長度 <input type="number" id="cutLen" value="30" step="0.5" min="5" max="65"> cm</label><button class="b" id="btnCut">用小刀剪斷</button></div>
+<div class="row"><button class="g" id="btnMeasA" disabled>量 A 段</button><button class="g" id="btnMeasB" disabled>量 B 段（剩下）</button><button class="g" id="btnWireReset">換一條新線</button></div>
+<div id="wireInfo" class="res"></div>
+<p class="mute">剪下的兩段都可以彎成小鉤掛起來使用，也可兩段一起掛（A+B）。拉直不完全時卷尺讀數會略短。</p>
+</div>
+</div>
+<div class="card">
+<h3>找竹筷的平衡點（支點）</h3>
+<svg viewBox="0 0 700 260" id="pivSvg" class="svgbox"></svg>
+<div class="row"><label>吊線綁在距粗端 <b id="pVal"></b> cm 處</label>
+<input type="range" id="pSl" min="4" max="14" step="0.01">
+<button class="g" data-dp="-0.1">−0.1</button><button class="g" data-dp="-0.01">−0.01</button><button class="g" data-dp="0.01">+0.01</button><button class="g" data-dp="0.1">+0.1</button>
+<button class="b" id="btnPivRec">筷子水平了，記錄支點位置</button></div>
+<div id="pivInfo" class="res"></div>
+<div class="note">免洗筷一頭粗一頭細，重心靠近粗端，不在中點。對照虛線（水平參考線）調到筷子水平。支點沒對準重心也還能做，誤差會跑進 ③ 迴歸的截距。</div>
+</div>
+</section>
+
+<!-- ============ ③ 槓桿 ============ -->
+<section class="tab" id="t3">
+<div class="card">
+<h2>③ 槓桿量測單顆質量 m</h2>
+<p>左側距支點 a 掛 n 顆螺帽，右側掛金屬線，滑動 x 直到筷子水平後記錄。<b>建議改變 n 與 a 取得至少 5～6 組 X = n·a</b>，X 範圍拉開，斜率才準。</p>
+</div>
+<div class="card">
+<svg viewBox="0 0 700 420" id="levSvg" class="svgbox"></svg>
+<div class="grid2">
+<div>
+<div class="row"><label>左側螺帽數 n <input type="number" id="lvN" value="1" min="1" max="10" step="1"></label>
+<label>右側金屬線 <select id="lvPiece"></select></label></div>
+<div class="row"><label>螺帽吊點距支點 a = <b id="aVal"></b> cm</label><input type="range" id="aSl" step="0.01"></div>
+<div class="row"><label>金屬線吊點距支點 x = <b id="xVal"></b> cm</label><input type="range" id="xSl" step="0.01"></div>
+<div class="row"><span class="mute">微調 x：</span><button class="g" data-dx="-0.1">−0.1</button><button class="g" data-dx="-0.01">−0.01</button><button class="g" data-dx="0.01">+0.01</button><button class="g" data-dx="0.1">+0.1</button></div>
+<div class="row"><button class="b" id="btnLevRec">水平了，用直尺讀 a、x 並記錄</button></div>
+<div id="levMsg" class="mute"></div>
+</div>
+<div>
+<div class="tw"><table class="dt" id="levTab"></table></div>
+<p class="mute">表中 a、x、L 可直接修改；m<sub>w</sub> = 0.05 × L。</p>
+</div>
+</div>
+</div>
+<div class="grid2">
+<div class="card"><h3>Y = m<sub>w</sub>x 對 X = n·a 作圖</h3><div id="levPlot"></div></div>
+<div class="card"><h3>結果</h3><div id="levRes" class="res"></div></div>
+</div>
+</section>
+
+<!-- ============ ④ Atwood ============ -->
+<section class="tab" id="t4">
+<div class="card">
+<h2>④ Atwood 機對照：1/a–N 迴歸</h2>
+<p>定滑輪夾在支架上，棉線跨過滑輪；左側 N 顆，右側 N 顆＋金屬線。<b>按「釋放」碼錶同時啟動</b>，看到右側落地時按「停」。同一個 N 建議重複 3 次以上，並試試「左右兩疊對調」。</p>
+</div>
+<div class="grid2">
+<div class="card">
+<svg viewBox="0 0 360 540" id="atSvg" class="svgbox"></svg>
+</div>
+<div>
+<div class="card">
+<div class="row"><label>每側螺帽數 N <input type="number" id="atN" value="3" min="1" max="25" step="1"></label>
+<label>右側加掛 <select id="atPiece"></select></label></div>
+<div class="row"><label>起始高度 h <b id="hVal"></b> cm</label><input type="range" id="hSl" min="30" max="115" step="0.5" value="90"></div>
+<div class="row"><label><input type="checkbox" id="atSwap"> 左右兩疊螺帽對調</label>
+<label><input type="checkbox" id="atAuto"> 自動按停（模擬人手反應）</label></div>
+<div class="row"><span class="watch" id="watch">0.00</span></div>
+<div class="row"><button class="b" id="btnRel">釋放（碼錶同步啟動）</button><button class="w" id="btnStop" disabled>停（空白鍵）</button><button class="g" id="btnReset">放回起點</button></div>
+<div id="atMsg" class="res"></div>
+<div class="row"><button class="b" id="btnAtRec" disabled>記錄這一次</button><button class="g" id="btnAtDis" disabled>捨棄</button></div>
+</div>
+<div class="card"><div class="tw"><table class="dt" id="atTab"></table></div></div>
+</div>
+</div>
+<div class="grid2">
+<div class="card"><h3>1/a 對 N 作圖 <select id="atFitPiece"></select></h3><div id="atPlot"></div></div>
+<div class="card"><h3>結果</h3><div id="atRes" class="res"></div></div>
+</div>
+</section>
+
+<!-- ============ ⑤ 體積 ============ -->
+<section class="tab" id="t5">
+<div class="card">
+<h2>⑤ 體積量測</h2>
+<p>直尺最小刻度 1 mm，讀數估到 0.5 mm。單顆量厚度只有 5～8 mm，讀數誤差高達 5～10%；<b>疊高、並排多顆再迴歸</b>，可把誤差降到 1% 以下。</p>
+</div>
+<div class="grid3">
+<div class="card"><h3>疊高：H–n</h3>
+<svg viewBox="0 0 220 300" id="stkSvg" class="svgbox"></svg>
+<div class="row"><label>n <input type="number" id="stkN" value="10" min="1" max="50"></label><button class="b" id="btnStk">讀總高 H</button></div>
+<div class="tw"><table class="dt" id="stkTab"></table></div></div>
+<div class="card"><h3>並排（平邊相貼）：W–n</h3>
+<svg viewBox="0 0 220 300" id="rowSvg" class="svgbox"></svg>
+<div class="row"><label>n <input type="number" id="rowN" value="10" min="1" max="50"></label><button class="b" id="btnRow">讀總寬 W</button></div>
+<div class="tw"><table class="dt" id="rowTab"></table></div></div>
+<div class="card"><h3>並排（對角相頂）：E–n</h3>
+<svg viewBox="0 0 220 300" id="corSvg" class="svgbox"></svg>
+<div class="row"><label>n <input type="number" id="corN" value="10" min="1" max="50"></label><button class="b" id="btnCor">讀總長 E</button></div>
+<div class="tw"><table class="dt" id="corTab"></table></div>
+<p class="mute">選做：用來檢查邊角被倒角削掉多少。</p></div>
+</div>
+<div class="grid3">
+<div class="card"><h3>H–n</h3><div id="stkPlot"></div><div id="stkRes" class="res"></div></div>
+<div class="card"><h3>W–n</h3><div id="rowPlot"></div><div id="rowRes" class="res"></div></div>
+<div class="card"><h3>E–n</h3><div id="corPlot"></div><div id="corRes" class="res"></div></div>
+</div>
+<div class="grid2">
+<div class="card"><h3>孔徑 d</h3>
+<svg viewBox="0 0 420 170" id="holeSvg" class="svgbox"></svg>
+<div class="row"><label><input type="radio" name="hm" value="ruler" checked> 直尺直接量孔徑</label>
+<label><input type="radio" name="hm" value="wrap"> 筷子插入卡住→棉線繞 5 圈量長</label></div>
+<div class="row" id="wrapRow"><label><input type="checkbox" id="taped"> 筷子纏膠帶加粗</label>
+<button class="g" id="btnTh">棉線密繞 20 圈量寬度（估棉線粗）</button><span id="thInfo" class="mute"></span></div>
+<div class="row"><button class="b" id="btnHole">任取一顆量一次</button><button class="g" id="btnHoleClr">清除孔徑數據</button></div>
+<div id="holeMsg" class="mute"></div>
+<div class="tw"><table class="dt" id="holeTab"></table></div>
+</div>
+<div class="card"><h3>修正與體積</h3>
+<div class="row"><label><input type="checkbox" id="thrCorr"> 螺紋修正 d<sub>eff</sub>² = (d² + (d/0.83)²)/2</label></div>
+<div class="row"><label>倒角體積修正 c = <b id="cVal">0.0</b> %</label><input type="range" id="cSl" min="0" max="6" step="0.5" value="0"></div>
+<div id="volRes" class="res"></div>
+</div>
+</div>
+</section>
+
+<!-- ============ ⑥ 結果 ============ -->
+<section class="tab" id="t6">
+<div class="card">
+<h2>⑥ 密度、誤差傳遞與真值揭曉</h2>
+<div id="finRes" class="res"></div>
+</div>
+<div class="card"><h3>材質判斷</h3><div id="matTab"></div>
+<p class="mute">碳鋼 7.85 與不鏽鋼 7.93 g/cm³ 只差 1%，要分辨需要 &lt; 0.5% 的精度──本實驗器材做不到，這種情況應在討論中說明，並可用「磁鐵吸不吸」等其他性質輔助。</p></div>
+<div class="card">
+<h3>真值揭曉</h3>
+<div class="row"><button class="w" id="btnReveal">揭曉隱藏真值</button></div>
+<div id="truth"></div>
+</div>
+<div class="card">
+<h3>報告撰寫檢核（對應評分比例）</h3>
+<ul>
+<li><b>理論基礎 20%</b>：槓桿力矩平衡、Atwood 加速度式、六角柱體積公式、為何用迴歸。</li>
+<li><b>實驗步驟 20%</b>：剪線量長、找平衡點、改變 n 與 a、疊高並排、孔徑量法。</li>
+<li><b>數據記錄 10%</b>：所有讀數含單位與估計位，重複次數。</li>
+<li><b>計算分析與結果 25%</b>：迴歸斜率與標準差、m、V、ρ ± σ。</li>
+<li><b>討論 25%</b>：支點偏移只影響截距、滑輪摩擦使 Atwood m 偏大、螺紋與倒角修正、金屬線 μ 的不確定度、材質判斷的極限。</li>
+</ul>
+</div>
+</section>
+</main>
+
+<script>
+"use strict";
+/* ================= 工具 ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const U=(a,b)=>a+(b-a)*Math.random();
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const rnd=(x,s)=>Math.round(x/s)*s;
+const avg=a=>a.reduce((p,q)=>p+q,0)/a.length;
+const sum=a=>a.reduce((p,q)=>p+q,0);
+const f=(x,d)=>(x==null||!isFinite(x))?'—':x.toFixed(d);
+const SQ3=Math.sqrt(3);
+function sdev(a){if(a.length<2)return NaN;const m=avg(a);return Math.sqrt(a.reduce((p,q)=>p+(q-m)**2,0)/(a.length-1));}
+function linreg(pts){
+  const n=pts.length; if(n<2) return null;
+  let sx=0,sy=0,sxx=0,sxy=0; pts.forEach(p=>{sx+=p.x;sy+=p.y;sxx+=p.x*p.x;sxy+=p.x*p.y;});
+  const D=n*sxx-sx*sx; if(Math.abs(D)<1e-12) return null;
+  const m=(n*sxy-sx*sy)/D, b=(sy-m*sx)/n;
+  let ss=0,st=0; const my=sy/n; pts.forEach(p=>{ss+=(p.y-m*p.x-b)**2;st+=(p.y-my)**2;});
+  const s2=n>2?ss/(n-2):NaN;
+  return {m,b,sm:Math.sqrt(s2*n/D),sb:Math.sqrt(s2*sxx/D),r2:st>0?1-ss/st:1,n};
+}
+function niceStep(r){const p=Math.pow(10,Math.floor(Math.log10(r)));const q=r/p;return (q<1.5?1:q<3?2:q<7?5:10)*p;}
+function plot(el,pts,fit,o){
+  const W=520,H=300,L=62,R=14,Tp=12,B=46;
+  if(!pts.length){el.innerHTML='<p class="mute">尚無數據</p>';return;}
+  let xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(o.zero){x0=Math.min(0,x0);y0=Math.min(0,y0);}
+  if(fit&&o.zero){y0=Math.min(y0,fit.b);y1=Math.max(y1,fit.b);}
+  if(x1-x0<1e-9){x1+=1;x0-=o.zero?0:1;} if(y1-y0<1e-9){y1+=1;y0-=o.zero?0:1;}
+  const sxs=niceStep((x1-x0)/5),sys=niceStep((y1-y0)/5);
+  x0=Math.floor(x0/sxs)*sxs;x1=Math.ceil(x1/sxs)*sxs;y0=Math.floor(y0/sys)*sys;y1=Math.ceil(y1/sys)*sys;
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Y=y=>H-B-(y-y0)/(y1-y0)*(H-B-Tp);
+  let s=`<svg viewBox="0 0 ${W} ${H}"><rect x="${L}" y="${Tp}" width="${W-L-R}" height="${H-B-Tp}" fill="none" stroke="var(--line)"/>`;
+  const dg=v=>Math.max(0,-Math.floor(Math.log10(v)+1e-9));
+  for(let v=x0;v<=x1+1e-9;v+=sxs){s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${Tp}" y2="${H-B}" stroke="var(--grid)"/><text x="${X(v)}" y="${H-B+16}" font-size="11" text-anchor="middle" fill="var(--mute)">${v.toFixed(dg(sxs))}</text>`;}
+  for(let v=y0;v<=y1+1e-9;v+=sys){s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${L-5}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="var(--mute)">${v.toFixed(dg(sys))}</text>`;}
+  s+=`<text x="${(L+W-R)/2}" y="${H-8}" font-size="13" text-anchor="middle" fill="var(--ink)">${o.xl}</text>`;
+  s+=`<text x="14" y="${(Tp+H-B)/2}" font-size="13" text-anchor="middle" fill="var(--ink)" transform="rotate(-90 14 ${(Tp+H-B)/2})">${o.yl}</text>`;
+  if(fit){const xa=x0,xb=x1;s+=`<line x1="${X(xa)}" y1="${Y(fit.m*xa+fit.b)}" x2="${X(xb)}" y2="${Y(fit.m*xb+fit.b)}" stroke="var(--acc)" stroke-width="2"/>`;}
+  pts.forEach(p=>{s+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4" fill="${p.c||'var(--warn)'}" stroke="#fff" stroke-width="1"/>`;});
+  el.innerHTML=s+'</svg>';
+}
+
+/* ================= 隱藏真值 ================= */
+const G=979;                 // cm/s²
+const CH_L=21.0, CH_D0=0.75, CH_D1=0.40, H_EFF=0.25; // 筷長、粗端徑、細端徑、重心低於吊點(cm)
+const SIZES={M6:{F:1.000,t:0.520,D:0.600,D1:0.4917},M8:{F:1.300,t:0.680,D:0.800,D1:0.6647},M10:{F:1.600,t:0.840,D:1.000,D1:0.8376}};
+const MATS=[{name:'鋁合金',rho:2.70,col:'#c9ced6',col2:'#9aa1ab'},{name:'鋅合金（Zamak）',rho:6.60,col:'#a9afb6',col2:'#7d848d'},{name:'碳鋼（鍍鋅）',rho:7.85,col:'#b4bcc8',col2:'#79828f'},{name:'黃銅',rho:8.50,col:'#d9b45a',col2:'#a8822c'}];
+let T,S;
+function newTruth(){
+  const sk=pick(Object.keys(SIZES)),sz=SIZES[sk],mat=pick(MATS);
+  const rho=mat.rho*(1+0.004*randn());
+  const Fb=sz.F-U(0.005,0.025), tb=sz.t-U(0.005,0.04), D1=sz.D1+U(0.002,0.02), c=U(0.025,0.045), rc=U(0.025,0.05);
+  const Ah=Math.PI/4*(D1*D1+sz.D*sz.D)/2;
+  const nuts=[];
+  for(let i=0;i<50;i++){const F=Fb+0.002*randn(),t=tb+0.003*randn();const V=(SQ3/2*F*F*(1-c)-Ah)*t;nuts.push({F,t,e:F*2/SQ3-rc+0.002*randn(),V,m:rho*V});}
+  const k=CH_D1/CH_D0, cc=CH_L*(1+2*k+3*k*k)/(4*(1+k+k*k))+0.25*randn();
+  return {sk,sz,mat,rho,Fb,tb,D1,D:sz.D,c,rc,nuts,mu:0.05*(1+0.01*randn()),Ltot:U(68.5,71.5),Mc:U(3.0,4.2),cc,
+    Ieq:U(4,9),f0:U(0.02,0.06),kap:0.001,dth:U(0.018,0.025),
+    mbar:avg(nuts.map(n=>n.m)),Vbar:avg(nuts.map(n=>n.V)),Fbar:avg(nuts.map(n=>n.F)),tbar:avg(nuts.map(n=>n.t))};
+}
+function newState(){
+  return {wire:{tot:null,cut:false,A:null,B:null,Ar:null,Br:null},pivot:{p:10.5,read:null},
+    lever:{rows:[]},atw:{rows:[],run:false,pending:null},
+    vol:{H:[],W:[],E:[],holes:[],thRead:null},revealed:false};
+}
+function init(){T=newTruth();S=newState();buildAll();}
+
+/* ================= 金屬線 ================= */
+function pieces(){
+  const w=S.wire;
+  if(!w.cut) return [{k:'W',lab:'整條金屬線',L:T.Ltot,R:w.tot}];
+  return [{k:'A',lab:'A 段',L:w.A,R:w.Ar},{k:'B',lab:'B 段',L:w.B,R:w.Br},{k:'AB',lab:'A+B 兩段',L:w.A+w.B,R:(w.Ar!=null&&w.Br!=null)?w.Ar+w.Br:null}];
+}
+const getPiece=k=>pieces().find(p=>p.k===k)||pieces()[0];
+const tapeRead=L=>rnd(L*(1-U(0,0.003))+0.05*randn(),0.05);
+function wireUI(){
+  const w=S.wire;
+  $('#wireTot').innerHTML=w.tot!=null?`整條 L = <b>${f(w.tot,2)}</b> cm`:'';
+  $('#btnMeasA').disabled=!w.cut;$('#btnMeasB').disabled=!w.cut;$('#btnCut').disabled=w.cut;
+  let h='';
+  pieces().forEach(p=>{h+=`${p.lab}：${p.R!=null?`L = <b>${f(p.R,2)}</b> cm → m<sub>w</sub> = 0.05×L = <b>${f(0.05*p.R,3)}</b> g`:'<span class="mute">尚未量長度</span>'}<br>`;});
+  $('#wireInfo').innerHTML=h;
+  // 圖
+  let s='';const sc=380/72;
+  if(!w.cut){s+=wireSeg(20,40,T.Ltot*sc);}
+  else{s+=wireSeg(20,30,w.A*sc)+`<text x="22" y="22" font-size="12" fill="var(--mute)">A</text>`+wireSeg(20,75,w.B*sc)+`<text x="22" y="67" font-size="12" fill="var(--mute)">B</text>`;}
+  $('#wireView').innerHTML=s;
+  // 下拉選單
+  const opts=pieces().map(p=>`<option value="${p.k}">${p.lab}</option>`).join('');
+  ['#lvPiece','#atPiece'].forEach(id=>{const el=$(id);const v=el.value;el.innerHTML=opts;if(pieces().some(p=>p.k===v))el.value=v;else el.value=w.cut?'A':'W';});
+}
+function wireSeg(x,y,len){let d=`M${x} ${y}`;for(let i=0;i<=40;i++){const xx=x+len*i/40;d+=` L${xx.toFixed(1)} ${(y+1.6*Math.sin(i*1.3)).toFixed(1)}`;}return `<path d="${d}" stroke="var(--wire)" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;}
+
+/* ================= 螺帽圖 ================= */
+function hexPts(cx,cy,F,rot){const R=F/SQ3;let p=[];for(let i=0;i<6;i++){const a=Math.PI/3*i+(rot||0);p.push(`${(cx+R*Math.cos(a)).toFixed(1)},${(cy+R*Math.sin(a)).toFixed(1)}`);}return p.join(' ');}
+function nutTop(cx,cy,sc){const F=T.Fb*sc,d=T.D1*sc;return `<polygon points="${hexPts(cx,cy,F,0)}" fill="${T.mat.col}" stroke="${T.mat.col2}" stroke-width="1.5"/><circle cx="${cx}" cy="${cy}" r="${F/2*0.97}" fill="none" stroke="${T.mat.col2}" stroke-width="0.8" opacity=".7"/><circle cx="${cx}" cy="${cy}" r="${d/2}" fill="var(--card)" stroke="${T.mat.col2}" stroke-width="1.5"/><circle cx="${cx}" cy="${cy}" r="${T.D/2*sc}" fill="none" stroke="${T.mat.col2}" stroke-dasharray="2 2" stroke-width=".8"/>`;}
+function nutSide(x,y,w,h){ // 側視（看到兩個面），x,y 為左上
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(2,h/4)}" fill="${T.mat.col}" stroke="${T.mat.col2}" stroke-width=".8"/><line x1="${x+w*0.25}" x2="${x+w*0.25}" y1="${y}" y2="${y+h}" stroke="${T.mat.col2}" stroke-width=".7"/><line x1="${x+w*0.75}" x2="${x+w*0.75}" y1="${y}" y2="${y+h}" stroke="${T.mat.col2}" stroke-width=".7"/>`;}
+function rulerH(x0,y0,lenCm,sc,lab){let s=`<rect x="${x0}" y="${y0}" width="${lenCm*sc}" height="18" fill="#f3e3b5" stroke="#b49a55"/>`;
+  for(let mm=0;mm<=lenCm*10;mm++){const x=x0+mm/10*sc;const L=mm%10===0?10:mm%5===0?7:4;if(sc/10<2.2&&mm%5&&mm%10)continue;s+=`<line x1="${x}" x2="${x}" y1="${y0}" y2="${y0+L}" stroke="#4a3b17" stroke-width=".6"/>`;if(mm%10===0&&(lab||mm%50===0))s+=`<text x="${x}" y="${y0+17}" font-size="8" text-anchor="middle" fill="#4a3b17">${mm/10}</text>`;}
+  return s;}
+function drawNutView(){const sc=60;let s=nutTop(110,85,sc)+nutTop(270,85,sc);s+=rulerH(30,160,6,sc,true);$('#nutView').innerHTML=s;}
+
+/* ================= 竹筷槓桿圖 ================= */
+const PX=28;
+function chopPoly(p){ // 局部座標，原點=吊點(筷子頂面)，粗端在左
+  const top=[],bot=[];for(let i=0;i<=20;i++){const u=CH_L*i/20;const d=CH_D0+(CH_D1-CH_D0)*u/CH_L;top.push([(u-p)*PX,0]);bot.unshift([(u-p)*PX,d*PX]);}
+  return top.concat(bot);}
+function rot(pt,th,ox,oy){return [ox+pt[0]*Math.cos(th)-pt[1]*Math.sin(th),oy+pt[0]*Math.sin(th)+pt[1]*Math.cos(th)];}
+function drawChop(svg,p,th,loads,W,H){
+  const ox=40+p*PX, oy=110;
+  let s=`<rect x="20" y="20" width="${W-40}" height="9" fill="var(--steel2)"/><text x="24" y="16" font-size="11" fill="var(--mute)">支架橫桿</text>`;
+  s+=`<line x1="20" x2="${W-20}" y1="${oy}" y2="${oy}" stroke="var(--mute)" stroke-dasharray="5 5" stroke-width=".8"/><text x="${W-22}" y="${oy-4}" font-size="10" text-anchor="end" fill="var(--mute)">水平參考線</text>`;
+  s+=`<line x1="${ox}" y1="29" x2="${ox}" y2="${oy}" stroke="var(--thread)" stroke-width="1.2"/>`;
+  const poly=chopPoly(p).map(q=>rot(q,th,ox,oy)).map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ');
+  s+=`<polygon points="${poly}" fill="var(--wood)" stroke="var(--wood2)" stroke-width="1"/>`;
+  (loads||[]).forEach(L=>{
+    const u=L.u, d=CH_D0+(CH_D1-CH_D0)*(u+p)/CH_L;
+    const at=rot([u*PX,d*PX],th,ox,oy);const hy=at[1]+40;
+    s+=`<line x1="${at[0]}" y1="${at[1]}" x2="${at[0]}" y2="${hy}" stroke="var(--thread)" stroke-width="1"/>`;
+    if(L.type==='nut'){const w=T.Fb*2/SQ3*PX*0.9,h=T.tb*PX*0.9;for(let i=0;i<L.n;i++)s+=nutSide(at[0]-w/2,hy+i*h,w,h);}
+    else{const r=Math.min(18,6+L.len*0.2);for(let i=0;i<4;i++)s+=`<ellipse cx="${at[0]}" cy="${hy+r*0.5+i*2.4}" rx="${r}" ry="${r*0.32}" fill="none" stroke="var(--wire)" stroke-width="1.8"/>`;}
+  });
+  s+=`<circle cx="${ox}" cy="${oy}" r="2.5" fill="var(--warn)"/>`;
+  svg.innerHTML=s;
+}
+function figures(){
+  // 原理圖：槓桿
+  let s=`<rect x="10" y="10" width="400" height="7" fill="var(--steel2)"/><line x1="200" y1="17" x2="200" y2="60" stroke="var(--thread)"/><rect x="40" y="60" width="330" height="10" rx="4" fill="var(--wood)" stroke="var(--wood2)"/><polygon points="196,60 204,60 200,66" fill="var(--warn)"/>`;
+  s+=`<line x1="120" y1="70" x2="120" y2="100" stroke="var(--thread)"/><rect x="104" y="100" width="32" height="12" fill="var(--steel)" stroke="var(--steel2)"/><rect x="104" y="112" width="32" height="12" fill="var(--steel)" stroke="var(--steel2)"/><text x="120" y="142" font-size="12" text-anchor="middle" fill="var(--ink)">n 顆</text>`;
+  s+=`<line x1="320" y1="70" x2="320" y2="100" stroke="var(--thread)"/><ellipse cx="320" cy="106" rx="14" ry="5" fill="none" stroke="var(--wire)" stroke-width="2"/><ellipse cx="320" cy="110" rx="14" ry="5" fill="none" stroke="var(--wire)" stroke-width="2"/><text x="320" y="132" font-size="12" text-anchor="middle" fill="var(--ink)">m<tspan baseline-shift="sub" font-size="9">w</tspan> = μL</text>`;
+  s+=`<line x1="120" y1="168" x2="200" y2="168" stroke="var(--acc)" marker-end="url(#ar)" marker-start="url(#ar)"/><text x="160" y="184" font-size="12" text-anchor="middle" fill="var(--acc)">a</text><line x1="200" y1="168" x2="320" y2="168" stroke="var(--acc)" marker-end="url(#ar)" marker-start="url(#ar)"/><text x="260" y="184" font-size="12" text-anchor="middle" fill="var(--acc)">x</text>`;
+  s='<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="var(--acc)"/></marker></defs>'+s;
+  $('#figLever').innerHTML=s;
+  // Atwood
+  s=`<rect x="60" y="10" width="8" height="175" fill="var(--steel2)"/><rect x="60" y="22" width="150" height="6" fill="var(--steel2)"/><circle cx="210" cy="40" r="18" fill="none" stroke="var(--steel2)" stroke-width="3"/><circle cx="210" cy="40" r="3" fill="var(--steel2)"/>`;
+  s+=`<line x1="192" y1="40" x2="192" y2="110" stroke="var(--thread)"/><line x1="228" y1="40" x2="228" y2="80" stroke="var(--thread)"/>`;
+  for(let i=0;i<3;i++){s+=`<rect x="178" y="${110+i*10}" width="28" height="10" fill="var(--steel)" stroke="var(--steel2)"/><rect x="214" y="${88+i*10}" width="28" height="10" fill="var(--steel)" stroke="var(--steel2)"/>`;}
+  s+=`<ellipse cx="228" cy="84" rx="12" ry="4" fill="none" stroke="var(--wire)" stroke-width="2"/><text x="150" y="128" font-size="12" text-anchor="end" fill="var(--ink)">N 顆</text><text x="252" y="104" font-size="12" fill="var(--ink)">N 顆 + Δm</text>`;
+  s+=`<line x1="290" y1="118" x2="290" y2="178" stroke="var(--acc)" stroke-width="1.5" marker-end="url(#ar2)"/><text x="298" y="152" font-size="12" fill="var(--acc)">h，t</text><line x1="20" x2="400" y1="182" y2="182" stroke="var(--mute)"/>`;
+  s='<defs><marker id="ar2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--acc)"/></marker></defs>'+s;
+  $('#figAtw').innerHTML=s;
+  // 六角
+  const F=150,cx=120,cy=115,R=F/SQ3;
+  s=`<polygon points="${hexPts(cx,cy,F,0)}" fill="var(--steel)" stroke="var(--steel2)" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="${F/2*0.97}" fill="none" stroke="var(--steel2)" stroke-dasharray="3 3"/><circle cx="${cx}" cy="${cy}" r="30" fill="var(--card)" stroke="var(--steel2)" stroke-width="1.5"/><circle cx="${cx}" cy="${cy}" r="36" fill="none" stroke="var(--steel2)" stroke-dasharray="2 2"/>`;
+  s+=`<line x1="${cx-F/2}" y1="${cy+R*0.5+28}" x2="${cx+F/2}" y2="${cy+R*0.5+28}" stroke="var(--acc)"/><line x1="${cx-F/2}" x2="${cx-F/2}" y1="${cy}" y2="${cy+R*.5+32}" stroke="var(--acc)" stroke-dasharray="2 2"/><line x1="${cx+F/2}" x2="${cx+F/2}" y1="${cy}" y2="${cy+R*.5+32}" stroke="var(--acc)" stroke-dasharray="2 2"/><text x="${cx}" y="${cy+R*0.5+42}" font-size="13" text-anchor="middle" fill="var(--acc)">F 對邊寬</text>`;
+  s+=`<line x1="${cx-R}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="var(--warn)" stroke-width="1"/><text x="${cx+R+4}" y="${cy+4}" font-size="12" fill="var(--warn)">e 對角寬</text><text x="${cx}" y="${cy-8}" font-size="11" text-anchor="middle" fill="var(--ink)">D₁</text><text x="${cx+30}" y="${cy-30}" font-size="10" fill="var(--mute)">D（虛線）</text>`;
+  s+=`<text x="${cx}" y="18" font-size="11" text-anchor="middle" fill="var(--mute)">外圈虛線＝倒角邊界</text>`;
+  // 側視
+  s+=`<rect x="290" y="80" width="100" height="40" fill="var(--steel)" stroke="var(--steel2)"/><polygon points="290,80 296,74 384,74 390,80" fill="var(--steel2)" opacity=".5"/><polygon points="290,120 296,126 384,126 390,120" fill="var(--steel2)" opacity=".5"/><line x1="400" y1="74" x2="400" y2="126" stroke="var(--acc)"/><text x="404" y="104" font-size="13" fill="var(--acc)">t</text><text x="340" y="150" font-size="11" text-anchor="middle" fill="var(--mute)">側視：兩面 30° 倒角</text>`;
+  $('#figHex').innerHTML=s;
+}
+
+/* ================= ② 支點 ================= */
+function pivotTheta(p){const tau=-T.Mc*(p-T.cc);return Math.max(-0.33,Math.min(0.33,Math.atan(tau/(T.Mc*H_EFF))));}
+function pivUI(){
+  const p=S.pivot.p;$('#pVal').textContent=p.toFixed(2);$('#pSl').value=p;
+  drawChop($('#pivSvg'),p,pivotTheta(p),[],700,260);
+  $('#pivInfo').innerHTML=S.pivot.read!=null?`已記錄：支點距粗端 <b>${f(S.pivot.read,2)}</b> cm（③ 的 a、x 都從此處量起）`:'<span class="mute">尚未記錄支點</span>';
+}
+
+/* ================= ③ 槓桿 ================= */
+function levState(){const p=S.pivot.p;return {p,n:Math.max(1,Math.min(10,parseInt($('#lvN').value)||1)),a:parseFloat($('#aSl').value),x:parseFloat($('#xSl').value),pc:getPiece($('#lvPiece').value)};}
+function levTheta(st){
+  const mn=sum(T.nuts.slice(0,st.n).map(q=>q.m)), mw=T.mu*st.pc.L;
+  const tau=mw*st.x-mn*st.a-T.Mc*(st.p-T.cc);
+  return Math.max(-0.33,Math.min(0.33,Math.atan(tau/((T.Mc+mn+mw)*H_EFF))));
+}
+function levUI(){
+  const p=S.pivot.p;const aS=$('#aSl'),xS=$('#xSl');
+  aS.min=0.3;aS.max=(p-0.3).toFixed(2);xS.min=0.3;xS.max=(CH_L-p-0.3).toFixed(2);
+  if(+aS.value>+aS.max)aS.value=aS.max;if(+xS.value>+xS.max)xS.value=xS.max;
+  const st=levState();$('#aVal').textContent=st.a.toFixed(2);$('#xVal').textContent=st.x.toFixed(2);
+  const th=levTheta(st);
+  drawChop($('#levSvg'),p,th,[{u:-st.a,type:'nut',n:st.n},{u:st.x,type:'wire',len:st.pc.L}],700,420);
+  $('#levMsg').innerHTML=Math.abs(th)>=0.329?'筷子已經斜到底（碰到限位）──差太多了，大幅移動 x 或改 n、a。':'';
+}
+function levRecord(){
+  const st=levState();
+  if(st.pc.R==null){alert('這段金屬線還沒量長度，請先到 ② 量。');return;}
+  const th=levTheta(st);
+  if(Math.abs(th)>0.012&&!confirm('筷子看起來還沒水平，仍要記錄嗎？'))return;
+  S.lever.rows.push({n:st.n,a:rnd(st.a+0.015*randn(),0.05),pk:st.pc.k,L:st.pc.R,x:rnd(st.x+0.015*randn(),0.05)});
+  levTable();
+}
+function levTable(){
+  const rows=S.lever.rows;
+  let h='<tr><th>#</th><th>n</th><th>a (cm)</th><th>線段</th><th>L (cm)</th><th>m<sub>w</sub> (g)</th><th>x (cm)</th><th>X=n·a</th><th>Y=m<sub>w</sub>x</th><th>Y/X</th><th></th></tr>';
+  rows.forEach((r,i)=>{const mw=0.05*r.L,X=r.n*r.a,Y=mw*r.x;
+    h+=`<tr><td>${i+1}</td><td><input data-t="lev" data-i="${i}" data-k="n" type="number" value="${r.n}" style="width:46px"></td><td><input data-t="lev" data-i="${i}" data-k="a" type="number" step="0.05" value="${r.a.toFixed(2)}"></td><td>${r.pk}</td><td><input data-t="lev" data-i="${i}" data-k="L" type="number" step="0.05" value="${r.L.toFixed(2)}"></td><td>${f(mw,3)}</td><td><input data-t="lev" data-i="${i}" data-k="x" type="number" step="0.05" value="${r.x.toFixed(2)}"></td><td>${f(X,2)}</td><td>${f(Y,3)}</td><td>${f(Y/X,3)}</td><td><button class="g" data-del="lev" data-i="${i}">刪</button></td></tr>`;});
+  $('#levTab').innerHTML=h;levAnalysis();
+}
+function levFit(){const pts=S.lever.rows.map(r=>({x:r.n*r.a,y:0.05*r.L*r.x}));return {pts,fit:pts.length>=2?linreg(pts):null};}
+function levAnalysis(){
+  const {pts,fit}=levFit();plot($('#levPlot'),pts,fit,{xl:'X = n·a (cm)',yl:'Y = m_w·x (g·cm)',zero:true});
+  if(!fit||pts.length<3){$('#levRes').innerHTML='<p class="mute">至少 3 組數據才能做迴歸（建議 6 組以上）。</p>';return;}
+  const single=avg(pts.map(p=>p.y/p.x)), sdS=sdev(pts.map(p=>p.y/p.x));
+  $('#levRes').innerHTML=`迴歸：Y = (${f(fit.m,4)} ± ${f(fit.sm,4)}) X + (${f(fit.b,3)} ± ${f(fit.sb,3)})，R² = ${f(fit.r2,5)}<br>
+  ⇒ 單顆質量 <b>m = ${f(fit.m,3)} ± ${f(fit.sm,3)} g</b>（相對 ${f(fit.sm/fit.m*100,2)}%）<br><br>
+  對照：逐點 Y/X 平均 = ${f(single,3)} ± ${f(sdS/Math.sqrt(pts.length),3)} g<br>
+  <div class="note">截距 b ≈ ${f(fit.b,2)} g·cm 代表支點與筷子重心的殘餘力矩。若 b 明顯不為 0，逐點 Y/X 會在 X 小時偏差特別大，迴歸斜率則不受影響。</div>`;
+}
+
+/* ================= ④ Atwood ================= */
+const ATP=3.4, FLOOR=520;
+let atAnim=null;
+function atSetup(){
+  const N=Math.max(1,Math.min(25,parseInt($('#atN').value)||1)), sw=$('#atSwap').checked, pc=getPiece($('#atPiece').value);
+  let L=T.nuts.slice(0,N), R=T.nuts.slice(25,25+N); if(sw)[L,R]=[R,L];
+  const mL=sum(L.map(q=>q.m)), mR=sum(R.map(q=>q.m)), dm=T.mu*pc.L;
+  const drive=mR+dm-mL, fr=T.f0+T.kap*(mL+mR+dm), tot=mL+mR+dm+T.Ieq;
+  const a=drive>fr?G*(drive-fr)/tot:0;
+  return {N,sw,pc,a,h:parseFloat($('#hSl').value)};
+}
+function atDraw(s){ // s = 已下落距離 cm
+  const st=atSetup();const h=st.h;
+  const pcx=180,pcy=60,pr=22,xl=pcx-pr,xr=pcx+pr;
+  const nh=Math.max(2.2,T.tb*ATP), nw=Math.max(16,T.Fb*2/SQ3*ATP*4);
+  const rb=FLOOR-(h-s)*ATP, lb=FLOOR-(4+s)*ATP;
+  const rTop=rb-st.N*nh-10, lTop=lb-st.N*nh;
+  let g=`<rect x="40" y="${FLOOR}" width="300" height="12" fill="var(--grid)"/><text x="44" y="${FLOOR+24}" font-size="11" fill="var(--mute)">地面（落點）</text>`;
+  g+=`<rect x="60" y="30" width="9" height="${FLOOR-30}" fill="var(--steel2)"/><rect x="60" y="${pcy-4}" width="${pcx-60}" height="7" fill="var(--steel2)"/>`;
+  g+=`<circle cx="${pcx}" cy="${pcy}" r="${pr}" fill="none" stroke="var(--steel2)" stroke-width="4"/><circle cx="${pcx}" cy="${pcy}" r="4" fill="var(--steel2)"/>`;
+  g+=`<path d="M${xl} ${pcy} A${pr} ${pr} 0 0 1 ${xr} ${pcy}" fill="none" stroke="var(--thread)" stroke-width="1.3"/>`;
+  g+=`<line x1="${xl}" y1="${pcy}" x2="${xl}" y2="${lTop}" stroke="var(--thread)" stroke-width="1.3"/><line x1="${xr}" y1="${pcy}" x2="${xr}" y2="${rTop}" stroke="var(--thread)" stroke-width="1.3"/>`;
+  for(let i=0;i<st.N;i++){g+=nutSide(xl-nw/2,lTop+i*nh,nw,nh);g+=nutSide(xr-nw/2,rTop+10+i*nh,nw,nh);}
+  g+=`<ellipse cx="${xr}" cy="${rTop+5}" rx="${nw/2+2}" ry="4" fill="none" stroke="var(--wire)" stroke-width="2"/>`;
+  // 卷尺
+  g+=`<rect x="262" y="${FLOOR-125*ATP}" width="16" height="${125*ATP}" fill="#f6e08a" stroke="#b49a55"/>`;
+  for(let c=0;c<=125;c+=5){const y=FLOOR-c*ATP;g+=`<line x1="262" x2="${c%10?270:274}" y1="${y}" y2="${y}" stroke="#4a3b17" stroke-width=".7"/>`;if(c%10===0)g+=`<text x="282" y="${y+3}" font-size="9" fill="var(--mute)">${c}</text>`;}
+  g+=`<line x1="${xr+nw/2}" x2="262" y1="${FLOOR-h*ATP}" y2="${FLOOR-h*ATP}" stroke="var(--acc)" stroke-dasharray="3 3"/><text x="300" y="${FLOOR-h*ATP-4}" font-size="11" fill="var(--acc)">起點</text>`;
+  $('#atSvg').innerHTML=g;
+}
+function atUI(){$('#hVal').textContent=parseFloat($('#hSl').value).toFixed(1);if(!S.atw.run)atDraw(0);}
+function atRelease(){
+  if(S.atw.run)return;const st=atSetup();
+  if(st.pc.R==null){alert('這段金屬線還沒量長度，請先到 ② 量。');return;}
+  if(st.a<=0){$('#atMsg').innerHTML='<span class="bad">放手後不動──差重小於滑輪摩擦，請加重金屬線或減少 N。</span>';return;}
+  S.atw.run=true;S.atw.pending=null;
+  const tl=Math.sqrt(2*st.h/st.a), auto=$('#atAuto').checked, tAuto=Math.max(0.05,tl+0.02+0.04*randn());
+  const t0=performance.now();let stopped=false,landed=false;
+  $('#btnStop').disabled=auto;$('#btnRel').disabled=true;$('#btnAtRec').disabled=true;$('#btnAtDis').disabled=true;$('#atMsg').innerHTML='';
+  const finish=tm=>{stopped=true;S.atw.run=false;$('#btnStop').disabled=true;$('#btnRel').disabled=false;
+    const tr=Math.floor(tm*100)/100;$('#watch').textContent=tr.toFixed(2);
+    S.atw.pending={N:st.N,sw:st.sw,pk:st.pc.k,L:st.pc.R,h:rnd(st.h+0.1*randn(),0.05),t:tr};
+    $('#atMsg').innerHTML=`碼錶 t = <b>${tr.toFixed(2)}</b> s，卷尺讀起點 h = <b>${S.atw.pending.h.toFixed(2)}</b> cm`;
+    $('#btnAtRec').disabled=false;$('#btnAtDis').disabled=false;};
+  S.atw.stop=()=>{if(!stopped)finish((performance.now()-t0)/1000);};
+  const step=()=>{const t=(performance.now()-t0)/1000;
+    const s=Math.min(st.h,0.5*st.a*t*t);if(!landed&&s>=st.h)landed=true;
+    atDraw(s);
+    if(!stopped){$('#watch').textContent=(Math.floor(t*100)/100).toFixed(2);
+      if(auto&&t>=tAuto)finish(tAuto);else if(t>12)finish(t);}
+    if(!stopped||!landed)atAnim=requestAnimationFrame(step);};
+  atAnim=requestAnimationFrame(step);
+}
+function atTable(){
+  const rows=S.atw.rows;
+  let h='<tr><th>#</th><th>N</th><th>對調</th><th>線段</th><th>L (cm)</th><th>h (cm)</th><th>t (s)</th><th>a=2h/t² (cm/s²)</th><th>1/a (s²/cm)</th><th></th></tr>';
+  rows.forEach((r,i)=>{const a=2*r.h/(r.t*r.t);
+    h+=`<tr><td>${i+1}</td><td>${r.N}</td><td>${r.sw?'是':''}</td><td>${r.pk}</td><td><input data-t="at" data-i="${i}" data-k="L" type="number" step="0.05" value="${r.L.toFixed(2)}"></td><td><input data-t="at" data-i="${i}" data-k="h" type="number" step="0.05" value="${r.h.toFixed(2)}"></td><td><input data-t="at" data-i="${i}" data-k="t" type="number" step="0.01" value="${r.t.toFixed(2)}"></td><td>${f(a,2)}</td><td>${f(1/a,5)}</td><td><button class="g" data-del="at" data-i="${i}">刪</button></td></tr>`;});
+  $('#atTab').innerHTML=h;
+  const ks=[...new Set(rows.map(r=>r.pk))], sel=$('#atFitPiece'), v=sel.value;
+  sel.innerHTML=ks.map(k=>`<option value="${k}">線段 ${k}</option>`).join('');if(ks.includes(v))sel.value=v;
+  atAnalysis();
+}
+function atFit(){
+  const k=$('#atFitPiece').value;const rows=S.atw.rows.filter(r=>r.pk===k);
+  const pts=rows.map(r=>({x:r.N,y:r.t*r.t/(2*r.h),c:r.sw?'var(--acc2)':'var(--warn)'}));
+  const L=rows.length?avg(rows.map(r=>r.L)):NaN;
+  const nx=new Set(rows.map(r=>r.N)).size;
+  return {pts,fit:nx>=2?linreg(pts):null,L,nx};
+}
+function atAnalysis(){
+  const {pts,fit,L,nx}=atFit();plot($('#atPlot'),pts,fit,{xl:'每側螺帽數 N',yl:'1/a (s²/cm)',zero:true});
+  if(!fit||nx<3){$('#atRes').innerHTML='<p class="mute">至少要有 3 種不同 N 才能做迴歸。橘點＝未對調、綠點＝對調。</p>';return;}
+  const dm=0.05*L, m=fit.m*dm*G/2, sm=m*Math.sqrt((fit.sm/fit.m)**2+(0.05/L)**2), Ieq=fit.b*dm*G-dm;
+  $('#atRes').innerHTML=`迴歸：1/a = (${fit.m.toExponential(4)} ± ${fit.sm.toExponential(2)}) N + (${fit.b.toExponential(4)})，R² = ${f(fit.r2,4)}<br>
+  Δm = 0.05 × ${f(L,2)} = ${f(dm,3)} g，g = 979 cm/s²<br>
+  ⇒ <b>m = s·Δm·g/2 = ${f(m,3)} ± ${f(sm,3)} g</b>（相對 ${f(sm/m*100,2)}%）<br>
+  截距 ⇒ 滑輪等效質量 I/r² ≈ ${f(Ieq,2)} g
+  <div class="note">兩疊螺帽本身質量就有差異（每顆約 ±0.5%），N 大時這個差值可與 Δm 相比；左右對調各做一次再平均，可抵消此誤差。滑輪摩擦等效於 Δm 被減掉 f，會使此法求得的 m 系統性偏大約 f/Δm。</div>`;
+}
+
+/* ================= ⑤ 體積 ================= */
+function volDraw(){
+  // 疊高
+  const nS=Math.max(1,Math.min(50,parseInt($('#stkN').value)||1)), Ht=nS*T.tb;
+  let sc=Math.min(30,250/Ht);let s=`<rect x="0" y="282" width="220" height="18" fill="var(--grid)"/>`;
+  const nw=T.Fb*2/SQ3*sc*1.0, nh=T.tb*sc;
+  for(let i=0;i<nS;i++)s+=nutSide(110-nw/2,282-(i+1)*nh,Math.max(nw,10),nh);
+  s+=`<g transform="translate(70,282) rotate(-90)">${rulerH(0,0,Math.ceil(Ht)+1,sc,sc>12)}</g>`;$('#stkSvg').innerHTML=s;
+  // 平邊並排（俯視）
+  const draw=(id,n,F,horizRot)=>{const tot=n*F;const sc2=Math.min(40,190/tot);let q='';const w=F*sc2;
+    for(let i=0;i<n;i++){const cx=15+w/2+i*w, cy=140;q+=`<polygon points="${hexPts(cx,cy,(horizRot?T.Fb:T.Fb)*sc2,horizRot?Math.PI/6:0)}" fill="${T.mat.col}" stroke="${T.mat.col2}" stroke-width=".7"/><circle cx="${cx}" cy="${cy}" r="${T.D1/2*sc2}" fill="var(--card)"/>`;}
+    q+=rulerH(15,190,Math.ceil(tot)+1,sc2,sc2>12);$(id).innerHTML=q;};
+  draw('#rowSvg',Math.max(1,Math.min(50,parseInt($('#rowN').value)||1)),T.Fb,true);
+  draw('#corSvg',Math.max(1,Math.min(50,parseInt($('#corN').value)||1)),T.Fb*2/SQ3,false);
+  // 孔
+  const m=document.querySelector('input[name=hm]:checked').value;
+  let h=nutTop(90,85,110);
+  if(m==='ruler'){h+=rulerH(30,150,1.6,110,true).replace(/y="150"/,'y="150"');}
+  else{h+=`<polygon points="220,70 400,62 400,108 220,100" fill="var(--wood)" stroke="var(--wood2)"/>`;if($('#taped').checked)h+=`<rect x="300" y="58" width="40" height="54" fill="#e8e3d2" opacity=".85" stroke="#bbb"/>`;
+    h+=`<text x="300" y="135" font-size="12" text-anchor="middle" fill="var(--mute)">筷子插入孔中卡住→作記號→棉線在記號處繞 5 圈</text>`;}
+  $('#holeSvg').innerHTML=h;
+  $('#wrapRow').style.display=m==='wrap'?'flex':'none';
+}
+function volRec(kind){
+  const n=Math.max(1,Math.min(50,parseInt($('#'+{H:'stk',W:'row',E:'cor'}[kind]+'N').value)||1));
+  let tru=0;const ns=T.nuts.slice(0,n);
+  if(kind==='H')tru=sum(ns.map(q=>q.t))+(n-1)*0.002;
+  if(kind==='W')for(let i=0;i<n;i++)tru+=ns[i].F+(i<n-1?0.003+Math.abs(0.003*randn()):0);
+  if(kind==='E')for(let i=0;i<n;i++)tru+=ns[i].e+(i<n-1?0.002+Math.abs(0.004*randn()):0);
+  S.vol[kind].push({n,v:rnd(tru+0.02*randn(),0.05)});volTables();
+}
+function volTables(){
+  [['H','#stkTab','#stkPlot','#stkRes','t（厚度）','H'],['W','#rowTab','#rowPlot','#rowRes','F（對邊寬）','W'],['E','#corTab','#corPlot','#corRes','e（對角寬）','E']].forEach(([k,tb,pl,rs,nm,sym])=>{
+    let h=`<tr><th>n</th><th>${sym} (cm)</th><th>${sym}/n</th><th></th></tr>`;
+    S.vol[k].forEach((r,i)=>{h+=`<tr><td>${r.n}</td><td><input data-t="v${k}" data-i="${i}" data-k="v" type="number" step="0.05" value="${r.v.toFixed(2)}"></td><td>${f(r.v/r.n,4)}</td><td><button class="g" data-del="v${k}" data-i="${i}">刪</button></td></tr>`;});
+    $(tb).innerHTML=h;
+    const pts=S.vol[k].map(r=>({x:r.n,y:r.v}));const nx=new Set(pts.map(p=>p.x)).size;const fit=nx>=2?linreg(pts):null;
+    plot($(pl),pts,fit,{xl:'n（顆）',yl:sym+' (cm)',zero:true});
+    $(rs).innerHTML=fit&&nx>=3?`斜率 ${nm} = <b>${f(fit.m,4)} ± ${f(fit.sm,4)}</b> cm，截距 ${f(fit.b,3)} cm`:'<span class="mute">至少 3 種不同 n</span>';
+  });
+  const fe=volFits();
+  if(fe.E&&fe.W)$('#corRes').innerHTML+=`<br>e/F = ${f(fe.E.m/fe.W.m,4)}（理想正六角形 2/√3 = 1.1547）`;
+  volCalc();
+}
+function volFits(){const o={};['H','W','E'].forEach(k=>{const pts=S.vol[k].map(r=>({x:r.n,y:r.v}));o[k]=new Set(pts.map(p=>p.x)).size>=3?linreg(pts):null;});return o;}
+function holeRec(){
+  const m=document.querySelector('input[name=hm]:checked').value;
+  if(m==='ruler'){const r=rnd(T.D1+0.025*randn(),0.05);S.vol.holes.push({m,raw:r,d:r});}
+  else{
+    if(T.D1>CH_D0-0.01&&!$('#taped').checked){$('#holeMsg').innerHTML='<span class="bad">筷子最粗處（約 0.75 cm）仍比孔小，插到底也卡不住──試試在筷子上纏膠帶加粗。</span>';return;}
+    if(S.vol.thRead==null){$('#holeMsg').innerHTML='<span class="bad">請先估棉線粗細（密繞 20 圈量寬度），才能從周長扣掉棉線本身的厚度。</span>';return;}
+    const L5=rnd(5*Math.PI*(T.D1+T.dth)+0.03*randn(),0.05);S.vol.holes.push({m,raw:L5,d:L5/(5*Math.PI)-S.vol.thRead});
+  }
+  $('#holeMsg').innerHTML='';holeTable();
+}
+function holeTable(){
+  let h='<tr><th>#</th><th>方法</th><th>讀數 (cm)</th><th>d (cm)</th><th></th></tr>';
+  S.vol.holes.forEach((r,i)=>{h+=`<tr><td>${i+1}</td><td>${r.m==='ruler'?'直尺':'繞線 5 圈'}</td><td>${r.raw.toFixed(2)}</td><td>${f(r.d,4)}</td><td><button class="g" data-del="hole" data-i="${i}">刪</button></td></tr>`;});
+  $('#holeTab').innerHTML=h;volCalc();
+}
+function holeStat(){
+  const m=document.querySelector('input[name=hm]:checked').value;const ds=S.vol.holes.filter(r=>r.m===m).map(r=>r.d);
+  if(!ds.length)return null;const res=m==='ruler'?0.05:0.05/(5*Math.PI);
+  const se=ds.length>1?sdev(ds)/Math.sqrt(ds.length):0;
+  return {d:avg(ds),sd:Math.sqrt(se*se+res*res/12),n:ds.length,m};
+}
+function Vof(F,t,d,c,corr){const de2=corr?(d*d+(d/0.83)**2)/2:d*d;return (SQ3/2*F*F*(1-c)-Math.PI/4*de2)*t;}
+function volResult(){
+  const fe=volFits(),hs=holeStat();if(!fe.H||!fe.W||!hs)return null;
+  const F=fe.W.m,t=fe.H.m,d=hs.d,c=parseFloat($('#cSl').value)/100,corr=$('#thrCorr').checked;
+  const sF=fe.W.sm||0,st=fe.H.sm||0,sd=hs.sd;
+  const V=Vof(F,t,d,c,corr);
+  const dF=(Vof(F+1e-5,t,d,c,corr)-V)/1e-5, dt=(Vof(F,t+1e-5,d,c,corr)-V)/1e-5, dd=(Vof(F,t,d+1e-5,c,corr)-V)/1e-5;
+  const sV=Math.sqrt((dF*sF)**2+(dt*st)**2+(dd*sd)**2);
+  return {F,t,d,c,corr,V,sV,parts:{F:Math.abs(dF*sF),t:Math.abs(dt*st),d:Math.abs(dd*sd)}};
+}
+function volCalc(){
+  $('#cVal').textContent=parseFloat($('#cSl').value).toFixed(1);
+  const r=volResult();
+  if(!r){$('#volRes').innerHTML='<p class="mute">需要：H–n 與 W–n 各至少 3 種 n，以及至少 1 筆目前所選方法的孔徑。</p>';return;}
+  const hs=holeStat();
+  $('#volRes').innerHTML=`F = ${f(r.F,4)} cm，t = ${f(r.t,4)} cm，d = ${f(r.d,4)} ± ${f(hs.sd,4)} cm（${hs.n} 筆）<br>
+  六角形面積 (√3/2)F²(1−c) = ${f(SQ3/2*r.F*r.F*(1-r.c),4)} cm²，孔面積 = ${f(Math.PI/4*(r.corr?(r.d*r.d+(r.d/0.83)**2)/2:r.d*r.d),4)} cm²<br>
+  ⇒ <b>V = ${f(r.V,4)} ± ${f(r.sV,4)} cm³</b>（相對 ${f(r.sV/r.V*100,2)}%）<br>
+  <span class="mute">σ<sub>V</sub> 分項：F ${f(r.parts.F,5)}、t ${f(r.parts.t,5)}、d ${f(r.parts.d,5)} cm³</span>
+  <div class="note">不做螺紋修正時的 V = ${f(Vof(r.F,r.t,r.d,r.c,false),4)}；做螺紋修正時的 V = ${f(Vof(r.F,r.t,r.d,r.c,true),4)} cm³。兩者差 ${f(Math.abs(Vof(r.F,r.t,r.d,r.c,true)-Vof(r.F,r.t,r.d,r.c,false))/r.V*100,1)}%，需要在討論中說明你的選擇。</div>`;
+}
+
+/* ================= ⑥ 結果 ================= */
+function mResults(){
+  const o={};const {pts,fit}=levFit();
+  if(fit&&pts.length>=3)o.lev={m:fit.m,sm:fit.sm};
+  const A=atFit();if(A.fit&&A.nx>=3){const dm=0.05*A.L,m=A.fit.m*dm*G/2;o.atw={m,sm:m*Math.sqrt((A.fit.sm/A.fit.m)**2+(0.05/A.L)**2)};}
+  return o;
+}
+function finUI(){
+  const M=mResults(),V=volResult();let h='';
+  const rows=[];
+  if(M.lev)rows.push(['槓桿法',M.lev]);if(M.atw)rows.push(['Atwood 法',M.atw]);
+  if(!rows.length||!V){$('#finRes').innerHTML='<p class="mute">需要 ③ 或 ④ 至少一個質量結果，以及 ⑤ 的體積結果。</p>';$('#matTab').innerHTML='';return;}
+  h+=`<p>體積 V = ${f(V.V,4)} ± ${f(V.sV,4)} cm³</p><table class="dt"><tr><th>方法</th><th>m (g)</th><th>σ<sub>m</sub>/m</th><th>σ<sub>V</sub>/V</th><th>ρ (g/cm³)</th><th>σ<sub>ρ</sub></th></tr>`;
+  const res=[];
+  rows.forEach(([nm,mm])=>{const rho=mm.m/V.V,s=rho*Math.sqrt((mm.sm/mm.m)**2+(V.sV/V.V)**2);res.push({nm,rho,s});
+    h+=`<tr><td>${nm}</td><td>${f(mm.m,3)} ± ${f(mm.sm,3)}</td><td>${f(mm.sm/mm.m*100,2)}%</td><td>${f(V.sV/V.V*100,2)}%</td><td><b>${f(rho,3)}</b></td><td>${f(s,3)}</td></tr>`;});
+  h+='</table>';
+  if(res.length===2){const w1=1/res[0].s**2,w2=1/res[1].s**2;const rw=(res[0].rho*w1+res[1].rho*w2)/(w1+w2),sw=1/Math.sqrt(w1+w2);
+    const z=(res[0].rho-res[1].rho)/Math.sqrt(res[0].s**2+res[1].s**2);
+    h+=`<p>兩法差異 = ${f(z,2)} σ ${Math.abs(z)<2?'<span class="ok">（一致）</span>':'<span class="bad">（不一致，請檢查系統誤差）</span>'}；加權平均 ρ = <b>${f(rw,3)} ± ${f(sw,3)}</b> g/cm³</p>`;res.push({nm:'加權平均',rho:rw,s:sw});}
+  $('#finRes').innerHTML=h;
+  const best=res[0];
+  let t=`<table class="dt"><tr><th>候選材質</th><th>參考密度</th>${res.map(r=>`<th>${r.nm} (ρ−ρ<sub>ref</sub>)/σ</th>`).join('')}</tr>`;
+  MATS.forEach(mt=>{t+=`<tr><td>${mt.name}</td><td>${mt.rho.toFixed(2)}</td>${res.map(r=>{const z=(r.rho-mt.rho)/r.s;return `<td class="${Math.abs(z)<2?'ok':''}">${f(z,1)}</td>`;}).join('')}</tr>`;});
+  $('#matTab').innerHTML=t+'</table>';
+  if(S.revealed)truthUI();
+}
+function truthUI(){
+  const M=mResults(),V=volResult();
+  let h=`<table class="dt"><tr><th>項目</th><th>隱藏真值</th></tr>
+  <tr><td>規格／材質</td><td>${T.sk}　${T.mat.name}</td></tr>
+  <tr><td>密度 ρ</td><td><b>${f(T.rho,3)}</b> g/cm³</td></tr>
+  <tr><td>50 顆平均質量 m̄</td><td>${f(T.mbar,4)} g（散佈 σ = ${f(sdev(T.nuts.map(q=>q.m))/T.mbar*100,2)}%）</td></tr>
+  <tr><td>50 顆平均體積 V̄</td><td>${f(T.Vbar,4)} cm³</td></tr>
+  <tr><td>F̄、t̄</td><td>${f(T.Fbar,4)} cm、${f(T.tbar,4)} cm</td></tr>
+  <tr><td>螺紋小徑 D₁／大徑 D</td><td>${f(T.D1,4)} ／ ${f(T.D,3)} cm（D₁/D = ${f(T.D1/T.D,3)}）</td></tr>
+  <tr><td>倒角體積比 c</td><td>${f(T.c*100,2)}%</td></tr>
+  <tr><td>金屬線實際 μ</td><td>${f(T.mu,5)} g/cm（標示 0.05，偏差 ${f((T.mu/0.05-1)*100,2)}%）</td></tr>
+  <tr><td>整條金屬線長</td><td>${f(T.Ltot,2)} cm</td></tr>
+  <tr><td>筷子質量／重心距粗端</td><td>${f(T.Mc,2)} g ／ ${f(T.cc,2)} cm（你的支點 ${f(S.pivot.p,2)} cm，偏 ${f(S.pivot.p-T.cc,2)} cm）</td></tr>
+  <tr><td>滑輪等效質量 I/r²／摩擦 f₀</td><td>${f(T.Ieq,2)} g ／ ${f(T.f0,3)} g（另 +0.1% 負載）</td></tr>
+  <tr><td>棉線直徑</td><td>${f(T.dth,4)} cm</td></tr></table>`;
+  h+='<h3>你的結果 vs 真值</h3><table class="dt"><tr><th>量</th><th>測量值 ± σ</th><th>真值</th><th>相對誤差</th><th>(測−真)/σ</th></tr>';
+  const line=(nm,v,s,tv,d)=>{const z=(v-tv)/s;h+=`<tr><td>${nm}</td><td>${f(v,d)} ± ${f(s,d)}</td><td>${f(tv,d)}</td><td>${f((v/tv-1)*100,2)}%</td><td class="${Math.abs(z)<2?'ok':'bad'}">${f(z,2)}</td></tr>`;};
+  if(M.lev)line('m（槓桿）',M.lev.m,M.lev.sm,T.mbar,4);
+  if(M.atw)line('m（Atwood）',M.atw.m,M.atw.sm,T.mbar,4);
+  const fe=volFits();
+  if(fe.W)line('F',fe.W.m,fe.W.sm,T.Fbar,4);if(fe.H)line('t',fe.H.m,fe.H.sm,T.tbar,4);
+  if(V){line('V',V.V,V.sV,T.Vbar,4);
+    if(M.lev)line('ρ（槓桿）',M.lev.m/V.V,M.lev.m/V.V*Math.hypot(M.lev.sm/M.lev.m,V.sV/V.V),T.rho,3);
+    if(M.atw)line('ρ（Atwood）',M.atw.m/V.V,M.atw.m/V.V*Math.hypot(M.atw.sm/M.atw.m,V.sV/V.V),T.rho,3);}
+  h+='</table>';
+  // 系統誤差說明
+  let d='<h3>系統誤差診斷</h3><ul>';
+  d+=`<li>金屬線實際 μ 偏差 ${f((T.mu/0.05-1)*100,2)}%：兩種方法求得的 m 都會偏 ${f((0.05/T.mu-1)*100,2)}%（用標示值 0.05 計算時無從得知，只能列入不確定度）。</li>`;
+  if(M.atw){const pcs=S.atw.rows.length?avg(S.atw.rows.map(r=>r.L))*T.mu:NaN;d+=`<li>滑輪摩擦約 ${f(T.f0,3)} g 等效，Δm ≈ ${f(pcs,2)} g，使 Atwood 的 m 偏大約 ${f(T.f0/pcs*100,1)}%；軸承摩擦還會隨總負載增加（N 越大越明顯），加上兩疊螺帽本身的質量差與按停反應時間，都會讓斜率偏離。</li>`;}
+  if(V){d+=`<li>倒角：你用 c = ${f(V.c*100,1)}%，真值 ${f(T.c*100,2)}%。倒角估計的差異使 V ${T.c>V.c?'偏大':'偏小'}約 ${f(Math.abs(T.c-V.c)*SQ3/2*T.Fbar**2*T.tbar/T.Vbar*100,1)}%。</li>`;
+    d+=`<li>螺紋：${V.corr?'已做螺紋修正。':'未做螺紋修正──孔面積用 D₁ 算偏小，V 偏大約 '+f((Math.PI/4*(T.D*T.D-T.D1*T.D1)/2*T.tbar)/T.Vbar*100,1)+'%。'}</li>`;
+    const hs=holeStat();if(hs)d+=`<li>孔徑：你量 d = ${f(hs.d,4)} cm，實際小徑 ${f(T.D1,4)} cm（${hs.m==='ruler'?'直尺 1 mm 刻度只能讀到 0.05 cm':'繞線法解析度約 0.003 cm'}）。</li>`;}
+  d+=`<li>螺帽之間的質量散佈約 ${f(sdev(T.nuts.map(q=>q.m))/T.mbar*100,2)}%，槓桿與疊高所用的螺帽不同，也會帶來微小差異。</li></ul>`;
+  $('#truth').innerHTML=h+d;
+}
+
+/* ================= 介面組裝 ================= */
+const TABS=['① 原理','② 器材與標準質量','③ 槓桿求 m','④ Atwood 對照','⑤ 體積','⑥ 密度與真值'];
+function showTab(i){$$('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));$$('#nav button').forEach((b,j)=>b.classList.toggle('on',i===j));
+  if(i===2)levUI();if(i===3)atUI();if(i===4){volDraw();volTables();holeTable();}if(i===5)finUI();window.scrollTo(0,0);}
+function buildAll(){
+  if(atAnim)cancelAnimationFrame(atAnim);
+  $('#cSl').value=0;$('#thrCorr').checked=false;$('#taped').checked=false;$('#atSwap').checked=false;
+  figures();drawNutView();wireUI();pivUI();
+  $('#aSl').value=3;$('#xSl').value=5;levUI();levTable();
+  atUI();atTable();$('#watch').textContent='0.00';$('#atMsg').innerHTML='';$('#btnAtRec').disabled=true;$('#btnAtDis').disabled=true;$('#btnRel').disabled=false;$('#btnStop').disabled=true;
+  $('#thInfo').textContent='';$('#holeMsg').innerHTML='';
+  volDraw();volTables();holeTable();
+  $('#truth').innerHTML='';
+}
+function wire(){
+  $('#nav').innerHTML=TABS.map((t,i)=>`<button data-tab="${i}">${t}</button>`).join('');
+  $('#nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)showTab(+b.dataset.tab);});
+  $('#btnNew').onclick=()=>{if(confirm('會換一組新的螺帽並清除所有數據，確定？'))init();};
+  // ②
+  $('#btnWireTot').onclick=()=>{if(S.wire.cut){alert('已經剪斷了，請分別量 A、B 段。');return;}S.wire.tot=tapeRead(T.Ltot);wireUI();};
+  $('#btnCut').onclick=()=>{const L=parseFloat($('#cutLen').value);if(!(L>=5&&L<=T.Ltot-5)){alert('目標長度需在 5 cm 到（全長−5 cm）之間');return;}
+    const A=L+0.15*randn();Object.assign(S.wire,{cut:true,A,B:T.Ltot-A,Ar:null,Br:null});wireUI();levUI();atUI();};
+  $('#btnMeasA').onclick=()=>{S.wire.Ar=tapeRead(S.wire.A);wireUI();};
+  $('#btnMeasB').onclick=()=>{S.wire.Br=tapeRead(S.wire.B);wireUI();};
+  $('#btnWireReset').onclick=()=>{if(!confirm('換新線後，用舊線記錄的數據仍保留但長度不再對應，確定？'))return;T.Ltot=U(68.5,71.5);S.wire={tot:null,cut:false,A:null,B:null,Ar:null,Br:null};wireUI();levUI();atUI();};
+  $('#pSl').oninput=e=>{S.pivot.p=parseFloat(e.target.value);pivUI();};
+  $$('[data-dp]').forEach(b=>b.onclick=()=>{S.pivot.p=Math.max(4,Math.min(14,+(S.pivot.p+parseFloat(b.dataset.dp)).toFixed(2)));pivUI();});
+  $('#btnPivRec').onclick=()=>{if(Math.abs(pivotTheta(S.pivot.p))>0.012&&!confirm('筷子看起來還沒水平，仍要記錄嗎？'))return;
+    if(S.lever.rows.length&&!confirm('移動支點後，③ 先前的數據將與新支點不一致，仍要記錄嗎？'))return;
+    S.pivot.read=rnd(S.pivot.p+0.015*randn(),0.05);pivUI();};
+  // ③
+  ['#lvN','#lvPiece','#aSl','#xSl'].forEach(id=>$(id).addEventListener('input',levUI));
+  $$('[data-dx]').forEach(b=>b.onclick=()=>{const x=$('#xSl');x.value=Math.max(+x.min,Math.min(+x.max,+(parseFloat(x.value)+parseFloat(b.dataset.dx)).toFixed(2)));levUI();});
+  $('#btnLevRec').onclick=levRecord;
+  // ④
+  ['#atN','#atPiece','#hSl','#atSwap'].forEach(id=>$(id).addEventListener('input',()=>{if(!S.atw.run)atUI();}));
+  $('#btnRel').onclick=atRelease;$('#btnStop').onclick=()=>S.atw.stop&&S.atw.stop();
+  document.addEventListener('keydown',e=>{if(e.code==='Space'&&S.atw.run&&$('#t4').classList.contains('on')){e.preventDefault();S.atw.stop&&S.atw.stop();}});
+  $('#btnReset').onclick=()=>{if(S.atw.run)return;$('#watch').textContent='0.00';S.atw.pending=null;$('#btnAtRec').disabled=true;$('#btnAtDis').disabled=true;$('#atMsg').innerHTML='';atUI();};
+  $('#btnAtRec').onclick=()=>{if(S.atw.pending){S.atw.rows.push(S.atw.pending);S.atw.pending=null;atTable();}$('#btnAtRec').disabled=true;$('#btnAtDis').disabled=true;$('#atMsg').innerHTML+=' ── 已記錄';};
+  $('#btnAtDis').onclick=()=>{S.atw.pending=null;$('#btnAtRec').disabled=true;$('#btnAtDis').disabled=true;$('#atMsg').innerHTML='已捨棄';};
+  $('#atFitPiece').onchange=atAnalysis;
+  // ⑤
+  ['#stkN','#rowN','#corN','#taped'].forEach(id=>$(id).addEventListener('input',volDraw));
+  $$('input[name=hm]').forEach(r=>r.onchange=()=>{volDraw();holeTable();});
+  $('#btnStk').onclick=()=>volRec('H');$('#btnRow').onclick=()=>volRec('W');$('#btnCor').onclick=()=>volRec('E');
+  $('#btnHole').onclick=holeRec;$('#btnHoleClr').onclick=()=>{S.vol.holes=[];holeTable();};
+  $('#btnTh').onclick=()=>{const w=rnd(20*T.dth+0.02*randn(),0.05);S.vol.thRead=w/20;$('#thInfo').textContent=`20 圈寬 ${w.toFixed(2)} cm → 棉線直徑 ≈ ${(w/20).toFixed(4)} cm`;};
+  $('#thrCorr').onchange=volCalc;$('#cSl').oninput=volCalc;
+  // ⑥
+  $('#btnReveal').onclick=()=>{S.revealed=true;truthUI();};
+  // 表格編輯／刪除
+  document.addEventListener('change',e=>{const el=e.target;if(!el.dataset||!el.dataset.t)return;const i=+el.dataset.i,k=el.dataset.k,v=parseFloat(el.value);if(!isFinite(v))return;
+    const t=el.dataset.t;
+    if(t==='lev'){S.lever.rows[i][k]=k==='n'?Math.round(v):v;levTable();}
+    else if(t==='at'){S.atw.rows[i][k]=v;atTable();}
+    else if(t[0]==='v'){S.vol[t[1]][i][k]=v;volTables();}});
+  document.addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;const i=+b.dataset.i,t=b.dataset.del;
+    if(t==='lev'){S.lever.rows.splice(i,1);levTable();}else if(t==='at'){S.atw.rows.splice(i,1);atTable();}
+    else if(t==='hole'){S.vol.holes.splice(i,1);holeTable();}else{S.vol[t[1]].splice(i,1);volTables();}});
+}
+wire();init();showTab(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>瓶與螺絲密度</title>
+<style>
+:root{--bg:#f4f6f9;--card:#ffffff;--ink:#1c2330;--mut:#5d6778;--line:#d5dbe3;--acc:#1f6feb;--acc2:#0a7d55;--warn:#b54708;--bad:#c62828;--water:#a9d8f7;--wl:#2b86cc;--glass:#cfe6ee;--metal:#8a9099;--paper:#fff8e6;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141a;--card:#19202a;--ink:#e6eaf0;--mut:#9aa5b5;--line:#2d3644;--acc:#5b9dff;--acc2:#3ccf91;--warn:#f0a35a;--bad:#ff6b6b;--water:#1d4c70;--wl:#5fb3ef;--glass:#47626c;--metal:#a7adb6;--paper:#3a3626;}}
+:root[data-theme="dark"]{--bg:#10141a;--card:#19202a;--ink:#e6eaf0;--mut:#9aa5b5;--line:#2d3644;--acc:#5b9dff;--acc2:#3ccf91;--warn:#f0a35a;--bad:#ff6b6b;--water:#1d4c70;--wl:#5fb3ef;--glass:#47626c;--metal:#a7adb6;--paper:#3a3626;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6}
+header{padding:16px;border-bottom:1px solid var(--line);background:var(--card)}
+header h1{margin:0;font-size:1.25rem}
+header .sub{color:var(--mut);font-size:.9rem}
+nav{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:.92rem}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1200px;margin:0 auto;padding:16px}
+section.tab{display:none}
+section.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:1.08rem}
+.card h3{margin:10px 0 6px;font-size:.98rem}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.btn{border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.9rem;margin:3px 4px 3px 0}
+.btn.ghost{background:transparent;color:var(--acc)}
+.btn.warn{background:var(--warn);border-color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input[type=number]{width:80px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:var(--bg)}
+td input{width:72px;text-align:center}
+.tbl{overflow-x:auto}
+.msg{min-height:1.4em;font-size:.9rem;margin:6px 0}
+.msg.warn{color:var(--warn)} .msg.bad{color:var(--bad)} .msg.ok{color:var(--acc2)}
+.res{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:.92rem}
+.res b{color:var(--acc)}
+.mut{color:var(--mut);font-size:.88rem}
+.f{font-family:"Cambria Math","Times New Roman",serif;font-size:1.02rem;background:var(--bg);padding:6px 10px;border-radius:6px;display:block;margin:4px 0;overflow-x:auto}
+svg{max-width:100%;height:auto;display:block}
+.empty{color:var(--mut);padding:30px;text-align:center;border:1px dashed var(--line);border-radius:8px}
+label.opt{display:block;font-size:.9rem;margin:3px 0}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.8rem;background:var(--bg);border:1px solid var(--line)}
+.z-ok{color:var(--acc2);font-weight:bold}.z-mid{color:var(--warn);font-weight:bold}.z-bad{color:var(--bad);font-weight:bold}
+</style>
+</head>
+<body>
+<header>
+  <h1>104 學年度 臺灣省第 9 區複賽 物理實驗第二題 — 玻璃空瓶與螺絲的密度</h1>
+  <div class="sub">無天平、無彈簧秤：以水的浮力換算質量，以排水換算體積。每次開啟時，待測物的真值都會重新隨機產生。</div>
+  <button class="btn ghost" onclick="newSample()">換一組新待測物（清除全部數據）</button>
+</header>
+<nav id="nav">
+  <button data-t="t1" class="on">① 原理</button>
+  <button data-t="t2">② 燒杯截面積校正</button>
+  <button data-t="t3">③ 待測物 A 玻璃瓶</button>
+  <button data-t="t4">④ 待測物 B 螺絲</button>
+  <button data-t="t5">⑤ 數據作圖與誤差</button>
+  <button data-t="t6">⑥ 真值揭曉</button>
+</nav>
+<main>
+
+<!-- ① -->
+<section class="tab on" id="t1">
+<div class="card">
+<h2>實驗構想</h2>
+<p>器材裡沒有任何秤，因此所有「質量」都必須用水來量：物體<b>漂浮</b>時排開水的重量等於物體的重量；物體<b>完全沒入</b>時排開水的體積等於物體的體積。這個實驗唯一需要的「標準」是量筒的刻度與水的密度 ρ<sub>水</sub>。</p>
+<div class="grid">
+<div>
+<h3>1. 燒杯截面積 A（第 ② 頁）</h3>
+<p>1000 mL 燒杯的刻度很粗，因此在燒杯外側立一支直尺讀水位 h。用量筒分次倒入已知體積的水，再對 V–h 做迴歸：</p>
+<span class="f">V = A·h + c　（c 吸收了杯底厚度造成的零點偏移）</span>
+<p>之後所有水位上升量 Δh 都可換成體積 ΔV = A·Δh。</p>
+<h3>2. 玻璃瓶 A（第 ③ 頁）</h3>
+<p>空瓶漂浮後，用量筒分次加入體積 V<sub>加</sub> 的水到瓶內，瓶子仍然漂浮：</p>
+<span class="f">ρ<sub>水</sub>·V<sub>排</sub> = m<sub>瓶</sub> + ρ<sub>水</sub>·V<sub>加</sub>　⇒　V<sub>排</sub> = V<sub>加</sub> + m<sub>瓶</sub>/ρ<sub>水</sub></span>
+<span class="f">V<sub>排</sub> = A (h − h₀)</span>
+<p>V<sub>排</sub>–V<sub>加</sub> 圖的斜率應為 1（可用來檢驗實驗），<b>截距 = m<sub>瓶</sub>/ρ<sub>水</sub></b>。接著讓瓶子灌滿水沉到杯底，此時排開的只有玻璃本身：</p>
+<span class="f">V<sub>玻璃</sub> = A (h<sub>s</sub> − h₀)　　ρ<sub>A</sub> = m<sub>瓶</sub> / V<sub>玻璃</sub></span>
+</div>
+<div>
+<h3>3. 瓶子當成「浮力秤」（第 ③、④ 頁）</h3>
+<p>在瓶側貼一條方格紙，讀出瓶子的吃水深度 d。若瓶身是等截面的圓柱：</p>
+<span class="f">d = (m<sub>瓶</sub>/ρ<sub>水</sub> + V<sub>加</sub>) / A<sub>外</sub>　⇒　d–V<sub>加</sub> 斜率 = 1/A<sub>外</sub></span>
+<h3>4. 螺絲 B（第 ④ 頁）：瓶內／瓶下差值法</h3>
+<p>依序量三種狀態的吃水深度：空瓶 d₀、螺絲放在瓶內 d₁、螺絲用膠帶貼在瓶底外側（泡在水中）d₂。</p>
+<span class="f">Δd₁ = d₁ − d₀ = m/(ρ<sub>水</sub>A<sub>外</sub>)　　d₁ − d₂ = V/A<sub>外</sub></span>
+<span class="f">m = ρ<sub>水</sub>A<sub>外</sub>Δd₁　　V = A<sub>外</sub>(d₁ − d₂)　　ρ<sub>B</sub> = ρ<sub>水</sub>·Δd₁ / (d₁ − d₂)</span>
+<p class="mut">注意：ρ<sub>B</sub> 的式子中 A<sub>外</sub> 被消去了，所以即使瓶子的截面積量得不準，螺絲的密度仍然不受影響。對照組是用量筒直接排水量螺絲體積，可用來看出量筒解析度（約 1 mL）面對只有數 cm³ 的螺絲時有多吃力。</p>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>三種狀態示意</h2>
+<div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr))" id="t1figs"></div>
+<p class="mut">本模擬會加入以下真實誤差：直尺讀數只能估到 0.05 cm 且帶有視差雜訊、量筒讀到 1 mL、量筒倒水後內壁殘留、瓶底與方格紙零點不齊、瓶子沉底時卡住的氣泡、螺絲表面附著的小氣泡、螺絲放在瓶內使瓶身傾斜、膠帶本身的質量、未知的水溫（ρ<sub>水</sub> 不一定等於 1.000）。</p>
+</div>
+</section>
+
+<!-- ② -->
+<section class="tab" id="t2">
+<div class="grid">
+<div class="card"><h2>裝置</h2><div id="app2"></div></div>
+<div class="card">
+<h2>步驟：量筒倒水 → 讀燒杯水位</h2>
+<p class="mut">直尺立在燒杯外側，零點對齊桌面（杯底玻璃有厚度，因此空杯時讀數不為 0）。建議分 4–6 次倒入，總水量約 750–850 mL；水太少，後面的瓶子會觸底。</p>
+<button class="btn" onclick="readEmpty()">讀取目前水位（不倒水）</button><br>
+量筒取水約 <input type="number" id="pourV" value="150" min="10" max="250" step="10"> mL
+<button class="btn" onclick="pour()">讀量筒 → 倒入燒杯 → 讀水位</button>
+<button class="btn ghost" onclick="delLast('cal')">刪除最後一筆</button>
+<button class="btn warn" onclick="resetCal()">倒光重來</button>
+<div class="msg" id="msg2"></div>
+<div class="tbl" id="tbl2"></div>
+<div class="res" id="res2" style="margin-top:8px"></div>
+</div>
+</div>
+<div class="card"><h2>V–h 迴歸</h2><div id="ch2"></div></div>
+</section>
+
+<!-- ③ -->
+<section class="tab" id="t3">
+<div class="grid">
+<div class="card"><h2>裝置</h2><div id="app3"></div></div>
+<div class="card">
+<h2>步驟</h2>
+<div class="mut" id="w3"></div>
+<b>(a)</b> <button class="btn" onclick="readH0()">讀 h₀（瓶子尚未放入，可重複取平均）</button><br>
+<b>(b)</b> <button class="btn" onclick="putBottle()">放入空瓶（瓶側已貼方格紙條）並讀 h、d</button><br>
+<b>(c)</b> 量筒取約 <input type="number" id="addV" value="15" min="2" max="60" step="1"> mL
+<button class="btn" onclick="addWater()">倒入瓶內，讀 h、d</button><br>
+<b>(d)</b> <button class="btn" onclick="sinkBottle()">倒掉瓶內水 → 壓入水中灌滿使其沉底，讀 hₛ</button>
+<button class="btn ghost" onclick="shakeBubble()">排出氣泡／再讀一次 hₛ</button><br>
+<button class="btn warn" onclick="resetBottle()">取出瓶子倒乾，清除本頁數據</button>
+<div class="msg" id="msg3"></div>
+<h3>瓶子外觀（方格紙繞瓶一圈量周長，直尺量瓶高）</h3>
+<button class="btn ghost" onclick="measureBottle()">量周長 C 與瓶高</button>
+<span id="bottleDim" class="mut"></span>
+</div>
+</div>
+<div class="card">
+<h2>數據紀錄</h2>
+<div class="res">h₀ = <b id="h0v">—</b> cm　　hₛ（沉底）= <b id="hsv">—</b> cm　<span id="hsnote" class="mut"></span></div>
+<div class="tbl" id="tbl3" style="margin-top:8px"></div>
+<div class="res" id="res3" style="margin-top:8px"></div>
+</div>
+<div class="grid">
+<div class="card"><h2>V<sub>排</sub>–V<sub>加</sub></h2><div id="ch3a"></div></div>
+<div class="card"><h2>吃水 d–V<sub>加</sub></h2><div id="ch3b"></div></div>
+</div>
+</section>
+
+<!-- ④ -->
+<section class="tab" id="t4">
+<div class="grid">
+<div class="card"><h2>裝置</h2>
+<div>顯示狀態：
+<label><input type="radio" name="v4" value="0" onchange="setView(0)"> 空瓶 d₀</label>
+<label><input type="radio" name="v4" value="1" checked onchange="setView(1)"> 螺絲在瓶內 d₁</label>
+<label><input type="radio" name="v4" value="2" onchange="setView(2)"> 螺絲貼瓶底外 d₂</label></div>
+<div id="app4"></div></div>
+<div class="card">
+<h2>差值法：每輪依序量 d₀ → d₁ → d₂</h2>
+<p class="mut">瓶子已擦乾、空瓶漂浮在同一燒杯中（水量與 ③ 相同）。螺絲長度約與瓶內徑相當，放入瓶內時可能斜靠而使瓶身傾斜。</p>
+<label class="opt"><input type="checkbox" id="oTape" onchange="opt()"> 量 d₁ 時，把待會要用的那段膠帶也一起放進瓶內</label>
+<label class="opt"><input type="checkbox" id="oBub" onchange="opt()"> 螺絲入水前先沾濕、入水後輕敲，去除表面氣泡</label>
+<label class="opt"><input type="checkbox" id="oTwo" onchange="opt()"> 瓶身相對兩側各貼一條方格紙，兩側讀數取平均</label>
+<button class="btn" onclick="doRound()">量測一輪 d₀、d₁、d₂</button>
+<button class="btn ghost" onclick="delLast('rounds')">刪除最後一輪</button><br>
+<button class="btn ghost" onclick="tapeRound()">只貼膠帶（無螺絲）：量「膠帶放瓶內 d<sub>t1</sub>」與「膠帶貼瓶底外 d<sub>t2</sub>」</button>
+<label class="opt"><input type="checkbox" id="oSubTape" onchange="refresh()"> 計算 V<sub>B</sub> 時扣除膠帶體積 A<sub>外</sub>(d<sub>t1</sub>−d<sub>t2</sub>)</label>
+<div class="msg" id="msg4"></div>
+<div>計算 A<sub>外</sub> 採用：
+<label><input type="radio" name="asrc" value="reg" checked onchange="S.Asrc='reg';refresh()"> ③ 的 d–V<sub>加</sub> 斜率</label>
+<label><input type="radio" name="asrc" value="C" onchange="S.Asrc='C';refresh()"> 周長 C²/4π</label></div>
+<div class="tbl" id="tbl4" style="margin-top:6px"></div>
+<div class="res" id="res4" style="margin-top:8px"></div>
+</div>
+</div>
+<div class="grid">
+<div class="card"><h2>對照：量筒直接排水法</h2>
+<p class="mut">量筒先裝約 150 mL 的水，讀 V₁；將量筒傾斜，讓螺絲沿內壁滑入，再讀 V₂。</p>
+<button class="btn" onclick="cylTrial()">做一次量筒排水</button>
+<button class="btn ghost" onclick="delLast('cyl')">刪除最後一筆</button>
+<div id="app4c"></div>
+<div class="tbl" id="tbl4c"></div>
+<div class="res" id="res4c" style="margin-top:8px"></div>
+</div>
+<div class="card"><h2>解析度比較</h2><div id="reso4" class="mut"></div></div>
+</div>
+</section>
+
+<!-- ⑤ -->
+<section class="tab" id="t5">
+<div class="card">
+<h2>採用的水密度</h2>
+ρ<sub>水</sub> = <input type="number" id="rhoAdopt" value="1.000" step="0.001" onchange="refresh()"> g/cm³
+<span class="mut">（器材中沒有溫度計，一般取 1.00；室溫 25 °C 時實際約為 0.997。）</span>
+</div>
+<div class="grid">
+<div class="card"><h2>② 燒杯校正 V–h</h2><div id="ch5a"></div></div>
+<div class="card"><h2>③ V<sub>排</sub>–V<sub>加</sub></h2><div id="ch5b"></div></div>
+</div>
+<div class="grid">
+<div class="card"><h2>③ d–V<sub>加</sub></h2><div id="ch5c"></div></div>
+<div class="card"><h2>④ 各輪 Δd₁ 與 (d₁−d₂)</h2><div id="ch5d"></div></div>
+</div>
+<div class="card"><h2>結果總表（有效數字依讀數精度取 3 位）</h2><div class="tbl" id="sum5"></div></div>
+<div class="card"><h2>單點法 vs 迴歸法</h2><div id="cmp5"></div></div>
+<div class="card"><h2>誤差討論</h2><div id="disc5"></div></div>
+</section>
+
+<!-- ⑥ -->
+<section class="tab" id="t6">
+<div class="card">
+<h2>真值揭曉</h2>
+<p class="mut">請先完成 ②–④ 的量測並寫下自己的結論，再揭曉。偏差以「(測量值 − 真值) / σ」表示：|z| ≤ 2 屬於合理範圍；若 |z| 明顯偏大，代表存在未被估計到的系統誤差。</p>
+<button class="btn" onclick="S.revealed=true;refresh()">揭曉真值</button>
+<div id="rev6"></div>
+</div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const PI=Math.PI;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*PI*v);}
+function rhoWater(t){return 1-(t+288.9414)/(508929.2*(t+68.12963))*Math.pow(t-3.9863,2);}
+const RD=0.05, RS=0.025;           // 直尺估讀到 0.05 cm；視差雜訊 σ≈0.025 cm
+const round05=x=>Math.round(x/RD)*RD;
+const readRuler=x=>round05(x+gauss()*RS);
+const readCyl=v=>Math.round(v+gauss()*0.4);
+const fx=(x,n)=>(x==null||!isFinite(x))?'—':x.toFixed(n);
+const sg=(x,n=3)=>(x==null||!isFinite(x))?'—':Number(x.toPrecision(n)).toString();
+const MATS=[{name:'鐵（鍍鋅碳鋼）',lo:7.80,hi:7.88},{name:'不鏽鋼 304',lo:7.90,hi:8.00},{name:'黃銅',lo:8.40,hi:8.60}];
+let T={},S={};
+
+function genTruth(){
+  T={};
+  T.Tc=rnd(22,30); T.rhow=rhoWater(T.Tc);
+  T.Db=rnd(10.2,10.8); T.Ab=PI*T.Db*T.Db/4; T.Hb=14.0; T.tb=rnd(0.25,0.45);
+  T.resid=rnd(0.3,0.8);
+  for(let k=0;k<1000;k++){
+    T.Do=rnd(4.6,5.6); T.H=rnd(8.5,10.5); T.w=rnd(0.20,0.30); T.tbot=rnd(0.45,0.75); T.rhog=rnd(2.40,2.60);
+    const ro=T.Do/2, ri=ro-T.w; T.ri=ri;
+    T.Vg=PI*(ro*ro-ri*ri)*(T.H-T.tbot)+PI*ro*ro*T.tbot;
+    T.mb=T.rhog*T.Vg; T.Aout=PI*ro*ro;
+    T.mat=MATS[Math.floor(Math.random()*3)]; T.rhos=rnd(T.mat.lo,T.mat.hi);
+    T.dn=[0.8,1.0,1.2][Math.floor(Math.random()*3)]; T.L=Math.round(rnd(4,6)*2)/2;
+    T.Vs=0.85*PI*Math.pow(T.dn/2,2)*T.L+Math.sqrt(3)/2*Math.pow(1.6*T.dn,2)*0.65*T.dn;
+    T.ms=T.rhos*T.Vs;
+    T.mt=rnd(0.15,0.35); T.Vt=T.mt/1.25;
+    if((T.mb+T.ms+T.mt)/T.rhow<T.Aout*(T.H-1.2) && T.mb/T.rhow>T.Aout*3.0) break;
+  }
+  T.screwH=1.6*T.dn; T.doff=rnd(-0.10,0.10); T.sinkBub=rnd(0.8,3.0);
+}
+function initState(){
+  S={Vw:0,Vcum:0,cal:[],h0:null,h0s:[],hss:[],tapeR:[],bottle:'none',Vin:0,VaddRec:0,flt:[],flooded:false,hs:null,hsBub:true,dim:null,
+     rounds:[],cyl:[],view:1,Asrc:'reg',revealed:false};
+}
+function newSample(){ if(!confirm('換一組新的待測物並清除全部數據？'))return; genTruth(); initState(); syncOpts(); refresh(); }
+
+/* ---------- 物理：水位與吃水 ---------- */
+function levelState(o){
+  const A=T.Ab,Ao=T.Aout,r=T.rhow,Vw=S.Vw;
+  if(o.bottle==='none') return {hin:Vw/A,d:null};
+  if(o.bottle==='sunk') return {hin:(Vw+T.Vg+(o.bub||0))/A,d:null};
+  let m=T.mb+r*(o.Vin||0),Vext=0,base=0;
+  if(o.screw==='in') m+=T.ms+(o.tapeIn?T.mt:0);
+  if(o.screw==='below'){m+=T.ms+T.mt;Vext=T.Vs+T.Vt+(o.bub||0);base=T.screwH;}
+  let d=(m/r-Vext)/Ao, hin=(Vw+Ao*d+Vext)/A, grounded=false;
+  if(hin-d<base+0.05){grounded=true;hin=(Vw+Vext-Ao*base)/(A-Ao);d=Math.max(0,hin-base);}
+  return {hin,d,grounded,flood:d>=T.H-0.02};
+}
+
+/* ---------- 迴歸 ---------- */
+function linreg(x,y){
+  const n=x.length; if(n<2) return null;
+  const mx=x.reduce((a,b)=>a+b)/n,my=y.reduce((a,b)=>a+b)/n;
+  let sxx=0,sxy=0,syy=0; for(let i=0;i<n;i++){sxx+=(x[i]-mx)**2;sxy+=(x[i]-mx)*(y[i]-my);syy+=(y[i]-my)**2;}
+  if(sxx===0) return null;
+  const b=sxy/sxx,a=my-b*mx; let ss=0; for(let i=0;i<n;i++) ss+=(y[i]-a-b*x[i])**2;
+  const s2=n>2?ss/(n-2):0;
+  return {a,b,seb:Math.sqrt(s2/sxx),sea:Math.sqrt(s2*(1/n+mx*mx/sxx)),r2:syy>0?1-ss/syy:1,n};
+}
+const mean=a=>a.reduce((p,q)=>p+q,0)/a.length;
+const sem=a=>a.length<2?null:Math.sqrt(a.reduce((p,q)=>p+(q-mean(a))**2,0)/(a.length-1)/a.length);
+
+/* ---------- 繪圖：裝置 ---------- */
+function zoomBox(x,y,label,val,showWater){
+  const W=118,H=150,k=70,mid=y+H/2+6;
+  let s=`<rect x="${x}" y="${y}" width="${W}" height="${H}" rx="6" fill="var(--paper)" stroke="var(--line)"/>`;
+  s+=`<text x="${x+6}" y="${y+14}" font-size="11" fill="var(--mut)">${label}</text>`;
+  s+=`<clipPath id="cp${x}${y}"><rect x="${x}" y="${y+20}" width="${W}" height="${H-22}"/></clipPath><g clip-path="url(#cp${x}${y})">`;
+  if(showWater){s+=`<path d="M${x} ${mid+4} Q${x+10} ${mid-3} ${x+30} ${mid} L${x+W} ${mid} L${x+W} ${y+H} L${x} ${y+H}Z" fill="var(--water)" opacity=".75"/>`;
+    s+=`<line x1="${x}" y1="${mid}" x2="${x+W}" y2="${mid}" stroke="var(--wl)" stroke-width="1.2"/>`;}
+  const lo=Math.ceil((val-1.1)*10),hi=Math.floor((val+1.1)*10);
+  for(let m=lo;m<=hi;m++){const yy=mid-(m/10-val)*k,len=m%10===0?22:(m%5===0?15:9);
+    s+=`<line x1="${x+W-4-len}" y1="${yy}" x2="${x+W-4}" y2="${yy}" stroke="var(--ink)" stroke-width="${m%10===0?1.3:.8}"/>`;
+    if(m%10===0) s+=`<text x="${x+W-30-6}" y="${yy+4}" font-size="12" text-anchor="end" fill="var(--ink)">${m/10}</text>`;}
+  s+=`</g>`;
+  return s;
+}
+function drawApp(o,opt={}){
+  const k=20,cx=150,y0=332,ls=levelState(o),hin=ls.hin,yW=y0-hin*k,half=T.Db*k/2,xl=cx-half,xr=cx+half,yt=y0-T.Hb*k,yTable=y0+T.tb*k;
+  const W=opt.small?300:430;
+  let s=`<svg viewBox="0 0 ${W} 360" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">`;
+  s+=`<line x1="10" y1="${yTable}" x2="${W-10}" y2="${yTable}" stroke="var(--mut)" stroke-width="2"/>`;
+  if(hin>0) s+=`<rect x="${xl}" y="${Math.max(yW,yt)}" width="${2*half}" height="${Math.min(hin,T.Hb)*k}" fill="var(--water)" opacity=".8"/><line x1="${xl}" y1="${yW}" x2="${xr}" y2="${yW}" stroke="var(--wl)" stroke-width="1.5"/>`;
+  // 瓶子
+  if(o.bottle==='float'){
+    const bb=y0-(hin-ls.d)*k,w=T.Do*k,bx=cx-w/2,top=bb-T.H*k,wk=T.w*k;
+    s+=`<rect x="${bx}" y="${top}" width="${w}" height="${T.H*k}" rx="5" fill="var(--glass)" fill-opacity=".85" stroke="var(--mut)"/>`;
+    s+=`<rect x="${bx+wk}" y="${top}" width="${w-2*wk}" height="${(T.H-T.tbot)*k}" fill="var(--card)" fill-opacity=".9"/>`;
+    const hw=(o.Vin||0)/(PI*T.ri*T.ri);
+    if(hw>0) s+=`<rect x="${bx+wk}" y="${bb-T.tbot*k-hw*k}" width="${w-2*wk}" height="${hw*k}" fill="var(--water)"/>`;
+    for(let c=0;c<=Math.floor(T.H);c++){const yy=bb-(c-T.doff)*k;s+=`<line x1="${bx-6}" y1="${yy}" x2="${bx}" y2="${yy}" stroke="var(--ink)" stroke-width=".8"/>`;}
+    s+=`<rect x="${bx-7}" y="${top+4}" width="7" height="${T.H*k-6}" fill="var(--paper)" fill-opacity=".6"/>`;
+    if(o.screw==='in'){const L=Math.min(T.L,2*T.ri-0.1);s+=`<rect x="${cx-L*k/2}" y="${bb-T.tbot*k-T.dn*k}" width="${L*k}" height="${T.dn*k}" fill="var(--metal)" rx="2" transform="rotate(${T.L>2*T.ri?-8:0} ${cx} ${bb-T.tbot*k})"/>`;}
+    if(o.screw==='below'){s+=`<rect x="${cx-T.L*k/2}" y="${bb}" width="${T.L*k}" height="${T.dn*k}" fill="var(--metal)" rx="2"/><rect x="${cx-T.L*k/2-T.dn*0.65*k}" y="${bb}" width="${T.dn*0.65*k}" height="${T.screwH*k}" fill="var(--metal)"/><rect x="${cx-T.L*k/2-4}" y="${bb-3}" width="${T.L*k+8}" height="5" fill="#d9d2a6" opacity=".8"/>`;
+      if(o.bub>0) for(let i=0;i<4;i++) s+=`<circle cx="${cx-T.L*k/3+i*T.L*k/5}" cy="${bb+T.dn*k+2}" r="2.2" fill="#fff" stroke="var(--wl)" stroke-width=".6"/>`;}
+    if(ls.grounded) s+=`<text x="${cx}" y="${top-6}" text-anchor="middle" font-size="13" fill="var(--bad)">觸底！</text>`;
+  }
+  if(o.bottle==='sunk'){
+    const w=T.H*k,h=T.Do*k,bx=cx-w/2,by=y0-h;
+    s+=`<rect x="${bx}" y="${by}" width="${w}" height="${h}" rx="5" fill="var(--glass)" stroke="var(--mut)"/><rect x="${bx+T.tbot*k}" y="${by+T.w*k}" width="${w-T.tbot*k}" height="${h-2*T.w*k}" fill="var(--water)"/>`;
+    if(o.bub>0) s+=`<ellipse cx="${bx+w*0.6}" cy="${by+T.w*k+5}" rx="${8+o.bub*5}" ry="5" fill="var(--card)" stroke="var(--wl)"/>`;
+  }
+  s+=`<path d="M${xl-3} ${yt-6} L${xl-3} ${yTable} L${xr+3} ${yTable} L${xr+3} ${yt-6}" fill="none" stroke="var(--mut)" stroke-width="2.5"/>`;
+  s+=`<line x1="${xl-3}" y1="${y0}" x2="${xr+3}" y2="${y0}" stroke="var(--mut)" stroke-width="1"/>`;
+  // 直尺
+  const rx=xr+12; s+=`<rect x="${rx}" y="${yTable-15*k}" width="14" height="${15*k}" fill="var(--paper)" stroke="var(--mut)"/>`;
+  for(let c=0;c<=15;c++){const yy=yTable-c*k;s+=`<line x1="${rx}" y1="${yy}" x2="${rx+7}" y2="${yy}" stroke="var(--ink)"/>`;if(c%2===0)s+=`<text x="${rx+9}" y="${yy+3}" font-size="8" fill="var(--ink)">${c}</text>`;}
+  if(!opt.small){
+    s+=zoomBox(306,10,'放大：燒杯外直尺 h',hin+T.tb,true);
+    if(o.bottle==='float'&&!ls.grounded) s+=zoomBox(306,180,'放大：瓶側方格紙 d',ls.d+T.doff,true);
+  }
+  s+='</svg>'; return s;
+}
+function drawCyl(V,withScrew,bub){
+  const k=1.2,y0=330,w=44,x=60; const h=(V+(withScrew?T.Vs+bub:0))/(PI*1.85*1.85);
+  let s=`<svg viewBox="0 0 300 340" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">`;
+  const yw=y0-h*12;
+  s+=`<rect x="${x}" y="${yw}" width="${w}" height="${y0-yw}" fill="var(--water)"/>`;
+  if(withScrew) s+=`<rect x="${x+16}" y="${y0-T.L*12}" width="${T.dn*10}" height="${T.L*12}" fill="var(--metal)"/>`;
+  s+=`<path d="M${x} 20 L${x} ${y0} L${x+w} ${y0} L${x+w} 20" fill="none" stroke="var(--mut)" stroke-width="2"/>`;
+  for(let v=0;v<=250;v+=10){const yy=y0-v/(PI*1.85*1.85)*12;s+=`<line x1="${x+w-8}" y1="${yy}" x2="${x+w}" y2="${yy}" stroke="var(--ink)" stroke-width=".7"/>`;}
+  s+=zoomCyl(150,40,V+(withScrew?T.Vs+bub:0));
+  s+='</svg>';return s;
+}
+function zoomCyl(x,y,v){
+  const W=118,H=150,k=12,mid=y+H/2;
+  let s=`<rect x="${x}" y="${y}" width="${W}" height="${H}" rx="6" fill="var(--paper)" stroke="var(--line)"/><text x="${x+6}" y="${y+14}" font-size="11" fill="var(--mut)">放大：量筒刻度 (mL)</text>`;
+  s+=`<clipPath id="cpc"><rect x="${x}" y="${y+20}" width="${W}" height="${H-22}"/></clipPath><g clip-path="url(#cpc)">`;
+  s+=`<path d="M${x} ${mid-3} Q${x+W/2} ${mid+4} ${x+W} ${mid-3} L${x+W} ${y+H} L${x} ${y+H}Z" fill="var(--water)" opacity=".75"/>`;
+  const lo=Math.ceil((v-6)/2)*2,hi=Math.floor((v+6)/2)*2;
+  for(let m=lo;m<=hi;m+=2){const yy=mid-(m-v)*k,len=m%10===0?22:12;s+=`<line x1="${x+4}" y1="${yy}" x2="${x+4+len}" y2="${yy}" stroke="var(--ink)"/>`;if(m%10===0)s+=`<text x="${x+30}" y="${yy+4}" font-size="12" fill="var(--ink)">${m}</text>`;}
+  return s+'</g>';
+}
+
+/* ---------- 繪圖：圖表 ---------- */
+function niceStep(r){const p=Math.pow(10,Math.floor(Math.log10(r))),f=r/p;return (f<1.5?1:f<3?2:f<7?5:10)*p;}
+function plot(pts,fits,xl,yl,o={}){
+  if(!pts.length) return `<div class="empty">尚無數據</div>`;
+  const W=460,H=290,ml=60,mr=16,mt=14,mb=46;
+  let xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(o.zx){x0=Math.min(0,x0);} if(o.zy){y0=Math.min(0,y0);}
+  (fits||[]).forEach(f=>{if(f&&o.zx){y0=Math.min(y0,f.a+f.b*x0);y1=Math.max(y1,f.a+f.b*x0);}});
+  if(x1===x0){x1+=1;x0-=1;} if(y1===y0){y1+=1;y0-=1;}
+  const px=(x1-x0)*.08,py=(y1-y0)*.1; x0-=o.zx&&x0===0?0:px; x1+=px; y0-=o.zy&&y0===0?0:py; y1+=py;
+  const X=v=>ml+(v-x0)/(x1-x0)*(W-ml-mr),Y=v=>H-mb-(v-y0)/(y1-y0)*(H-mt-mb);
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="11">`;
+  const sx=niceStep((x1-x0)/5),sy=niceStep((y1-y0)/5);
+  for(let v=Math.ceil(x0/sx)*sx;v<=x1;v+=sx){s+=`<line x1="${X(v)}" y1="${mt}" x2="${X(v)}" y2="${H-mb}" stroke="var(--line)"/><text x="${X(v)}" y="${H-mb+14}" text-anchor="middle" fill="var(--mut)">${+v.toPrecision(6)}</text>`;}
+  for(let v=Math.ceil(y0/sy)*sy;v<=y1;v+=sy){s+=`<line x1="${ml}" y1="${Y(v)}" x2="${W-mr}" y2="${Y(v)}" stroke="var(--line)"/><text x="${ml-5}" y="${Y(v)+4}" text-anchor="end" fill="var(--mut)">${+v.toPrecision(6)}</text>`;}
+  s+=`<rect x="${ml}" y="${mt}" width="${W-ml-mr}" height="${H-mt-mb}" fill="none" stroke="var(--mut)"/>`;
+  const cols=['var(--acc)','var(--warn)'];
+  (fits||[]).forEach((f,i)=>{if(!f)return;const a=o.zx?x0:Math.min(...xs),b=x1;s+=`<line x1="${X(a)}" y1="${Y(f.a+f.b*a)}" x2="${X(b)}" y2="${Y(f.a+f.b*b)}" stroke="${cols[i]}" stroke-width="1.6" ${i?'stroke-dasharray="5 4"':''}/>`;});
+  pts.forEach(p=>{s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4" fill="${p[2]||'var(--acc2)'}" stroke="var(--card)"/>`;});
+  s+=`<text x="${(ml+W-mr)/2}" y="${H-8}" text-anchor="middle" fill="var(--ink)" font-size="12">${xl}</text>`;
+  s+=`<text transform="translate(14 ${(mt+H-mb)/2}) rotate(-90)" text-anchor="middle" fill="var(--ink)" font-size="12">${yl}</text>`;
+  return s+'</svg>';
+}
+
+/* ---------- ② ---------- */
+function msg(id,t,c=''){const e=$(id);e.textContent=t;e.className='msg '+c;}
+function hasDownstream(){return S.h0!=null||S.flt.length||S.hs!=null||S.rounds.length;}
+function clearDownstream(){S.h0=null;S.h0s=[];S.hss=[];S.tapeR=[];S.bottle='none';S.Vin=0;S.VaddRec=0;S.flt=[];S.flooded=false;S.hs=null;S.hsBub=true;S.rounds=[];}
+function readEmpty(){
+  const h=readRuler(levelState({bottle:'none'}).hin+T.tb);
+  S.cal.push({V:S.Vcum,h}); msg('msg2',`水位讀數 h = ${fx(h,2)} cm（累計倒入 ${S.Vcum} mL）`,'ok'); refresh();
+}
+function pour(){
+  let t=parseFloat($('pourV').value); if(!(t>=5&&t<=250)){msg('msg2','量筒一次最多 250 mL','warn');return;}
+  if(hasDownstream()&&!confirm('燒杯水量改變後，③④ 的數據都會失效並清除，確定要繼續？'))return;
+  if(hasDownstream()) clearDownstream();
+  const vtrue=t+gauss()*0.8, r=readCyl(vtrue), deliv=vtrue-(T.resid+gauss()*0.12);
+  if((S.Vw+deliv)/T.Ab>T.Hb-0.3){msg('msg2','再倒就要溢出了！','bad');return;}
+  S.Vw+=deliv; S.Vcum+=r;
+  const h=readRuler(S.Vw/T.Ab+T.tb);
+  S.cal.push({V:S.Vcum,h});
+  msg('msg2',`量筒讀數 ${r} mL → 倒入；燒杯水位 h = ${fx(h,2)} cm（累計 ${S.Vcum} mL）`,'ok'); refresh();
+}
+function resetCal(){ if(!confirm('倒光燒杯的水，清除 ②③④ 的數據？'))return; S.Vw=0;S.Vcum=0;S.cal=[];clearDownstream();msg('msg2','');refresh();}
+function delLast(a){S[a].pop();refresh();}
+function editCell(arr,i,key,el){const v=parseFloat(el.value);if(isFinite(v)){S[arr][i][key]=v;refresh();}}
+const inp=(arr,i,key,v,n)=>`<input type="number" step="any" value="${fx(v,n)}" onchange="editCell('${arr}',${i},'${key}',this)">`;
+
+/* ---------- ③ ---------- */
+function needWater(){if(S.Vw<300){msg('msg3','燒杯水太少，請先到 ② 倒入約 750–850 mL 的水','warn');return true;}return false;}
+function readH0(){
+  if(needWater())return;
+  if(S.bottle!=='none'){msg('msg3','瓶子還在燒杯裡，h₀ 必須在放瓶之前讀','warn');return;}
+  S.h0s.push(readRuler(S.Vw/T.Ab+T.tb)); S.h0=mean(S.h0s); msg('msg3',`第 ${S.h0s.length} 次讀 h₀ = ${fx(S.h0s[S.h0s.length-1],2)} cm（可多讀幾次取平均：每次重讀前把直尺移開再放回）`,'ok'); refresh();
+}
+function readFloat(){
+  const ls=levelState({bottle:'float',Vin:S.Vin});
+  const h=readRuler(ls.hin+T.tb), d=readRuler(ls.d+T.doff);
+  S.flt.push({Va:S.VaddRec,h,d,g:ls.grounded});
+  return ls;
+}
+function putBottle(){
+  if(needWater())return;
+  if(S.bottle!=='none'){msg('msg3','瓶子已經在燒杯裡','warn');return;}
+  if(S.flooded){msg('msg3','請先按「取出瓶子倒乾」','warn');return;}
+  S.bottle='float';S.Vin=0;S.VaddRec=0;
+  const ls=readFloat();
+  msg('msg3',ls.grounded?'瓶底碰到燒杯底部了，讀數無效：請回 ② 多加一些水':'空瓶漂浮，已記錄 h 與 d',ls.grounded?'bad':'ok'); refresh();
+}
+function addWater(){
+  if(S.bottle!=='float'||S.flooded){msg('msg3','請先放入空瓶','warn');return;}
+  let t=parseFloat($('addV').value); if(!(t>=1&&t<=100)){msg('msg3','請輸入 1–100 mL','warn');return;}
+  const vtrue=t+gauss()*0.6, r=readCyl(vtrue), deliv=vtrue-(T.resid+gauss()*0.12);
+  S.Vin+=deliv; S.VaddRec+=r;
+  const ls=levelState({bottle:'float',Vin:S.Vin});
+  if(ls.flood){S.flooded=true;S.bottle='sunk';S.Vin=0;msg('msg3','瓶口沒入水面，水灌進瓶子，瓶子沉沒了！這一步的數據作廢。按「取出瓶子倒乾」可保留先前數據，重新開始加水。','bad');refresh();return;}
+  readFloat();
+  msg('msg3',`量筒讀數 ${r} mL 倒入瓶內（累計 ${S.VaddRec} mL）${ls.grounded?'　⚠ 瓶底觸底':''}`,ls.grounded?'bad':'ok'); refresh();
+}
+function sinkBottle(){
+  if(needWater())return;
+  S.bottle='sunk';S.Vin=0;S.hsBub=true;S.flooded=false;
+  const ls=levelState({bottle:'sunk',bub:T.sinkBub});
+  S.hss=[readRuler(ls.hin+T.tb)]; S.hs=S.hss[0];
+  msg('msg3',`瓶子沉底，hₛ = ${fx(S.hs,2)} cm（仔細看：瓶內是否卡了一個氣泡？）`,'warn'); refresh();
+}
+function shakeBubble(){
+  if(S.bottle!=='sunk'){msg('msg3','瓶子還沒沉底','warn');return;}
+  if(S.hsBub){S.hss=[];} S.hsBub=false; S.hss.push(readRuler(levelState({bottle:'sunk',bub:0}).hin+T.tb)); S.hs=mean(S.hss);
+  msg('msg3',`氣泡已排出，第 ${S.hss.length} 次讀 hₛ = ${fx(S.hss[S.hss.length-1],2)} cm（可再按幾次取平均）`,'ok'); refresh();
+}
+function resetBottle(){
+  if(S.flooded){S.flooded=false;S.bottle='none';S.Vin=0;S.VaddRec=0;msg('msg3','瓶子已倒乾。先前的數據保留；要重做加水序列請再按一次此鈕清除。','ok');refresh();return;}
+  if(!confirm('清除本頁數據（h₀ 保留）？'))return;
+  S.bottle='none';S.Vin=0;S.VaddRec=0;S.flt=[];S.hs=null;S.hss=[];S.hsBub=true;msg('msg3','');refresh();
+}
+function measureBottle(){
+  S.dim={C:readRuler(PI*T.Do+0.03),H:readRuler(T.H)};
+  refresh();
+}
+
+/* ---------- ④ ---------- */
+function syncOpts(){$('oTape').checked=false;$('oBub').checked=false;$('oTwo').checked=false;}
+function opt(){}
+function setView(v){S.view=v;refresh();}
+function readD(dTrue,tilt,two){
+  if(two) return (readRuler(dTrue+T.doff+tilt)+readRuler(dTrue+T.doff-tilt))/2;
+  return readRuler(dTrue+T.doff+tilt);
+}
+function doRound(){
+  if(S.Vw<300){msg('msg4','燒杯水太少，請先到 ② 倒水','warn');return;}
+  const tape=$('oTape').checked,bubOff=$('oBub').checked,two=$('oTwo').checked;
+  const bub=bubOff?rnd(0,0.02):rnd(0.06,0.25);
+  const s0=levelState({bottle:'float',screw:'none'}),s1=levelState({bottle:'float',screw:'in',tapeIn:tape}),s2=levelState({bottle:'float',screw:'below',bub});
+  const tilt=(Math.random()<.5?-1:1)*rnd(0.03,0.12);
+  const d0=readD(s0.d,0,two),d1=readD(s1.d,tilt,two),d2=readD(s2.d,0,two);
+  S.rounds.push({d0,d1,d2,g:s2.grounded,tape,bubOff,two,bub});
+  let m=`第 ${S.rounds.length} 輪：d₀=${fx(d0,2)}，d₁=${fx(d1,2)}，d₂=${fx(d2,2)} cm`;
+  if(!two) m+=`　（螺絲斜靠使瓶身略為傾斜，只讀單側會受影響）`;
+  msg('msg4',m,s2.grounded?'bad':'ok');
+  if(s2.grounded) msg('msg4',m+'　⚠ 貼在瓶底的螺絲碰到杯底，d₂ 無效！請回 ② 加水','bad');
+  refresh();
+}
+function tapeRound(){
+  if(S.Vw<300){msg('msg4','燒杯水太少','warn');return;}
+  const two=$('oTwo').checked,a=levelState({bottle:'float',screw:'none'});
+  const m=T.mb+T.mt, d1=(m/T.rhow)/T.Aout, d2=(m/T.rhow-T.Vt)/T.Aout;
+  const r1=readD(d1,0,two),r2=readD(d2,0,two);
+  S.tapeR.push(r1-r2); msg('msg4',`膠帶：d_t1 = ${fx(r1,3)}，d_t2 = ${fx(r2,3)} cm，差 ${fx(r1-r2,3)} cm（膠帶體積極小，常常讀不出差異，需多次平均）`,'ok'); refresh();
+}
+function cylTrial(){
+  const bubOff=$('oBub').checked, bub=bubOff?rnd(0,0.02):rnd(0.06,0.25);
+  const v1t=150+gauss()*3, V1=readCyl(v1t), V2=readCyl(v1t+T.Vs+bub);
+  S.cyl.push({V1,V2}); S.lastCyl={v:v1t,bub}; refresh();
+}
+
+/* ---------- 計算 ---------- */
+function calc(){
+  const R={}; R.rw=parseFloat($('rhoAdopt').value)||1.000;
+  if(S.cal.length>=2){const f=linreg(S.cal.map(r=>r.h),S.cal.map(r=>r.V));if(f){R.cal=f;R.A=f.b;R.Ase=f.seb;}}
+  const rows=S.flt.filter(r=>!r.g);
+  if(R.A&&S.h0!=null&&rows.length){
+    R.vd=rows.map(r=>({x:r.Va,y:R.A*(r.h-S.h0)}));
+    R.Vm1=R.vd[0].y;
+    if(rows.length>=3){const f=linreg(R.vd.map(p=>p.x),R.vd.map(p=>p.y));R.fv=f;R.Vm=f.a;R.Vmse=f.sea;}
+  }
+  if(rows.length>=3){const f=linreg(rows.map(r=>r.Va),rows.map(r=>r.d));if(f&&f.b>0){R.fd=f;R.Ao_reg=1/f.b;R.Ao_regse=f.seb/f.b/f.b;}}
+  if(S.dim){R.Ao_C=S.dim.C*S.dim.C/(4*PI);R.Ao_Cse=2*R.Ao_C*0.03/S.dim.C;}
+  if(R.A&&S.h0!=null&&S.hs!=null){R.Vg=R.A*(S.hs-S.h0);R.Vgse=Math.hypot(R.A*0.03*Math.sqrt(1/Math.max(1,S.h0s.length)+1/Math.max(1,S.hss.length)),(S.hs-S.h0)*(R.Ase||0));}
+  if(R.Vm!=null){R.mb=R.rw*R.Vm;R.mbse=R.rw*R.Vmse;}
+  if(R.Vm1!=null) R.mb1=R.rw*R.Vm1;
+  if(R.mb&&R.Vg>0){R.rhoA=R.mb/R.Vg;R.rhoAse=R.rhoA*Math.hypot(R.mbse/R.mb,R.Vgse/R.Vg);}
+  if(R.mb1&&R.Vg>0) R.rhoA1=R.mb1/R.Vg;
+  const rr=S.rounds.filter(r=>!r.g);
+  if(rr.length){
+    const a=rr.map(r=>r.d1-r.d0),b=rr.map(r=>r.d1-r.d2);
+    R.dd1=mean(a);R.dd12=mean(b);
+    const floor=0.03*Math.SQRT2;
+    R.dd1se=Math.max(sem(a)||0,floor/Math.sqrt(rr.length));R.dd12se=Math.max(sem(b)||0,floor/Math.sqrt(rr.length));
+    R.nr=rr.length;
+    const Ao=S.Asrc==='C'?R.Ao_C:R.Ao_reg, Aose=S.Asrc==='C'?R.Ao_Cse:R.Ao_regse;
+    if(Ao){R.Ao=Ao;R.ms=R.rw*Ao*R.dd1;R.msse=R.ms*Math.hypot(R.dd1se/R.dd1,Aose/Ao);
+      }
+    R.dtp=0;R.dtpse=0;
+    if($('oSubTape').checked&&S.tapeR.length){R.dtp=mean(S.tapeR);R.dtpse=Math.max(sem(S.tapeR)||0,0.03*Math.SQRT2/Math.sqrt(S.tapeR.length));}
+    const dv=R.dd12-R.dtp, dvse=Math.hypot(R.dd12se,R.dtpse); R.dv=dv;
+    if(Ao){R.Vs=Ao*dv;R.Vsse=Math.abs(R.Vs)*Math.hypot(dvse/dv,Aose/Ao);}
+    if(dv>0){R.rhos=R.rw*R.dd1/dv;R.rhosse=R.rhos*Math.hypot(R.dd1se/R.dd1,dvse/dv);}
+  }
+  if(S.cyl.length){const v=S.cyl.map(c=>c.V2-c.V1);R.Vc=mean(v);R.Vcse=Math.max(sem(v)||0,0.6/Math.sqrt(v.length));R.nc=v.length;
+    if(R.ms&&R.Vc>0){R.rhoc=R.ms/R.Vc;R.rhocse=R.rhoc*Math.hypot(R.msse/R.ms,R.Vcse/R.Vc);}}
+  return R;
+}
+
+/* ---------- 畫面更新 ---------- */
+function refresh(){
+  const R=calc();
+  // ①
+  $('t1figs').innerHTML=['空瓶漂浮','瓶內加水仍漂浮','灌滿沉底'].map((t,i)=>`<div><div class="mut" style="text-align:center">${t}</div>${drawApp(i===0?{bottle:'float'}:i===1?{bottle:'float',Vin:30}:{bottle:'sunk'},{small:true})}</div>`).join('');
+  // ②
+  $('app2').innerHTML=drawApp({bottle:'none'});
+  $('tbl2').innerHTML=S.cal.length?`<table><tr><th>#</th><th>累計倒入 V (mL)</th><th>水位 h (cm)</th></tr>${S.cal.map((r,i)=>`<tr><td>${i+1}</td><td>${inp('cal',i,'V',r.V,0)}</td><td>${inp('cal',i,'h',r.h,2)}</td></tr>`).join('')}</table>`:'';
+  $('res2').innerHTML=R.cal?`迴歸 V = A·h + c：A = <b>${sg(R.A)}</b> cm²（±${sg(R.Ase,2)}），c = ${sg(R.cal.a)} mL，R² = ${R.cal.r2.toFixed(5)}<br><span class="mut">水位讀數 0.05 cm 對應約 ${sg(R.A*0.05,2)} mL；目前燒杯水量約 ${Math.round(S.Vcum)} mL</span>`:'至少需要 2 筆數據才能做迴歸';
+  $('ch2').innerHTML=plot(S.cal.map(r=>[r.h,r.V]),[R.cal],'水位 h (cm)','累計體積 V (mL)');
+  // ③
+  const st3=S.bottle==='sunk'?{bottle:'sunk',bub:S.hsBub?T.sinkBub:0}:{bottle:S.bottle,Vin:S.Vin};
+  $('app3').innerHTML=drawApp(st3);
+  $('w3').textContent=S.Vw<300?'⚠ 燒杯水量不足，請先完成 ②。':`燒杯水量（量筒累計）約 ${Math.round(S.Vcum)} mL。流程：讀 h₀ → 放空瓶 → 分次加水（每次約 10–20 mL，留意瓶口不要沒入水面）→ 倒掉瓶內的水後壓沉。`;
+  $('h0v').textContent=S.h0==null?'—':(S.h0s.length>1?`${fx(S.h0,3)}（${S.h0s.length} 次平均：${S.h0s.map(v=>fx(v,2)).join('、')}）`:fx(S.h0,2));
+  $('hsv').textContent=S.hs==null?'—':(S.hss.length>1?`${fx(S.hs,3)}（${S.hss.length} 次平均：${S.hss.map(v=>fx(v,2)).join('、')}）`:fx(S.hs,2));
+  $('hsnote').textContent=S.hs==null?'':(S.hsBub?'（尚未排除氣泡）':'（已排除氣泡）');
+  $('tbl3').innerHTML=S.flt.length?`<table><tr><th>#</th><th>瓶內累計加水 V<sub>加</sub> (mL)</th><th>水位 h (cm)</th><th>吃水 d (cm)</th><th>V<sub>排</sub> = A(h−h₀) (mL)</th></tr>${S.flt.map((r,i)=>`<tr${r.g?' style="color:var(--bad)"':''}><td>${i+1}${r.g?' 觸底':''}</td><td>${inp('flt',i,'Va',r.Va,0)}</td><td>${inp('flt',i,'h',r.h,2)}</td><td>${inp('flt',i,'d',r.d,2)}</td><td>${R.A&&S.h0!=null?sg(R.A*(r.h-S.h0)):'需 A 與 h₀'}</td></tr>`).join('')}</table>`:'';
+  let t3='';
+  if(R.fv) t3+=`V<sub>排</sub>–V<sub>加</sub>：斜率 = <b>${R.fv.b.toFixed(3)}</b>（理論 1），截距 = <b>${sg(R.Vm)}</b> mL ⇒ m<sub>瓶</sub> = ρ<sub>水</sub>×截距 = <b>${sg(R.mb)}</b> g<br>`;
+  else t3+='V<sub>排</sub>–V<sub>加</sub> 迴歸需要 A、h₀ 與至少 3 筆漂浮數據<br>';
+  if(R.fd) t3+=`d–V<sub>加</sub>：斜率 = ${sg(R.fd.b)} cm/mL ⇒ A<sub>外</sub> = <b>${sg(R.Ao_reg)}</b> cm²<br>`;
+  if(R.Vg!=null) t3+=`V<sub>玻璃</sub> = A(hₛ−h₀) = <b>${sg(R.Vg)}</b> cm³${S.hsBub?'　<span style="color:var(--warn)">（hₛ 含氣泡）</span>':''}<br>`;
+  if(R.rhoA) t3+=`ρ<sub>A</sub> = m<sub>瓶</sub>/V<sub>玻璃</sub> = <b>${sg(R.rhoA)}</b> g/cm³`;
+  $('res3').innerHTML=t3;
+  $('bottleDim').innerHTML=S.dim?`C = ${fx(S.dim.C,2)} cm，瓶高 = ${fx(S.dim.H,2)} cm ⇒ A<sub>外</sub> = C²/4π = ${sg(R.Ao_C)} cm²`:'';
+  const rows=S.flt.filter(r=>!r.g);
+  $('ch3a').innerHTML=R.vd?plot(R.vd.map(p=>[p.x,p.y]),[R.fv],'V加 (mL)','V排 (mL)',{zx:true}):plot([],[]);
+  $('ch3b').innerHTML=plot(rows.map(r=>[r.Va,r.d]),[R.fd],'V加 (mL)','吃水 d (cm)');
+  // ④
+  const vv=S.view, lr=S.rounds[S.rounds.length-1];
+  const o4=vv===0?{bottle:'float'}:vv===1?{bottle:'float',screw:'in',tapeIn:$('oTape').checked}:{bottle:'float',screw:'below',bub:lr?lr.bub:0.15};
+  $('app4').innerHTML=drawApp(o4);
+  $('tbl4').innerHTML=S.rounds.length?`<table><tr><th>輪</th><th>d₀</th><th>d₁</th><th>d₂</th><th>Δd₁=d₁−d₀</th><th>d₁−d₂</th><th>條件</th></tr>${S.rounds.map((r,i)=>`<tr${r.g?' style="color:var(--bad)"':''}><td>${i+1}</td><td>${inp('rounds',i,'d0',r.d0,r.two?3:2)}</td><td>${inp('rounds',i,'d1',r.d1,r.two?3:2)}</td><td>${inp('rounds',i,'d2',r.d2,r.two?3:2)}</td><td>${fx(r.d1-r.d0,3)}</td><td>${fx(r.d1-r.d2,3)}</td><td class="mut">${[r.tape?'膠帶同放':'',r.bubOff?'除泡':'',r.two?'兩側平均':'',r.g?'觸底':''].filter(Boolean).join('、')||'—'}</td></tr>`).join('')}</table>`:'';
+  let t4='';
+  if(R.dd1!=null){
+    t4+=`平均（${R.nr} 輪）：Δd₁ = ${R.dd1.toFixed(3)} ± ${R.dd1se.toFixed(3)} cm，d₁−d₂ = ${R.dd12.toFixed(3)} ± ${R.dd12se.toFixed(3)} cm<br>`;
+    if(R.Ao) t4+=`A<sub>外</sub> = ${sg(R.Ao)} cm² ⇒ m<sub>B</sub> = <b>${sg(R.ms)}</b> g，V<sub>B</sub> = <b>${sg(R.Vs)}</b> cm³<br>`;
+    else t4+=`<span class="mut">尚無 A<sub>外</sub>（請完成 ③ 的 d–V<sub>加</sub> 迴歸或量周長）</span><br>`;
+    if(R.dtp) t4+=`扣除膠帶：d<sub>t1</sub>−d<sub>t2</sub> = ${R.dtp.toFixed(3)} cm（${S.tapeR.length} 次平均）<br>`;
+    if(R.rhos) t4+=`ρ<sub>B</sub> = ρ<sub>水</sub>·Δd₁/(d₁−d₂${R.dtp?'−膠帶差':''}) = <b>${sg(R.rhos)}</b> ± ${sg(R.rhosse,2)} g/cm³`;
+  }
+  $('res4').innerHTML=t4;
+  const lc=S.cyl[S.cyl.length-1];
+  $('app4c').innerHTML=lc&&S.lastCyl?drawCyl(S.lastCyl.v,true,S.lastCyl.bub):drawCyl(150,false,0);
+  $('tbl4c').innerHTML=S.cyl.length?`<table><tr><th>#</th><th>V₁ (mL)</th><th>V₂ (mL)</th><th>V₂−V₁</th></tr>${S.cyl.map((c,i)=>`<tr><td>${i+1}</td><td>${inp('cyl',i,'V1',c.V1,0)}</td><td>${inp('cyl',i,'V2',c.V2,0)}</td><td>${c.V2-c.V1}</td></tr>`).join('')}</table>`:'';
+  $('res4c').innerHTML=R.Vc!=null?`量筒法：V<sub>B</sub> = ${sg(R.Vc,2)} ± ${sg(R.Vcse,1)} cm³${R.rhoc?`　⇒ ρ<sub>B</sub> = ${sg(R.rhoc,2)} g/cm³（m 取差值法）`:''}`:'';
+  $('reso4').innerHTML=`<ul>
+  <li>燒杯水位：讀數 0.05 cm ↔ <b>${sg(T.Ab*0.05,2)} mL</b>（燒杯很粗，對小體積幾乎無感）</li>
+  <li>瓶側吃水：讀數 0.05 cm ↔ <b>${sg(T.Aout*0.05,2)} mL</b>，而且可多次重複取平均</li>
+  <li>量筒：刻度 2 mL，估讀到 1 mL；兩次讀數相減，誤差約 ±1 mL</li>
+  <li>螺絲體積只有數 cm³，因此這是全實驗相對誤差最大的一項；增加輪數取平均是最直接的改善方式</li></ul>`;
+  // ⑤
+  render5(R); render6(R);
+}
+function zcls(z){const a=Math.abs(z);return a<=2?'z-ok':a<=3?'z-mid':'z-bad';}
+function render5(R){
+  $('ch5a').innerHTML=plot(S.cal.map(r=>[r.h,r.V]),[R.cal],'h (cm)','V (mL)');
+  $('ch5b').innerHTML=R.vd?plot(R.vd.map(p=>[p.x,p.y]),[R.fv],'V加 (mL)','V排 (mL)',{zx:true}):plot([],[]);
+  const rows=S.flt.filter(r=>!r.g);
+  $('ch5c').innerHTML=plot(rows.map(r=>[r.Va,r.d]),[R.fd],'V加 (mL)','d (cm)');
+  const rr=S.rounds.filter(r=>!r.g);
+  $('ch5d').innerHTML=plot(rr.flatMap((r,i)=>[[i+1,r.d1-r.d0,'var(--acc)'],[i+1,r.d1-r.d2,'var(--warn)']]),[],'輪次','cm（藍：Δd₁，橘：d₁−d₂）');
+  const row=(n,v,se,u,note='')=>`<tr><td>${n}</td><td><b>${sg(v)}</b></td><td>${se!=null&&isFinite(se)?sg(se,2):'—'}</td><td>${u}</td><td class="mut">${note}</td></tr>`;
+  $('sum5').innerHTML=`<table><tr><th>量</th><th>測量值</th><th>估計 σ</th><th>單位</th><th>來源</th></tr>
+  ${row('燒杯截面積 A',R.A,R.Ase,'cm²','② V–h 斜率')}
+  ${row('瓶子質量 m<sub>A</sub>',R.mb,R.mbse,'g','③ V排–V加 截距 × ρ水')}
+  ${row('玻璃體積 V<sub>A</sub>',R.Vg,R.Vgse,'cm³','③ A(hₛ−h₀)')}
+  ${row('<b>玻璃密度 ρ<sub>A</sub></b>',R.rhoA,R.rhoAse,'g/cm³','')}
+  ${row('瓶外截面積 A<sub>外</sub>',R.Ao,null,'cm²',S.Asrc==='C'?'周長':'d–V加 斜率')}
+  ${row('螺絲質量 m<sub>B</sub>',R.ms,R.msse,'g','④ ρ水A外Δd₁')}
+  ${row('螺絲體積 V<sub>B</sub>（差值法）',R.Vs,R.Vsse,'cm³','④ A外(d₁−d₂)')}
+  ${row('<b>螺絲密度 ρ<sub>B</sub>（差值法）</b>',R.rhos,R.rhosse,'g/cm³','ρ水Δd₁/(d₁−d₂)')}
+  ${row('螺絲體積 V<sub>B</sub>（量筒）',R.Vc,R.Vcse,'cm³','對照')}
+  ${row('螺絲密度 ρ<sub>B</sub>（量筒）',R.rhoc,R.rhocse,'g/cm³','對照')}</table>
+  <p class="mut">σ 由迴歸標準誤差、重複量測的標準誤差，或讀數極限（0.03 cm／1 mL）估計，僅作為第 ⑥ 頁自我評量之用；競賽報告依題目指示「不必考慮誤差傳遞」，但仍須注意有效數字。</p>`;
+  let c='';
+  if(R.mb1!=null&&R.mb!=null) c+=`<p>瓶質量：只用第一點（空瓶漂浮）得 m = ${sg(R.mb1)} g；用迴歸截距得 m = ${sg(R.mb)} g。迴歸用到所有點，單一水位讀數的視差與量筒殘留誤差會被平均掉；同時斜率 ${R.fv.b.toFixed(3)} 是否接近 1，也是「瓶子確實自由漂浮、沒有觸底或傾倒」的檢驗。若斜率明顯小於 1，代表量筒倒水後有殘留（實際倒入量比讀數少）。</p>`;
+  if(R.rhoA1&&R.rhoA) c+=`<p>ρ<sub>A</sub>：單點法 ${sg(R.rhoA1)}，迴歸法 ${sg(R.rhoA)} g/cm³。</p>`;
+  if(R.Ao_reg&&R.Ao_C) c+=`<p>A<sub>外</sub>：吃水斜率法 ${sg(R.Ao_reg)} cm²，周長法 ${sg(R.Ao_C)} cm²。兩者若有差異，可能是瓶身在水線附近並非等截面（瓶肩、瓶底圓角），或方格紙繞瓶時有重疊與厚度。ρ<sub>B</sub> 不受 A<sub>外</sub> 影響。</p>`;
+  $('cmp5').innerHTML=c||'<p class="mut">完成 ③ 後顯示。</p>';
+  const tape=S.rounds.some(r=>!r.tape),bub=S.rounds.some(r=>!r.bubOff),one=S.rounds.some(r=>!r.two);
+  $('disc5').innerHTML=`<ol>
+  <li><b>讀數解析度決定方法的選擇：</b>粗燒杯每 0.05 cm 約 ${sg(T.Ab*0.05,2)} mL，用來量 ${R.Vg?sg(R.Vg,2):'數十'} cm³ 的玻璃還可以，但量數 cm³ 的螺絲就不夠了。改用細瓶吃水量螺絲，相當於把讀數放大了 A/A<sub>外</sub> ≈ ${sg(T.Ab/T.Aout,2)} 倍。</li>
+  <li><b>量筒殘留：</b>每次倒水都會有約 0.3–0.8 mL 掛在量筒內壁，使 V<sub>加</sub> 的讀數比實際倒入量大，V<sub>排</sub>–V<sub>加</sub> 的斜率會略小於 1；② 的 A 也會因此略為偏大。</li>
+  <li><b>沉底時的氣泡：</b>${S.hsBub&&S.hs!=null?'<span style="color:var(--warn)">你目前的 hₛ 尚未排除瓶內氣泡</span>；':''}卡在瓶內的空氣會讓 hₛ 偏高、V<sub>玻璃</sub> 偏大，ρ<sub>A</sub> 偏小。</li>
+  <li><b>膠帶：</b>${tape?'<span style="color:var(--warn)">有幾輪量 d₁ 時沒把膠帶一起放入瓶內</span>，':''}膠帶的質量若只出現在 d₂ 狀態，會使 d₁−d₂ 偏小（V 偏小、ρ<sub>B</sub> 偏大）。把同一段膠帶在 d₁ 時也放進瓶內，可以抵銷膠帶的<b>質量</b>；但膠帶貼在瓶外時本身也排水，它的<b>體積</b>（約 0.1–0.3 cm³）仍會被算成螺絲的體積，使 V 偏大、ρ<sub>B</sub> 偏小。可以另外只用膠帶量一次 d<sub>t1</sub>−d<sub>t2</sub> 再扣除；不過這個差值只有零點幾 mm，必須多次平均才看得出來，所以也可以改用細棉線綁螺絲，讓這項誤差變得更小。</li>
+  <li><b>表面氣泡：</b>${bub?'<span style="color:var(--warn)">部分輪次未除泡</span>，':''}螺紋間附著的小氣泡會增加排水體積，使 V<sub>B</sub> 偏大、ρ<sub>B</sub> 偏小；量筒法同樣有此問題。</li>
+  <li><b>瓶身傾斜：</b>${one?'<span style="color:var(--warn)">部分輪次只讀單側</span>，':''}螺絲在瓶內斜靠時，瓶子一側吃水較深、另一側較淺，只讀單側會造成隨機或系統偏差；貼兩條方格紙取平均即可消除。</li>
+  <li><b>水的密度：</b>器材中沒有溫度計，取 ρ<sub>水</sub> = 1.00 g/cm³；室溫 22–30 °C 時實際為 0.998–0.996，m<sub>A</sub>、m<sub>B</sub>、ρ<sub>A</sub>、ρ<sub>B</sub> 都會因此偏大約 0.2–0.4%。</li>
+  <li><b>有效數字：</b>水位與吃水讀到 0.05 cm（例如 9.35 cm），量筒讀到 1 mL；最後的密度以 3 位有效數字表示即可。</li></ol>`;
+}
+function render6(R){
+  if(!S.revealed){$('rev6').innerHTML='';return;}
+  const tr=(n,m,se,t,u)=>{let z=(m!=null&&se>0)?(m-t)/se:null;return `<tr><td>${n}</td><td>${sg(m)}</td><td>${se!=null&&isFinite(se)?sg(se,2):'—'}</td><td><b>${sg(t,4)}</b></td><td>${u}</td><td>${m!=null?((m-t)/t*100).toFixed(1)+'%':'—'}</td><td>${z!=null?`<span class="${zcls(z)}">${z.toFixed(1)}σ</span>`:'—'}</td></tr>`;};
+  const pp=(1/T.rhow-1)*100;
+  $('rev6').innerHTML=`<div class="tbl"><table><tr><th>量</th><th>你的值</th><th>σ</th><th>真值</th><th>單位</th><th>相對誤差</th><th>z</th></tr>
+  ${tr('燒杯截面積 A',R.A,R.Ase,T.Ab,'cm²')}
+  ${tr('瓶子質量 m<sub>A</sub>',R.mb,R.mbse,T.mb,'g')}
+  ${tr('玻璃體積 V<sub>A</sub>',R.Vg,R.Vgse,T.Vg,'cm³')}
+  ${tr('<b>玻璃密度 ρ<sub>A</sub></b>',R.rhoA,R.rhoAse,T.rhog,'g/cm³')}
+  ${tr('瓶外截面積 A<sub>外</sub>',R.Ao,S.Asrc==='C'?R.Ao_Cse:R.Ao_regse,T.Aout,'cm²')}
+  ${tr('螺絲質量 m<sub>B</sub>',R.ms,R.msse,T.ms,'g')}
+  ${tr('螺絲體積 V<sub>B</sub>（差值法）',R.Vs,R.Vsse,T.Vs,'cm³')}
+  ${tr('<b>螺絲密度 ρ<sub>B</sub>（差值法）</b>',R.rhos,R.rhosse,T.rhos,'g/cm³')}
+  ${tr('螺絲體積 V<sub>B</sub>（量筒）',R.Vc,R.Vcse,T.Vs,'cm³')}
+  ${tr('螺絲密度 ρ<sub>B</sub>（量筒）',R.rhoc,R.rhocse,T.rhos,'g/cm³')}</table></div>
+  <h3>隱藏參數</h3>
+  <ul>
+  <li>螺絲材質：<b>${T.mat.name}</b>，公稱直徑 ${T.dn*10} mm、長 ${T.L*10} mm（六角頭）</li>
+  <li>玻璃瓶：外徑 ${T.Do.toFixed(2)} cm、高 ${T.H.toFixed(2)} cm、壁厚 ${(T.w*10).toFixed(1)} mm、瓶底厚 ${(T.tbot*10).toFixed(1)} mm</li>
+  <li>水溫 ${T.Tc.toFixed(1)} °C ⇒ ρ<sub>水</sub> = ${T.rhow.toFixed(4)} g/cm³（若取 1.000，質量會偏大 ${pp.toFixed(2)}%）</li>
+  <li>燒杯內徑 ${T.Db.toFixed(2)} cm，杯底玻璃厚 ${T.tb.toFixed(2)} cm（即直尺零點偏移）</li>
+  <li>量筒每次倒水平均殘留 ${T.resid.toFixed(2)} mL</li>
+  <li>方格紙零點與瓶底的偏差 ${T.doff>=0?'+':''}${T.doff.toFixed(2)} cm（在差值與斜率中會被消去）</li>
+  <li>沉底時瓶內卡住的氣泡 ${T.sinkBub.toFixed(1)} cm³ ⇒ 若未排除，V<sub>玻璃</sub> 會偏大 ${(T.sinkBub/T.Vg*100).toFixed(1)}%</li>
+  <li>膠帶質量 ${T.mt.toFixed(2)} g、體積 ${T.Vt.toFixed(2)} cm³ ⇒ 若量 d₁ 時沒把膠帶放入瓶內，V<sub>B</sub> 會偏小約 ${(T.mt/T.rhow-T.Vt).toFixed(2)} cm³；若有放入但沒有扣除膠帶體積，V<sub>B</sub> 會偏大 ${T.Vt.toFixed(2)} cm³（${(T.Vt/T.Vs*100).toFixed(1)}%）</li>
+  </ul>
+  <p class="mut">提示：若 ρ<sub>B</sub> 的 z 值偏大，先檢查膠帶與氣泡這兩項系統誤差；若 ρ<sub>A</sub> 偏小，先檢查 hₛ 是否排除了氣泡。按頁首「換一組新待測物」可以重新練習。</p>`;
+}
+
+/* ---------- 分頁 ---------- */
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));window.scrollTo(0,0);
+});
+['oTape','oBub','oTwo'].forEach(id=>$(id).addEventListener('change',refresh));
+genTruth(); initState(); refresh();
+</script>
+</body>
+</html>

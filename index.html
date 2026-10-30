@@ -27,7 +27,7 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 :root{
   --desk:#dfe2e6; --paper:#fbfaf7; --paper-2:#f2f0ea; --ink:#1d2333; --muted:#5f6576; --rule:#d9d6cd;
   --cover:#25306b; --cover-ink:#f3f1ea; --accent:#2f3f94;
-  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a; --c4:#1d6f8a; --c5:#6b6a1f; --c6:#3f4fa8; --c7:#7a3fa0; --c8:#16797a;
+  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a; --c4:#1d6f8a; --c5:#6b6a1f; --c6:#3f4fa8; --c7:#7a3fa0; --c8:#16797a; --c9:#8a5a1c; --c10a:#2f6b3a; --c10b:#3b5fa0; --c10c:#8c3a5e; --c11:#b0401f;
   --shadow:0 18px 40px rgba(29,35,51,.18);
   --f-display:"LXGW WenKai TC","Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
   --f-body:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
@@ -36,12 +36,12 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef; --c7:#c79be6; --c8:#5fd0c9;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef; --c7:#c79be6; --c8:#5fd0c9; --c9:#e2b16b; --c10a:#86cf8f; --c10b:#93b1ef; --c10c:#e48db3; --c11:#f2916f;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef; --c7:#c79be6; --c8:#5fd0c9;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef; --c7:#c79be6; --c8:#5fd0c9; --c9:#e2b16b; --c10a:#86cf8f; --c10b:#93b1ef; --c10c:#e48db3; --c11:#f2916f;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}
 
 body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75}
@@ -187,6 +187,33 @@ html.lab-open,html.lab-open body{overflow:hidden}
 const SITE="https://sites.google.com/ms.mingdao.edu.tw/sim/";
 const SPEC=["#e5484d","#f08c2e","#e9c22b","#3fa65b","#2f78d6","#6a4fc6"];
 const ART={
+  stokes:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <rect x="110" y="4" width="80" height="112" rx="6" fill="var(--c9)" opacity=".16" stroke="var(--ink)" stroke-width="2"/>
+        <circle cx="150" cy="58" r="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5"/>
+        <line x1="150" y1="70" x2="150" y2="104" stroke="var(--ink)" stroke-width="2"/><polygon points="150,110 145,102 155,102" fill="var(--ink)"/>
+        <line x1="150" y1="46" x2="150" y2="16" stroke="var(--c9)" stroke-width="2"/><polygon points="150,10 145,18 155,18" fill="var(--c9)"/>
+        <text x="158" y="104" font-size="12" fill="var(--ink)" font-style="italic">mg</text>
+        <text x="200" y="26" font-size="12" fill="var(--ink)" font-style="italic">B + 6πηRv</text>
+      </svg>`,
+  density:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <path d="M70 10 L70 106 Q70 114 78 114 L142 114 Q150 114 150 106 L150 10" fill="none" stroke="var(--ink)" stroke-width="2.5"/>
+        <rect x="72" y="40" width="76" height="72" fill="var(--c10b)" opacity=".2"/>
+        <line x1="72" y1="40" x2="148" y2="40" stroke="var(--c10b)" stroke-width="2"/>
+        <rect x="102" y="6" width="16" height="70" rx="8" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <circle cx="110" cy="84" r="10" fill="var(--c10a)"/>
+        ${[20,30,40,50].map(y=>`<line x1="102" y1="${y}" x2="108" y2="${y}" stroke="var(--ink)" stroke-width="1.2"/>`).join("")}
+        <text x="168" y="64" font-size="14" fill="var(--ink)" font-style="italic">ρ = m / V</text>
+      </svg>`,
+  circuit:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <path d="M40 20 H240 V100 H40 Z" fill="none" stroke="var(--ink)" stroke-width="2.2"/>
+        <rect x="30" y="44" width="20" height="32" fill="var(--paper)"/>
+        <line x1="26" y1="52" x2="54" y2="52" stroke="var(--ink)" stroke-width="2.5"/><line x1="33" y1="62" x2="47" y2="62" stroke="var(--ink)" stroke-width="4"/>
+        <rect x="110" y="12" width="60" height="16" fill="var(--paper)" stroke="var(--c11)" stroke-width="2.5"/>
+        <text x="140" y="46" text-anchor="middle" font-size="13" fill="var(--ink)" font-style="italic">R</text>
+        <circle cx="240" cy="60" r="14" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="240" y="65" text-anchor="middle" font-size="13" fill="var(--ink)">A</text>
+        <text x="62" y="66" font-size="13" fill="var(--ink)" font-style="italic">V</text>
+      </svg>`,
   pendulum:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
         <line x1="96" y1="8" x2="204" y2="8" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
         <line x1="150" y1="8" x2="150" y2="100" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 4"/>
@@ -322,6 +349,30 @@ const FLUID_EXP=[
   {t:"沙漏漏完所需時間",slug:"沙漏漏完所需時間",lab:"fluid-hourglass",src:"98 學年度 第十區（屏東區）複賽 實驗第二題",d:"器材裡沒有任何計時器，要自己造一個鐘。用棉線和 50 g 掛碼做單擺，翻轉沙漏的同時放開擺錘，數漏完時擺了幾次，換算成時間。再用彈簧振子對照，說明為什麼單擺當時鐘比較可靠。",f:["單擺當時鐘","t = N · 2π √(ℓ / g)"],tabs:["實驗原理","器材組裝","漏沙計數","數據迴歸","彈簧對照與誤差","真值揭曉"],rnd:true}
 ];
 
+const VISC_EXP=[
+  {t:"管壁效應：黏滯力修正",slug:"管壁效應-黏滯力修正",lab:"visc-wall",src:"102 學年度 全國決賽",d:"題目故意把黏滯力寫成 F = 6πη rᵐ v，要你用實驗求出指數 m。先檢驗小球是否已達等速，再改變球的大小求 m、求液體密度，最後換不同管徑，看管壁讓小球落得比 Stokes 定律預測更慢多少。",f:["終端速度（c = 2g / 9η）","vₜ = c · r³⁻ᵐ (ρ − ρ′)"],tabs:["理論推導","落球計時與等速檢驗","求指數 m","求液體密度","管壁效應","誤差分析與真值"],rnd:true},
+  {t:"落球法測甘油黏滯係數",slug:"落球法測定甘油的黏滯係數",lab:"visc-glycerin",src:"102 學年度 北二區",d:"不同大小的鋼球在甘油中落下，先畫受力圖推導終端速度，再在量筒上標位置、計時，作 v–x 圖確認已達等速。終端速度與半徑平方成正比，所以要以 vₜ 對 R² 作圖，由斜率求甘油的黏滯係數 η。",f:["vₜ 對 R² 為直線","vₜ = 2R² g (ρ球 − ρ液) / 9η"],tabs:["原理與推導","裝置組裝","落球計時","v–x 關係圖","vₜ–R² 求 η","誤差與真值"],rnd:true}
+];
+
+const DENS_EXP=[
+  {w:"solid",t:"合金檢測",slug:"合金檢測",lab:"dens-alloy",src:"91 學年度 屏東區複賽 實驗第一題",d:"用天平與量筒排水法量合金的質量和體積，逐塊累加、以 M–V 迴歸求密度，再對照六種候選合金鑑定成分。合金密度是兩種金屬依質量分率加權的調和平均，不是算術平均。",f:["兩金屬混合（體積可加成）","1 / d = x / d_A + (1 − x) / d_B"],tabs:["原理","器材與準備","量測","作圖迴歸","鑑定與誤差","真值揭曉"],rnd:true},
+  {w:"solid",t:"冰糖密度（97 臺南區）",slug:"冰糖密度-97",lab:"dens-sugar97",src:"97 學年度 臺南區複賽 實驗第一題",d:"冰糖會溶於水，不能直接用清水排液。要先自己配一杯飽和糖液，測出它的密度，再把冰糖吊進糖液裡，由天平讀數的增加量求排開的體積。",f:["懸吊法：讀數增加量扣掉橡皮筋","ρ冰糖 = m ρs / (Δ − b)"],tabs:["原理","配製飽和糖液","測糖液密度 ρs","冰糖排液量測","數據迴歸","誤差與真值揭曉"],rnd:true},
+  {w:"solid",t:"冰糖密度（102 臺南區）",slug:"冰糖密度102",lab:"dens-sugar102",src:"102 學年度 臺南區（第 7 區）複賽 實驗第二題",d:"先把冰糖磨細倒進量筒壓實，看看磨得越細，算出的密度是否越接近實際值。量到的其實是含空隙的「體密度」，所以要再設計更準的方法：飽和糖水排液法與天平浮力法。",f:["壓實法量到的是體密度（φ 為填充率）","ρ_app = m / V = φ · ρ冰糖"],tabs:["原理","研磨與壓實","第 1 題分析","法 A：飽和糖水排液","法 B：天平浮力法","誤差與真值揭曉"],rnd:true},
+  {w:"solid",t:"螺絲帽密度",slug:"螺帽密度-97",lab:"dens-nut",src:"97 學年度 屏東區複賽 實驗第二題",d:"沒有天平、量筒，也沒有水。質量用已知線密度的金屬線當砝碼，以竹筷槓桿迴歸求單顆螺帽質量，再用 Atwood 機對照；體積則量六角柱扣掉螺紋孔的幾何尺寸。",f:["槓桿迴歸（斜率即單顆質量 m）","μL · x = m · (n a) + b"],tabs:["實驗設計之理論基礎","器材組裝與標準質量","槓桿量測單顆質量 m","Atwood 機對照：1/a–N 迴歸","體積量測","密度、誤差傳遞與真值揭曉"],rnd:true},
+  {w:"solid",t:"玻璃瓶與螺絲的密度",slug:"測密度",lab:"dens-bottle-screw",src:"104 學年度 臺灣省第 9 區（屏東區）複賽 實驗第二題",d:"沒有天平也沒有彈簧秤，所有質量都靠水來量：漂浮時排開水的重量等於物重，完全沒入時排開的體積等於物體體積。先校正燒杯截面積，再把玻璃瓶當成浮力秤，求瓶子和螺絲的密度。",f:["燒杯截面積校正","V = A · h + c"],tabs:["原理","燒杯截面積校正","待測物 A：玻璃瓶","待測物 B：螺絲","數據作圖與誤差","真值揭曉"],rnd:true},
+  {w:"liquid",t:"液體密度（注射筒與彈簧秤）",slug:"液體密度",lab:"dens-liquid-syringe",src:"93 學年度 屏東區複賽 實驗第二題",d:"沒有尺、天平，也沒有已知密度的液體，只有彈簧秤、注射筒和方格紙。法 A 抽不同體積的液體秤重，作 W–V 圖；法 B 把物體浸入不同深度讀彈簧秤，作 W′–h 圖。兩種迴歸互相驗證。",f:["法 A：斜率即液體密度","W = 常數 + ρ · V"],tabs:["原理推導","器材組裝與歸零","法 A：抽液秤重","法 B：浮力浸入","迴歸分析","誤差與真值揭曉"],rnd:true},
+  {w:"liquid",t:"自製密度計",slug:"密度計",lab:"dens-hydrometer",src:"90 學年度 高雄市複賽 實驗第二題",d:"量筒變天平：浮體排開幾毫升水就約有幾公克。先用浮體法求玻璃管和銲錫的密度，再用銲錫配重做成密度計，畫上刻度去量待測液。還要處理配重位置與表面張力造成的系統誤差。",f:["浮體法求玻璃管密度","ρ管 = ρ水 · V / V′"],tabs:["原理","器材組裝","玻璃管密度","銲錫密度","密度計","誤差與真值揭曉"],rnd:true},
+  {w:"liquid",t:"鉛筆浮體測液體密度",slug:"液體的密度",lab:"dens-pencil",src:"94 學年度 臺南區複賽 實驗第二題",d:"鉛筆底端纏金屬線當配重，讓它直立浮在液體中。依序加掛同一批短金屬線，分別在清水和飽和食鹽水裡記錄沉入讀數，由兩者變化量的比值 R 求待測液密度，不需要尺。",f:["短線掛在液面上方時","ρ液 = R · ρ水　（R = Δy / Δx）"],tabs:["原理","器材組裝","清水中量測（讀數 y）","待測液中量測（讀數 x）","數據分析：三種求 R 的方法","誤差與真值揭曉"],rnd:true},
+  {w:"linear",t:"線密度與聲速",slug:"線密度",lab:"dens-linear",src:"105 學年度 全國決賽",d:"音叉帶動釣魚線產生駐波，以駐波段數 n 對長度 l 作圖求線密度；再把音叉放在量筒口，調水量讓空氣柱共鳴，用不同管徑求管口端點修正係數 α，最後算出聲速。全程沒有天平和溫度計。",f:["Melde 駐波法（s 為 l–n 斜率）","ρ = T / (2 f s)²"],tabs:["原理","弦線駐波","求線密度 ρ","氣柱共鳴","求 α 與聲速","誤差與真值揭曉"],rnd:true}
+];
+
+const ELEC_EXP=[
+  {t:"電阻衰減器",slug:"電阻衰減器",lab:"elec-attenuator",src:"90 學年度 屏東區複賽 實驗第二題",d:"電阻網路可以當音量控制電路。先鑑定六種未標示的電阻，組裝衰減器，選擇適當的 R₁、R₂ 讓電源看到的等效電阻等於負載 20 Ω，量 Vᵢ、i 並作圖，找出 R₁、R₂、R_L 的關係。",f:["等效電阻等於負載的條件","R_L² = 4R₁ (R₁ + R₂)"],tabs:["原理推導","電阻鑑定","電路組裝","量測 Vᵢ、i","作圖分析","誤差與真值揭曉"],rnd:true},
+  {t:"電池直徑、可變電阻與未知元件",slug:"電學",lab:"elec-105",src:"105 學年度 北一區（花蓮區）",d:"三個部分：用直尺和游標尺量電池直徑並分析工具誤差；量可變雙電阻的阻值隨格點數 N 的變化，找出線性範圍；最後自行設計電路，量未知元件的電流與電壓，找出它的函數關係。",f:["可變電阻的線性範圍","R(N) = αN + β"],tabs:["器材與規則","基本測量","電阻量測","R–N 分析","未知元件量測","I–V 分析與真值揭曉"],rnd:true},
+  {t:"金屬棒電阻率",slug:"金屬棒電阻係數",lab:"elec-rod",src:"104 學年度 北一區（花蓮區）",d:"用游標尺量鋁、銅、鐵三根金屬棒的長度與直徑，再設計電路驗證歐姆定律、求室溫電阻率。金屬棒電阻很小，必須用四端點法量；直徑的相對誤差會放大兩倍傳到電阻率。",f:["電阻率","ρ = R · π d² / (4 ℓ)"],tabs:["原理","游標尺量測","電路組裝","V–I 量測","作圖與迴歸","誤差與真值揭曉"],rnd:true},
+  {t:"電池盒內電阻",slug:"電阻",lab:"elec-internal",src:"96 學年度 北一區（花蓮區）",d:"只有五個未知電阻和一台三用電表，要量出電池盒的電動勢與內電阻。先討論怎麼保護電表、用歐姆計量各電阻，再把 I–R 的雙曲線取倒數變成直線，由斜率和截距求 V_B 與 R_B。",f:["取倒數線性化","1 / I = R / V_B + R_B / V_B"],tabs:["原理與保護問題","歐姆計量電阻","電路組裝與量測","I–R 作圖","迴歸求 V_B、R_B","誤差與真值揭曉"],rnd:true}
+];
+
 /* 每一章一個物件；ready:true 的章才會排進書頁 */
 const CHAPTERS=[
   {no:"一",num:1,name:"基礎能力",path:"基礎能力/",ready:true,color:"var(--c1)",art:"fit",
@@ -353,9 +404,19 @@ const CHAPTERS=[
   {no:"八",num:8,name:"流體",path:"主題分類/流體/",ready:true,color:"var(--c8)",art:"jet",
    intro:"水從孔裡流出來的四種問法：用液面下降求孔徑、用表面張力托住水滴、用水柱軌跡求流速，以及沒有碼表時怎麼量沙漏的時間。好幾題都不給尺或計時器，要先自己造出量具。",
    sections:null,exps:FLUID_EXP},
-  {no:"九",num:9,name:"黏滯",path:"主題分類/黏滯/"},
-  {no:"十",num:10,name:"密度",path:"主題分類/密度/"},
-  {no:"十一",num:11,name:"電學",path:"主題分類/電學/"}
+  {no:"九",num:9,name:"黏滯",path:"主題分類/黏滯/",ready:true,color:"var(--c9)",art:"stokes",
+   intro:"兩道落球法的題目：小球在液體中落下，達到終端速度時重力、浮力、黏滯力三力平衡。關鍵都是選對座標作圖，讓關係變成直線，再由斜率求出黏滯係數或未知的指數。",
+   sections:null,exps:VISC_EXP},
+  {no:"十",num:10,name:"密度",path:"主題分類/密度/",ready:true,art:"density",
+   intro:"九道量密度的題目，器材常常缺東缺西：沒有天平、沒有量筒，甚至沒有水。要用浮力、槓桿、排液或駐波把質量和體積換算出來，再用迴歸把量具的系統誤差移到截距。",
+   sections:[
+    {id:"solid", no:"10.1",name:"固體密度",color:"var(--c10a)",blurb:"合金、冰糖、螺帽、玻璃瓶：沒有天平或量筒時怎麼量。"},
+    {id:"liquid",no:"10.2",name:"液體密度",color:"var(--c10b)",blurb:"注射筒秤重、自製密度計、鉛筆浮體。"},
+    {id:"linear",no:"10.3",name:"線密度",color:"var(--c10c)",blurb:"用駐波量釣魚線的線密度，再求聲速。"}],
+   exps:DENS_EXP},
+  {no:"十一",num:11,name:"電學",path:"主題分類/電學/",ready:true,color:"var(--c11)",art:"circuit",
+   intro:"四道電路題：設計電阻衰減器、量可變電阻與未知元件、用四端點法量金屬棒的電阻率，以及用倒數線性化求電池的內電阻。除了接對電路，還要懂得保護電表。",
+   sections:null,exps:ELEC_EXP}
 ];
 
 /* ---------- pages ---------- */
@@ -397,7 +458,7 @@ function renderPage(i){
       <div class="sub">歷屆實驗題的虛擬實驗室</div>
       <button class="open-btn" type="button" data-go="1">翻開這本書</button>
     </div>
-    <div class="foot"><span>已完成：${done}</span><span>${left?`其餘 ${left} 章撰寫中`:"全書完成"}</span></div>`;
+    <div class="foot">${left?`<span>已完成：${done}</span><span>其餘 ${left} 章撰寫中</span>`:`<span>全 ${CHAPTERS.length} 章・${CHAPTERS.reduce((n,c)=>n+c.exps.length,0)} 個虛擬實驗室</span>`}</div>`;
   }else if(p.kind==="toc"){
     d.classList.add("toc");
     const rows=CHAPTERS.map(c=>{

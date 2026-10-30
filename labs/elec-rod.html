@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>金屬棒電阻率虛擬實驗室</title>
+<style>
+:root{--bg:#f3f0e8;--paper:#fffdf8;--ink:#23211c;--muted:#6b665c;--line:#dcd5c5;--accent:#1f5f8b;--accent2:#b5462c;--good:#2e7d32;--warn:#b26a00;--bad:#c62828;--lcd:#c9d8b0;--lcdInk:#16240e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;font-size:15px;line-height:1.6}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:#2b3a46;color:#fff;flex-wrap:wrap}
+header h1{margin:0;font-size:21px;letter-spacing:.04em}
+header .sub{font-size:12.5px;opacity:.85}
+nav{display:flex;gap:4px;padding:8px 12px 0;background:#2b3a46;overflow-x:auto}
+.tab{border:0;background:#3d4f5d;color:#dfe7ee;padding:9px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:14px;white-space:nowrap;font-family:inherit}
+.tab.on{background:var(--bg);color:var(--ink);font-weight:700}
+main{max-width:1180px;margin:0 auto;padding:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:17px;color:var(--accent)}
+.card h3{margin:10px 0 6px;font-size:15px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid4{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:14px}
+@media(max-width:860px){.grid2,.grid4{grid-template-columns:1fr}}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+.lab{min-width:84px;color:var(--muted);font-size:13.5px}
+button{font-family:inherit;font-size:14px;padding:6px 12px;border-radius:7px;border:1px solid #b9b2a2;background:#fff;cursor:pointer}
+button:hover{background:#f2efe7}
+button.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.pri:hover{background:#174a6d}
+button.warnb{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+button.ghost{background:transparent;color:#fff;border-color:#8aa0b2}
+button:disabled{opacity:.45;cursor:not-allowed}
+.seg{border-radius:0;margin-left:-1px}
+.segs{display:inline-flex}
+.segs .seg:first-child{border-radius:7px 0 0 7px}
+.segs .seg:last-child{border-radius:0 7px 7px 0}
+.seg.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+select,input[type=number],input[type=text]{font-family:inherit;font-size:14px;padding:5px 7px;border:1px solid #b9b2a2;border-radius:6px;background:#fff}
+input[type=number]{width:96px}
+input[type=range]{width:220px;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#efe9dc;font-weight:600}
+td input[type=number]{width:84px;padding:3px 5px}
+.note{font-size:13px;color:var(--muted)}
+.warn{color:var(--warn)}
+.bad{color:var(--bad)}
+.good{color:var(--good)}
+.formula{background:#f4f7fa;border-left:4px solid var(--accent);padding:8px 12px;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:16px}
+.svgwrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:8px}
+.svgwrap svg{display:block;width:100%;height:auto;min-width:560px}
+.plotwrap svg{display:block;width:100%;height:auto}
+.lcdbox{display:flex;gap:12px;flex-wrap:wrap}
+.meter{flex:1;min-width:200px;background:#e9b93a;border-radius:12px;padding:10px;border:2px solid #9a7a1f}
+.meter .nm{font-weight:700;font-size:13px;color:#3b2d06}
+.lcd{background:var(--lcd);color:var(--lcdInk);font-family:"Consolas","Courier New",monospace;font-size:34px;text-align:right;padding:4px 10px;border-radius:6px;margin:6px 0;letter-spacing:2px}
+.lcd small{font-size:15px;margin-left:6px}
+.heat{height:14px;border-radius:7px;background:#e5e0d4;overflow:hidden}
+.heat>div{height:100%;transition:width .2s}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:#e8e2d3}
+.check li{margin:3px 0}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#2b3a46;color:#fff;padding:10px 18px;border-radius:9px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .3s;max-width:92vw;z-index:9}
+#toast.show{opacity:1}
+.big{font-size:17px;font-weight:700}
+.kv td:first-child{text-align:left;color:var(--muted)}
+.res td{font-variant-numeric:tabular-nums}
+sup{font-size:.7em}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>金屬棒電阻率虛擬實驗室</h1>
+    <div class="sub">104 學年度北一區 高級中學數理及資訊學科能力競賽．物理科實驗試題（競賽日期 104.11.4）</div>
+  </div>
+  <button id="btnReset" class="ghost">重新抽題（新的隱藏真值）</button>
+</header>
+<nav id="tabs">
+  <button class="tab on">① 原理</button>
+  <button class="tab">② 游標尺量測</button>
+  <button class="tab">③ 電路組裝</button>
+  <button class="tab">④ V–I 量測</button>
+  <button class="tab">⑤ 作圖與迴歸</button>
+  <button class="tab">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ================= ① ================= -->
+<section class="page" id="pg1">
+  <div class="card">
+    <h2>實驗任務</h2>
+    <p><b>第一部分（10 分）</b>：用游標尺量測鋁棒、銅棒、鐵棒的長度與直徑各 10 次，計算平均值 x̄ = (1/N)Σxᵢ 與標準差 s = √[Σ(xᵢ−x̄)²/(N−1)]。<br>
+    <b>第二部分（30 分）</b>：設計實驗，驗證三根金屬棒滿足歐姆定律，並求其室溫電阻率。</p>
+    <p class="note">器材：游標尺、銅棒（色澤偏黃）、鋁棒（色澤偏亮）、鐵棒（色澤偏暗）、三用電表 ×2、3 號電池 ×2、電池盒、100 Ω 與 1 kΩ 可變電阻、單香蕉–鱷魚夾線 ×4、鱷魚夾–鱷魚夾線 ×2、鱷魚夾接頭 ×4、方格紙。<br>
+    題目注意：可變電阻的白線接往安培計；小心可變電阻發熱，兩顆燒壞即不再提供；安培計保險絲只提供一次更換機會。</p>
+  </div>
+  <div class="card">
+    <h2>原理</h2>
+    <div class="formula">歐姆定律：V = I R　　（R 與 I 無關 ⇔ V–I 圖為過原點的直線）</div>
+    <div class="formula">電阻與幾何：R = ρ ℓ ⁄ A，A = π d² ⁄ 4　⇒　ρ = R · π d² ⁄ (4 ℓ)</div>
+    <p>只要量得一段長度 ℓ 的電阻 R 與直徑 d，就能求電阻率 ρ。注意 ρ ∝ d²，直徑的相對誤差會被<b>放大 2 倍</b>傳到 ρ。</p>
+    <p>改變電壓夾點的間距 ℓ，作 R–ℓ 圖：斜率 k = ρ ⁄ A，所以 ρ = k·A。夾點「有效位置」的系統偏差只會影響截距，不影響斜率。這就是迴歸法優於單點計算的地方。</p>
+  </div>
+  <div class="card">
+    <h2>關鍵：為什麼必須用四端點法？</h2>
+    <div class="grid2">
+      <div class="svgwrap" id="fig2w"></div>
+      <div class="svgwrap" id="fig4w"></div>
+    </div>
+    <p>金屬棒的電阻只有<b>毫歐姆（mΩ）</b>等級，鱷魚夾與棒之間的接觸電阻卻有數十 mΩ。<br>
+    <b>兩端點法</b>：伏特計接在電流夾上，量到 I(R<sub>棒</sub> + R<sub>c1</sub> + R<sub>c2</sub>)，接觸電阻主導結果，ρ 會偏大數倍到數十倍。<br>
+    <b>四端點法</b>：電流由兩端的夾子流入、流出；伏特計另用兩個夾子夾在<b>內側</b>。伏特計內阻約 10 MΩ，電壓夾幾乎沒有電流通過，所以電壓夾的接觸電阻不產生壓降，量到的就是那段長度 ℓ 的 I·R。</p>
+  </div>
+  <div class="card">
+    <h2>訊號估算器：電表讀得到嗎？</h2>
+    <div class="row"><span class="lab">材質</span>
+      <select id="estMat">
+        <option value="1.72">純銅 1.72×10⁻⁸ Ω·m</option>
+        <option value="6.4" selected>黃銅 ≈6.4×10⁻⁸ Ω·m</option>
+        <option value="2.82">純鋁 2.82×10⁻⁸ Ω·m</option>
+        <option value="3.99">鋁合金 6061 3.99×10⁻⁸ Ω·m</option>
+        <option value="10">純鐵 ≈1.0×10⁻⁷ Ω·m</option>
+        <option value="15">低碳鋼 ≈1.5×10⁻⁷ Ω·m</option>
+      </select></div>
+    <div class="row"><span class="lab">直徑 d</span><input type="range" id="estD" min="1" max="6" step="0.1" value="2"><span id="estDv"></span></div>
+    <div class="row"><span class="lab">夾距 ℓ</span><input type="range" id="estL" min="10" max="120" step="1" value="90"><span id="estLv"></span></div>
+    <div class="row"><span class="lab">電流 I</span><input type="range" id="estI" min="0.05" max="2" step="0.05" value="1"><span id="estIv"></span></div>
+    <div class="row"><span class="lab">接觸電阻</span><input type="range" id="estC" min="10" max="100" step="5" value="50"><span id="estCv"></span></div>
+    <div id="estOut"></div>
+  </div>
+  <div class="card">
+    <h2>本模擬的設定</h2>
+    <ul class="note">
+      <li>試題卷沒有給器材規格，本模擬自訂：棒長約 12–14 cm（150 mm 游標尺量得到）、直徑約 2 mm、50 分度游標尺（0.02 mm）、3½ 位數三用電表（200 mV 檔解析度 0.1 mV；10 A 檔解析度 0.01 A；mA 插孔保險絲 0.25 A）。</li>
+      <li>每次開啟（或按「重新抽題」）會隨機抽出：三根棒的實際材質（市售「銅棒」常是黃銅、鋁棒常是 6061／6063 合金、鐵棒常是低碳鋼）、批次差異、室溫、尺寸、直徑錐度與橢圓度、游標尺零點誤差、電表增益與零點誤差、電池內阻。</li>
+      <li>真實度全開：鱷魚夾接觸電阻（每次夾持都不同）、夾點有效位置偏差、熱電動勢、電池極化壓降、可變電阻的熱累積燒毀（全實驗限 2 顆）、mA 保險絲燒斷（限換 1 次）、滑動端接觸雜訊。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= ② ================= -->
+<section class="page" id="pg2" hidden>
+  <div class="grid4">
+    <div>
+      <div class="card">
+        <h2>游標尺量測（第一部分）</h2>
+        <div class="row"><span class="lab">金屬棒</span><span id="c2rods" class="segs"></span></div>
+        <div class="row"><span class="lab">量測項目</span>
+          <label><input type="radio" name="q2" value="L"> 長度 L</label>
+          <label><input type="radio" name="q2" value="d" checked> 直徑 d</label></div>
+        <div class="row" id="rowPos"><span class="lab">夾測位置</span><input type="range" id="pos2" min="5" max="95" value="50"><span id="pos2v"></span></div>
+        <div class="row" id="rowRot"><span class="lab">轉動角度</span><input type="range" id="rot2" min="0" max="180" value="0"><span id="rot2v"></span></div>
+        <div class="row">
+          <button id="btnClamp" class="pri">夾住並讀取</button>
+          <button id="btnRand">隨機換位置</button>
+          <button id="btnZero">歸零檢查（合攏量爪）</button>
+        </div>
+        <div class="svgwrap" id="calSvg"></div>
+        <div class="row" style="margin-top:8px"><span class="lab">你的讀數</span>
+          <input id="read2" type="number" step="0.02" inputmode="decimal"> mm
+          <button id="btnRec2" class="pri">記錄到表格</button>
+          <label class="note"><input type="checkbox" id="hint2"> 顯示參考讀數（練習用）</label></div>
+        <div id="hint2v" class="note"></div>
+        <p class="note">讀法：主尺讀副尺「0」刻線左邊的整毫米數，再找副尺上與主尺刻線<b>對齊</b>的那一條，第 n 條就加 n × 0.02 mm。副尺標的數字 1、2…10 代表 0.1、0.2…1.0 mm。直徑請在不同位置、不同角度量，才能反映棒的錐度與橢圓度。</p>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2 id="t2title">數據表</h2>
+        <div id="tbl2"></div>
+        <div id="stat2" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <h2>三根棒總表</h2>
+        <div class="row"><span class="lab">零點讀數</span><input id="zero2" type="number" step="0.02"> mm <span class="note">（合攏量爪的讀數，修正值 = 讀數 − 零點讀數）</span></div>
+        <div id="sum2"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ③ ================= -->
+<section class="page" id="pg3" hidden>
+  <div class="grid2">
+    <div class="card">
+      <h2>接線設定</h2>
+      <div class="row"><span class="lab">伏特計接法</span>
+        <select id="cfgMode"><option value="4w">四端點：電壓夾夾在電流夾內側</option><option value="2w">兩端點：伏特計直接接在電流夾上</option></select></div>
+      <div class="row"><span class="lab">伏特計位置</span>
+        <select id="cfgVplace"><option value="par">與金屬棒並聯</option><option value="ser">串聯在電路中</option></select></div>
+      <div class="row"><span class="lab">安培計</span>
+        <select id="cfgA"><option value="10A">紅棒插 10A 孔，旋鈕 10A 檔</option><option value="200mA">紅棒插 mA 孔，旋鈕 200mA 檔</option><option value="20mA">紅棒插 mA 孔，旋鈕 20mA 檔</option></select></div>
+      <div class="row"><span class="lab">伏特計檔位</span>
+        <select id="cfgV"><option value="200m">DCV 200 mV</option><option value="2">DCV 2 V</option><option value="20">DCV 20 V</option></select></div>
+      <div class="row"><span class="lab">可變電阻</span>
+        <select id="cfgPot"><option value="100">100 Ω</option><option value="1000">1 kΩ</option></select></div>
+      <div class="row"><span class="lab">可變電阻接法</span>
+        <select id="cfgWiper"><option value="ok">白線（滑動端）接安培計，另取一側端點接電池</option><option value="bad">只接兩側端點（白線未接）</option></select></div>
+      <h3>檢查</h3>
+      <ul id="chk3" class="check"></ul>
+    </div>
+    <div class="card">
+      <h2>電路圖</h2>
+      <div class="svgwrap" id="sch3"></div>
+      <p class="note">電流迴路：電池 → 開關 → 可變電阻（限流）→ 安培計 → 金屬棒（由兩端電流夾進出）→ 回電池。伏特計另以兩條線夾在棒上。<br>
+      3 號電池兩顆串聯約 3 V；要讓 mV 級的電壓讀得清楚，電流需要接近 1 A。此時可變電阻只調到約 2 Ω，熱功率集中在很短一段電阻軌道上，會迅速發熱。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ④ ================= -->
+<section class="page" id="pg4" hidden>
+  <div class="grid4">
+    <div>
+      <div class="card">
+        <div class="row"><span class="lab">待測棒</span><span id="c4rods" class="segs"></span>
+          <span class="pill" id="cfgSum"></span></div>
+        <div class="svgwrap" id="app4"></div>
+        <div class="row">
+          <span class="lab">電壓夾距</span><input type="range" id="ell4" min="20" max="110" step="1"><span id="ell4v"></span>
+          <button id="btnReclip">重新夾持所有鱷魚夾</button>
+        </div>
+        <div class="row"><span class="lab">游標尺量夾距</span><span id="ellRead" class="big"></span><span class="note">（量兩電壓夾的夾齒中心距；此讀數會隨數據一起記錄）</span></div>
+      </div>
+      <div class="card">
+        <h2>本棒的量測紀錄</h2>
+        <div id="rec4"></div>
+        <div class="row"><button id="btnClr4">清除本棒全部紀錄</button></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="lcdbox">
+          <div class="meter"><div class="nm">安培計 <select id="aSel4"></select></div><div class="lcd" id="lcdA">0.00</div></div>
+          <div class="meter"><div class="nm">伏特計 <select id="vSel4"></select></div><div class="lcd" id="lcdV">0.0</div></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="btnOn" class="pri">接通開關</button>
+          <button id="btnPol">電池反接</button>
+          <label class="note"><input type="checkbox" id="autoOff"> 接通 4 秒後自動斷開</label>
+        </div>
+        <div class="row"><span class="lab">可變電阻旋鈕</span><input type="range" id="knob" min="0" max="1000" value="500"><span id="knobv"></span></div>
+        <div class="row"><span class="lab">微調</span>
+          <button data-k="-10">−1%</button><button data-k="-1">−0.1%</button><button data-k="1">+0.1%</button><button data-k="10">+1%</button></div>
+        <div class="row"><span class="lab">可變電阻溫度</span><div style="flex:1;min-width:160px"><div class="heat"><div id="heatBar"></div></div></div><span id="heatTxt"></span></div>
+        <div id="status4" class="note"></div>
+        <div class="row"><button id="btnRec4" class="pri">記錄目前讀數（V, I, ℓ）</button></div>
+        <p class="note">建議：每點「接通 → 等讀數穩定 → 記錄 → 斷開」，讓可變電阻冷卻。同時記錄 V 與 I，電池壓降造成的電流漂移就不影響 V/I 的比值。可記錄 I≈0 的零點，也可按「電池反接」量負電流，在 V–I 圖上檢驗是否過原點，並消去電表零點誤差與熱電動勢。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ⑤ ================= -->
+<section class="page" id="pg5" hidden>
+  <div class="card">
+    <div class="row"><span class="lab">金屬棒</span><span id="c5rods" class="segs"></span>
+      <span class="lab">接法</span><select id="mode5"><option value="4w">四端點</option><option value="2w">兩端點</option></select>
+      <span class="lab">V–I 組別</span><select id="grp5"></select></div>
+    <div id="warn5" class="note"></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h2>V–I 圖（驗證歐姆定律）</h2>
+      <div class="plotwrap" id="plotVI"></div>
+      <div id="fitVI"></div>
+    </div>
+    <div class="card">
+      <h2>R–ℓ 圖（斜率 = ρ ⁄ A）</h2>
+      <div class="plotwrap" id="plotRL"></div>
+      <div id="fitRL"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>電阻率計算</h2>
+    <div id="rho5"></div>
+    <h3>三根棒總結</h3>
+    <div id="sum5"></div>
+  </div>
+</section>
+
+<!-- ================= ⑥ ================= -->
+<section class="page" id="pg6" hidden>
+  <div class="card">
+    <h2>誤差討論</h2>
+    <ol>
+      <li><b>接觸電阻</b>：鱷魚夾與棒的接觸電阻約 20–90 mΩ，是棒本身的 10–100 倍。兩端點法把它算進去，ρ 嚴重偏大；四端點法的電壓夾不流電流，可以避開。</li>
+      <li><b>電表解析度</b>：200 mV 檔一格 0.1 mV，銅（黃銅）棒的訊號只有 1–3 mV，讀數只有 1–2 位有效數字。對策：加大電流、加大夾距 ℓ、取多點做迴歸，不要只用單點。</li>
+      <li><b>零點偏移與熱電動勢</b>：電表零點誤差 ±1 格、異種金屬接點的熱電動勢約 10 μV。它們讓 V–I 線不過原點；反接電流並取迴歸斜率，就能消去。</li>
+      <li><b>夾點有效位置</b>：鱷魚夾齒寬約 1–2 mm，實際接觸點與游標尺量的中心距差約 ±0.5 mm。R–ℓ 迴歸斜率不受這種固定偏差影響。</li>
+      <li><b>直徑不均</b>：棒有錐度與橢圓度，A ∝ d²，所以 d 的相對誤差 ×2 傳到 ρ。要在不同位置、不同角度多次量測。</li>
+      <li><b>游標尺零點誤差</b>：合攏量爪時讀數不為 0，所有讀數都要減去它。對 2 mm 的直徑而言，0.02 mm 就是 1%，傳到 ρ 變成 2%。</li>
+      <li><b>電池壓降</b>：大電流下電池內阻與極化讓電流逐漸下降，所以 V 與 I 必須同時讀。</li>
+      <li><b>溫度</b>：金屬 ρ 隨溫度上升（α ≈ 0.0015–0.006 /K）。可變電阻的發熱不在棒上；棒自身的焦耳熱 I²R 只有毫瓦級，可忽略。</li>
+      <li><b>材質</b>：市售「銅棒」常是黃銅，「鋁棒」常是鋁合金，「鐵棒」常是低碳鋼，電阻率都和純金屬課本值不同。這不是量測誤差。</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>你的結果</h2>
+    <div id="mine6"></div>
+    <div class="row"><button id="btnReveal" class="warnb">揭曉真值</button></div>
+  </div>
+  <div class="card" id="truthCard" hidden>
+    <h2>隱藏真值</h2>
+    <div id="truth6"></div>
+  </div>
+  <div class="card">
+    <h2>參考：常見金屬 20 °C 電阻率</h2>
+    <table>
+      <tr><th>材料</th><th>ρ（×10⁻⁸ Ω·m）</th><th>α（/K，約）</th></tr>
+      <tr><td>純銅（退火）</td><td>1.72</td><td>0.0039</td></tr>
+      <tr><td>黃銅 C2600／C3604</td><td>6.2／6.6</td><td>≈0.0016</td></tr>
+      <tr><td>純鋁 1050</td><td>2.8</td><td>0.0040</td></tr>
+      <tr><td>鋁合金 6063／6061</td><td>3.3–3.5／4.0</td><td>≈0.0035</td></tr>
+      <tr><td>純鐵</td><td>≈10</td><td>≈0.006</td></tr>
+      <tr><td>低碳鋼／中碳鋼</td><td>≈14.5／≈16</td><td>≈0.004–0.0045</td></tr>
+    </table>
+  </div>
+</section>
+</main>
+<div id="toast"></div>
+
+<script>
+"use strict";
+// ================= 工具 =================
+const $=s=>document.querySelector(s);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const quant=(x,q)=>Math.round(x/q)*q;
+const fx=(x,d)=>Number.isFinite(x)?x.toFixed(d):'—';
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let rng=Math.random;
+const U=(a,b)=>a+(b-a)*rng();
+function N(m,s){let u=0;while(!u)u=rng();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*rng())}
+const U2=(a,b)=>a+(b-a)*Math.random();
+function N2(m,s){let u=0;while(!u)u=Math.random();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random())}
+function pick(list){const x=rng();let c=0;for(const it of list){c+=it.p;if(x<c)return it}return list[list.length-1]}
+let toastT=null;
+function toast(msg,ms=3200){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms)}
+function niceStep(r){if(!(r>0))return 1;const p=10**Math.floor(Math.log10(r));const f=r/p;return(f<1.5?1:f<3.5?2:f<7.5?5:10)*p}
+function linfit(pts){const n=pts.length;if(n<2)return null;let sx=0,sy=0;for(const[x,y]of pts){sx+=x;sy+=y}const mx=sx/n,my=sy/n;let Sxx=0,Sxy=0,Syy=0;for(const[x,y]of pts){Sxx+=(x-mx)**2;Sxy+=(x-mx)*(y-my);Syy+=(y-my)**2}if(Sxx<=0)return null;const k=Sxy/Sxx,b=my-k*mx;let sse=0;for(const[x,y]of pts)sse+=(y-k*x-b)**2;const s2=n>2?sse/(n-2):NaN;return{k,b,sk:Math.sqrt(s2/Sxx),sb:Math.sqrt(s2*(1/n+mx*mx/Sxx)),r:Syy>0?Sxy/Math.sqrt(Sxx*Syy):1,n}}
+
+// ================= 材料與真值 =================
+const MATS={
+ cu:[{name:'快削黃銅 C3604',rho:6.6e-8,a:0.0017,p:.45},{name:'黃銅 C2600',rho:6.2e-8,a:0.0016,p:.35},{name:'純銅 C1100',rho:1.72e-8,a:0.0039,p:.20}],
+ al:[{name:'鋁合金 6061-T6',rho:3.99e-8,a:0.0034,p:.5},{name:'鋁合金 6063-T5',rho:3.5e-8,a:0.0036,p:.3},{name:'純鋁 1050',rho:2.82e-8,a:0.0040,p:.2}],
+ fe:[{name:'低碳鋼（SS400／1010 級）',rho:1.45e-7,a:0.0045,p:.5},{name:'中碳鋼 S45C',rho:1.62e-7,a:0.0040,p:.3},{name:'純鐵（電磁軟鐵）',rho:1.0e-7,a:0.0060,p:.2}]
+};
+const RODS=[{k:'al',name:'鋁棒',hint:'色澤偏亮',col:'#c9ced6'},{k:'cu',name:'銅棒',hint:'色澤偏黃',col:'#c9a227'},{k:'fe',name:'鐵棒',hint:'色澤偏暗',col:'#5f6166'}];
+const rodName=k=>RODS.find(r=>r.k===k).name;
+
+function newTruth(){
+ const seed=(Math.random()*4294967296)>>>0;rng=mulberry(seed);
+ const T={seed,Troom:U(22,30),zero:pick([{v:0,p:.4},{v:0.02,p:.25},{v:-0.02,p:.2},{v:0.04,p:.15}]).v,rods:{}};
+ for(const r of RODS){
+  const m=pick(MATS[r.k]);const rho20=m.rho*N(1,0.02);
+  T.rods[r.k]={mat:m,rho20,rho:rho20*(1+m.a*(T.Troom-20)),L:U(120,138),d0:U(1.90,2.10),taper:N(0,0.006),ell:U(0.002,0.008),phi0:U(0,180),endVar:U(0.02,0.06),Vth:N(0,12e-6)};
+ }
+ T.meterV={gain:N(1,0.003),off:Math.round(N(0,0.7))};
+ T.meterA={g10:N(1,0.008),o10:Math.round(N(0,0.6)),gm:N(1,0.004),om:Math.round(N(0,0.6))};
+ T.batt={E0:[U(1.56,1.61),U(1.56,1.61)],r:[U(0.13,0.22),U(0.13,0.22)]};
+ T.Rwires=U(0.08,0.14);
+ rng=Math.random;
+ return T;
+}
+
+let S,cur=0;
+function initState(){
+ const T=newTruth();
+ const e=()=>({L:Array(10).fill(''),d:Array(10).fill('')});
+ S={T,p1:{al:e(),cu:e(),fe:e()},zeroRead:'',ui2:{rod:'al',q:'d',pos:50,rot:0},cal:null,
+  cfg:{rod:'al',mode:'4w',vPlace:'par',aSel:'10A',vRange:'200m',pot:'100',wiper:'ok',ellNom:90},
+  clip:null,
+  live:{on:false,onT:0,knob:0.5,pol:1,potT:{'100':T.Troom,'1000':T.Troom},burns:0,potDead:{'100':false,'1000':false},fuseBlown:false,fuseSpare:1,Vp:0,dE:0,I:0,V:0,dV:{txt:'',val:0},dA:{txt:'',val:0}},
+  rec:[],ui5:{rod:'al',mode:'4w',grp:''},revealed:false};
+ newClip(true);
+}
+function newClip(all){
+ const t=S.T.rods[S.cfg.rod];
+ S.cfg.ellNom=clamp(S.cfg.ellNom,20,Math.floor(t.L-24));
+ const old=S.clip;
+ const c={};
+ if(all||!old){c.Rc1=U2(0.02,0.09);c.Rc2=U2(0.02,0.09);c.r2=quant(t.L-4+N2(0,0.3)+S.T.zero,0.02)}else{c.Rc1=old.Rc1;c.Rc2=old.Rc2;c.r2=old.r2}
+ c.ellTrue=S.cfg.ellNom+N2(0,0.6);
+ c.ellEff=c.ellTrue+N2(0,0.35);
+ c.r4=quant(c.ellTrue+S.T.zero+N2(0,0.03),0.02);
+ S.clip=c;
+}
+
+// ================= 分頁 =================
+const tabs=[...document.querySelectorAll('.tab')];
+tabs.forEach((b,i)=>b.onclick=()=>showTab(i));
+function showTab(i){cur=i;tabs.forEach((b,j)=>b.classList.toggle('on',j===i));document.querySelectorAll('section.page').forEach((p,j)=>p.hidden=j!==i);[r1,r2,r3,r4,r5,r6][i]();window.scrollTo(0,0)}
+$('#btnReset').onclick=()=>{if(confirm('重新抽題會清除所有數據並換一組新的隱藏真值，確定嗎？')){initState();syncCfgUI();showTab(cur);toast('已換一組新的器材與隱藏真值')}};
+
+// ================= ① =================
+function fig(mode){
+ const four=mode==='4w';
+ let s=`<svg viewBox="0 0 420 210"><text x="210" y="20" text-anchor="middle" font-size="14" font-weight="700" fill="${four?'#2e7d32':'#c62828'}">${four?'四端點法（正確）':'兩端點法（被接觸電阻主導）'}</text>`;
+ s+=`<rect x="60" y="100" width="300" height="14" rx="3" fill="#c9a227" stroke="#7a6116"/>`;
+ s+=`<path d="M20 107 H70 M350 107 H400" stroke="#b5462c" stroke-width="3"/>`;
+ s+=`<rect x="64" y="94" width="10" height="26" fill="#b5462c"/><rect x="346" y="94" width="10" height="26" fill="#b5462c"/>`;
+ s+=`<text x="20" y="96" font-size="12" fill="#b5462c">I 進</text><text x="372" y="96" font-size="12" fill="#b5462c">I 出</text>`;
+ s+=`<text x="69" y="140" text-anchor="middle" font-size="11" fill="#555">R<tspan dy="3" font-size="8">c1</tspan></text><text x="351" y="140" text-anchor="middle" font-size="11" fill="#555">R<tspan dy="3" font-size="8">c2</tspan></text>`;
+ const a=four?130:69,b=four?290:351;
+ if(four){s+=`<rect x="125" y="94" width="10" height="26" fill="#1f5f8b"/><rect x="285" y="94" width="10" height="26" fill="#1f5f8b"/>`;
+  s+=`<path d="M130 80 V60 M290 80 V60" stroke="#999"/><path d="M130 70 H290" stroke="#999" marker-start="url(#m)" marker-end="url(#m)"/><text x="210" y="64" text-anchor="middle" font-size="12">ℓ</text>`;}
+ s+=`<path d="M${a} 120 V175 H185 M${b} 120 V175 H235" stroke="#1f5f8b" stroke-width="2" fill="none"/><circle cx="210" cy="175" r="22" fill="#fff" stroke="#1f5f8b" stroke-width="2"/><text x="210" y="181" text-anchor="middle" font-size="16" fill="#1f5f8b">V</text>`;
+ s+=`<text x="210" y="205" text-anchor="middle" font-size="12">${four?'V = I·R(ℓ)　（電壓夾不流電流）':'V = I·(R棒 + Rc1 + Rc2)'}</text></svg>`;
+ return s;
+}
+function r1(){
+ $('#fig2w').innerHTML=fig('2w');$('#fig4w').innerHTML=fig('4w');
+ const rho=+$('#estMat').value*1e-8,d=+$('#estD').value,l=+$('#estL').value,I=+$('#estI').value,Rc=+$('#estC').value/1000;
+ $('#estDv').textContent=d.toFixed(1)+' mm';$('#estLv').textContent=l+' mm';$('#estIv').textContent=I.toFixed(2)+' A';$('#estCv').textContent=(Rc*1000)+' mΩ ×2';
+ const A=Math.PI*(d/1000)**2/4,R=rho*(l/1000)/A,V4=I*R*1000,V2=I*(R+2*Rc)*1000,cnt=Math.round(V4/0.1);
+ const sig=cnt>=30?'<span class="good">讀數有 2–3 位有效數字，可用。</span>':cnt>=8?'<span class="warn">只有 1–2 位有效數字，需要多點迴歸。</span>':'<span class="bad">不到 8 格，幾乎讀不出差異，請加大 I 或 ℓ。</span>';
+ $('#estOut').innerHTML=`<table class="kv"><tr><td>這段棒的電阻 R</td><td>${fx(R*1000,3)} mΩ</td></tr><tr><td>四端點電壓 I·R</td><td>${fx(V4,3)} mV（200 mV 檔約 ${cnt} 格）</td></tr><tr><td>兩端點電壓 I·(R+2R<sub>c</sub>)</td><td>${fx(V2,1)} mV（為真值的 ${fx(V2/V4,1)} 倍）</td></tr><tr><td>評估</td><td>${sig}</td></tr></table>`;
+}
+['estMat','estD','estL','estI','estC'].forEach(id=>$('#'+id).addEventListener('input',r1));
+
+// ================= ② =================
+function dAt(t,pos,rot){return t.d0*(1+t.taper*(pos/100-0.5))+t.ell*Math.cos(2*(rot-t.phi0)*Math.PI/180)}
+function vernier(m){
+ const ppm=15,v0=Math.floor(m)-4,W=60*ppm,ox=20,X=mm=>ox+(mm-v0)*ppm;
+ let s=`<svg viewBox="0 0 ${W} 140"><rect width="${W}" height="140" fill="#eceff1"/><rect x="0" y="8" width="${W}" height="64" fill="#f8f8f6" stroke="#999"/>`;
+ for(let k=v0;k<=v0+58;k++){const x=X(k),L=k%10===0?28:(k%5===0?20:13);s+=`<line x1="${x}" y1="72" x2="${x}" y2="${72-L}" stroke="#222" stroke-width="1.2"/>`;if(k%10===0&&k>=0)s+=`<text x="${x}" y="32" text-anchor="middle" font-size="15">${k/10}</text>`}
+ s+=`<text x="${W-8}" y="22" text-anchor="end" font-size="11" fill="#555">主尺（cm，最小刻度 1 mm）</text>`;
+ s+=`<rect x="${X(m)-12}" y="72" width="${49*ppm+24}" height="56" fill="#fbf3dc" stroke="#999"/>`;
+ for(let k=0;k<=50;k++){const x=X(m+k*0.98),L=k%5===0?22:12;s+=`<line x1="${x}" y1="72" x2="${x}" y2="${72+L}" stroke="#8a2c1a" stroke-width="1.1"/>`;if(k%5===0)s+=`<text x="${x}" y="110" text-anchor="middle" font-size="12" fill="#8a2c1a">${k/5}</text>`}
+ s+=`<text x="${X(m)+49*ppm}" y="124" text-anchor="end" font-size="11" fill="#8a2c1a">副尺（50 分度，0.02 mm）</text></svg>`;
+ return s;
+}
+function calHead(cal){
+ const r=RODS.find(x=>x.k===cal.rod);
+ let s=`<svg viewBox="0 0 900 110"><rect width="900" height="110" fill="#fff"/>`;
+ s+=`<rect x="60" y="20" width="780" height="22" fill="#d7dade" stroke="#888"/>`;
+ if(cal.zero){s+=`<path d="M200 42 V95 H215 V42 Z M215 42 V95 H230 V42 Z" fill="#b0b5bb" stroke="#666"/><text x="260" y="80" font-size="14">量爪合攏：讀數應為 0，否則即為零點誤差</text>`}
+ else if(cal.q==='L'){s+=`<path d="M100 42 V95 H115 V42 Z" fill="#b0b5bb" stroke="#666"/><rect x="115" y="62" width="600" height="14" fill="${r.col}" stroke="#555"/><path d="M715 42 V95 H730 V42 Z" fill="#b0b5bb" stroke="#666"/><text x="415" y="100" text-anchor="middle" font-size="13">${r.name}：長度（外測爪夾兩端面）</text>`}
+ else{s+=`<path d="M380 42 V95 H395 V42 Z" fill="#b0b5bb" stroke="#666"/><circle cx="420" cy="70" r="24" fill="${r.col}" stroke="#555"/><path d="M445 42 V95 H460 V42 Z" fill="#b0b5bb" stroke="#666"/><text x="520" y="64" font-size="13">${r.name}：直徑（位置 ${cal.pos}%，角度 ${cal.rot}°）</text><text x="520" y="84" font-size="12" fill="#777">截面示意，非比例</text>`}
+ return s+'</svg>';
+}
+function r2(){
+ const u=S.ui2;
+ $('#c2rods').innerHTML=RODS.map(r=>`<button class="seg ${r.k===u.rod?'on':''}" data-rod="${r.k}">${r.name}</button>`).join('');
+ document.querySelectorAll('input[name=q2]').forEach(x=>x.checked=x.value===u.q);
+ $('#rowPos').style.display=$('#rowRot').style.display=u.q==='d'?'':'none';
+ $('#pos2').value=u.pos;$('#rot2').value=u.rot;$('#pos2v').textContent=u.pos+'%（沿棒長）';$('#rot2v').textContent=u.rot+'°';
+ if(S.cal){$('#calSvg').innerHTML=calHead(S.cal)+vernier(S.cal.m)}else{$('#calSvg').innerHTML='<p class="note" style="padding:10px">按「夾住並讀取」開始量測。</p>'}
+ $('#hint2v').textContent=($('#hint2').checked&&S.cal)?`參考讀數：${fx(quant(S.cal.m,0.02),2)} mm`:'';
+ $('#zero2').value=S.zeroRead;
+ tbl2();sum2();
+}
+function tbl2(){
+ const u=S.ui2,p=S.p1[u.rod];
+ $('#t2title').textContent=rodName(u.rod)+' 數據表（單位 mm）';
+ let h='<table><tr><th>次</th><th>長度 L</th><th>直徑 d</th></tr>';
+ for(let i=0;i<10;i++)h+=`<tr><td>${i+1}</td><td><input type="number" step="0.02" data-q="L" data-i="${i}" value="${p.L[i]}"></td><td><input type="number" step="0.02" data-q="d" data-i="${i}" value="${p.d[i]}"></td></tr>`;
+ $('#tbl2').innerHTML=h+'</table>';
+ stat2();
+}
+function stats(arr){const v=arr.map(Number).filter((x,i)=>arr[i]!==''&&Number.isFinite(x));const n=v.length;if(!n)return null;const m=v.reduce((a,b)=>a+b,0)/n;const s=n>1?Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1)):NaN;return{n,m,s,sem:s/Math.sqrt(n)}}
+function stat2(){
+ const p=S.p1[S.ui2.rod],a=stats(p.L),b=stats(p.d),row=(nm,x)=>x?`<tr><td>${nm}</td><td>${x.n}</td><td>${fx(x.m,3)}</td><td>${fx(x.s,3)}</td><td>${fx(x.sem,3)}</td></tr>`:`<tr><td>${nm}</td><td>0</td><td>—</td><td>—</td><td>—</td></tr>`;
+ $('#stat2').innerHTML=`<table><tr><th></th><th>N</th><th>平均 x̄</th><th>標準差 s</th><th>平均值標準誤 s/√N</th></tr>${row('L',a)}${row('d',b)}</table>`;
+}
+function zeroVal(){const z=parseFloat(S.zeroRead);return Number.isFinite(z)?z:0}
+function geo(rod){const z=zeroVal(),a=stats(S.p1[rod].L),b=stats(S.p1[rod].d);return{L:a?{...a,c:a.m-z}:null,d:b?{...b,c:b.m-z}:null}}
+function sum2(){
+ let h='<table><tr><th>棒</th><th>L̄ ± s（mm）</th><th>d̄ ± s（mm）</th><th>修正後 L</th><th>修正後 d</th></tr>';
+ for(const r of RODS){const g=geo(r.k);h+=`<tr><td>${r.name}</td><td>${g.L?fx(g.L.m,3)+' ± '+fx(g.L.s,3):'—'}</td><td>${g.d?fx(g.d.m,3)+' ± '+fx(g.d.s,3):'—'}</td><td>${g.L?fx(g.L.c,3):'—'}</td><td>${g.d?fx(g.d.c,3):'—'}</td></tr>`}
+ $('#sum2').innerHTML=h+'</table>';
+}
+$('#c2rods').addEventListener('click',e=>{const k=e.target.dataset.rod;if(k){S.ui2.rod=k;S.cal=null;r2()}});
+document.querySelectorAll('input[name=q2]').forEach(x=>x.onchange=()=>{S.ui2.q=x.value;S.cal=null;r2()});
+$('#pos2').oninput=e=>{S.ui2.pos=+e.target.value;$('#pos2v').textContent=S.ui2.pos+'%（沿棒長）'};
+$('#rot2').oninput=e=>{S.ui2.rot=+e.target.value;$('#rot2v').textContent=S.ui2.rot+'°'};
+$('#btnRand').onclick=()=>{S.ui2.pos=Math.round(U2(5,95));S.ui2.rot=Math.round(U2(0,180));r2()};
+$('#btnClamp').onclick=()=>{const u=S.ui2,t=S.T.rods[u.rod];let m;
+ if(u.q==='L')m=t.L+t.endVar*(2*Math.random()-1)+Math.abs(N2(0,0.015))+S.T.zero;
+ else m=dAt(t,u.pos,u.rot)+N2(0,0.004)+S.T.zero;
+ S.cal={rod:u.rod,q:u.q,pos:u.pos,rot:u.rot,m};$('#read2').value='';r2()};
+$('#btnZero').onclick=()=>{S.cal={zero:true,rod:S.ui2.rod,m:S.T.zero+N2(0,0.003)};$('#read2').value='';r2()};
+$('#hint2').onchange=r2;
+$('#btnRec2').onclick=()=>{
+ const v=parseFloat($('#read2').value);if(!S.cal){toast('請先夾住讀取');return}if(!Number.isFinite(v)){toast('請輸入你從游標尺讀到的數值');return}
+ if(S.cal.zero){S.zeroRead=String(v);toast('已填入零點讀數');r2();return}
+ const arr=S.p1[S.cal.rod][S.cal.q],i=arr.findIndex(x=>x==='');if(i<0){toast('這一欄已滿 10 筆，可直接修改表格');return}
+ arr[i]=v.toFixed(2);const ref=quant(S.cal.m,0.02);
+ toast(Math.abs(v-ref)<0.011?`已記錄第 ${i+1} 筆`:`已記錄第 ${i+1} 筆（與參考讀數差 ${fx(Math.abs(v-ref)/0.02,0)} 格，請再檢查讀法）`);
+ S.cal=null;r2();
+};
+$('#tbl2').addEventListener('change',e=>{const el=e.target;if(el.dataset.q){S.p1[S.ui2.rod][el.dataset.q][+el.dataset.i]=el.value;stat2();sum2()}});
+$('#zero2').addEventListener('change',e=>{S.zeroRead=e.target.value;sum2()});
+
+// ================= ③ =================
+function syncCfgUI(){const c=S.cfg;$('#cfgMode').value=c.mode;$('#cfgVplace').value=c.vPlace;$('#cfgA').value=c.aSel;$('#cfgV').value=c.vRange;$('#cfgPot').value=c.pot;$('#cfgWiper').value=c.wiper}
+[['cfgMode','mode'],['cfgVplace','vPlace'],['cfgA','aSel'],['cfgV','vRange'],['cfgPot','pot'],['cfgWiper','wiper']].forEach(([id,k])=>$('#'+id).onchange=e=>{S.cfg[k]=e.target.value;if(k==='mode')newClip(false);r3()});
+function r3(){
+ syncCfgUI();const c=S.cfg,L=[];
+ const ok=(t)=>L.push(`<li class="good">✓ ${t}</li>`),wa=(t)=>L.push(`<li class="warn">⚠ ${t}</li>`),ba=(t)=>L.push(`<li class="bad">✗ ${t}</li>`);
+ if(c.vPlace==='ser')ba('伏特計內阻約 10 MΩ，串聯在電路中會讓電流幾乎為 0，而伏特計讀到的是電池電壓。伏特計應與待測段並聯。');else ok('伏特計與待測段並聯。');
+ if(c.mode==='2w')wa('兩端點法：量到的電壓包含兩個鱷魚夾的接觸電阻（數十 mΩ），遠大於棒本身（數 mΩ）。可以當作對照組。');else ok('四端點法：電壓夾在電流夾內側，避開接觸電阻。');
+ if(c.wiper==='bad')ba(`白線（滑動端）沒接，可變電阻變成固定 ${c.pot} Ω，電流只有約 ${fx(3/+c.pot*1000,0)} mA 且無法調整。`);else ok('白線（滑動端）接往安培計，可變電阻當限流器使用。');
+ if(c.aSel!=='10A')wa('mA 插孔的保險絲約 0.25 A，電流太大就會燒斷（只能換一次）。但電流 &lt; 0.2 A 時，棒上的電壓只有零點幾 mV。');else ok('安培計用 10 A 插孔（解析度 0.01 A），可以通 1 A 左右的電流。');
+ if(c.vRange!=='200m')wa('棒上電壓只有數 mV，2 V 檔解析度 1 mV、20 V 檔 10 mV，都不夠。');else ok('伏特計 200 mV 檔，解析度 0.1 mV。');
+ if(c.pot==='1000')wa('1 kΩ 可變電阻低阻值端的調整範圍很窄，最低約 6 Ω，電流上不到 0.5 A；100 Ω 比較適合。');else ok('100 Ω 可變電阻。');
+ $('#chk3').innerHTML=L.join('');
+ $('#sch3').innerHTML=schematic();
+}
+function schematic(){
+ const c=S.cfg,ser=c.vPlace==='ser',four=c.mode==='4w';
+ let s=`<svg viewBox="0 0 640 330"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#333"/></marker></defs><g stroke="#333" stroke-width="2" fill="none">`;
+ s+=`<path d="M60 60 V105 M60 135 V200 H170 M470 200 H600 V${ser?110:60} H470 M410 60 H340 M260 60 H200 M150 60 H60"/>`;
+ if(ser)s+=`<path d="M600 60 H470"/><path d="M600 60 V90"/>`;
+ s+=`<path d="M44 105 H76 M52 113 H68 M44 122 H76 M52 130 H68" stroke-width="3"/>`;
+ s+=`<path d="M150 60 L195 42"/><circle cx="150" cy="60" r="3" fill="#333"/><circle cx="200" cy="60" r="3" fill="#333"/>`;
+ s+=`<path d="M260 60 l6 -10 l10 20 l10 -20 l10 20 l10 -20 l10 20 l10 -20 l6 10 H340"/>`;
+ s+=c.wiper==='ok'?`<path d="M300 92 L300 72" marker-end="url(#ar)" stroke="#e5e5e5" stroke-width="3"/><path d="M300 92 L300 72" marker-end="url(#ar)" stroke="#888" stroke-width="1"/><path d="M300 92 H340 V60" stroke="#999" stroke-dasharray="4 3"/>`:'';
+ s+=`<circle cx="440" cy="60" r="22" fill="#fff"/></g><text x="440" y="67" text-anchor="middle" font-size="18">A</text><text x="440" y="100" text-anchor="middle" font-size="11">${c.aSel}</text>`;
+ s+=`<text x="60" y="160" text-anchor="middle" font-size="11" transform="rotate(-90 22 160)"></text><text x="18" y="122" font-size="12">3 V</text><text x="175" y="35" font-size="12">開關</text><text x="300" y="38" text-anchor="middle" font-size="12">${c.pot==='100'?'100 Ω':'1 kΩ'}${c.wiper==='ok'?'（白線＝滑動端）':'（固定）'}</text>`;
+ s+=`<rect x="170" y="192" width="300" height="16" rx="3" fill="#c9a227" stroke="#7a6116" stroke-width="1.5"/><rect x="172" y="186" width="9" height="28" fill="#b5462c"/><rect x="459" y="186" width="9" height="28" fill="#b5462c"/><text x="320" y="185" text-anchor="middle" font-size="12">金屬棒</text>`;
+ if(ser){s+=`<g stroke="#333" stroke-width="2"><circle cx="600" cy="110" r="20" fill="#fff"/></g><text x="600" y="117" text-anchor="middle" font-size="16" fill="#c62828">V</text><text x="600" y="150" text-anchor="middle" font-size="11" fill="#c62828">串聯（錯誤）</text>`}
+ else{const a=four?230:176,b=four?410:464;
+  if(four)s+=`<rect x="226" y="186" width="9" height="28" fill="#1f5f8b"/><rect x="406" y="186" width="9" height="28" fill="#1f5f8b"/>`;
+  s+=`<path d="M${a} 214 V285 H298 M${b} 214 V285 H342" stroke="#1f5f8b" stroke-width="2" fill="none"/><circle cx="320" cy="285" r="22" fill="#fff" stroke="#1f5f8b" stroke-width="2"/><text x="320" y="292" text-anchor="middle" font-size="18" fill="#1f5f8b">V</text><text x="320" y="322" text-anchor="middle" font-size="11">${{'200m':'200 mV','2':'2 V','20':'20 V'}[c.vRange]}　${four?'四端點':'兩端點'}</text>`;
+  if(four)s+=`<path d="M230 240 H410" stroke="#555" marker-start="url(#ar)" marker-end="url(#ar)"/><text x="320" y="236" text-anchor="middle" font-size="12">ℓ</text>`}
+ return s+'</svg>';
+}
+
+// ================= 電路物理 =================
+const VR={'200m':{res:1e-4,sc:1e3,dec:1,u:'mV'},'2':{res:1e-3,sc:1,dec:3,u:'V'},'20':{res:1e-2,sc:1,dec:2,u:'V'}};
+const AR={'10A':{res:1e-2,sc:1,dec:2,u:'A'},'200mA':{res:1e-4,sc:1e3,dec:1,u:'mA'},'20mA':{res:1e-5,sc:1e3,dec:2,u:'mA'}};
+function rodR(t,mm){return t.rho*(mm/1000)/(Math.PI*(t.d0/1000)**2/4)}
+function tick(dt){
+ const L=S.live,c=S.cfg,T=S.T,t=T.rods[c.rod];
+ const Rmax=+c.pot;
+ const Rpot=c.wiper==='ok'?(0.006*Rmax+0.25+L.knob*Rmax)*(1+N2(0,0.004)):Rmax;
+ const Ram=c.aSel==='10A'?0.012:(c.aSel==='200mA'?1.4:10.4);
+ const E=T.batt.E0[0]+T.batt.E0[1]-L.Vp-L.dE;
+ const Rfull=rodR(t,t.L);
+ const Rtot=T.batt.r[0]+T.batt.r[1]+0.04+T.Rwires+S.clip.Rc1+S.clip.Rc2+Rfull+Ram+Rpot;
+ const open=L.potDead[c.pot]||(c.aSel!=='10A'&&L.fuseBlown);
+ let I=0;
+ if(L.on&&!open)I=(c.vPlace==='ser'?E/(Rtot+1e7):E/Rtot)*L.pol;
+ if(L.on&&!open&&c.aSel!=='10A'&&Math.abs(I)>0.25){L.fuseBlown=true;L.on=false;I=0;toast('「啪」一聲，安培計 mA 插孔的保險絲燒斷了！',4500)}
+ for(const p of ['100','1000']){
+  let Tss=T.Troom;
+  if(p===c.pot&&L.on&&!open&&c.vPlace!=='ser'){const P=I*I*Rpot;const f=c.wiper==='ok'?Rpot/(+p):1;Tss=T.Troom+120*P/Math.sqrt(Math.max(f,0.03))*(p==='1000'?1.1:1)}
+  L.potT[p]+=(Tss-L.potT[p])*(1-Math.exp(-dt/25));
+  if(L.potT[p]>250&&!L.potDead[p]){L.potDead[p]=true;L.burns++;L.on=false;I=0;toast(`可變電阻（${p==='100'?'100 Ω':'1 kΩ'}）冒煙燒毀！${L.burns<2?'可向評審領一顆新的。':'已燒壞兩顆，評審不再提供。'}`,5000)}
+ }
+ const Ia=Math.abs(I);L.Vp+=(0.12*Ia-L.Vp)*(1-Math.exp(-dt/15));L.dE+=1e-4*Ia*dt;
+ let V;
+ if(c.vPlace==='ser')V=L.on&&!open?E*1e7/(Rtot+1e7)*L.pol:0;
+ else if(c.mode==='4w')V=I*rodR(t,S.clip.ellEff)+t.Vth;
+ else V=I*(Rfull+S.clip.Rc1+S.clip.Rc2)+t.Vth;
+ L.I=I;L.V=V;
+ if(L.on){L.onT+=dt;if($('#autoOff').checked&&L.onT>=4){L.on=false;}}
+}
+function readMeters(){
+ const L=S.live,c=S.cfg,T=S.T;
+ const v=VR[c.vRange],g=T.meterV;let cnt=Math.round((L.V*g.gain)/v.res+g.off+N2(0,0.35));
+ L.dV=Math.abs(cnt)>1999?{txt:(cnt<0?'-':'')+'1.',val:NaN,u:v.u}:{txt:(cnt*v.res*v.sc).toFixed(v.dec),val:cnt*v.res,u:v.u};
+ const a=AR[c.aSel],big=c.aSel==='10A';let ca=Math.round(L.I*(big?T.meterA.g10:T.meterA.gm)/a.res+(big?T.meterA.o10:T.meterA.om)+N2(0,0.3));
+ if(c.aSel!=='10A'&&L.fuseBlown)ca=Math.round(N2(0,0.3));
+ L.dA=Math.abs(ca)>1999?{txt:(ca<0?'-':'')+'1.',val:NaN,u:a.u}:{txt:(ca*a.res*a.sc).toFixed(a.dec),val:ca*a.res,u:a.u};
+}
+
+// ================= ④ =================
+function r4(){
+ const c=S.cfg,t=S.T.rods[c.rod];
+ $('#c4rods').innerHTML=RODS.map(r=>`<button class="seg ${r.k===c.rod?'on':''}" data-rod="${r.k}">${r.name}</button>`).join('');
+ $('#cfgSum').textContent=`${c.mode==='4w'?'四端點':'兩端點'}${c.vPlace==='ser'?'／伏特計串聯':''}／${c.pot==='100'?'100 Ω':'1 kΩ'}${c.wiper==='ok'?'':'（白線未接）'}`;
+ $('#aSel4').innerHTML=Object.keys(AR).map(k=>`<option value="${k}" ${k===c.aSel?'selected':''}>${k==='10A'?'10A 孔／10A 檔':k==='200mA'?'mA 孔／200mA 檔':'mA 孔／20mA 檔'}</option>`).join('');
+ $('#vSel4').innerHTML=Object.keys(VR).map(k=>`<option value="${k}" ${k===c.vRange?'selected':''}>DCV ${k==='200m'?'200 mV':k+' V'}</option>`).join('');
+ const e=$('#ell4');e.max=Math.floor(t.L-24);e.value=c.ellNom;e.disabled=c.mode!=='4w';
+ recTable();live4();
+}
+function live4(){
+ const L=S.live,c=S.cfg,T=S.T,t=T.rods[c.rod];
+ $('#ell4v').textContent=c.mode==='4w'?`約 ${c.ellNom} mm`:'（兩端點：用電流夾）';
+ $('#ellRead').textContent=fx(c.mode==='4w'?S.clip.r4:S.clip.r2,2)+' mm';
+ $('#lcdA').innerHTML=`${L.dA.txt||'0'}<small>${L.dA.u||''}</small>`;
+ $('#lcdV').innerHTML=`${L.dV.txt||'0'}<small>${L.dV.u||''}</small>`;
+ $('#knobv').textContent=`${(L.knob*100).toFixed(1)}%（旋轉 ${Math.round(L.knob*270)}°）`;
+ const btn=$('#btnOn');btn.textContent=L.on?'斷開開關':'接通開關';btn.className=L.on?'warnb':'pri';
+ $('#btnPol').textContent=L.pol>0?'電池反接':'電池恢復正接';
+ const pT=L.potT[c.pot],fr=clamp((pT-T.Troom)/(250-T.Troom),0,1);
+ const hb=$('#heatBar');hb.style.width=(fr*100)+'%';hb.style.background=pT<60?'#7cb342':pT<120?'#fbc02d':pT<180?'#fb8c00':'#e53935';
+ $('#heatTxt').textContent=L.potDead[c.pot]?'已燒毀':pT<45?'正常':pT<90?'溫熱':pT<150?'燙手':pT<200?'有焦味！':'冒煙！快斷電';
+ let st=[];
+ if(L.potDead[c.pot]){st.push(`<span class="bad">此可變電阻已燒毀，電路開路。</span>`+(L.burns<2?' <button id="btnNewPot">向評審領新的可變電阻</button>':' <span class="bad">已燒壞兩顆，不再提供，請改用另一顆。</span>'))}
+ if(L.fuseBlown)st.push(c.aSel!=='10A'?`<span class="bad">mA 插孔保險絲已燒斷。</span>`+(L.fuseSpare>0?' <button id="btnFuse">更換保險絲（僅此一次）</button>':' 已無備用保險絲，只能用 10A 插孔。'):'<span class="note">（mA 插孔保險絲已斷，目前使用 10A 插孔不受影響）</span>');
+ if(L.pol<0)st.push('電池目前反接，電流與電壓為負值。');
+ st.push(`累計燒毀可變電阻 ${L.burns}／2 顆。`);
+ const h=st.join('<br>');if($('#status4').dataset.h!==h){$('#status4').innerHTML=h;$('#status4').dataset.h=h}
+ $('#app4').innerHTML=app4();
+}
+function app4(){
+ const c=S.cfg,t=S.T.rods[c.rod],r=RODS.find(x=>x.k===c.rod),L=S.live,T=S.T;
+ const X0=110,X1=650,yR=215,px=mm=>X0+(mm/t.L)*(X1-X0);
+ const ci1=px(2),ci2=px(t.L-2),mid=t.L/2;
+ const four=c.mode==='4w',ser=c.vPlace==='ser';
+ const v1=four?px(mid-S.clip.ellTrue/2):ci1,v2=four?px(mid+S.clip.ellTrue/2):ci2;
+ const pT=L.potT[c.pot],hf=clamp((pT-T.Troom)/(250-T.Troom),0,1);
+ const glow=`rgba(${Math.round(255)},${Math.round(120-100*hf)},0,${(0.15+0.75*hf).toFixed(2)})`;
+ const ang=-135+270*L.knob,on=L.on;
+ const wire=on?'#d35400':'#444';
+ let s=`<svg viewBox="0 0 760 360"><rect width="760" height="360" fill="#fbfaf6"/>`;
+ // 電池盒
+ s+=`<rect x="40" y="40" width="120" height="56" rx="6" fill="#333"/><rect x="50" y="50" width="48" height="16" rx="3" fill="#2e7d32"/><rect x="50" y="70" width="48" height="16" rx="3" fill="#2e7d32"/><rect x="102" y="50" width="48" height="16" rx="3" fill="#2e7d32"/><rect x="102" y="70" width="48" height="16" rx="3" fill="#2e7d32"/><text x="100" y="112" text-anchor="middle" font-size="12">電池盒 3 V${L.pol<0?'（反接）':''}</text>`;
+ s+=`<text x="166" y="64" font-size="14" fill="${L.pol>0?'#c62828':'#1f5f8b'}">${L.pol>0?'+':'−'}</text><text x="24" y="64" font-size="14" fill="${L.pol>0?'#1f5f8b':'#c62828'}">${L.pol>0?'−':'+'}</text>`;
+ // 開關
+ s+=`<path d="M160 68 H190" stroke="${wire}" stroke-width="3"/><circle cx="192" cy="68" r="4" fill="#333"/><circle cx="232" cy="68" r="4" fill="#333"/><path d="M192 68 L${on?232:226} ${on?68:44}" stroke="#333" stroke-width="4"/><text x="212" y="96" text-anchor="middle" font-size="12">開關</text>`;
+ // 可變電阻
+ s+=`<path d="M236 68 H272" stroke="${wire}" stroke-width="3"/><circle cx="305" cy="68" r="36" fill="${glow}"/><circle cx="305" cy="68" r="26" fill="#355" stroke="#122" stroke-width="2"/><g transform="rotate(${ang} 305 68)"><rect x="301" y="44" width="8" height="26" rx="3" fill="#ddd"/></g>`;
+ if(L.potDead[c.pot])s+=`<text x="305" y="73" text-anchor="middle" font-size="12" fill="#fff">燒毀</text>`;
+ if(pT>180&&!L.potDead[c.pot])s+=`<path d="M290 28 q6 -10 0 -18 M305 26 q6 -10 0 -18 M320 28 q6 -10 0 -18" stroke="#999" stroke-width="2" fill="none"/>`;
+ s+=`<text x="305" y="122" text-anchor="middle" font-size="12">${c.pot==='100'?'100 Ω':'1 kΩ'} 可變電阻</text>`;
+ // 安培計
+ s+=`<rect x="430" y="22" width="150" height="84" rx="8" fill="#e9b93a" stroke="#9a7a1f" stroke-width="2"/><rect x="440" y="32" width="130" height="38" rx="4" fill="#c9d8b0"/><text x="562" y="62" text-anchor="end" font-size="24" font-family="Consolas,monospace" fill="#16240e">${L.dA.txt||''}</text><text x="505" y="86" text-anchor="middle" font-size="11">安培計 ${c.aSel}</text><circle cx="460" cy="100" r="5" fill="#c62828"/><circle cx="550" cy="100" r="5" fill="#222"/>`;
+ // 接線：可變電阻（白線）→ 安培計
+ if(c.wiper==='ok')s+=`<path d="M305 94 V130 H460 V105" stroke="#eee" stroke-width="5" fill="none"/><path d="M305 94 V130 H460 V105" stroke="#bbb" stroke-width="1" fill="none"/>`;
+ else s+=`<path d="M338 68 H350 V130 H460 V105" stroke="${wire}" stroke-width="3" fill="none"/>`;
+ // 安培計 COM → 棒左端
+ s+=`<path d="M550 105 V158 H${ci1} V${yR-10}" stroke="${wire}" stroke-width="3" fill="none"/>`;
+ // 棒右端 → 回電池
+ s+=`<path d="M${ci2} ${yR-10} V180 H720 V14 H24 V68 H40" stroke="${wire}" stroke-width="3" fill="none"/>`;
+ // 金屬棒
+ s+=`<rect x="${X0}" y="${yR-7}" width="${X1-X0}" height="14" rx="3" fill="${r.col}" stroke="#555"/><text x="${(X0+X1)/2}" y="${yR+30}" text-anchor="middle" font-size="12">${r.name}（${r.hint}）</text>`;
+ const clip=(x,col,lab,up)=>`<path d="M${x-6} ${yR-14} L${x+6} ${yR-14} L${x+4} ${yR+14} L${x-4} ${yR+14} Z" fill="${col}" stroke="#222"/><text x="${x}" y="${up?yR-20:yR+48}" text-anchor="middle" font-size="11" fill="${col}">${lab}</text>`;
+ s+=clip(ci1,'#c62828','I',true)+clip(ci2,'#222','I',true);
+ // 伏特計
+ if(!ser){
+  if(four)s+=clip(v1,'#1f5f8b','V',false)+clip(v2,'#1f5f8b','V',false)+`<path d="M${v1} ${yR-26} H${v2}" stroke="#777" stroke-dasharray="3 3"/><text x="${(v1+v2)/2}" y="${yR-30}" text-anchor="middle" font-size="12">ℓ</text>`;
+  s+=`<path d="M${v1} ${yR+14} V${four?262:258} H350 V280 M${v2} ${yR+14} V${four?270:266} H430 V280" stroke="#1f5f8b" stroke-width="2.5" fill="none"/>`;
+ }
+ s+=`<rect x="300" y="280" width="180" height="70" rx="8" fill="#e9b93a" stroke="#9a7a1f" stroke-width="2"/><rect x="312" y="288" width="156" height="36" rx="4" fill="#c9d8b0"/><text x="460" y="316" text-anchor="end" font-size="24" font-family="Consolas,monospace" fill="#16240e">${L.dV.txt||''}</text><text x="390" y="342" text-anchor="middle" font-size="11">伏特計 DCV ${c.vRange==='200m'?'200 mV':c.vRange+' V'}</text>`;
+ if(ser)s+=`<text x="380" y="262" text-anchor="middle" font-size="14" fill="#c62828">伏特計被串聯在電路中（錯誤接法）</text>`;
+ return s+'</svg>';
+}
+function recTable(){
+ const rod=S.cfg.rod,list=S.rec.map((x,i)=>({...x,i})).filter(x=>x.rod===rod);
+ if(!list.length){$('#rec4').innerHTML='<p class="note">尚無紀錄。</p>';return}
+ let h='<table><tr><th>#</th><th>接法</th><th>ℓ 讀數 (mm)</th><th>I (A)</th><th>V (mV)</th><th></th></tr>';
+ list.forEach((x,j)=>h+=`<tr><td>${j+1}</td><td>${x.mode==='4w'?'四端點':'兩端點'}</td><td><input type="number" step="0.02" data-i="${x.i}" data-f="ell" value="${x.ell}"></td><td><input type="number" step="0.01" data-i="${x.i}" data-f="I" value="${x.I}"></td><td><input type="number" step="0.1" data-i="${x.i}" data-f="V" value="${x.V}"></td><td><button data-del="${x.i}">刪除</button></td></tr>`);
+ $('#rec4').innerHTML=h+'</table>';
+}
+$('#rec4').addEventListener('change',e=>{const el=e.target;if(el.dataset.f){const v=parseFloat(el.value);if(Number.isFinite(v))S.rec[+el.dataset.i][el.dataset.f]=el.dataset.f==='ell'?+v.toFixed(2):v}});
+$('#rec4').addEventListener('click',e=>{const d=e.target.dataset.del;if(d!==undefined){S.rec.splice(+d,1);recTable()}});
+$('#btnClr4').onclick=()=>{if(confirm('清除'+rodName(S.cfg.rod)+'的全部紀錄？')){S.rec=S.rec.filter(x=>x.rod!==S.cfg.rod);recTable()}};
+$('#c4rods').addEventListener('click',e=>{const k=e.target.dataset.rod;if(k&&k!==S.cfg.rod){S.cfg.rod=k;S.live.on=false;newClip(true);r4();toast('已換上'+rodName(k)+'，鱷魚夾重新夾持')}});
+$('#ell4').oninput=e=>{S.cfg.ellNom=+e.target.value;newClip(false);live4()};
+$('#btnReclip').onclick=()=>{newClip(true);live4();toast('所有鱷魚夾已重新夾持（接觸電阻與夾點位置都會改變）')};
+$('#aSel4').onchange=e=>{S.cfg.aSel=e.target.value;live4()};
+$('#vSel4').onchange=e=>{S.cfg.vRange=e.target.value;live4()};
+$('#btnOn').onclick=()=>{const L=S.live;L.on=!L.on;L.onT=0;live4()};
+$('#btnPol').onclick=()=>{S.live.pol*=-1;live4()};
+$('#knob').oninput=e=>{S.live.knob=e.target.value/1000};
+document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=clamp(Math.round(S.live.knob*1000)+(+b.dataset.k),0,1000);S.live.knob=k/1000;$('#knob').value=k});
+$('#status4').addEventListener('click',e=>{
+ const L=S.live,c=S.cfg;
+ if(e.target.id==='btnNewPot'){L.potDead[c.pot]=false;L.potT[c.pot]=S.T.Troom;toast('評審給了一顆新的可變電阻。再燒一顆就不再提供。');live4()}
+ if(e.target.id==='btnFuse'){L.fuseBlown=false;L.fuseSpare=0;toast('已更換保險絲，這是唯一一次機會。');live4()}
+});
+$('#btnRec4').onclick=()=>{
+ const L=S.live,c=S.cfg;
+ if(!Number.isFinite(L.dV.val)||!Number.isFinite(L.dA.val)){toast('有電表顯示超出量程（1.），請換檔再記錄');return}
+ if(c.vPlace==='ser'){toast('伏特計串聯的數據沒有意義，請先到 ③ 修正接線');return}
+ S.rec.push({rod:c.rod,mode:c.mode,ell:+(c.mode==='4w'?S.clip.r4:S.clip.r2).toFixed(2),I:+L.dA.val.toFixed(5),V:+(L.dV.val*1000).toFixed(2)});
+ recTable();toast(`已記錄：I = ${L.dA.txt} ${L.dA.u}，V = ${L.dV.txt} ${L.dV.u}`);
+};
+
+// ================= ⑤ =================
+function plot(pts,fit,xl,yl){
+ const W=520,H=370,m={l:64,r:16,t:14,b:48};
+ if(!pts.length)return`<svg viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fff"/><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#999">尚無數據</text></svg>`;
+ const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+ let x0=Math.min(0,...xs),x1=Math.max(0,...xs),y0=Math.min(0,...ys),y1=Math.max(0,...ys);
+ if(x1-x0<=0)x1=x0+1;if(y1-y0<=0)y1=y0+1;
+ const sx=niceStep((x1-x0)/6),sy=niceStep((y1-y0)/6);
+ x0=Math.floor(x0/sx-1e-9)*sx;x1=Math.ceil(x1/sx+1e-9)*sx;y0=Math.floor(y0/sy-1e-9)*sy;y1=Math.ceil(y1/sy+1e-9)*sy;
+ const X=x=>m.l+(x-x0)/(x1-x0)*(W-m.l-m.r),Y=y=>H-m.b-(y-y0)/(y1-y0)*(H-m.t-m.b);
+ const dx=d=>Math.max(0,-Math.floor(Math.log10(d)+1e-9));
+ let s=`<svg viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fff"/>`;
+ for(let k=0;k<=Math.round((x1-x0)/(sx/5));k++){const x=x0+k*sx/5;s+=`<line x1="${X(x)}" y1="${m.t}" x2="${X(x)}" y2="${H-m.b}" stroke="${k%5===0?'#8fbf9b':'#d6eadb'}" stroke-width="${k%5===0?1:0.6}"/>`;if(k%5===0)s+=`<text x="${X(x)}" y="${H-m.b+16}" text-anchor="middle" font-size="11">${x.toFixed(dx(sx))}</text>`}
+ for(let k=0;k<=Math.round((y1-y0)/(sy/5));k++){const y=y0+k*sy/5;s+=`<line x1="${m.l}" y1="${Y(y)}" x2="${W-m.r}" y2="${Y(y)}" stroke="${k%5===0?'#8fbf9b':'#d6eadb'}" stroke-width="${k%5===0?1:0.6}"/>`;if(k%5===0)s+=`<text x="${m.l-6}" y="${Y(y)+4}" text-anchor="end" font-size="11">${y.toFixed(dx(sy))}</text>`}
+ if(x0<0&&x1>0)s+=`<line x1="${X(0)}" y1="${m.t}" x2="${X(0)}" y2="${H-m.b}" stroke="#333"/>`;
+ if(y0<0&&y1>0)s+=`<line x1="${m.l}" y1="${Y(0)}" x2="${W-m.r}" y2="${Y(0)}" stroke="#333"/>`;
+ s+=`<rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="none" stroke="#333"/>`;
+ if(fit){const ya=fit.k*x0+fit.b,yb=fit.k*x1+fit.b;s+=`<clipPath id="cp${xl.length}"><rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}"/></clipPath><line clip-path="url(#cp${xl.length})" x1="${X(x0)}" y1="${Y(ya)}" x2="${X(x1)}" y2="${Y(yb)}" stroke="#b5462c" stroke-width="2"/>`}
+ for(const[x,y]of pts)s+=`<circle cx="${X(x)}" cy="${Y(y)}" r="4" fill="#1f5f8b" stroke="#fff"/>`;
+ s+=`<text x="${(m.l+W-m.r)/2}" y="${H-10}" text-anchor="middle" font-size="13">${xl}</text><text x="16" y="${(m.t+H-m.b)/2}" text-anchor="middle" font-size="13" transform="rotate(-90 16 ${(m.t+H-m.b)/2})">${yl}</text></svg>`;
+ return s;
+}
+function groups(rod,mode){
+ const g=new Map();for(const x of S.rec)if(x.rod===rod&&x.mode===mode){const k=x.ell.toFixed(2);if(!g.has(k))g.set(k,[]);g.get(k).push(x)}
+ return g;
+}
+function groupR(list){
+ const pts=list.map(x=>[x.I,x.V]);const f=linfit(pts);
+ if(f&&new Set(list.map(x=>x.I)).size>=2)return{R:f.k,sR:f.sk,fit:f,pts};
+ const ok=list.filter(x=>x.I!==0);if(!ok.length)return null;const R=ok.reduce((a,x)=>a+x.V/x.I,0)/ok.length;return{R,sR:NaN,fit:null,pts};
+}
+function analyze(rod,mode){
+ const out={rod,mode},z=zeroVal(),g=geo(rod),gr=groups(rod,mode);
+ out.groups=[...gr.entries()].map(([k,list])=>({ell:+k,ellc:+k-z,list,...(groupR(list)||{R:NaN,sR:NaN,fit:null,pts:[]})}));
+ if(g.d&&g.d.n>=2){const sd=Math.sqrt(g.d.sem**2+0.01**2);out.d=g.d.c;out.sd=sd;out.A=Math.PI*(g.d.c/1000)**2/4}
+ const best=out.groups.filter(x=>Number.isFinite(x.R)).sort((a,b)=>b.list.length-a.list.length||b.ell-a.ell)[0];
+ out.best=best;
+ if(out.A&&best){const R=best.R/1000,rho=R*out.A/(best.ellc/1000);const rel=Math.sqrt((best.sR/best.R)**2+(2*out.sd/out.d)**2+(0.5/best.ellc)**2);out.rhoVI=rho;out.sVI=Math.abs(rho)*rel}
+ const rl=out.groups.filter(x=>Number.isFinite(x.R)).map(x=>[x.ellc,x.R]);
+ out.rlPts=rl;out.rlFit=rl.length>=2?linfit(rl):null;
+ if(out.A&&out.rlFit&&rl.length>=3){const k=out.rlFit.k;out.rhoRL=k*out.A;out.sRL=Math.abs(out.rhoRL)*Math.sqrt((out.rlFit.sk/k)**2+(2*out.sd/out.d)**2)}
+ return out;
+}
+const r8=x=>fx(x/1e-8,2);
+function r5(){
+ const u=S.ui5;
+ $('#c5rods').innerHTML=RODS.map(r=>`<button class="seg ${r.k===u.rod?'on':''}" data-rod="${r.k}">${r.name}</button>`).join('');
+ $('#mode5').value=u.mode;
+ const a=analyze(u.rod,u.mode);
+ const keys=a.groups.map(x=>x.ell.toFixed(2));
+ if(!keys.includes(u.grp))u.grp=a.best?a.best.ell.toFixed(2):(keys[0]||'');
+ $('#grp5').innerHTML=a.groups.length?a.groups.map(x=>`<option value="${x.ell.toFixed(2)}" ${x.ell.toFixed(2)===u.grp?'selected':''}>ℓ 讀數 ${x.ell.toFixed(2)} mm（${x.list.length} 點）</option>`).join(''):'<option>無數據</option>';
+ const w=[];if(!a.d)w.push('⚠ 尚未完成第 ② 頁的直徑量測（至少 2 筆），無法算截面積 A。');if(S.zeroRead==='')w.push('提醒：第 ② 頁尚未填零點讀數，目前以 0 計算。');
+ $('#warn5').innerHTML=w.join('<br>');
+ const G=a.groups.find(x=>x.ell.toFixed(2)===u.grp);
+ $('#plotVI').innerHTML=plot(G?G.pts:[],G?G.fit:null,'電流 I（A）','電壓 V（mV）');
+ if(G&&G.fit){const f=G.fit,ohm=Math.abs(f.b)<2*f.sb;
+  let verdict=f.n<3?'點數太少，至少需 3 點才能估計不確定度。':(f.r>0.999&&ohm?'<span class="good">數據落在一直線上，截距在 2σ 內與 0 一致：符合歐姆定律（R 不隨 I 改變）。</span>':!ohm?'<span class="warn">截距顯著不為 0：多半來自電表零點偏移或熱電動勢。斜率 R 仍可用；反接電流取點可以看出並消去它。</span>':'<span class="warn">線性度不佳：讀數太接近電表解析度（0.1 mV）。請加大電流或夾距，並增加點數。</span>');
+  $('#fitVI').innerHTML=`<table class="kv res"><tr><td>斜率 R</td><td>${fx(f.k,4)} ± ${fx(f.sk,4)} mΩ</td></tr><tr><td>截距</td><td>${fx(f.b,3)} ± ${fx(f.sb,3)} mV</td></tr><tr><td>相關係數 r</td><td>${fx(f.r,5)}（${f.n} 點）</td></tr><tr><td>判讀</td><td>${verdict}</td></tr></table>`;
+ }else $('#fitVI').innerHTML=G?'<p class="note">這組只有單一電流值，以 V/I 平均估計 R，無法驗證線性。請取至少 3 個不同電流。</p>':'';
+ $('#plotRL').innerHTML=plot(a.rlPts,a.rlFit,'修正後夾距 ℓ（mm）','電阻 R（mΩ）');
+ let rh='<table><tr><th>ℓ 讀數 (mm)</th><th>修正後 ℓ (mm)</th><th>點數</th><th>R (mΩ)</th></tr>';
+ a.groups.forEach(x=>rh+=`<tr><td>${x.ell.toFixed(2)}</td><td>${x.ellc.toFixed(2)}</td><td>${x.list.length}</td><td>${fx(x.R,4)}${Number.isFinite(x.sR)?' ± '+fx(x.sR,4):''}</td></tr>`);
+ rh+='</table>';
+ if(a.rlFit)rh+=`<table class="kv res" style="margin-top:6px"><tr><td>斜率 k = ρ/A</td><td>${fx(a.rlFit.k,5)} ± ${fx(a.rlFit.sk,5)} mΩ/mm（= Ω/m）</td></tr><tr><td>截距</td><td>${fx(a.rlFit.b,4)} ± ${fx(a.rlFit.sb,4)} mΩ</td></tr></table>`;
+ else rh+='<p class="note">需在 ④ 改變電壓夾距，取至少 3 種 ℓ（每種 ℓ 量數個電流），才能做 R–ℓ 迴歸。</p>';
+ if(u.mode==='2w')rh+='<p class="note">兩端點法只有一種夾距，無法做 R–ℓ 迴歸。</p>';
+ $('#fitRL').innerHTML=rh;
+ let p='';
+ if(a.d)p+=`<p>截面積：d = ${fx(a.d,3)} ± ${fx(a.sd,3)} mm（零點修正後，含平均值標準誤與游標尺半格 0.01 mm），A = πd²/4 = ${fx(a.A*1e6,4)} mm²</p>`;
+ p+=`<table class="res"><tr><th>方法</th><th>算式</th><th>ρ（×10⁻⁸ Ω·m）</th><th>相對不確定度</th></tr>`;
+ p+=`<tr><td>V–I 單組</td><td>ρ = R·A/ℓ${a.best?`（ℓ = ${fx(a.best.ellc,2)} mm）`:''}</td><td>${Number.isFinite(a.rhoVI)?r8(a.rhoVI)+' ± '+r8(a.sVI):'—'}</td><td>${Number.isFinite(a.sVI)?fx(a.sVI/a.rhoVI*100,1)+' %':'—'}</td></tr>`;
+ p+=`<tr><td>R–ℓ 迴歸</td><td>ρ = k·A</td><td>${Number.isFinite(a.rhoRL)?r8(a.rhoRL)+' ± '+r8(a.sRL):'—'}</td><td>${Number.isFinite(a.sRL)?fx(a.sRL/a.rhoRL*100,1)+' %':'—'}</td></tr></table>`;
+ p+=`<p class="note">不確定度傳遞：(σρ/ρ)² = (σR/R)² + (2σd/d)² + (σℓ/ℓ)²。σℓ 取 0.5 mm（鱷魚夾齒寬造成的有效接點不確定）。R–ℓ 迴歸的斜率不受夾點固定偏差影響，所以不含 σℓ 項。</p>`;
+ $('#rho5').innerHTML=p;
+ let s='<table class="res"><tr><th>棒</th><th>接法</th><th>V–I 單組 ρ</th><th>R–ℓ 迴歸 ρ</th></tr>';
+ for(const r of RODS)for(const md of ['4w','2w']){const b=analyze(r.k,md);if(!b.groups.length)continue;s+=`<tr><td>${r.name}</td><td>${md==='4w'?'四端點':'兩端點'}</td><td>${Number.isFinite(b.rhoVI)?r8(b.rhoVI)+' ± '+r8(b.sVI):'—'}</td><td>${Number.isFinite(b.rhoRL)?r8(b.rhoRL)+' ± '+r8(b.sRL):'—'}</td></tr>`}
+ $('#sum5').innerHTML=s+'</table><p class="note">單位：×10⁻⁸ Ω·m</p>';
+}
+$('#c5rods').addEventListener('click',e=>{const k=e.target.dataset.rod;if(k){S.ui5.rod=k;S.ui5.grp='';r5()}});
+$('#mode5').onchange=e=>{S.ui5.mode=e.target.value;S.ui5.grp='';r5()};
+$('#grp5').onchange=e=>{S.ui5.grp=e.target.value;r5()};
+
+// ================= ⑥ =================
+function r6(){
+ let h='<table class="res"><tr><th>棒</th><th>L̄（修正後, mm）</th><th>d̄（修正後, mm）</th><th>ρ（四端點，×10⁻⁸ Ω·m）</th><th>採用方法</th></tr>';
+ for(const r of RODS){const g=geo(r.k),a=analyze(r.k,'4w');const useRL=Number.isFinite(a.rhoRL);const rho=useRL?a.rhoRL:a.rhoVI,s=useRL?a.sRL:a.sVI;
+  h+=`<tr><td>${r.name}</td><td>${g.L?fx(g.L.c,3):'—'}</td><td>${g.d?fx(g.d.c,3):'—'}</td><td>${Number.isFinite(rho)?r8(rho)+' ± '+r8(s):'—'}</td><td>${useRL?'R–ℓ 迴歸':Number.isFinite(rho)?'V–I 單組':'—'}</td></tr>`}
+ $('#mine6').innerHTML=h+'</table>';
+ $('#truthCard').hidden=!S.revealed;if(S.revealed)truth6();
+}
+function truth6(){
+ const T=S.T;
+ let h=`<p>室溫 T = ${fx(T.Troom,1)} °C；游標尺零點誤差 = ${T.zero>=0?'+':''}${T.zero.toFixed(2)} mm（你填的零點讀數：${S.zeroRead===''?'未填':S.zeroRead+' mm'}）</p>`;
+ h+='<table class="res"><tr><th>棒</th><th>實際材質</th><th>ρ₂₀（×10⁻⁸）</th><th>α（/K）</th><th>ρ(室溫) 真值</th><th>你的 ρ（四端點）</th><th>相對誤差</th><th>偏差 / σ</th></tr>';
+ for(const r of RODS){const t=T.rods[r.k],a=analyze(r.k,'4w');const useRL=Number.isFinite(a.rhoRL);const rho=useRL?a.rhoRL:a.rhoVI,s=useRL?a.sRL:a.sVI;
+  const z=Number.isFinite(rho)&&s>0?Math.abs(rho-t.rho)/s:NaN;const zc=z<=2?'good':z<=3?'warn':'bad';
+  h+=`<tr><td>${r.name}</td><td>${t.mat.name}</td><td>${r8(t.rho20)}</td><td>${t.mat.a}</td><td><b>${r8(t.rho)}</b></td><td>${Number.isFinite(rho)?r8(rho)+' ± '+r8(s):'—'}</td><td>${Number.isFinite(rho)?fx((rho-t.rho)/t.rho*100,1)+' %':'—'}</td><td class="${Number.isFinite(z)?zc:''}">${Number.isFinite(z)?fx(z,1)+' σ':'—'}</td></tr>`}
+ h+='</table><p class="note">偏差 / σ ≤ 2 表示你的結果與真值在統計上一致；超過 3 代表有未納入的系統誤差。</p>';
+ h+='<h3>幾何真值</h3><table class="res"><tr><th>棒</th><th>真實長度 L</th><th>平均直徑 d₀</th><th>錐度（全長 d 變化）</th><th>橢圓度振幅</th><th>你量的 d̄（修正後）</th></tr>';
+ for(const r of RODS){const t=T.rods[r.k],g=geo(r.k);h+=`<tr><td>${r.name}</td><td>${fx(t.L,3)} mm</td><td>${fx(t.d0,4)} mm</td><td>${fx(t.taper*100,2)} %</td><td>±${fx(t.ell,4)} mm</td><td>${g.d?fx(g.d.c,3)+' mm':'—'}</td></tr>`}
+ h+='</table>';
+ const two=RODS.map(r=>{const t=T.rods[r.k],b=analyze(r.k,'2w');return Number.isFinite(b.rhoVI)?`${r.name}：兩端點得 ${r8(b.rhoVI)}×10⁻⁸ Ω·m，是真值的 <b>${fx(b.rhoVI/t.rho,1)} 倍</b>`:null}).filter(Boolean);
+ if(two.length)h+=`<h3>兩端點法對照</h3><p>${two.join('<br>')}<br><span class="note">多出來的部分就是兩個電流夾的接觸電阻。</span></p>`;
+ const c=S.clip,tr=T.rods[S.cfg.rod];
+ h+=`<h3>儀器與電路</h3><table class="kv res"><tr><td>伏特計增益誤差／零點</td><td>${fx((T.meterV.gain-1)*100,2)} %／${T.meterV.off} 格</td></tr><tr><td>安培計 10A 檔增益誤差／零點</td><td>${fx((T.meterA.g10-1)*100,2)} %／${T.meterA.o10} 格</td></tr><tr><td>安培計 mA 檔增益誤差／零點</td><td>${fx((T.meterA.gm-1)*100,2)} %／${T.meterA.om} 格</td></tr><tr><td>電池電動勢／內阻</td><td>${fx(T.batt.E0[0],3)} V + ${fx(T.batt.E0[1],3)} V／${fx(T.batt.r[0],3)} Ω + ${fx(T.batt.r[1],3)} Ω</td></tr><tr><td>目前夾持（${rodName(S.cfg.rod)}）電流夾接觸電阻</td><td>${fx(c.Rc1*1000,1)} mΩ、${fx(c.Rc2*1000,1)} mΩ（棒全長電阻只有 ${fx(rodR(tr,tr.L)*1000,2)} mΩ）</td></tr><tr><td>目前電壓夾有效間距 vs 讀數</td><td>${fx(c.ellEff,2)} mm vs ${fx(c.r4,2)} mm</td></tr><tr><td>熱電動勢（${rodName(S.cfg.rod)}）</td><td>${fx(tr.Vth*1e6,1)} μV</td></tr></table>`;
+ $('#truth6').innerHTML=h;
+}
+$('#btnReveal').onclick=()=>{if(S.revealed||confirm('揭曉後就能看到真值，建議先完成所有量測與分析。確定揭曉？')){S.revealed=true;r6()}};
+
+// ================= 迴圈 =================
+let tk=0;
+setInterval(()=>{tick(0.1);tk++;if(tk%4===0)readMeters();if(cur===3)live4()},100);
+
+initState();syncCfgUI();readMeters();showTab(0);
+</script>
+</body>
+</html>

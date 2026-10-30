@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>102 學年度高中科學能力競賽 物理科實驗 — 落球法測甘油黏滯係數</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --panel:#ffffff; --ink:#1d2733; --sub:#5b6b7c;
+    --line:#d7dee6; --accent:#1f6f8b; --accent2:#c85a2b; --ok:#2e7d52; --warn:#b3541e; --bad:#b3282d;
+    --glyc:#d8c98a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+       font-size:15px;line-height:1.65;}
+  header{background:linear-gradient(135deg,#17384a,#1f6f8b);color:#fff;padding:18px 24px;}
+  header h1{margin:0;font-size:20px;letter-spacing:.5px;}
+  header p{margin:4px 0 0;font-size:13px;opacity:.85;}
+  nav{display:flex;flex-wrap:wrap;background:#0f2a38;}
+  nav button{flex:1 1 auto;min-width:130px;background:none;border:none;color:#a9c3d1;
+       padding:11px 8px;font-size:14px;cursor:pointer;font-family:inherit;border-bottom:3px solid transparent;}
+  nav button:hover{color:#fff;background:#16394b;}
+  nav button.active{color:#fff;border-bottom-color:var(--accent2);background:#16394b;}
+  nav button:disabled{color:#5a7080;cursor:not-allowed;}
+  main{max-width:1240px;margin:0 auto;padding:20px 16px 60px;}
+  .tab{display:none;} .tab.active{display:block;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px;}
+  .card h2{margin:0 0 4px;font-size:17px;color:var(--accent);}
+  .card h3{margin:16px 0 6px;font-size:15px;}
+  .card .q{font-size:13px;color:var(--sub);margin:0 0 12px;}
+  .grid{display:grid;gap:16px;}
+  .g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+  .g-lab{grid-template-columns:330px minmax(0,1fr);}
+  @media(max-width:900px){.g2,.g-lab{grid-template-columns:1fr;}}
+  label{font-size:13px;color:var(--sub);}
+  input[type=number],input[type=text],select{font-family:inherit;font-size:14px;padding:5px 7px;
+       border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink);}
+  input[type=range]{width:100%;}
+  button.act{font-family:inherit;font-size:14px;padding:8px 14px;border-radius:6px;border:1px solid var(--accent);
+       background:var(--accent);color:#fff;cursor:pointer;}
+  button.act:hover{filter:brightness(1.12);}
+  button.act.sec{background:#fff;color:var(--accent);}
+  button.act.warm{background:var(--accent2);border-color:var(--accent2);}
+  button.act:disabled{opacity:.4;cursor:not-allowed;filter:none;}
+  table{border-collapse:collapse;width:100%;font-size:13px;}
+  th,td{border:1px solid var(--line);padding:4px 6px;text-align:center;}
+  th{background:#eef3f6;font-weight:600;}
+  td input{width:60px;text-align:center;border:1px solid transparent;background:transparent;}
+  td input:focus{border-color:var(--accent);background:#fff;}
+  .note{font-size:12.5px;color:var(--sub);background:#f0f4f7;border-left:3px solid var(--accent);
+        padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;}
+  .warnbox{font-size:13px;background:#fdf1e7;border-left:3px solid var(--warn);color:#7a3b12;
+        padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;}
+  .okbox{font-size:13px;background:#eaf5ee;border-left:3px solid var(--ok);color:#1d5236;
+        padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;}
+  .eq{font-family:"Cambria Math","Times New Roman",serif;font-size:17px;text-align:center;margin:10px 0;}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;}
+  .chip{display:inline-block;background:#eef3f6;border:1px solid var(--line);border-radius:12px;
+        padding:2px 10px;font-size:12.5px;margin:2px 4px 2px 0;}
+  .stopwatch{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:34px;text-align:center;
+        background:#11232c;color:#8ff0c8;border-radius:8px;padding:10px;letter-spacing:2px;}
+  .lapbox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:#f7f9fa;
+        border:1px solid var(--line);border-radius:6px;padding:8px;min-height:92px;}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;}
+  details{margin:8px 0;} summary{cursor:pointer;color:var(--accent);font-size:14px;}
+  .steel{fill:url(#steelgrad);}
+  .todo{color:var(--sub);font-style:italic;}
+</style>
+</head>
+<body>
+<header>
+  <h1>102 學年度高級中學數學、自然科及資訊科能力競賽 — 物理科實驗</h1>
+  <p>北二區　競賽日期 102.11.18｜落球法測定甘油的黏滯係數　虛擬實驗室（6 分頁完整版）</p>
+</header>
+
+<nav>
+  <button class="active" data-tab="t1">一、原理與推導</button>
+  <button data-tab="t2">二、裝置組裝</button>
+  <button data-tab="t3">三、落球計時</button>
+  <button data-tab="t4">四、v–x 關係圖</button>
+  <button data-tab="t5">五、v_t–R 求 η</button>
+  <button data-tab="t6">六、誤差與真值</button>
+</nav>
+
+<main>
+
+<!-- ================= TAB 1 ================= -->
+<section id="t1" class="tab active">
+  <div class="card">
+    <h2>第一部分　小球在溶液中的終端速度（10 分）</h2>
+    <p class="q">(1) 畫出小球達終端速度時所受重力、浮力 F<sub>b</sub> 與黏滯力 F<sub>d</sub> 的力圖（4 分）　
+       (2) 寫下力平衡方程式（2 分）　(3) 推導 v<sub>t</sub> 的表示式（4 分）</p>
+
+    <div class="grid g2">
+      <div>
+        <h3>受力圖（拖動速度觀察三力變化）</h3>
+        <svg id="forceSvg" viewBox="0 0 380 330" style="width:100%;max-width:400px;background:#fbfcfd;border:1px solid var(--line);border-radius:8px;">
+          <defs>
+            <linearGradient id="steelgrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#e8edf2"/><stop offset="45%" stop-color="#9aa8b5"/>
+              <stop offset="100%" stop-color="#4c5a67"/>
+            </linearGradient>
+            <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 Z" fill="context-stroke"/>
+            </marker>
+          </defs>
+          <rect x="40" y="20" width="300" height="290" fill="#e6dfc0" opacity=".55"/>
+          <line x1="40" y1="20" x2="340" y2="20" stroke="#b9ab72" stroke-width="2"/>
+          <text x="46" y="35" font-size="11" fill="#7a6d3d">甘油</text>
+          <circle cx="190" cy="165" r="22" class="steel" stroke="#39434d"/>
+          <!-- arrows drawn by JS -->
+          <g id="forceArrows"></g>
+        </svg>
+        <div class="row">
+          <label style="flex:1 1 100%">小球瞬時速度 v ＝ <span id="vFrac" class="mono">0.00</span> v<sub>t</sub></label>
+          <input type="range" id="vSlider" min="0" max="100" value="0">
+        </div>
+        <div id="forceMsg" class="note">v = 0：黏滯力為零，合力 = 重力 − 浮力，小球開始加速。</div>
+      </div>
+
+      <div>
+        <h3>(2) 力平衡方程式</h3>
+        <p style="font-size:13.5px;">達終端速度時加速度為零，三力合為零。向下為正：</p>
+        <div class="eq">m g − F<sub>b</sub> − F<sub>d</sub> = 0</div>
+        <div class="eq">m g = ρ<sub>液</sub> V g + 6π η R v<sub>t</sub></div>
+
+        <h3>(3) 終端速度表示式</h3>
+        <p style="font-size:13.5px;">代入球體體積 V = 4/3 πR³，解出 v<sub>t</sub>：</p>
+        <div class="eq" style="font-size:16px;">
+          v<sub>t</sub> ＝ ( m g − 4/3 πR³ ρ<sub>液</sub> g ) ⁄ ( 6π η R )
+        </div>
+        <p style="font-size:13.5px;">若小球密度均勻，m = 4/3 πR³ρ<sub>球</sub>，可再化簡為：</p>
+        <div class="eq" style="font-size:18px;color:var(--accent2);">
+          v<sub>t</sub> ＝ 2 R² g ( ρ<sub>球</sub> − ρ<sub>液</sub> ) ⁄ ( 9 η )
+        </div>
+        <div class="okbox">
+          關鍵結論：<b>v<sub>t</sub> ∝ R²</b>。因此第三部分若直接以 v<sub>t</sub> 對 R 作圖會得到拋物線，
+          必須改以 <b>v<sub>t</sub> 對 R² 作圖</b>才是直線，斜率 k = 2g(ρ<sub>球</sub>−ρ<sub>液</sub>)/(9η)，
+          由斜率反推 η = 2g(ρ<sub>球</sub>−ρ<sub>液</sub>)/(9k)。
+        </div>
+        <details>
+          <summary>為什麼一開始要加速？加速多久？</summary>
+          <p style="font-size:13px;">運動方程式 m dv/dt = (m−ρ<sub>液</sub>V)g − 6πηRv 的解為
+            v(t) = v<sub>t</sub>(1 − e<sup>−t/τ</sup>)，鬆弛時間 τ = 2ρ<sub>球</sub>R²/(9η)。
+            以 8 mm 鋼珠、η ≈ 0.9 Pa·s 估算 τ ≈ 0.03 s，對應的加速距離不到 1 cm。
+            這正是試題要從 x = 10 cm 才開始計時的原因 — 該處小球早已達到終端速度。</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section id="t2" class="tab">
+  <div class="card">
+    <h2>第二部分（前置）　裝置組裝與位置標定</h2>
+    <p class="q">立管 → 以鉛垂線校正垂直 → 用固定夾固定 → 注入甘油 → 以直尺與橡皮筋標定 x 位置</p>
+
+    <div class="grid g-lab">
+      <div>
+        <h3>步驟 1　校正垂直度</h3>
+        <p style="font-size:13px;">用棉線綁上螺帽做成<b>鉛垂線</b>，與壓克力管比對。管子傾斜時小球會偏向管壁一側，阻力顯著增加。</p>
+        <div class="row">
+          <label style="flex:1 1 100%">管身傾角 θ ＝ <span id="tiltVal" class="mono">2.0</span>°</label>
+          <input type="range" id="tiltSlider" min="0" max="40" value="20">
+        </div>
+        <div id="tiltMsg" class="warnbox">尚未校正：傾角過大，量得的終端速度會系統性偏低。</div>
+
+        <h3>步驟 2　固定夾</h3>
+        <div class="row">
+          <button class="act sec" id="btnClamp">夾緊固定夾</button>
+          <span id="clampState" style="font-size:13px;color:var(--sub);">未固定</span>
+        </div>
+
+        <h3>步驟 3　量測管內徑</h3>
+        <p style="font-size:13px;">試題<b>沒有給定管徑</b>，須自行以直尺量管口內徑。這個值決定甘油能灌多高、
+           也決定管壁對小球的阻滯有多強，是本實驗最關鍵的隱藏參數。</p>
+        <div class="row">
+          <label style="flex:1 1 100%">管內徑 D<sub>管</sub> ＝ <span id="tubeVal" class="mono">2.40</span> cm
+             （截面積 <span id="areaVal" class="mono">4.52</span> cm²）</label>
+          <input type="range" id="tubeSlider" min="200" max="340" step="5" value="240">
+        </div>
+        <div id="tubeMsg" class="note"></div>
+
+        <h3>步驟 4　注入甘油</h3>
+        <p style="font-size:13px;">全瓶 250 mL，倒入後液面即為 x = 0。注意<b>不要溢出管口</b>。</p>
+        <div class="row">
+          <label style="flex:1 1 100%">注入量 ＝ <span id="pourVal" class="mono">0</span> mL</label>
+          <input type="range" id="pourSlider" min="0" max="270" value="0">
+        </div>
+        <div id="pourMsg" class="note">尚未注入甘油。</div>
+
+        <h3>步驟 5　標定量測位置</h3>
+        <p style="font-size:13px;">以 100 cm 直尺（最小刻度 1 mm，可讀至 0.05 cm）量測，用橡皮筋在管外套環做記號。
+           計時起點固定在 x = 10.00 cm，另標定 5 個位置，須留管底約 3 cm 避免端效應。</p>
+        <div class="row">
+          <button class="act sec" id="btnAutoMark">依液柱高自動配置 5 個位置</button>
+        </div>
+        <table id="markTable">
+          <tr><th>記號</th><th>x (cm)</th><th>記號</th><th>x (cm)</th></tr>
+        </table>
+        <div id="markMsg" class="note">橡皮筋套環實際位置與讀數會有約 ±0.03 cm 的隨機偏差，這是真實的標定誤差來源。</div>
+      </div>
+
+      <div>
+        <h3>裝置示意圖</h3>
+        <svg id="setupSvg" viewBox="0 0 420 640" style="width:100%;max-width:420px;background:#fbfcfd;border:1px solid var(--line);border-radius:8px;"></svg>
+        <div id="setupStatus" class="note"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section id="t3" class="tab">
+  <div class="card">
+    <h2>第二部分　測定小球在甘油中的終端速度（20 分）</h2>
+    <p class="q">小球自 x = 0 輕放入甘油，以碼錶量測從 x = 10 cm 下落至任五個位置所需時間，每個距離測 5 次，
+       計算平均速度並填入表格。5 種直徑（4、5、6、7、8 mm）各做一組。</p>
+
+    <div id="notReady" class="warnbox">請先到「二、裝置組裝」完成垂直校正、固定與注入甘油。</div>
+
+    <div id="labArea" style="display:none;">
+    <div class="grid g-lab">
+      <div>
+        <svg id="tubeSvg" viewBox="0 0 300 640" style="width:100%;max-width:300px;background:#fbfcfd;border:1px solid var(--line);border-radius:8px;"></svg>
+        <div class="note" style="margin-top:6px;">
+          右側放大圖為管壁與鋼珠的<b>實際比例橫截面</b>（6×）。注意球徑愈大，與管壁的間隙愈小。
+        </div>
+      </div>
+
+      <div>
+        <div class="row">
+          <label>鋼珠直徑</label>
+          <select id="ballSel">
+            <option value="4">4 mm</option><option value="5">5 mm</option>
+            <option value="6">6 mm</option><option value="7">7 mm</option>
+            <option value="8">8 mm</option>
+          </select>
+          <label style="margin-left:12px;">計時模式</label>
+          <select id="modeSel">
+            <option value="lap">分段計時（一次落球取 5 段）</option>
+            <option value="single">單段計時（一次落球取 1 段）</option>
+          </select>
+          <span id="singleTargetWrap" style="display:none;">
+            <label>目標位置</label>
+            <select id="targetSel"></select>
+          </span>
+        </div>
+
+        <div class="stopwatch" id="swDisplay">0.00</div>
+        <div class="row">
+          <button class="act warm" id="btnDrop">放球（x = 0 輕放）</button>
+          <button class="act" id="btnStart" disabled>開始（球過 10 cm）</button>
+          <button class="act" id="btnLap" disabled>分段</button>
+          <button class="act sec" id="btnStop" disabled>停止</button>
+          <button class="act sec" id="btnMagnet" disabled>強力磁鐵回收</button>
+          <button class="act sec" id="btnReset">碼錶歸零</button>
+        </div>
+        <div class="lapbox" id="lapBox">碼錶待命。按「放球」後盯住 x = 10.00 cm 的橡皮筋，球通過瞬間按「開始」。</div>
+        <div id="dropMsg" class="note">每次落球後需用強力磁鐵沿管外把鋼珠吸回管口，才能進行下一次。</div>
+
+        <h3>原始數據　直徑 <span id="tabDia">4</span> mm</h3>
+        <p style="font-size:12.5px;color:var(--sub);">t 為從 x = 10.00 cm 起算之累計時間（s）；平均速度 v̄ = (x − 10.00)/t̄。可直接編輯儲存格。</p>
+        <div style="overflow-x:auto;">
+          <table id="dataTable"></table>
+        </div>
+        <div class="row">
+          <button class="act sec" id="btnClearBall">清除本球徑數據</button>
+          <span id="progress" style="font-size:13px;color:var(--sub);"></span>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 4 ================= -->
+<section id="t4" class="tab">
+  <div class="card">
+    <h2>第二部分（作圖）　平均速度對距離的關係圖　＋　第三部分 (1)</h2>
+    <p class="q">「對每個不同直徑的小球，在方格紙上作平均速度對距離的關係圖共五個。」
+       「請由速度–距離關係圖來判斷，對不同直徑的球而言，其終端速度有何變化？（2 分）」</p>
+    <div id="t4empty" class="warnbox">尚無資料。請先到分頁三完成落球計時。</div>
+    <div id="t4body" style="display:none;">
+      <h3>五個平均速度–距離圖（試題要求）</h3>
+      <div id="vxCharts" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(290px,1fr));"></div>
+      <div id="vxNote" class="note"></div>
+    </div>
+  </div>
+
+  <div class="card" id="t4card2" style="display:none;">
+    <h2>兩種取 v<sub>t</sub> 的方法並列對照</h2>
+    <p class="q">左圖：試題的平均速度法 v̄ = Δx / t̄。右圖：距離對時間作圖，以最小平方法取斜率。</p>
+    <div class="grid g2">
+      <div>
+        <h3>方法 A　平均速度法</h3>
+        <p style="font-size:13px;">取五個 v̄ 的平均值作為 v<sub>t</sub>。這是試題字面要求的做法。</p>
+        <div id="chartAvg"></div>
+      </div>
+      <div>
+        <h3>方法 B　Δx–t̄ 迴歸法</h3>
+        <p style="font-size:13px;">斜率即 v<sub>t</sub>；截距反映按錶的系統性時間偏移。</p>
+        <div id="chartXT"></div>
+      </div>
+    </div>
+    <h3>匯總</h3>
+    <div style="overflow-x:auto;"><table id="vtTable"></table></div>
+    <div id="vtNote" class="note"></div>
+  </div>
+</section>
+
+<!-- ================= TAB 5 ================= -->
+<section id="t5" class="tab">
+  <div class="card">
+    <h2>第三部分 (2)　將 v<sub>t</sub> 對 R 作圖，求甘油的黏滯係數 η（8 分）</h2>
+    <div id="t5empty" class="warnbox">尚無足夠資料。請先在分頁三至少完成兩種球徑的量測。</div>
+    <div id="t5body" style="display:none;">
+      <div class="row">
+        <label>v<sub>t</sub> 取法</label>
+        <select id="vtMethod">
+          <option value="reg">方法 B：Δx–t̄ 迴歸斜率（建議）</option>
+          <option value="avg">方法 A：平均速度法</option>
+        </select>
+        <label style="margin-left:12px;">代入常數</label>
+        <select id="constSel">
+          <option value="exam">試題給定值（ρ<sub>鐵</sub>=7.7、ρ<sub>甘油</sub>=1.258、g=10）</option>
+          <option value="exact">精確值（ρ<sub>鐵</sub>=7.81、ρ 由溫度定、g=9.807）</option>
+        </select>
+      </div>
+
+      <div class="grid g2">
+        <div>
+          <h3>v<sub>t</sub> 對 R 作圖</h3>
+          <div id="chartVR"></div>
+          <div class="note">v<sub>t</sub> ∝ R² 是二次曲線，直接對 R 作圖無法用斜率求 η。</div>
+        </div>
+        <div>
+          <h3>v<sub>t</sub> 對 R² 作圖（可線性化）</h3>
+          <div id="chartVR2"></div>
+          <div id="fitNote" class="note"></div>
+        </div>
+      </div>
+
+      <h3>殘差圖：資料真的落在直線上嗎？</h3>
+      <p style="font-size:13px;">殘差 = 量到的 v<sub>t</sub> − 擬合直線的預測值。誤差棒為各點 v<sub>t</sub> 自身的標準誤。
+         若資料只有隨機誤差，殘差應<b>在 0 上下隨機散布</b>、且大多落在誤差棒範圍內；
+         若殘差呈現<b>有規律的形狀</b>（例如兩端為負、中間為正的 ∩ 形），代表直線模型本身不對。</p>
+      <div class="grid g2">
+        <div id="chartResid"></div>
+        <div>
+          <div style="overflow-x:auto;"><table id="residTable"></table></div>
+          <div id="residNote" class="note"></div>
+        </div>
+      </div>
+
+      <h3>由斜率反推 η</h3>
+      <div class="eq">k ＝ 2g(ρ<sub>球</sub> − ρ<sub>液</sub>) ⁄ (9η)　⟹　η ＝ 2g(ρ<sub>球</sub> − ρ<sub>液</sub>) ⁄ (9k)</div>
+      <div style="overflow-x:auto;"><table id="etaTable"></table></div>
+      <div id="etaNote" class="note"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 6 ================= -->
+<section id="t6" class="tab">
+  <div class="card">
+    <h2>誤差分析與真值揭曉</h2>
+    <p class="q">先自己寫完誤差分析，再按下揭曉。真值在每次開啟本頁面時隨機抽樣，事先看答案就失去意義了。</p>
+    <div class="row">
+      <button class="act warm" id="btnReveal">揭曉真值</button>
+      <button class="act sec" id="btnFrancis" style="display:none;">以 Francis 因子修正後重新迴歸</button>
+    </div>
+    <div id="revealBox"></div>
+  </div>
+
+  <div class="card">
+    <h2>誤差來源檢核表</h2>
+    <p class="q">寫誤差分析時可對照這份清單，判斷哪些是系統誤差（有方向）、哪些是隨機誤差（可用重複測量縮小）。</p>
+    <div id="errList"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ============================================================
+   真值（每次載入隨機抽樣，學生看不到）
+   ============================================================ */
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+// Cheng (2008) 甘油–水混合物黏度相關式，回傳 Pa·s
+function chengViscosity(T,Cm){
+  const muW=1.790*Math.exp((-1230-T)*T/(36100+360*T));      // mPa·s
+  const muG=12100*Math.exp((-1233+T)*T/(9900+70*T));        // mPa·s
+  const a=0.705-0.0017*T;
+  const b=(4.9+0.036*T)*Math.pow(a,2.5);
+  const alpha=1-Cm+(a*b*Cm*(1-Cm))/(a*Cm+b*(1-Cm));
+  return Math.pow(muW,alpha)*Math.pow(muG,1-alpha)/1000;
+}
+function mixDensity(T,Cm){
+  const rhoG=1261-0.65*(T-20), rhoW=998-0.25*(T-20);
+  return 1/(Cm/rhoG+(1-Cm)/rhoW);
+}
+// Francis (1933) 管壁修正：v_實測 / v_無限介質
+function francisK(lam){return Math.pow((1-lam)/(1-0.475*lam),4);}
+
+const TRUTH={};
+function sampleTruth(){
+  TRUTH.T=Math.round(rnd(20,28)*10)/10;          // 室溫 °C
+  TRUTH.Cm=rnd(0.985,0.995);                     // 甘油質量分率（吸濕）
+  TRUTH.eta=chengViscosity(TRUTH.T,TRUTH.Cm);    // Pa·s
+  TRUTH.rhoF=mixDensity(TRUTH.T,TRUTH.Cm);       // kg/m³
+  TRUTH.rhoS=7810;                               // 軸承鋼實際密度 kg/m³（試題給 7.7 為近似）
+  TRUTH.g=9.80665;
+}
+sampleTruth();
+
+/* ============================================================
+   器材與狀態
+   ============================================================ */
+const TUBE={len:60, innerD:2.40, wallT:0.30};    // cm（innerD 由學生量測，可調）
+function area(){return Math.PI*Math.pow(TUBE.innerD/2,2);}   // cm²
+const DIAMS=[4,5,6,7,8];
+const NTRIAL=5;
+const MKN=['①','②','③','④','⑤'];
+
+const ST={
+  tilt:2.0, clamped:false, poured:0, liquidTop:0, liquidBottom:0,
+  startMark:{nom:10.00, act:10.00},
+  marks:[18,26,34,42,50].map(v=>({nom:v, act:v})),
+  data:{}, // data[d][posIdx][trial] = 秒數 or null
+  ball:{dia:4, state:'idle', t0:0, drop:null, y:0}
+};
+DIAMS.forEach(d=>{ST.data[d]=ST.marks.map(()=>Array(NTRIAL).fill(null));});
+
+function liquidHeight(){return ST.poured/area();}      // cm
+// 傾斜 → 球側向漂移 ≈ L·tanθ，接近管壁後偏心使阻力上升（Famularo 偏心修正量級），飽和於 −16%
+function tiltFactor(dia){
+  const th=ST.tilt*Math.PI/180;
+  const clear=(TUBE.innerD-dia/10)/2;                  // cm，球心可偏移的間隙
+  const drift=40*Math.tan(th);                         // cm，典型 40 cm 落距的側向漂移
+  const f=drift/(drift+Math.max(clear,0.05));          // 0→1 平滑飽和
+  return 1-0.16*f;
+}
+function ballPhysics(dia){
+  const R=dia/2000;                                    // m
+  const Rt=TUBE.innerD/200;                            // m
+  const lam=R/Rt;
+  const K=francisK(lam);
+  const vS=2*R*R*TRUTH.g*(TRUTH.rhoS-TRUTH.rhoF)/(9*TRUTH.eta);   // m/s 無限介質
+  const vt=vS*K*tiltFactor(dia);
+  const tau=2*TRUTH.rhoS*R*R*K/(9*TRUTH.eta);
+  const Re=TRUTH.rhoF*vt*2*R/TRUTH.eta;
+  return {R,lam,K,vS,vt,tau,Re};
+}
+function xOfT(t,p,jit){                                // 回傳 cm
+  const vt=p.vt*jit;
+  return 100*(vt*(t-p.tau*(1-Math.exp(-t/p.tau))));
+}
+function tOfX(x,p,jit){                                // 數值反解，cm → s
+  const vt=p.vt*jit, xm=x/100;
+  let t=xm/vt+p.tau;
+  for(let i=0;i<40;i++){
+    const f=vt*(t-p.tau*(1-Math.exp(-t/p.tau)))-xm;
+    const df=vt*(1-Math.exp(-t/p.tau));
+    t-=f/df;
+  }
+  return t;
+}
+
+/* ============================================================
+   分頁切換
+   ============================================================ */
+document.querySelectorAll('nav button[data-tab]').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+    if(b.dataset.tab==='t3') refreshLab();
+    if(b.dataset.tab==='t2') drawSetup();
+    if(b.dataset.tab==='t4'||b.dataset.tab==='t5'||b.dataset.tab==='t6') refreshAnalysis();
+  };
+});
+
+/* ============================================================
+   TAB 1：受力圖
+   ============================================================ */
+const vSlider=document.getElementById('vSlider');
+function drawForces(){
+  const f=vSlider.value/100;
+  document.getElementById('vFrac').textContent=f.toFixed(2);
+  // 以終端速度為基準：W = 1.0, Fb = rhoF/rhoS, Fd = (W-Fb)*f
+  const W=1.0, Fb=TRUTH.rhoF/TRUTH.rhoS, Fd=(W-Fb)*f;
+  const S=110; // 像素 / 單位力
+  const g=document.getElementById('forceArrows');
+  const cx=190, cy=165;
+  function arrow(x,y,dy,color,label,val){
+    return `<line x1="${x}" y1="${y}" x2="${x}" y2="${y+dy}" stroke="${color}" stroke-width="3.5" marker-end="url(#ah)"/>`
+         + `<text x="${x+ (dy>0?8:8)}" y="${y+dy/2}" font-size="12.5" fill="${color}">${label} = ${val.toFixed(2)} mg</text>`;
+  }
+  let s='';
+  s+=arrow(cx,cy+22,W*S,'#b3282d','mg',W);
+  s+=arrow(cx-55,cy-22,-Fb*S,'#1f6f8b','F_b',Fb);
+  if(Fd>0.002) s+=arrow(cx+55,cy-22,-Fd*S,'#2e7d52','F_d',Fd);
+  else s+=`<text x="${cx+63}" y="${cy-30}" font-size="12.5" fill="#8c98a4">F_d = 0</text>`;
+  const net=W-Fb-Fd;
+  s+=`<text x="12" y="322" font-size="12.5" fill="#5b6b7c">合力 = ${net.toFixed(3)} mg　（向下為正）</text>`;
+  g.innerHTML=s;
+  const m=document.getElementById('forceMsg');
+  if(f<0.02){m.className='note';m.innerHTML='v = 0：黏滯力為零，合力 = 重力 − 浮力，小球開始加速。';}
+  else if(f<0.99){m.className='note';m.innerHTML=`加速中：速度增加使 F<sub>d</sub> 變大，合力隨之減小（目前為靜止時合力的 ${((1-f)*100).toFixed(0)}%）。`;}
+  else{m.className='okbox';m.innerHTML='達終端速度：mg = F<sub>b</sub> + F<sub>d</sub>，合力為零，此後等速下落。';}
+}
+vSlider.oninput=drawForces;
+drawForces();
+
+/* ============================================================
+   TAB 2：裝置組裝
+   ============================================================ */
+const tiltSlider=document.getElementById('tiltSlider');
+const pourSlider=document.getElementById('pourSlider');
+
+tiltSlider.oninput=()=>{
+  ST.tilt=tiltSlider.value/10;
+  document.getElementById('tiltVal').textContent=ST.tilt.toFixed(1);
+  const m=document.getElementById('tiltMsg');
+  const pen8=(1-tiltFactor(8))*100, pen4=(1-tiltFactor(4))*100;
+  if(ST.tilt<=0.3){m.className='okbox';m.innerHTML=`垂直度良好：鉛垂線與管身平行，小球可沿管軸中心下落（8 mm 球僅偏低 ${pen8.toFixed(1)}%）。`;}
+  else if(ST.tilt<=1.0){m.className='note';m.innerHTML=`略有傾斜：落距 40 cm 的側向漂移已達 ${(40*Math.tan(ST.tilt*Math.PI/180)).toFixed(2)} cm，8 mm 球終端速度偏低 ${pen8.toFixed(1)}%，建議繼續校正。`;}
+  else{m.className='warnbox';m.innerHTML=`傾角 ${ST.tilt.toFixed(1)}°：小球下落途中已貼上管壁，偏心使阻力上升 — 8 mm 球偏低 ${pen8.toFixed(1)}%、4 mm 球偏低 ${pen4.toFixed(1)}%。<b>各球徑受影響程度不同</b>，會直接扭曲 v<sub>t</sub>–R² 的斜率。`;}
+  drawSetup(); refreshLab();
+};
+document.getElementById('btnClamp').onclick=()=>{
+  ST.clamped=!ST.clamped;
+  document.getElementById('clampState').textContent=ST.clamped?'已固定':'未固定';
+  document.getElementById('btnClamp').textContent=ST.clamped?'鬆開固定夾':'夾緊固定夾';
+  drawSetup(); refreshLab();
+};
+const tubeSlider=document.getElementById('tubeSlider');
+tubeSlider.oninput=()=>{
+  TUBE.innerD=+tubeSlider.value/100;
+  document.getElementById('tubeVal').textContent=TUBE.innerD.toFixed(2);
+  document.getElementById('areaVal').textContent=area().toFixed(2);
+  DIAMS.forEach(d=>{ST.data[d]=ST.marks.map(()=>Array(NTRIAL).fill(null));});
+  updateTubeMsg(); pourSlider.oninput(); buildMarkTable();
+};
+function updateTubeMsg(){
+  const m=document.getElementById('tubeMsg');
+  const hFull=250/area();
+  const lam8=0.8/TUBE.innerD, lam4=0.4/TUBE.innerD;
+  const K8=francisK(lam8), K4=francisK(lam4);
+  const txt=`250 mL 可灌 <b>${hFull.toFixed(1)} cm</b> 高　|　8 mm 球 λ = ${lam8.toFixed(3)}（K = ${K8.toFixed(3)}）、`
+    +`4 mm 球 λ = ${lam4.toFixed(3)}（K = ${K4.toFixed(3)}）`;
+  if(hFull>TUBE.len-3){
+    m.className='warnbox';
+    m.innerHTML=txt+`<br>管太細：250 mL 會溢出 60 cm 管，最多只能倒約 ${Math.floor(area()*(TUBE.len-4)/10)*10} mL。管壁效應也最嚴重。`;
+  }else if(hFull<22){
+    m.className='warnbox';
+    m.innerHTML=txt+`<br>管太粗：液柱只有 ${hFull.toFixed(1)} cm，扣掉起點 10 cm 與管底 3 cm 後可用落距不足 10 cm，計時誤差會被放大。`;
+  }else{
+    m.className='note';
+    m.innerHTML=txt+`<br>K 值跨度 ${(K4/K8).toFixed(2)} 倍 — 這個跨度愈大，v<sub>t</sub>–R² 圖彎得愈厲害，求得的 η 偏高愈多。`;
+  }
+}
+pourSlider.oninput=()=>{
+  ST.poured=+pourSlider.value;
+  document.getElementById('pourVal').textContent=ST.poured;
+  const h=liquidHeight();
+  const m=document.getElementById('pourMsg');
+  const usable=h-3-10;
+  if(ST.poured===0){m.className='note';m.textContent='尚未注入甘油。';}
+  else if(h>TUBE.len-2){m.className='warnbox';m.innerHTML=`液柱高 ${h.toFixed(1)} cm，<b>甘油溢出管口</b>！須請監考人員補充，補充兩次以上扣分。`;}
+  else if(usable<8){m.className='warnbox';m.innerHTML=`液柱高 ${h.toFixed(1)} cm，扣掉起點 10 cm 與管底 3 cm 後可用落距僅 ${usable.toFixed(1)} cm，太短。`;}
+  else{m.className='okbox';m.innerHTML=`液柱高 ${h.toFixed(1)} cm，可用落距 ${usable.toFixed(1)} cm（x = 10.00 ～ ${(h-3).toFixed(1)} cm）。`;}
+  drawSetup(); refreshLab(); refreshAnalysis();
+};
+
+function buildMarkTable(){
+  const t=document.getElementById('markTable');
+  let s='<tr><th>記號</th><th>讀數 x (cm)</th><th>記號</th><th>讀數 x (cm)</th></tr>';
+  s+='<tr><td>起點</td><td>10.00（固定）</td><td>①</td><td><input type="number" step="0.05" data-mk="0" value="'+ST.marks[0].nom.toFixed(2)+'"></td></tr>';
+  s+='<tr><td>②</td><td><input type="number" step="0.05" data-mk="1" value="'+ST.marks[1].nom.toFixed(2)+'"></td>'
+    +'<td>③</td><td><input type="number" step="0.05" data-mk="2" value="'+ST.marks[2].nom.toFixed(2)+'"></td></tr>';
+  s+='<tr><td>④</td><td><input type="number" step="0.05" data-mk="3" value="'+ST.marks[3].nom.toFixed(2)+'"></td>'
+    +'<td>⑤</td><td><input type="number" step="0.05" data-mk="4" value="'+ST.marks[4].nom.toFixed(2)+'"></td></tr>';
+  t.innerHTML=s;
+  t.querySelectorAll('input').forEach(inp=>{
+    inp.onchange=()=>{
+      const i=+inp.dataset.mk;
+      let v=Math.round(parseFloat(inp.value)*20)/20;   // 直尺可讀至 0.05 cm
+      if(isNaN(v)) v=ST.marks[i].nom;
+      const hi=Math.max(11,liquidHeight()-3);
+      v=Math.min(hi,Math.max(10.5,v));
+      ST.marks[i].nom=v;
+      ST.marks[i].act=v+0.03*gauss();                  // 橡皮筋套環標定誤差
+      inp.value=v.toFixed(2);
+      DIAMS.forEach(d=>{ST.data[d][i]=Array(NTRIAL).fill(null);});
+      drawSetup(); refreshLab(); refreshAnalysis();
+    };
+  });
+}
+document.getElementById('btnAutoMark').onclick=()=>{
+  const hi=liquidHeight()-3;
+  if(hi<=11){alert('液柱太淺，請先注入足夠的甘油或改用較細的管。');return;}
+  for(let i=0;i<5;i++){
+    const v=Math.round((10+(hi-10)*(i+1)/5)*20)/20;
+    ST.marks[i].nom=v; ST.marks[i].act=v+0.03*gauss();
+  }
+  DIAMS.forEach(d=>{ST.data[d]=ST.marks.map(()=>Array(NTRIAL).fill(null));});
+  buildMarkTable(); drawSetup(); refreshLab(); refreshAnalysis();
+};
+buildMarkTable();
+ST.marks.forEach(m=>{m.act=m.nom+0.03*gauss();});
+ST.startMark.act=10+0.03*gauss();
+updateTubeMsg();
+
+function drawSetup(){
+  const svg=document.getElementById('setupSvg');
+  const PX=9.0, top=40, cx=200;
+  const h=liquidHeight();
+  const wIn=TUBE.innerD*PX, wOut=(TUBE.innerD+2*TUBE.wallT)*PX;
+  const tiltDeg=ST.tilt;
+  let s=`<defs><linearGradient id="gly" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#cbb96f"/><stop offset="35%" stop-color="#e6d79a"/>
+    <stop offset="100%" stop-color="#bda85c"/></linearGradient></defs>`;
+  // 鉛垂線
+  s+=`<line x1="80" y1="${top-15}" x2="80" y2="${top+TUBE.len*PX+10}" stroke="#7a6a52" stroke-width="1.2" stroke-dasharray="3 3"/>`;
+  s+=`<circle cx="80" cy="${top+TUBE.len*PX+14}" r="6" fill="#7b7f86"/>`;
+  s+=`<text x="46" y="${top-22}" font-size="11" fill="#5b6b7c">鉛垂線</text>`;
+  // 管（以傾角旋轉）
+  s+=`<g transform="rotate(${tiltDeg} ${cx} ${top+TUBE.len*PX})">`;
+  s+=`<rect x="${cx-wOut/2}" y="${top}" width="${wOut}" height="${TUBE.len*PX}" rx="3" fill="#eef2f5" stroke="#9fb0bd" stroke-width="1.2"/>`;
+  s+=`<rect x="${cx-wIn/2}" y="${top}" width="${wIn}" height="${TUBE.len*PX}" fill="#fafcfd"/>`;
+  if(h>0){
+    const yTop=top+(TUBE.len-h)*PX;
+    s+=`<rect x="${cx-wIn/2}" y="${yTop}" width="${wIn}" height="${h*PX}" fill="url(#gly)"/>`;
+    s+=`<line x1="${cx-wIn/2}" y1="${yTop}" x2="${cx+wIn/2}" y2="${yTop}" stroke="#a08f4d" stroke-width="1.5"/>`;
+    s+=`<text x="${cx+wOut/2+6}" y="${yTop+4}" font-size="11" fill="#7a6d3d">x = 0</text>`;
+    // 標記
+    const drawMk=(xcm,lab,col)=>{
+      const y=yTop+xcm*PX;
+      if(y>top+TUBE.len*PX) return '';
+      return `<rect x="${cx-wOut/2-3}" y="${y-2.5}" width="${wOut+6}" height="5" rx="2.5" fill="none" stroke="${col}" stroke-width="2"/>`
+           + `<text x="${cx+wOut/2+9}" y="${y+4}" font-size="10.5" fill="${col}">${lab}</text>`;
+    };
+    s+=drawMk(ST.startMark.act,'10.00 起點','#b3282d');
+    ST.marks.forEach((m,i)=>{ s+=drawMk(m.act,['①','②','③','④','⑤'][i]+' '+m.nom.toFixed(2),'#1f6f8b'); });
+  }
+  s+=`</g>`;
+  // 支架
+  s+=`<rect x="30" y="${top+TUBE.len*PX+22}" width="340" height="12" rx="3" fill="#8b7355"/>`;
+  if(ST.clamped){
+    s+=`<rect x="${cx-wOut/2-16}" y="${top+150}" width="${wOut+32}" height="16" rx="4" fill="#5a6b78"/>`;
+    s+=`<text x="${cx+wOut/2+20}" y="${top+162}" font-size="11" fill="#5a6b78">固定夾</text>`;
+  }
+  svg.innerHTML=s;
+
+  const st=document.getElementById('setupStatus');
+  const ok=ST.clamped && ST.poured>=200 && liquidHeight()<=TUBE.len-2;
+  st.className=ok?'okbox':'note';
+  st.innerHTML=`傾角 ${ST.tilt.toFixed(1)}°　|　固定夾：${ST.clamped?'已固定':'未固定'}　|　甘油 ${ST.poured} mL（液柱 ${h.toFixed(1)} cm）`
+    +(ok?'　→ 可前往分頁三進行落球計時。':'　→ 尚未就緒。');
+}
+drawSetup();
+
+/* ============================================================
+   TAB 3：落球計時
+   ============================================================ */
+const ballSel=document.getElementById('ballSel'),
+      modeSel=document.getElementById('modeSel'),
+      targetSel=document.getElementById('targetSel'),
+      swDisp=document.getElementById('swDisplay'),
+      lapBox=document.getElementById('lapBox'),
+      dropMsg=document.getElementById('dropMsg');
+const bDrop=document.getElementById('btnDrop'), bStart=document.getElementById('btnStart'),
+      bLap=document.getElementById('btnLap'), bStop=document.getElementById('btnStop'),
+      bMag=document.getElementById('btnMagnet'), bRst=document.getElementById('btnReset');
+
+let SW={running:false, t0:0, laps:[], recording:false};
+let ANIM=null;
+
+function readyToRun(){return ST.clamped && ST.poured>=200 && liquidHeight()<=TUBE.len-2;}
+
+function refreshLab(){
+  const ok=readyToRun();
+  document.getElementById('notReady').style.display=ok?'none':'block';
+  document.getElementById('labArea').style.display=ok?'block':'none';
+  if(!ok) return;
+  buildTargetSel(); buildDataTable(); drawTube(); updateProgress();
+}
+function buildTargetSel(){
+  targetSel.innerHTML=ST.marks.map((m,i)=>`<option value="${i}">${['①','②','③','④','⑤'][i]}　x = ${m.nom.toFixed(2)} cm</option>`).join('');
+}
+ballSel.onchange=()=>{ST.ball.dia=+ballSel.value;document.getElementById('tabDia').textContent=ballSel.value;
+  resetDrop();buildDataTable();drawTube();updateProgress();};
+modeSel.onchange=()=>{
+  document.getElementById('singleTargetWrap').style.display=modeSel.value==='single'?'inline':'none';
+  resetDrop();
+};
+
+function resetDrop(){
+  if(ANIM){cancelAnimationFrame(ANIM);ANIM=null;}
+  ST.ball.state='idle'; ST.ball.y=0; ST.ball.drop=null;
+  SW={running:false,t0:0,laps:[],recording:false};
+  swDisp.textContent='0.00';
+  lapBox.textContent='碼錶待命。按「放球」後盯住 x = 10.00 cm 的橡皮筋，球通過瞬間按「開始」。';
+  bDrop.disabled=false; bStart.disabled=true; bLap.disabled=true; bStop.disabled=true; bMag.disabled=true;
+  drawTube();
+}
+bRst.onclick=()=>{SW={running:false,t0:0,laps:[],recording:false};swDisp.textContent='0.00';
+  bStart.disabled=(ST.ball.state!=='falling');bLap.disabled=true;bStop.disabled=true;
+  lapBox.textContent='碼錶已歸零。';};
+
+bDrop.onclick=()=>{
+  const p=ballPhysics(ST.ball.dia);
+  ST.ball.drop={p, jit:1+0.010*gauss(), t0:performance.now()};
+  ST.ball.state='falling'; ST.ball.y=0;
+  bDrop.disabled=true; bStart.disabled=false;
+  lapBox.textContent='小球下落中… 通過 x = 10.00 cm 的橡皮筋時按「開始」。';
+  animate();
+};
+function animate(){
+  const d=ST.ball.drop; if(!d) return;
+  const t=(performance.now()-d.t0)/1000;
+  const hLiq=liquidHeight();
+  let x=xOfT(t,d.p,d.jit);
+  const xmax=hLiq-1.0;                       // 球停在管底附近
+  if(x>=xmax){x=xmax; ST.ball.state='bottom';
+    bStart.disabled=true;bLap.disabled=true;bStop.disabled=true;bMag.disabled=false;
+    if(SW.running){SW.running=false;lapBox.innerHTML+='<br>球已到底，碼錶停止。';finishRecord();}
+  }
+  ST.ball.y=x;
+  if(SW.running) swDisp.textContent=((performance.now()-SW.t0)/1000).toFixed(2);
+  drawTube();
+  if(ST.ball.state==='falling') ANIM=requestAnimationFrame(animate);
+}
+bStart.onclick=()=>{
+  SW.running=true; SW.t0=performance.now(); SW.laps=[];
+  bStart.disabled=true; bStop.disabled=false;
+  if(modeSel.value==='lap'){bLap.disabled=false;lapBox.textContent='計時中：每通過一個橡皮筋記號按一次「分段」。';}
+  else{lapBox.textContent='計時中：通過目標位置時按「停止」。';}
+};
+bLap.onclick=()=>{
+  if(!SW.running) return;
+  const t=(performance.now()-SW.t0)/1000;
+  SW.laps.push(Math.round(t*100)/100);
+  renderLaps();
+  if(SW.laps.length>=ST.marks.length){SW.running=false;bLap.disabled=true;bStop.disabled=true;finishRecord();}
+};
+bStop.onclick=()=>{
+  if(!SW.running) return;
+  const t=(performance.now()-SW.t0)/1000;
+  SW.running=false; bLap.disabled=true; bStop.disabled=true;
+  if(modeSel.value==='single'){SW.laps=[Math.round(t*100)/100];}
+  renderLaps(); finishRecord();
+};
+function renderLaps(){
+  const names=['①','②','③','④','⑤'];
+  if(modeSel.value==='single'){
+    const i=+targetSel.value;
+    lapBox.innerHTML=`目標 ${names[i]} x = ${ST.marks[i].nom.toFixed(2)} cm　t = ${SW.laps[0]?SW.laps[0].toFixed(2):'--'} s`;
+  }else{
+    lapBox.innerHTML=SW.laps.map((t,i)=>`${names[i]}　x = ${ST.marks[i].nom.toFixed(2)} cm　t = ${t.toFixed(2)} s`).join('<br>');
+  }
+}
+function finishRecord(){
+  const d=ST.ball.dia;
+  const put=(posIdx,t)=>{
+    const arr=ST.data[d][posIdx];
+    const k=arr.findIndex(v=>v===null);
+    if(k<0){dropMsg.className='warnbox';dropMsg.textContent='該位置已記滿 5 次，如需重測請先清除。';return;}
+    arr[k]=t;
+  };
+  if(modeSel.value==='single'){ if(SW.laps.length) put(+targetSel.value,SW.laps[0]); }
+  else{ SW.laps.forEach((t,i)=>{if(i<ST.marks.length) put(i,t);}); }
+  buildDataTable(); updateProgress(); refreshAnalysis();
+  dropMsg.className='okbox'; dropMsg.innerHTML='已記錄。請用<b>強力磁鐵</b>沿管外將鋼珠吸回管口後再進行下一次。';
+  bMag.disabled=(ST.ball.state!=='bottom' && ST.ball.state!=='falling');
+  bMag.disabled=false;
+}
+bMag.onclick=()=>{
+  const steps=30; let i=0; const y0=ST.ball.y;
+  bMag.disabled=true;
+  (function up(){
+    i++; ST.ball.y=y0*(1-i/steps); drawTube();
+    if(i<steps) requestAnimationFrame(up);
+    else{resetDrop();dropMsg.className='note';dropMsg.textContent='鋼珠已回收，可進行下一次落球。';}
+  })();
+};
+
+function drawTube(){
+  const svg=document.getElementById('tubeSvg'); if(!svg) return;
+  const PX=9.0, top=30, cx=120;
+  const h=liquidHeight();
+  const wIn=TUBE.innerD*PX, wOut=(TUBE.innerD+2*TUBE.wallT)*PX;
+  const yTop=top+(TUBE.len-h)*PX;
+  let s=`<defs><linearGradient id="gly2" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#cbb96f"/><stop offset="35%" stop-color="#e6d79a"/>
+    <stop offset="100%" stop-color="#bda85c"/></linearGradient>
+    <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#eef2f6"/><stop offset="45%" stop-color="#94a3b1"/>
+    <stop offset="100%" stop-color="#46535f"/></linearGradient></defs>`;
+  s+=`<rect x="${cx-wOut/2}" y="${top}" width="${wOut}" height="${TUBE.len*PX}" rx="3" fill="#eef2f5" stroke="#9fb0bd"/>`;
+  s+=`<rect x="${cx-wIn/2}" y="${top}" width="${wIn}" height="${TUBE.len*PX}" fill="#fafcfd"/>`;
+  s+=`<rect x="${cx-wIn/2}" y="${yTop}" width="${wIn}" height="${h*PX}" fill="url(#gly2)"/>`;
+  s+=`<line x1="${cx-wIn/2-4}" y1="${yTop}" x2="${cx+wIn/2+4}" y2="${yTop}" stroke="#a08f4d" stroke-width="1.5"/>`;
+  s+=`<text x="${cx+wOut/2+6}" y="${yTop+4}" font-size="10.5" fill="#7a6d3d">x = 0</text>`;
+  const mk=(xcm,lab,col,w)=>{const y=yTop+xcm*PX;
+    return `<rect x="${cx-wOut/2-3}" y="${y-2.5}" width="${wOut+6}" height="5" rx="2.5" fill="none" stroke="${col}" stroke-width="${w}"/>`
+         +`<text x="${cx+wOut/2+9}" y="${y+4}" font-size="10" fill="${col}">${lab}</text>`;};
+  // 記號畫在「橡皮筋的實際位置」(.act)，標籤顯示「直尺讀數」(.nom)：兩者的差就是標定誤差
+  s+=mk(ST.startMark.act,'10.00','#b3282d',2.4);
+  ST.marks.forEach((m,i)=>{s+=mk(m.act,['①','②','③','④','⑤'][i]+' '+m.nom.toFixed(2),'#1f6f8b',2);});
+  // 鋼珠
+  if(ST.ball.state!=='idle'){
+    const rpx=(ST.ball.dia/20)*PX;   // dia mm → cm/2 → px
+    s+=`<circle cx="${cx}" cy="${yTop+ST.ball.y*PX}" r="${rpx}" fill="url(#sg)" stroke="#39434d" stroke-width=".6"/>`;
+  }else{
+    const rpx=(ST.ball.dia/20)*PX;
+    s+=`<circle cx="${cx}" cy="${yTop-rpx-3}" r="${rpx}" fill="url(#sg)" stroke="#39434d" stroke-width=".6" opacity=".8"/>`;
+  }
+  // 放大橫截面 6×
+  const M=6, mx=235, my=110;
+  const RwIn=TUBE.innerD*M*3, Rball=(ST.ball.dia/10)*M*3;
+  s+=`<text x="${mx-RwIn/2}" y="${my-RwIn/2-8}" font-size="10" fill="#5b6b7c">橫截面 (6×)</text>`;
+  s+=`<circle cx="${mx}" cy="${my}" r="${RwIn/2}" fill="url(#gly2)" stroke="#9fb0bd" stroke-width="3"/>`;
+  s+=`<circle cx="${mx}" cy="${my}" r="${Rball/2}" fill="url(#sg)" stroke="#39434d" stroke-width=".8"/>`;
+  const p=ballPhysics(ST.ball.dia);
+  s+=`<text x="${mx-RwIn/2-6}" y="${my+RwIn/2+16}" font-size="10" fill="#5b6b7c">R/R管 = ${p.lam.toFixed(3)}</text>`;
+  svg.innerHTML=s;
+}
+
+function buildDataTable(){
+  const d=ST.ball.dia, names=['①','②','③','④','⑤'];
+  let s='<tr><th rowspan="2">位置</th><th rowspan="2">x (cm)</th><th rowspan="2">x−10 (cm)</th>'
+       +'<th colspan="5">計時 t (s)</th><th rowspan="2">t̄ (s)</th><th rowspan="2">σ (s)</th><th rowspan="2">v̄ (cm/s)</th></tr>'
+       +'<tr>'+[1,2,3,4,5].map(i=>`<th>${i}</th>`).join('')+'</tr>';
+  ST.marks.forEach((m,i)=>{
+    const arr=ST.data[d][i];
+    const vals=arr.filter(v=>v!==null);
+    const mean=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+    const sd=vals.length>1?Math.sqrt(vals.reduce((a,b)=>a+(b-mean)**2,0)/(vals.length-1)):null;
+    const dx=m.nom-10;
+    const v=mean?dx/mean:null;
+    s+=`<tr><td>${names[i]}</td><td>${m.nom.toFixed(2)}</td><td>${dx.toFixed(2)}</td>`;
+    arr.forEach((t,k)=>{s+=`<td><input type="number" step="0.01" data-p="${i}" data-k="${k}" value="${t===null?'':t.toFixed(2)}"></td>`;});
+    s+=`<td>${mean?mean.toFixed(3):'—'}</td><td>${sd?sd.toFixed(3):'—'}</td><td><b>${v?v.toFixed(3):'—'}</b></td></tr>`;
+  });
+  const tb=document.getElementById('dataTable');
+  tb.innerHTML=s;
+  tb.querySelectorAll('input').forEach(inp=>{
+    inp.onchange=()=>{
+      const i=+inp.dataset.p,k=+inp.dataset.k;
+      const v=parseFloat(inp.value);
+      ST.data[ST.ball.dia][i][k]=isNaN(v)?null:v;
+      buildDataTable();updateProgress();refreshAnalysis();
+    };
+  });
+}
+document.getElementById('btnClearBall').onclick=()=>{
+  ST.data[ST.ball.dia]=ST.marks.map(()=>Array(NTRIAL).fill(null));
+  buildDataTable();updateProgress();refreshAnalysis();
+};
+function updateProgress(){
+  let done=0,total=0;
+  DIAMS.forEach(d=>ST.data[d].forEach(a=>a.forEach(v=>{total++;if(v!==null)done++;})));
+  const dd=ST.data[ST.ball.dia].flat().filter(v=>v!==null).length;
+  document.getElementById('progress').textContent=`本球徑 ${dd} / 25 筆　|　全部 ${done} / ${total} 筆`;
+}
+
+/* ============================================================
+   統計與繪圖工具
+   ============================================================ */
+function linreg(pts){
+  const n=pts.length; if(n<2) return null;
+  let sx=0,sy=0,sxx=0,sxy=0;
+  pts.forEach(p=>{sx+=p.x;sy+=p.y;sxx+=p.x*p.x;sxy+=p.x*p.y;});
+  const den=n*sxx-sx*sx; if(Math.abs(den)<1e-18) return null;
+  const m=(n*sxy-sx*sy)/den, b=(sy-m*sx)/n;
+  let ss=0; pts.forEach(p=>{ss+=Math.pow(p.y-m*p.x-b,2);});
+  const s2=n>2?ss/(n-2):0;
+  const ybar=sy/n; let sst=0; pts.forEach(p=>{sst+=Math.pow(p.y-ybar,2);});
+  return {m,b,n,sm:Math.sqrt(s2*n/den),sb:Math.sqrt(s2*sxx/den),r2:sst>0?1-ss/sst:1};
+}
+function linregOrigin(pts){
+  let sxx=0,sxy=0; pts.forEach(p=>{sxx+=p.x*p.x;sxy+=p.x*p.y;});
+  if(sxx<1e-20) return null;
+  const m=sxy/sxx;
+  let ss=0; pts.forEach(p=>{ss+=Math.pow(p.y-m*p.x,2);});
+  const s2=pts.length>1?ss/(pts.length-1):0;
+  return {m,b:0,n:pts.length,sm:Math.sqrt(s2/sxx)};
+}
+function ticks(a,b,n){
+  if(!(b>a)) return [a];
+  const raw=(b-a)/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), nm=raw/mag;
+  const st=(nm<1.5?1:nm<3?2:nm<7?5:10)*mag;
+  const out=[];
+  for(let v=Math.ceil(a/st)*st; v<=b+st*1e-6; v+=st) out.push(+v.toPrecision(12));
+  return out;
+}
+const SERIES=['#1f6f8b','#c85a2b','#2e7d52','#7b4ea3','#b3282d'];
+function svgChart(o){
+  const W=o.w||330,H=o.h||235,L=o.L||58,R=14,T=16,B=42;
+  const pw=W-L-R, ph=H-T-B;
+  const all=[].concat(...o.series.map(s=>s.pts));
+  if(!all.length) return '<div class="note">無資料</div>';
+  let x0=o.xmin!==undefined?o.xmin:0, x1=o.xmax!==undefined?o.xmax:Math.max(...all.map(p=>p.x));
+  let y0=o.ymin!==undefined?o.ymin:0, y1=o.ymax!==undefined?o.ymax:Math.max(...all.map(p=>p.y));
+  if(x1<=x0) x1=x0+1; if(y1<=y0) y1=y0+1;
+  x1+=(x1-x0)*0.08; y1+=(y1-y0)*0.12;
+  const X=v=>L+(v-x0)/(x1-x0)*pw, Y=v=>T+ph-(v-y0)/(y1-y0)*ph;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W*1.35}px;background:#fff;border:1px solid var(--line);border-radius:6px;">`;
+  ticks(x0,x1,5).forEach(v=>{s+=`<line x1="${X(v)}" y1="${T}" x2="${X(v)}" y2="${T+ph}" stroke="#eef2f5"/>`
+    +`<text x="${X(v)}" y="${T+ph+15}" font-size="10" fill="#5b6b7c" text-anchor="middle">${(+v).toPrecision(3)/1}</text>`;});
+  ticks(y0,y1,4).forEach(v=>{s+=`<line x1="${L}" y1="${Y(v)}" x2="${L+pw}" y2="${Y(v)}" stroke="#eef2f5"/>`
+    +`<text x="${L-6}" y="${Y(v)+3.5}" font-size="10" fill="#5b6b7c" text-anchor="end">${(+v).toPrecision(3)/1}</text>`;});
+  s+=`<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="#9fb0bd"/>`
+    +`<line x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}" stroke="#9fb0bd"/>`;
+  o.series.forEach((se,si)=>{
+    const c=se.color||SERIES[si%SERIES.length];
+    if(se.fit){
+      const a=Math.max(x0,0), b2=x1;
+      s+=`<line x1="${X(a)}" y1="${Y(se.fit.m*a+se.fit.b)}" x2="${X(b2)}" y2="${Y(se.fit.m*b2+se.fit.b)}" stroke="${c}" stroke-width="1.6" stroke-dasharray="${se.dash||'5 3'}" opacity=".85"/>`;
+    }
+    if(se.curve){
+      s+='<polyline fill="none" stroke="'+c+'" stroke-width="1.5" stroke-dasharray="2 3" opacity=".7" points="'
+        +se.curve.map(p=>X(p.x)+','+Y(p.y)).join(' ')+'"/>';
+    }
+    se.pts.forEach(p=>{s+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="3.6" fill="${c}" stroke="#fff" stroke-width=".8"/>`;});
+  });
+  s+=`<text x="${L+pw/2}" y="${H-5}" font-size="10.5" fill="#5b6b7c" text-anchor="middle">${o.xlab||''}</text>`;
+  s+=`<text x="11" y="${T+ph/2}" font-size="10.5" fill="#5b6b7c" text-anchor="middle" transform="rotate(-90 11 ${T+ph/2})">${o.ylab||''}</text>`;
+  if(o.title) s+=`<text x="${L}" y="${T-4}" font-size="11" fill="#1d2733" font-weight="600">${o.title}</text>`;
+  return s+'</svg>';
+}
+
+/* ============================================================
+   由原始數據萃取每個球徑的結果
+   ============================================================ */
+function ballResult(d){
+  const pts=[];
+  ST.marks.forEach((m,i)=>{
+    const vals=ST.data[d][i].filter(v=>v!==null&&v>0);
+    if(!vals.length) return;
+    const t=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const sd=vals.length>1?Math.sqrt(vals.reduce((a,b)=>a+(b-t)*(b-t),0)/(vals.length-1)):0;
+    pts.push({x:m.nom-10, t, sd, n:vals.length, v:(m.nom-10)/t});
+  });
+  if(!pts.length) return null;
+  const vAvg=pts.reduce((a,p)=>a+p.v,0)/pts.length;
+  const vSd=pts.length>1?Math.sqrt(pts.reduce((a,p)=>a+(p.v-vAvg)*(p.v-vAvg),0)/(pts.length-1)):0;
+  const fit=linreg(pts.map(p=>({x:p.t,y:p.x})));   // x = v_t·t + b
+  return {d,pts,vAvg,vSd,fit,
+    vReg:fit?fit.m:null, vRegSd:fit?fit.sm:null,
+    delay:(fit&&fit.m>0)?fit.b/fit.m:null};        // 截距換算成時間偏移（秒）
+}
+function allResults(){return DIAMS.map(ballResult).filter(r=>r&&r.pts.length>=2);}
+function vtOf(r){return document.getElementById('vtMethod') && document.getElementById('vtMethod').value==='avg'
+  ? r.vAvg : (r.vReg!==null?r.vReg:r.vAvg);}
+
+/* ============================================================
+   TAB 4
+   ============================================================ */
+function renderT4(){
+  const res=allResults();
+  const has=res.length>0;
+  document.getElementById('t4empty').style.display=has?'none':'block';
+  document.getElementById('t4body').style.display=has?'block':'none';
+  document.getElementById('t4card2').style.display=has?'block':'none';
+  if(!has) return;
+
+  const vmax=Math.max(...res.map(r=>Math.max(...r.pts.map(p=>p.v))));
+  document.getElementById('vxCharts').innerHTML=res.map((r,i)=>
+    '<div>'+svgChart({w:300,h:210,ymax:vmax,
+      title:`直徑 ${r.d} mm`, xlab:'距離 x − 10 (cm)', ylab:'平均速度 v̄ (cm/s)',
+      series:[{pts:r.pts.map(p=>({x:p.x,y:p.v})),color:SERIES[i%5],
+               fit:{m:0,b:r.vAvg},dash:'4 3'}]})
+    +`<div style="font-size:12px;color:var(--sub);text-align:center;">平均 v̄ = ${r.vAvg.toFixed(3)} ± ${r.vSd.toFixed(3)} cm/s</div></div>`
+  ).join('');
+
+  const worst=Math.max(...res.map(r=>r.vSd/r.vAvg*100));
+  let mono=true;
+  for(let i=1;i<res.length;i++) if(res[i].vAvg<=res[i-1].vAvg) mono=false;
+  const n=document.getElementById('vxNote');
+  n.className=(worst>4||!mono)?'warnbox':'okbox';
+  n.innerHTML=`<b>第三部分 (1) 的答案：</b>每一張圖的 v̄ 大致不隨 x 變化（水平線），表示小球在 x = 10 cm 之前就已達終端速度；`
+    +`而五張圖的水平線高度為 ${res.map(r=>r.d+' mm: '+r.vAvg.toFixed(2)).join('、')} cm/s，`
+    +(mono?`隨球徑<b>單調遞增</b>，即<b>球愈大終端速度愈大</b>。`
+          :`<b>並非單調遞增</b> — 至少有一組被雜訊蓋過，建議該球徑重測。`)
+    +`<br>各組 v̄ 在自身平均值附近的起伏最大為 ${worst.toFixed(1)}%。`
+    +(worst>4?`超過 4%，多半是計時次數不足或有異常值，請檢查原始數據。`:`屬合理範圍。`);
+
+  // 方法 A / B 對照圖
+  document.getElementById('chartAvg').innerHTML=svgChart({w:340,h:250,ymax:vmax,
+    xlab:'距離 x − 10 (cm)', ylab:'v̄ (cm/s)',
+    series:res.map((r,i)=>({pts:r.pts.map(p=>({x:p.x,y:p.v})),color:SERIES[i%5],fit:{m:0,b:r.vAvg}}))});
+  document.getElementById('chartXT').innerHTML=svgChart({w:340,h:250,
+    xlab:'平均時間 t̄ (s)', ylab:'距離 x − 10 (cm)',
+    series:res.map((r,i)=>({pts:r.pts.map(p=>({x:p.t,y:p.x})),color:SERIES[i%5],fit:r.fit}))});
+
+  let s='<tr><th>直徑 (mm)</th><th>R (mm)</th><th>方法 A　v̄ 平均 (cm/s)</th><th>A 的標準差</th>'
+       +'<th>方法 B　迴歸斜率 (cm/s)</th><th>斜率標準誤</th><th>迴歸 r²</th><th>截距換算時間偏移 (s)</th><th>A 與 B 相差</th></tr>';
+  res.forEach(r=>{
+    const diff=r.vReg?(r.vAvg-r.vReg)/r.vReg*100:null;
+    s+=`<tr><td>${r.d}</td><td>${(r.d/2).toFixed(1)}</td>`
+      +`<td>${r.vAvg.toFixed(3)}</td><td>${r.vSd.toFixed(3)}</td>`
+      +`<td><b>${r.vReg?r.vReg.toFixed(3):'—'}</b></td><td>${r.vRegSd?r.vRegSd.toFixed(3):'—'}</td>`
+      +`<td>${r.fit?r.fit.r2.toFixed(5):'—'}</td>`
+      +`<td>${r.delay!==null?(-r.delay).toFixed(3):'—'}</td>`
+      +`<td>${diff!==null?(diff>0?'+':'')+diff.toFixed(1)+'%':'—'}</td></tr>`;
+  });
+  document.getElementById('vtTable').innerHTML=s;
+
+  const delays=res.filter(r=>r.delay!==null).map(r=>-r.delay);
+  const dm=delays.length?delays.reduce((a,b)=>a+b,0)/delays.length:0;
+  document.getElementById('vtNote').innerHTML=
+    `<b>為什麼兩種方法會差？</b>按碼錶有反應時間。設按下「開始」比球真正通過晚 δ<sub>0</sub>、按下分段晚 δ<sub>i</sub>，`
+    +`則量到的 t = t<sub>真</sub> + (δ<sub>i</sub> − δ<sub>0</sub>)。<br>`
+    +`方法 A 的 v̄ = Δx / t 把這個偏移直接除進去，<b>短距離受害最重</b>，所以 v̄ 會隨 x 系統性變化。<br>`
+    +`方法 B 對 Δx–t̄ 作迴歸，偏移只進入<b>截距</b>而不影響<b>斜率</b>，因此斜率是對反應時間免疫的 v<sub>t</sub> 估計值。`
+    +`<br>本次五組截距換算出的平均時間偏移約 ${dm>=0?'+':''}${dm.toFixed(3)} s。`
+    +(Math.abs(dm)>0.08
+      ? `這個量級已經不是雜訊，代表你按「開始」與按「分段」的習慣不一致（例如起點會預判、分段則是看到才按）。`
+      : `這個量級與計時的隨機散布相當，看不出系統性偏差 — 合理，因為起停若延遲相同，相減時就抵消了；`
+        +`真正會殘留的是起點與分段兩種按法不一致的那部分。`);
+}
+
+/* ============================================================
+   TAB 5
+   ============================================================ */
+function constants(){
+  const exam=document.getElementById('constSel').value==='exam';
+  return exam?{rhoS:7700,rhoF:1258,g:10,name:'試題給定值'}
+             :{rhoS:7810,rhoF:TRUTH.rhoF,g:9.80665,name:'精確值'};
+}
+let FRANCIS_ON=false;
+function renderT5(){
+  const res=allResults();
+  const ok=res.length>=2;
+  document.getElementById('t5empty').style.display=ok?'none':'block';
+  document.getElementById('t5body').style.display=ok?'block':'none';
+  if(!ok) return;
+
+  const C=constants();
+  const data=res.map(r=>{
+    const R=r.d/2000;                       // m
+    let vt=vtOf(r)/100;                     // m/s
+    if(FRANCIS_ON) vt/=francisK((r.d/20)/(TUBE.innerD/2));
+    return {d:r.d,R,vt,r};
+  });
+
+  document.getElementById('chartVR').innerHTML=svgChart({w:330,h:250,
+    xlab:'半徑 R (mm)', ylab:'v_t (cm/s)',
+    series:[{pts:data.map(p=>({x:p.d/2,y:p.vt*100}))}]});
+
+  const fit=linreg(data.map(p=>({x:p.R*p.R,y:p.vt})));
+  const fit0=linregOrigin(data.map(p=>({x:p.R*p.R,y:p.vt})));
+  // 圖上單位用 mm² 與 cm/s，故斜率換算
+  const fitPlot={m:fit.m*1e-6*100, b:fit.b*100};
+  document.getElementById('chartVR2').innerHTML=svgChart({w:330,h:250,
+    xlab:'R² (mm²)', ylab:'v_t (cm/s)',
+    series:[{pts:data.map(p=>({x:(p.d/2)*(p.d/2),y:p.vt*100})),fit:fitPlot}]});
+
+  const curved=fit.b*100;
+  const fn=document.getElementById('fitNote');
+  fn.className=Math.abs(curved)>0.3?'warnbox':'note';
+  fn.innerHTML=`最小平方擬合：v<sub>t</sub> = ${(fit.m*1e-6*100).toPrecision(4)}·R²(mm²) ${curved>=0?'+':'−'} ${Math.abs(curved).toFixed(3)} cm/s，r² = ${fit.r2.toFixed(5)}`
+    +(Math.abs(curved)>0.3?`<br>理論上截距應為 0，但擬合出 ${curved.toFixed(3)} cm/s 的<b>負截距</b>。這代表資料點並非真的落在直線上 — 大球被壓得比 R² 預期更低，圖形向下彎。`
+                          :'<br>截距接近 0，與理論一致。');
+
+  renderResiduals(data,fit);
+
+  const etaFree=2*C.g*(C.rhoS-C.rhoF)/(9*fit.m);
+  const etaOrig=2*C.g*(C.rhoS-C.rhoF)/(9*fit0.m);
+  const dEta=etaFree*fit.sm/fit.m;
+  let s='<tr><th>擬合方式</th><th>斜率 k (m⁻¹s⁻¹)</th><th>截距 (cm/s)</th><th>η (Pa·s)</th><th>不確定度</th></tr>';
+  s+=`<tr><td>自由截距最小平方</td><td>${fit.m.toPrecision(4)}</td><td>${curved.toFixed(3)}</td>`
+    +`<td><b>${etaFree.toFixed(3)}</b></td><td>± ${dEta.toFixed(3)}</td></tr>`;
+  s+=`<tr><td>強制過原點</td><td>${fit0.m.toPrecision(4)}</td><td>0（固定）</td>`
+    +`<td><b>${etaOrig.toFixed(3)}</b></td><td>± ${(etaOrig*fit0.sm/fit0.m).toFixed(3)}</td></tr>`;
+  document.getElementById('etaTable').innerHTML=s;
+  document.getElementById('etaNote').innerHTML=
+    `代入${C.name}：ρ<sub>球</sub> = ${(C.rhoS/1000).toFixed(3)}、ρ<sub>液</sub> = ${(C.rhoF/1000).toFixed(3)} g/cm³、g = ${C.g} m/s²。`
+    +`　v<sub>t</sub> 取${document.getElementById('vtMethod').value==='avg'?'方法 A（平均速度法）':'方法 B（迴歸斜率）'}`
+    +(FRANCIS_ON?'，<b>已套用 Francis 管壁修正</b>。':'。')
+    +`<br>兩種擬合若差距明顯，就是資料偏離直線的警訊 — 別急著挑看起來比較漂亮的那個，先想清楚為什麼會彎。`;
+}
+
+/* ---------- 殘差圖 ---------- */
+function vtSigma(p){                       // 回傳 m/s
+  const avg=document.getElementById('vtMethod').value==='avg';
+  const r=p.r;
+  let s=avg ? r.vSd/Math.sqrt(r.pts.length) : (r.vRegSd!==null?r.vRegSd:r.vSd/Math.sqrt(r.pts.length));
+  s/=100;
+  if(FRANCIS_ON) s/=francisK((p.d/20)/(TUBE.innerD/2));
+  return Math.max(s,1e-6);
+}
+function svgResid(pts){                    // pts: {x (mm²), y (cm/s), e (cm/s), lab}
+  const W=340,H=250,L=58,R=14,T=16,B=42, pw=W-L-R, ph=H-T-B;
+  const x1=Math.max(...pts.map(p=>p.x))*1.1;
+  let ym=Math.max(...pts.map(p=>Math.abs(p.y)+p.e))*1.25; if(!(ym>0)) ym=1;
+  const X=v=>L+v/x1*pw, Y=v=>T+ph/2-v/ym*(ph/2);
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:460px;background:#fff;border:1px solid var(--line);border-radius:6px;">`;
+  ticks(0,x1,5).forEach(v=>{s+=`<line x1="${X(v)}" y1="${T}" x2="${X(v)}" y2="${T+ph}" stroke="#eef2f5"/>`
+    +`<text x="${X(v)}" y="${T+ph+15}" font-size="10" fill="#5b6b7c" text-anchor="middle">${+(+v).toPrecision(3)}</text>`;});
+  ticks(-ym,ym,4).forEach(v=>{s+=`<line x1="${L}" y1="${Y(v)}" x2="${L+pw}" y2="${Y(v)}" stroke="#eef2f5"/>`
+    +`<text x="${L-6}" y="${Y(v)+3.5}" font-size="10" fill="#5b6b7c" text-anchor="end">${+(+v).toPrecision(3)}</text>`;});
+  s+=`<line x1="${L}" y1="${Y(0)}" x2="${L+pw}" y2="${Y(0)}" stroke="#1d2733" stroke-width="1.2"/>`;
+  s+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}" stroke="#9fb0bd"/>`;
+  // 連線讓形狀一眼可見
+  s+='<polyline fill="none" stroke="#c85a2b" stroke-width="1.2" stroke-dasharray="3 3" opacity=".6" points="'
+    +pts.map(p=>X(p.x)+','+Y(p.y)).join(' ')+'"/>';
+  pts.forEach(p=>{
+    s+=`<line x1="${X(p.x)}" y1="${Y(p.y-p.e)}" x2="${X(p.x)}" y2="${Y(p.y+p.e)}" stroke="#1f6f8b" stroke-width="1.3"/>`
+      +`<line x1="${X(p.x)-4}" y1="${Y(p.y-p.e)}" x2="${X(p.x)+4}" y2="${Y(p.y-p.e)}" stroke="#1f6f8b" stroke-width="1.3"/>`
+      +`<line x1="${X(p.x)-4}" y1="${Y(p.y+p.e)}" x2="${X(p.x)+4}" y2="${Y(p.y+p.e)}" stroke="#1f6f8b" stroke-width="1.3"/>`
+      +`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4" fill="#c85a2b" stroke="#fff" stroke-width=".8"/>`
+      +`<text x="${X(p.x)}" y="${p.y>=0?Y(p.y+p.e)-5:Y(p.y-p.e)+12}" font-size="9.5" fill="#5b6b7c" text-anchor="middle">${p.lab}</text>`;
+  });
+  s+=`<text x="${L+pw/2}" y="${H-5}" font-size="10.5" fill="#5b6b7c" text-anchor="middle">R² (mm²)</text>`;
+  s+=`<text x="11" y="${T+ph/2}" font-size="10.5" fill="#5b6b7c" text-anchor="middle" transform="rotate(-90 11 ${T+ph/2})">殘差 (cm/s)</text>`;
+  return s+'</svg>';
+}
+function renderResiduals(data,fit){
+  const pts=data.map(p=>{
+    const res=(p.vt-(fit.m*p.R*p.R+fit.b))*100;     // cm/s
+    return {x:(p.d/2)*(p.d/2), y:res, e:vtSigma(p)*100, lab:p.d+' mm', d:p.d};
+  });
+  document.getElementById('chartResid').innerHTML=svgResid(pts);
+
+  const n=pts.length, dof=n-2;
+  const chi2=pts.reduce((a,p)=>a+Math.pow(p.y/p.e,2),0);
+  const chi2nu=dof>0?chi2/dof:NaN;
+  let t='<tr><th>直徑</th><th>殘差 (cm/s)</th><th>σ (cm/s)</th><th>殘差 / σ</th></tr>';
+  pts.forEach(p=>{
+    const z=p.y/p.e;
+    t+=`<tr><td>${p.d} mm</td><td>${p.y>=0?'+':''}${p.y.toFixed(3)}</td><td>${p.e.toFixed(3)}</td>`
+      +`<td style="${Math.abs(z)>3?'color:#b3282d;font-weight:600;':''}">${z>=0?'+':''}${z.toFixed(1)}</td></tr>`;
+  });
+  document.getElementById('residTable').innerHTML=t;
+
+  // 形狀判讀：兩端 vs 中間
+  let shape='';
+  if(n>=4){
+    const ends=(pts[0].y+pts[n-1].y)/2;
+    const mid=pts.slice(1,n-1).reduce((a,p)=>a+p.y,0)/(n-2);
+    if(ends<0&&mid>0) shape='∩';
+    else if(ends>0&&mid<0) shape='∪';
+  }
+  const note=document.getElementById('residNote');
+  if(dof<=0){note.className='note';note.textContent='至少需要 3 種球徑才能判讀殘差。';return;}
+  const bad=chi2nu>4;
+  note.className=bad?'warnbox':'okbox';
+  note.innerHTML=`約化卡方 χ²<sub>ν</sub> = Σ(殘差/σ)² ⁄ (n−2) = <b>${chi2nu.toFixed(1)}</b>`
+    +`（自由度 ${dof}；若只有隨機誤差，χ²<sub>ν</sub> 應接近 1）<br>`
+    +(bad
+      ? `殘差遠大於各點自身的誤差棒${shape?`，而且呈現 <b>${shape} 形</b>`:''} — 這不是測量不夠仔細，而是<b>資料點本來就不在一條直線上</b>。`
+        +(shape==='∩'?`兩端為負、中間為正，正是「向下彎的曲線被硬套直線」的標準特徵：大球被壓得比 R² 預期低。`:'')
+        +(FRANCIS_ON?'':`<br>到分頁六揭曉真值後，可按「以 Francis 因子修正」回來看殘差如何變平。`)
+      : `殘差與誤差棒相容、看不出系統性形狀，直線模型可以接受。`
+        +(FRANCIS_ON?`<br>對照未修正時的殘差圖，這就是管壁修正把曲線「拉直」的證據。`:''));
+}
+
+/* ============================================================
+   TAB 6
+   ============================================================ */
+let REVEALED=false;
+document.getElementById('btnReveal').onclick=()=>{REVEALED=true;renderT6();};
+document.getElementById('btnFrancis').onclick=()=>{
+  FRANCIS_ON=!FRANCIS_ON;
+  document.getElementById('btnFrancis').textContent=FRANCIS_ON?'取消 Francis 修正':'以 Francis 因子修正後重新迴歸';
+  renderT5(); renderT6();
+};
+function renderT6(){
+  const box=document.getElementById('revealBox');
+  document.getElementById('btnFrancis').style.display=REVEALED?'inline-block':'none';
+  if(!REVEALED){box.innerHTML='';return;}
+  const res=allResults();
+  const C=constants();
+  let s=`<div class="okbox"><b>本次隨機抽樣的真值</b><br>`
+    +`室溫 T = ${TRUTH.T.toFixed(1)} °C　|　甘油質量分率 ${(TRUTH.Cm*100).toFixed(1)} %（其餘為吸收的水氣）<br>`
+    +`<b>η<sub>真</sub> = ${TRUTH.eta.toFixed(4)} Pa·s</b>　|　ρ<sub>液</sub> = ${(TRUTH.rhoF/1000).toFixed(4)} g/cm³　`
+    +`|　ρ<sub>鋼</sub> = ${(TRUTH.rhoS/1000).toFixed(3)} g/cm³　|　g = ${TRUTH.g} m/s²<br>`
+    +`黏度由 Cheng (2008) 甘油–水相關式計算；管內徑 ${TUBE.innerD.toFixed(2)} cm。</div>`;
+
+  if(res.length>=2){
+    const data=res.map(r=>({d:r.d,R:r.d/2000,vt:vtOf(r)/100}));
+    const raw=linreg(data.map(p=>({x:p.R*p.R,y:p.vt})));
+    const etaRaw=2*C.g*(C.rhoS-C.rhoF)/(9*raw.m);
+    const dRaw=etaRaw*raw.sm/raw.m;
+    const corr=linreg(data.map(p=>({x:p.R*p.R,y:p.vt/francisK((p.d/20)/(TUBE.innerD/2))})));
+    const etaCorr=2*C.g*(C.rhoS-C.rhoF)/(9*corr.m);
+    const dCorr=etaCorr*corr.sm/corr.m;
+    const sig=v=>dRaw>0?Math.abs(v-TRUTH.eta)/dRaw:0;
+    s+=`<h3>你的結果 vs 真值</h3><table>`
+      +`<tr><th>分析方式</th><th>η (Pa·s)</th><th>與真值之比</th><th>偏差</th><th>以自身標準誤計</th></tr>`
+      +`<tr><td>未修正（試題方法）</td><td><b>${etaRaw.toFixed(3)}</b> ± ${dRaw.toFixed(3)}</td>`
+      +`<td>${(etaRaw/TRUTH.eta).toFixed(2)} 倍</td><td>${((etaRaw/TRUTH.eta-1)*100).toFixed(0)} %</td>`
+      +`<td>${sig(etaRaw).toFixed(1)} σ</td></tr>`
+      +`<tr><td>套用 Francis 管壁修正</td><td><b>${etaCorr.toFixed(3)}</b> ± ${dCorr.toFixed(3)}</td>`
+      +`<td>${(etaCorr/TRUTH.eta).toFixed(2)} 倍</td><td>${((etaCorr/TRUTH.eta-1)*100).toFixed(0)} %</td>`
+      +`<td>${dCorr>0?(Math.abs(etaCorr-TRUTH.eta)/dCorr).toFixed(1):'—'} σ</td></tr></table>`;
+
+    s+=`<h3>管壁效應逐球徑分解</h3><table><tr><th>直徑 (mm)</th><th>λ = R/R<sub>管</sub></th>`
+      +`<th>Francis K</th><th>量到的 v<sub>t</sub> (cm/s)</th><th>無限介質應有的 v<sub>t</sub> (cm/s)</th><th>被拖慢</th></tr>`;
+    res.forEach(r=>{
+      const lam=(r.d/20)/(TUBE.innerD/2), K=francisK(lam), v=vtOf(r);
+      s+=`<tr><td>${r.d}</td><td>${lam.toFixed(3)}</td><td>${K.toFixed(3)}</td>`
+        +`<td>${v.toFixed(2)}</td><td>${(v/K).toFixed(2)}</td><td>−${((1-K)*100).toFixed(0)} %</td></tr>`;
+    });
+    s+='</table>';
+    const Ks=res.map(r=>francisK((r.d/20)/(TUBE.innerD/2)));
+    s+=`<div class="warnbox"><b>為什麼 η 會偏高這麼多？</b>如果 K 對所有球徑都一樣，它只會讓斜率整體縮放，`
+      +`影響有限。真正的問題是 K 從 ${Math.max(...Ks).toFixed(3)} 一路掉到 ${Math.min(...Ks).toFixed(3)}（跨度 ${(Math.max(...Ks)/Math.min(...Ks)).toFixed(2)} 倍）：`
+      +`大球被拖慢得比小球嚴重，v<sub>t</sub>–R² 圖因而<b>向下彎</b>，最小平方直線的斜率被壓低，反推的 η 就被放大。`
+      +`這是<b>系統誤差</b>，再多測幾次也不會變好 — 只能靠修正公式或換更粗的管。</div>`;
+
+    const Remax=Math.max(...res.map(r=>TRUTH.rhoF*(vtOf(r)/100)*(r.d/1000)/TRUTH.eta));
+    if(Remax>1) s+=`<div class="warnbox"><b>另一項須誠實交代的限制：</b>最大球的雷諾數已達 Re ≈ ${Remax.toFixed(1)}，`
+      +`而 Stokes 定律嚴格成立的條件是 Re ≪ 1。本模擬採 Francis 經驗式，其適用範圍已涵蓋有限 Re，`
+      +`故未再另外疊加 Oseen 慣性修正（重複計算反而會使結果失真）。若要在真實實驗中嚴謹處理，`
+      +`應把最大球徑限制在 Re < 1 的範圍內。</div>`;
+  }else{
+    s+='<div class="note">量測資料不足（至少需兩種球徑），無法比較。</div>';
+  }
+
+  // 管徑掃描：換一根管救得回來嗎？
+  s+=`<h3>那換一根管子就好了嗎？</h3><table><tr><th>管內徑 (cm)</th><th>250 mL 液柱高 (cm)</th>`
+    +`<th>可用落距 (cm)</th><th>4 mm 球 K</th><th>8 mm 球 K</th><th>K 跨度</th><th>理想數據下 η 會偏高</th></tr>`;
+  for(let D=2.0;D<=3.45;D+=0.2){
+    const A=Math.PI*D*D/4, hF=Math.min(250/A,TUBE.len-4), usable=hF-3-10;
+    const K4=francisK(0.4/D), K8=francisK(0.8/D);
+    const pts=DIAMS.map(dd=>{const R=dd/2000; return {x:R*R, y:R*R*francisK((dd/20)/(D/2))};});
+    const f=linreg(pts);
+    const ratio=f? (1/f.m) : NaN;             // 斜率被壓低多少倍 = η 被放大多少倍
+    const bad=usable<8;
+    s+=`<tr${D>TUBE.innerD-0.1&&D<TUBE.innerD+0.1?' style="background:#eef7fb;font-weight:600;"':''}>`
+      +`<td>${D.toFixed(1)}</td><td>${hF.toFixed(1)}</td>`
+      +`<td${bad?' style="color:#b3282d;"':''}>${usable.toFixed(1)}${bad?'（太短）':''}</td>`
+      +`<td>${K4.toFixed(3)}</td><td>${K8.toFixed(3)}</td><td>${(K4/K8).toFixed(2)} 倍</td>`
+      +`<td><b>${ratio.toFixed(2)} 倍</b></td></tr>`;
+  }
+  s+='</table>';
+  s+=`<div class="warnbox"><b>本實驗最重要的結論：救不回來。</b>甘油只有 250 mL — 管子細，液柱才夠深，`
+    +`但 λ 大、管壁效應嚴重；管子粗，λ 小了，液柱卻淺到落距不足、計時誤差反而爆掉。`
+    +`上表中<b>沒有任何一個管徑能讓未修正的 η 落在真值的 2 倍以內</b>。<br>`
+    +`所以這份試題的器材配置，本質上<b>量不到甘油的真實黏滯係數</b>；它量到的是「在這根管子裡的等效黏滯係數」。`
+    +`能拿滿分的作答，不是算出 0.6 或 1.4 這種漂亮數字，而是<b>誠實報告測得值、並在誤差分析中指出管壁效應是主導的系統誤差、且估計出它的方向與量級</b>。`
+    +`這正是試題把「誤差分析」列入評分的用意。</div>`;
+  box.innerHTML=s;
+}
+function renderErrList(){
+  const items=[
+    ['管壁效應（Ladenburg / Francis）','系統','管內徑有限，甘油被球擠向管壁時受到額外剪切，阻力大於無限介質的 Stokes 值。因 λ 隨球徑改變，此效應會扭曲 v_t–R² 的斜率而非只是平移，是本實驗最大的系統誤差。'],
+    ['按錶反應時間','系統＋隨機','起停各有延遲，對短距離影響最大。用 Δx–t̄ 迴歸取斜率可使其只進入截距，不影響 v_t。'],
+    ['管身未垂直','系統','小球側向漂移貼上管壁，偏心使阻力上升；各球徑受影響程度不同，會額外扭曲斜率。用鉛垂線校正。'],
+    ['橡皮筋標定位置','隨機','直尺可讀至 0.05 cm，套環實際位置與讀數另有偏差。Δx 愈短，相對誤差愈大。'],
+    ['甘油溫度','系統','黏度對溫度極敏感 — 室溫每升高 1 °C，η 約下降 6–8 %。長時間實驗中手溫、室溫變化都會漂移。'],
+    ['甘油吸水','系統','甘油具強吸濕性，含水量差 1 % 即可使 η 變化逾 20 %。開瓶久置的甘油黏度明顯偏低。'],
+    ['試題常數的取值','系統（幾乎抵消）','試題取 ρ_鐵 = 7.7（實際軸承鋼約 7.81，偏低 1.4 %）、g = 10（實際 9.807，偏高 2.0 %）。兩者方向相反，乘積 (ρ_球 − ρ_液)g 僅差約 0.2 %，可忽略。'],
+    ['雷諾數偏高','系統','大球的 Re 可能接近或超過 1，Stokes 定律的前提（Re ≪ 1）已在邊緣。'],
+    ['小球未從管軸中心放入','隨機','偏離軸心放入會使初期就靠近管壁。試題要求「自最高點的中心處自由落下」即為此。'],
+    ['小球表面沾附氣泡','系統','氣泡改變有效密度與表面滑移，使該次下落明顯偏快。應剔除異常值並重測。']
+  ];
+  document.getElementById('errList').innerHTML='<table><tr><th style="width:190px;">誤差來源</th><th style="width:90px;">類型</th><th>說明</th></tr>'
+    +items.map(r=>`<tr><td style="text-align:left;"><b>${r[0]}</b></td><td>${r[1]}</td><td style="text-align:left;">${r[2]}</td></tr>`).join('')+'</table>';
+}
+
+function refreshAnalysis(){
+  try{ renderT4(); }catch(e){}
+  try{ if(document.getElementById('constSel')) renderT5(); }catch(e){}
+  try{ renderT6(); }catch(e){}
+}
+document.getElementById('vtMethod').onchange=()=>{renderT5();renderT6();};
+document.getElementById('constSel').onchange=()=>{renderT5();renderT6();};
+
+renderErrList();
+refreshLab();
+refreshAnalysis();
+</script>
+</body>
+</html>

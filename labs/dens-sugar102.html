@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>冰糖密度虛擬實驗室</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#222;--mute:#666;--line:#d8d2c4;--acc:#b5651d;--acc2:#2f6f8f;--ok:#2e7d32;--bad:#c62828;--syrup:#f3d58a;--water:#bfe3f5;--sugar:#fbf7ec}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+header{background:#3b2a1a;color:#fff;padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+header h1{font-size:18px;margin:0}
+header .sub{font-size:13px;opacity:.85}
+.speed{font-size:13px}
+.speed select{font-size:13px}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#e9e3d6;position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1180px;margin:0 auto;padding:12px 16px 40px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.card h3{margin:0 0 8px;font-size:16px;color:var(--acc)}
+.grid2{display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.2fr);gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+button.b{border:1px solid #a98b6a;background:#fffaf2;border-radius:6px;padding:5px 10px;margin:3px 2px;cursor:pointer;font-size:14px}
+button.b:hover{background:#f6e6cf}
+button.p{background:var(--acc);color:#fff;border-color:var(--acc)}
+button.p:hover{background:#9a5418}
+button.s{font-size:12px;padding:2px 7px}
+.msg{min-height:1.6em;font-size:14px;color:var(--acc2);background:#eef5f8;border-radius:6px;padding:6px 10px;margin:6px 0}
+.bal{display:inline-flex;align-items:baseline;gap:4px;background:#1d2b1d;color:#7dff7d;font-family:Consolas,monospace;font-size:26px;padding:4px 12px;border-radius:6px;min-width:130px;justify-content:flex-end}
+.bal small{font-size:14px;color:#bfe}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:3px 5px;text-align:center}
+th{background:#f3ede1}
+td input{width:80px;font-size:14px;border:1px solid #ccc;border-radius:4px;padding:1px 3px;text-align:center}
+td.calc{background:#faf7f0}
+label{font-size:14px}
+input[type=number]{width:80px}
+.formrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0;font-size:14px}
+.formrow input{width:78px}
+.res{font-family:Consolas,monospace;font-size:14px;background:#faf7f0;border-radius:6px;padding:8px 10px;white-space:pre-wrap}
+svg{max-width:100%;height:auto;display:block}
+.note{font-size:13px;color:var(--mute)}
+.eq{font-family:"Cambria Math","Times New Roman",serif;font-size:16px;background:#f7f3ea;padding:4px 10px;border-radius:6px;display:inline-block;margin:3px 0}
+details{margin:8px 0}summary{cursor:pointer;color:var(--acc2);font-weight:bold}
+.lumps{display:flex;flex-wrap:wrap;gap:6px}
+.lump{border:1px solid var(--line);border-radius:8px;padding:5px 7px;font-size:13px;background:#fffdf8;min-width:150px}
+.lump.sel{border-color:var(--acc);box-shadow:0 0 0 2px #f0c99a}
+.lump.done{opacity:.55}
+.tag{display:inline-block;font-size:12px;padding:0 6px;border-radius:10px;background:#eee;margin-left:4px}
+.warn{color:var(--bad);font-weight:bold}
+.good{color:var(--ok);font-weight:bold}
+.hidden{display:none}
+#pestle{transition:transform .15s}
+#pestle.g{animation:grind .3s linear 3}
+@keyframes grind{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-8px,4px) rotate(-6deg)}50%{transform:translate(0,6px) rotate(0)}75%{transform:translate(8px,4px) rotate(6deg)}100%{transform:translate(0,0)}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>冰糖密度虛擬實驗室</h1>
+    <div class="sub">102 學年度 高級中學自然學科能力競賽 第 7 區複賽｜物理科實驗試題第二題</div>
+  </div>
+  <div class="speed">模擬時間：<span id="clock">0:00</span>　流速
+    <select id="spd"><option value="1">×1</option><option value="5">×5</option><option value="20">×20</option></select>
+  </div>
+</header>
+<nav id="tabs">
+  <button data-t="t1" class="on">① 原理</button>
+  <button data-t="t2">② 研磨與壓實</button>
+  <button data-t="t3">③ 第1題分析</button>
+  <button data-t="t4">④ 法A 飽和糖水排液</button>
+  <button data-t="t5">⑤ 法B 天平浮力法</button>
+  <button data-t="t6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ ① ============ -->
+<section id="t1" class="tab on">
+<div class="card">
+<h3>試題</h3>
+<p>1. 秤適量冰糖磨細後倒入量筒中壓實，量其體積，依此計算冰糖密度。隨著冰糖越磨越細，計算所得的密度是否越來越趨近實際值？請以實驗數據說明。<br>
+2. 若覺上述方法不夠準確，請設計一實驗測量冰糖的密度。【冰糖比重約 1.52～1.58】</p>
+</div>
+
+<div class="card">
+<h3>一、量筒壓實法量到的是「體密度」</h3>
+<p>粉末倒進量筒後，量筒刻度讀到的體積 <i>V</i> 包含冰糖固體本身與顆粒間的空隙：</p>
+<div class="eq">V = V<sub>固</sub> + V<sub>隙</sub>，　填充率 φ = V<sub>固</sub> / V</div><br>
+<div class="eq">ρ<sub>app</sub> = m / V = φ · ρ<sub>冰糖</sub></div>
+<p>所以算出來的「密度」其實是 φρ。要讓 ρ<sub>app</sub> 趨近 ρ，必須 φ → 1。φ 的大小受下列因素控制：</p>
+<ul>
+<li><b>堆積幾何上限</b>：等徑球隨機緊密堆積 φ ≈ 0.64；不規則的冰糖晶粒有稜角、互相卡住，通常更低。</li>
+<li><b>壁效應</b>：量筒內徑只有約 2.75 cm，粗顆粒靠壁處排不密，粒徑 d 與筒徑 D 的比值越大，φ 越低。</li>
+<li><b>細粉的凝聚</b>：粒徑小到約 0.1 mm 以下時，顆粒間的凡得瓦力與吸濕形成的液橋，大於顆粒本身的重量，粉末會「架橋」而堆不密；壓實前後的體積比（Hausner 比）也隨之變大。</li>
+<li><b>粒徑分布</b>：粗細混合時，細粒可填入粗粒的縫隙，φ 會略升。</li>
+</ul>
+<p>請在 ② 頁實際研磨、壓實、量測，在 ③ 頁作圖，再以數據回答第 1 題。</p>
+<svg viewBox="0 0 560 150" aria-label="堆積示意">
+<rect x="10" y="10" width="150" height="130" fill="#fff" stroke="#999"/>
+<g fill="#f3e6c8" stroke="#a88">
+<polygon points="20,20 70,18 75,65 22,70"/><polygon points="80,22 150,20 148,72 82,66"/><polygon points="22,80 78,76 80,132 24,134"/><polygon points="88,78 150,82 148,134 90,130"/>
+</g>
+<text x="85" y="152" font-size="12" text-anchor="middle">粗塊：壁效應大</text>
+<rect x="205" y="10" width="150" height="130" fill="#fff" stroke="#999"/>
+<g fill="#f3e6c8" stroke="#a88" id="midpack"></g>
+<text x="280" y="152" font-size="12" text-anchor="middle">中等粒徑：最密</text>
+<rect x="400" y="10" width="150" height="130" fill="#fff" stroke="#999"/>
+<g fill="#f3e6c8" stroke="#a88" id="finepack"></g>
+<text x="475" y="152" font-size="12" text-anchor="middle">極細粉：凝聚架橋，孔隙多</text>
+</svg>
+</div>
+
+<div class="card">
+<h3>二、法 A：飽和糖水排液法（第 2 題）</h3>
+<p>器材中唯一的液體是水，而冰糖溶於水。若改用<b>以冰糖自己配成的飽和糖水</b>，溶液已無法再溶解冰糖，冰糖塊放進去就能保持完整。量筒先裝飽和糖水讀 <i>V</i><sub>0</sub>，逐次放入秤過質量的冰糖塊：</p>
+<div class="eq">V = V<sub>0</sub> + M<sub>累計</sub> / ρ　⟹　V–M 迴歸斜率 = 1/ρ</div>
+<p>用迴歸斜率而不是單點相除，可以消去 V<sub>0</sub> 的讀數誤差，並由多點估計不確定度。至於直接用清水會差多少，請在 ④ 頁實際比較，答案可能和你的直覺不同。</p>
+</div>
+
+<div class="card">
+<h3>三、法 B：天平浮力法（第 2 題）</h3>
+<p>把裝有飽和糖水的容器放在天平上，以棉線懸吊冰糖塊，讓它<b>完全浸沒且不碰到底部與管壁</b>。液體對冰糖施浮力 <i>B</i>，依牛頓第三定律冰糖對液體施等大反作用力，天平讀數因此增加：</p>
+<div class="eq">Δ = B/g = ρ<sub>L</sub> V　⟹　ρ = ρ<sub>L</sub> · M / Δ</div><br>
+<div class="eq">Δ–M 迴歸斜率 k = ρ<sub>L</sub>/ρ　⟹　ρ = ρ<sub>L</sub> / k</div>
+<p>糖水密度 ρ<sub>L</sub> 另外用量筒加天平，以 m–V 迴歸測得。天平上限只有 200 g，容器要怎麼選？請在 ⑤ 頁試試看。</p>
+</div>
+
+<div class="card">
+<h3>四、本模擬的器材設定（試題未給規格處為自訂值）</h3>
+<ul class="note">
+<li>量筒 100 mL、最小刻度 1 mL，內徑 2.75 cm（1 mL 約 1.68 mm 高）；量筒質量隱藏。</li>
+<li>燒杯 500 mL，內徑 8.4 cm；燒杯質量隱藏（玻璃燒杯約 130 g 上下）。</li>
+<li>天平最大秤量 200 g（指總重，扣重不增加量程）、最小刻度 0.1 g。</li>
+<li>塑膠漏斗支管徑約 1 cm，太粗的冰糖塊會卡住漏斗頸。</li>
+<li>冰糖包數量足夠；室溫（影響飽和濃度）、冰糖真密度（1.52–1.58 之間）、糖塊內部微氣泡皆為隨機隱藏值，於 ⑥ 頁揭曉。</li>
+<li>右上角「流速」可加速模擬時間（攪拌溶解、糖水掛壁流下、糖塊在清水中溶解都會隨時間進行）。</li>
+</ul>
+</div>
+</section>
+
+<!-- ============ ② ============ -->
+<section id="t2" class="tab">
+<div class="grid2">
+<div>
+ <div class="card">
+  <h3>研缽</h3>
+  <button class="b" onclick="addLump2()">取一匙冰糖塊放入研缽</button>
+  <button class="b" onclick="grind2(10)">研磨 10 s</button>
+  <button class="b" onclick="grind2(30)">研磨 30 s</button>
+  <button class="b" onclick="grind2(60)">研磨 60 s</button>
+  <div class="note">研缽內冰糖約 <b id="t2M">0</b> g（目測），累計研磨時間 <b id="t2tg">0</b> s</div>
+  <button class="b" onclick="observe2()">取少許放在方格紙上觀察粒徑</button>
+ </div>
+ <div class="card">
+  <h3>量筒（一直放在天平上）</h3>
+  <label><input type="checkbox" id="funnel" checked> 經塑膠漏斗倒入</label><br>
+  <button class="b p" onclick="fill2()">把研缽中的冰糖倒入量筒</button>
+  <button class="b" onclick="tamp2()">木棒壓實</button>
+  <button class="b" onclick="tap2()">輕敲量筒底</button><br>
+  <button class="b" onclick="tool2()" id="toolBtn">組裝刮鬆工具（長尾夾尾端＋膠帶＋木棒）</button>
+  <button class="b" onclick="remove2()">刮鬆取出、倒回研缽</button>
+  <div style="margin-top:8px">天平 <span class="bal"><span id="bal2">0.0</span><small>g</small></span>
+   <button class="b" onclick="tare2()">歸零（扣重）</button></div>
+  <div class="msg" id="msg2">先取冰糖放入研缽。建議先記下空量筒的讀數或按「歸零」。</div>
+ </div>
+ <div class="card">
+  <h3>記錄一筆數據</h3>
+  <div class="formrow">研磨時間 <b id="r2tg">—</b> s</div>
+  <div class="formrow">估計粒徑 <input id="r2d" type="number" step="any"> mm　
+   冰糖質量 <input id="r2m" type="number" step="any"> g <button class="b s" onclick="fillBal('r2m','bal2')">帶入天平讀數</button></div>
+  <div class="formrow">讀得體積 <input id="r2V" type="number" step="any"> mL　<button class="b p" onclick="rec2()">加入數據表</button></div>
+  <div class="note">「帶入天平讀數」只有在已用空量筒歸零時才等於冰糖質量。</div>
+ </div>
+</div>
+<div>
+ <div class="card">
+  <h3>實驗台</h3>
+  <svg id="sv2" viewBox="0 0 520 430"></svg>
+ </div>
+ <div class="grid3">
+  <div class="card"><h3>量筒刻度放大（讀體積）</h3><svg id="zm2" viewBox="0 0 220 280"></svg><div class="note">粉末表面不平，請估讀平均高度。</div></div>
+  <div class="card"><h3>方格紙（最小刻度 1 mm）</h3><svg id="gp2" viewBox="0 0 300 200"></svg><div class="note" id="gp2n">尚未取樣。</div></div>
+ </div>
+</div>
+</div>
+<div class="card">
+ <h3>數據表（可直接修改）</h3>
+ <table><thead><tr><th>#</th><th>研磨時間 (s)</th><th>估計粒徑 (mm)</th><th>冰糖質量 m (g)</th><th>體積 V (mL)</th><th>ρ<sub>app</sub> = m/V (g/cm³)</th><th></th></tr></thead><tbody id="tb2"></tbody></table>
+ <div class="note">建議至少做 5 種研磨程度，例如 0（未研磨，需不經漏斗倒入）、10、40、120、300、600 s，每種都充分壓實到體積不再變小。</div>
+</div>
+</section>
+
+<!-- ============ ③ ============ -->
+<section id="t3" class="tab">
+<div class="card">
+ <h3>ρ<sub>app</sub> 與研磨程度的關係</h3>
+ <div class="formrow">橫軸：<select id="t3x" onchange="renderT3()"><option value="tg">研磨時間 (s)</option><option value="d">估計粒徑 (mm，對數)</option></select>
+ <span class="note">灰色帶為冰糖比重 1.52–1.58。</span></div>
+ <svg id="pl3" viewBox="0 0 560 340"></svg>
+ <div class="res" id="res3"></div>
+</div>
+<div class="card">
+ <h3>填充率換算</h3>
+ <table><thead><tr><th>#</th><th>研磨時間 (s)</th><th>ρ<sub>app</sub></th><th>φ = ρ<sub>app</sub>/1.55</th><th>空隙率 1−φ</th></tr></thead><tbody id="tb3"></tbody></table>
+</div>
+<div class="card">
+ <h3>回答第 1 題</h3>
+ <p>請根據圖形判斷：ρ<sub>app</sub> 是否隨研磨單調增加並趨近 1.52–1.58？最大 φ 約多少？</p>
+ <details><summary>討論提示（先自己判斷再展開）</summary>
+ <ul>
+ <li>粗塊階段：顆粒尺寸與量筒內徑相近，壁效應使 φ 很低；研磨後粒徑變小、粗細混合，φ 上升。</li>
+ <li>持續磨細：粒徑降到約 0.1 mm 以下，細粉的凝聚力（凡得瓦力、吸濕液橋）超過重力，粉末架橋，壓實也壓不密，φ 反而下降；細粉還會沾在木棒與管壁。</li>
+ <li>結論：ρ<sub>app</sub> 不會越來越趨近實際值。它有最大值，但 φ 的上限約 0.6，ρ<sub>app</sub> 最多只有實際值的六成左右。根本原因是體積讀數永遠包含空隙。</li>
+ <li>延伸：若把粉末倒入「已知體積的飽和糖水」中，讓液體填滿空隙，量到的就是固體體積。這就是法 A 的想法。</li>
+ </ul></details>
+</div>
+</section>
+
+<!-- ============ ④ ============ -->
+<section id="t4" class="tab">
+<div class="grid2">
+<div>
+ <div class="card">
+  <h3>(a) 在燒杯中配製飽和糖水</h3>
+  <button class="b" onclick="addWater4()">加水約 20 mL</button>
+  <button class="b" onclick="addSugar4()">加研磨好的冰糖粉約 10 g</button><br>
+  <button class="b" onclick="stir4(30)">攪拌 30 s</button>
+  <button class="b" onclick="stir4(120)">攪拌 2 min</button>
+  <div class="msg" id="msgS">燒杯是空的。</div>
+  <div class="note">判斷飽和：持續攪拌後杯底仍有未溶的冰糖，且數量不再減少。</div>
+ </div>
+ <div class="card">
+  <h3>(b) 測糖水密度 ρ<sub>L</sub>（量筒放在天平上）</h3>
+  <button class="b" onclick="pourSyrup4()">倒入上層澄清糖水約 10 mL</button>
+  <button class="b" onclick="tare4()">歸零（扣重）</button>
+  <div style="margin:6px 0">天平 <span class="bal"><span id="bal4">0.0</span><small>g</small></span></div>
+  <div class="formrow">V <input id="r4V" type="number" step="any"> mL　m <input id="r4m" type="number" step="any"> g
+   <button class="b s" onclick="fillBal('r4m','bal4')">帶入天平讀數</button> <button class="b p" onclick="recL4()">記錄</button></div>
+  <table><thead><tr><th>#</th><th>V (mL)</th><th>m (g)</th><th></th></tr></thead><tbody id="tbL"></tbody></table>
+  <div class="res" id="resL"></div>
+ </div>
+ <div class="card">
+  <h3>(c) 排液法：逐塊放入冰糖</h3>
+  <div class="formrow">量筒內液體：<b id="liq4">—</b></div>
+  <button class="b" onclick="backToBeaker4()">取出糖塊、糖水倒回燒杯</button>
+  <button class="b" onclick="empty4()">清空量筒（洗淨擦乾）</button>
+  <button class="b" onclick="pourWater4()">倒入清水約 10 mL（對照組）</button><br>
+  <button class="b" onclick="knock4()">輕敲量筒、趕走附著氣泡</button>
+  <div class="msg" id="msg4">先完成 (a)(b)，量筒中留約 40–50 mL 糖水即可開始。</div>
+  <div class="lumps" id="lumps4"></div>
+  <div class="formrow" style="margin-top:6px">累計冰糖質量 M <input id="r4M" type="number" step="any"> g　液面讀數 V <input id="r4V2" type="number" step="any"> mL
+   <button class="b p" onclick="recA4()">記錄</button></div>
+  <table><thead><tr><th>#</th><th>M 累計 (g)</th><th>V (mL)</th><th></th></tr></thead><tbody id="tbA"></tbody></table>
+ </div>
+</div>
+<div>
+ <div class="card"><h3>實驗台</h3><svg id="sv4" viewBox="0 0 520 430"></svg></div>
+ <div class="card"><h3>量筒刻度放大（讀凹液面最低處）</h3><svg id="zm4" viewBox="0 0 220 280" style="max-width:260px"></svg>
+  <div class="note">糖水黏稠，倒入後管壁的糖水需要一段時間才會流下，液面會慢慢上升。</div></div>
+ <div class="card"><h3>V–M 迴歸</h3><svg id="plA" viewBox="0 0 560 340"></svg><div class="res" id="resA"></div></div>
+</div>
+</div>
+</section>
+
+<!-- ============ ⑤ ============ -->
+<section id="t5" class="tab">
+<div class="grid2">
+<div>
+ <div class="card">
+  <h3>容器與液體</h3>
+  <div class="formrow">容器：<label><input type="radio" name="cont" value="cyl" checked onchange="setCont5(this.value)"> 量筒</label>
+  <label><input type="radio" name="cont" value="beaker" onchange="setCont5(this.value)"> 燒杯 500 mL</label></div>
+  <button class="b" onclick="pour5('syrup')">倒入 ④ 的飽和糖水約 10 mL</button>
+  <button class="b" onclick="pour5('water')">倒入清水約 10 mL（對照組）</button>
+  <button class="b" onclick="empty5()">清空容器</button>
+  <div style="margin:6px 0">天平 <span class="bal"><span id="bal5">0.0</span><small>g</small></span>
+  <button class="b" onclick="tare5()">歸零（扣重）</button></div>
+  <div class="msg" id="msg5">天平上限 200 g 是總重。請先思考：哪一個容器能裝夠深的糖水又不超載？</div>
+ </div>
+ <div class="card">
+  <h3>冰糖塊</h3>
+  <div class="lumps" id="lumps5"></div>
+  <div class="formrow" style="margin-top:6px">懸吊高度（糖塊底部離容器底，cm）
+   <input type="range" id="hx5" min="-0.3" max="18" step="0.05" value="18" style="width:200px" oninput="B.x=parseFloat(this.value)"> <b id="hx5v">—</b></div>
+  <button class="b" onclick="jiggle5()">上下抽動幾次（趕氣泡）</button>
+  <button class="b" onclick="unhang5()">取出糖塊</button>
+ </div>
+ <div class="card">
+  <h3>記錄</h3>
+  <div class="formrow">M（空氣中）<input id="r5M" type="number" step="any"> g　
+  R<sub>0</sub>（未吊入）<input id="r5a" type="number" step="any"> <button class="b s" onclick="fillBal('r5a','bal5')">帶入</button>
+  R<sub>1</sub>（完全浸沒）<input id="r5b" type="number" step="any"> <button class="b s" onclick="fillBal('r5b','bal5')">帶入</button>
+  <button class="b p" onclick="rec5()">記錄</button></div>
+  <table><thead><tr><th>#</th><th>M (g)</th><th>R₀ (g)</th><th>R₁ (g)</th><th>Δ = R₁−R₀ (g)</th><th></th></tr></thead><tbody id="tb5"></tbody></table>
+  <div class="formrow">使用的 ρ<sub>L</sub> <input id="rhoL5" type="number" step="any" style="width:90px"> ± <input id="srhoL5" type="number" step="any" style="width:80px"> g/cm³
+  <button class="b s" onclick="pullRhoL()">帶入 ④ 的結果</button></div>
+ </div>
+</div>
+<div>
+ <div class="card"><h3>實驗台</h3><svg id="sv5" viewBox="0 0 520 430"></svg></div>
+ <div class="card"><h3>Δ–M 迴歸</h3><svg id="plB" viewBox="0 0 560 340"></svg><div class="res" id="resB"></div></div>
+</div>
+</div>
+</section>
+
+<!-- ============ ⑥ ============ -->
+<section id="t6" class="tab">
+<div class="card">
+ <h3>結果彙整</h3>
+ <table><thead><tr><th>方法</th><th>量測值 (g/cm³)</th><th>標準差 σ</th><th>真值</th><th>偏差</th><th>偏差 / σ</th></tr></thead><tbody id="tb6"></tbody></table>
+ <div style="margin-top:8px"><button class="b p" onclick="reveal()">揭曉真值</button> <span class="note">揭曉後 ③ 頁會加上模型曲線。可隨時重新整理頁面，取得一組新的隱藏值。</span></div>
+</div>
+<div class="card hidden" id="truth6">
+ <h3>隱藏參數</h3>
+ <div class="res" id="truthTxt"></div>
+</div>
+<div class="card">
+ <h3>誤差來源與討論</h3>
+ <ul>
+ <li><b>第 1 題的系統誤差</b>：體積讀數包含空隙，ρ<sub>app</sub> = φρ，φ 上限約 0.6。這不是「磨不夠細」造成，而是方法本身的限制。磨得過細反而因凝聚而使 φ 下降。</li>
+ <li><b>附著氣泡</b>：冰糖表面粗糙，放入黏稠糖水時會帶入氣泡。法 A 中它使 V 偏大，法 B 中使浮力偏大，兩者都讓 ρ 偏低。要輕敲量筒，或把糖塊上下抽動來趕走氣泡。</li>
+ <li><b>糖水掛壁</b>：糖水黏度約為水的百倍，倒入後管壁殘留的糖水要數十秒才會流下。太早讀數，V 會偏小。</li>
+ <li><b>飽和不足</b>：若糖水未飽和，冰糖會緩慢溶解，讀數隨時間漂移。</li>
+ <li><b>ρ<sub>L</sub> 的誤差</b>：法 B 的 ρ 與 ρ<sub>L</sub> 成正比，ρ<sub>L</sub> 的相對誤差會全部傳到 ρ。</li>
+ <li><b>碰底或擦壁</b>：法 B 中糖塊碰到底部或管壁時，部分重量直接由容器支撐，Δ 大增，ρ 嚴重偏低。</li>
+ <li><b>天平量程</b>：500 mL 玻璃燒杯本身約 130 g，再裝夠深的糖水就超過 200 g，所以法 B 只能用量筒當容器，糖塊也必須夠窄才不會擦壁。</li>
+ </ul>
+ <details><summary>關於「直接用清水」的反直覺結果（做完 ④ 對照組再展開）</summary>
+ <p>蔗糖溶於水時，每溶解 1 g 只使溶液體積增加約 0.62 mL（表觀比容）；冰糖固體每 1 g 的體積約 1/1.55 ≈ 0.645 mL。所以冰糖在清水中溶掉 1 g，總體積只減少約 0.03 mL。若放入後很快讀數，清水排液法的體積誤差其實很小，遠小於 1 mL 的刻度。</p>
+ <p>清水真正的問題在於：</p>
+ <ul>
+ <li>液面隨時間持續漂移，只是很慢。</li>
+ <li>糖塊被消耗，無法重複量測或回收。</li>
+ <li>在法 B 中，懸吊的糖塊溶下的糖轉移到容器內，天平讀數以 δ(1 − ρ<sub>L</sub>/ρ) 的速率持續上升，讀不到穩定值。</li>
+ </ul>
+ <p>飽和糖水同時解決這三個問題。</p>
+ </details>
+</div>
+</section>
+</main>
+
+<script>
+'use strict';
+/* ================= 亂數與工具 ================= */
+let seed=(Date.now()^0x9e3779b9)>>>0;
+function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
+const U=(a,b)=>a+(b-a)*rnd();
+function N(m,s){const u=1-rnd(),v=rnd();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const $=id=>document.getElementById(id);
+const fmt=(x,n)=>(x!==null&&x!==undefined&&Number.isFinite(x))?x.toFixed(n):'—';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const avg=a=>a.reduce((s,v)=>s+v,0)/a.length;
+function say(id,t){$(id).innerHTML=t;}
+
+/* ================= 隱藏真值 ================= */
+const TRUE={
+  rho:U(1.52,1.58),          // 冰糖密度 g/cm3
+  T:U(22,30),                // 室溫 °C
+  cylMass:U(56,66),          // 量筒質量 g
+  cylID:2.75,                // cm
+  beakerMass:U(126,142),
+  beakerID:8.4,
+};
+TRUE.wSat=0.671+0.0016*(TRUE.T-20);           // 飽和蔗糖質量分率
+function rhoSol(w){return 0.9982-0.00025*(TRUE.T-20)+0.3851*w+0.1709*w*w;}  // 蔗糖水溶液密度
+const CYL_A=Math.PI*(TRUE.cylID/2)**2;   // cm^2
+const BEK_A=Math.PI*(TRUE.beakerID/2)**2;
+const solRatio=TRUE.wSat/(1-TRUE.wSat);  // g 糖 / g 水
+
+/* ================= 粉體模型 ================= */
+function d50(te){return 0.04+6.5*Math.exp(-te/15)+1.3*Math.exp(-te/120);} // mm
+function sigLn(te){return 0.35+0.6*(1-Math.exp(-te/40));}
+function phiTapModel(d){
+  const base=0.585+0.045*Math.exp(-0.5*(Math.log(d/0.5)/1.2)**2);
+  const wall=1-0.9*(d/(TRUE.cylID*10));
+  const coh=1-0.27/(1+Math.pow(d/0.08,1.5));
+  return base*wall*coh;
+}
+function hausner(d){return 1.14+0.30/(1+Math.pow(d/0.1,1.5));}
+
+/* ================= 時鐘 ================= */
+let simT=0,speed=1;
+$('spd').onchange=e=>speed=parseFloat(e.target.value);
+let activeTab='t1';
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  activeTab=b.dataset.t;
+  if(activeTab==='t3')renderT3();
+  if(activeTab==='t6')renderT6();
+  window.scrollTo(0,0);
+});
+setInterval(()=>{
+  const dt=0.2*speed; simT+=dt;
+  stepBeaker(dt); stepCylA(dt); stepB(dt);
+  $('clock').textContent=Math.floor(simT/60)+':'+String(Math.floor(simT%60)).padStart(2,'0');
+  if(activeTab==='t2')live2();
+  if(activeTab==='t4')draw4();
+  if(activeTab==='t5')draw5();
+},200);
+
+function balRead(gross,tare){
+  if(gross>200)return '-OL-';
+  const v=gross-tare+N(0,0.025);
+  return (Math.round(v*10)/10).toFixed(1);
+}
+function fillBal(inp,bal){const t=$(bal).textContent;if(t==='-OL-'){alert('天平超載，無讀數。');return;}$(inp).value=t;}
+
+/* ================= 線性迴歸 ================= */
+function linreg(xs,ys){
+  const n=xs.length;if(n<2)return null;
+  const mx=avg(xs),my=avg(ys);let sxx=0,sxy=0,syy=0;
+  for(let i=0;i<n;i++){sxx+=(xs[i]-mx)**2;sxy+=(xs[i]-mx)*(ys[i]-my);syy+=(ys[i]-my)**2;}
+  if(sxx===0)return null;
+  const m=sxy/sxx,b=my-m*mx;let ss=0;
+  for(let i=0;i<n;i++)ss+=(ys[i]-(m*xs[i]+b))**2;
+  const s2=n>2?ss/(n-2):NaN;
+  return{m,b,sm:Math.sqrt(s2/sxx),sb:Math.sqrt(s2*(1/n+mx*mx/sxx)),r2:syy>0?1-ss/syy:1,n};
+}
+
+/* ================= 作圖 ================= */
+function niceStep(range,n){const raw=range/n;const p=Math.pow(10,Math.floor(Math.log10(raw)));const f=raw/p;return(f<1.5?1:f<3?2:f<7?5:10)*p;}
+function plot(el,cfg){
+  const W=560,H=340,L=64,Rm=16,T=16,Bm=50;
+  const tx=v=>cfg.logx?Math.log10(v):v;
+  const pts=cfg.pts.filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1])&&(!cfg.logx||p[0]>0));
+  let xs=pts.map(p=>tx(p[0])),ys=pts.map(p=>p[1]);
+  if(cfg.curve)cfg.curve.forEach(p=>{xs.push(tx(p[0]));ys.push(p[1]);});
+  if(cfg.band)ys.push(cfg.band[0],cfg.band[1]);
+  if(!pts.length){el.innerHTML=`<text x="280" y="170" text-anchor="middle" fill="#888" font-size="15">尚無數據</text>`;return;}
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(cfg.xzero)x0=Math.min(x0,0);
+  if(cfg.yzero)y0=Math.min(y0,0);
+  if(x1-x0<1e-9){x0-=1;x1+=1;} if(y1-y0<1e-9){y0-=0.5;y1+=0.5;}
+  const padx=(x1-x0)*0.07,pady=(y1-y0)*0.1;
+  if(!(cfg.xzero&&x0===0))x0-=padx; x1+=padx;
+  if(!(cfg.yzero&&y0===0))y0-=pady; y1+=pady;
+  const sx=v=>L+(tx(v)-x0)/(x1-x0)*(W-L-Rm), sxr=v=>L+(v-x0)/(x1-x0)*(W-L-Rm);
+  const sy=v=>H-Bm-(v-y0)/(y1-y0)*(H-Bm-T);
+  let s=`<rect x="${L}" y="${T}" width="${W-L-Rm}" height="${H-Bm-T}" fill="#fff" stroke="#999"/>`;
+  if(cfg.band){s+=`<rect x="${L}" y="${sy(cfg.band[1])}" width="${W-L-Rm}" height="${sy(cfg.band[0])-sy(cfg.band[1])}" fill="#ddd" opacity=".7"/>`;}
+  // y ticks
+  const ys0=niceStep(y1-y0,6);
+  for(let v=Math.ceil(y0/ys0)*ys0;v<=y1+1e-9;v+=ys0){const y=sy(v);s+=`<line x1="${L}" x2="${W-Rm}" y1="${y}" y2="${y}" stroke="#eee"/><text x="${L-5}" y="${y+4}" font-size="11" text-anchor="end">${+v.toFixed(6)}</text>`;}
+  if(cfg.logx){
+    for(let e=Math.floor(x0);e<=Math.ceil(x1);e++){[1,2,5].forEach(k=>{const lv=e+Math.log10(k);if(lv<x0||lv>x1)return;const x=sxr(lv);s+=`<line x1="${x}" x2="${x}" y1="${T}" y2="${H-Bm}" stroke="#eee"/><text x="${x}" y="${H-Bm+15}" font-size="11" text-anchor="middle">${+(k*Math.pow(10,e)).toPrecision(2)}</text>`;});}
+  }else{
+    const xs0=niceStep(x1-x0,7);
+    for(let v=Math.ceil(x0/xs0)*xs0;v<=x1+1e-9;v+=xs0){const x=sxr(v);s+=`<line x1="${x}" x2="${x}" y1="${T}" y2="${H-Bm}" stroke="#eee"/><text x="${x}" y="${H-Bm+15}" font-size="11" text-anchor="middle">${+v.toFixed(6)}</text>`;}
+  }
+  s+=`<text x="${(L+W-Rm)/2}" y="${H-12}" font-size="13" text-anchor="middle">${cfg.xlabel}</text>`;
+  s+=`<text x="16" y="${(T+H-Bm)/2}" font-size="13" text-anchor="middle" transform="rotate(-90 16 ${(T+H-Bm)/2})">${cfg.ylabel}</text>`;
+  if(cfg.curve&&cfg.curve.length){s+=`<polyline fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4" points="${cfg.curve.map(p=>sx(p[0])+','+sy(p[1])).join(' ')}"/>`;}
+  if(cfg.fit&&!cfg.logx){const a=x0,b=x1;s+=`<line x1="${sxr(a)}" y1="${sy(cfg.fit.m*a+cfg.fit.b)}" x2="${sxr(b)}" y2="${sy(cfg.fit.m*b+cfg.fit.b)}" stroke="#2f6f8f" stroke-width="2"/>`;}
+  pts.forEach(p=>{s+=`<circle cx="${sx(p[0])}" cy="${sy(p[1])}" r="4.5" fill="#b5651d" stroke="#fff"/>`;});
+  el.innerHTML=s;
+}
+
+/* ================= 通用表格 ================= */
+function renderTable(tbId,rows,cols,onchange){
+  const tb=$(tbId);tb.innerHTML='';
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td>`+cols.map(c=>c.calc?`<td class="calc">${fmt(c.calc(r),c.dec)}</td>`:`<td><input type="number" step="any" data-k="${c.key}" value="${Number.isFinite(r[c.key])?r[c.key]:''}"></td>`).join('')+`<td><button class="b s">✕</button></td>`;
+    tr.querySelectorAll('input').forEach(inp=>inp.addEventListener('change',()=>{r[inp.dataset.k]=parseFloat(inp.value);onchange();}));
+    tr.querySelector('button').onclick=()=>{rows.splice(i,1);onchange();};
+    tb.appendChild(tr);
+  });
+}
+
+/* ================= SVG 零件 ================= */
+const PXCM=18,PXML=PXCM/CYL_A,CW=TRUE.cylID*PXCM;
+function poly(cx,cy,w,h,sd){let s=sd*7919%233280,o=[];const n=8;for(let i=0;i<n;i++){const a=i/n*2*Math.PI+0.3;s=(s*9301+49297)%233280;const r=0.82+0.3*(s/233280);o.push((cx+Math.cos(a)*w/2*r).toFixed(1)+','+(cy+Math.sin(a)*h/2*r).toFixed(1));}return o.join(' ');}
+function cylinderSVG(x,yb,o){
+  let s='';const top=yb-110*PXML;
+  if(o.liqV>0){const yl=yb-o.liqV*PXML;s+=`<rect x="${x}" y="${yl}" width="${CW}" height="${yb-yl}" fill="${o.liqColor}"/>`;}
+  if(o.film>0.03){const yl=yb-o.liqV*PXML;const fh=Math.min(70,o.film*60);s+=`<rect x="${x}" y="${yl-fh}" width="4" height="${fh}" fill="${o.liqColor}" opacity=".8"/><rect x="${x+CW-4}" y="${yl-fh}" width="4" height="${fh}" fill="${o.liqColor}" opacity=".8"/>`;}
+  if(o.powder){const p=o.powder;let pts=[`${x},${yb}`];const n=p.rough.length;
+    for(let i=0;i<n;i++){const v=p.V+p.amp*p.rough[i];pts.push(`${(x+i/(n-1)*CW).toFixed(1)},${(yb-v*PXML).toFixed(1)}`);}
+    pts.push(`${x+CW},${yb}`);s+=`<polygon points="${pts.join(' ')}" fill="#f1e7cf" stroke="#c9b48a" stroke-width=".8"/>`;}
+  if(o.lumps){let yy=yb;o.lumps.forEach((l,i)=>{const w=Math.min(CW-4,l.w*PXCM),h=l.h*PXCM*Math.cbrt(l.ms/l.m0);const cx=x+CW/2+((i%2)?-1:1)*Math.max(0,(CW-w)/2-2)*0.6;
+      s+=`<polygon points="${poly(cx,yy-h/2,w,h,l.id+3)}" fill="#fffaf0" stroke="#b9a37a"/>`;
+      const nb=Math.round(l.b*40);for(let k=0;k<Math.min(nb,14);k++){s+=`<circle cx="${cx+(k%2?1:-1)*w*0.42}" cy="${yy-h*(0.15+0.7*((k*37%10)/10))}" r="1.6" fill="#fff" stroke="#6aa"/>`;}
+      yy-=h*0.72;});}
+  s+=`<rect x="${x-2}" y="${top}" width="${CW+4}" height="${yb-top+2}" fill="none" stroke="#6f8597" stroke-width="2" rx="2"/>`;
+  s+=`<polygon points="${x-14},${yb+2} ${x+CW+14},${yb+2} ${x+CW+20},${yb+10} ${x-20},${yb+10}" fill="#cfdbe3" stroke="#6f8597"/>`;
+  for(let v=0;v<=100;v+=5){const y=yb-v*PXML;const len=v%10===0?14:8;s+=`<line x1="${x+CW-len}" x2="${x+CW}" y1="${y}" y2="${y}" stroke="#335" stroke-width=".8"/>`;if(v%20===0)s+=`<text x="${x+CW+5}" y="${y+4}" font-size="9" fill="#335">${v}</text>`;}
+  return s;
+}
+function zoomSVG(level,kind,o){
+  const k=26,cy=140,ctr=Math.floor(level)+0.5;const yOf=v=>cy-(v-ctr)*k;
+  let s=`<rect x="20" y="0" width="180" height="280" fill="#f8fbfd"/>`;
+  if(kind==='powder'){
+    const n=o.rough.length;let pts=['20,280'];
+    for(let i=0;i<n;i++){pts.push(`${(20+i/(n-1)*180).toFixed(1)},${yOf(level+o.amp*o.rough[i]).toFixed(1)}`);}
+    pts.push('200,280');s+=`<polygon points="${pts.join(' ')}" fill="#f1e7cf" stroke="#b49c6a"/>`;
+    for(let i=0;i<60;i++){const xx=24+((i*53)%170),yy=yOf(level)+8+((i*29)%110);s+=`<circle cx="${xx}" cy="${yy}" r="${1+(i%3)}" fill="#e0d2b0"/>`;}
+  }else if(kind==='liquid'){
+    const men=o.men;let pts=['20,280'];
+    for(let i=0;i<=40;i++){const xx=20+i*4.5;const u=Math.abs(xx-110)/90;pts.push(`${xx},${(yOf(level)-men*k*Math.pow(u,6)).toFixed(1)}`);}
+    pts.push('200,280');s+=`<polygon points="${pts.join(' ')}" fill="${o.color}" stroke="#7a6a3a" stroke-width=".8"/>`;
+    if(o.film>0.03){const fh=Math.min(120,o.film*150);s+=`<rect x="20" y="${yOf(level)-men*k-fh}" width="6" height="${fh}" fill="${o.color}" opacity=".8"/><rect x="194" y="${yOf(level)-men*k-fh}" width="6" height="${fh}" fill="${o.color}" opacity=".8"/>`;}
+  }
+  for(let v=Math.floor(ctr)-6;v<=Math.ceil(ctr)+6;v++){
+    const y=yOf(v);if(y<0||y>280||v<0)continue;
+    const len=v%10===0?80:v%5===0?58:36;
+    s+=`<line x1="20" x2="${20+len}" y1="${y}" y2="${y}" stroke="#123" stroke-width="1.4"/>`;
+    if(v%5===0)s+=`<text x="${24+len}" y="${y+5}" font-size="14" fill="#123">${v}</text>`;
+  }
+  s+=`<rect x="20" y="0" width="180" height="280" fill="none" stroke="#6f8597" stroke-width="2"/>`;
+  return s;
+}
+function balanceSVG(cx,y,text,id){
+  return `<rect x="${cx-80}" y="${y}" width="160" height="16" fill="#ccc" stroke="#888"/><rect x="${cx-95}" y="${y+16}" width="190" height="44" rx="5" fill="#e6e6e6" stroke="#888"/><rect x="${cx-45}" y="${y+24}" width="90" height="26" fill="#1d2b1d"/><text x="${cx+40}" y="${y+43}" fill="#7dff7d" font-family="Consolas,monospace" font-size="17" text-anchor="end"${id?` id="${id}"`:''}>${text}</text>`;
+}
+
+/* ================= ① 示意圖 ================= */
+(function(){let s='';for(let i=0;i<7;i++)for(let j=0;j<6;j++){const x=215+i*20+(j%2)*8,y=22+j*20;if(x>348)continue;s+=`<polygon points="${poly(x+6,y+6,15+(i*j%3)*2,13+(i+j)%3*2,i*7+j)}"/>`;}$('midpack').innerHTML=s;
+ s='';for(let i=0;i<40;i++){const cx=420+(i*37%120),cy=25+(i*53%105);s+=`<g><circle cx="${cx}" cy="${cy}" r="3"/><circle cx="${cx+5}" cy="${cy+2}" r="2.5"/><circle cx="${cx+2}" cy="${cy+6}" r="2.5"/></g>`;}$('finepack').innerHTML=s;})();
+
+/* ================= ② 研磨與壓實 ================= */
+const P={M:0,te:0,tg:0,cyl:null,tare:0,tool:false,obs:null};
+const rows2=[];
+function addLump2(){const m=U(9,12);if(P.M>0.5&&P.te>0){const f=P.M/(P.M+m);P.te*=f;P.tg*=f;say('msg2','注意：新冰糖塊與已磨的粉混在一起，研磨程度被稀釋了。');}else say('msg2',`加入一匙冰糖塊（約 ${m.toFixed(0)} g）。`);P.M+=m;draw2();}
+function grind2(sec){
+  if(P.M<1){say('msg2','研缽裡沒有冰糖。');return;}
+  P.tg+=sec;P.te+=sec*Math.sqrt(30/Math.max(P.M,5));
+  say('msg2',`研磨 ${sec} s。研缽中冰糖越多，每秒的研磨效果越差。`);draw2();
+  const pe=$('pestle');if(pe)pe.classList.add('g');
+}
+function observe2(){
+  const te=P.M>0.5?P.te:(P.cyl?P.cyl.te:null);
+  if(te===null){say('msg2','沒有可觀察的冰糖。');return;}
+  const d=d50(te),sl=sigLn(te);P.obs={d,sl,seed:Math.floor(rnd()*1e6)};drawGrid2();
+}
+function drawGrid2(){
+  const g=$('gp2');if(!P.obs){g.innerHTML='';return;}
+  const {d,sl}=P.obs;let s='';const k=15;
+  for(let i=0;i<=20;i++){s+=`<line x1="${i*k}" x2="${i*k}" y1="0" y2="200" stroke="${i%10===0?'#7fb07f':'#cfe5cf'}" stroke-width="${i%10===0?1.2:.6}"/>`;}
+  for(let j=0;j<=13;j++){s+=`<line x1="0" x2="300" y1="${j*k}" y2="${j*k}" stroke="${j%10===0?'#7fb07f':'#cfe5cf'}" stroke-width="${j%10===0?1.2:.6}"/>`;}
+  let sd=P.obs.seed;const r=()=>{sd=(sd*9301+49297)%233280;return sd/233280;};
+  if(d<0.12){
+    for(let i=0;i<700;i++){s+=`<circle cx="${(r()*300).toFixed(1)}" cy="${(r()*200).toFixed(1)}" r="${(0.4+r()*0.9).toFixed(2)}" fill="#e9dcc0"/>`;}
+    $('gp2n').textContent='粉末細到肉眼無法分辨單一顆粒（小於約 0.1 mm），且有結成小團的現象。';
+  }else{
+    const n=clamp(Math.round(0.3*20*13/(0.785*d*d)),2,450);
+    for(let i=0;i<n;i++){const z=Math.sqrt(-2*Math.log(1-r()))*Math.cos(2*Math.PI*r());const sz=d*Math.exp(sl*z)*k;
+      s+=`<polygon points="${poly(r()*300,r()*200,sz,sz*(0.7+0.5*r()),i+P.obs.seed)}" fill="#fbf6e8" stroke="#b9a37a" stroke-width=".7" opacity=".95"/>`;}
+    $('gp2n').textContent='以方格估計典型顆粒大小（中位數）。';
+  }
+  g.innerHTML=s;
+}
+function fill2(){
+  if(P.cyl){say('msg2','量筒裡已有冰糖，請先刮鬆取出。');return;}
+  if(P.M<2){say('msg2','研缽中冰糖太少。');return;}
+  const d=d50(P.te),sl=sigLn(P.te),d90=d*Math.exp(1.28*sl);
+  const useF=$('funnel').checked;
+  if(useF&&d90>9){say('msg2','<span class="warn">漏斗頸被卡住了！</span>支管徑約 1 cm，粗冰糖塊過不去。請再研磨，或取消「經漏斗倒入」直接用湯匙倒。');return;}
+  const res=Math.min(P.M,U(0.2,0.5)+(d<0.15?0.4:0));
+  let m=P.M-res,spill=0;
+  if(!useF){spill=Math.min(m*0.3,U(0.3,1.5));m-=spill;}
+  const pt=phiTapModel(d)*(1+N(0,0.008+0.04*d/27.5));
+  P.cyl={m,s:U(0,0.08),d,te:P.te,tg:P.tg,phiTap:pt,H:hausner(d),rough:Array.from({length:30},()=>clamp(N(0,1),-2.2,2.2)),rf:1};
+  P.M=res;
+  $('r2tg').textContent=P.cyl.tg.toFixed(0);
+  say('msg2',`已倒入量筒。研缽中殘留少許。${spill>0?'直接倒時有些冰糖灑在桌上。':''}未壓實前體積偏大，請壓實到體積不再變小。`);draw2();
+}
+function phiS(c){const pl=c.phiTap/c.H;return pl+(c.phiTap-pl)*c.s;}
+function cylV2(c){return c.m/(phiS(c)*TRUE.rho);}
+function amp2(c){return Math.min(0.45*c.d,4.5)/10*CYL_A*c.rf;}
+function tamp2(){
+  const c=P.cyl;if(!c){say('msg2','量筒是空的。');return;}
+  const before=cylV2(c);c.s+=(1-c.s)*0.3*U(0.8,1.2);c.rf=Math.max(0.25,c.rf*0.6);
+  let t='用木棒壓實一次。';
+  if(c.d<0.15){const st=U(0.03,0.15);c.m-=st;t+='細粉沾黏在木棒上，帶走了一些。';}
+  say('msg2',t+`（體積約減少 ${(before-cylV2(c)).toFixed(1)} mL）`);draw2();
+}
+function tap2(){const c=P.cyl;if(!c){say('msg2','量筒是空的。');return;}c.s+=(1-c.s)*0.12;say('msg2','輕敲量筒底，粉末略為下沉。');draw2();}
+function tool2(){P.tool=true;$('toolBtn').textContent='刮鬆工具已組裝 ✓';say('msg2','已將長尾夾的兩個尾端拆下，用膠帶固定在圓木棒尾端。');}
+function remove2(){
+  const c=P.cyl;if(!c){say('msg2','量筒是空的。');return;}
+  if(!P.tool){say('msg2','壓實的冰糖卡在量筒裡倒不出來，請先組裝刮鬆工具。');return;}
+  const res=U(0.1,0.3)+(c.d<0.15?0.3:0);
+  if(P.M>0.5){const f=P.M/(P.M+c.m-res);P.te=P.te*f+c.te*(1-f);P.tg=P.tg*f+c.tg*(1-f);}else{P.te=c.te;P.tg=c.tg;}
+  P.M+=c.m-res;P.cyl=null;$('r2tg').textContent='—';
+  say('msg2','已刮鬆並倒回研缽，量筒內殘粉以衛生紙擦淨。可繼續研磨。');draw2();
+}
+function tare2(){P.tare=TRUE.cylMass+(P.cyl?P.cyl.m:0);live2();}
+function live2(){const t=balRead(TRUE.cylMass+(P.cyl?P.cyl.m:0),P.tare);$('bal2').textContent=t;const e=$('sbal2');if(e)e.textContent=t;}
+function draw2(){
+  $('t2M').textContent=P.M<0.5?'0':P.M.toFixed(0);$('t2tg').textContent=P.tg.toFixed(0);
+  let s='';
+  // 研缽
+  s+=`<path d="M40 250 Q40 340 125 340 Q210 340 210 250 Z" fill="#e8e2d8" stroke="#8a7f70" stroke-width="2"/>`;
+  if(P.M>0.5){const h=Math.min(45,8+P.M*0.5);const d=d50(P.te);
+    s+=`<path d="M${125-60} ${336-h} Q125 ${330-h-10} ${125+60} ${336-h} L${125+50} 336 L${125-50} 336 Z" fill="#f1e7cf" stroke="#b9a37a"/>`;
+    if(d>1.2){for(let i=0;i<Math.min(12,P.M/2);i++){const w=Math.min(26,d*3.2);s+=`<polygon points="${poly(80+(i*29%90),330-h+((i*17)%Math.max(4,h-6)),w,w*0.8,i)}" fill="#fffaf0" stroke="#b9a37a"/>`;}}}
+  s+=`<g id="pestle"><rect x="150" y="190" width="18" height="110" rx="8" transform="rotate(25 159 245)" fill="#d8cfc0" stroke="#8a7f70"/></g>`;
+  s+=`<text x="125" y="365" text-anchor="middle" font-size="13">研缽與杵</text>`;
+  // 量筒
+  const x=330,yb=355;
+  const c=P.cyl;
+  s+=cylinderSVG(x,yb,c?{powder:{V:cylV2(c),amp:amp2(c),rough:c.rough}}:{});
+  if($('funnel').checked){s+=`<path d="M${x-25} ${yb-345} L${x+CW+25} ${yb-345} L${x+CW/2+5} ${yb-310} L${x+CW/2+5} ${yb-290} L${x+CW/2-5} ${yb-290} L${x+CW/2-5} ${yb-310} Z" fill="#dfe9f0" stroke="#6f8597" opacity=".8"/>`;}
+  s+=balanceSVG(x+CW/2,yb+12,$('bal2').textContent,'sbal2');
+  $('sv2').innerHTML=s;
+  if(c)$('zm2').innerHTML=zoomSVG(cylV2(c),'powder',{amp:amp2(c),rough:c.rough});else $('zm2').innerHTML='<text x="110" y="140" text-anchor="middle" fill="#888">量筒是空的</text>';
+}
+function rec2(){
+  const d=parseFloat($('r2d').value),m=parseFloat($('r2m').value),V=parseFloat($('r2V').value);
+  if(!Number.isFinite(m)||!Number.isFinite(V)){say('msg2','請填入冰糖質量與體積讀數。');return;}
+  rows2.push({tg:P.cyl?Math.round(P.cyl.tg):Math.round(P.tg),d,m,V});
+  ['r2d','r2m','r2V'].forEach(i=>$(i).value='');upd2();
+}
+const cols2=[{key:'tg'},{key:'d'},{key:'m'},{key:'V'},{calc:r=>r.m/r.V,dec:3}];
+function upd2(){renderTable('tb2',rows2,cols2,upd2);}
+
+/* ================= ③ ================= */
+let revealed=false;
+function renderT3(){
+  const mode=$('t3x').value;
+  const pts=rows2.map(r=>[mode==='tg'?r.tg:r.d,r.m/r.V]);
+  let curve=null;
+  if(revealed&&mode==='d'){curve=[];for(let lg=Math.log10(0.04);lg<=Math.log10(9);lg+=0.05){const d=Math.pow(10,lg);curve.push([d,TRUE.rho*phiTapModel(d)]);}}
+  plot($('pl3'),{pts,xlabel:mode==='tg'?'研磨時間 (s)':'估計粒徑 (mm)',ylabel:'ρ_app (g/cm³)',band:[1.52,1.58],logx:mode==='d',curve,yzero:true,xzero:mode==='tg'});
+  const tb=$('tb3');tb.innerHTML='';
+  rows2.forEach((r,i)=>{const ra=r.m/r.V,phi=ra/1.55;tb.innerHTML+=`<tr><td>${i+1}</td><td>${r.tg}</td><td>${fmt(ra,3)}</td><td>${fmt(phi,3)}</td><td>${fmt(1-phi,3)}</td></tr>`;});
+  if(rows2.length){const best=rows2.reduce((a,b)=>a.m/a.V>b.m/b.V?a:b);
+    $('res3').textContent=`最大 ρ_app = ${fmt(best.m/best.V,3)} g/cm³（研磨 ${best.tg} s），相當於 φ ≈ ${fmt(best.m/best.V/1.55,2)}`+(revealed&&mode==='d'?'\n紅色虛線：完全壓實時的模型 ρ·φ(d)':'')+(revealed&&mode==='tg'?'\n（切換橫軸為「估計粒徑」可看到模型曲線）':'');}
+  else $('res3').textContent='請先在 ② 頁記錄數據。';
+}
+
+/* ================= ④ 飽和糖水與排液 ================= */
+const S={W:0,S:0,U:0};               // 燒杯：水 g、已溶糖 g、未溶糖 g
+const C={Wc:0,Sc:0,lumps:[],film:0,tare:0,liq:'none'};
+const rowsL=[],rowsA=[];
+function wBeaker(){return S.W>0?S.S/(S.S+S.W):0;}
+function beakerLiqV(){return S.W>0?(S.W+S.S)/rhoSol(wBeaker()):0;}
+function addWater4(){const v=20+N(0,0.5);S.W+=v*(rhoSol(0));say('msgS',`加入約 20 mL 水。`);updS();}
+function addSugar4(){const m=U(9.2,10.8);S.U+=m;say('msgS',`加入冰糖粉（天平秤得 ${m.toFixed(1)} g）。`);updS();}
+function dissolve(dt,tau){const Smax=S.W*solRatio;const gap=Smax-S.S;if(gap>0&&S.U>0){const d=Math.min(S.U,gap*(1-Math.exp(-dt/tau)));S.S+=d;S.U-=d;}}
+function stir4(sec){if(S.W<=0){say('msgS','燒杯裡沒有水。');return;}dissolve(sec,90);simT+=sec;updS(true);}
+function stepBeaker(dt){if(S.W>0)dissolve(dt,700);}
+function updS(stirred){
+  if(S.W<=0){say('msgS','燒杯是空的。');return;}
+  let t=`燒杯內糖水約 ${beakerLiqV().toFixed(0)} mL。`;
+  if(S.U>8)t+='杯底仍有<b>大量</b>未溶冰糖。';else if(S.U>2)t+='杯底仍有<b>少量</b>未溶冰糖。';else if(S.U>0.3)t+='杯底只剩<b>些許</b>未溶冰糖。';else t+='<b>冰糖已全部溶解</b>，糖水尚未飽和，需再加冰糖。';
+  if(stirred)t+=' 已攪拌。';
+  say('msgS',t);
+}
+function cylLiqV(){const m=C.Wc+C.Sc;return m>0?m/rhoSol(C.Sc/m):0;}
+function cylLevel(){return cylLiqV()-C.film+C.lumps.reduce((s,l)=>s+l.ms/TRUE.rho+l.b,0);}
+function cylW(){const m=C.Wc+C.Sc;return m>0?C.Sc/m:0;}
+function pourSyrup4(){
+  if(C.liq==='water'){say('msg4','量筒裡是清水，請先清空。');return;}
+  const avail=beakerLiqV()-6;if(avail<=1){say('msg4','燒杯中可倒出的澄清糖水不夠，請在 (a) 多配一些。');return;}
+  let v=Math.min(avail,U(8,12));if(cylLevel()+v>104){say('msg4','量筒快滿了。');return;}
+  const w=wBeaker(),mass=v*rhoSol(w),f=mass/(S.W+S.S);
+  C.Wc+=S.W*f;C.Sc+=S.S*f;S.W*=1-f;S.S*=1-f;C.film+=U(0.4,0.7);C.liq='syrup';
+  say('msg4','倒入糖水。管壁上的糖水正慢慢流下。');updS();
+}
+function pourWater4(){
+  if(C.liq==='syrup'){say('msg4','量筒裡是糖水，請先清空或倒回燒杯。');return;}
+  const v=U(8,12);if(cylLevel()+v>104){say('msg4','量筒快滿了。');return;}
+  C.Wc+=v*rhoSol(0);C.film+=0.08;C.liq='water';say('msg4','倒入清水（對照組）。');
+}
+function empty4(){C.Wc=0;C.Sc=0;C.film=0;C.lumps.forEach(l=>{l.state='done';});C.lumps=[];C.liq='none';C.tare=0;say('msg4','量筒已清空、洗淨、擦乾；天平扣重已取消。');renderLumps4();}
+function backToBeaker4(){
+  if(C.liq!=='syrup'){say('msg4','量筒中不是糖水。');return;}
+  const keep=Math.min(C.Wc+C.Sc,0.6*rhoSol(cylW()));const f=1-keep/(C.Wc+C.Sc);
+  S.W+=C.Wc*f;S.S+=C.Sc*f;C.Wc=0;C.Sc=0;C.film=0;C.lumps.forEach(l=>{l.state='done';});C.lumps=[];C.liq='none';
+  say('msg4','糖塊取出放一旁，糖水倒回燒杯（少量掛在量筒壁上損失）。量筒已洗淨擦乾。');updS();renderLumps4();
+}
+function tare4(){C.tare=TRUE.cylMass+C.Wc+C.Sc+C.lumps.reduce((s,l)=>s+l.ms,0);}
+function knock4(){C.lumps.forEach(l=>l.b*=U(0.25,0.45));say('msg4','輕敲量筒，附著在糖塊上的小氣泡浮出。');}
+function stepCylA(dt){
+  C.film*=Math.exp(-dt/(C.liq==='water'?6:45));
+  const w=cylW(),drive=Math.max(0,(TRUE.wSat-w)/TRUE.wSat);
+  C.lumps.forEach(l=>{
+    if(l.ms<=0)return;
+    const area=4.8*Math.pow(l.ms/TRUE.rho,2/3);
+    const dm=Math.min(l.ms,0.0006*area*drive*dt);l.ms-=dm;C.Sc+=dm;
+    if(C.liq==='water')l.b*=Math.exp(-dt/60);
+  });
+}
+function mkLump(id,m,big){const w=1.25*Math.cbrt(m/TRUE.rho)*(big?1.22:U(0.95,1.15));return{id,m0:m,ms:m,w,h:w*U(0.75,1.0),b:0,state:'table',read:null,big:!!big,inB:false};}
+const LA=[];for(let i=0;i<8;i++)LA.push(mkLump(i+1,U(3,7)));LA.splice(3,0,mkLump(99,U(13,16),true));
+LA.forEach((l,i)=>l.label='A'+(i+1));
+function weigh(l){l.read=(Math.round((l.ms+(l.wet||0)+N(0,0.025))*10)/10).toFixed(1);}
+function cut(arr,l,render){
+  const f=U(0.4,0.6),crumb=U(0.05,0.2),i=arr.indexOf(l);
+  const a=mkLump(l.id*10+1,(l.ms-crumb)*f),b=mkLump(l.id*10+2,(l.ms-crumb)*(1-f));
+  a.label=l.label+'-1';b.label=l.label+'-2';arr.splice(i,1,a,b);render();
+}
+function renderLumps4(){
+  const el=$('lumps4');el.innerHTML='';
+  LA.forEach(l=>{const d=document.createElement('div');d.className='lump'+(l.state!=='table'?' done':'');
+    d.innerHTML=`<b>${l.label}</b> 寬約 ${l.w.toFixed(1)} cm<span class="tag">${l.state==='table'?'桌上':l.state==='cyl'?'在量筒中':'已用過'}</span><br>
+    秤重：<b>${l.read??'—'}</b> g<br>`;
+    if(l.state==='table'){
+      const b1=document.createElement('button');b1.className='b s';b1.textContent='秤重';b1.onclick=()=>{weigh(l);renderLumps4();};d.appendChild(b1);
+      const b2=document.createElement('button');b2.className='b s';b2.textContent='放入量筒';b2.onclick=()=>dropA(l);d.appendChild(b2);
+      const b3=document.createElement('button');b3.className='b s';b3.textContent='小刀切開';b3.onclick=()=>cut(LA,l,renderLumps4);d.appendChild(b3);
+    }
+    el.appendChild(d);});
+}
+function dropA(l){
+  if(C.liq==='none'){say('msg4','量筒中還沒有液體。');return;}
+  if(l.w>TRUE.cylID-0.25){say('msg4',`<span class="warn">${l.label} 太大，放不進量筒口（內徑 2.75 cm）。</span>可用小刀切開。`);return;}
+  if(l.read===null)say('msg4',`<span class="warn">提醒：${l.label} 還沒秤重就放進去了！</span>`);
+  else say('msg4',`${l.label} 沿管壁滑入。濺起的液體沾在管壁上。`);
+  if(cylLevel()+l.ms/TRUE.rho>104){say('msg4','液面會超過刻度範圍。');return;}
+  l.state='cyl';l.b=l.ms*(C.liq==='syrup'?U(0.012,0.03):U(0.004,0.012));C.lumps.push(l);C.film+=C.liq==='syrup'?U(0.05,0.15):0.02;
+  renderLumps4();
+}
+function draw4(){
+  let s='';
+  // 燒杯
+  const bx=40,by=360,bw=TRUE.beakerID*PXCM*0.85,sc=PXCM*0.85;
+  if(S.W>0){const v=beakerLiqV()+S.U/TRUE.rho/0.55;const h=v/BEK_A*sc;const w=wBeaker();
+    s+=`<rect x="${bx}" y="${by-h}" width="${bw}" height="${h}" fill="${w>0.3?'#f3d58a':'#bfe3f5'}" opacity="${0.5+0.5*w}"/>`;
+    const hu=S.U/TRUE.rho/0.55/BEK_A*sc;if(hu>0.3)s+=`<rect x="${bx}" y="${by-hu}" width="${bw}" height="${hu}" fill="#f6f0df" stroke="#c9b48a"/>`;}
+  s+=`<path d="M${bx-4} ${by-190} L${bx} ${by-186} L${bx} ${by} L${bx+bw} ${by} L${bx+bw} ${by-190}" fill="none" stroke="#6f8597" stroke-width="2.5"/>`;
+  s+=`<text x="${bx+bw/2}" y="${by+20}" text-anchor="middle" font-size="13">燒杯（配製糖水）</text>`;
+  // 量筒
+  const x=330,yb=355,lv=cylLevel();
+  const col=C.liq==='water'?'#bfe3f5':'#f3d58a';
+  s+=cylinderSVG(x,yb,{liqV:Math.max(0,lv),liqColor:col,film:C.film,lumps:C.lumps});
+  s+=balanceSVG(x+CW/2,yb+12,$('bal4').textContent);
+  $('sv4').innerHTML=s;
+  $('bal4').textContent=balRead(TRUE.cylMass+C.Wc+C.Sc+C.lumps.reduce((a,l)=>a+l.ms,0),C.tare);
+  $('liq4').textContent=C.liq==='none'?'無':C.liq==='water'?'清水（對照組）':'糖水';
+  if(lv>0.5)$('zm4').innerHTML=zoomSVG(lv,'liquid',{men:C.liq==='water'?0.25:0.4,color:col,film:C.film});
+  else $('zm4').innerHTML='<text x="110" y="140" text-anchor="middle" fill="#888">量筒是空的</text>';
+}
+function recL4(){const V=parseFloat($('r4V').value),m=parseFloat($('r4m').value);if(!Number.isFinite(V)||!Number.isFinite(m)){say('msg4','請填 V 與 m。');return;}rowsL.push({V,m});$('r4V').value='';$('r4m').value='';updL();}
+function recA4(){const M=parseFloat($('r4M').value),V=parseFloat($('r4V2').value);if(!Number.isFinite(M)||!Number.isFinite(V)){say('msg4','請填累計質量與液面讀數。');return;}rowsA.push({M,V});$('r4V2').value='';updA();}
+const RES={};
+function updL(){
+  renderTable('tbL',rowsL,[{key:'V'},{key:'m'}],updL);
+  const r=linreg(rowsL.map(x=>x.V),rowsL.map(x=>x.m));
+  if(r&&rowsL.length>=3){RES.rhoL={v:r.m,s:r.sm};$('resL').textContent=`m = ρ_L·V + b\nρ_L = ${r.m.toFixed(4)} ± ${fmt(r.sm,4)} g/cm³　b = ${r.b.toFixed(2)} g　R² = ${r.r2.toFixed(5)}`;}
+  else{RES.rhoL=null;$('resL').textContent='至少需要 3 筆數據才能迴歸。';}
+}
+function updA(){
+  renderTable('tbA',rowsA,[{key:'M'},{key:'V'}],updA);
+  const r=linreg(rowsA.map(x=>x.M),rowsA.map(x=>x.V));
+  plot($('plA'),{pts:rowsA.map(x=>[x.M,x.V]),fit:r,xlabel:'累計冰糖質量 M (g)',ylabel:'液面讀數 V (mL)',xzero:true});
+  if(r&&rowsA.length>=3){const rho=1/r.m,s=r.sm/(r.m*r.m);RES.A={v:rho,s};
+    $('resA').textContent=`V = (1/ρ)·M + V₀\n斜率 = ${r.m.toFixed(5)} ± ${fmt(r.sm,5)} mL/g　V₀ = ${r.b.toFixed(2)} mL　R² = ${r.r2.toFixed(5)}\nρ = 1/斜率 = ${rho.toFixed(4)} ± ${fmt(s,4)} g/cm³`;}
+  else{RES.A=null;$('resA').textContent='至少需要 3 筆數據（含 M = 0 的初始讀數）。';}
+}
+
+/* ================= ⑤ 天平浮力法 ================= */
+const B={cont:'cyl',liq:'none',Wc:0,Sc:0,tare:0,hang:null,x:18,wall:0};
+const rows5=[];
+const LB=[];for(let i=0;i<6;i++)LB.push(mkLump(200+i,U(2.5,6)));LB.splice(2,0,(()=>{const l=mkLump(299,U(7.5,9));l.w=2.45;return l;})());
+LB.forEach((l,i)=>l.label='B'+(i+1));
+function contMass(){return B.cont==='cyl'?TRUE.cylMass:TRUE.beakerMass;}
+function contA(){return B.cont==='cyl'?CYL_A:BEK_A;}
+function contH(){return B.cont==='cyl'?110/CYL_A:11;}
+function bLiqV(){const m=B.Wc+B.Sc;return m>0?m/rhoSol(B.Sc/m):0;}
+function bRhoL(){const m=B.Wc+B.Sc;return m>0?rhoSol(B.Sc/m):1;}
+function setCont5(v){if(B.Wc+B.Sc>0||B.hang){alert('請先清空容器、取出糖塊再換容器。');document.querySelector(`input[name=cont][value=${B.cont}]`).checked=true;return;}B.cont=v;B.tare=0;$('hx5').max=contH().toFixed(1);B.x=contH();$('hx5').value=B.x;say('msg5',v==='cyl'?'改用量筒當容器。':'改用 500 mL 燒杯當容器。');}
+function pour5(kind){
+  if(B.liq!=='none'&&B.liq!==kind){say('msg5','容器中是另一種液體，請先清空。');return;}
+  const v=U(8,12);if(bLiqV()+v>(B.cont==='cyl'?100:450)){say('msg5','容器快滿了。');return;}
+  if(kind==='syrup'){const avail=beakerLiqV()-6;if(avail<v){say('msg5','④ 燒杯中的澄清糖水不夠，請回 ④ (a) 多配一些（或把量筒中的糖水倒回燒杯）。');return;}
+    const mass=v*rhoSol(wBeaker()),f=mass/(S.W+S.S);B.Wc+=S.W*f;B.Sc+=S.S*f;S.W*=1-f;S.S*=1-f;}
+  else B.Wc+=v*rhoSol(0);
+  B.liq=kind;
+  const gross=contMass()+B.Wc+B.Sc;
+  say('msg5',`倒入約 10 mL ${kind==='syrup'?'糖水':'清水'}，液深約 ${(bLiqV()/contA()).toFixed(1)} cm。`+(gross>200?' <span class="warn">天平超載！</span>':''));
+}
+function empty5(){if(B.hang!==null)unhang5(true);B.Wc=0;B.Sc=0;B.liq='none';B.tare=0;say('msg5','容器已清空、洗淨、擦乾；扣重已取消。');}
+function tare5(){const g=grossB();if(g>200){say('msg5','超載時無法歸零。');return;}B.tare=g;}
+function hangGeom(l){
+  const A=contA(),Vs=l.ms/TRUE.rho,Vl=bLiqV();
+  const den=l.h-Vs/A;let f;
+  if(den<=0.01)f=(Vl/A-B.x)>0?1:0;else f=clamp((Vl/A-B.x)/den,0,1);
+  return f;
+}
+function grossB(){
+  let g=contMass()+B.Wc+B.Sc;
+  if(B.hang!==null){const l=LB[B.hang];const f=hangGeom(l);const rl=bRhoL();
+    const buoy=rl*(f*l.ms/TRUE.rho+f*l.b);g+=buoy;
+    const app=(l.ms+(l.wet||0))-buoy;
+    const sup=clamp(-B.x/0.3,0,1);g+=sup*app;
+    if(B.cont==='cyl'&&l.w>TRUE.cylID-0.35&&f>0)g+=B.wall*app;
+  }
+  return g;
+}
+function stepB(dt){
+  if(B.hang===null)return;const l=LB[B.hang];const f=hangGeom(l);
+  if(f>0.02&&l.b===0&&!l.inB){l.inB=true;l.b=l.ms*(B.liq==='syrup'?U(0.012,0.03):U(0.004,0.012));}
+  const m=B.Wc+B.Sc,w=m>0?B.Sc/m:0,drive=Math.max(0,(TRUE.wSat-w)/TRUE.wSat);
+  const area=4.8*Math.pow(l.ms/TRUE.rho,2/3);const dm=Math.min(l.ms,0.0006*area*drive*dt*f);l.ms-=dm;B.Sc+=dm;
+  if(B.liq==='water')l.b*=Math.exp(-dt/60);
+  B.wall=(B.cont==='cyl'&&l.w>TRUE.cylID-0.35&&f>0)?U(0.1,0.5):0;
+}
+function jiggle5(){if(B.hang===null)return;const l=LB[B.hang];l.b*=U(0.25,0.45);say('msg5','上下抽動幾次，氣泡脫離糖塊浮出液面。');}
+function hang5(i){
+  if(B.hang!==null){say('msg5','請先取出目前懸吊的糖塊。');return;}
+  if(B.liq==='none'){say('msg5','容器中還沒有液體。');return;}
+  const l=LB[i];if(B.cont==='cyl'&&l.w>TRUE.cylID-0.15){say('msg5',`<span class="warn">${l.label} 太寬，放不進量筒。</span>`);return;}
+  B.hang=i;B.x=contH();$('hx5').max=contH().toFixed(1);$('hx5').value=B.x;l.state='hang';
+  say('msg5',`${l.label} 已綁上棉線，懸在容器上方。拖動滑桿慢慢放下。`+(l.read===null?' <span class="warn">（還沒在空氣中秤重！）</span>':''));renderLumps5();
+}
+function unhang5(silent){
+  if(B.hang===null)return;const l=LB[B.hang];const f=hangGeom(l);
+  if(f>0){const drag=(B.liq==='syrup'?U(0.1,0.3):U(0.04,0.1))*Math.sqrt(l.ms/4);const m=B.Wc+B.Sc;if(m>drag){B.Wc*=1-drag/m;B.Sc*=1-drag/m;}l.wet=(l.wet||0)+drag;}
+  l.state='done';B.hang=null;B.wall=0;
+  if(!silent)say('msg5','糖塊取出，表面帶走了一些液體，所以容器讀數也變了。下一塊要重新讀 R₀。');renderLumps5();
+}
+function renderLumps5(){
+  const el=$('lumps5');el.innerHTML='';
+  LB.forEach((l,i)=>{const d=document.createElement('div');d.className='lump'+(B.hang===i?' sel':'')+(l.state==='done'?' done':'');
+    d.innerHTML=`<b>${l.label}</b> 寬約 ${l.w.toFixed(1)} cm<span class="tag">${l.state==='table'?'桌上':l.state==='hang'?'懸吊中':'已浸過'}</span><br>空氣中秤重：<b>${l.read??'—'}</b> g<br>`;
+    if(l.state!=='hang'){const b1=document.createElement('button');b1.className='b s';b1.textContent='空氣中秤重';b1.onclick=()=>{weigh(l);renderLumps5();};d.appendChild(b1);}
+    if(l.state==='table'){const b2=document.createElement('button');b2.className='b s';b2.textContent='綁線懸吊';b2.onclick=()=>hang5(i);d.appendChild(b2);
+      const b3=document.createElement('button');b3.className='b s';b3.textContent='小刀切開';b3.onclick=()=>cut(LB,l,renderLumps5);d.appendChild(b3);}
+    el.appendChild(d);});
+}
+function draw5(){
+  const g=grossB();$('bal5').textContent=balRead(g,B.tare);
+  let s='';const cx=260,yb=355;
+  const A=contA(),w=B.cont==='cyl'?CW:TRUE.beakerID*PXCM*0.9,sc=B.cont==='cyl'?PXCM:PXCM*0.9;
+  const x=cx-w/2,Vl=bLiqV();let f=0,l=null;
+  if(B.hang!==null){l=LB[B.hang];f=hangGeom(l);}
+  const level=(Vl+(l?f*(l.ms/TRUE.rho+l.b):0))/A;
+  const col=B.liq==='water'?'#bfe3f5':'#f3d58a';
+  if(Vl>0)s+=`<rect x="${x}" y="${yb-level*sc}" width="${w}" height="${level*sc}" fill="${col}"/>`;
+  // 支架
+  s+=`<rect x="40" y="40" width="8" height="${yb+70-40}" fill="#777"/><rect x="40" y="40" width="${cx-40}" height="6" fill="#777"/>`;
+  if(l){const lw=Math.min(l.w,TRUE.cylID-0.1)*sc,lh=l.h*sc,ly=yb-B.x*sc-lh/2;
+    s+=`<line x1="${cx}" y1="46" x2="${cx}" y2="${ly-lh/2}" stroke="#555" stroke-width="1"/>`;
+    s+=`<polygon points="${poly(cx,ly,lw,lh,l.id)}" fill="#fffaf0" stroke="#b9a37a"/>`;
+    if(f>0){const nb=Math.min(14,Math.round(l.b*40));for(let k=0;k<nb;k++){s+=`<circle cx="${cx+(k%2?1:-1)*lw*0.42}" cy="${ly-lh*0.4+lh*0.8*((k*37%10)/10)}" r="1.6" fill="#fff" stroke="#6aa"/>`;}}
+  }
+  if(B.cont==='cyl'){s+=`<rect x="${x-2}" y="${yb-110*PXML}" width="${w+4}" height="${110*PXML+2}" fill="none" stroke="#6f8597" stroke-width="2"/>`;
+    for(let v=0;v<=100;v+=10){const y=yb-v*PXML;s+=`<line x1="${x+w-12}" x2="${x+w}" y1="${y}" y2="${y}" stroke="#335"/>`;}
+    s+=`<polygon points="${x-14},${yb+2} ${x+w+14},${yb+2} ${x+w+20},${yb+10} ${x-20},${yb+10}" fill="#cfdbe3" stroke="#6f8597"/>`;}
+  else{s+=`<path d="M${x-4} ${yb-11*sc} L${x} ${yb-11*sc+4} L${x} ${yb} L${x+w} ${yb} L${x+w} ${yb-11*sc}" fill="none" stroke="#6f8597" stroke-width="2.5"/>`;}
+  s+=balanceSVG(cx,yb+12,$('bal5').textContent);
+  $('sv5').innerHTML=s;
+  // 狀態
+  if(l){let st;if(B.x<0)st='<span class="warn">糖塊壓在容器底部！</span>';else if(f<=0)st='在液面上方';else if(f<0.999)st='<span class="warn">只有部分浸入</span>';else st='<span class="good">完全浸沒</span>';
+    if(B.wall>0)st+=' <span class="warn">擦到量筒壁！讀數不穩</span>';
+    $('hx5v').innerHTML=B.x.toFixed(2)+'｜'+st;}
+  else $('hx5v').textContent='（尚未懸吊）';
+}
+function rec5(){const M=parseFloat($('r5M').value),a=parseFloat($('r5a').value),b=parseFloat($('r5b').value);if(![M,a,b].every(Number.isFinite)){say('msg5','請填 M、R₀、R₁。');return;}rows5.push({M,a,b});['r5M','r5a','r5b'].forEach(i=>$(i).value='');upd5();}
+function pullRhoL(){if(!RES.rhoL){alert('④ (b) 尚未得到 ρ_L（至少 3 筆數據）。');return;}$('rhoL5').value=RES.rhoL.v.toFixed(4);$('srhoL5').value=fmt(RES.rhoL.s,4);upd5();}
+$('rhoL5').onchange=upd5;$('srhoL5').onchange=upd5;
+function upd5(){
+  renderTable('tb5',rows5,[{key:'M'},{key:'a'},{key:'b'},{calc:r=>r.b-r.a,dec:1}],upd5);
+  const xs=rows5.map(r=>r.M),ys=rows5.map(r=>r.b-r.a);const r=linreg(xs,ys);
+  plot($('plB'),{pts:rows5.map(r=>[r.M,r.b-r.a]),fit:r,xlabel:'冰糖質量 M (g)',ylabel:'Δ = R₁ − R₀ (g)',xzero:true,yzero:true});
+  const rl=parseFloat($('rhoL5').value),srl=parseFloat($('srhoL5').value)||0;
+  if(r&&rows5.length>=3&&Number.isFinite(rl)){const rho=rl/r.m,s=rho*Math.sqrt((r.sm/r.m)**2+(srl/rl)**2);RES.B={v:rho,s};
+    $('resB').textContent=`Δ = k·M + b，k = ρ_L/ρ\nk = ${r.m.toFixed(5)} ± ${fmt(r.sm,5)}　b = ${r.b.toFixed(3)} g　R² = ${r.r2.toFixed(5)}\nρ = ρ_L / k = ${rho.toFixed(4)} ± ${fmt(s,4)} g/cm³`;}
+  else{RES.B=null;$('resB').textContent=rows5.length<3?'至少需要 3 筆數據。':'請填入 ρ_L。';}
+}
+
+/* ================= ⑥ ================= */
+function renderT6(){
+  const tb=$('tb6');tb.innerHTML='';
+  const line=(name,v,s)=>{const dv=revealed&&v?v-TRUE.rho:null;const z=(dv!==null&&s)?dv/s:null;
+    tb.innerHTML+=`<tr><td>${name}</td><td>${fmt(v,4)}</td><td>${fmt(s,4)}</td><td>${revealed?TRUE.rho.toFixed(4):'？'}</td><td>${fmt(dv,4)}</td><td>${z===null?'—':(Math.abs(z)<=2?'<span class="good">':'<span class="warn">')+z.toFixed(2)+'</span>'}</td></tr>`;};
+  let app=null;if(rows2.length)app=Math.max(...rows2.map(r=>r.m/r.V));
+  line('第 1 題：量筒壓實法（最大 ρ_app）',app,null);
+  line('法 A：飽和糖水排液 V–M 迴歸',RES.A?RES.A.v:null,RES.A?RES.A.s:null);
+  line('法 B：天平浮力 Δ–M 迴歸',RES.B?RES.B.v:null,RES.B?RES.B.s:null);
+  if(RES.rhoL){tb.innerHTML+=`<tr><td>糖水密度 ρ_L（④ b）</td><td>${fmt(RES.rhoL.v,4)}</td><td>${fmt(RES.rhoL.s,4)}</td><td>${revealed?rhoSol(cylW()||wBeaker()).toFixed(4)+'＊':'？'}</td><td colspan="2" class="note">＊揭曉時燒杯／量筒中糖水的實際密度</td></tr>`;}
+}
+function reveal(){
+  revealed=true;
+  const wb=wBeaker();
+  const aBub=LA.filter(l=>l.state!=='table'&&l.m0>0).map(l=>l.b/l.m0);
+  const t=[`冰糖真密度 ρ = ${TRUE.rho.toFixed(4)} g/cm³`,
+  `室溫 T = ${TRUE.T.toFixed(1)} °C　→ 飽和質量分率 w_sat = ${(TRUE.wSat*100).toFixed(1)} %，飽和糖水密度 = ${rhoSol(TRUE.wSat).toFixed(4)} g/cm³`,
+  S.W>0?`燒杯中糖水目前質量分率 = ${(wb*100).toFixed(1)} %（${wb>TRUE.wSat-0.003?'已飽和':'未飽和'}），密度 = ${rhoSol(wb).toFixed(4)} g/cm³，杯底未溶 ${S.U.toFixed(1)} g`:'燒杯中沒有糖水',
+  `量筒質量 = ${TRUE.cylMass.toFixed(2)} g，燒杯質量 = ${TRUE.beakerMass.toFixed(2)} g`,
+  `完全壓實時的填充率模型 φ(d)：`+[7,3,1,0.5,0.2,0.1,0.05].map(d=>`d=${d} mm → ${phiTapModel(d).toFixed(3)}`).join('；'),
+  `最大 φ ≈ ${Math.max(...Array.from({length:200},(_,i)=>phiTapModel(0.04*Math.pow(10,i/200*2.4)))).toFixed(3)}，對應 ρ_app 上限 ≈ ${(TRUE.rho*Math.max(...Array.from({length:200},(_,i)=>phiTapModel(0.04*Math.pow(10,i/200*2.4))))).toFixed(3)} g/cm³`,
+  aBub.length?`法 A 糖塊殘留氣泡（目前）平均 ${(avg(aBub)*1000).toFixed(1)} μL/g，使 V 偏大約 ${(avg(aBub)*TRUE.rho*100).toFixed(2)} %`:''
+  ].filter(Boolean).join('\n');
+  $('truthTxt').textContent=t;$('truth6').classList.remove('hidden');renderT6();
+}
+
+/* ================= 初始化 ================= */
+draw2();upd2();renderLumps4();updL();updA();renderLumps5();upd5();
+$('hx5').max=contH().toFixed(1);$('hx5').value=contH();B.x=contH();
+</script>
+</body>
+</html>

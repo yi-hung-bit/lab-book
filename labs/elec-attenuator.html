@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>電阻衰減器虛擬實驗室</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--mute:#5b6577;--line:#d7dce5;--acc:#2a62c9;--acc2:#0f8a6a;--warn:#c9372c;--amber:#c27c0e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;font-size:15px;line-height:1.6}
+header{background:#1f2a44;color:#fff;padding:12px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+header h1{font-size:19px;margin:0}
+header .sub{font-size:13px;opacity:.8}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#e9edf4;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px;font-family:inherit}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+nav button.todo{color:#9aa3b5}
+main{max-width:1200px;margin:0 auto;padding:14px}
+section.tab{display:none}section.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 8px}
+.card h3{font-size:15px;margin:12px 0 6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.btn{border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:14px;font-family:inherit}
+.btn.ghost{background:#fff;color:var(--acc)}
+.btn.warn{background:var(--warn);border-color:var(--warn)}
+.btn.green{background:var(--acc2);border-color:var(--acc2)}
+.btn.sm{padding:2px 8px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+select,input[type=number]{font-family:inherit;font-size:14px;padding:3px 5px;border:1px solid var(--line);border-radius:5px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#eef2f8;font-weight:600}
+td[contenteditable]{background:#fffef2}
+.note{font-size:13px;color:var(--mute)}
+.warnbox{background:#fff1f0;border:1px solid #f1b8b3;color:#8a1f17;border-radius:8px;padding:8px 10px;font-size:14px;margin:6px 0}
+.okbox{background:#ecf8f3;border:1px solid #a6dcc6;color:#0b5c46;border-radius:8px;padding:8px 10px;font-size:14px;margin:6px 0}
+.infobox{background:#eef4ff;border:1px solid #bcd0f5;border-radius:8px;padding:8px 10px;font-size:14px;margin:6px 0}
+.eq{background:#f7f8fb;border-left:3px solid var(--acc);padding:5px 10px;margin:5px 0;font-family:"Times New Roman","Cambria Math",serif;font-size:17px}
+.eq .c{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:13px;color:var(--mute);margin-left:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:6px 0}
+.lbl{font-size:14px;color:var(--mute)}
+.big{font-size:20px;font-weight:700;font-family:"Times New Roman",serif}
+svg{max-width:100%;height:auto;display:block}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.meters{grid-template-columns:1fr}}
+.meterbox{border:1px solid var(--line);border-radius:10px;padding:6px;background:#fcfcfd}
+.meterbox .mt{font-size:13px;color:var(--mute);text-align:center}
+.status{min-height:24px}
+.slotgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:900px){.slotgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.slotgrid{grid-template-columns:1fr}}
+.slot{border:1px solid var(--line);border-radius:9px;padding:8px;background:#fbfcfe}
+.slot .sh{display:flex;justify-content:space-between;align-items:baseline;font-size:14px}
+.slot .est{font-family:"Times New Roman",serif;color:var(--acc)}
+.grp{border:1px dashed #b9c3d6;border-radius:7px;padding:4px;margin:5px 0;background:#fff}
+.grp .gl{font-size:11px;color:var(--mute)}
+.chip{display:inline-flex;align-items:center;gap:3px;border:1px solid #9fb2d6;background:#eaf0fb;border-radius:12px;padding:0 7px;margin:2px;font-size:13px}
+.chip a{cursor:pointer;color:#b33;font-weight:700;text-decoration:none}
+.chip.warm{background:#fff2d9;border-color:#e5b45a}
+.chip.hot{background:#ffd9d4;border-color:#e2766a}
+.chip.burnt{background:#444;color:#fff;border-color:#222;text-decoration:line-through}
+.inv{display:flex;flex-wrap:wrap;gap:6px}
+.inv span{border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:13px;background:#fff}
+.tog{display:inline-flex;border:1px solid var(--acc);border-radius:6px;overflow:hidden}
+.tog button{border:0;background:#fff;color:var(--acc);padding:4px 10px;cursor:pointer;font-family:inherit;font-size:13px}
+.tog button.on{background:var(--acc);color:#fff}
+.sw{font-weight:700}
+.flow{stroke-dasharray:6 8;animation:flow 0.7s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-14}}
+.todo-card{text-align:center;color:var(--mute);padding:40px}
+.kbd{font-family:"Times New Roman",serif;font-style:italic}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>電阻衰減器虛擬實驗室</h1>
+    <div class="sub">九十學年度 高級中學自然學科競賽 屏東區複賽 物理實驗試題第二題</div>
+  </div>
+  <div class="row" style="margin:0">
+    <span class="sub" id="seedInfo"></span>
+    <button class="btn ghost sm" id="btnNew" style="background:#fff">新實驗（重新抽樣隱藏值）</button>
+  </div>
+</header>
+<nav id="nav">
+  <button data-t="1" class="on">① 原理推導</button>
+  <button data-t="2">② 電阻鑑定</button>
+  <button data-t="3">③ 電路組裝</button>
+  <button data-t="4">④ 量測 V<sub>i</sub>、i</button>
+  <button data-t="5">⑤ 作圖分析</button>
+  <button data-t="6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ TAB 1 ============ -->
+<section class="tab on" id="tab1">
+  <div class="card">
+    <h2>題目重點</h2>
+    <p>電阻器網路可當作音量控制電路，稱為「電阻衰減器」（圖一）。適當選擇 <i>R</i><sub>1</sub> 與 <i>R</i><sub>2</sub>，可使輸入電源所見等效電阻 <i>R<sub>ab</sub></i> = <i>R<sub>L</sub></i> = 20 Ω。要求：(1) 設計 <i>R</i><sub>1</sub>、<i>R</i><sub>2</sub> 並量 <i>V<sub>i</sub></i>、<i>i</i>，完成表一並作圖三（<i>R</i><sub>1</sub> 對 <i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>）；(2) 由圖三找出 <i>R</i><sub>1</sub>、<i>R</i><sub>2</sub>、<i>R<sub>L</sub></i> 的關係並推導；(3) 討論實驗與理論的誤差。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>圖一　電阻衰減器電路</h2>
+      <svg viewBox="0 0 560 260" id="fig1"></svg>
+      <p class="note">四個 <i>R</i><sub>1</sub> 對稱分布於上下兩條線，<i>R</i><sub>2</sub> 跨接中間，<i>R<sub>L</sub></i> 為負載（喇叭）。</p>
+    </div>
+    <div class="card">
+      <h2>推導 <i>R<sub>L</sub></i><sup>2</sup> = 4<i>R</i><sub>1</sub>(<i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>)</h2>
+      <div class="eq"><i>R<sub>ab</sub></i> = 2<i>R</i><sub>1</sub> + <i>R</i><sub>2</sub> ∥ (2<i>R</i><sub>1</sub> + <i>R<sub>L</sub></i>)<span class="c">左側兩個 R₁ 串聯，再串上並聯部分</span></div>
+      <div class="eq">令 <i>R<sub>ab</sub></i> = <i>R<sub>L</sub></i>：　<i>R<sub>L</sub></i> − 2<i>R</i><sub>1</sub> = <i>R</i><sub>2</sub>(2<i>R</i><sub>1</sub>+<i>R<sub>L</sub></i>) / (<i>R</i><sub>2</sub>+2<i>R</i><sub>1</sub>+<i>R<sub>L</sub></i>)</div>
+      <div class="eq">(<i>R<sub>L</sub></i> − 2<i>R</i><sub>1</sub>)(<i>R</i><sub>2</sub> + 2<i>R</i><sub>1</sub> + <i>R<sub>L</sub></i>) = <i>R</i><sub>2</sub>(2<i>R</i><sub>1</sub> + <i>R<sub>L</sub></i>)</div>
+      <div class="eq"><i>R<sub>L</sub>R</i><sub>2</sub> + <i>R<sub>L</sub></i><sup>2</sup> − 2<i>R</i><sub>1</sub><i>R</i><sub>2</sub> − 4<i>R</i><sub>1</sub><sup>2</sup> = 2<i>R</i><sub>1</sub><i>R</i><sub>2</sub> + <i>R<sub>L</sub>R</i><sub>2</sub><span class="c">±2R₁R<sub>L</sub> 互相消去</span></div>
+      <div class="eq" style="border-left-color:var(--acc2)"><b><i>R<sub>L</sub></i><sup>2</sup> = 4<i>R</i><sub>1</sub>(<i>R</i><sub>1</sub> + <i>R</i><sub>2</sub>)</b></div>
+      <h3>由此可得</h3>
+      <ul style="margin:4px 0;padding-left:20px">
+        <li><i>R</i><sub>1</sub>·(<i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>) = <i>R<sub>L</sub></i><sup>2</sup>/4 = 100 Ω<sup>2</sup>（<i>R<sub>L</sub></i>=20 Ω）→ <i>R</i><sub>1</sub> 與 <i>R</i><sub>1</sub>+<i>R</i><sub>2</sub> <b>成反比</b>，圖三為雙曲線。</li>
+        <li><i>R</i><sub>2</sub> = <i>R<sub>L</sub></i><sup>2</sup>/(4<i>R</i><sub>1</sub>) − <i>R</i><sub>1</sub> ≥ 0，故必須 <i>R</i><sub>1</sub> ≤ <i>R<sub>L</sub></i>/2 = 10 Ω。</li>
+        <li>匹配時衰減比 <i>V<sub>L</sub></i>/<i>V<sub>i</sub></i> = (<i>R<sub>L</sub></i> − 2<i>R</i><sub>1</sub>)/(<i>R<sub>L</sub></i> + 2<i>R</i><sub>1</sub>)；因為 <i>R<sub>ab</sub></i> 仍是 <i>R<sub>L</sub></i>，衰減器可一節一節串接。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>互動計算器</h2>
+      <div class="row"><span class="lbl"><i>R<sub>L</sub></i></span><input type="range" id="t1RL" min="10" max="40" step="1" value="20" style="flex:1"><span class="big" id="t1RLv">20 Ω</span></div>
+      <div class="row"><span class="lbl"><i>R</i><sub>1</sub></span><input type="range" id="t1R1" min="0.5" max="10" step="0.1" value="5" style="flex:1"><span class="big" id="t1R1v">5.0 Ω</span></div>
+      <div class="row"><label><input type="checkbox" id="t1auto" checked> <i>R</i><sub>2</sub> 自動取匹配值</label></div>
+      <div class="row"><span class="lbl"><i>R</i><sub>2</sub></span><input type="range" id="t1R2" min="0" max="80" step="0.1" value="15" style="flex:1"><span class="big" id="t1R2v">15.0 Ω</span></div>
+      <table style="margin-top:8px">
+        <tr><th><i>R</i><sub>1</sub>+<i>R</i><sub>2</sub></th><th><i>R<sub>ab</sub></i></th><th><i>R<sub>ab</sub></i>−<i>R<sub>L</sub></i></th><th><i>V<sub>L</sub></i>/<i>V<sub>i</sub></i></th></tr>
+        <tr><td id="t1sum"></td><td id="t1Rab"></td><td id="t1dev"></td><td id="t1att"></td></tr>
+      </table>
+      <p class="note">取消「自動」後自行拖動 <i>R</i><sub>2</sub>，可以看到 <i>R<sub>ab</sub></i> 偏離 <i>R<sub>L</sub></i> 的情形。實驗中 <i>R</i><sub>2</sub> 只能用現有電阻組合，通常只能「接近」匹配。</p>
+    </div>
+    <div class="card">
+      <h2>圖三（理論曲線）與參考解核對</h2>
+      <svg viewBox="0 0 420 300" id="t1plot"></svg>
+      <div id="t1refnote"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>參考解表一核對（<i>R<sub>L</sub></i> = 20 Ω）</h2>
+    <table id="t1ref"></table>
+    <p class="note">「理論 <i>R</i><sub>2</sub>」由 <i>R</i><sub>2</sub> = <i>R<sub>L</sub></i><sup>2</sup>/(4<i>R</i><sub>1</sub>) − <i>R</i><sub>1</sub> 算出；「以參考解 <i>R</i><sub>2</sub> 實際算出的 <i>R<sub>ab</sub></i>」才是電路真正的等效電阻。</p>
+  </div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section class="tab" id="tab2">
+  <div class="card">
+    <h2>② 電阻鑑定：A–F 六種電阻阻值未標示</h2>
+    <p>器材表只寫「編號 A～F 各 8 個」，沒有給阻值，器材中也<b>沒有現成的 20 Ω 電阻</b>。所以第一步要用電池、安培計、伏特計自己量出每種電阻的阻值：改變電池個數取得多組 (<i>I</i>, <i>V</i>)，再以 <i>V</i>–<i>I</i> 迴歸斜率求 <i>R</i>。</p>
+    <div class="infobox"><b>本模擬的自訂設定（試題未給）：</b>電阻為 ½ W 碳膜電阻，同編號各顆阻值有 ±5% 製造誤差，且溫度上升時阻值略降；安培計 500 mA（最小刻度 10 mA）有內阻與保險絲；伏特計 10 V（最小刻度 0.2 V）內阻 1000 Ω/V；1 號乾電池有內電阻；鱷魚夾有接觸電阻，偶爾會夾不緊。</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>測試電路</h3>
+      <svg viewBox="0 0 520 250" id="c2svg"></svg>
+      <div class="row">
+        <span class="lbl">待測電阻</span>
+        <select id="c2type"></select>
+        <select id="c2idx"></select>
+        <span class="note" id="c2pieceNote"></span>
+      </div>
+      <div class="row">
+        <span class="lbl">乾電池串聯</span>
+        <select id="c2n"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select> 個
+        <span class="lbl">伏特計接法</span>
+        <span class="tog" id="c2mode"><button data-m="R" class="on">只跨電阻</button><button data-m="AR">跨安培計＋電阻</button></span>
+      </div>
+      <div class="row">
+        <button class="btn" id="c2sw">開關：斷開（按下接通）</button>
+        <button class="btn ghost sm" id="c2clamp">重新夾緊接點</button>
+        <button class="btn ghost sm" id="fuse2">更換安培計保險絲</button>
+      </div>
+      <div class="status" id="c2status"></div>
+    </div>
+    <div class="card">
+      <h3>電表（請自行讀刻度）</h3>
+      <div class="meters">
+        <div class="meterbox"><div id="A2"></div><div class="mt">安培計　放大鏡</div><div id="A2z"></div></div>
+        <div class="meterbox"><div id="V2"></div><div class="mt">伏特計　放大鏡</div><div id="V2z"></div></div>
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="btn green" id="c2rec">記錄這組讀數</button>
+      </div>
+      <p class="note">「記錄」會依刻度讀到最小刻度的 1/10（安培計 1 mA、伏特計 0.02 V），並含人眼估讀誤差。表格中的數字可以點選直接修改。通電時電阻會慢慢變熱，讀完就斷開開關。</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>量測紀錄</h3>
+      <div style="max-height:340px;overflow:auto">
+      <table id="t2table"><thead><tr><th>#</th><th>編號</th><th>電池數</th><th>接法</th><th><i>V</i> (V)</th><th><i>I</i> (A)</th><th><i>V/I</i> (Ω)</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="row"><button class="btn ghost sm" id="t2clear">清除全部紀錄</button></div>
+    </div>
+    <div class="card">
+      <h3><i>V</i>–<i>I</i> 迴歸</h3>
+      <div class="row"><span class="lbl">選擇編號</span><select id="t2fitType"></select></div>
+      <svg viewBox="0 0 420 260" id="t2plot"></svg>
+      <div id="t2fit"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>阻值總表（③ 組裝時依此估算）</h3>
+    <table id="t2sum"></table>
+    <p class="note">可按「採用」帶入迴歸斜率，也可直接在欄位輸入數值。同一編號量多顆不同的電阻，可以看出製造誤差。</p>
+  </div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section class="tab" id="tab3">
+  <div class="card">
+    <h2>③ 電路組裝</h2>
+    <p>依圖一在六個位置各自用 A–F 電阻串並聯組出 <i>R</i><sub>1</sub>（四個）、<i>R</i><sub>2</sub> 與 <i>R<sub>L</sub></i>（目標 20 Ω）。每個位置由若干「串聯段」組成，每段內的電阻彼此並聯。組好後接通電源，以安培計量 a 點電流 <i>i</i>，以伏特計量 <i>V<sub>i</sub></i>。</p>
+    <div class="row"><span class="lbl">剩餘可用電阻：</span><div class="inv" id="inv"></div></div>
+  </div>
+  <div class="card">
+    <div class="slotgrid" id="slots"></div>
+    <div class="row">
+      <button class="btn ghost sm" id="copyR1">把「R₁ 左上」的組法複製到其餘三個 R₁</button>
+      <button class="btn ghost sm" id="clearAll">全部拆除</button>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>設計助手（依 ② 測得阻值估算）</h3>
+      <div id="design"></div>
+    </div>
+    <div class="card">
+      <h3>電路圖</h3>
+      <svg viewBox="0 0 700 330" id="c3svg"></svg>
+      <div class="row">
+        <span class="lbl">乾電池串聯</span>
+        <select id="c3n"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select> 個
+        <span class="lbl">伏特計</span>
+        <span class="tog" id="c3mode"><button data-m="bat" class="on">接電池兩端</button><button data-m="ab">接 a、b 兩端</button></span>
+      </div>
+      <div class="row">
+        <button class="btn" id="c3sw">開關：斷開（按下接通）</button>
+        <button class="btn ghost sm" id="c3clamp">重新夾緊接點</button>
+        <button class="btn ghost sm" id="fuse3">更換安培計保險絲</button>
+      </div>
+      <div class="status" id="c3status"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>電表</h3>
+    <div class="meters">
+      <div class="meterbox"><div id="A3"></div><div class="mt">安培計（a 點電流 <i>i</i>）放大鏡</div><div id="A3z"></div></div>
+      <div class="meterbox"><div id="V3"></div><div class="mt">伏特計（<i>V<sub>i</sub></i>）放大鏡</div><div id="V3z"></div></div>
+    </div>
+    <div class="row" style="justify-content:center">
+      <button class="btn green" id="c3read">試讀一次</button>
+      <span id="c3readout" class="big"></span>
+    </div>
+    <p class="note">這一頁先試通電、確認接線與匹配程度。正式填寫表一、改變 <i>R</i><sub>1</sub> 取得多組數據，將在 ④ 頁進行。</p>
+  </div>
+</section>
+
+<!-- ============ TAB 4 ============ -->
+<section class="tab" id="tab4">
+  <div class="card">
+    <h2>④ 量測 <i>V<sub>i</sub></i>、<i>i</i>，完成表一</h2>
+    <p>表一需要至少 4 組不同的 <i>R</i><sub>1</sub>，每組都要讓 <i>R<sub>ab</sub></i> = <i>V<sub>i</sub></i>/<i>i</i> 盡量等於 <i>R<sub>L</sub></i>。有兩種取得數據的方式：</p>
+    <ul style="margin:4px 0;padding-left:20px">
+      <li><b>直接匹配</b>：用現有電阻組出最接近理論值的 <i>R</i><sub>2</sub>，量一次記入表一。受限於電阻只能離散組合，<i>R<sub>ab</sub></i> 通常只能「接近」<i>R<sub>L</sub></i>。</li>
+      <li><b>固定 <i>R</i><sub>1</sub>、掃描 <i>R</i><sub>2</sub> 內插</b>：保持 <i>R</i><sub>1</sub>、<i>R<sub>L</sub></i> 不變，換幾種 <i>R</i><sub>2</sub>（有的偏小、有的偏大）各量一次 <i>R<sub>ab</sub></i>，再內插出 <i>R<sub>ab</sub></i> = <i>R<sub>L</sub></i> 時的 <i>R</i><sub>2</sub>。這樣即使沒有剛好的電阻，也能得到精確的匹配點。</li>
+    </ul>
+    <h3>目前電路（依 ② 測得阻值估算）</h3>
+    <div id="c4cfg"></div>
+    <div class="row"><button class="btn ghost sm" id="goto3">前往 ③ 修改 R₁ 或 R<sub>L</sub></button><span class="lbl">剩餘：</span><div class="inv" id="inv4"></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>電源與電表</h3>
+      <div class="row">
+        <span class="lbl">乾電池串聯</span>
+        <select id="c4n"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select> 個
+        <span class="lbl">伏特計</span>
+        <span class="tog" id="c4mode"><button data-m="bat" class="on">接電池兩端</button><button data-m="ab">接 a、b 兩端</button></span>
+      </div>
+      <div class="row">
+        <button class="btn" id="c4sw">開關：斷開（按下接通）</button>
+        <button class="btn ghost sm" id="c4clamp">重新夾緊接點</button>
+        <button class="btn ghost sm" id="fuse4">更換安培計保險絲</button>
+      </div>
+      <div class="meters">
+        <div class="meterbox"><div id="A4"></div><div class="mt">安培計（a 點電流 <i>i</i>）放大鏡</div><div id="A4z"></div></div>
+        <div class="meterbox"><div id="V4"></div><div class="mt">伏特計（<i>V<sub>i</sub></i>）放大鏡</div><div id="V4z"></div></div>
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="btn green" id="c4rec">記錄到表一</button>
+        <button class="btn" id="c4sweep">記錄到 R₂ 掃描</button>
+      </div>
+      <div class="status" id="c4status"></div>
+    </div>
+    <div class="card">
+      <h3>在這裡更換 <i>R</i><sub>2</sub>（掃描用）</h3>
+      <div id="slotsR2"></div>
+      <h3>固定 <i>R</i><sub>1</sub>、掃描 <i>R</i><sub>2</sub> 內插</h3>
+      <div class="row"><span class="lbl">掃描組</span><select id="swSel" style="max-width:100%"></select></div>
+      <div id="swTable"></div>
+      <svg viewBox="0 0 420 270" id="swPlot"></svg>
+      <div id="swRes"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>表一（<i>R<sub>L</sub></i> 目標 20 Ω）</h3>
+    <div style="overflow-x:auto"><table id="t4table"></table></div>
+    <div class="row"><button class="btn ghost sm" id="t4clear">清除表一</button><button class="btn ghost sm" id="swClear">清除全部掃描數據</button></div>
+    <p class="note">R₁、R₂ 欄是你依 ② 測得阻值估算的數字（四個 R₁ 取平均），可點選修改。綠底列為內插得到的匹配點，依定義 <i>R<sub>ab</sub></i> = <i>R<sub>L</sub></i>。</p>
+  </div>
+</section>
+
+<!-- ============ TAB 5 ============ -->
+<section class="tab" id="tab5">
+  <div class="card">
+    <h2>⑤ 作圖分析：由圖三找 <i>R</i><sub>1</sub>、<i>R</i><sub>2</sub>、<i>R<sub>L</sub></i> 的關係</h2>
+    <p>原題的圖三是 <i>R</i><sub>1</sub> 對 <i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>，點會落在雙曲線上，肉眼只能看出「反比」。把橫軸改成 1/(<i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>) 就會變成直線：<span class="kbd">R</span><sub>1</sub> = (<span class="kbd">R<sub>L</sub></span><sup>2</sup>/4) · 1/(<span class="kbd">R</span><sub>1</sub>+<span class="kbd">R</span><sub>2</sub>)，斜率 <i>k</i> = <i>R<sub>L</sub></i><sup>2</sup>/4，可用迴歸求出 <i>R<sub>L</sub></i> = 2√<i>k</i> 並估計不確定度。</p>
+    <div class="row">
+      <span class="lbl">採用條件：只用 |<i>R<sub>ab</sub></i> − <i>R<sub>L</sub></i>|/<i>R<sub>L</sub></i> ≤</span>
+      <select id="t5thr"><option value="1">1%</option><option value="2">2%</option><option value="3" selected>3%</option><option value="5">5%</option><option value="100">全部</option></select>
+      <label><input type="checkbox" id="t5interp" checked> 含內插匹配點</label>
+    </div>
+    <p class="note">未匹配的點本來就不滿足 <i>R<sub>L</sub></i><sup>2</sup> = 4<i>R</i><sub>1</sub>(<i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>)，納入迴歸會讓結果偏掉。可以切換條件比較看看。</p>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>圖三　<i>R</i><sub>1</sub> 對 <i>R</i><sub>1</sub>+<i>R</i><sub>2</sub></h3><svg viewBox="0 0 420 300" id="t5p1"></svg>
+      <p class="note">黑點：採用；灰圈：未採用；綠菱形：內插匹配點。虛線：<i>R<sub>L</sub></i> = 20 Ω 理論曲線；藍線：依迴歸結果 <i>R<sub>L</sub></i> 畫出的曲線。</p></div>
+    <div class="card"><h3>線性化　<i>R</i><sub>1</sub> 對 1/(<i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>)</h3><svg viewBox="0 0 420 300" id="t5p2"></svg>
+      <p class="note">藍線：一般迴歸 <i>y</i> = <i>kx</i> + <i>b</i>；橘虛線：過原點迴歸 <i>y</i> = <i>kx</i>。</p></div>
+  </div>
+  <div class="card"><h3>結果</h3><div id="t5res"></div></div>
+  <div class="card">
+    <h3>題目 (2) 的回答要點</h3>
+    <ol style="margin:4px 0;padding-left:20px">
+      <li>圖三的點落在一條雙曲線上：<i>R</i><sub>1</sub> 愈大，<i>R</i><sub>1</sub>+<i>R</i><sub>2</sub> 愈小，兩者成反比。</li>
+      <li>理論推導（見 ①）：<i>R<sub>ab</sub></i> = 2<i>R</i><sub>1</sub> + <i>R</i><sub>2</sub> ∥ (2<i>R</i><sub>1</sub>+<i>R<sub>L</sub></i>) = <i>R<sub>L</sub></i> ⇒ <i>R<sub>L</sub></i><sup>2</sup> = 4<i>R</i><sub>1</sub>(<i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>)，乘積 <i>R</i><sub>1</sub>(<i>R</i><sub>1</sub>+<i>R</i><sub>2</sub>) 是常數 <i>R<sub>L</sub></i><sup>2</sup>/4。</li>
+      <li>實驗驗證：線性化後斜率求得的 <i>R<sub>L</sub></i> 與 20 Ω 比較，截距應接近 0。</li>
+      <li>限制條件：<i>R</i><sub>2</sub> ≥ 0 ⇒ <i>R</i><sub>1</sub> ≤ <i>R<sub>L</sub></i>/2，曲線止於 (<i>R<sub>L</sub></i>/2, <i>R<sub>L</sub></i>/2)。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ TAB 6 ============ -->
+<section class="tab" id="tab6">
+  <div class="card">
+    <h2>⑥ 誤差討論（題目 (3)）</h2>
+    <div id="t6disc"></div>
+  </div>
+  <div class="card">
+    <h2>真值揭曉</h2>
+    <p>揭曉後可以看到 A–F 的真實阻值、電表內阻與級差、電池參數，以及表一每一列的真實 <i>R<sub>ab</sub></i>，用來檢查你的分析偏差有幾個標準差、偏差從哪裡來。</p>
+    <button class="btn warn" id="btnReveal">揭曉真值</button>
+    <div id="t6rev"></div>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+/* ================= 物理常數與工具 ================= */
+//PHYS-START
+const ALPHA = -5e-4;   // 碳膜電阻溫度係數 (1/K)
+const THETA = 150;     // ½ W 電阻熱阻 (K/W)
+const TAU = 12;        // 熱時間常數 (s)
+const BURN = 200;      // 溫升超過此值即燒毀 (K)
+const FUSE_I = 1.0;    // 安培計保險絲 (A)
+const NOMINALS = [5.1, 10, 15, 22, 33, 47];
+const TYPES = ["A","B","C","D","E","F"];
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gaussFrom(r){let u=0;while(u===0)u=r();const v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function randn(){return gaussFrom(Math.random);}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+function par(a,b){if(!isFinite(a))return b;if(!isFinite(b))return a;if(a+b===0)return 0;return a*b/(a+b);}
+
+function makeHidden(seed){
+  const r = mulberry32(seed);
+  const order=[0,1,2,3,4,5];
+  for(let i=5;i>0;i--){const j=Math.floor(r()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  const H={seed,typeNom:{},pieces:{},cells:[],fuseOK:true,fuseOver:0,fuseCount:0,replaced:0};
+  TYPES.forEach((t,k)=>{
+    H.typeNom[t]=NOMINALS[order[k]];
+    for(let i=1;i<=8;i++){
+      const nom=H.typeNom[t];
+      H.pieces[t+i]={id:t+i,type:t,R0:nom*(1+clamp(0.018*gaussFrom(r),-0.05,0.05)),
+        c:0.01+0.03*r(),loose:r()<0.05,looseR:0,burnt:false,dT:0};
+    }
+  });
+  H.rA=0.2+0.3*r(); H.gA=(r()*2-1)*0.01;
+  H.RV=10000*(1+(r()*2-1)*0.02); H.gV=(r()*2-1)*0.01;
+  for(let i=0;i<5;i++)H.cells.push({emf:1.50+0.12*r(),r:0.08+0.17*r()});
+  return H;
+}
+function pieceR(p){
+  if(p.burnt)return Infinity;
+  return p.R0*(1+ALPHA*p.dT)+2*p.c+(p.loose?p.looseR:0);
+}
+function groupR(H,g){let G=0;for(const id of g){const R=pieceR(H.pieces[id]);if(isFinite(R))G+=1/R;}return G>0?1/G:Infinity;}
+function slotR(H,slot){if(!slot||!slot.length)return Infinity;let s=0;for(const g of slot){s+=groupR(H,g);}return s;}
+function battery(H,n){let E=0,ri=0;for(let i=0;i<n;i++){E+=H.cells[i].emf;ri+=H.cells[i].r;}return{E,ri};}
+// 伏特計跨在 (安培計+網路) 兩端：mode 'outer'；伏特計只跨網路：mode 'inner'
+function solve(E,ri,ra,RV,Rnet,mode){
+  if(mode==="outer"){
+    const Rbr=ra+Rnet, load=par(RV,Rbr), I=E/(ri+load), V=I*load;
+    const Ia=isFinite(Rbr)?V/Rbr:0;
+    return{V,Ia,Inet:Ia,Vnet:Ia*(isFinite(Rnet)?Rnet:0)};
+  }else{
+    const Rp=par(RV,Rnet), load=ra+Rp;
+    const I=isFinite(load)?E/(ri+load):0, Vnet=I*Rp;
+    return{V:Vnet,Ia:I,Inet:isFinite(Rnet)?Vnet/Rnet:0,Vnet};
+  }
+}
+function network(H,slots){
+  const R={};for(const k of ["R1a","R1b","R1c","R1d","R2","RL"])R[k]=slotR(H,slots[k]);
+  const Rleft=R.R1a+R.R1c, Rbr=R.R1b+R.R1d+R.RL, Rp=par(R.R2,Rbr);
+  return{R,Rleft,Rbr,Rp,Rab:Rleft+Rp};
+}
+function distribute(H,slot,I,out){
+  if(!slot)return;
+  for(const g of slot){const Rg=groupR(H,g);const Vg=isFinite(Rg)?I*Rg:0;
+    for(const id of g){const R=pieceR(H.pieces[id]);out[id]=(out[id]||0)+(isFinite(R)?Vg/R:0);}}
+}
+function networkCurrents(H,slots,net,Inet){
+  const out={};const Vp=Inet*(isFinite(net.Rp)?net.Rp:0);
+  const I2=isFinite(net.R.R2)?Vp/net.R.R2:0, Ibr=isFinite(net.Rbr)?Vp/net.Rbr:0;
+  distribute(H,slots.R1a,Inet,out);distribute(H,slots.R1c,Inet,out);
+  distribute(H,slots.R2,I2,out);
+  distribute(H,slots.R1b,Ibr,out);distribute(H,slots.R1d,Ibr,out);distribute(H,slots.RL,Ibr,out);
+  return out;
+}
+function rabTheory(R1,R2,RL){return 2*R1+par(R2,2*R1+RL);}
+function linfit(xs,ys){
+  const n=xs.length;if(n<2)return null;
+  let sx=0,sy=0;for(let i=0;i<n;i++){sx+=xs[i];sy+=ys[i];}
+  const mx=sx/n,my=sy/n;let Sxx=0,Sxy=0;for(let i=0;i<n;i++){Sxx+=(xs[i]-mx)**2;Sxy+=(xs[i]-mx)*(ys[i]-my);}
+  if(Sxx===0)return null;
+  const m=Sxy/Sxx,b=my-m*mx;let ss=0;for(let i=0;i<n;i++)ss+=(ys[i]-m*xs[i]-b)**2;
+  const s=n>2?Math.sqrt(ss/(n-2)):NaN;
+  let sx2=0;for(const x of xs)sx2+=x*x;
+  let Sxy0=0,Sxx0=0;for(let i=0;i<n;i++){Sxy0+=xs[i]*ys[i];Sxx0+=xs[i]*xs[i];}
+  const m0=Sxy0/Sxx0;let ss0=0;for(let i=0;i<n;i++)ss0+=(ys[i]-m0*xs[i])**2;
+  return{m,b,sm:n>2?s/Math.sqrt(Sxx):NaN,sb:n>2?s*Math.sqrt(sx2/(n*Sxx)):NaN,m0,sm0:n>1?Math.sqrt(ss0/(n-1)/Sxx0):NaN,n};
+}
+//PHYS-END
+
+/* ================= 狀態 ================= */
+const KEY="atten90_pt_v1";
+let H,S;
+function freshState(){
+  return{tab:1,c2:{type:"A",idx:1,n:1,mode:"R",on:false},c3:{n:4,mode:"bat",on:false},
+    data2:[],meas:{},measSig:{},slots:{R1a:[],R1b:[],R1c:[],R1d:[],R2:[],RL:[]},
+    t1rows:[],sweep:[],sweepSel:null,revealed:false};
+}
+function newExperiment(){H=makeHidden((Math.random()*2**31)>>>0);S=freshState();save();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({H,S}));}catch(e){}}
+function load(){
+  try{const o=JSON.parse(localStorage.getItem(KEY)||"null");
+    if(o&&o.H&&o.S&&o.H.pieces&&o.S.slots){H=o.H;S=Object.assign(freshState(),o.S);S.c2.on=false;S.c3.on=false;return true;}}catch(e){}
+  return false;
+}
+if(!load())newExperiment();
+
+const $=id=>document.getElementById(id);
+const f=(x,d)=>isFinite(x)?x.toFixed(d):"—";
+
+/* ================= 分頁 ================= */
+function showTab(t){
+  S.tab=t;document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));
+  document.querySelectorAll("section.tab").forEach(s=>s.classList.toggle("on",s.id==="tab"+t));
+  if(t==3||t==4){renderSlots();}
+  if(t==4){renderT4();renderSweep();}
+  if(t==5){renderT5();}
+  if(t==6){renderT6();}
+}
+$("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)showTab(+b.dataset.t);});
+$("btnNew").onclick=()=>{if(confirm("重新抽樣所有隱藏值並清除全部紀錄？")){newExperiment();initAll();}};
+
+/* ================= 電表元件 ================= */
+class Meter{
+  constructor(host,zoomHost,o){Object.assign(this,o);this.host=host;this.zhost=zoomHost;this.disp=0;this.target=0;this.build();}
+  P(th,r){return[150+r*Math.sin(th*Math.PI/180),168-r*Math.cos(th*Math.PI/180)];}
+  isMult(v,s){const q=v/s;return Math.abs(q-Math.round(q))<1e-6;}
+  build(){
+    const r=122;let s=`<svg viewBox="0 0 300 190"><rect x="3" y="3" width="294" height="184" rx="12" fill="#fbfaf3" stroke="#8a8a80"/>`;
+    const n=Math.round(this.FS/this.minor);
+    const [ax,ay]=this.P(-50,r),[bx,by]=this.P(50,r);
+    s+=`<path d="M${ax},${ay} A${r},${r} 0 0 1 ${bx},${by}" fill="none" stroke="#333" stroke-width="1.2"/>`;
+    const [mx1,my1]=this.P(-50,r-30),[mx2,my2]=this.P(50,r-30);
+    s+=`<path d="M${mx1},${my1} A${r-30},${r-30} 0 0 1 ${mx2},${my2}" fill="none" stroke="#c9c9c0" stroke-width="5"/>`;
+    for(let k=0;k<=n;k++){
+      const v=k*this.minor,th=-50+100*v/this.FS,maj=this.isMult(v,this.major),mid=!maj&&this.isMult(v,this.major/2);
+      const L=maj?15:(mid?10:6);const[x1,y1]=this.P(th,r),[x2,y2]=this.P(th,r-L);
+      s+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#222" stroke-width="${maj?1.4:0.8}"/>`;
+      if(maj){const[tx,ty]=this.P(th,r+11);s+=`<text x="${tx.toFixed(1)}" y="${(ty+4).toFixed(1)}" font-size="12" text-anchor="middle" font-family="Times New Roman">${+v.toFixed(3)}</text>`;}
+    }
+    s+=`<text x="150" y="112" text-anchor="middle" font-size="26" font-family="Times New Roman" fill="#333">${this.sym}</text>`;
+    s+=`<text x="150" y="132" text-anchor="middle" font-size="12" fill="#555">${this.unit}　滿刻度 ${this.FS}</text>`;
+    s+=`<g class="needle"><line x1="150" y1="168" x2="150" y2="${168-r+4}" stroke="#c0221a" stroke-width="2"/></g><circle cx="150" cy="168" r="7" fill="#333"/>`;
+    s+="</svg>";this.host.innerHTML=s;this.needle=this.host.querySelector(".needle");
+  }
+  step(dt){this.disp+=(this.target-this.disp)*(1-Math.exp(-dt/0.2));this.render();}
+  render(){
+    const fr=clamp(this.disp/this.FS,-0.03,1.06);
+    this.needle.setAttribute("transform",`rotate(${(-50+100*fr).toFixed(2)} 150 168)`);
+    // 放大鏡
+    const ppm=26,c=clamp(this.disp,-this.minor*0.3,this.FS*1.06)/this.minor;
+    let s=`<svg viewBox="0 0 300 52"><rect x="1" y="1" width="298" height="50" rx="6" fill="#fbfaf3" stroke="#bbb"/>`;
+    const n=Math.round(this.FS/this.minor);
+    for(let k=Math.floor(c-6);k<=Math.ceil(c+6);k++){
+      if(k<0||k>n)continue;const x=150+(k-c)*ppm;if(x<4||x>296)continue;
+      const v=k*this.minor,maj=this.isMult(v,this.major),mid=!maj&&this.isMult(v,this.major/2);
+      const L=maj?20:(mid?14:9);
+      s+=`<line x1="${x.toFixed(1)}" y1="6" x2="${x.toFixed(1)}" y2="${6+L}" stroke="#222" stroke-width="${maj?1.5:0.9}"/>`;
+      if(maj||mid)s+=`<text x="${x.toFixed(1)}" y="44" font-size="11" text-anchor="middle" font-family="Times New Roman">${+v.toFixed(3)}</text>`;
+    }
+    s+=`<line x1="150" y1="2" x2="150" y2="34" stroke="#c0221a" stroke-width="2"/></svg>`;
+    this.zhost.innerHTML=s;
+  }
+  read(){
+    if(this.disp>this.FS*1.0)return null;
+    const v=this.disp+randn()*0.15*this.minor;
+    return Math.max(0,Math.round(v/this.res)*this.res);
+  }
+}
+const mA={FS:500,major:100,minor:10,res:1,sym:"A",unit:"mA"};
+const mV={FS:10,major:1,minor:0.2,res:0.02,sym:"V",unit:"V"};
+let A2,V2,A3,V3;
+
+/* ================= TAB 1 ================= */
+function svgRes(x,y,w,label,vert){ // 鋸齒電阻
+  let pts=[];const n=6,amp=6,seg=w/(n*2);
+  if(!vert){pts.push([x,y]);for(let i=0;i<n*2;i++)pts.push([x+seg*(i+0.5),y+(i%2?amp:-amp)]);pts.push([x+w,y]);}
+  else{pts.push([x,y]);for(let i=0;i<n*2;i++)pts.push([x+(i%2?amp:-amp),y+seg*(i+0.5)]);pts.push([x,y+w]);}
+  return `<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#222" stroke-width="1.6"/>`+label;
+}
+function drawFig1(){
+  const T=(x,y,t,a)=>`<text x="${x}" y="${y}" font-size="15" font-family="Times New Roman" font-style="italic" text-anchor="${a||"middle"}">${t}</text>`;
+  let s=`<g stroke="#222" stroke-width="1.6" fill="none">`;
+  s+=`<line x1="40" y1="50" x2="150" y2="50"/><line x1="210" y1="50" x2="330" y2="50"/><line x1="390" y1="50" x2="500" y2="50"/><line x1="500" y1="50" x2="500" y2="110"/><line x1="500" y1="170" x2="500" y2="210"/>`;
+  s+=`<line x1="40" y1="210" x2="150" y2="210"/><line x1="210" y1="210" x2="330" y2="210"/><line x1="390" y1="210" x2="500" y2="210"/>`;
+  s+=`<line x1="270" y1="50" x2="270" y2="100"/><line x1="270" y1="160" x2="270" y2="210"/></g>`;
+  s+=svgRes(150,50,60,T(180,80,"R₁"));s+=svgRes(330,50,60,T(360,80,"R₁"));
+  s+=svgRes(150,210,60,T(180,240,"R₁"));s+=svgRes(330,210,60,T(360,240,"R₁"));
+  s+=svgRes(270,100,60,T(292,135,"R₂","start"),true);
+  s+=svgRes(500,110,60,`<text x="518" y="145" font-size="15" font-family="Times New Roman" font-style="italic">R<tspan font-size="11" dy="4">L</tspan></text>`,true);
+  s+=`<circle cx="40" cy="50" r="5" fill="#222"/><circle cx="40" cy="210" r="5" fill="#222"/><circle cx="270" cy="50" r="4" fill="#222"/><circle cx="270" cy="210" r="4" fill="#222"/><circle cx="110" cy="50" r="3" fill="#222"/><circle cx="110" cy="210" r="3" fill="#222"/>`;
+  s+=T(110,40,"a")+T(110,200,"b")+`<text x="30" y="45" font-size="16">+</text><text x="30" y="230" font-size="18">−</text>`;
+  s+=`<text x="50" y="135" font-size="14" font-family="Times New Roman" font-style="italic">V<tspan font-size="10" dy="4">i</tspan></text><text x="70" y="135" font-size="13">（電池電壓）</text>`;
+  s+=`<line x1="60" y1="30" x2="95" y2="30" stroke="#222" stroke-width="1.4" marker-end="url(#ar)"/><text x="75" y="22" font-size="14" font-style="italic" font-family="Times New Roman">i</text>`;
+  s=`<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#222"/></marker></defs>`+s;
+  $("fig1").innerHTML=s;
+}
+const REF=[[3,30.0,33.0],[5,15.0,20.0],[7,8.0,15.0],[8,4.5,12.5]];
+function updT1(){
+  const RL=+$("t1RL").value;$("t1R1").max=RL/2;
+  let R1=Math.min(+$("t1R1").value,RL/2);
+  const auto=$("t1auto").checked;$("t1R2").disabled=auto;
+  let R2;
+  if(auto){R2=RL*RL/(4*R1)-R1;$("t1R2").value=Math.min(R2,80);}else R2=+$("t1R2").value;
+  $("t1RLv").textContent=RL+" Ω";$("t1R1v").textContent=R1.toFixed(1)+" Ω";$("t1R2v").textContent=R2.toFixed(2)+" Ω";
+  const Rab=rabTheory(R1,R2,RL);
+  const Rp=par(R2,2*R1+RL),att=(Rp/Rab)*(RL/(2*R1+RL));
+  $("t1sum").textContent=(R1+R2).toFixed(2)+" Ω";$("t1Rab").textContent=Rab.toFixed(3)+" Ω";
+  $("t1dev").textContent=(Rab-RL>=0?"+":"")+(Rab-RL).toFixed(3)+" Ω";
+  $("t1att").textContent=att.toFixed(4)+"（"+(20*Math.log10(att)).toFixed(1)+" dB）";
+  // 圖三
+  const X0=50,Y0=250,W=340,Hh=220,xmax=2*RL,ymax=0.6*RL;
+  const px=x=>X0+x/xmax*W,py=y=>Y0-y/ymax*Hh;
+  let s=`<rect x="0" y="0" width="420" height="300" fill="#fff"/>`;
+  for(let i=0;i<=4;i++){const x=xmax*i/4;s+=`<line x1="${px(x)}" y1="${Y0}" x2="${px(x)}" y2="${Y0-Hh}" stroke="#eee"/><text x="${px(x)}" y="${Y0+16}" font-size="11" text-anchor="middle">${+x.toFixed(1)}</text>`;}
+  for(let i=0;i<=6;i++){const y=ymax*i/6;s+=`<line x1="${X0}" y1="${py(y)}" x2="${X0+W}" y2="${py(y)}" stroke="#eee"/><text x="${X0-6}" y="${py(y)+4}" font-size="11" text-anchor="end">${+y.toFixed(1)}</text>`;}
+  s+=`<line x1="${X0}" y1="${Y0}" x2="${X0+W}" y2="${Y0}" stroke="#333"/><line x1="${X0}" y1="${Y0}" x2="${X0}" y2="${Y0-Hh}" stroke="#333"/>`;
+  let d="";for(let k=0;k<=200;k++){const x=RL/2+(xmax-RL/2)*k/200;const y=RL*RL/(4*x);d+=(k?"L":"M")+px(x).toFixed(1)+","+py(y).toFixed(1);}
+  s+=`<path d="${d}" fill="none" stroke="var(--acc)" stroke-width="2"/>`;
+  s+=`<circle cx="${px(RL/2)}" cy="${py(RL/2)}" r="3" fill="var(--acc)"/><text x="${px(RL/2)+6}" y="${py(RL/2)-4}" font-size="10" fill="var(--acc)">R₂=0 端點</text>`;
+  if(RL===20){REF.forEach((r,i)=>{const bad=i===2;s+=`<circle cx="${px(r[2])}" cy="${py(r[0])}" r="4.5" fill="${bad?"#c9372c":"#333"}"/>`;});
+    const xc=100/7;s+=`<circle cx="${px(xc)}" cy="${py(7)}" r="5.5" fill="none" stroke="#0f8a6a" stroke-width="2"/>`;
+    s+=`<line x1="${px(15)}" y1="${py(7)}" x2="${px(xc)+6}" y2="${py(7)}" stroke="#c9372c" stroke-dasharray="3 2"/>`;}
+  s+=`<circle cx="${px(R1+R2)}" cy="${py(R1)}" r="6" fill="none" stroke="#c27c0e" stroke-width="2.5"/>`;
+  s+=`<text x="${X0+W/2}" y="${Y0+36}" font-size="13" text-anchor="middle" font-family="Times New Roman">R₁ + R₂ (Ω)</text><text x="14" y="${Y0-Hh/2}" font-size="13" transform="rotate(-90 14 ${Y0-Hh/2})" text-anchor="middle" font-family="Times New Roman">R₁ (Ω)</text>`;
+  s+=`<text x="${X0+W-4}" y="${Y0-Hh+14}" font-size="12" text-anchor="end">藍線：R₁(R₁+R₂)=R<tspan font-size="9" dy="3">L</tspan><tspan dy="-3">²/4　橘圈：目前設定</tspan></text>`;
+  $("t1plot").innerHTML=s;
+  $("t1refnote").innerHTML=RL===20?`<div class="warnbox">黑點：參考解表一。<b>紅點（R₁=7 Ω）位置有誤</b>：理論上 R₁+R₂ 應為 100/7 = 14.29 Ω（綠圈），參考解寫成 15.0 Ω。</div>`:`<p class="note">（R<sub>L</sub> = 20 Ω 時才顯示參考解資料點）</p>`;
+}
+function buildRefTable(){
+  let s=`<tr><th>R₁ (Ω)</th><th>參考解 R₂</th><th>理論 R₂</th><th>參考解 R₁+R₂</th><th>理論 R₁+R₂</th><th>以參考解 R₂ 實際算出的 R<sub>ab</sub></th><th>判定</th></tr>`;
+  for(const[r1,r2,sum]of REF){const t=400/(4*r1)-r1,Rab=rabTheory(r1,r2,20);const d=Rab-20;
+    const verdict=Math.abs(d)<0.1?`<span style="color:var(--acc2)">正確（四捨五入誤差）</span>`:`<span style="color:var(--warn);font-weight:700">有誤，R₂ 應為 ${t.toFixed(2)} Ω</span>`;
+    s+=`<tr${Math.abs(d)>=0.1?' style="background:#fff1f0"':""}><td>${r1}</td><td>${r2.toFixed(1)}</td><td>${t.toFixed(2)}</td><td>${sum.toFixed(1)}</td><td>${(t+r1).toFixed(2)}</td><td>${Rab.toFixed(3)} Ω（${d>=0?"+":""}${d.toFixed(3)}）</td><td>${verdict}</td></tr>`;}
+  $("t1ref").innerHTML=s;
+}
+["t1RL","t1R1","t1R2","t1auto"].forEach(id=>$(id).addEventListener("input",updT1));
+
+/* ================= TAB 2 ================= */
+function pieceStatus(p){if(p.burnt)return"已燒毀";if(p.dT>150)return"冒煙！";if(p.dT>70)return"燙手";if(p.dT>25)return"溫熱";return"";}
+function inSlots(id){for(const k in S.slots)for(const g of S.slots[k])if(g.includes(id))return k;return null;}
+function fillC2(){
+  $("c2type").innerHTML=TYPES.map(t=>`<option ${t===S.c2.type?"selected":""}>${t}</option>`).join("");
+  let o="";for(let i=1;i<=8;i++){const p=H.pieces[S.c2.type+i];o+=`<option value="${i}" ${i===S.c2.idx?"selected":""}>第 ${i} 顆${p.burnt?"（燒毀）":""}</option>`;}
+  $("c2idx").innerHTML=o;$("c2n").value=S.c2.n;
+  document.querySelectorAll("#c2mode button").forEach(b=>b.classList.toggle("on",b.dataset.m===S.c2.mode));
+  $("t2fitType").innerHTML=TYPES.map(t=>`<option>${t}</option>`).join("");$("t2fitType").value=S.c2.type;
+  drawC2();
+}
+$("c2type").onchange=e=>{S.c2.type=e.target.value;S.c2.idx=1;setOn(2,false);fillC2();renderT2fit();};
+$("c2idx").onchange=e=>{S.c2.idx=+e.target.value;setOn(2,false);drawC2();};
+$("c2n").onchange=e=>{S.c2.n=+e.target.value;drawC2();save();};
+$("c2mode").onclick=e=>{const b=e.target.closest("button");if(!b)return;S.c2.mode=b.dataset.m;fillC2();save();};
+$("c2sw").onclick=()=>setOn(2,!S.c2.on);
+$("c3sw").onclick=()=>setOn(3,!S.c3.on);
+function setOn(which,on){
+  if(which===2){S.c2.on=on;if(on)S.c3.on=false;}else{S.c3.on=on;if(on)S.c2.on=false;}
+  $("c2sw").textContent=S.c2.on?"開關：接通中（按下斷開）":"開關：斷開（按下接通）";$("c2sw").classList.toggle("warn",S.c2.on);
+  for(const id of ["c3sw","c4sw"]){$(id).textContent=S.c3.on?"開關：接通中（按下斷開）":"開關：斷開（按下接通）";$(id).classList.toggle("warn",S.c3.on);}
+  drawC2();drawC3();
+}
+function clampActive(ids){let n=0;ids.forEach(id=>{if(H.pieces[id].loose){H.pieces[id].loose=false;n++;}});return n;}
+$("c2clamp").onclick=()=>{const n=clampActive([S.c2.type+S.c2.idx]);flash("c2status",n?"已重新夾緊鬆脫的接點。":"接點都已夾緊。","ok");};
+function clampNet(st){const ids=[];for(const k in S.slots)S.slots[k].forEach(g=>ids.push(...g));const n=clampActive(ids);flash(st,n?`已重新夾緊 ${n} 個鬆脫的接點。`:"接點都已夾緊。","ok");}
+$("c3clamp").onclick=()=>clampNet("c3status");$("c4clamp").onclick=()=>clampNet("c4status");
+function replaceFuse(st){if(H.fuseOK){flash(st,"保險絲正常，不需更換。","ok");return;}H.fuseOK=true;H.fuseOver=0;H.fuseCount++;flash(st,"已更換保險絲（實際競賽中需舉手請監考老師處理）。","ok");save();}
+$("fuse2").onclick=()=>replaceFuse("c2status");$("fuse3").onclick=()=>replaceFuse("c3status");
+let flashT={};
+function flash(id,msg,kind){flashT[id]={msg,kind,t:performance.now()};}
+
+function drawC2(){
+  const on=S.c2.on,p=H.pieces[S.c2.type+S.c2.idx],cls=on?"flow":"";
+  const n=S.c2.n;let s=`<rect width="520" height="250" fill="#fff"/>`;
+  s+=`<g stroke="#222" stroke-width="1.8" fill="none">`;
+  // 電池在左 x=60
+  s+=`<line x1="60" y1="40" x2="60" y2="${125-n*8}"/><line x1="60" y1="${125+n*8}" x2="60" y2="210"/>`;
+  s+=`<line x1="60" y1="40" x2="120" y2="40"/>`;
+  s+=on?`<line x1="120" y1="40" x2="165" y2="40"/>`:`<line x1="120" y1="40" x2="160" y2="22"/>`;
+  s+=`<line x1="165" y1="40" x2="220" y2="40"/><line x1="270" y1="40" x2="430" y2="40"/><line x1="430" y1="40" x2="430" y2="95"/><line x1="430" y1="155" x2="430" y2="210"/><line x1="60" y1="210" x2="430" y2="210"/></g>`;
+  if(on)s+=`<path d="M60,210 L60,40 L430,40 L430,210 Z" stroke="#2a62c9" stroke-width="1.2" fill="none" class="${cls}" opacity=".6"/>`;
+  for(let i=0;i<n;i++){const y=125-n*8+i*16+4;s+=`<line x1="44" y1="${y}" x2="76" y2="${y}" stroke="#222" stroke-width="2"/><line x1="52" y1="${y+8}" x2="68" y2="${y+8}" stroke="#222" stroke-width="4"/>`;}
+  s+=`<text x="20" y="130" font-size="13">${n}×1.5V</text><circle cx="120" cy="40" r="3"/><circle cx="165" cy="40" r="3"/><text x="140" y="62" font-size="12" text-anchor="middle">開關</text>`;
+  s+=`<circle cx="245" cy="40" r="22" fill="#fff" stroke="#222" stroke-width="1.8"/><text x="245" y="46" font-size="17" text-anchor="middle">A</text>`;
+  if(!H.fuseOK)s+=`<text x="245" y="80" font-size="11" fill="#c9372c" text-anchor="middle">保險絲斷</text>`;
+  const st=pieceStatus(p),col=p.burnt?"#555":p.dT>70?"#d9534f":p.dT>25?"#e0a030":"#222";
+  s+=svgRes(430,95,60,"",true).replace('stroke="#222"',`stroke="${col}"`);
+  s+=`<text x="446" y="130" font-size="14">${p.id}</text><text x="446" y="148" font-size="12" fill="${col}">${st}</text>`;
+  if(p.burnt)s+=`<text x="410" y="128" font-size="20" fill="#555">✕</text>`;
+  // 伏特計
+  const vx=S.c2.mode==="R"?340:300;
+  if(S.c2.mode==="R"){s+=`<g stroke="#2a62c9" stroke-width="1.5" fill="none"><line x1="430" y1="70" x2="340" y2="70"/><line x1="340" y1="70" x2="340" y2="103"/><line x1="340" y1="147" x2="340" y2="180"/><line x1="340" y1="180" x2="430" y2="180"/></g>`;}
+  else{s+=`<g stroke="#2a62c9" stroke-width="1.5" fill="none"><line x1="200" y1="40" x2="200" y2="125"/><line x1="200" y1="125" x2="278" y2="125"/><line x1="322" y1="125" x2="340" y2="125"/><line x1="340" y1="125" x2="340" y2="210"/></g>`;}
+  const vy=S.c2.mode==="R"?125:125,vcx=S.c2.mode==="R"?340:300;
+  s+=`<circle cx="${vcx}" cy="${vy}" r="22" fill="#fff" stroke="#2a62c9" stroke-width="1.8"/><text x="${vcx}" y="${vy+6}" font-size="17" text-anchor="middle" fill="#2a62c9">V</text>`;
+  $("c2svg").innerHTML=s;
+  $("c2pieceNote").textContent=inSlots(p.id)?`（${p.id} 目前裝在 ③ 的電路中）`:"";
+}
+
+/* 紀錄 */
+$("c2rec").onclick=()=>{
+  if(!S.c2.on){flash("c2status","請先接通開關再讀數。","warn");return;}
+  const I=A2.read(),V=V2.read();
+  if(I===null){flash("c2status","安培計指針超出滿刻度，無法讀數！請減少電池數。","warn");return;}
+  if(V===null){flash("c2status","伏特計超出量程。","warn");return;}
+  S.data2.push({type:S.c2.type,id:S.c2.type+S.c2.idx,n:S.c2.n,mode:S.c2.mode,V:+V.toFixed(2),I:+(I/1000).toFixed(3)});
+  renderT2table();S.c2.type&&($("t2fitType").value=S.c2.type);renderT2fit();save();
+};
+function renderT2table(){
+  const tb=$("t2table").querySelector("tbody");
+  tb.innerHTML=S.data2.map((r,i)=>`<tr><td>${i+1}</td><td>${r.id}</td><td>${r.n}</td><td>${r.mode==="R"?"只跨R":"跨A+R"}</td><td contenteditable data-i="${i}" data-k="V">${r.V.toFixed(2)}</td><td contenteditable data-i="${i}" data-k="I">${r.I.toFixed(3)}</td><td>${r.I>0?(r.V/r.I).toFixed(2):"—"}</td><td><a href="#" data-del="${i}" style="color:#c33">刪</a></td></tr>`).join("")||`<tr><td colspan="8" class="note">尚無紀錄</td></tr>`;
+}
+$("t2table").addEventListener("blur",e=>{const td=e.target;if(!td.dataset||!td.dataset.k)return;const v=parseFloat(td.textContent);if(isFinite(v)){S.data2[+td.dataset.i][td.dataset.k]=v;save();}renderT2table();renderT2fit();},true);
+$("t2table").addEventListener("click",e=>{const a=e.target.closest("[data-del]");if(!a)return;e.preventDefault();S.data2.splice(+a.dataset.del,1);renderT2table();renderT2fit();save();});
+$("t2clear").onclick=()=>{if(confirm("清除所有 ② 的量測紀錄？")){S.data2=[];renderT2table();renderT2fit();save();}};
+$("t2fitType").onchange=renderT2fit;
+function fitFor(t){const rows=S.data2.filter(r=>r.type===t);return{rows,fit:linfit(rows.map(r=>r.I),rows.map(r=>r.V))};}
+function renderT2fit(){
+  const t=$("t2fitType").value;const{rows,fit}=fitFor(t);
+  const X0=50,Y0=220,W=350,Hh=195;
+  let xmax=0.5,ymax=2;rows.forEach(r=>{xmax=Math.max(xmax,r.I*1.15);ymax=Math.max(ymax,r.V*1.15);});
+  const px=x=>X0+x/xmax*W,py=y=>Y0-y/ymax*Hh;
+  let s=`<rect width="420" height="260" fill="#fff"/>`;
+  for(let i=0;i<=5;i++){const x=xmax*i/5,y=ymax*i/5;s+=`<line x1="${px(x)}" y1="${Y0}" x2="${px(x)}" y2="${Y0-Hh}" stroke="#eee"/><text x="${px(x)}" y="${Y0+14}" font-size="10" text-anchor="middle">${x.toFixed(2)}</text><line x1="${X0}" y1="${py(y)}" x2="${X0+W}" y2="${py(y)}" stroke="#eee"/><text x="${X0-5}" y="${py(y)+3}" font-size="10" text-anchor="end">${y.toFixed(1)}</text>`;}
+  s+=`<line x1="${X0}" y1="${Y0}" x2="${X0+W}" y2="${Y0}" stroke="#333"/><line x1="${X0}" y1="${Y0}" x2="${X0}" y2="${Y0-Hh}" stroke="#333"/>`;
+  s+=`<text x="${X0+W/2}" y="${Y0+32}" font-size="12" text-anchor="middle">I (A)</text><text x="12" y="${Y0-Hh/2}" font-size="12" transform="rotate(-90 12 ${Y0-Hh/2})" text-anchor="middle">V (V)</text>`;
+  if(fit){s+=`<line x1="${px(0)}" y1="${py(fit.b)}" x2="${px(xmax)}" y2="${py(fit.b+fit.m*xmax)}" stroke="var(--acc)" stroke-width="1.8"/>`;
+    s+=`<line x1="${px(0)}" y1="${py(0)}" x2="${px(xmax)}" y2="${py(fit.m0*xmax)}" stroke="#c27c0e" stroke-width="1.2" stroke-dasharray="5 3"/>`;}
+  rows.forEach(r=>{s+=`<circle cx="${px(r.I)}" cy="${py(r.V)}" r="4" fill="#222"/>`;});
+  $("t2plot").innerHTML=s;
+  let h="";
+  if(!fit)h=`<p class="note">編號 ${t} 至少需要 2 組不同電流的數據才能迴歸（建議 4 組以上：1～4 個電池）。</p>`;
+  else{
+    const ids=[...new Set(rows.map(r=>r.id))];
+    h=`<table><tr><th>方法</th><th>R (Ω)</th><th>σ<sub>R</sub> (Ω)</th><th>截距 (V)</th><th></th></tr>
+    <tr><td style="color:var(--acc)">一般迴歸 V = RI + b</td><td>${f(fit.m,3)}</td><td>${f(fit.sm,3)}</td><td>${f(fit.b,3)} ± ${f(fit.sb,3)}</td><td><button class="btn sm" data-adopt="${fit.m}" data-sig="${fit.sm}">採用</button></td></tr>
+    <tr><td style="color:#c27c0e">過原點 V = RI</td><td>${f(fit.m0,3)}</td><td>${f(fit.sm0,3)}</td><td>0</td><td><button class="btn ghost sm" data-adopt="${fit.m0}" data-sig="${fit.sm0}">採用</button></td></tr></table>
+    <p class="note">共 ${fit.n} 點，來自 ${ids.join("、")}。${ids.length>1?"混合不同顆電阻時，散布包含製造誤差。":""}截距若明顯不為 0，代表有系統誤差（例如伏特計接法把安培計內阻算進去）。</p>`;
+  }
+  $("t2fit").innerHTML=h;
+}
+$("t2fit").addEventListener("click",e=>{const b=e.target.closest("[data-adopt]");if(!b)return;const v=+b.dataset.adopt;if(!(v>0.1)){alert("斜率不合理（≤ 0.1 Ω），請檢查數據：是否有接點鬆脫造成的異常點，或各組電流差距太小。");return;}const t=$("t2fitType").value,sg=parseFloat(b.dataset.sig);S.meas[t]=+v.toFixed(3);if(isFinite(sg))S.measSig[t]=sg;else delete S.measSig[t];renderT2sum();save();});
+function renderT2sum(){
+  let s=`<tr><th>編號</th>${TYPES.map(t=>`<th>${t}</th>`).join("")}</tr><tr><td>採用阻值 (Ω)</td>${TYPES.map(t=>`<td><input type="number" step="0.01" style="width:80px" data-meas="${t}" value="${S.meas[t]!=null?S.meas[t]:""}" placeholder="未量"></td>`).join("")}</tr>`;
+  s+=`<tr><td>可用數量</td>${TYPES.map(t=>`<td>${freeCount(t)} / 8</td>`).join("")}</tr>`;
+  $("t2sum").innerHTML=s;
+}
+$("t2sum").addEventListener("change",e=>{const t=e.target.dataset.meas;if(!t)return;const v=parseFloat(e.target.value);if(isFinite(v)&&v>0)S.meas[t]=v;else delete S.meas[t];delete S.measSig[t];save();});
+
+/* ================= TAB 3 ================= */
+const SLOTS=[["R1a","R₁（左上）"],["R1b","R₁（右上）"],["R2","R₂（中間）"],["R1c","R₁（左下）"],["R1d","R₁（右下）"],["RL","R<sub>L</sub>（負載，目標 20 Ω）"]];
+function freeCount(t){let n=0;for(let i=1;i<=8;i++){const id=t+i;if(!H.pieces[id].burnt&&!inSlots(id))n++;}return n;}
+function takeFree(t){for(let i=1;i<=8;i++){const id=t+i;if(!H.pieces[id].burnt&&!inSlots(id))return id;}return null;}
+function estGroup(g){let G=0;for(const id of g){const m=S.meas[H.pieces[id].type];if(!(m>0))return NaN;G+=1/m;}return 1/G;}
+function estSlot(k){const sl=S.slots[k];if(!sl.length)return Infinity;let s=0;for(const g of sl)s+=estGroup(g);return s;}
+function slotText(k,useIds){const sl=S.slots[k];if(!sl.length)return"（空，開路）";
+  return sl.map(g=>{const names=g.map(id=>useIds?id:H.pieces[id].type);return g.length>1&&sl.length>1?"("+names.join("∥")+")":names.join("∥");}).join("+");}
+function chipCls(p){return p.burnt?"burnt":p.dT>70?"hot":p.dT>25?"warm":"";}
+function slotCard(k,name,opt){
+  const sl=S.slots[k],e=estSlot(k);
+  const gs=sl.map((g,gi)=>`<div class="grp"><div class="gl">串聯段 ${gi+1}${g.length>1?"（段內並聯）":""}</div>${g.map(id=>`<span class="chip ${chipCls(H.pieces[id])}" title="${pieceStatus(H.pieces[id])}">${id}<a data-rm="${k}|${gi}|${id}">×</a></span>`).join("")}
+    <span style="white-space:nowrap"><select data-ps="${k}|${gi}">${opt}</select><button class="btn ghost sm" data-par="${k}|${gi}">∥ 並聯</button></span></div>`).join("");
+  return `<div class="slot"><div class="sh"><b>${name}</b><span class="est">${!sl.length?"開路":isFinite(e)?"估 "+e.toFixed(2)+" Ω":"估 ?（有未量編號）"}</span></div>${gs}
+    <div class="row" style="margin:4px 0 0"><select data-ss="${k}">${opt}</select><button class="btn sm" data-ser="${k}">＋串聯段</button><button class="btn ghost sm" data-clr="${k}">清空</button></div></div>`;
+}
+function renderSlots(){
+  const opt=TYPES.map(t=>`<option>${t}</option>`).join("");
+  $("slots").innerHTML=SLOTS.map(([k,name])=>slotCard(k,name,opt)).join("");
+  $("slotsR2").innerHTML=slotCard("R2","R₂（中間）",opt);
+  const inv=TYPES.map(t=>`<span>${t}：${freeCount(t)}${S.meas[t]!=null?`（≈${S.meas[t]} Ω）`:"（未量）"}</span>`).join("");
+  $("inv").innerHTML=inv;$("inv4").innerHTML=inv;
+  renderDesign();drawC3();renderT2sum();renderC4cfg();
+}
+function slotClick(e){
+  const root=e.currentTarget,b=e.target;let d;
+  if((d=b.dataset.ser)){const t=root.querySelector(`[data-ss="${d}"]`).value;const id=takeFree(t);if(!id){alert(`編號 ${t} 已無可用電阻。`);return;}S.slots[d].push([id]);}
+  else if((d=b.dataset.par)){const[k,gi]=d.split("|");const t=root.querySelector(`[data-ps="${d}"]`).value;const id=takeFree(t);if(!id){alert(`編號 ${t} 已無可用電阻。`);return;}S.slots[k][+gi].push(id);}
+  else if((d=b.dataset.rm)){const[k,gi,id]=d.split("|");const g=S.slots[k][+gi];g.splice(g.indexOf(id),1);if(!g.length)S.slots[k].splice(+gi,1);}
+  else if((d=b.dataset.clr)){S.slots[d]=[];}
+  else return;
+  renderSlots();save();
+}
+$("slots").addEventListener("click",slotClick);$("slotsR2").addEventListener("click",slotClick);
+$("copyR1").onclick=()=>{
+  const src=S.slots.R1a;if(!src.length){alert("請先組好 R₁（左上）。");return;}
+  const need={};src.forEach(g=>g.forEach(id=>{const t=H.pieces[id].type;need[t]=(need[t]||0)+1;}));
+  ["R1b","R1c","R1d"].forEach(k=>S.slots[k]=[]);
+  for(const t in need){if(freeCount(t)<need[t]*3){alert(`編號 ${t} 數量不足，無法複製三份（需要 ${need[t]*3} 個，剩 ${freeCount(t)} 個）。`);renderSlots();return;}}
+  ["R1b","R1c","R1d"].forEach(k=>{S.slots[k]=[];src.forEach(g=>{const ng=[];S.slots[k].push(ng);g.forEach(id=>ng.push(takeFree(H.pieces[id].type)));});});
+  renderSlots();save();
+};
+$("clearAll").onclick=()=>{if(confirm("拆除全部電阻？")){for(const k in S.slots)S.slots[k]=[];setOn(3,false);renderSlots();save();}};
+function syncC3(){["c3n","c4n"].forEach(id=>$(id).value=S.c3.n);
+  ["c3mode","c4mode"].forEach(id=>document.querySelectorAll("#"+id+" button").forEach(x=>x.classList.toggle("on",x.dataset.m===S.c3.mode)));}
+["c3n","c4n"].forEach(id=>$(id).onchange=e=>{S.c3.n=+e.target.value;syncC3();drawC3();renderDesign();save();});
+["c3mode","c4mode"].forEach(id=>$(id).onclick=e=>{const b=e.target.closest("button");if(!b)return;S.c3.mode=b.dataset.m;syncC3();drawC3();save();});
+$("c4sw").onclick=()=>setOn(3,!S.c3.on);
+$("fuse4").onclick=()=>replaceFuse("c4status");
+$("goto3").onclick=()=>showTab(3);
+
+function renderDesign(){
+  const e={};["R1a","R1b","R1c","R1d","R2","RL"].forEach(k=>e[k]=estSlot(k));
+  const r1s=[e.R1a,e.R1b,e.R1c,e.R1d];const r1ok=r1s.every(isFinite);
+  let h="";
+  if(!Object.keys(S.meas).length){$("design").innerHTML=`<div class="warnbox">尚未在 ② 採用任何阻值，無法估算。請先到 ② 鑑定 A–F。</div>`;return;}
+  const R1m=r1ok?r1s.reduce((a,b)=>a+b,0)/4:NaN,RLe=e.RL;
+  h+=`<table><tr><th>R₁ 平均（估）</th><th>R<sub>L</sub>（估）</th><th>匹配所需 R₂</th><th>R₂（估）</th></tr>`;
+  const need=isFinite(R1m)&&isFinite(RLe)?RLe*RLe/(4*R1m)-R1m:NaN;
+  h+=`<tr><td>${f(R1m,2)}</td><td>${f(RLe,2)}</td><td>${f(need,2)}</td><td>${f(e.R2,2)}</td></tr></table>`;
+  const Rab=(e.R1a+e.R1c)+par(e.R2,e.R1b+e.R1d+e.RL);
+  if(isFinite(Rab))h+=`<p>依測得值預測 <i>R<sub>ab</sub></i> ≈ <b>${Rab.toFixed(2)} Ω</b>；與 <i>R<sub>L</sub></i> 相差 ${(Rab-RLe).toFixed(2)} Ω（${((Rab-RLe)/RLe*100).toFixed(1)}%）。</p>`;
+  if(isFinite(R1m)&&R1m>RLe/2)h+=`<div class="warnbox">R₁ 太大：R₁ 必須 ≤ R<sub>L</sub>/2，否則需要負的 R₂，不可能匹配。</div>`;
+  if(isFinite(RLe)&&Math.abs(RLe-20)>1)h+=`<div class="warnbox">R<sub>L</sub> 目前約 ${RLe.toFixed(2)} Ω，題目要求 20 Ω。</div>`;
+  h+=`<p class="note">表中只使用你在 ② 量到的值，不是真值。各顆電阻的製造誤差、溫升與接觸電阻會讓實際量到的 <i>R<sub>ab</sub></i> 與預測略有差別。</p>`;
+  // 功率提醒
+  const n=S.c3.n;if(isFinite(Rab)&&isFinite(R1m)){const V=1.55*n,I=V/Rab;const maxSingle=Math.max(...["R1a","R1c"].flatMap(k=>S.slots[k].filter(g=>g.length===1).map(g=>I*I*S.meas[H.pieces[g[0]].type])),0);
+    if(maxSingle>0.5)h+=`<div class="warnbox">以 ${n} 個電池估算，a 點電流約 ${(I*1000).toFixed(0)} mA，單顆 R₁ 功率約 ${maxSingle.toFixed(2)} W，超過 ½ W 額定，會發燙、阻值漂移，甚至燒毀。可考慮減少電池或改用並聯分攤功率。</div>`;}
+  $("design").innerHTML=h;
+}
+
+function drawC3(){
+  if(!$("c3svg"))return;
+  const on=S.c3.on,n=S.c3.n,bat=S.c3.mode==="bat";
+  const T=(x,y,t,sz,col,anc)=>`<text x="${x}" y="${y}" font-size="${sz||13}" fill="${col||"#222"}" text-anchor="${anc||"middle"}">${t}</text>`;
+  let s=`<rect width="700" height="330" fill="#fff"/>`;
+  const top=60,bot=280,yc=(top+bot)/2;
+  s+=`<g stroke="#222" stroke-width="1.8" fill="none">`;
+  s+=`<line x1="90" y1="${top}" x2="90" y2="${yc-n*8}"/><line x1="90" y1="${yc+n*8}" x2="90" y2="${bot}"/>`;
+  s+=`<line x1="90" y1="${top}" x2="125" y2="${top}"/>`+(on?`<line x1="125" y1="${top}" x2="160" y2="${top}"/>`:`<line x1="125" y1="${top}" x2="156" y2="${top-18}"/>`);
+  s+=`<line x1="160" y1="${top}" x2="183" y2="${top}"/><line x1="227" y1="${top}" x2="260" y2="${top}"/>`;
+  s+=`<line x1="260" y1="${top}" x2="280" y2="${top}"/><line x1="380" y1="${top}" x2="480" y2="${top}"/><line x1="580" y1="${top}" x2="640" y2="${top}"/>`;
+  s+=`<line x1="90" y1="${bot}" x2="280" y2="${bot}"/><line x1="380" y1="${bot}" x2="480" y2="${bot}"/><line x1="580" y1="${bot}" x2="640" y2="${bot}"/>`;
+  s+=`<line x1="430" y1="${top}" x2="430" y2="${yc-40}"/><line x1="430" y1="${yc+40}" x2="430" y2="${bot}"/>`;
+  s+=`<line x1="640" y1="${top}" x2="640" y2="${yc-40}"/><line x1="640" y1="${yc+40}" x2="640" y2="${bot}"/></g>`;
+  if(on)s+=`<path d="M90,${bot} L90,${top} L640,${top} L640,${bot} Z" stroke="#2a62c9" stroke-width="1.2" fill="none" class="flow" opacity=".55"/>`;
+  for(let i=0;i<n;i++){const y=yc-n*8+i*16+4;s+=`<line x1="74" y1="${y}" x2="106" y2="${y}" stroke="#222" stroke-width="2"/><line x1="82" y1="${y+8}" x2="98" y2="${y+8}" stroke="#222" stroke-width="4"/>`;}
+  s+=T(90,bot+20,`${n} 個 1 號電池`,12);
+  s+=`<circle cx="125" cy="${top}" r="3"/><circle cx="160" cy="${top}" r="3"/>`+T(142,top+20,"開關",11);
+  s+=`<circle cx="205" cy="${top}" r="22" fill="#fff" stroke="#222" stroke-width="1.8"/>`+T(205,top+6,"A",17);
+  if(!H.fuseOK)s+=T(205,top-30,"保險絲斷",11,"#c9372c");
+  s+=`<circle cx="260" cy="${top}" r="4" fill="#222"/><circle cx="260" cy="${bot}" r="4" fill="#222"/>`+T(260,top-10,"a",15)+T(260,bot+18,"b",15);
+  s+=`<line x1="90" y1="${bot}" x2="260" y2="${bot}" stroke="#222" stroke-width="1.8"/>`;
+  const box=(x,y,w,h,k,lab)=>{const sl=S.slots[k],e=estSlot(k);const any=sl.flat().map(id=>H.pieces[id]);
+    const burnt=any.some(p=>p.burnt),hot=any.some(p=>p.dT>70),warm=any.some(p=>p.dT>25);
+    const col=!sl.length?"#bbb":burnt?"#555":hot?"#d9534f":warm?"#e0a030":"#222";
+    let r=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${!sl.length?"#f6f6f6":"#fff"}" stroke="${col}" stroke-width="2" ${!sl.length?'stroke-dasharray="4 3"':""}/>`;
+    r+=T(x+w/2,y+h/2+5,lab,14,col);
+    const tx=slotText(k);return{r,tx:tx.length>16?tx.slice(0,15)+"…":tx,e};};
+  const parts=[[280,top-12,100,24,"R1a","R₁"],[480,top-12,100,24,"R1b","R₁"],[280,bot-12,100,24,"R1c","R₁"],[480,bot-12,100,24,"R1d","R₁"]];
+  parts.forEach(([x,y,w,h,k,l])=>{const b=box(x,y,w,h,k,l);s+=b.r+T(x+w/2,y-6,b.tx,11,"#2a62c9")+T(x+w/2,y+h+14,isFinite(b.e)?b.e.toFixed(2)+" Ω":"",11,"#666");});
+  {const b=box(418,yc-40,24,80,"R2","");s+=b.r+T(452,yc-4,"R₂",14,"#222","start")+T(452,yc+12,b.tx,11,"#2a62c9","start")+T(452,yc+26,isFinite(b.e)?b.e.toFixed(2)+" Ω":"",11,"#666","start");}
+  {const b=box(628,yc-40,24,80,"RL","");s+=b.r+`<text x="660" y="${yc-4}" font-size="14">R<tspan font-size="10" dy="3">L</tspan></text>`+T(660,yc+12,b.tx,11,"#2a62c9","start")+T(660,yc+26,isFinite(b.e)?b.e.toFixed(2)+" Ω":"",11,"#666","start");}
+  s+=`<circle cx="430" cy="${top}" r="3.5" fill="#222"/><circle cx="430" cy="${bot}" r="3.5" fill="#222"/>`;
+  // 伏特計
+  if(bat){s+=`<g stroke="#2a62c9" stroke-width="1.5" fill="none"><line x1="90" y1="${top}" x2="90" y2="${top-28}"/><line x1="90" y1="${top-28}" x2="30" y2="${top-28}"/><line x1="30" y1="${top-28}" x2="30" y2="${yc-22}"/><line x1="30" y1="${yc+22}" x2="30" y2="${bot+28}"/><line x1="30" y1="${bot+28}" x2="90" y2="${bot+28}"/><line x1="90" y1="${bot+28}" x2="90" y2="${bot}"/></g>`;
+    s+=`<circle cx="30" cy="${yc}" r="20" fill="#fff" stroke="#2a62c9" stroke-width="1.8"/>`+T(30,yc+6,"V",16,"#2a62c9");}
+  else{s+=`<g stroke="#2a62c9" stroke-width="1.5" fill="none"><line x1="260" y1="${top}" x2="260" y2="${yc-22}"/><line x1="260" y1="${yc+22}" x2="260" y2="${bot}"/></g>`;
+    s+=`<circle cx="260" cy="${yc}" r="20" fill="#fff" stroke="#2a62c9" stroke-width="1.8"/>`+T(260,yc+6,"V",16,"#2a62c9");}
+  $("c3svg").innerHTML=s;
+}
+$("c3read").onclick=()=>{
+  const I=A3.read(),V=V3.read();
+  if(I===null){$("c3readout").textContent="安培計超出量程！";return;}
+  if(!S.c3.on){$("c3readout").innerHTML=`<span style="font-size:15px">開關斷開：V = ${V.toFixed(2)} V（${S.c3.mode==="bat"?"近似電池電動勢":"無電流"}），i = 0</span>`;return;}
+  if(I<=0){$("c3readout").textContent="i = 0，電路開路，請檢查各位置是否都已接上。";return;}
+  $("c3readout").innerHTML=`V<sub>i</sub> = ${V.toFixed(2)} V，i = ${(I/1000).toFixed(3)} A → V<sub>i</sub>/i = ${(V/(I/1000)).toFixed(2)} Ω`;
+};
+
+/* ================= 共用：作圖與統計 ================= */
+const SK=["R1a","R1b","R1c","R1d","R2","RL"];
+let A4,V4;
+const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
+const std=a=>{if(a.length<2)return NaN;const m=avg(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1));};
+const sgn=(x,d)=>isFinite(x)?(x>=0?"+":"")+x.toFixed(d):"—";
+function plotFrame(id,W0,H0,xmin,xmax,ymin,ymax,xl,yl,xd,yd){
+  const X0=58,Y0=H0-44,W=W0-X0-14,Hh=Y0-14;
+  const px=x=>X0+(x-xmin)/(xmax-xmin)*W,py=y=>Y0-(y-ymin)/(ymax-ymin)*Hh;
+  let s=`<rect width="${W0}" height="${H0}" fill="#fff"/><defs><clipPath id="cp_${id}"><rect x="${X0}" y="${Y0-Hh}" width="${W}" height="${Hh}"/></clipPath></defs>`;
+  for(let i=0;i<=5;i++){const x=xmin+(xmax-xmin)*i/5,y=ymin+(ymax-ymin)*i/5;
+    s+=`<line x1="${px(x).toFixed(1)}" y1="${Y0}" x2="${px(x).toFixed(1)}" y2="${Y0-Hh}" stroke="#eee"/><text x="${px(x).toFixed(1)}" y="${Y0+15}" font-size="10.5" text-anchor="middle">${x.toFixed(xd)}</text>`;
+    s+=`<line x1="${X0}" y1="${py(y).toFixed(1)}" x2="${X0+W}" y2="${py(y).toFixed(1)}" stroke="#eee"/><text x="${X0-5}" y="${(py(y)+4).toFixed(1)}" font-size="10.5" text-anchor="end">${y.toFixed(yd)}</text>`;}
+  s+=`<line x1="${X0}" y1="${Y0}" x2="${X0+W}" y2="${Y0}" stroke="#333"/><line x1="${X0}" y1="${Y0}" x2="${X0}" y2="${Y0-Hh}" stroke="#333"/>`;
+  s+=`<text x="${X0+W/2}" y="${Y0+34}" font-size="12.5" text-anchor="middle" font-family="Times New Roman">${xl}</text><text x="14" y="${Y0-Hh/2}" font-size="12.5" transform="rotate(-90 14 ${Y0-Hh/2})" text-anchor="middle" font-family="Times New Roman">${yl}</text>`;
+  return{s,px,py,X0,Y0,W,Hh,clip:`clip-path="url(#cp_${id})"`};
+}
+function curve(fn,x0,x1,P,style){let d="";for(let k=0;k<=200;k++){const x=x0+(x1-x0)*k/200,y=fn(x);if(!isFinite(y))continue;d+=(d?"L":"M")+P.px(x).toFixed(1)+","+P.py(y).toFixed(1);}return `<path d="${d}" fill="none" ${style} ${P.clip}/>`;}
+function diamond(x,y,r,col){x=+x;y=+y;return `<path d="M${x},${y-r} L${x+r},${y} L${x},${y+r} L${x-r},${y}Z" fill="${col}"/>`;}
+
+/* ================= TAB 4 ================= */
+function cfgNow(){
+  const e={};SK.forEach(k=>e[k]=estSlot(k));
+  const r1=[e.R1a,e.R1b,e.R1c,e.R1d];
+  return{e,R1:avg(r1),R2:e.R2,RL:e.RL,spread:Math.max(...r1)-Math.min(...r1),
+    ok:r1.every(isFinite)&&isFinite(e.R2)&&isFinite(e.RL)};
+}
+function trueSnap(){const net=network(H,S.slots);return{R1:(net.R.R1a+net.R.R1b+net.R.R1c+net.R.R1d)/4,R1L:(net.R.R1a+net.R.R1c)/2,R1R:(net.R.R1b+net.R.R1d)/2,R2:net.R.R2,RL:net.R.RL,Rab:net.Rab,mode:S.c3.mode,key:JSON.stringify(S.slots)};}
+function cfgText(){return `R₁=${slotText("R1a")}、R₂=${slotText("R2")}、R<sub>L</sub>=${slotText("RL")}`;}
+function renderC4cfg(){
+  const c=cfgNow();
+  let h=`<div style="overflow-x:auto"><table><tr>${SLOTS.map(([k,n])=>`<th>${n.split("（")[0]}<span class="note">${k.startsWith("R1")?"（"+n.split("（")[1].replace("）",""):""}${k.startsWith("R1")?"）":""}</span></th>`).join("")}</tr>
+    <tr>${SLOTS.map(([k])=>`<td style="font-size:12.5px">${slotText(k)}<br><b>${isFinite(c.e[k])?c.e[k].toFixed(2)+" Ω":"?"}</b></td>`).join("")}</tr></table></div>`;
+  if(c.ok){
+    const need=c.RL*c.RL/(4*c.R1)-c.R1,pred=(c.e.R1a+c.e.R1c)+par(c.R2,c.e.R1b+c.e.R1d+c.RL);
+    h+=`<p>R₁ 平均 <b>${c.R1.toFixed(2)} Ω</b>、R₂ <b>${c.R2.toFixed(2)} Ω</b>、R<sub>L</sub> <b>${c.RL.toFixed(2)} Ω</b>；匹配所需 R₂ = ${need.toFixed(2)} Ω；預測 R<sub>ab</sub> ≈ ${pred.toFixed(2)} Ω。</p>`;
+    if(c.spread/c.R1>0.03)h+=`<div class="warnbox">四個 R₁ 的估計值相差 ${(c.spread/c.R1*100).toFixed(1)}%，電路不對稱；表一只記平均值，會引入額外誤差。</div>`;
+    if(c.R1>c.RL/2)h+=`<div class="warnbox">R₁ &gt; R<sub>L</sub>/2，任何 R₂ 都無法匹配。</div>`;
+  }else h+=`<div class="warnbox">六個位置都要組好，且所用編號都要在 ② 量過阻值，才能記錄。</div>`;
+  $("c4cfg").innerHTML=h;
+}
+function takeReading(st){
+  if(!S.c3.on){flash(st,"請先接通開關再讀數。","warn");return null;}
+  const I=A4.read(),V=V4.read();
+  if(I===null){flash(st,"安培計超出量程，無法讀數！","warn");return null;}
+  if(!(I>0)){flash(st,"電流為 0：電路開路或保險絲已斷。","warn");return null;}
+  return{V:+V.toFixed(2),I:+(I/1000).toFixed(3)};
+}
+$("c4rec").onclick=()=>{
+  const c=cfgNow();if(!c.ok){flash("c4status","六個位置都要組好，且所用編號都要在 ② 量過阻值。","warn");return;}
+  const r=takeReading("c4status");if(!r)return;
+  S.t1rows.push({src:"meas",RL:+c.RL.toFixed(3),R1:+c.R1.toFixed(3),R2:+c.R2.toFixed(3),V:r.V,I:r.I,mode:S.c3.mode,n:S.c3.n,cfg:cfgText(),tr:trueSnap()});
+  renderT4();save();flash("c4status",`已記錄到表一：V<sub>i</sub>/i = ${(r.V/r.I).toFixed(2)} Ω。`,"ok");
+};
+function groupLabel(c){return `R₁＝${slotText("R1a")}（≈${c.R1.toFixed(2)} Ω）｜R_L＝${slotText("RL")}（≈${c.RL.toFixed(2)} Ω）`;}
+$("c4sweep").onclick=()=>{
+  const c=cfgNow();if(!c.ok){flash("c4status","六個位置都要組好，且所用編號都要在 ② 量過阻值。","warn");return;}
+  const r=takeReading("c4status");if(!r)return;
+  const g=groupLabel(c);
+  S.sweep.push({g,R1:c.R1,RL:c.RL,R2:c.R2,r2txt:slotText("R2"),V:r.V,I:r.I,mode:S.c3.mode,tr:trueSnap()});
+  S.sweepSel=g;renderSweep();save();flash("c4status",`已加入掃描：R₂ ≈ ${c.R2.toFixed(2)} Ω，V<sub>i</sub>/i = ${(r.V/r.I).toFixed(2)} Ω。`,"ok");
+};
+function rowRab(r){return r.src==="interp"?r.RL:(r.I>0?r.V/r.I:NaN);}
+function renderT4(){
+  let s=`<tr><th>#</th><th>R<sub>L</sub> (Ω)</th><th>V<sub>i</sub> (V)</th><th>i (A)</th><th>R₁ (Ω)</th><th>R₂ (Ω)</th><th>R₁+R₂ (Ω)</th><th>R<sub>ab</sub>=V<sub>i</sub>/i (Ω)</th><th>(R<sub>ab</sub>−R<sub>L</sub>)/R<sub>L</sub></th><th>伏特計</th><th>組合／來源</th><th></th></tr>`;
+  S.t1rows.forEach((r,i)=>{
+    const Rab=rowRab(r),dev=(Rab-r.RL)/r.RL*100,meas=r.src==="meas";
+    const ed=k=>meas?`contenteditable data-i="${i}" data-k="${k}"`:"";
+    s+=`<tr${meas?"":' style="background:#ecf8f3"'}><td>${i+1}</td><td contenteditable data-i="${i}" data-k="RL">${f(r.RL,2)}</td><td ${ed("V")}>${r.V==null?"—":r.V.toFixed(2)}</td><td ${ed("I")}>${r.I==null?"—":r.I.toFixed(3)}</td>
+      <td contenteditable data-i="${i}" data-k="R1">${f(r.R1,2)}</td><td contenteditable data-i="${i}" data-k="R2">${f(r.R2,2)}</td><td>${f(r.R1+r.R2,2)}</td><td>${f(Rab,2)}</td>
+      <td style="color:${!meas||Math.abs(dev)<=3?"var(--acc2)":"var(--warn)"}">${meas?sgn(dev,1)+"%":"0（內插）"}</td><td>${r.mode==="bat"?"電池兩端":"a、b 兩端"}</td><td style="font-size:12px;text-align:left">${r.cfg}</td><td><a href="#" data-del="${i}" style="color:#c33">刪</a></td></tr>`;
+  });
+  if(!S.t1rows.length)s+=`<tr><td colspan="12" class="note">尚無紀錄。題目要求至少 4 組不同的 R₁。</td></tr>`;
+  $("t4table").innerHTML=s;
+}
+$("t4table").addEventListener("blur",e=>{const td=e.target;if(!td.dataset||!td.dataset.k)return;const v=parseFloat(td.textContent);if(isFinite(v)&&v>0){S.t1rows[+td.dataset.i][td.dataset.k]=v;save();}renderT4();},true);
+$("t4table").addEventListener("click",e=>{const a=e.target.closest("[data-del]");if(!a)return;e.preventDefault();S.t1rows.splice(+a.dataset.del,1);renderT4();save();});
+$("t4clear").onclick=()=>{if(confirm("清除表一全部資料？")){S.t1rows=[];renderT4();save();}};
+$("swClear").onclick=()=>{if(confirm("清除全部 R₂ 掃描數據？")){S.sweep=[];S.sweepSel=null;renderSweep();save();}};
+
+/* R₂ 掃描與內插 */
+function sweepGroups(){return[...new Set(S.sweep.map(r=>r.g))];}
+function sweepRows(g){return S.sweep.map((r,i)=>Object.assign({i},r)).filter(r=>r.g===g);}
+function interpSweep(rows){
+  const pts=rows.map(r=>({x:r.R2,y:r.V/r.I,r})).sort((a,b)=>a.x-b.x);
+  const RL=rows.length?rows[0].RL:NaN,R1=rows.length?rows[0].R1:NaN;
+  let res=null;
+  for(let i=0;i<pts.length;i++){const a=pts[i];if(Math.abs(a.y-RL)<1e-9){res={x:a.x,p:a};break;}
+    if(i+1<pts.length){const b=pts[i+1],da=a.y-RL,db=b.y-RL;if(da*db<0&&b.x!==a.x){const t=da/(da-db);res={x:a.x+t*(b.x-a.x),t,a,b};break;}}}
+  return{pts,RL,R1,res,R2th:RL*RL/(4*R1)-R1};
+}
+$("swSel").onchange=e=>{S.sweepSel=sweepGroups()[+e.target.value]||null;renderSweep();save();};
+function renderSweep(){
+  const groups=sweepGroups();
+  if(!groups.includes(S.sweepSel))S.sweepSel=groups[groups.length-1]||null;
+  $("swSel").innerHTML=groups.length?groups.map((g,i)=>`<option value="${i}" ${g===S.sweepSel?"selected":""}>${g}</option>`).join(""):`<option>（尚無掃描數據）</option>`;
+  const rows=S.sweepSel?sweepRows(S.sweepSel):[];
+  let t=`<table><tr><th>#</th><th>R₂ 組合</th><th>R₂（估, Ω）</th><th>V<sub>i</sub> (V)</th><th>i (A)</th><th>V<sub>i</sub>/i (Ω)</th><th>伏特計</th><th></th></tr>`;
+  rows.forEach((r,k)=>{t+=`<tr><td>${k+1}</td><td>${r.r2txt}</td><td>${r.R2.toFixed(2)}</td><td>${r.V.toFixed(2)}</td><td>${r.I.toFixed(3)}</td><td>${(r.V/r.I).toFixed(2)}</td><td>${r.mode==="bat"?"電池":"a、b"}</td><td><a href="#" data-sdel="${r.i}" style="color:#c33">刪</a></td></tr>`;});
+  if(!rows.length)t+=`<tr><td colspan="8" class="note">組好 R₁ 與 R<sub>L</sub> 後，在上方更換不同的 R₂，每換一次按「記錄到 R₂ 掃描」。至少需要一點 R<sub>ab</sub> &lt; R<sub>L</sub>、一點 R<sub>ab</sub> &gt; R<sub>L</sub>。</td></tr>`;
+  $("swTable").innerHTML=t+"</table>";
+  const o=interpSweep(rows);
+  const xs=o.pts.map(p=>p.x),ys=o.pts.map(p=>p.y);
+  const xmax=Math.max(10,...xs.map(x=>x*1.25),isFinite(o.R2th)?o.R2th*1.3:0);
+  const yl=[...ys,isFinite(o.RL)?o.RL:20];const ymin=Math.floor(Math.min(...yl)-1),ymax=Math.ceil(Math.max(...yl)+1);
+  const P=plotFrame("sw",420,270,0,xmax,ymin,ymax,"R₂ (Ω)","R_ab = V_i / i (Ω)",1,1);
+  let s=P.s;
+  if(rows.length){
+    s+=`<line x1="${P.X0}" y1="${P.py(o.RL)}" x2="${P.X0+P.W}" y2="${P.py(o.RL)}" stroke="#c27c0e" stroke-width="1.5"/><text x="${P.X0+P.W-4}" y="${P.py(o.RL)-5}" font-size="11" text-anchor="end" fill="#c27c0e">R_L ≈ ${o.RL.toFixed(2)} Ω</text>`;
+    s+=curve(x=>2*o.R1+par(x,2*o.R1+o.RL),0,xmax,P,'stroke="#999" stroke-dasharray="5 4" stroke-width="1.4"');
+    if(o.pts.length>1)s+=`<polyline points="${o.pts.map(p=>P.px(p.x).toFixed(1)+","+P.py(p.y).toFixed(1)).join(" ")}" fill="none" stroke="var(--acc)" stroke-width="1.2" ${P.clip}/>`;
+    o.pts.forEach(p=>{s+=`<circle cx="${P.px(p.x).toFixed(1)}" cy="${P.py(p.y).toFixed(1)}" r="4.5" fill="#222"/>`;});
+    if(o.res)s+=diamond(P.px(o.res.x),P.py(o.RL),7,"#0f8a6a")+`<line x1="${P.px(o.res.x)}" y1="${P.py(o.RL)}" x2="${P.px(o.res.x)}" y2="${P.Y0}" stroke="#0f8a6a" stroke-dasharray="3 3"/>`;
+  }
+  $("swPlot").innerHTML=s;
+  let h="";
+  if(rows.length){
+    h+=`<p class="note">灰虛線：以你的 R₁、R<sub>L</sub> 估計值算出的理論曲線 R<sub>ab</sub> = 2R₁ + R₂∥(2R₁+R<sub>L</sub>)。</p>`;
+    if(new Set(rows.map(r=>r.mode)).size>1)h+=`<div class="warnbox">這一組混用了兩種伏特計接法，系統誤差不同，內插結果不可靠。</div>`;
+    if(o.res){const d=(o.res.x-o.R2th)/o.R2th*100;
+      h+=`<div class="okbox">內插得 R₂* = <b>${o.res.x.toFixed(2)} Ω</b>（R₁+R₂* = ${(o.R1+o.res.x).toFixed(2)} Ω）。理論值 R₂ = R<sub>L</sub>²/(4R₁) − R₁ = ${o.R2th.toFixed(2)} Ω，差 ${sgn(d,1)}%。</div>
+        <button class="btn green sm" id="swAdd">將內插匹配點加入表一</button>`;
+    }else if(o.pts.length){const allLow=o.pts.every(p=>p.y<o.RL);
+      h+=`<div class="infobox">${allLow?"目前所有點 R<sub>ab</sub> 都小於 R<sub>L</sub>，請改用較大的 R₂。":"目前所有點 R<sub>ab</sub> 都大於 R<sub>L</sub>，請改用較小的 R₂。"}內插需要 R<sub>L</sub> 兩側各至少一點。</div>`;}
+  }
+  $("swRes").innerHTML=h;
+  const btn=$("swAdd");if(btn)btn.onclick=addInterp;
+}
+$("swTable").addEventListener("click",e=>{const a=e.target.closest("[data-sdel]");if(!a)return;e.preventDefault();S.sweep.splice(+a.dataset.sdel,1);renderSweep();save();});
+function addInterp(){
+  const rows=sweepRows(S.sweepSel),o=interpSweep(rows);if(!o.res)return;
+  let tr;
+  if(o.res.a){const t=o.res.t,a=o.res.a.r.tr,b=o.res.b.r.tr,L=(u,v)=>u+t*(v-u);
+    tr={R1:L(a.R1,b.R1),R1L:L(a.R1L,b.R1L),R1R:L(a.R1R,b.R1R),R2:L(a.R2,b.R2),RL:L(a.RL,b.RL),Rab:L(a.Rab,b.Rab),mode:a.mode,key:"interp"};}
+  else tr=Object.assign({},o.res.p.r.tr,{key:"interp"});
+  S.t1rows.push({src:"interp",RL:+o.RL.toFixed(3),R1:+o.R1.toFixed(3),R2:+o.res.x.toFixed(3),V:null,I:null,mode:rows[0].mode,n:null,
+    cfg:`R₂ 掃描內插（${rows.length} 點；R₁＝${o.R1.toFixed(2)} Ω）`,tr});
+  renderT4();save();flash("c4status","已將內插匹配點加入表一（綠底列）。","ok");
+}
+
+/* ================= TAB 5 ================= */
+$("t5thr").onchange=renderT5;$("t5interp").onchange=renderT5;
+function t5compute(){
+  const thr=+$("t5thr").value,inc=$("t5interp").checked;
+  const rows=S.t1rows.map((r,i)=>{const Rab=rowRab(r),dev=Math.abs(Rab-r.RL)/r.RL*100;
+    const use=r.src==="interp"?inc:(thr>=100||dev<=thr);
+    return{r,i,Rab,dev,use:use&&isFinite(r.R1+r.R2)&&r.R1+r.R2>0,x:1/(r.R1+r.R2),y:r.R1,P:r.R1*(r.R1+r.R2)};});
+  const u=rows.filter(o=>o.use);
+  const fit=u.length>=2?linfit(u.map(o=>o.x),u.map(o=>o.y)):null;
+  const single=u.map(o=>2*Math.sqrt(o.P));
+  const c={rows,u,fit,RLest:avg(u.map(o=>o.r.RL))};
+  if(fit){c.RLg=2*Math.sqrt(fit.m);c.sRLg=fit.sm/Math.sqrt(fit.m);c.RL0=2*Math.sqrt(fit.m0);c.sRL0=fit.sm0/Math.sqrt(fit.m0);}
+  if(single.length){c.RLs=avg(single);c.sRLs=std(single)/Math.sqrt(single.length);}
+  return c;
+}
+function renderT5(){
+  const c=t5compute();
+  // 圖三
+  const xs=c.rows.map(o=>o.r.R1+o.r.R2).filter(isFinite),ys=c.rows.map(o=>o.r.R1).filter(isFinite);
+  const xmax=Math.max(40,...xs.map(x=>x*1.1)),ymax=Math.max(12,...ys.map(y=>y*1.15));
+  let P=plotFrame("t5a",420,300,0,xmax,0,ymax,"R₁ + R₂ (Ω)","R₁ (Ω)",0,1),s=P.s;
+  s+=curve(x=>100/x,10,xmax,P,'stroke="#999" stroke-dasharray="5 4" stroke-width="1.5"');
+  if(c.fit&&c.fit.m>0)s+=curve(x=>c.fit.m/x,Math.sqrt(c.fit.m),xmax,P,'stroke="var(--acc)" stroke-width="2"');
+  const mark=(o,x,y)=>o.r.src==="interp"?diamond(x,y,6.5,o.use?"#0f8a6a":"#9fd3c2"):(o.use?`<circle cx="${x}" cy="${y}" r="4.5" fill="#222"/>`:`<circle cx="${x}" cy="${y}" r="4.5" fill="#fff" stroke="#999" stroke-width="1.5"/>`);
+  c.rows.forEach(o=>{if(isFinite(o.x))s+=mark(o,P.px(o.r.R1+o.r.R2).toFixed(1),P.py(o.r.R1).toFixed(1));});
+  $("t5p1").innerHTML=s;
+  // 線性化
+  const xs2=c.rows.map(o=>o.x).filter(isFinite);const xm2=Math.max(0.1,...xs2.map(x=>x*1.15));
+  const ym2=Math.max(12,...ys.map(y=>y*1.15));
+  P=plotFrame("t5b",420,300,0,xm2,0,ym2,"1 / (R₁ + R₂)  (Ω⁻¹)","R₁ (Ω)",3,1);s=P.s;
+  s+=curve(x=>100*x,0,xm2,P,'stroke="#999" stroke-dasharray="5 4" stroke-width="1.3"');
+  if(c.fit){s+=curve(x=>c.fit.m*x+c.fit.b,0,xm2,P,'stroke="var(--acc)" stroke-width="2"');s+=curve(x=>c.fit.m0*x,0,xm2,P,'stroke="#c27c0e" stroke-width="1.6" stroke-dasharray="6 3"');}
+  c.rows.forEach(o=>{if(isFinite(o.x))s+=mark(o,P.px(o.x).toFixed(1),P.py(o.y).toFixed(1));});
+  $("t5p2").innerHTML=s;
+  // 結果
+  let h="";
+  if(!S.t1rows.length)h=`<div class="infobox">表一還沒有資料，請先到 ④ 量測。</div>`;
+  else if(!c.fit)h=`<div class="warnbox">符合條件的點少於 2 個，無法迴歸。可以放寬條件，或回到 ④ 用 R₂ 掃描內插取得匹配點。</div>`;
+  else{
+    const z=(v,s)=>isFinite(s)&&s>0?((v-20)/s).toFixed(1)+"σ":"—";
+    h+=`<table><tr><th>方法</th><th>k = R<sub>L</sub>²/4 (Ω²)</th><th>R<sub>L</sub> = 2√k (Ω)</th><th>與 20 Ω 差</th><th>以 σ 計</th></tr>
+      <tr><td style="color:var(--acc)">一般迴歸 R₁ = k·x + b</td><td>${f(c.fit.m,2)} ± ${f(c.fit.sm,2)}</td><td><b>${f(c.RLg,2)} ± ${f(c.sRLg,2)}</b></td><td>${sgn(c.RLg-20,2)}</td><td>${z(c.RLg,c.sRLg)}</td></tr>
+      <tr><td style="color:#c27c0e">過原點迴歸 R₁ = k·x</td><td>${f(c.fit.m0,2)} ± ${f(c.fit.sm0,2)}</td><td><b>${f(c.RL0,2)} ± ${f(c.sRL0,2)}</b></td><td>${sgn(c.RL0-20,2)}</td><td>${z(c.RL0,c.sRL0)}</td></tr>
+      <tr><td>逐點 2√(R₁(R₁+R₂)) 平均</td><td>—</td><td>${f(c.RLs,2)} ± ${f(c.sRLs,2)}</td><td>${sgn(c.RLs-20,2)}</td><td>${z(c.RLs,c.sRLs)}</td></tr></table>
+      <p>一般迴歸截距 b = ${f(c.fit.b,3)} ± ${f(c.fit.sb,3)} Ω${isFinite(c.fit.sb)&&Math.abs(c.fit.b)<2*c.fit.sb?"，與 0 相差不到 2σ，符合理論（直線過原點）。":isFinite(c.fit.sb)?"，明顯不為 0，代表數據有系統偏差或包含未匹配的點。":"（點數不足以估計截距不確定度）。"}
+      你自己組的 R<sub>L</sub>（依 ② 估算）平均為 ${f(c.RLest,2)} Ω，迴歸結果應與它比較，而不只是與 20 Ω 比較。</p>
+      <p class="note">σ<sub>R<sub>L</sub></sub> = σ<sub>k</sub>/√k（由 R<sub>L</sub> = 2√k 誤差傳遞）。只有 ${c.u.length} 點時 σ 本身的不確定度也很大，建議至少 4 點以上。</p>`;
+  }
+  h+=`<h3>逐點資料</h3><table><tr><th>#</th><th>R₁</th><th>R₁+R₂</th><th>1/(R₁+R₂)</th><th>R₁(R₁+R₂)</th><th>2√(R₁(R₁+R₂))</th><th>|R<sub>ab</sub>−R<sub>L</sub>|/R<sub>L</sub></th><th>採用</th></tr>`;
+  c.rows.forEach(o=>{h+=`<tr${o.use?"":' style="color:#999"'}><td>${o.i+1}${o.r.src==="interp"?"（內插）":""}</td><td>${f(o.r.R1,2)}</td><td>${f(o.r.R1+o.r.R2,2)}</td><td>${f(o.x,4)}</td><td>${f(o.P,1)}</td><td>${f(2*Math.sqrt(o.P),2)}</td><td>${o.r.src==="interp"?"0":f(o.dev,1)+"%"}</td><td>${o.use?"✓":"—"}</td></tr>`;});
+  $("t5res").innerHTML=h+"</table>";
+}
+
+/* ================= TAB 6 ================= */
+$("btnReveal").onclick=()=>{
+  if(!S.revealed&&!confirm("揭曉後就看得到所有隱藏值。確定要揭曉嗎？"))return;
+  S.revealed=true;$("btnReveal").textContent="已揭曉";save();renderT6();
+};
+function renderT6(){
+  let h="";
+  // (a) 電表接法
+  const meas=S.t1rows.filter(r=>r.src==="meas");
+  const groups={};meas.forEach(r=>{(groups[r.tr.key]=groups[r.tr.key]||[]).push(r);});
+  const cmp=[];for(const k in groups){const g=groups[k],b=g.filter(r=>r.mode==="bat"),a=g.filter(r=>r.mode==="ab");
+    if(b.length&&a.length)cmp.push({cfg:g[0].cfg,mb:avg(b.map(rowRab)),ma:avg(a.map(rowRab))});}
+  h+=`<h3>1. 電表接法造成的系統誤差</h3>
+   <div class="eq">伏特計接電池兩端：V<sub>i</sub>/i = R<sub>ab</sub> + R<sub>A</sub><span class="c">安培計內阻被算進去，偏大</span></div>
+   <div class="eq">伏特計接 a、b 兩端：V<sub>i</sub>/i = R<sub>ab</sub> ∥ R<sub>V</sub> ≈ R<sub>ab</sub> − R<sub>ab</sub>²/R<sub>V</sub><span class="c">安培計多量到伏特計的電流，偏小但極小</span></div>
+   <p>題目寫「測量電池電壓」，照字面接電池兩端，量到的 R<sub>ab</sub> 會多一個 R<sub>A</sub>（通常 0.1～0.5 Ω，約 1～2%）。R<sub>V</sub> 約 10 kΩ，接 a、b 兩端的偏差只有 20²/10000 ≈ 0.04 Ω。若照電池兩端的讀數去調 R₂ 使 V<sub>i</sub>/i = R<sub>L</sub>，真實 R<sub>ab</sub> 其實比 R<sub>L</sub> 小 R<sub>A</sub>，R₂ 會被調得偏小。</p>`;
+  if(cmp.length){h+=`<table><tr><th>同一組電路</th><th>接電池兩端 V/i</th><th>接 a、b 兩端 V/i</th><th>差值 ≈ R<sub>A</sub> + R<sub>ab</sub>²/R<sub>V</sub></th></tr>`;
+    cmp.forEach(c=>{h+=`<tr><td style="font-size:12px;text-align:left">${c.cfg}</td><td>${c.mb.toFixed(2)}</td><td>${c.ma.toFixed(2)}</td><td><b>${(c.mb-c.ma).toFixed(2)} Ω</b></td></tr>`;});
+    h+=`</table><p class="note">差值扣掉約 0.04 Ω，就是你實驗估出的安培計內阻。</p>`;}
+  else h+=`<div class="infobox">建議：在 ④ 用同一組電路、兩種伏特計接法各記錄一次表一，這裡會自動算出差值，等於用實驗估出安培計內阻。</div>`;
+  // (b) 製造誤差
+  const byPiece={};S.data2.filter(r=>r.mode==="R"&&r.I>0).forEach(r=>{(byPiece[r.id]=byPiece[r.id]||[]).push(r.V/r.I);});
+  const spread=TYPES.map(t=>{const ids=Object.keys(byPiece).filter(id=>id[0]===t);const v=ids.map(id=>avg(byPiece[id]));return{t,ids,v};}).filter(o=>o.ids.length>=2);
+  h+=`<h3>2. 電阻的製造誤差</h3><p>同一編號的 8 顆電阻阻值並不完全相同（碳膜電阻常見 ±5%）。② 只量了其中幾顆，③ 組裝時用的卻可能是另外幾顆，所以表一的 R₁、R₂ 估計值本身就有誤差，這個誤差會直接傳到 R<sub>L</sub> = 2√k。</p>`;
+  if(spread.length){h+=`<table><tr><th>編號</th><th>量過的顆</th><th>各顆 V/I (Ω)</th><th>離散（標準差／平均）</th></tr>`;
+    spread.forEach(o=>{h+=`<tr><td>${o.t}</td><td>${o.ids.join("、")}</td><td>${o.v.map(x=>x.toFixed(2)).join("、")}</td><td>${(std(o.v)/avg(o.v)*100).toFixed(1)}%</td></tr>`;});h+="</table>";}
+  else h+=`<div class="infobox">建議：在 ② 同一編號至少量 2～3 顆不同的電阻，就能看出製造誤差的大小。</div>`;
+  // (c) 讀數精度
+  h+=`<h3>3. 電表讀數精度</h3><p>安培計最小刻度 10 mA、估讀到 1 mA；伏特計最小刻度 0.2 V、估讀到 0.02 V。R<sub>ab</sub> = V/i 的相對誤差 δR/R = √((δV/V)² + (δi/i)²)：</p>`;
+  if(meas.length){h+=`<table><tr><th>表一 #</th><th>V<sub>i</sub></th><th>i</th><th>δR/R</th><th>δR (Ω)</th></tr>`;
+    S.t1rows.forEach((r,i)=>{if(r.src!=="meas")return;const rel=Math.sqrt((0.02/r.V)**2+(0.001/r.I)**2);h+=`<tr><td>${i+1}</td><td>${r.V.toFixed(2)}</td><td>${r.I.toFixed(3)}</td><td>${(rel*100).toFixed(2)}%</td><td>${(rel*rowRab(r)).toFixed(2)}</td></tr>`;});
+    h+=`</table><p class="note">電池愈多、電流愈大，相對誤差愈小；但電流太大會讓電阻發熱（第 4 點），也可能超出安培計量程。另外電表本身有約 1% 的級差（刻度準確度），這部分讀得再仔細也消除不了。</p>`;}
+  // (d) 溫升
+  h+=`<h3>4. 電阻發熱</h3><p>P = I²R。以 6 V、0.3 A 計算，單顆 5 Ω 的 R₁ 約 0.45 W，接近 ½ W 額定。碳膜電阻溫度升高時阻值略為下降（本模擬設約 −500 ppm/K），通電愈久讀數愈飄。對策：讀完立刻斷電；用兩顆並聯分攤功率；或減少電池個數。</p>`;
+  // (e) 電池
+  if(meas.length){const bat=meas.filter(r=>r.mode==="bat"&&r.n);if(bat.length){const r=bat[0],nom=r.n*1.5;
+    h+=`<h3>5. 電池內電阻</h3><p>電池有內電阻，接上負載後端電壓會下降。例如表一第一筆電池兩端讀數：${r.n} 個電池標示 ${nom.toFixed(1)} V，實測 V<sub>i</sub> = ${r.V.toFixed(2)} V。若直接用 ${nom.toFixed(1)} V 計算，R<sub>ab</sub> 會差 ${sgn((nom/r.I-r.V/r.I),2)} Ω。因為本實驗用伏特計實測 V<sub>i</sub>，內電阻<b>不會</b>造成誤差，這正是題目要求「測量」電池電壓的原因。</p>`;}}
+  // (f) 離散組合
+  h+=`<h3>${meas.length?"6":"5"}. 電阻只能離散組合（參考解誤差討論第 2 點）</h3><p>A–F 只有固定幾種阻值，R₁、R₂ 不一定能剛好組出理論值，所以 R<sub>ab</sub> 通常只能「約等於」R<sub>L</sub>。把未匹配的點硬放進圖三，會讓關係式看起來不準。改善方法是 ④ 的「固定 R₁、掃描 R₂ 內插」，或在 ⑤ 只採用偏差小於幾 % 的點。</p>`;
+  h+=`<h3>${meas.length?"7":"6"}. 接觸電阻與接觸不良（參考解誤差討論第 1 點）</h3><p>每個鱷魚夾約有 0.01～0.04 Ω 的接觸電阻，串並聯時夾得愈多累積愈多。夾不緊時指針會跳動，嚴重時造成開路。看到指針不穩，先按「重新夾緊接點」再讀數。</p>`;
+  $("t6disc").innerHTML=h;
+  $("t6rev").innerHTML=S.revealed?revealHTML():"";
+}
+function revealHTML(){
+  let h=`<h3>1. 電阻 A–F 真值</h3><div style="overflow-x:auto"><table><tr><th>編號</th><th>標稱值</th><th>8 顆真值 平均 ± 標準差</th><th>你在 ② 量過的顆</th><th>那幾顆的真值（含兩端夾子接觸電阻）</th><th>你採用的值</th><th>偏差</th></tr>`;
+  TYPES.forEach(t=>{
+    const v=[];for(let i=1;i<=8;i++)v.push(H.pieces[t+i].R0);
+    const ids=[...new Set(S.data2.filter(r=>r.type===t).map(r=>r.id))];
+    const tv=ids.length?avg(ids.map(id=>H.pieces[id].R0+2*H.pieces[id].c)):NaN;
+    const me=S.meas[t],sg=S.measSig[t],dev=me!=null&&isFinite(tv)?me-tv:NaN;
+    h+=`<tr><td>${t}</td><td>${H.typeNom[t]} Ω</td><td>${avg(v).toFixed(3)} ± ${std(v).toFixed(3)}</td><td>${ids.join("、")||"—"}</td><td>${f(tv,3)}</td>
+      <td>${me!=null?me+(isFinite(sg)?" ± "+sg.toFixed(3):""):"—"}</td><td>${isFinite(dev)?sgn(dev,3)+" Ω"+(isFinite(sg)&&sg>0?`（${(dev/sg).toFixed(1)}σ）`:""):"—"}</td></tr>`;});
+  h+=`</table></div>`;
+  h+=`<h3>2. 電表與電池</h3><table><tr><th>安培計內阻 R<sub>A</sub></th><th>安培計級差</th><th>伏特計內阻 R<sub>V</sub></th><th>伏特計級差</th></tr>
+    <tr><td>${H.rA.toFixed(3)} Ω</td><td>${sgn(H.gA*100,2)}%</td><td>${(H.RV/1000).toFixed(2)} kΩ</td><td>${sgn(H.gV*100,2)}%</td></tr></table>
+    <table style="margin-top:6px"><tr><th>電池</th>${H.cells.map((_,i)=>`<th>#${i+1}</th>`).join("")}</tr><tr><td>電動勢 (V)</td>${H.cells.map(c=>`<td>${c.emf.toFixed(3)}</td>`).join("")}</tr><tr><td>內電阻 (Ω)</td>${H.cells.map(c=>`<td>${c.r.toFixed(3)}</td>`).join("")}</tr></table>`;
+  // 表一逐列
+  h+=`<h3>3. 表一逐列：你量到的 R<sub>ab</sub> 與真值</h3><div style="overflow-x:auto"><table><tr><th>#</th><th>真 R₁（平均）</th><th>真 R₂</th><th>真 R<sub>L</sub></th><th>真 R<sub>ab</sub></th><th>你量到 V<sub>i</sub>/i</th><th>總偏差</th><th>接法系統誤差</th><th>電表級差</th><th>讀數與飄移</th></tr>`;
+  const gain=(1+H.gV)/(1+H.gA);
+  S.t1rows.forEach((r,i)=>{const t=r.tr;if(!t)return;
+    if(r.src==="interp"){h+=`<tr style="background:#ecf8f3"><td>${i+1}（內插）</td><td>${t.R1.toFixed(3)}</td><td>${t.R2.toFixed(3)}</td><td>${t.RL.toFixed(3)}</td><td>${t.Rab.toFixed(3)}</td><td>= R<sub>L</sub>（${r.RL.toFixed(2)}）</td><td colspan="4" style="text-align:left">內插點的真實 R<sub>ab</sub> − 真實 R<sub>L</sub> = <b>${sgn(t.Rab-t.RL,3)} Ω</b>${t.mode==="bat"?"（接電池兩端時約為 −R<sub>A</sub>，因為讀數多含了安培計內阻）":""}</td></tr>`;return;}
+    const base=t.mode==="bat"?t.Rab+H.rA:par(t.Rab,H.RV),pred=base*gain,m=rowRab(r);
+    h+=`<tr><td>${i+1}</td><td>${t.R1.toFixed(3)}</td><td>${t.R2.toFixed(3)}</td><td>${t.RL.toFixed(3)}</td><td>${t.Rab.toFixed(3)}</td><td>${m.toFixed(3)}</td><td><b>${sgn(m-t.Rab,3)}</b></td><td>${sgn(base-t.Rab,3)}</td><td>${sgn(pred-base,3)}</td><td>${sgn(m-pred,3)}</td></tr>`;});
+  if(!S.t1rows.length)h+=`<tr><td colspan="10" class="note">表一沒有資料</td></tr>`;
+  h+=`</table></div><p class="note">「真」值是記錄當下（含發熱與接觸電阻）的實際阻值。總偏差 = 接法系統誤差 + 電表級差 + 讀數與飄移。</p>`;
+  // R_L 結果
+  const c=t5compute();
+  if(c.fit){
+    const RLt=avg(c.u.map(o=>o.r.tr?o.r.tr.RL:NaN));
+    const zz=(v,s)=>isFinite(s)&&s>0?((v-RLt)/s).toFixed(1)+"σ":"—";
+    h+=`<h3>4. ⑤ 求得的 R<sub>L</sub> 與真值</h3><p>採用列的真實 R<sub>L</sub> 平均 = <b>${RLt.toFixed(3)} Ω</b>（題目標稱 20 Ω，你自己組的 R<sub>L</sub> 依 ② 估計 ${f(c.RLest,2)} Ω）。</p>
+      <table><tr><th>方法</th><th>你的 R<sub>L</sub></th><th>與真值差</th><th>以 σ 計</th></tr>
+      <tr><td>一般迴歸</td><td>${f(c.RLg,3)} ± ${f(c.sRLg,3)}</td><td>${sgn(c.RLg-RLt,3)}</td><td>${zz(c.RLg,c.sRLg)}</td></tr>
+      <tr><td>過原點迴歸</td><td>${f(c.RL0,3)} ± ${f(c.sRL0,3)}</td><td>${sgn(c.RL0-RLt,3)}</td><td>${zz(c.RL0,c.sRL0)}</td></tr>
+      <tr><td>逐點平均</td><td>${f(c.RLs,3)} ± ${f(c.sRLs,3)}</td><td>${sgn(c.RLs-RLt,3)}</td><td>${zz(c.RLs,c.sRLs)}</td></tr></table>`;
+    h+=`<p>用真值檢驗理論關係（每一採用列）：</p><table><tr><th>#</th><th>真 R₁(R₁+R₂)</th><th>真 R<sub>L</sub>²/4</th><th>差</th><th>說明</th></tr>`;
+    c.u.forEach(o=>{const t=o.r.tr;if(!t)return;const P=t.R1*(t.R1+t.R2),Q=t.RL*t.RL/4;
+      const asym=isFinite(t.R1L)&&isFinite(t.R1R)?`；四個 R₁ 不對稱：左側平均 ${t.R1L.toFixed(2)} Ω、右側平均 ${t.R1R.toFixed(2)} Ω（左側整個串在主幹上，右側只在分支裡，所以用平均 R₁ 檢驗會有殘差）`:"";
+      h+=`<tr><td>${o.i+1}</td><td>${P.toFixed(2)}</td><td>${Q.toFixed(2)}</td><td>${sgn((P-Q)/Q*100,1)}%</td><td style="font-size:12px;text-align:left">${Math.abs(t.Rab-t.RL)/t.RL<0.005?"真實 R<sub>ab</sub> 與 R<sub>L</sub> 幾乎相等":"真實電路未完全匹配（真 R<sub>ab</sub> − R<sub>L</sub> = "+sgn(t.Rab-t.RL,2)+" Ω），關係式本來就不成立"}${asym}${o.r.src==="interp"?"；內插點的真值由相鄰兩點線性內插而來，本身也是近似":""}</td></tr>`;});
+    h+=`</table><p class="note">|偏差| &lt; 2σ 表示結果與真值一致；若超過 3σ，代表有未被不確定度涵蓋的系統誤差，常見來源是伏特計接電池兩端（含 R<sub>A</sub>）以及 R₁、R₂ 採用了其他顆電阻的估計值。</p>`;
+  }else h+=`<div class="infobox">⑤ 尚無迴歸結果，完成後這裡會顯示 R<sub>L</sub> 與真值的比較。</div>`;
+  return h;
+}
+
+/* ================= 主迴圈 ================= */
+let last=performance.now(),uiT=0,looseT=0;
+function loop(t){
+  const dt=Math.min(0.1,(t-last)/1000);last=t;
+  looseT+=dt;const flick=looseT>0.15;if(flick)looseT=0;
+  const cur={};let a2=0,v2=0,a3=0,v3=0,ia=0;
+  const ra=H.fuseOK?H.rA:Infinity;
+  // 鬆脫接點閃爍
+  if(flick)for(const id in H.pieces){const p=H.pieces[id];if(p.loose)p.looseR=Math.random()<0.15?40+Math.random()*200:0.3+2.5*Math.random();}
+  if(S.c2.on){
+    const p=H.pieces[S.c2.type+S.c2.idx],{E,ri}=battery(H,S.c2.n);
+    const r=solve(E,ri,ra,H.RV,pieceR(p),S.c2.mode==="R"?"inner":"outer");
+    cur[p.id]=r.Inet;ia=r.Ia;a2=r.Ia;v2=r.V;
+  }
+  {
+    const{E,ri}=battery(H,S.c3.n),net=network(H,S.slots);
+    if(S.c3.on){
+      const r=solve(E,ri,ra,H.RV,net.Rab,S.c3.mode==="bat"?"outer":"inner");
+      Object.assign(cur,networkCurrents(H,S.slots,net,r.Inet));ia=r.Ia;a3=r.Ia;v3=r.V;
+    }else if(S.c3.mode==="bat"){v3=E*H.RV/(ri+H.RV);}
+  }
+  // 保險絲
+  if(ia>FUSE_I){H.fuseOver+=dt;if(H.fuseOver>1.5&&H.fuseOK){H.fuseOK=false;flash(S.c2.on?"c2status":(S.tab===4?"c4status":"c3status"),"⚠ 電流過大，安培計保險絲燒斷了！指針歸零。","warn");}}
+  else H.fuseOver=Math.max(0,H.fuseOver-dt);
+  // 發熱
+  let burnt=null;
+  for(const id in H.pieces){const p=H.pieces[id];if(p.burnt)continue;const I=cur[id]||0;const P=I*I*p.R0*(1+ALPHA*p.dT);
+    p.dT+=(P*THETA-p.dT)*(1-Math.exp(-dt/TAU));if(p.dT>BURN){p.burnt=true;p.dT=BURN;burnt=id;}}
+  if(burnt){flash(S.c2.on?"c2status":(S.tab===4?"c4status":"c3status"),`⚠ 電阻 ${burnt} 過熱冒煙燒毀（開路）！`,"warn");fillC2();if(S.tab===3)renderSlots();}
+  A2.target=a2*1000*(1+H.gA);V2.target=v2*(1+H.gV);A3.target=a3*1000*(1+H.gA);V3.target=v3*(1+H.gV);
+  A4.target=A3.target;V4.target=V3.target;
+  A2.step(dt);V2.step(dt);A3.step(dt);V3.step(dt);A4.step(dt);V4.step(dt);
+  uiT+=dt;if(uiT>0.3){uiT=0;updStatus();}
+  requestAnimationFrame(loop);
+}
+function updStatus(){
+  for(const[id,on,A]of[["c2status",S.c2.on,A2],["c3status",S.c3.on,A3],["c4status",S.c3.on,A4]]){
+    let h="";const fl=flashT[id];
+    if(fl&&performance.now()-fl.t<5000)h+=`<div class="${fl.kind==="ok"?"okbox":"warnbox"}">${fl.msg}</div>`;
+    if(on&&A.disp>A.FS)h+=`<div class="warnbox">安培計指針打到底（超過 500 mA）！請立刻斷開開關。</div>`;
+    if(!H.fuseOK)h+=`<div class="warnbox">安培計保險絲已斷，讀數為 0。</div>`;
+    $(id).innerHTML=h;
+  }
+  if(S.tab===2)drawC2();
+  if(S.tab===3||S.tab===4){document.querySelectorAll("#slots .chip, #slotsR2 .chip").forEach(c=>{const id=c.firstChild.textContent.trim();const p=H.pieces[id];if(p){c.className="chip "+chipCls(p);c.title=pieceStatus(p);}});drawC3();}
+}
+setInterval(save,5000);
+
+function initAll(){
+  $("seedInfo").textContent="實驗編號 #"+H.seed.toString(36).toUpperCase();
+  A2=new Meter($("A2"),$("A2z"),mA);V2=new Meter($("V2"),$("V2z"),mV);
+  A3=new Meter($("A3"),$("A3z"),mA);V3=new Meter($("V3"),$("V3z"),mV);
+  A4=new Meter($("A4"),$("A4z"),mA);V4=new Meter($("V4"),$("V4z"),mV);
+  syncC3();$("btnReveal").textContent=S.revealed?"已揭曉（可重新整理檢視）":"揭曉真值";
+  setOn(2,false);fillC2();renderT2table();renderT2fit();renderT2sum();renderSlots();renderT4();renderSweep();showTab(S.tab||1);
+}
+drawFig1();buildRefTable();updT1();initAll();
+requestAnimationFrame(t=>{last=t;requestAnimationFrame(loop);});
+</script>
+</body>
+</html>

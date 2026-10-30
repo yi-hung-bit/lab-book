@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>液體密度虛擬實驗室</title>
+<style>
+:root{--bg:#f4f5f1;--card:#fff;--ink:#1e2a30;--mut:#5b6a72;--acc:#1f6f8b;--acc2:#c0582b;--line:#d8ddd5;--liq:#6fa8c9;--good:#2e7d4f;--bad:#b3261e;--warn:#9a6700}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
+header{background:#17313b;color:#fff;padding:12px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+header h1{font-size:1.12rem;margin:0}
+header .sub{font-size:.82rem;opacity:.8}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px;background:#e2e6df;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
+nav button{border:0;background:transparent;padding:7px 12px;border-radius:6px;cursor:pointer;font:inherit;font-size:.92rem;color:var(--ink)}
+nav button.on{background:var(--acc);color:#fff}
+main{max-width:1200px;margin:0 auto;padding:14px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:14px}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media(max-width:880px){.g2,.g3{grid-template-columns:1fr}}
+h2{font-size:1.08rem;margin:.1em 0 .5em;color:#17313b}
+h3{font-size:.98rem;margin:.7em 0 .35em;color:#17313b}
+p{margin:.35em 0}
+.btn{display:inline-block;border:1px solid #9fb3bb;background:#f3f8fa;color:var(--ink);border-radius:7px;padding:6px 11px;margin:3px 3px 3px 0;cursor:pointer;font:inherit;font-size:.9rem}
+.btn:hover{background:#e3eff4}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.pri:hover{background:#185a71}
+.btn.warn{background:#fff3ec;border-color:#d8a184}
+.btn.sm{padding:3px 8px;font-size:.82rem}
+.msg{min-height:1.6em;font-size:.9rem;color:var(--mut);padding:4px 8px;border-left:3px solid var(--line);margin:6px 0;background:#fafbf8}
+.msg.w{color:var(--warn);border-color:#e0b04f}
+.msg.e{color:var(--bad);border-color:var(--bad)}
+.msg.ok{color:var(--good);border-color:var(--good)}
+svg{display:block;max-width:100%;height:auto}
+.scene{background:linear-gradient(#fbfcfa,#eef1ec);border:1px solid var(--line);border-radius:8px}
+.zoom{background:#fff;border:1px solid var(--line);border-radius:8px}
+.zl{font-size:.8rem;color:var(--mut);text-align:center;margin-top:2px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#eef2ec}
+td input{width:80px;border:1px solid #cfd6cc;border-radius:4px;padding:2px 4px;font:inherit;text-align:center}
+.rec input[type=number]{width:96px;padding:4px 6px;border:1px solid #b9c6c0;border-radius:5px;font:inherit}
+label.inl{margin-right:12px;font-size:.92rem}
+.steps li{margin:4px 0}
+.done{color:var(--good);font-weight:600}
+.formula{background:#f1f5f7;border-radius:6px;padding:8px 12px;margin:6px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:1.05rem}
+.note{font-size:.86rem;color:var(--mut)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:.92rem}
+.kv b{font-weight:600}
+.big{font-size:1.25rem;font-weight:700;color:#17313b}
+.tag{display:inline-block;padding:0 7px;border-radius:10px;font-size:.78rem;background:#eee}
+.tag.bad{background:#fde8e6;color:var(--bad)}.tag.good{background:#e5f4ea;color:var(--good)}.tag.w{background:#fff4d6;color:var(--warn)}
+input[type=range]{width:100%}
+.flex{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
+.flex>div{flex:1 1 170px}
+details summary{cursor:pointer;color:var(--acc)}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>待測液體密度 ρ 虛擬實驗室</h1>
+    <div class="sub">九十三年度高級中學自然學科賽 屏東區複賽　物理實驗試題第二題</div>
+  </div>
+  <button class="btn warn" id="btnNew">🔄 換一杯新的待測液（重新出題）</button>
+</header>
+<nav id="nav">
+  <button data-t="1" class="on">① 原理推導</button>
+  <button data-t="2">② 器材組裝與歸零</button>
+  <button data-t="3">③ 法 A：抽液秤重</button>
+  <button data-t="4">④ 法 B：浮力浸入</button>
+  <button data-t="5">⑤ 迴歸分析</button>
+  <button data-t="6">⑥ 誤差與真值揭曉</button>
+</nav>
+<main>
+
+<!-- ① -->
+<section id="t1" class="on">
+  <div class="card">
+    <h2>題目與器材限制</h2>
+    <p>以下列器材設計實驗求待測液體密度 ρ：鐵架、萬用夾、<b>彈簧秤（0–200 g，最小刻度 5 g）</b>、<b>方格紙（1 mm 方格）</b>、細透明膠帶、1000 c.c. 廣口燒杯（內裝待測液）、迴紋針鉤、<b>50 mL 注射筒</b>、橡皮管、吸管、小刀、計算器。</p>
+    <p>器材中<b>沒有直尺、沒有天平，也沒有已知密度的液體</b>。能直接讀出物理量的只有三樣：彈簧秤（質量，單位 g 重）、注射筒刻度（體積，mL）、方格紙（長度，1 mm 格）。</p>
+    <p class="note">本模擬中密度一律用 g/cm³（= g/mL），彈簧秤讀數以「g」（公克重）記錄，因此不必代入 g 值。</p>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <h2>法 A：抽液秤重（W–V 迴歸）</h2>
+      <svg viewBox="0 0 300 200" style="max-width:300px;margin:auto">
+        <line x1="150" y1="8" x2="150" y2="20" stroke="#444" stroke-width="2"/>
+        <rect x="140" y="20" width="20" height="62" rx="4" fill="#e9e3d3" stroke="#665"/>
+        <line x1="150" y1="82" x2="150" y2="98" stroke="#444" stroke-width="2"/>
+        <path d="M150 98 q-6 6 0 10" fill="none" stroke="#444" stroke-width="2"/>
+        <rect x="128" y="106" width="44" height="5" fill="#bcc"/>
+        <rect x="136" y="111" width="28" height="64" fill="#e8f1f5" stroke="#567"/>
+        <rect x="137" y="140" width="26" height="35" fill="#6fa8c9" opacity=".7"/>
+        <rect x="137" y="128" width="26" height="12" fill="#556"/>
+        <line x1="150" y1="90" x2="150" y2="128" stroke="#667" stroke-width="4"/>
+        <rect x="147" y="175" width="6" height="9" fill="#6fa8c9" stroke="#567"/>
+        <text x="182" y="155" font-size="12" fill="#333">抽入 V mL 待測液</text>
+        <text x="168" y="52" font-size="12" fill="#333">讀 W</text>
+      </svg>
+      <div class="formula">W = (m<sub>針筒</sub> + m<sub>鉤</sub> + ρV<sub>死</sub>) + ρ·V</div>
+      <p>改變抽入體積 V，作 <b>W–V 圖</b>：<b>斜率 B = ρ</b>，截距 A = 空針筒（含鉤與針口殘液）質量。</p>
+      <p>歸零誤差、針筒本身質量、針口殘留的「死體積」都只影響截距，<b>不影響斜率</b>。</p>
+    </div>
+    <div class="card">
+      <h2>法 B：浮力浸入（W′–h 迴歸）</h2>
+      <svg viewBox="0 0 300 200" style="max-width:300px;margin:auto">
+        <line x1="150" y1="6" x2="150" y2="16" stroke="#444" stroke-width="2"/>
+        <rect x="140" y="16" width="20" height="50" rx="4" fill="#e9e3d3" stroke="#665"/>
+        <line x1="150" y1="66" x2="150" y2="78" stroke="#444" stroke-width="2"/>
+        <rect x="138" y="78" width="24" height="4" fill="#667"/>
+        <line x1="150" y1="82" x2="150" y2="100" stroke="#667" stroke-width="4"/>
+        <rect x="136" y="100" width="28" height="70" fill="#6fa8c9" opacity=".75" stroke="#567"/>
+        <rect x="163" y="112" width="7" height="58" fill="#f6fbf2" stroke="#8b8"/>
+        <rect x="146" y="170" width="8" height="9" fill="#a55"/>
+        <path d="M95 140 H205 V195 H95 Z" fill="#6fa8c9" opacity=".35"/>
+        <path d="M95 105 V195 H205 V105" fill="none" stroke="#8aa" stroke-width="2"/>
+        <line x1="210" y1="140" x2="210" y2="170" stroke="#c0582b"/>
+        <text x="214" y="160" font-size="12" fill="#c0582b">h</text>
+        <text x="10" y="128" font-size="12" fill="#333">裝滿封口的針筒</text>
+        <text x="10" y="144" font-size="12" fill="#333">逐段浸入燒杯</text>
+      </svg>
+      <div class="formula">W′ = W<sub>0</sub> − ρ·A<sub>外</sub>·h　　A<sub>外</sub> = L² / 4π</div>
+      <p>筒身外貼方格紙條讀浸入深度 h，作 <b>W′–h 圖</b>：<b>斜率 = −ρA<sub>外</sub></b>。外截面積由方格紙繞筒身一圈量周長 L 求得。</p>
+      <p>陷阱：<b>排開液體的是「外」截面</b>。針筒刻度只代表內截面 A<sub>內</sub>，若誤用 A<sub>內</sub>，ρ 會被高估 (D<sub>外</sub>/D<sub>內</sub>)² 倍（約 20%）。</p>
+    </div>
+  </div>
+  <div class="card">
+    <h2>為什麼一定要用迴歸？</h2>
+    <p>彈簧秤最小刻度 5 g，估讀到半格也有約 ±2.5 g 的不確定度。50 mL 液體只對應約 10 格。以單一點計算時，一個 20 mL 的點換算 ρ 就有 ±2.5/20 ≈ ±12% 的誤差；而取 10 個點以上做最小平方迴歸，斜率誤差能降到 2–3%。</p>
+    <p>題目提供的最小平方法公式（y = A + Bx）：</p>
+    <div class="formula">B = [ nΣxy − ΣxΣy ] / [ nΣx² − (Σx)² ]　　A = ( Σy − BΣx ) / n</div>
+    <p class="note">本模擬在第 ⑤ 頁另外計算斜率與截距的標準誤 σ<sub>B</sub>、σ<sub>A</sub>，並在第 ⑥ 頁以「偏離真值幾個 σ」評估結果。</p>
+  </div>
+  <div class="card">
+    <h2>兩法互補</h2>
+    <table>
+      <tr><th>誤差來源</th><th>法 A（W–V）</th><th>法 B（W′–h）</th></tr>
+      <tr><td>彈簧秤歸零偏差、空針筒質量</td><td>只影響截距</td><td>只影響截距</td></tr>
+      <tr><td>針筒內混入氣泡</td><td><b>V 讀數偏大 → 點落在線下方</b></td><td>不影響（只改變 W<sub>0</sub>）</td></tr>
+      <tr><td>針筒刻度本身的印刷誤差</td><td><b>直接進入斜率</b></td><td>不影響（h、L 都用方格紙量）</td></tr>
+      <tr><td>方格紙條貼的起點</td><td>—</td><td>只影響截距</td></tr>
+      <tr><td>外徑量測 L</td><td>—</td><td><b>相對誤差 ×2 進入 ρ</b></td></tr>
+      <tr><td>彈簧秤刻度增益（彈簧本身不準）</td><td colspan="2">兩法同時偏差，無法互相檢出</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ② -->
+<section id="t2">
+  <div class="g2">
+    <div class="card">
+      <h2>實驗場景</h2>
+      <svg id="scene2" class="scene" viewBox="0 0 460 520"></svg>
+    </div>
+    <div class="card">
+      <h2>組裝步驟</h2>
+      <ol class="steps">
+        <li>將萬用夾固定在鐵架上，把彈簧秤垂直夾好。 <button class="btn sm" id="s_stand">完成</button> <span id="d_stand"></span></li>
+        <li>把彎成鉤狀的迴紋針掛在彈簧秤下（之後所有量測都會帶著這個鉤）。 <button class="btn sm" id="s_hook">掛上</button> <span id="d_hook"></span></li>
+        <li>歸零：帶著鉤，轉動彈簧秤頂端的歸零螺絲，使指針對準 0。
+          <div style="margin:4px 0">
+            <button class="btn sm" data-z="-1">↓ −1 g</button><button class="btn sm" data-z="-0.2">↓ −0.2 g</button>
+            <button class="btn sm" data-z="0.2">↑ +0.2 g</button><button class="btn sm" data-z="1">↑ +1 g</button>
+            <button class="btn sm" id="tap2">輕敲彈簧秤</button>
+            <button class="btn sm pri" id="s_zero">確認已歸零</button> <span id="d_zero"></span>
+          </div>
+          <span class="note">指針與殼內壁有摩擦：轉完螺絲後先輕敲，再判斷是否對準 0。</span>
+        </li>
+        <li>在 1000 c.c. 燒杯中倒入約 800 mL 待測液。 <button class="btn sm" id="s_liq">倒入</button> <span id="d_liq"></span></li>
+        <li>注射筒口接上橡皮管（抽液用）。 <button class="btn sm" id="s_tube">接上</button> <span id="d_tube"></span></li>
+      </ol>
+      <div class="msg" id="m2">依序完成 1–5 步。</div>
+      <div class="flex">
+        <div><svg id="zs2" class="zoom" viewBox="0 0 170 230" style="max-width:190px;margin:auto"></svg><div class="zl">彈簧秤指針放大</div></div>
+        <div class="note" style="flex:2 1 220px">
+          <p>這把彈簧秤刻度每格 5 g。放大圖中長刻度每 10 g、最長刻度每 20 g。</p>
+          <p>歸零只能做到「看起來對準」，殘留的零點偏差會留在每個讀數中。但它對法 A、法 B 都只影響截距，不影響斜率；第 ⑥ 頁會揭曉你的實際殘差。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ -->
+<section id="t3">
+  <div class="g2">
+    <div class="card">
+      <h2>實驗場景</h2>
+      <svg id="scene3" class="scene" viewBox="0 0 460 520"></svg>
+    </div>
+    <div class="card">
+      <h2>操作</h2>
+      <div>抽取速度：
+        <label class="inl"><input type="radio" name="spd" value="slow" checked> 慢慢抽</label>
+        <label class="inl"><input type="radio" name="spd" value="fast"> 快速抽</label>
+      </div>
+      <div style="margin-top:6px">活塞拉到刻度約 <b id="tgtv">10.0</b> mL
+        <input type="range" id="tgt" min="0" max="50" step="0.5" value="10">
+      </div>
+      <div>
+        <button class="btn pri" id="a_draw">抽取／推出到此刻度</button>
+        <button class="btn" id="a_bub">針口朝上輕敲，推出氣泡</button>
+      </div>
+      <div>
+        <button class="btn pri" id="a_hang">取下橡皮管，掛上彈簧秤</button>
+        <button class="btn" id="a_off">從秤上取下（接回橡皮管）</button>
+        <button class="btn" id="tap3">輕敲彈簧秤</button>
+      </div>
+      <div class="msg" id="m3">先抽取一定體積的待測液，讀注射筒刻度，再掛上彈簧秤讀 W。</div>
+      <div class="flex">
+        <div><svg id="zy3" class="zoom" viewBox="0 0 170 230" style="max-width:190px;margin:auto"></svg><div class="zl">注射筒刻度放大（讀活塞橡皮前緣）</div></div>
+        <div><svg id="zs3" class="zoom" viewBox="0 0 170 230" style="max-width:190px;margin:auto"></svg><div class="zl">彈簧秤指針放大</div></div>
+      </div>
+      <div class="rec" style="margin-top:6px">
+        V = <input type="number" id="inV" step="0.1"> mL　
+        W = <input type="number" id="inW" step="0.5"> g　
+        <button class="btn pri" id="recA">記錄這組</button>
+      </div>
+      <p class="note">建議：V 從 0 到 50 mL 取 10 個以上的點；包含 V = 0（空針筒）這一點。讀數請自己判讀並估讀，模擬不會幫你填。</p>
+    </div>
+  </div>
+  <div class="card">
+    <h2>法 A 數據記錄</h2>
+    <div id="tblA"></div>
+  </div>
+</section>
+
+<!-- ④ -->
+<section id="t4">
+  <div class="g2">
+    <div class="card">
+      <h2>實驗場景</h2>
+      <svg id="scene4" class="scene" viewBox="0 0 460 520"></svg>
+    </div>
+    <div class="card">
+      <h2>（一）準備針筒</h2>
+      <div>
+        <button class="btn pri" id="b_fill">抽滿至 50 mL</button>
+        <button class="btn" id="b_bub">針口朝上輕敲，推出氣泡</button>
+        <button class="btn pri" id="b_seal">封口，倒掛於彈簧秤下</button>
+        <button class="btn" id="b_strip">筒身外側貼上方格紙條</button>
+      </div>
+      <p class="note">針口套一小段橡皮管反折並以膠帶纏緊封口；迴紋針鉤鉤住活塞推柄，使針筒口朝下垂直懸掛。方格紙條從筒身底部附近往上貼，0 刻度大致對準筒底即可（起點偏差只影響截距）。</p>
+      <h2>（三）浸入量測</h2>
+      <div>萬用夾高度 <b id="yav">64.0</b> cm
+        <input type="range" id="ya" min="38" max="66" step="0.1" value="64">
+        <button class="btn sm" data-ya="-1">↓ 1 cm</button><button class="btn sm" data-ya="-0.2">↓ 2 mm</button>
+        <button class="btn sm" data-ya="0.2">↑ 2 mm</button><button class="btn sm" data-ya="1">↑ 1 cm</button>
+        <button class="btn sm" id="tap4">輕敲彈簧秤</button>
+      </div>
+      <div class="msg" id="m4">先完成（一）準備針筒。</div>
+      <div class="flex">
+        <div><svg id="zw4" class="zoom" viewBox="0 0 220 200" style="max-width:230px;margin:auto"></svg><div class="zl">液面與方格紙條放大（讀遠處平液面）</div></div>
+        <div><svg id="zs4" class="zoom" viewBox="0 0 170 230" style="max-width:190px;margin:auto"></svg><div class="zl">彈簧秤指針放大</div></div>
+      </div>
+      <div class="rec" style="margin-top:6px">
+        h = <input type="number" id="inH" step="0.01"> cm　
+        W′ = <input type="number" id="inW2" step="0.5"> g　
+        <button class="btn pri" id="recB">記錄這組</button>
+      </div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <h2>（二）量筒身外周長 L</h2>
+      <p>剪一條方格紙條緊貼筒身繞一圈，在重疊處畫記號，攤平後讀記號位置。</p>
+      <button class="btn pri" id="c_wrap">繞一圈並畫記號</button>
+      <svg id="zc" class="zoom" viewBox="0 0 320 110" style="margin-top:6px"></svg>
+      <div class="rec" style="margin-top:6px">L = <input type="number" id="inL" step="0.01"> cm <button class="btn pri" id="recL">記錄</button></div>
+      <div id="tblL" style="margin-top:6px"></div>
+      <h3>（選做）量刻度長度 → 內截面 A<sub>內</sub></h3>
+      <p class="note">把方格紙條沿著注射筒刻度貼，讀 0 mL 與 40 mL 兩條刻度線對應的紙條位置。第 ⑤ 頁會示範「誤用 A<sub>內</sub>」的後果。</p>
+      <button class="btn" id="g_put">沿刻度貼紙條</button>
+      <div class="flex">
+        <div><svg id="zg0" class="zoom" viewBox="0 0 150 150" style="max-width:170px;margin:auto"></svg><div class="zl">0 mL 刻度處</div></div>
+        <div><svg id="zg40" class="zoom" viewBox="0 0 150 150" style="max-width:170px;margin:auto"></svg><div class="zl">40 mL 刻度處</div></div>
+      </div>
+      <div class="rec">0 mL 處 = <input type="number" id="inG0" step="0.01"> cm　40 mL 處 = <input type="number" id="inG40" step="0.01"> cm <button class="btn" id="recG">記錄</button></div>
+      <div id="tblG" style="margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <h2>法 B 數據記錄</h2>
+      <div id="tblB"></div>
+      <p class="note">只有「筒身已浸入」（h &gt; 0）的點才落在同一直線上；只有針口浸入時截面不同。出現「觸底」或「浮起、鉤線鬆弛」的點應剔除。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ -->
+<section id="t5">
+  <div class="card"><h2>法 A：W–V 迴歸</h2><div id="anaA"></div></div>
+  <div class="card"><h2>法 B：W′–h 迴歸</h2><div id="anaB"></div></div>
+  <div class="card"><h2>兩法比較</h2><div id="anaC"></div></div>
+</section>
+
+<!-- ⑥ -->
+<section id="t6">
+  <div class="card">
+    <h2>誤差討論</h2>
+    <ol>
+      <li><b>讀數解析度：</b>彈簧秤 5 g 一格是最大的隨機誤差來源。迴歸用了全部數據，所以斜率誤差遠小於單點換算（第 ⑤ 頁單點表可看出差距）。</li>
+      <li><b>指針摩擦：</b>負載增加時指針停在偏低處、減少時停在偏高處（遲滯）。讀數前輕敲可消除大部分摩擦。</li>
+      <li><b>零點與自身質量：</b>歸零殘差、針筒與鉤的質量、針口死體積，只出現在截距，不影響 ρ。</li>
+      <li><b>氣泡（法 A）：</b>第一次抽取時橡皮管內的空氣會被抽進針筒，快速抽取也容易帶入氣泡。此時刻度讀到的 V 大於實際液體體積，點會落在線下方。法 B 的針筒是密封的，內部氣泡只會改變 W<sub>0</sub>。</li>
+      <li><b>刻度印刷誤差（法 A）：</b>一般注射筒刻度允差約 ±1–2%，會直接成為 ρ 的系統誤差。法 B 只用方格紙量長度，不受影響。</li>
+      <li><b>外截面積（法 B）：</b>ρ ∝ 1/L²，周長量測的相對誤差會加倍。方格紙本身有厚度，繞一圈量到的是 π(D<sub>外</sub> + t)，會使 A<sub>外</sub> 略偏大。</li>
+      <li><b>液面上升：</b>針筒浸入時燒杯液面會上升。但 h 是直接讀「紙條與實際液面的交點」，所以不需修正。如果改成用萬用夾下降量當 h，就會出錯。</li>
+      <li><b>表面張力：</b>液體沿筒壁附著，產生約 γ·L 的向下拉力（約 0.3–0.6 g）。只要筒身已浸入，周長固定，這個拉力是常數，只影響截距。</li>
+      <li><b>彈簧秤增益：</b>若彈簧秤刻度本身不準，例如每 100 g 實為 101 g，兩法的 ρ 會同比例偏差，互相比對也查不出來。此時需另用已知質量校正。</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>真值揭曉</h2>
+    <p>建議完成法 A、法 B 迴歸與討論後再揭曉。</p>
+    <button class="btn pri" id="btnReveal">揭曉隱藏真值</button>
+    <div id="reveal"></div>
+  </div>
+</section>
+
+</main>
+<script>
+"use strict";
+/* ---------- 常數 ---------- */
+const PX=6.5, KS=0.045;            // 場景 px/cm；彈簧伸長 cm/g
+const BEAK_R=5.25, BEAK_H=14.5, BASE=0.5, V_INIT=800;
+const AB=Math.PI*BEAK_R*BEAK_R;
+const NL_A=1.2, ND_A=0.4, NL_B=1.5, ND_B=0.7, CAP_M=1.2, BARREL=9.5, ROD=10.5;
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const fx=(v,d)=>(v===null||v===undefined||!isFinite(v))?'—':Number(v).toFixed(d);
+function Y(cm){return 500-cm*PX;}
+
+let T,S,CUR=1;
+
+function newTruth(){
+  const Din=rnd(2.86,2.94), wall=rnd(0.13,0.18);
+  T={rho:+rnd(0.80,1.30).toFixed(3), mSyr:rnd(24,32), mHook:rnd(1.3,1.8),
+     z0:(Math.random()<.5?-1:1)*rnd(3,9), gain:rnd(0.99,1.01),
+     cal:rnd(0.985,1.015), Din, Dout:Din+2*wall, Vdead:rnd(0.12,0.25),
+     gamma:rnd(0.025,0.065), stripOff:rnd(0.05,0.35), paperT:0.010,
+     tubeAir:rnd(2.4,3.4)};
+  T.Ain=Math.PI*T.Din*T.Din/4; T.Aout=Math.PI*T.Dout*T.Dout/4;
+  T.cmPerMark=T.cal/T.Ain;
+}
+function newState(){
+  S={setup:{stand:false,hook:false,zero:false,liq:false,tube:false},
+     zeroAdj:0, zeroRes:null, tubePrimed:false,
+     sc:{load:0,fric:0,disp:0,from:0,t0:0,anim:false},
+     A:{mark:0,liq:0,bub:0,dead:false,onScale:false,wet:0},
+     B:{mark:0,liq:0,bub:0,dead:false,hung:false,strip:false,yArm:64,wet:0,eq:null},
+     dataA:[],dataB:[],circ:[],grad:[],circMark:null,gradR0:null,revealed:false};
+  S.sc.disp=indicated();
+}
+
+/* ---------- 彈簧秤 ---------- */
+function indicated(){return clamp(T.gain*S.sc.load + T.z0 + S.zeroAdj + S.sc.fric, -8, 210);}
+function startAnim(){S.sc.from=S.sc.disp;S.sc.t0=performance.now();S.sc.anim=true;}
+function setLoad(L){
+  const sc=S.sc;
+  if(Math.abs(L-sc.load)>0.005){sc.fric=-Math.sign(L-sc.load)*rnd(0.3,1.6);}
+  sc.load=L; startAnim();
+}
+function tapScale(){S.sc.fric=rnd(-0.3,0.3);startAnim();}
+function hookLoad(){return S.setup.hook?T.mHook:0;}
+
+/* ---------- 法 A 質量 ---------- */
+function massA(){
+  const a=S.A;
+  return hookLoad()+(a.onScale? T.mSyr + T.rho*(a.liq+(a.dead?T.Vdead:0)) + a.wet : 0);
+}
+/* ---------- 法 B 力平衡 ---------- */
+function wB(){const b=S.B;return T.mSyr+CAP_M+T.rho*(b.liq+(b.dead?T.Vdead:0))+b.wet;}
+function vsubB(d){
+  if(d<=0)return 0;
+  const an=Math.PI*ND_B*ND_B/4;
+  if(d<=NL_B)return an*d;
+  return an*NL_B+T.Aout*(d-NL_B);
+}
+function solveB(){
+  const b=S.B, W=wB(), mh=T.mHook;
+  const L=0.6+ROD+b.mark*T.cmPerMark+0.3+NL_B;
+  const hookRest=b.yArm-18;
+  const V0=V_INIT-b.liq;
+  const gG=(d)=>{ if(d<=0)return 0; const P=d>NL_B?Math.PI*T.Dout:Math.PI*ND_B; return T.gamma*P/0.98; };
+  function at(tip){
+    let ys=BASE+V0/AB;
+    for(let k=0;k<30;k++){ys=BASE+(V0+vsubB(ys-tip))/AB;}
+    const d=ys-tip; return {tip,ys,d,Rs:W-T.rho*vsubB(d)+gG(d)};
+  }
+  // 掛著：bisection on e
+  let lo=0,hi=14;
+  const g=e=>e-KS*(mh+at(hookRest-e-L).Rs);
+  for(let i=0;i<60;i++){const m=(lo+hi)/2; if(g(m)>0)hi=m; else lo=m;}
+  let e=(lo+hi)/2, r=at(hookRest-e-L), R=mh+r.Rs, slack=false, touch=false;
+  if(r.Rs<=0){ // 浮起
+    slack=true; R=mh;
+    let tlo=-20,thi=30;
+    for(let i=0;i<60;i++){const m=(tlo+thi)/2; if(at(m).Rs>0)thi=m; else tlo=m;}
+    r=at((tlo+thi)/2);
+    if(r.tip<BASE){r=at(BASE);touch=true;}
+  } else if(r.tip<BASE){ // 觸底
+    touch=true; r=at(BASE);
+    const ee=hookRest-L-BASE; R=Math.max(mh,Math.min(R,ee/KS));
+  }
+  const bb=r.tip+NL_B;
+  return {tip:r.tip,ys:r.ys,d:r.d,R,slack,touch,hb:r.ys-bb,s:r.ys-bb-T.stripOff,L};
+}
+
+/* ---------- SVG 元件 ---------- */
+function standSVG(rodX,armCm,armX){
+  let s=`<rect x="${rodX-135}" y="${Y(0)-9}" width="160" height="9" rx="2" fill="#5b6066"/>`;
+  s+=`<rect x="${rodX-3}" y="${Y(76)}" width="6" height="${Y(0)-Y(76)-9}" fill="#8a9097"/>`;
+  s+=`<rect x="${rodX-8}" y="${Y(armCm)-6}" width="16" height="12" rx="2" fill="#444"/>`;
+  s+=`<line x1="${rodX}" y1="${Y(armCm)}" x2="${armX}" y2="${Y(armCm)}" stroke="#555" stroke-width="4"/>`;
+  return s;
+}
+function scaleSVG(x,armCm){
+  const disp=S.sc.disp, ext=KS*clamp(disp,-5,205);
+  const top=armCm-1, bot=armCm-17, slot0=top-1.5;
+  let s=`<circle cx="${x}" cy="${Y(armCm-0.5)}" r="4" fill="none" stroke="#444" stroke-width="2"/>`;
+  s+=`<rect x="${x-11}" y="${Y(top)}" width="22" height="${16*PX}" rx="5" fill="#e9e3d3" stroke="#776"/>`;
+  s+=`<rect x="${x-3}" y="${Y(slot0)}" width="6" height="${(KS*200+0.6)*PX}" fill="#fff" stroke="#998"/>`;
+  for(let g=0;g<=200;g+=20){const yy=Y(slot0-KS*g);s+=`<line x1="${x+4}" y1="${yy}" x2="${x+(g%100?7:10)}" y2="${yy}" stroke="#333" stroke-width=".7"/>`;}
+  s+=`<line x1="${x-8}" y1="${Y(slot0-KS*disp)}" x2="${x+8}" y2="${Y(slot0-KS*disp)}" stroke="#c62828" stroke-width="2"/>`;
+  const hookCm=armCm-18-ext;
+  s+=`<line x1="${x}" y1="${Y(bot)}" x2="${x}" y2="${Y(hookCm+0.9)}" stroke="#555" stroke-width="2"/>`;
+  return {s,hookCm};
+}
+function hookSVG(x,hookCm){
+  return `<path d="M${x} ${Y(hookCm+0.9)} L${x} ${Y(hookCm+0.2)} q0 6 6 4 q4 -2 2 -6" fill="none" stroke="#999" stroke-width="1.6"/>`;
+}
+function beakerSVG(cx,level,poured){
+  const r=BEAK_R*PX, w=0.3*PX, top=Y(BEAK_H), bot=Y(0);
+  let s='';
+  if(poured){
+    s+=`<rect x="${cx-r}" y="${Y(level)}" width="${2*r}" height="${Y(BASE)-Y(level)}" fill="var(--liq)" opacity=".5"/>`;
+    s+=`<line x1="${cx-r}" y1="${Y(level)}" x2="${cx+r}" y2="${Y(level)}" stroke="#3f7fa5" stroke-width="1.2"/>`;
+  }
+  s+=`<path d="M${cx-r-w} ${top-4} L${cx-r-w} ${bot} L${cx+r+w} ${bot} L${cx+r+w} ${top}" fill="none" stroke="#7fa0a8" stroke-width="2.4"/>`;
+  s+=`<path d="M${cx-r} ${top} L${cx-r} ${Y(BASE)} L${cx+r} ${Y(BASE)} L${cx+r} ${top}" fill="none" stroke="#a9c3c9" stroke-width="1"/>`;
+  for(let v=200;v<=1000;v+=200){const yy=Y(BASE+v/AB);if(BASE+v/AB<BEAK_H){s+=`<line x1="${cx+r-8}" y1="${yy}" x2="${cx+r}" y2="${yy}" stroke="#6b8c94" stroke-width=".8"/><text x="${cx+r-10}" y="${yy+3}" font-size="7" text-anchor="end" fill="#6b8c94">${v}</text>`;}}
+  return s;
+}
+/* 針筒（針口朝下），yZero = 0 mL 內線高度 (cm) */
+function syringeSVG(o){
+  const x=o.x, rO=T.Dout/2*PX, rI=T.Din/2*PX;
+  const bottom=o.yZero-0.3, top=bottom+BARREL;
+  const front=o.yZero+o.mark*T.cmPerMark;
+  const liqTop=o.yZero+o.liq/T.Ain;
+  let s='';
+  // 液體（筒內）
+  if(o.liq>0) s+=`<rect x="${x-rI}" y="${Y(liqTop)}" width="${2*rI}" height="${Y(o.yZero)-Y(liqTop)}" fill="var(--liq)" opacity=".8"/>`;
+  // 筒身
+  s+=`<rect x="${x-rO}" y="${Y(top)}" width="${2*rO}" height="${BARREL*PX}" fill="rgba(225,238,246,.45)" stroke="#5a7380" stroke-width="1"/>`;
+  s+=`<rect x="${x-2.2*rO}" y="${Y(top)-2}" width="${4.4*rO}" height="3" fill="#9fb1ba"/>`;
+  for(let m=0;m<=50;m+=5){const yy=Y(o.yZero+m*T.cmPerMark);s+=`<line x1="${x-rO}" y1="${yy}" x2="${x-rO+(m%10?3:6)}" y2="${yy}" stroke="#223" stroke-width=".5"/>`;}
+  // 活塞
+  s+=`<rect x="${x-rI}" y="${Y(front+0.8)}" width="${2*rI}" height="${0.8*PX}" fill="#3b3f48"/>`;
+  s+=`<rect x="${x-2}" y="${Y(front+ROD)}" width="4" height="${(ROD-0.8)*PX}" fill="#c9d0d5" stroke="#8a959c" stroke-width=".6"/>`;
+  s+=`<rect x="${x-1.3*rO}" y="${Y(front+ROD)-2}" width="${2.6*rO}" height="3" fill="#9fb1ba"/>`;
+  // 針口
+  const nw=o.nozD*PX/2;
+  s+=`<rect x="${x-nw}" y="${Y(bottom)}" width="${2*nw}" height="${o.nozL*PX}" fill="${o.dead?'var(--liq)':'#e5eef3'}" stroke="#5a7380" stroke-width=".8"/>`;
+  if(o.cap) s+=`<rect x="${x-nw-1}" y="${Y(bottom-0.3)}" width="${2*nw+2}" height="${(o.nozL-0.3)*PX}" fill="#a0524a" opacity=".85"/>`;
+  if(o.strip){
+    const s0=bottom+T.stripOff;
+    s+=`<rect x="${x+rO-1}" y="${Y(s0+8)}" width="5" height="${8*PX}" fill="#f4faef" stroke="#8fb58a" stroke-width=".7"/>`;
+  }
+  return s;
+}
+
+/* ---------- 放大圖 ---------- */
+function scaleZoomSVG(disp){
+  const W=170,H=230,cy=115,k=3.6;
+  let s=`<rect x="22" y="4" width="126" height="${H-8}" rx="6" fill="#f5f1e6" stroke="#bbb19a"/>`;
+  s+=`<rect x="56" y="4" width="12" height="${H-8}" fill="#fff" stroke="#d8cfba"/>`;
+  const g0=Math.ceil((disp-34)/5)*5, g1=Math.floor((disp+34)/5)*5;
+  for(let g=g0;g<=g1;g+=5){
+    if(g<0||g>200)continue;
+    const y=cy+(g-disp)*k, len=g%20===0?42:g%10===0?30:18;
+    s+=`<line x1="70" y1="${y}" x2="${70+len}" y2="${y}" stroke="#222" stroke-width="${g%10===0?1.3:.9}"/>`;
+    if(g%10===0)s+=`<text x="${118}" y="${y+4}" font-size="11" fill="#222">${g}</text>`;
+  }
+  s+=`<path d="M30 ${cy} L66 ${cy}" stroke="#c62828" stroke-width="2"/><path d="M30 ${cy-5} L40 ${cy} L30 ${cy+5}Z" fill="#c62828"/>`;
+  s+=`<text x="8" y="14" font-size="9" fill="#776">g</text>`;
+  return s;
+}
+function syrZoomSVG(o){ // o:{mark,liq,dead,show}
+  const W=170,H=230,cy=115,k=16;
+  if(!o.show) return `<text x="85" y="115" text-anchor="middle" font-size="11" fill="#999">尚未抽取</text>`;
+  const fm=o.mark, ym=m=>cy-(m-fm)*k;
+  let s=`<rect x="18" y="0" width="80" height="${H}" fill="#eef5f9" stroke="#9fb6c2"/>`;
+  const liqMark=o.liq/T.cal;
+  if(liqMark>0){const yt=clamp(ym(liqMark),0,H), yb=clamp(ym(0),0,H); if(yb>yt) s+=`<rect x="22" y="${yt}" width="72" height="${yb-yt}" fill="var(--liq)" opacity=".75"/>`;}
+  if(fm<1.5){s+=`<rect x="18" y="${ym(-0.3/T.cmPerMark)}" width="80" height="${H}" fill="#cfdbe1"/>`;}
+  // 橡皮活塞（前緣在 fm，向上 0.8 cm）
+  const rh=0.8/T.cmPerMark*k;
+  s+=`<rect x="22" y="${ym(fm)-rh}" width="72" height="${rh}" fill="#3b3f48"/>`;
+  for(let i=1;i<=2;i++) s+=`<rect x="20" y="${ym(fm)-i*rh/3-3}" width="76" height="4" fill="#2a2d34"/>`;
+  s+=`<rect x="20" y="${ym(fm)-4}" width="76" height="4" fill="#2a2d34"/>`;
+  for(let m=Math.ceil(fm-8);m<=Math.floor(fm+8);m++){
+    if(m<0||m>50)continue;
+    const y=ym(m), len=m%10===0?26:m%5===0?18:10;
+    s+=`<line x1="${98-len}" y1="${y}" x2="98" y2="${y}" stroke="#111" stroke-width="${m%5===0?1.2:.8}"/>`;
+    if(m%5===0)s+=`<text x="104" y="${y+4}" font-size="11" fill="#111">${m}</text>`;
+  }
+  s+=`<text x="140" y="14" font-size="9" fill="#777">mL</text>`;
+  return s;
+}
+function stripPaper(x0,w,yOf,sMin,sMax,lo,hi,horiz){ // 方格紙條（縱向或橫向）
+  let s='';
+  for(let k=Math.ceil(lo*10);k<=Math.floor(hi*10);k++){
+    if(k<sMin*10-1e-6||k>sMax*10+1e-6)continue;
+    const p=yOf(k/10), c=k%10===0?'#3d8b3d':k%5===0?'#6aa86a':'#a9d3a3', sw=k%10===0?1.1:k%5===0?.8:.5;
+    if(!horiz) s+=`<line x1="${x0}" y1="${p}" x2="${x0+w}" y2="${p}" stroke="${c}" stroke-width="${sw}"/>`;
+    else s+=`<line x1="${p}" y1="${x0}" x2="${p}" y2="${x0+w}" stroke="${c}" stroke-width="${sw}"/>`;
+    if(k%10===0){
+      if(!horiz) s+=`<text x="${x0+w+3}" y="${p+4}" font-size="10" fill="#2d6b2d">${k/10}</text>`;
+      else s+=`<text x="${p}" y="${x0+w+12}" font-size="10" text-anchor="middle" fill="#2d6b2d">${k/10}</text>`;
+    }
+  }
+  return s;
+}
+function waterZoomSVG(eq){
+  const W=220,H=200,cy=100,k=40;
+  if(!eq) return `<text x="110" y="100" text-anchor="middle" font-size="11" fill="#999">針筒尚未懸掛</text>`;
+  const yOfH=hcm=>cy-(hcm-eq.ys)*k;            // 絕對高度→px
+  const bb=eq.tip+NL_B, s0=bb+T.stripOff;
+  let s=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fbfdfc"/>`;
+  // 外部液體
+  s+=`<rect x="0" y="${cy}" width="${W}" height="${H-cy}" fill="var(--liq)" opacity=".35"/>`;
+  // 筒身（含內部液體）
+  const yb=yOfH(bb);
+  if(yb>0){
+    s+=`<rect x="10" y="0" width="70" height="${clamp(yb,0,H)}" fill="var(--liq)" opacity=".55" stroke="#5a7380"/>`;
+    if(yb<H) s+=`<rect x="38" y="${yb}" width="14" height="${H-yb}" fill="#a0524a" opacity=".8"/>`;
+  } else {
+    s+=`<rect x="38" y="0" width="14" height="${H}" fill="#a0524a" opacity=".8"/>`;
+  }
+  // 紙條
+  if(S.B.strip){
+    const yTop=Math.max(0,yOfH(s0+8)), y0=Math.min(H,yOfH(s0));
+    if(y0>yTop){
+      s+=`<rect x="80" y="${yTop}" width="56" height="${y0-yTop}" fill="#f6fbf1" stroke="#8fb58a" stroke-width=".8"/>`;
+      s+=stripPaper(80,56,v=>yOfH(s0+v),0,8,eq.ys-s0-2.6,eq.ys-s0+2.6,false);
+      for(let xx=80;xx<=136;xx+=4)s+=`<line x1="${xx}" y1="${yTop}" x2="${xx}" y2="${y0}" stroke="#cfe6ca" stroke-width=".4"/>`;
+      if(eq.ys>s0) s+=`<rect x="80" y="${cy}" width="56" height="${Math.max(0,y0-cy)}" fill="var(--liq)" opacity=".18"/>`;
+    }
+  }
+  // 彎月面（附著於紙條外側）
+  if(eq.d>NL_B){
+    s+=`<path d="M136 ${cy-5} Q140 ${cy} 158 ${cy} L${W} ${cy}" fill="none" stroke="#3f7fa5" stroke-width="1.3"/>`;
+    s+=`<path d="M136 ${cy-5} Q140 ${cy} 158 ${cy} L${W} ${cy} L${W} ${cy+2} L136 ${cy+2}Z" fill="var(--liq)" opacity=".35"/>`;
+  } else s+=`<line x1="0" y1="${cy}" x2="${W}" y2="${cy}" stroke="#3f7fa5" stroke-width="1.3"/>`;
+  return s;
+}
+function circZoomSVG(){
+  const W=320,cx=160,k=40, m=S.circMark;
+  if(m===null) return `<text x="160" y="55" text-anchor="middle" font-size="11" fill="#999">尚未量測</text>`;
+  let s=`<rect x="0" y="22" width="${W}" height="46" fill="#f6fbf1" stroke="#8fb58a"/>`;
+  for(let xx=0;xx<=W;xx+=4)s+='';
+  for(let yy=26;yy<68;yy+=4)s+=`<line x1="0" y1="${yy}" x2="${W}" y2="${yy}" stroke="#d7ead3" stroke-width=".4"/>`;
+  s+=stripPaper(22,46,v=>cx+(v-m)*k,0,30,m-4.2,m+4.2,true);
+  s+=`<line x1="${cx}" y1="18" x2="${cx}" y2="72" stroke="#333" stroke-width="2"/><text x="${cx+4}" y="15" font-size="10" fill="#333">鉛筆記號（重疊處）</text>`;
+  return s;
+}
+function gradZoomSVG(which){
+  const W=150,H=150,cy=75,k=40;
+  if(S.gradR0===null) return `<text x="75" y="75" text-anchor="middle" font-size="11" fill="#999">尚未貼紙條</text>`;
+  const r0=S.gradR0, sc=which===0?r0:r0+40*T.cmPerMark;
+  const yOf=s=>cy-(s-sc)*k;
+  let s=`<rect x="6" y="0" width="70" height="${H}" fill="#eef5f9" stroke="#9fb6c2"/>`;
+  for(let m=0;m<=50;m++){const y=yOf(r0+m*T.cmPerMark); if(y<-5||y>H+5)continue;
+    const len=m%10===0?30:m%5===0?20:12;
+    s+=`<line x1="${76-len}" y1="${y}" x2="76" y2="${y}" stroke="#111" stroke-width="${m%5===0?1.1:.7}"/>`;
+    if(m%10===0)s+=`<text x="10" y="${y-2}" font-size="10" fill="#111">${m}</text>`;}
+  s+=`<rect x="77" y="0" width="45" height="${H}" fill="#f6fbf1" stroke="#8fb58a"/>`;
+  s+=stripPaper(77,45,v=>yOf(v),0,12,sc-2,sc+2,false);
+  return s;
+}
+
+/* ---------- 場景 ---------- */
+function renderScene2(){
+  let s=`<line x1="0" y1="${Y(0)}" x2="460" y2="${Y(0)}" stroke="#888"/>`;
+  s+=beakerSVG(120,BASE+V_INIT/AB,S.setup.liq);
+  if(S.setup.stand){
+    s+=standSVG(420,70,310);
+    const sc=scaleSVG(310,70); s+=sc.s;
+    if(S.setup.hook) s+=hookSVG(310,sc.hookCm);
+  } else s+=`<text x="330" y="300" font-size="12" fill="#999" text-anchor="middle">尚未架設</text>`;
+  if(S.setup.tube) s+=`<text x="120" y="${Y(BEAK_H)-30}" font-size="11" text-anchor="middle" fill="#555">注射筒＋橡皮管已備妥</text>`;
+  $('scene2').innerHTML=s;
+  $('zs2').innerHTML=scaleZoomSVG(S.sc.disp);
+}
+function renderScene3(){
+  const a=S.A;
+  let s=`<line x1="0" y1="${Y(0)}" x2="460" y2="${Y(0)}" stroke="#888"/>`;
+  const level=BASE+(V_INIT-a.liq-S.B.liq)/AB;
+  s+=beakerSVG(120,level,true);
+  s+=standSVG(420,70,310);
+  const sc=scaleSVG(310,70); s+=sc.s; s+=hookSVG(310,sc.hookCm);
+  if(a.onScale){
+    const topCm=sc.hookCm-0.3, yZero=topCm-BARREL+0.3;
+    s+=syringeSVG({x:310,yZero,mark:a.mark,liq:a.liq,dead:a.dead,nozL:NL_A,nozD:ND_A});
+  } else {
+    const yZero=26.5;
+    s+=syringeSVG({x:120,yZero,mark:a.mark,liq:a.liq,dead:a.dead,nozL:NL_A,nozD:ND_A});
+    const tipY=Y(yZero-0.3-NL_A);
+    s+=`<path d="M120 ${tipY} C120 ${tipY+40} 134 ${Y(16)} 134 ${Y(2.5)}" fill="none" stroke="#a0524a" stroke-width="4" opacity=".85"/>`;
+  }
+  $('scene3').innerHTML=s;
+  $('zy3').innerHTML=syrZoomSVG({mark:a.mark,liq:a.liq,show:true});
+  $('zs3').innerHTML=scaleZoomSVG(S.sc.disp);
+}
+function renderScene4(){
+  const b=S.B;
+  let s=`<line x1="0" y1="${Y(0)}" x2="460" y2="${Y(0)}" stroke="#888"/>`;
+  const eq=b.hung?b.eq:null;
+  const level=eq?eq.ys:BASE+(V_INIT-b.liq-S.A.liq)/AB;
+  s+=beakerSVG(200,level,true);
+  s+=standSVG(420,b.yArm,200);
+  const sc=scaleSVG(200,b.yArm); s+=sc.s; s+=hookSVG(200,sc.hookCm);
+  if(b.hung&&eq){
+    const yZero=eq.tip+NL_B+0.3;
+    s+=syringeSVG({x:200,yZero,mark:b.mark,liq:b.liq,dead:b.dead,nozL:NL_B,nozD:ND_B,cap:true,strip:b.strip});
+    // 液面重畫於針筒前方（外部液體遮蓋）
+    if(eq.d>0){const r=BEAK_R*PX;s+=`<rect x="${200-r}" y="${Y(eq.ys)}" width="${2*r}" height="${Y(BASE)-Y(eq.ys)}" fill="var(--liq)" opacity=".25"/>`;}
+  } else if(b.liq>0){
+    s+=`<text x="90" y="40" font-size="11" fill="#555">針筒已抽液，待封口懸掛</text>`;
+  }
+  $('scene4').innerHTML=s;
+  $('zw4').innerHTML=waterZoomSVG(eq);
+  $('zs4').innerHTML=scaleZoomSVG(S.sc.disp);
+}
+function renderCur(){
+  if(CUR===2)renderScene2(); else if(CUR===3)renderScene3(); else if(CUR===4)renderScene4();
+}
+function loop(now){
+  const sc=S.sc;
+  if(sc.anim){
+    const t=(now-sc.t0)/1000, tg=indicated();
+    sc.disp=tg+(sc.from-tg)*Math.exp(-t/0.45)*Math.cos(2*Math.PI*t/0.55);
+    if(t>3.5){sc.anim=false;sc.disp=tg;}
+    renderCur();
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- 訊息 ---------- */
+function msg(id,t,c){const e=$(id);e.textContent=t;e.className='msg'+(c?' '+c:'');}
+
+/* ---------- 分頁切換 ---------- */
+function loadForTab(t){
+  if(t===2) setLoad(hookLoad());
+  else if(t===3) setLoad(massA());
+  else if(t===4){ if(S.B.hung){S.B.eq=solveB();setLoad(hookLoad()+(S.B.eq.R-T.mHook));} else setLoad(hookLoad()); }
+}
+function showTab(t){
+  CUR=t;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',+b.dataset.t===t));
+  document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('on',s.id==='t'+t));
+  if(t>=2&&t<=4)loadForTab(t);
+  if(t===5)analyze();
+  if(t===6)renderReveal();
+  renderCur();
+}
+
+/* ---------- ② ---------- */
+function upd2(){
+  const st=S.setup;
+  $('d_stand').innerHTML=st.stand?'<span class="done">✔</span>':'';
+  $('d_hook').innerHTML=st.hook?'<span class="done">✔</span>':'';
+  $('d_zero').innerHTML=st.zero?'<span class="done">✔ 已歸零</span>':'';
+  $('d_liq').innerHTML=st.liq?'<span class="done">✔</span>':'';
+  $('d_tube').innerHTML=st.tube?'<span class="done">✔</span>':'';
+}
+function wire2(){
+  $('s_stand').onclick=()=>{S.setup.stand=true;upd2();msg('m2','彈簧秤已垂直夾好。注意：指針目前不一定在 0。');renderScene2();};
+  $('s_hook').onclick=()=>{if(!S.setup.stand){msg('m2','請先架好鐵架與彈簧秤。','w');return;}S.setup.hook=true;setLoad(hookLoad());upd2();msg('m2','鉤已掛上，接著轉動歸零螺絲使指針對準 0。');};
+  document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{
+    if(!S.setup.hook){msg('m2','請先掛上迴紋針鉤，再帶鉤歸零。','w');return;}
+    S.zeroAdj+=+b.dataset.z; S.sc.fric+=rnd(-0.4,0.4); S.setup.zero=false; upd2(); startAnim();
+    msg('m2','轉動螺絲後指針可能卡住，輕敲後再確認。');});
+  $('tap2').onclick=()=>{tapScale();msg('m2','輕敲後指針回到較正確的位置。');};
+  $('s_zero').onclick=()=>{
+    if(!S.setup.hook){msg('m2','請先掛上鉤。','w');return;}
+    S.setup.zero=true; S.zeroRes=T.z0+S.zeroAdj+T.gain*T.mHook; upd2();
+    msg('m2','已確認歸零（實際殘差於第 ⑥ 頁揭曉）。','ok');};
+  $('s_liq').onclick=()=>{S.setup.liq=true;upd2();msg('m2','已倒入約 800 mL 待測液。');renderScene2();};
+  $('s_tube').onclick=()=>{S.setup.tube=true;upd2();msg('m2','橡皮管已接上。注意：管內目前是空氣。');renderScene2();};
+}
+
+/* ---------- 抽液共用 ---------- */
+function drawSyr(o,target,fast){ // o = S.A 或 S.B
+  const act=clamp(target+gauss()*0.12,0,50.6);
+  const dV=T.cal*(act-o.mark);
+  let note='';
+  if(dV>0){
+    let air=0;
+    if(!S.tubePrimed){air+=Math.min(dV,T.tubeAir);S.tubePrimed=true;note='（管內空氣先被抽入）';}
+    const p=fast?0.6:0.12;
+    if(Math.random()<p){air+=Math.min((dV-air)*0.5,fast?rnd(0.8,2.5):rnd(0.2,0.8));}
+    air=Math.max(0,Math.min(air,dV));
+    o.bub+=air; o.liq+=dV-air;
+    if(!o.dead&&dV-air>0)o.dead=true;
+  } else if(dV<0){
+    let out=-dV; const fl=Math.min(out,o.liq); o.liq-=fl; out-=fl; o.bub=Math.max(0,o.bub-out);
+  }
+  o.mark=act;
+  const tot=o.liq+o.bub, cap=T.cal*o.mark; if(Math.abs(tot-cap)>1e-9){const f=tot>0?cap/tot:0;o.liq*=f;o.bub*=f;}
+  return note;
+}
+function purge(o){
+  if(o.bub<=1e-6) return false;
+  const extra=rnd(0,0.15);
+  const out=o.bub+Math.min(extra,o.liq);
+  o.liq-=Math.min(extra,o.liq); o.bub=0;
+  o.mark=Math.max(0,o.mark-out/T.cal);
+  return true;
+}
+
+/* ---------- ③ ---------- */
+function wire3(){
+  $('tgt').oninput=()=>{$('tgtv').textContent=(+$('tgt').value).toFixed(1);};
+  $('a_draw').onclick=()=>{
+    const a=S.A;
+    if(a.onScale){msg('m3','針筒掛在秤上，請先取下。','w');return;}
+    if(!S.setup.liq||!S.setup.tube){msg('m3','請先在第 ② 頁倒入待測液並接上橡皮管。','w');return;}
+    const fast=document.querySelector('input[name=spd]:checked').value==='fast';
+    const bub0=a.bub;
+    const note=drawSyr(a,+$('tgt').value,fast);
+    renderScene3();
+    if(a.bub>bub0+0.05) msg('m3','抽取完成'+note+'。仔細看刻度放大圖：活塞前緣與液面之間有一段空氣嗎？','w');
+    else msg('m3','抽取完成。讀注射筒刻度（活塞橡皮前緣），再掛上彈簧秤。');
+  };
+  $('a_bub').onclick=()=>{
+    const a=S.A; if(a.onScale){msg('m3','請先從秤上取下。','w');return;}
+    if(purge(a)) msg('m3','已把氣泡推出（可能帶出少量液體），活塞前移了，請重新讀刻度。','ok');
+    else msg('m3','輕敲後沒有看到氣泡。');
+    renderScene3();
+  };
+  $('a_hang').onclick=()=>{
+    const a=S.A; if(a.onScale){msg('m3','已經掛在秤上。');return;}
+    if(!S.setup.hook){msg('m3','請先在第 ② 頁掛上鉤並歸零。','w');return;}
+    a.onScale=true; a.wet=a.liq>0?rnd(0,0.35):0; setLoad(massA());
+    msg('m3',S.setup.zero?'已掛上，等指針靜止後讀數（可先輕敲）。':'已掛上。提醒：你尚未在第 ② 頁確認歸零。',S.setup.zero?'':'w');
+  };
+  $('a_off').onclick=()=>{const a=S.A; if(!a.onScale)return; a.onScale=false; a.wet=0; setLoad(massA()); msg('m3','已取下並接回橡皮管，可以調整體積。');};
+  $('tap3').onclick=()=>{tapScale();msg('m3','已輕敲彈簧秤。');};
+  $('recA').onclick=()=>{
+    const V=parseFloat($('inV').value), W=parseFloat($('inW').value);
+    if(!isFinite(V)||!isFinite(W)){msg('m3','請輸入 V 與 W 的讀數。','w');return;}
+    const a=S.A;
+    if(!a.onScale) msg('m3','注意：記錄時針筒並未掛在秤上。','w');
+    S.dataA.push({V,W,hid:{mark:a.mark,liq:a.liq,bub:a.bub,ind:indicated(),on:a.onScale,stable:!S.sc.anim}});
+    $('inV').value='';$('inW').value='';
+    tblA(); if(a.onScale) msg('m3',`已記錄第 ${S.dataA.length} 組。`,'ok');
+  };
+}
+function tblA(){
+  if(!S.dataA.length){$('tblA').innerHTML='<p class="note">尚無數據。</p>';return;}
+  let h='<table><tr><th>#</th><th>V (mL)</th><th>W (g)</th><th></th></tr>';
+  S.dataA.forEach((d,i)=>{h+=`<tr><td>${i+1}</td><td><input data-a="${i}" data-k="V" value="${d.V}"></td><td><input data-a="${i}" data-k="W" value="${d.W}"></td><td><button class="btn sm" data-da="${i}">刪除</button></td></tr>`;});
+  $('tblA').innerHTML=h+'</table>';
+  $('tblA').querySelectorAll('input').forEach(e=>e.onchange=()=>{const v=parseFloat(e.value);if(isFinite(v))S.dataA[+e.dataset.a][e.dataset.k]=v;});
+  $('tblA').querySelectorAll('[data-da]').forEach(e=>e.onclick=()=>{S.dataA.splice(+e.dataset.da,1);tblA();});
+}
+
+/* ---------- ④ ---------- */
+function updB(){
+  const b=S.B;
+  if(b.hung){b.eq=solveB();setLoad(hookLoad()+(b.eq.R-T.mHook));
+    const e=b.eq;
+    if(e.slack) msg('m4','針筒浮起，鉤與推柄間已鬆弛！彈簧秤只剩鉤的重量，此點無效。','e');
+    else if(e.touch) msg('m4','針口已觸及燒杯底部！讀數被底部支撐力減小，此點無效。','e');
+    else if(e.d<=0) msg('m4','針筒尚未接觸液面。');
+    else if(e.d<=NL_B) msg('m4','目前只有針口（封口處）浸入，筒身尚未入水。這段截面不同，不要納入迴歸。','w');
+    else msg('m4','筒身已浸入。讀紙條與「遠處平液面」的交點 h，以及彈簧秤讀數 W′。');
+  }
+  $('yav').textContent=b.yArm.toFixed(1); $('ya').value=b.yArm;
+  renderScene4();
+}
+function wire4(){
+  $('b_fill').onclick=()=>{
+    const b=S.B;
+    if(b.hung){msg('m4','針筒已封口懸掛。','w');return;}
+    if(!S.setup.liq||!S.setup.tube){msg('m4','請先在第 ② 頁倒入待測液並接上橡皮管。','w');return;}
+    const bub0=b.bub; const note=drawSyr(b,50,false);
+    msg('m4',b.bub>bub0+0.05?'已抽到約 50 mL'+note+'，筒內有氣泡（對法 B 其實無妨，可選擇推出後再補滿）。':'已抽到約 50 mL。', b.bub>bub0+0.05?'w':'');
+    renderScene4();
+  };
+  $('b_bub').onclick=()=>{const b=S.B; if(b.hung){msg('m4','已封口，無法排氣。','w');return;} if(purge(b))msg('m4','已推出氣泡，可再按「抽滿至 50 mL」補滿。','ok'); else msg('m4','沒有看到氣泡。'); renderScene4();};
+  $('b_seal').onclick=()=>{
+    const b=S.B; if(b.hung)return;
+    if(b.liq<40){msg('m4','請先抽入接近 50 mL 的待測液。','w');return;}
+    if(!S.setup.hook){msg('m4','請先在第 ② 頁掛上鉤並歸零。','w');return;}
+    b.hung=true; b.wet=0; updB(); };
+  $('b_strip').onclick=()=>{S.B.strip=true;msg('m4','方格紙條已貼上（起點約在筒底附近）。');renderScene4();};
+  $('ya').oninput=()=>{S.B.yArm=+$('ya').value;updB();};
+  document.querySelectorAll('[data-ya]').forEach(e=>e.onclick=()=>{S.B.yArm=clamp(+(S.B.yArm+ +e.dataset.ya).toFixed(1),38,66);updB();});
+  $('tap4').onclick=()=>{tapScale();};
+  $('recB').onclick=()=>{
+    const h=parseFloat($('inH').value), W=parseFloat($('inW2').value);
+    if(!isFinite(h)||!isFinite(W)){msg('m4','請輸入 h 與 W′。','w');return;}
+    if(!S.B.hung){msg('m4','針筒尚未懸掛。','w');return;}
+    const e=S.B.eq;
+    S.dataB.push({h,W,use:!(e.slack||e.touch||e.d<=NL_B),hid:{s:e.s,hb:e.hb,ind:indicated(),slack:e.slack,touch:e.touch,noz:e.d<=NL_B}});
+    $('inH').value='';$('inW2').value=''; tblB();
+  };
+  $('c_wrap').onclick=()=>{S.circMark=Math.PI*(T.Dout+T.paperT)+gauss()*0.04; $('zc').innerHTML=circZoomSVG();};
+  $('recL').onclick=()=>{const L=parseFloat($('inL').value); if(!isFinite(L))return; S.circ.push({L,hid:S.circMark}); $('inL').value=''; tblL();};
+  $('g_put').onclick=()=>{S.gradR0=rnd(0.1,0.45); $('zg0').innerHTML=gradZoomSVG(0); $('zg40').innerHTML=gradZoomSVG(40);};
+  $('recG').onclick=()=>{const a=parseFloat($('inG0').value), c=parseFloat($('inG40').value); if(!isFinite(a)||!isFinite(c)||c<=a)return; S.grad.push({r0:a,r40:c}); $('inG0').value='';$('inG40').value=''; tblG();};
+}
+function tblB(){
+  if(!S.dataB.length){$('tblB').innerHTML='<p class="note">尚無數據。</p>';return;}
+  let h='<table><tr><th>#</th><th>h (cm)</th><th>W′ (g)</th><th>納入迴歸</th><th></th></tr>';
+  S.dataB.forEach((d,i)=>{h+=`<tr><td>${i+1}</td><td><input data-b="${i}" data-k="h" value="${d.h}"></td><td><input data-b="${i}" data-k="W" value="${d.W}"></td><td><input type="checkbox" data-u="${i}" ${d.use?'checked':''} style="width:auto"></td><td><button class="btn sm" data-db="${i}">刪除</button></td></tr>`;});
+  $('tblB').innerHTML=h+'</table>';
+  $('tblB').querySelectorAll('input[data-b]').forEach(e=>e.onchange=()=>{const v=parseFloat(e.value);if(isFinite(v))S.dataB[+e.dataset.b][e.dataset.k]=v;});
+  $('tblB').querySelectorAll('[data-u]').forEach(e=>e.onchange=()=>{S.dataB[+e.dataset.u].use=e.checked;});
+  $('tblB').querySelectorAll('[data-db]').forEach(e=>e.onclick=()=>{S.dataB.splice(+e.dataset.db,1);tblB();});
+}
+function tblL(){
+  if(!S.circ.length){$('tblL').innerHTML='';return;}
+  $('tblL').innerHTML='<table><tr><th>#</th><th>L (cm)</th><th></th></tr>'+S.circ.map((c,i)=>`<tr><td>${i+1}</td><td>${c.L}</td><td><button class="btn sm" data-dl="${i}">刪除</button></td></tr>`).join('')+'</table>';
+  $('tblL').querySelectorAll('[data-dl]').forEach(e=>e.onclick=()=>{S.circ.splice(+e.dataset.dl,1);tblL();});
+}
+function tblG(){
+  if(!S.grad.length){$('tblG').innerHTML='';return;}
+  $('tblG').innerHTML='<table><tr><th>#</th><th>0 mL 處</th><th>40 mL 處</th><th>ℓ₄₀ (cm)</th><th></th></tr>'+S.grad.map((c,i)=>`<tr><td>${i+1}</td><td>${c.r0}</td><td>${c.r40}</td><td>${fx(c.r40-c.r0,2)}</td><td><button class="btn sm" data-dg="${i}">刪除</button></td></tr>`).join('')+'</table>';
+  $('tblG').querySelectorAll('[data-dg]').forEach(e=>e.onclick=()=>{S.grad.splice(+e.dataset.dg,1);tblG();});
+}
+
+/* ---------- 迴歸與作圖 ---------- */
+function linreg(xs,ys){
+  const n=xs.length; let Sx=0,Sy=0,Sxx=0,Sxy=0;
+  for(let i=0;i<n;i++){Sx+=xs[i];Sy+=ys[i];Sxx+=xs[i]*xs[i];Sxy+=xs[i]*ys[i];}
+  const D=n*Sxx-Sx*Sx; if(n<2||Math.abs(D)<1e-12)return null;
+  const B=(n*Sxy-Sx*Sy)/D, A=(Sy-B*Sx)/n;
+  let ss=0,st=0; const ym=Sy/n; const res=[];
+  for(let i=0;i<n;i++){const r=ys[i]-(A+B*xs[i]);res.push(r);ss+=r*r;st+=(ys[i]-ym)**2;}
+  const s=n>2?Math.sqrt(ss/(n-2)):NaN;
+  return {n,A,B,sB:s*Math.sqrt(n/D),sA:s*Math.sqrt(Sxx/D),s,r2:st>0?1-ss/st:NaN,res};
+}
+function niceStep(range,count){const raw=range/count,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;return (m<1.5?1:m<3?2:m<7?5:10)*p;}
+function plotSVG(pts,fit,o){
+  const W=600,H=o.h||330,ml=60,mr=16,mt=14,mb=46;
+  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
+  let xa=Math.min(...xs), xb=Math.max(...xs); if(o.x0!==undefined)xa=Math.min(xa,o.x0);
+  let ya=Math.min(...ys), yb=Math.max(...ys);
+  if(fit)[xa,xb].forEach(x=>{const y=fit.A+fit.B*x;ya=Math.min(ya,y);yb=Math.max(yb,y);});
+  if(o.zero){ya=Math.min(ya,0);yb=Math.max(yb,0);}
+  const dx=(xb-xa)||1, dy=(yb-ya)||1; xa-=dx*.05; xb+=dx*.05; ya-=dy*.1; yb+=dy*.1;
+  const X=x=>ml+(x-xa)/(xb-xa)*(W-ml-mr), Yp=y=>H-mb-(y-ya)/(yb-ya)*(H-mt-mb);
+  let s=`<svg viewBox="0 0 ${W} ${H}"><rect x="${ml}" y="${mt}" width="${W-ml-mr}" height="${H-mt-mb}" fill="#fff" stroke="#bbb"/>`;
+  const sx=niceStep(xb-xa,8), sy=niceStep(yb-ya,6);
+  for(let v=Math.ceil(xa/sx)*sx;v<=xb+1e-9;v+=sx){const p=X(v);s+=`<line x1="${p}" y1="${mt}" x2="${p}" y2="${H-mb}" stroke="#eee"/><text x="${p}" y="${H-mb+14}" font-size="11" text-anchor="middle" fill="#555">${+v.toFixed(6)}</text>`;}
+  for(let v=Math.ceil(ya/sy)*sy;v<=yb+1e-9;v+=sy){const p=Yp(v);s+=`<line x1="${ml}" y1="${p}" x2="${W-mr}" y2="${p}" stroke="#eee"/><text x="${ml-5}" y="${p+4}" font-size="11" text-anchor="end" fill="#555">${+v.toFixed(6)}</text>`;}
+  if(o.zero)s+=`<line x1="${ml}" y1="${Yp(0)}" x2="${W-mr}" y2="${Yp(0)}" stroke="#999" stroke-dasharray="4 3"/>`;
+  if(fit)s+=`<line x1="${X(xa)}" y1="${Yp(fit.A+fit.B*xa)}" x2="${X(xb)}" y2="${Yp(fit.A+fit.B*xb)}" stroke="#c0582b" stroke-width="1.8"/>`;
+  pts.forEach(p=>{s+=p.off?`<circle cx="${X(p.x)}" cy="${Yp(p.y)}" r="4" fill="none" stroke="#999"/>`:`<circle cx="${X(p.x)}" cy="${Yp(p.y)}" r="4" fill="#1f6f8b"/>`;});
+  s+=`<text x="${(ml+W-mr)/2}" y="${H-8}" font-size="12" text-anchor="middle" fill="#333">${o.xl}</text>`;
+  s+=`<text x="14" y="${(mt+H-mb)/2}" font-size="12" text-anchor="middle" fill="#333" transform="rotate(-90 14 ${(mt+H-mb)/2})">${o.yl}</text>`;
+  return s+'</svg>';
+}
+let RES={};
+function analyze(){
+  RES={};
+  /* A */
+  const dA=S.dataA.filter(d=>isFinite(d.V)&&isFinite(d.W));
+  if(dA.length<3){$('anaA').innerHTML='<p class="note">至少需要 3 組數據（建議 10 組以上）。</p>';}
+  else{
+    const f=linreg(dA.map(d=>d.V),dA.map(d=>d.W)); RES.A=f;
+    let h=plotSVG(dA.map(d=>({x:d.V,y:d.W})),f,{xl:'V (mL)',yl:'W (g)',x0:0});
+    h+=plotSVG(dA.map((d,i)=>({x:d.V,y:f.res[i]})),null,{xl:'V (mL)',yl:'殘差 (g)',h:170,zero:true});
+    h+=`<div class="g2"><div><p class="big">ρ<sub>A</sub> = ${fx(f.B,4)} ± ${fx(f.sB,4)} g/cm³</p>
+      <div class="kv"><b>斜率 B</b><span>${fx(f.B,4)} ± ${fx(f.sB,4)} g/mL</span><b>截距 A</b><span>${fx(f.A,2)} ± ${fx(f.sA,2)} g（空針筒＋鉤＋殘液＋零點）</span><b>相對誤差</b><span>${fx(100*f.sB/f.B,2)} %</span><b>R²</b><span>${fx(f.r2,5)}</span><b>n</b><span>${f.n}</span></div>`;
+    const big=f.res.map((r,i)=>({r,i})).filter(o=>Math.abs(o.r)>2.5*f.s);
+    if(big.length)h+=`<p class="msg w">第 ${big.map(o=>o.i+1).join('、')} 點殘差超過 2.5 倍標準差，可能是氣泡或讀數錯誤，可回第 ③ 頁檢查後刪除重測。</p>`;
+    h+='</div><div>';
+    const z=dA.filter(d=>Math.abs(d.V)<0.5); const W0=z.length?z.reduce((a,d)=>a+d.W,0)/z.length:null;
+    if(W0!==null){
+      const sp=dA.filter(d=>d.V>=5).map(d=>({V:d.V,r:(d.W-W0)/d.V}));
+      if(sp.length){
+        const m=sp.reduce((a,o)=>a+o.r,0)/sp.length, sd=Math.sqrt(sp.reduce((a,o)=>a+(o.r-m)**2,0)/Math.max(1,sp.length-1));
+        h+=`<h3>對照：單點換算 ρᵢ = (Wᵢ − W₀)/Vᵢ（W₀ = ${fx(W0,1)} g）</h3><table><tr><th>V</th><th>ρᵢ</th></tr>${sp.map(o=>`<tr><td>${fx(o.V,1)}</td><td>${fx(o.r,3)}</td></tr>`).join('')}</table>
+        <p>單點平均 = ${fx(m,3)}，單點標準差 = ${fx(sd,3)}（平均值標準誤 ${fx(sd/Math.sqrt(sp.length),3)}）。小 V 的點因 5 g 解析度而劇烈跳動，迴歸自然以大 V 端決定斜率。</p>`;
+        RES.Asp={m,sd};
+      }
+    } else h+='<p class="note">若要做單點對照，請記錄 V = 0（空針筒）的讀數。</p>';
+    $('anaA').innerHTML=h+'</div></div>';
+  }
+  /* B */
+  const dB=S.dataB.filter(d=>isFinite(d.h)&&isFinite(d.W));
+  const use=dB.filter(d=>d.use);
+  if(use.length<3){$('anaB').innerHTML='<p class="note">至少需要 3 組「納入迴歸」的數據。</p>';}
+  else{
+    const f=linreg(use.map(d=>d.h),use.map(d=>d.W)); RES.B=f;
+    let h=plotSVG(dB.map(d=>({x:d.h,y:d.W,off:!d.use})),f,{xl:'h (cm)',yl:'W′ (g)'});
+    h+=`<p class="note">空心點為未納入迴歸的數據。</p>`;
+    h+=`<div class="kv"><b>斜率</b><span>${fx(f.B,3)} ± ${fx(f.sB,3)} g/cm（= −ρA<sub>外</sub>）</span><b>截距</b><span>${fx(f.A,2)} g</span><b>R²</b><span>${fx(f.r2,5)}</span><b>n</b><span>${f.n}</span></div>`;
+    if(!S.circ.length) h+='<p class="msg w">尚未量外周長 L（第 ④ 頁（二））。</p>';
+    else{
+      const Ls=S.circ.map(c=>c.L), n=Ls.length, Lm=Ls.reduce((a,b)=>a+b,0)/n;
+      const sd=n>1?Math.sqrt(Ls.reduce((a,b)=>a+(b-Lm)**2,0)/(n-1)):0;
+      const sL=n>1?Math.max(sd/Math.sqrt(n),0.015):0.03;
+      const Ao=Lm*Lm/(4*Math.PI), rho=-f.B/Ao, srel=Math.sqrt((f.sB/f.B)**2+(2*sL/Lm)**2);
+      RES.Brho={rho,s:Math.abs(rho*srel),Ao,Lm,sL};
+      h+=`<h3>外截面積</h3><div class="kv"><b>L 平均</b><span>${fx(Lm,3)} ± ${fx(sL,3)} cm（${n} 次）</span><b>D<sub>外</sub> = L/π</b><span>${fx(Lm/Math.PI,3)} cm</span><b>A<sub>外</sub> = L²/4π</b><span>${fx(Ao,3)} cm²</span></div>`;
+      h+=`<p class="big">ρ<sub>B</sub> = −斜率 / A<sub>外</sub> = ${fx(rho,4)} ± ${fx(Math.abs(rho*srel),4)} g/cm³</p>`;
+      h+=`<p class="note">誤差傳遞：(σρ/ρ)² = (σ斜率/斜率)² + (2σL/L)² → 斜率貢獻 ${fx(100*Math.abs(f.sB/f.B),2)}%，周長貢獻 ${fx(200*sL/Lm,2)}%。</p>`;
+      if(S.grad.length){
+        const l=S.grad.reduce((a,g)=>a+(g.r40-g.r0),0)/S.grad.length, Ai=40/l, rw=-f.B/Ai;
+        RES.Bwrong={Ai,rw};
+        h+=`<div class="msg w">若誤以刻度內截面 A<sub>內</sub> = 40 mL / ${fx(l,3)} cm = ${fx(Ai,3)} cm² 代入，會得到 ρ = ${fx(rw,4)} g/cm³，比用 A<sub>外</sub> 大了 ${fx(100*(rw/rho-1),1)}%。浮力由筒身「外」表面排開的體積決定。</div>`;
+      }
+    }
+    $('anaB').innerHTML=h;
+  }
+  /* C */
+  let c='';
+  if(RES.A&&RES.Brho){
+    const a=RES.A.B, sa=RES.A.sB, b=RES.Brho.rho, sb=RES.Brho.s;
+    const wa=1/sa**2, wb=1/sb**2, m=(a*wa+b*wb)/(wa+wb), sm=1/Math.sqrt(wa+wb);
+    const z=Math.abs(a-b)/Math.sqrt(sa*sa+sb*sb);
+    RES.C={m,sm,z};
+    c+=`<table><tr><th>方法</th><th>ρ (g/cm³)</th><th>σ</th><th>相對誤差</th></tr>
+      <tr><td>A：W–V 迴歸</td><td>${fx(a,4)}</td><td>${fx(sa,4)}</td><td>${fx(100*sa/a,2)}%</td></tr>
+      <tr><td>B：W′–h 迴歸</td><td>${fx(b,4)}</td><td>${fx(sb,4)}</td><td>${fx(100*sb/b,2)}%</td></tr>
+      <tr><td><b>加權平均</b></td><td><b>${fx(m,4)}</b></td><td><b>${fx(sm,4)}</b></td><td>${fx(100*sm/m,2)}%</td></tr></table>
+      <p>兩法差異 = ${fx(Math.abs(a-b),4)}，相當於合成不確定度的 ${fx(z,2)} 倍。${z<2?'<span class="tag good">兩法在誤差範圍內一致</span>':'<span class="tag bad">兩法差異顯著，應檢查系統誤差（氣泡？刻度？周長？）</span>'}</p>`;
+  } else c='<p class="note">完成法 A 與法 B（含周長）後顯示比較。</p>';
+  $('anaC').innerHTML=c;
+}
+
+/* ---------- ⑥ ---------- */
+function zTag(v,s){
+  if(!isFinite(v)||!isFinite(s)||s<=0)return '';
+  const z=Math.abs(v-T.rho)/s;
+  return `${fx(z,2)} σ <span class="tag ${z<=2?'good':z<=3?'w':'bad'}">${z<=2?'在誤差內':z<=3?'略偏':'顯著偏差'}</span>`;
+}
+function renderReveal(){
+  if(!S.revealed){$('reveal').innerHTML='';return;}
+  analyze();
+  let h=`<p class="big">待測液真實密度 ρ = ${T.rho.toFixed(3)} g/cm³</p><table><tr><th>結果</th><th>ρ</th><th>相對真值誤差</th><th>偏離</th></tr>`;
+  const row=(n,v,s)=>`<tr><td>${n}</td><td>${fx(v,4)} ± ${fx(s,4)}</td><td>${fx(100*(v/T.rho-1),2)}%</td><td>${zTag(v,s)}</td></tr>`;
+  if(RES.A)h+=row('法 A 迴歸',RES.A.B,RES.A.sB);
+  if(RES.Asp)h+=row('法 A 單點平均',RES.Asp.m,RES.Asp.sd/Math.sqrt(Math.max(1,S.dataA.filter(d=>d.V>=5).length)));
+  if(RES.Brho)h+=row('法 B 迴歸',RES.Brho.rho,RES.Brho.s);
+  if(RES.C)h+=row('加權平均',RES.C.m,RES.C.sm);
+  if(RES.Bwrong)h+=`<tr><td>法 B 誤用 A<sub>內</sub></td><td>${fx(RES.Bwrong.rw,4)}</td><td>${fx(100*(RES.Bwrong.rw/T.rho-1),2)}%</td><td><span class="tag bad">系統誤差</span></td></tr>`;
+  h+='</table>';
+  h+=`<h3>隱藏參數</h3><div class="kv">
+   <b>空針筒質量</b><span>${fx(T.mSyr,2)} g；迴紋針鉤 ${fx(T.mHook,2)} g；針口死體積 ${fx(T.Vdead,2)} mL</span>
+   <b>歸零殘差</b><span>${S.zeroRes===null?'未確認歸零（原始偏差 '+fx(T.z0+T.gain*T.mHook,2)+' g）':fx(S.zeroRes,2)+' g'}</span>
+   <b>彈簧秤增益</b><span>${fx(T.gain,4)}（讀數 = ${fx(T.gain,4)} × 真實負載 + 零點）→ 兩法共同的系統誤差 ${fx(100*(T.gain-1),2)}%</span>
+   <b>注射筒刻度校準</b><span>每 1 mL 刻度實為 ${fx(T.cal,4)} mL → 法 A 理論斜率 = ρ·增益·校準 = ${fx(T.rho*T.gain*T.cal,4)}</span>
+   <b>法 B 理論斜率</b><span>−ρ·增益·A<sub>外</sub> = ${fx(-T.rho*T.gain*T.Aout,3)} g/cm</span>
+   <b>筒身外徑 / 內徑</b><span>${fx(T.Dout,3)} / ${fx(T.Din,3)} cm；A<sub>外</sub> = ${fx(T.Aout,3)} cm²，A<sub>內</sub> = ${fx(T.Ain,3)} cm²（比值 ${fx(T.Aout/T.Ain,3)}）</span>
+   <b>紙條繞一圈真實長度</b><span>π(D<sub>外</sub>+紙厚) = ${fx(Math.PI*(T.Dout+T.paperT),3)} cm（紙厚使 A<sub>外</sub> 偏大 ${fx(200*T.paperT/T.Dout,2)}%）</span>
+   <b>表面張力係數</b><span>${fx(T.gamma*1000,1)} mN/m → 筒身附著拉力 ≈ ${fx(T.gamma*Math.PI*T.Dout/0.98,2)} g（常數，只進截距）</span>
+   <b>紙條起點</b><span>筒底上方 ${fx(T.stripOff*10,1)} mm（只進截距）</span></div>`;
+  if(S.dataA.length){
+    h+=`<h3>法 A 逐點對照</h3><table><tr><th>#</th><th>記錄 V</th><th>活塞實際刻度</th><th>筒內真實液體 (mL)</th><th>氣泡 (mL)</th><th>記錄 W</th><th>指針實際位置</th><th>備註</th></tr>`;
+    S.dataA.forEach((d,i)=>{const x=d.hid; const note=[];
+      if(x.bub>0.05)note.push('<span class="tag bad">含氣泡</span>');
+      if(!x.on)note.push('<span class="tag w">未掛秤</span>');
+      if(!x.stable)note.push('<span class="tag w">指針未靜止</span>');
+      if(Math.abs(d.W-x.ind)>2.6)note.push('<span class="tag w">讀數偏差大</span>');
+      h+=`<tr><td>${i+1}</td><td>${d.V}</td><td>${fx(x.mark,2)}</td><td>${fx(x.liq,2)}</td><td>${fx(x.bub,2)}</td><td>${d.W}</td><td>${fx(x.ind,2)}</td><td>${note.join(' ')}</td></tr>`;});
+    h+='</table>';
+  }
+  if(S.dataB.length){
+    h+=`<h3>法 B 逐點對照</h3><table><tr><th>#</th><th>記錄 h</th><th>紙條真實讀數</th><th>記錄 W′</th><th>指針實際位置</th><th>狀態</th></tr>`;
+    S.dataB.forEach((d,i)=>{const x=d.hid;const st=x.slack?'<span class="tag bad">浮起</span>':x.touch?'<span class="tag bad">觸底</span>':x.noz?'<span class="tag w">僅針口</span>':'正常';
+      h+=`<tr><td>${i+1}</td><td>${d.h}</td><td>${fx(x.s,3)}</td><td>${d.W}</td><td>${fx(x.ind,2)}</td><td>${st}</td></tr>`;});
+    h+='</table>';
+  }
+  if(S.circ.length) h+=`<p class="note">周長記號實際位置：${S.circ.map(c=>fx(c.hid,3)).join('、')} cm（記號本身含 ±0.4 mm 的畫線誤差）。</p>`;
+  $('reveal').innerHTML=h;
+}
+
+/* ---------- 初始化 ---------- */
+function resetAll(){
+  newTruth(); newState();
+  ['tblA','tblB','tblL','tblG','anaA','anaB','anaC','reveal'].forEach(id=>$(id).innerHTML='');
+  ['zc','zg0','zg40'].forEach(id=>$(id).innerHTML='');
+  $('zc').innerHTML=circZoomSVG(); $('zg0').innerHTML=gradZoomSVG(0); $('zg40').innerHTML=gradZoomSVG(40);
+  upd2(); tblA(); tblB();
+  msg('m2','依序完成 1–5 步。'); msg('m3','先抽取一定體積的待測液，讀注射筒刻度，再掛上彈簧秤讀 W。'); msg('m4','先完成（一）準備針筒。');
+  $('yav').textContent='64.0'; $('ya').value=64;
+  showTab(CUR);
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showTab(+b.dataset.t));
+$('btnNew').onclick=()=>{if(confirm('換一杯新的待測液？所有數據將清除。'))resetAll();};
+$('btnReveal').onclick=()=>{if(S.revealed||confirm('確定要揭曉真值嗎？建議先完成兩法分析與討論。')){S.revealed=true;renderReveal();}};
+wire2(); wire3(); wire4();
+newTruth(); newState(); resetAll();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
