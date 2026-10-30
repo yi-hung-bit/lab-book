@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>重力加速度虛擬實驗室｜92學年度台灣省第二區 物理科實驗</title>
+<style>
+:root{
+  --bg:#f4f6fa; --panel:#ffffff; --ink:#1b2333; --sub:#5b6880;
+  --line:#dde3ee; --accent:#2f5bd0; --accent2:#c2410c;
+  --big:#1d4ed8; --small:#b45309; --ok:#0f7b4f; --warn:#b02a2a;
+  --shadow:0 1px 3px rgba(20,30,60,.08),0 6px 20px rgba(20,30,60,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  line-height:1.7;font-size:15.5px}
+header{background:linear-gradient(135deg,#1e3a8a,#2f5bd0);color:#fff;padding:18px 20px 14px}
+header h1{margin:0;font-size:20px;letter-spacing:.5px}
+header p{margin:4px 0 0;font-size:13px;opacity:.85}
+nav{display:flex;flex-wrap:wrap;gap:4px;background:#17306e;padding:0 12px}
+nav button{background:none;border:0;color:#cbd6f0;padding:11px 14px;font-size:14.5px;
+  cursor:pointer;border-bottom:3px solid transparent;font-family:inherit}
+nav button:hover{color:#fff}
+nav button.on{color:#fff;border-bottom-color:#ffd166;font-weight:700}
+main{max-width:1120px;margin:0 auto;padding:18px 16px 70px}
+section{display:none} section.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;margin:0 0 16px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;font-size:17px;color:var(--accent);
+  border-left:4px solid var(--accent);padding-left:9px}
+.card h3{margin:16px 0 6px;font-size:15px;color:#243049}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+.eq{background:#f7f9fd;border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:6px;padding:9px 13px;margin:9px 0;font-size:15.5px;overflow-x:auto}
+.note{background:#fffaf0;border:1px solid #f3e0b8;border-radius:8px;padding:10px 13px;
+  font-size:14px;margin:10px 0}
+.warnbox{background:#fdf2f2;border:1px solid #f0c9c9;border-radius:8px;padding:10px 13px;
+  font-size:14px;margin:10px 0}
+.okbox{background:#f0f9f4;border:1px solid #bfe3cf;border-radius:8px;padding:10px 13px;
+  font-size:14px;margin:10px 0}
+button.act{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:8px 15px;
+  font-size:14.5px;cursor:pointer;font-family:inherit;margin:3px 4px 3px 0}
+button.act:hover{background:#2449ad}
+button.act:disabled{background:#b6bfd2;cursor:not-allowed}
+button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+button.ghost:hover{background:#eef3ff}
+button.danger{background:#fff;color:var(--warn);border:1px solid #e3b3b3}
+button.big{font-size:16px;padding:11px 24px}
+label.ctl{display:block;margin:9px 0 2px;font-size:13.5px;color:var(--sub);font-weight:600}
+input[type=range]{width:100%}
+input[type=number],input[type=text]{border:1px solid var(--line);border-radius:6px;
+  padding:5px 8px;font-size:14.5px;font-family:inherit;width:100%}
+select{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:14.5px;font-family:inherit}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:5px 7px;text-align:center}
+th{background:#eef2f9;font-weight:700;color:#2b3752}
+td input{width:70px;text-align:center;padding:2px 3px;font-size:13px;border:1px solid #e6eaf3}
+tr.big-row td:nth-child(2){color:var(--big);font-weight:700}
+tr.small-row td:nth-child(2){color:var(--small);font-weight:700}
+.tablewrap{overflow-x:auto}
+.readout{font-family:"SFMono-Regular",Consolas,monospace;font-size:15px;
+  background:#0f1729;color:#7ee3a8;border-radius:7px;padding:9px 13px;display:inline-block;margin:4px 6px 4px 0}
+.readout b{color:#ffd166;font-weight:700}
+.kv{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.kv div{background:#f2f5fb;border:1px solid var(--line);border-radius:7px;padding:6px 11px;font-size:13.5px}
+.kv b{color:var(--accent)}
+.tag{display:inline-block;background:#eef2f9;border-radius:5px;padding:1px 7px;font-size:12.5px;color:var(--sub)}
+.stepnum{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;
+  background:var(--accent);color:#fff;border-radius:50%;font-size:13px;margin-right:6px}
+svg{max-width:100%;height:auto;display:block}
+.svgscroll{overflow-x:auto;background:#fbfcfe;border:1px solid var(--line);border-radius:9px;padding:6px}
+ul.tight{margin:6px 0;padding-left:22px} ul.tight li{margin:3px 0}
+.sub{color:var(--sub);font-size:13.5px}
+.mini{font-size:12.5px;color:var(--sub)}
+.stub{text-align:center;padding:50px 20px;color:var(--sub)}
+.flexrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.flexrow>div{flex:1;min-width:150px}
+hr.soft{border:0;border-top:1px dashed var(--line);margin:14px 0}
+.badge-ok{color:var(--ok);font-weight:700}
+.badge-no{color:var(--warn);font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>重力加速度 <i>g</i> 測定 — 虛擬實驗室</h1>
+  <p>九十二學年度 台灣省第二區 高級中學數學、資訊與自然學科能力競賽　物理科實驗試題（競賽日期 92.11.7）</p>
+</header>
+
+<nav id="nav">
+  <button data-t="t1" class="on">① 原理與器材</button>
+  <button data-t="t2">② 第一部分：游標尺量珠徑</button>
+  <button data-t="t3">③ 第二部分：單擺計時</button>
+  <button data-t="t4">④ 第二部分：T²–ℓ 迴歸求 g</button>
+  <button data-t="t5">⑤ 第三部分：圓錐擺</button>
+  <button data-t="t6">⑥ 誤差分析與真值揭曉</button>
+</nav>
+
+<main>
+
+<!-- ================= TAB 1 ================= -->
+<section id="t1" class="on">
+  <div class="card">
+    <h2>實驗目標</h2>
+    <p>本競賽三個部分環環相扣，共同目標是量出<b>板橋高中所在地的重力加速度 <i>g</i></b>。</p>
+    <div class="grid3">
+      <div class="note"><b>第一部分（5%）</b><br>游標尺量大、小鋼珠直徑各 10 次，求平均值與標準差。</div>
+      <div class="note"><b>第二部分（20%）</b><br>單擺：4 種擺長 × 2 種擺錘，作 ℓ–T² 圖，由斜率求 g；並分析誤差比例。</div>
+      <div class="note"><b>第三部分（15%）</b><br>圓錐擺：說明原理、量測方法與結果；並分析誤差比例。</div>
+    </div>
+    <div class="okbox"><b>三部分怎麼串起來？</b>單擺與圓錐擺的「擺長」都必須量到<b>球心</b>，而直尺只能量到球頂——
+      所以第一部分量到的直徑 <i>d</i>，正是第二、三部分計算 ℓ = L<sub>繩</sub> + d/2 的必要輸入。
+      這也是本實驗把「量直徑」放在第一題的真正理由。</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>單擺原理</h2>
+      <div class="svgscroll">
+        <svg viewBox="0 0 340 250">
+          <line x1="40" y1="30" x2="300" y2="30" stroke="#8a97b0" stroke-width="3"/>
+          <g stroke="#8a97b0" stroke-width="1.5">
+            <line x1="50" y1="30" x2="40" y2="20"/><line x1="80" y1="30" x2="70" y2="20"/>
+            <line x1="110" y1="30" x2="100" y2="20"/><line x1="140" y1="30" x2="130" y2="20"/>
+            <line x1="170" y1="30" x2="160" y2="20"/><line x1="200" y1="30" x2="190" y2="20"/>
+            <line x1="230" y1="30" x2="220" y2="20"/><line x1="260" y1="30" x2="250" y2="20"/>
+            <line x1="290" y1="30" x2="280" y2="20"/>
+          </g>
+          <line x1="170" y1="30" x2="170" y2="215" stroke="#b9c3d6" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <line x1="170" y1="30" x2="108" y2="200" stroke="#33415c" stroke-width="2"/>
+          <circle cx="108" cy="200" r="13" fill="#1d4ed8"/>
+          <path d="M170 110 A 80 80 0 0 0 143 145" fill="none" stroke="#c2410c" stroke-width="1.6"/>
+          <text x="146" y="108" font-size="13" fill="#c2410c">θ</text>
+          <text x="150" y="125" font-size="13" fill="#33415c" font-style="italic">ℓ</text>
+          <line x1="108" y1="200" x2="108" y2="238" stroke="#0f7b4f" stroke-width="2" marker-end="url(#ar)"/>
+          <text x="113" y="234" font-size="12" fill="#0f7b4f">mg</text>
+          <line x1="108" y1="200" x2="147" y2="228" stroke="#b02a2a" stroke-width="2" marker-end="url(#ar2)"/>
+          <text x="150" y="228" font-size="12" fill="#b02a2a">mg sinθ</text>
+          <defs>
+            <marker id="ar" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+              <path d="M0 0 L7 3.5 L0 7 z" fill="#0f7b4f"/></marker>
+            <marker id="ar2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+              <path d="M0 0 L7 3.5 L0 7 z" fill="#b02a2a"/></marker>
+          </defs>
+        </svg>
+      </div>
+      <p>切線方向的運動方程式：</p>
+      <div class="eq">m ℓ θ&Prime; = − m g sin θ　→　θ&Prime; = −(g/ℓ) sin θ</div>
+      <p>小角度時 sin θ ≈ θ，為簡諧運動：</p>
+      <div class="eq">T = 2π √(ℓ / g)　⟹　<b>T² = (4π² / g) · ℓ</b></div>
+      <p>所以以 <b>ℓ 為橫軸、T² 為縱軸</b>作圖應得一直線，斜率 <i>k</i> = 4π²/g，故</p>
+      <div class="eq">g = 4π² / k</div>
+      <div class="note"><b>為什麼要用斜率而不是單點代入？</b>
+        若擺長有一個固定的量測偏移 δ（例如夾子內部的真正支點比你看到的位置高一點點），
+        單點法算出的每個 g 都會被拉偏；但迴歸時這個 δ 只會跑到<b>截距</b>裡，<b>斜率不受影響</b>。
+        這就是題目要求「作出擺長與週期平方圖，由其斜率求重力加速度」的原因。</div>
+    </div>
+
+    <div class="card">
+      <h2>圓錐擺原理</h2>
+      <div class="svgscroll">
+        <svg viewBox="0 0 340 250">
+          <line x1="60" y1="28" x2="290" y2="28" stroke="#8a97b0" stroke-width="3"/>
+          <line x1="185" y1="28" x2="185" y2="190" stroke="#b9c3d6" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <ellipse cx="185" cy="190" rx="78" ry="24" fill="none" stroke="#c2410c" stroke-width="1.6"/>
+          <line x1="185" y1="28" x2="107" y2="190" stroke="#33415c" stroke-width="2"/>
+          <circle cx="107" cy="190" r="11" fill="#1d4ed8"/>
+          <line x1="185" y1="190" x2="107" y2="190" stroke="#c2410c" stroke-width="1.6"/>
+          <text x="140" y="205" font-size="13" fill="#c2410c" font-style="italic">r</text>
+          <text x="191" y="120" font-size="13" fill="#5b6880" font-style="italic">h = L cos θ</text>
+          <text x="126" y="105" font-size="13" fill="#33415c" font-style="italic">L</text>
+          <path d="M185 78 A 50 50 0 0 0 161 106" fill="none" stroke="#c2410c" stroke-width="1.5"/>
+          <text x="163" y="80" font-size="13" fill="#c2410c">θ</text>
+          <line x1="107" y1="190" x2="107" y2="228" stroke="#0f7b4f" stroke-width="2" marker-end="url(#ar3)"/>
+          <text x="66" y="224" font-size="12" fill="#0f7b4f">mg</text>
+          <defs><marker id="ar3" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+            <path d="M0 0 L7 3.5 L0 7 z" fill="#0f7b4f"/></marker></defs>
+        </svg>
+      </div>
+      <p>鋼珠作等速圓周運動時，繩張力 <i>F</i> 的兩個分量分別提供平衡重力與向心力：</p>
+      <div class="eq">垂直：F cos θ = m g　　水平：F sin θ = m ω² r</div>
+      <p>兩式相除，並代入 r = L sin θ、ω = 2π/T：</p>
+      <div class="eq">tan θ = ω² r / g = ω² L sin θ / g　⟹　cos θ = g / (ω² L)</div>
+      <div class="eq">T = 2π √(L cos θ / g) = 2π √(h / g)　⟹　<b>T² = (4π² / g) · h</b></div>
+      <p>其中 <b>h = L cos θ = √(L² − r²)</b> 是懸點到圓軌道平面的<b>鉛直高度</b>。
+        形式與單擺完全相同，只是把 ℓ 換成 h——所以一樣可以用 h–T² 迴歸求 g。</p>
+      <div class="note"><b>兩條量測路線的誤差放大倍率不同：</b><br>
+        用量角器量 θ：dh/h = tan θ · dθ<br>
+        用直尺量 r：　dh/h = tan²θ · (dr/r)<br>
+        θ 小的時候 tan²θ ≪ tan θ，<b>量半徑通常比量角度準得多</b>。第 ⑤ 分頁會讓你實際比較。</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>本模擬內建的真實效應</h2>
+    <p class="sub">這個虛擬實驗室不是「輸入公式得到答案」，而是盡可能重現真實實驗台上會遇到的每一種誤差來源：</p>
+    <div class="grid2">
+      <ul class="tight">
+        <li><b>游標尺 1/20（0.05 mm）量化讀數</b>：必須自己看副尺對齊線，不會直接給數字。</li>
+        <li><b>鋼珠真圓度誤差</b>：同一顆珠子不同方向夾出來的值會有微小差異，10 次量測的標準差就是從這裡來的。</li>
+        <li><b>游標尺零點誤差</b>：可能不為零，請先歸零檢查。</li>
+        <li><b>直尺讀數量化到 0.05 cm</b>，並含視差隨機誤差。</li>
+        <li><b>隱藏的支點偏移 δ</b>：夾子內的有效支點位置你看不到，會製造迴歸截距。</li>
+      </ul>
+      <ul class="tight">
+        <li><b>非線性單擺數值積分</b>：不用小角度近似，大角度時週期自然變長 T ≈ T₀(1 + θ₀²/16)。</li>
+        <li><b>碼錶反應時間</b>：手動計時用你自己的手；模擬計時含隨機誤差與提前按停的系統偏差。</li>
+        <li><b>空氣阻力與樞軸摩擦</b>：振幅會隨時間衰減。</li>
+        <li><b>空氣浮力與附加質量</b>：使有效 g 略小（約 −0.023%）。</li>
+        <li><b>細繩質量</b>：小鋼珠受影響較大，這是題目要求「2 種擺錘」的物理理由之一。</li>
+      </ul>
+    </div>
+    <div class="warnbox">真值 <i>g</i>、鋼珠真實直徑、支點偏移在本次開啟時已隨機產生並隱藏，
+      請完成實驗後再到第 ⑥ 分頁揭曉，才有自我檢核的意義。
+      <button class="act ghost" id="newSession">重新開始一次新的實驗（重擲所有真值）</button></div>
+  </div>
+
+  <div class="card">
+    <h2>器材清單</h2>
+    <div class="kv" id="gearList"></div>
+  </div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section id="t2">
+  <div class="card">
+    <h2>第一部分：使用游標尺測量大、小鋼珠直徑（5%）</h2>
+    <p>各量 <b>10 次</b>，計算平均值 <span style="white-space:nowrap">x̄ = (1/N) Σ x<sub>i</sub></span>
+      與標準差 <span style="white-space:nowrap">s = √[ Σ(x<sub>i</sub> − x̄)² / (N − 1) ]</span>。</p>
+    <div class="note"><b>怎麼讀 1/20 游標尺：</b>
+      ① 先看副尺的「0」落在本尺哪兩條 mm 刻度之間 → 讀出整數 mm。
+      ② 再找副尺上<b>唯一與本尺刻度對齊</b>的那一條線，序號 × 0.05 mm 就是小數部分。
+      （副尺 20 格 = 39 mm，每格比本尺少 0.05 mm。）</div>
+  </div>
+
+  <div class="card">
+    <h2>游標尺</h2>
+    <div class="flexrow">
+      <div>
+        <label class="ctl">選擇待測物</label>
+        <select id="calTarget">
+          <option value="big">大鋼珠</option>
+          <option value="small">小鋼珠</option>
+          <option value="zero">歸零檢查（夾口閉合）</option>
+        </select>
+      </div>
+      <div style="flex:2">
+        <button class="act" id="btnClamp">夾取／重新夾取一次</button>
+        <button class="act ghost" id="btnZoom">切換放大</button>
+      </div>
+    </div>
+    <div class="svgscroll" style="margin-top:10px"><div id="caliperBox"></div></div>
+    <div class="flexrow" style="margin-top:10px">
+      <div>
+        <label class="ctl">你讀到的數值（mm）</label>
+        <input type="number" id="calInput" step="0.01" placeholder="例如 25.35">
+      </div>
+      <div>
+        <button class="act" id="btnRecord">確認並記錄</button>
+        <button class="act ghost" id="btnReveal">我讀不出來，顯示讀數</button>
+      </div>
+    </div>
+    <div id="calMsg" style="margin-top:8px"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="color:var(--big)">大鋼珠 10 次量測</h3>
+      <div class="tablewrap"><table id="tblBig"></table></div>
+      <div id="statBig"></div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--small)">小鋼珠 10 次量測</h3>
+      <div class="tablewrap"><table id="tblSmall"></table></div>
+      <div id="statSmall"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <button class="act ghost" id="btnAutoFill">快速補齊剩餘次數（自動讀數，省略讀尺練習）</button>
+    <button class="act danger" id="btnClearCal">清除全部直徑數據</button>
+    <div id="calSummary" style="margin-top:10px"></div>
+  </div>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section id="t3">
+  <div class="card">
+    <h2>第二部分：架設單擺並測量週期（15%）</h2>
+    <p>題目要求：<b>改變 4 種不同的擺長、2 種擺錘</b>，測出相應的週期，作出擺長與週期平方圖。
+      也就是至少需要 <b>4 × 2 = 8 組</b>數據。</p>
+    <div id="gateCal" class="warnbox"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>實驗裝置</h2>
+      <div class="svgscroll"><div id="pendBox"></div></div>
+      <div class="kv" id="pendReadout"></div>
+    </div>
+
+    <div class="card">
+      <h2>操作台</h2>
+      <label class="ctl">擺錘</label>
+      <select id="pBall"><option value="big">大鋼珠</option><option value="small">小鋼珠</option></select>
+
+      <label class="ctl">繩長調整旋鈕（示意刻度，<b>不可直接當數據</b>）<span id="pLenLab"></span></label>
+      <input type="range" id="pLen" min="18" max="88" step="1" value="30">
+      <button class="act ghost" id="btnMeasureLen">用直尺量「懸點 → 球頂」</button>
+      <span id="lenRead" class="mini"></span>
+
+      <label class="ctl">釋放角度旋鈕<span id="pAngLab"></span></label>
+      <input type="range" id="pAng" min="2" max="30" step="0.5" value="8">
+      <button class="act ghost" id="btnMeasureAng">用量角器讀取角度</button>
+      <span id="angRead" class="mini"></span>
+
+      <hr class="soft">
+      <div class="flexrow">
+        <div>
+          <label class="ctl">計時次數 N（週期數）</label>
+          <select id="pN"><option>10</option><option selected>20</option><option>30</option></select>
+        </div>
+        <div>
+          <label class="ctl">計時方式</label>
+          <select id="pMode">
+            <option value="manual">手動碼錶（用你自己的反應時間）</option>
+            <option value="auto">模擬計時（自動模擬人為誤差）</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="act big" id="btnRelease">放開擺錘（同時啟動碼錶）</button>
+        <button class="act big ghost" id="btnStop" disabled>按停碼錶</button>
+        <button class="act ghost" id="btnResetP">歸位</button>
+      </div>
+      <div style="margin-top:10px">
+        <span class="readout">碼錶 <b id="swatch">0.00</b> s</span>
+        <span class="readout">已完成週期 <b id="cyc">0</b></span>
+      </div>
+      <div id="pMsg" style="margin-top:8px"></div>
+      <button class="act" id="btnRecordP" disabled>將這次結果記入數據表</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>單擺數據表</h2>
+    <p class="mini">ℓ = （直尺量到的懸點→球頂長度 L）+（第一部分量到的半徑 d̄/2）。表中白底欄位可手動修改。</p>
+    <div class="tablewrap"><table id="tblPend"></table></div>
+    <div id="pendCover" style="margin-top:8px"></div>
+    <button class="act danger" id="btnClearP">清除單擺數據</button>
+  </div>
+</section>
+
+<!-- ================= TAB 4 ================= -->
+<section id="t4">
+  <div class="card">
+    <h2>第二部分：作圖與迴歸分析</h2>
+    <div class="flexrow">
+      <div>
+        <label class="ctl">橫軸採用</label>
+        <select id="fitX">
+          <option value="ell">ℓ = L + d̄/2（正確作法）</option>
+          <option value="L">只用繩長 L（忘了加球半徑）</option>
+        </select>
+      </div>
+      <div>
+        <label class="ctl">分析方式</label>
+        <select id="fitMode">
+          <option value="all">全部 8 組合併迴歸</option>
+          <option value="split">大／小鋼珠分開迴歸</option>
+        </select>
+      </div>
+    </div>
+    <div class="svgscroll" style="margin-top:12px"><div id="fitPlot"></div></div>
+    <div id="fitOut"></div>
+  </div>
+
+  <div class="card">
+    <h2>斜率是怎麼決定的？（題目要求說明）</h2>
+    <p>本模擬採<b>最小平方法（least-squares linear regression）</b>，即在 y = a + b x 中求使
+      Σ(y<sub>i</sub> − a − b x<sub>i</sub>)² 最小的 a、b：</p>
+    <div class="eq">b = Σ(x<sub>i</sub> − x̄)(y<sub>i</sub> − ȳ) ⁄ Σ(x<sub>i</sub> − x̄)²　　a = ȳ − b x̄</div>
+    <div class="eq">σ<sub>b</sub> = s ⁄ √[ Σ(x<sub>i</sub> − x̄)² ]　，　s² = Σ(殘差)² ⁄ (N − 2)</div>
+    <p>再由 g = 4π²/b 與誤差傳遞 σ<sub>g</sub>/g = σ<sub>b</sub>/b 得到 g 與其不確定度。</p>
+  </div>
+
+  <div class="card">
+    <h2>單點法對照（為什麼迴歸比較好）</h2>
+    <p class="sub">下表對每一組單獨代入 g<sub>i</sub> = 4π² ℓ<sub>i</sub> / T<sub>i</sub>²，與迴歸結果比較。</p>
+    <div class="tablewrap"><table id="tblSingle"></table></div>
+    <div id="singleOut"></div>
+  </div>
+</section>
+
+<!-- ================= TAB 5 ================= -->
+<section id="t5">
+  <div class="card">
+    <h2>第三部分：以圓錐擺測重力加速度（15%）</h2>
+    <p>題目要求：<b>說明圓錐擺原理、量測方法與結果</b>，並分析誤差來源。原理見第 ① 分頁：</p>
+    <div class="eq">T² = (4π² / g) · h　，　h = ℓ cos θ = √(ℓ² − r²)　（ℓ = L + d̄/2，量到球心）</div>
+    <p><b>量測方法</b>：<span class="stepnum">1</span>量繩長 L
+      <span class="stepnum">2</span>把鋼珠拉開到約定張角，沿切線方向推出使其作水平圓周運動（推出瞬間碼錶同時啟動）
+      <span class="stepnum">3</span>在擺動中用<b>量角器</b>讀繩的張角 θ，也用<b>直尺</b>量球心軌跡的直徑 D
+      <span class="stepnum">4</span>計時 N 圈 → T
+      <span class="stepnum">5</span>改變擺長或張角，重複至少 4 組，作 h–T² 圖由斜率求 g。</p>
+    <div class="note"><b>和單擺最大的不同：</b>圓錐擺的 T = 2π√(h/g) 是<b>任意張角都成立的精確式</b>，沒有單擺那種大角度修正。
+      但手推出去不可能剛好是正圓——推的速率或方向稍有偏差，軌道就會變成<b>會旋轉（進動）的橢圓</b>，
+      半徑與張角都在變。請注意俯視圖上的軌跡。</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>實驗裝置</h2>
+      <div class="mini">側視（含量角器與水平直尺）</div>
+      <div class="svgscroll"><div id="coneSide"></div></div>
+      <div class="flexrow" style="margin-top:10px;align-items:flex-start">
+        <div style="max-width:280px">
+          <div class="mini">俯視（球心軌跡，格線每 5 cm）</div>
+          <div class="svgscroll"><div id="coneTop"></div></div>
+        </div>
+        <div><div class="kv" id="coneLive"></div>
+          <div class="mini">軌跡若不是一個固定的圓，而是一圈圈轉動的橢圓，代表推出時速率或方向有偏差。</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>操作台</h2>
+      <label class="ctl">擺錘</label>
+      <select id="cBall"><option value="big">大鋼珠</option><option value="small">小鋼珠</option></select>
+
+      <label class="ctl">繩長調整旋鈕（示意刻度，不可直接當數據）<span id="cLenLab"></span></label>
+      <input type="range" id="cLen" min="25" max="88" step="1" value="50">
+      <button class="act ghost" id="btnConeLen">用直尺量「懸點 → 球頂」</button>
+      <span id="coneLenRead" class="mini"></span>
+
+      <label class="ctl">拉開的張角（推出前大約拉到這個角度）<span id="cAngLab"></span></label>
+      <input type="range" id="cAng" min="10" max="45" step="1" value="25">
+
+      <label class="ctl">推出手法</label>
+      <select id="cSkill">
+        <option value="0.03">一般（速率、方向誤差約 3%）</option>
+        <option value="0.01">非常小心（約 1%）</option>
+        <option value="0.07">隨手一推（約 7%）</option>
+      </select>
+
+      <hr class="soft">
+      <div class="flexrow">
+        <div><label class="ctl">計時圈數 N</label>
+          <select id="cN"><option>10</option><option selected>20</option><option>30</option></select></div>
+        <div><label class="ctl">計時方式</label>
+          <select id="cMode">
+            <option value="manual">手動碼錶（用你自己的反應時間）</option>
+            <option value="auto">模擬計時（自動模擬人為誤差）</option>
+          </select></div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="act big" id="btnConeGo">推出鋼珠（同時啟動碼錶）</button>
+        <button class="act big ghost" id="btnConeStop" disabled>按停碼錶</button>
+        <button class="act ghost" id="btnConeReset">歸位</button>
+      </div>
+      <div style="margin-top:10px">
+        <span class="readout">碼錶 <b id="cSwatch">0.00</b> s</span>
+        <span class="readout">已完成圈數 <b id="cRev">0</b></span>
+      </div>
+      <hr class="soft">
+      <div class="mini">擺動中（至少轉滿 1 圈後）才能量：</div>
+      <button class="act ghost" id="btnConeAng" disabled>量角器讀張角 θ</button>
+      <span id="coneAngRead" class="mini"></span><br>
+      <button class="act ghost" id="btnConeD" disabled>直尺量軌跡直徑 D</button>
+      <span id="coneDRead" class="mini"></span>
+      <div id="cMsg" style="margin-top:8px"></div>
+      <button class="act" id="btnConeRec" disabled>將這次結果記入數據表</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>圓錐擺數據表</h2>
+    <p class="mini">h<sub>θ</sub> = ℓ cos θ（量角器路線）；h<sub>r</sub> = √(ℓ² − r²)，r = D/2（直尺路線）。白底欄位可手動修改。</p>
+    <div class="tablewrap"><table id="tblCone"></table></div>
+    <div id="coneCover"></div>
+    <button class="act danger" id="btnClearCone">清除圓錐擺數據</button>
+  </div>
+
+  <div class="card">
+    <h2>h–T² 迴歸：兩條路線並列</h2>
+    <div class="svgscroll"><div id="conePlot"></div></div>
+    <div id="coneFitOut"></div>
+    <div class="note"><b>誤差放大倍率（由 h 的誤差傳遞推得）：</b><br>
+      量角器路線：Δh/h = tan θ · Δθ（Δθ 用弧度）<br>
+      直尺路線：　Δh/h = tan²θ · (Δr/r)<br>
+      <span id="coneAmp"></span></div>
+  </div>
+</section>
+
+<!-- ================= TAB 6 ================= -->
+<section id="t6">
+  <div class="card">
+    <h2>誤差比例分析（題目第二、三部分皆要求）</h2>
+    <p>以下用<b>你自己的數據平均值</b>估算每一個誤差來源造成 g 的相對誤差，再以<b>變異數（平方）</b>計算各自所佔的比例：</p>
+    <div class="eq">佔比<sub>i</sub> = (δg/g)<sub>i</sub>² ⁄ Σ (δg/g)<sub>j</sub>²</div>
+    <p class="sub">各量測工具的不確定度可以依你自己的實際操作感覺修改：</p>
+    <div class="flexrow">
+      <div><label class="ctl">停錶反應時間 σ<sub>t</sub> (s)</label><input type="number" id="eT" step="0.01" value="0.10"></div>
+      <div><label class="ctl">直尺量繩長 σ<sub>L</sub> (cm)</label><input type="number" id="eL" step="0.01" value="0.05"></div>
+      <div><label class="ctl">量角器讀擺動中的張角 σ<sub>θ</sub> (°)</label><input type="number" id="eA" step="0.1" value="0.8"></div>
+      <div><label class="ctl">直尺量運動中的軌跡直徑 σ<sub>D</sub> (cm)</label><input type="number" id="eD" step="0.05" value="0.40"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>A. 單擺的誤差預算</h2>
+    <div id="budPend"></div>
+  </div>
+
+  <div class="card">
+    <h2>B. 單擺：大角度修正後重新迴歸</h2>
+    <p>有限振幅的單擺週期為</p>
+    <div class="eq">T = T₀ ( 1 + θ₀²/16 + 11θ₀⁴/3072 + … )</div>
+    <p>把每一組的 T² 除以 (1 + θ₀²/16 + 11θ₀⁴/3072)² 換回小角度週期 T₀²，再迴歸一次：</p>
+    <div id="corrPend"></div>
+  </div>
+
+  <div class="card">
+    <h2>C. 圓錐擺的誤差預算（兩條路線）</h2>
+    <div id="budCone"></div>
+  </div>
+
+  <div class="card">
+    <h2>D. 真值揭曉</h2>
+    <div class="warnbox">揭曉後就看得到隱藏參數。建議先把第 ②～⑤ 分頁的結果與你自己的誤差估計寫下來再按。</div>
+    <button class="act big" id="btnReveal6">揭曉真值</button>
+    <div id="revealOut"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ========================================================================
+   基本工具
+   ======================================================================== */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function fmt(x,n){return (x===null||x===undefined||!isFinite(x))?"—":Number(x).toFixed(n);}
+function quant(x,q){return Math.round(x/q)*q;}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length;}
+function sdev(a){if(a.length<2)return NaN;const m=mean(a);
+  return Math.sqrt(a.reduce((s,v)=>s+(v-m)*(v-m),0)/(a.length-1));}
+
+/* ========================================================================
+   隱藏真值
+   ======================================================================== */
+const RHO_STEEL=7850, RHO_AIR=1.20, CD=0.47;
+let TRUTH, S;
+
+function newTruth(){
+  TRUTH = {
+    // 板橋 25.01°N、海拔約 10 m 的理論重力 9.7895 m/s²，另加微小地區異常
+    g: 9.7895 + randn()*0.0003,   // 地區重力異常 σ ≈ 30 mGal
+    ball: {
+      big:   {d: 25.40 + randn()*0.10, ov: 0.018 + Math.random()*0.030},
+      small: {d: 15.88 + randn()*0.08, ov: 0.014 + Math.random()*0.024}
+    },
+    // 夾子內有效支點比可見夾點高出的距離 (cm)，學生量不到
+    pivot: 0.08 + Math.random()*0.28,
+    // 游標尺零點誤差 (mm)
+    zero: [0,0,0.05,0.05,-0.05][Math.floor(Math.random()*5)],
+    // 樞軸線性阻尼係數 γ (1/s)
+    gam: 6.0e-4 + Math.random()*4.0e-4,
+    // 細繩線密度 (kg/m)
+    lam: 1.3e-4 + Math.random()*0.5e-4,
+    // 每次重新架設時的繩長實際偏移種子
+    setupSeed: Math.random()*1000
+  };
+}
+function newState(){
+  S = {
+    cal:{big:[],small:[]},
+    pend:[],
+    cone:[],
+    revealed:false,
+    cur:{L:null,ang:null,t:null,N:null,ball:null,done:false}
+  };
+}
+newTruth(); newState();
+
+function ballProps(k){
+  const d=TRUTH.ball[k].d/1000, V=Math.PI*d*d*d/6;
+  return {d, V, m:RHO_STEEL*V, A:Math.PI*d*d/4};
+}
+// 學生量到的平均直徑（mm）；未量測時回 null
+function measuredD(k){
+  const a=S.cal[k]; return a.length? mean(a) : null;
+}
+
+/* ========================================================================
+   分頁切換
+   ======================================================================== */
+$$("#nav button").forEach(b=>b.addEventListener("click",()=>{
+  $$("#nav button").forEach(x=>x.classList.remove("on"));
+  $$("main section").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); $("#"+b.dataset.t).classList.add("on");
+  if(b.dataset.t==="t3"){renderGate();drawPendulum();}
+  if(b.dataset.t==="t4"){renderFit();}
+  if(b.dataset.t==="t5"){drawCone();renderConeTable();}
+  if(b.dataset.t==="t6"){renderT6();}
+}));
+
+/* ========================================================================
+   TAB 1
+   ======================================================================== */
+const GEAR=["鋼珠 二個","細繩 一條","游標尺 一支","鐵架臺附夾子 一個","碼錶 一只",
+            "直尺(100 公分) 一把","透明膠帶 一個","超級小刀 一把","橡皮擦 一個",
+            "量角器 一個","方格紙 四張"];
+$("#gearList").innerHTML = GEAR.map(g=>"<div>"+g+"</div>").join("");
+$("#newSession").addEventListener("click",()=>{
+  if(!confirm("將重新隨機產生所有隱藏真值，並清空全部數據。確定嗎？"))return;
+  stopAnim(); coneStopAnim();
+  newTruth(); newState(); renderCal(); renderPendTable(); renderGate();
+  drawCaliper(null); drawPendulum(); renderFit();
+  coneResetUI(); renderConeTable(); renderT6();
+  alert("已重新開始。請從第 ② 分頁重新量測鋼珠直徑。");
+});
+
+/* ========================================================================
+   TAB 2：游標尺
+   ======================================================================== */
+let curReading=null, curTarget=null, zoomBig=false;
+
+function trueChord(k){
+  const b=TRUTH.ball[k];
+  // 真圓度：隨機方位的弦長變化 + 夾持力／操作微擾
+  return b.d + b.ov*Math.cos(2*Math.PI*Math.random()) + randn()*0.008;
+}
+function makeReading(k){
+  if(k==="zero") return quant(TRUTH.zero + randn()*0.004, 0.05);
+  let r = quant(trueChord(k) + TRUTH.zero + randn()*0.004, 0.05);
+  if(Math.random()<0.05) r += (Math.random()<0.5?0.05:-0.05); // 偶發看錯一格
+  return Math.round(r*100)/100;
+}
+
+function drawCaliper(reading){
+  const box=$("#caliperBox");
+  if(reading===null){box.innerHTML='<div class="stub">請先按「夾取」</div>';return;}
+  const pxmm = zoomBig?34:18;
+  const start = Math.floor(reading) - (zoomBig?2:5);
+  const span  = zoomBig?26:50;
+  const W = span*pxmm, H = 210, y0 = 118;   // y0 = 本尺刻度基線
+  const X = mm => (mm-start)*pxmm;
+  let s = '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'">';
+  // 夾口與鋼珠示意
+  s += '<rect x="0" y="6" width="'+W+'" height="26" fill="#e8edf6"/>';
+  s += '<rect x="'+(X(reading)-pxmm*0.5)+'" y="6" width="'+(pxmm*0.5)+'" height="52" fill="#9fb0cf"/>';
+  s += '<rect x="'+(X(0)-pxmm*0.5)+'" y="6" width="'+(pxmm*0.5)+'" height="52" fill="#9fb0cf"/>';
+  if(curTarget && curTarget!=="zero"){
+    const cx=(X(0)+X(reading))/2, r=Math.max(6,(X(reading)-X(0))/2-1);
+    s += '<circle cx="'+cx+'" cy="34" r="'+r+'" fill="#4b6fbf" opacity=".85"/>';
+  }
+  // 本尺
+  s += '<rect x="0" y="'+y0+'" width="'+W+'" height="34" fill="#f8fafd" stroke="#c9d3e6"/>';
+  for(let mm=Math.max(0,start); mm<=start+span; mm++){
+    const x=X(mm); if(x<0||x>W)continue;
+    const big = mm%10===0, mid = mm%5===0;
+    s+='<line x1="'+x+'" y1="'+y0+'" x2="'+x+'" y2="'+(y0+(big?18:mid?13:8))+'" stroke="#33415c" stroke-width="'+(big?1.6:1)+'"/>';
+    if(big) s+='<text x="'+x+'" y="'+(y0+31)+'" font-size="12" text-anchor="middle" fill="#33415c">'+(mm/10)+'</text>';
+  }
+  s+='<text x="'+(W-4)+'" y="'+(y0+31)+'" font-size="11" text-anchor="end" fill="#8a97b0">本尺 (cm)</text>';
+  // 副尺：20 格 = 39 mm
+  const vy=y0-42;
+  s += '<rect x="'+X(reading)+'" y="'+vy+'" width="'+(39*pxmm)+'" height="42" fill="#fff6e8" stroke="#d9a441"/>';
+  for(let i=0;i<=20;i++){
+    const x=X(reading + i*1.95); if(x<-20||x>W+20)continue;
+    const lab = i%2===0;
+    s+='<line x1="'+x+'" y1="'+(vy+42)+'" x2="'+x+'" y2="'+(vy+42-(lab?18:12))+'" stroke="#8a5a09" stroke-width="'+(lab?1.6:1)+'"/>';
+    if(lab) s+='<text x="'+x+'" y="'+(vy+12)+'" font-size="11" text-anchor="middle" fill="#8a5a09">'+(i/2)+'</text>';
+  }
+  s+='<text x="'+(X(reading)+4)+'" y="'+(vy-4)+'" font-size="11" fill="#8a5a09">副尺 (每格 0.05 mm，標號單位 0.1 mm)</text>';
+  s+='</svg>';
+  box.innerHTML=s;
+}
+
+$("#btnClamp").addEventListener("click",()=>{
+  curTarget = $("#calTarget").value;
+  curReading = makeReading(curTarget);
+  $("#calInput").value=""; $("#calMsg").innerHTML="";
+  drawCaliper(curReading);
+});
+$("#btnZoom").addEventListener("click",()=>{zoomBig=!zoomBig;drawCaliper(curReading);});
+$("#calTarget").addEventListener("change",()=>{curReading=null;curTarget=null;drawCaliper(null);});
+
+$("#btnReveal").addEventListener("click",()=>{
+  if(curReading===null){$("#calMsg").innerHTML='<div class="warnbox">請先按「夾取」。</div>';return;}
+  $("#calInput").value=curReading.toFixed(2);
+  $("#calMsg").innerHTML='<div class="note">正確讀數為 <b>'+curReading.toFixed(2)+
+    ' mm</b>（本尺 '+Math.floor(curReading)+' mm ＋ 副尺第 '+
+    Math.round((curReading-Math.floor(curReading))/0.05)+' 格 × 0.05 mm）。</div>';
+});
+
+$("#btnRecord").addEventListener("click",()=>{
+  if(curReading===null){$("#calMsg").innerHTML='<div class="warnbox">請先按「夾取」。</div>';return;}
+  if(curTarget==="zero"){
+    $("#calMsg").innerHTML='<div class="note">歸零檢查的讀數為 <b>'+curReading.toFixed(2)+
+      ' mm</b>。若不為 0，之後每一筆讀數都應扣掉這個零點誤差（本模擬的數據表不會自動幫你扣）。</div>';
+    return;
+  }
+  const v=parseFloat($("#calInput").value);
+  if(!isFinite(v)){$("#calMsg").innerHTML='<div class="warnbox">請先輸入你讀到的數值。</div>';return;}
+  if(S.cal[curTarget].length>=10){
+    $("#calMsg").innerHTML='<div class="warnbox">這顆鋼珠已經量滿 10 次了。</div>';return;}
+  const ok = Math.abs(v-curReading)<1e-6;
+  S.cal[curTarget].push(v);
+  $("#calMsg").innerHTML = ok
+    ? '<div class="okbox">讀數正確，已記錄 '+v.toFixed(2)+' mm。</div>'
+    : '<div class="warnbox">已記錄你的讀數 '+v.toFixed(2)+' mm，但游標尺實際顯示的是 <b>'+
+      curReading.toFixed(2)+' mm</b>（讀尺誤差也是真實誤差來源之一，本次仍照你的讀數計入）。</div>';
+  curReading=null; drawCaliper(null); $("#calInput").value="";
+  renderCal();
+});
+
+$("#btnAutoFill").addEventListener("click",()=>{
+  ["big","small"].forEach(k=>{ while(S.cal[k].length<10) S.cal[k].push(makeReading(k)); });
+  curReading=null;drawCaliper(null);renderCal();
+});
+$("#btnClearCal").addEventListener("click",()=>{
+  if(!confirm("清除全部直徑數據？"))return;
+  S.cal={big:[],small:[]}; renderCal();
+});
+
+function calTable(k,elId){
+  const a=S.cal[k];
+  let h='<tr><th style="width:60px">次數</th><th>直徑 (mm)</th><th style="width:60px"></th></tr>';
+  for(let i=0;i<10;i++){
+    h+='<tr><td>'+(i+1)+'</td><td>'+(a[i]!==undefined?
+      '<input type="number" step="0.01" data-k="'+k+'" data-i="'+i+'" class="calcell" value="'+a[i].toFixed(2)+'">'
+      :'<span class="mini">—</span>')+'</td><td>'+
+      (a[i]!==undefined?'<button class="act danger" style="padding:1px 7px;font-size:12px" data-del="'+k+'" data-di="'+i+'">×</button>':'')+
+      '</td></tr>';
+  }
+  $(elId).innerHTML=h;
+}
+function renderCal(){
+  calTable("big","#tblBig"); calTable("small","#tblSmall");
+  ["big","small"].forEach(k=>{
+    const a=S.cal[k], el=$(k==="big"?"#statBig":"#statSmall");
+    if(a.length===0){el.innerHTML='<div class="mini">尚無數據</div>';return;}
+    const m=mean(a), s=sdev(a);
+    el.innerHTML='<div class="kv"><div>N = <b>'+a.length+'</b></div>'+
+      '<div>平均 d̄ = <b>'+fmt(m,3)+'</b> mm</div>'+
+      '<div>標準差 s = <b>'+(a.length>1?fmt(s,3):"—")+'</b> mm</div>'+
+      '<div>半徑 d̄/2 = <b>'+fmt(m/2,3)+'</b> mm</div>'+
+      '<div>標準誤 s/√N = <b>'+(a.length>1?fmt(s/Math.sqrt(a.length),4):"—")+'</b> mm</div></div>';
+  });
+  const nb=S.cal.big.length, ns=S.cal.small.length;
+  $("#calSummary").innerHTML = (nb>=10&&ns>=10)
+    ? '<div class="okbox">第一部分完成。大鋼珠 d̄ = <b>'+fmt(mean(S.cal.big),3)+
+      '</b> mm、小鋼珠 d̄ = <b>'+fmt(mean(S.cal.small),3)+'</b> mm，可以進行第二部分了。</div>'
+    : '<div class="note">進度：大鋼珠 '+nb+'/10、小鋼珠 '+ns+'/10。兩顆都滿 10 次後才能開始單擺實驗。</div>';
+  renderGate(); drawPendulum();
+}
+document.addEventListener("input",e=>{
+  if(e.target.classList.contains("calcell")){
+    const v=parseFloat(e.target.value);
+    if(isFinite(v)){S.cal[e.target.dataset.k][+e.target.dataset.i]=v;
+      const k=e.target.dataset.k,a=S.cal[k],el=$(k==="big"?"#statBig":"#statSmall");
+      const m=mean(a),s=sdev(a);
+      el.innerHTML='<div class="kv"><div>N = <b>'+a.length+'</b></div><div>平均 d̄ = <b>'+fmt(m,3)+
+        '</b> mm</div><div>標準差 s = <b>'+fmt(s,3)+'</b> mm</div><div>半徑 d̄/2 = <b>'+fmt(m/2,3)+
+        '</b> mm</div><div>標準誤 s/√N = <b>'+fmt(s/Math.sqrt(a.length),4)+'</b> mm</div></div>';
+    }
+  }
+});
+document.addEventListener("click",e=>{
+  if(e.target.dataset.del){
+    S.cal[e.target.dataset.del].splice(+e.target.dataset.di,1); renderCal();
+  }
+  if(e.target.dataset.delp!==undefined){
+    S.pend.splice(+e.target.dataset.delp,1); renderPendTable(); renderFit();
+  }
+});
+
+/* ========================================================================
+   TAB 3：單擺
+   ======================================================================== */
+// 真實懸掛長度（夾點可見處 → 球頂），含本次架設的隨機偏移
+function actualHang(nominalCm){
+  const jitter = Math.sin((nominalCm*7.31+TRUTH.setupSeed)*1.7)*0.35; // 可重現的 ±0.35 cm
+  return nominalCm + jitter;
+}
+// 建立單擺物理模型
+function pendModel(ballKey, nominalCm){
+  const bp = ballProps(ballKey);
+  const hangM = actualHang(nominalCm)/100;
+  const ell   = hangM + bp.d/2 + TRUTH.pivot/100;     // 真實擺長（到球心）
+  const ms    = TRUTH.lam*ell;                        // 細繩質量
+  const mEff  = bp.m*(1 + 0.5*RHO_AIR*bp.V/bp.m);     // 附加質量
+  const gEff  = TRUTH.g*(1 - RHO_AIR/RHO_STEEL);      // 浮力修正
+  // 含繩質量的等效角頻率平方
+  const w2 = gEff*(bp.m + ms/2)/((mEff + ms/3)*ell);
+  const kq = 0.5*RHO_AIR*CD*bp.A*ell/bp.m;            // 二次空氣阻力
+  const kl = 2*TRUTH.gam;                             // 樞軸線性阻尼
+  return {w2, kq, kl, ell, hangM, bp};
+}
+function pendAcc(M, th, w){
+  return -M.w2*Math.sin(th) - M.kq*Math.abs(w)*w - M.kl*w;
+}
+// 快速模擬：回傳完成第 N 個週期的真實時刻
+function simPeriods(M, th0, N){
+  let th=th0, w=0, t=0, pw=0, n=0;
+  const dt=5e-4, maxT=N*2*Math.PI/Math.sqrt(M.w2)*1.4+5;
+  while(t<maxT){
+    const a=pendAcc(M,th,w); w+=a*dt; th+=w*dt; t+=dt;
+    if(pw>0 && w<=0){ n++; const f=pw/(pw-w+1e-18);
+      if(n>=N) return t-dt+f*dt; }
+    pw=w;
+  }
+  return NaN;
+}
+
+let PA = {M:null, th:0, w:0, t:0, pw:0, cyc:0, run:false, raf:null, last:0,
+          lenRead:null, angRead:null, stopT:null, ball:"big", nominal:30};
+
+function drawPendulum(){
+  const box=$("#pendBox");
+  const nominal=+$("#pLen").value, ball=$("#pBall").value;
+  const ang = PA.run? PA.th : (+$("#pAng").value)*Math.PI/180;
+  const hang = actualHang(nominal);
+  const bp = ballProps(ball);
+  const rCm = bp.d*100/2;
+  const scale=4.3, W=430, H=500, px=250, py=48;
+  const Lpx=(hang+rCm)*scale;
+  const bx=px+Lpx*Math.sin(ang), by=py+Lpx*Math.cos(ang);
+  let s='<svg viewBox="0 0 '+W+' '+H+'">';
+  // 鐵架臺
+  s+='<rect x="34" y="452" width="150" height="16" rx="3" fill="#7a869c"/>';
+  s+='<rect x="100" y="58" width="13" height="398" fill="#8e9ab0"/>';
+  s+='<rect x="100" y="52" width="190" height="12" rx="3" fill="#8e9ab0"/>';
+  s+='<rect x="'+(px-16)+'" y="40" width="32" height="18" rx="3" fill="#5c6a84"/>';
+  s+='<text x="'+(px+22)+'" y="36" font-size="11" fill="#8a97b0">夾點（可見）</text>';
+  // 量角器
+  s+='<path d="M'+(px-92)+' '+py+' A 92 92 0 0 0 '+(px+92)+' '+py+'" fill="#fff8e7" stroke="#d9a441" opacity=".55"/>';
+  for(let a=-40;a<=40;a+=5){
+    const r1=92,r2=(a%10===0)?78:84,rad=a*Math.PI/180;
+    s+='<line x1="'+(px+r1*Math.sin(rad))+'" y1="'+(py+r1*Math.cos(rad))+
+       '" x2="'+(px+r2*Math.sin(rad))+'" y2="'+(py+r2*Math.cos(rad))+'" stroke="#d9a441" stroke-width="1"/>';
+    if(a%10===0)s+='<text x="'+(px+70*Math.sin(rad))+'" y="'+(py+70*Math.cos(rad)+4)+
+       '" font-size="9" text-anchor="middle" fill="#a97b1c">'+Math.abs(a)+'</text>';
+  }
+  // 鉛直參考線
+  s+='<line x1="'+px+'" y1="'+py+'" x2="'+px+'" y2="'+(py+Lpx+30)+'" stroke="#c6cfe0" stroke-dasharray="5 5"/>';
+  // 直尺
+  s+='<rect x="332" y="'+py+'" width="30" height="'+(100*scale)+'" fill="#fdf8e6" stroke="#cbbf92"/>';
+  for(let c=0;c<=100;c++){
+    const y=py+c*scale, big=c%10===0;
+    s+='<line x1="332" y1="'+y+'" x2="'+(332+(big?16:c%5===0?11:6))+'" y2="'+y+'" stroke="#8a7a45" stroke-width="'+(big?1.2:.7)+'"/>';
+    if(big)s+='<text x="'+(332+18)+'" y="'+(y+4)+'" font-size="9" fill="#8a7a45">'+c+'</text>';
+  }
+  s+='<text x="332" y="'+(py-6)+'" font-size="10" fill="#8a7a45">直尺 (cm)</text>';
+  // 擺
+  s+='<line x1="'+px+'" y1="'+py+'" x2="'+bx+'" y2="'+by+'" stroke="#33415c" stroke-width="1.6"/>';
+  s+='<circle cx="'+bx+'" cy="'+by+'" r="'+(rCm*scale)+'" fill="'+(ball==="big"?"#1d4ed8":"#b45309")+'"/>';
+  s+='<circle cx="'+bx+'" cy="'+by+'" r="1.6" fill="#fff"/>';
+  s+='</svg>';
+  box.innerHTML=s;
+  $("#pLenLab").textContent = "（約 "+nominal+" cm）";
+  $("#pAngLab").textContent = "（旋鈕 "+(+$("#pAng").value).toFixed(1)+"°）";
+  const dm=measuredD(ball);
+  $("#pendReadout").innerHTML =
+    '<div>擺錘：<b>'+(ball==="big"?"大":"小")+'鋼珠</b></div>'+
+    '<div>質量 ≈ <b>'+fmt(bp.m*1000,1)+'</b> g</div>'+
+    '<div>你量到的 d̄/2 = <b>'+(dm?fmt(dm/20,3):"未量測")+'</b> cm</div>';
+}
+["pLen","pAng","pBall"].forEach(id=>$("#"+id).addEventListener("input",()=>{
+  if(PA.run)return;
+  PA.lenRead=null;PA.angRead=null;$("#lenRead").textContent="";$("#angRead").textContent="";
+  PA.stopT=null;$("#btnRecordP").disabled=true;$("#swatch").textContent="0.00";$("#cyc").textContent="0";
+  drawPendulum();
+}));
+
+$("#btnMeasureLen").addEventListener("click",()=>{
+  const nominal=+$("#pLen").value;
+  const truth=actualHang(nominal);
+  PA.lenRead = quant(truth + randn()*0.04, 0.05);
+  PA.nominal = nominal;
+  $("#lenRead").innerHTML = '讀數 <b>'+PA.lenRead.toFixed(2)+'</b> cm（懸點→球頂）';
+});
+$("#btnMeasureAng").addEventListener("click",()=>{
+  const a=+$("#pAng").value;
+  PA.angRead = quant(a + randn()*0.45, 0.5);
+  $("#angRead").innerHTML = '讀數 <b>'+PA.angRead.toFixed(1)+'</b>°';
+});
+
+function stopAnim(){ if(PA.raf)cancelAnimationFrame(PA.raf); PA.raf=null; PA.run=false; }
+
+$("#btnRelease").addEventListener("click",()=>{
+  if(PA.lenRead===null){$("#pMsg").innerHTML='<div class="warnbox">請先用直尺量出繩長。</div>';return;}
+  if(PA.angRead===null){$("#pMsg").innerHTML='<div class="warnbox">請先用量角器讀出釋放角度。</div>';return;}
+  const dm=measuredD($("#pBall").value);
+  if(!dm){$("#pMsg").innerHTML='<div class="warnbox">請先回第 ② 分頁量出這顆鋼珠的直徑。</div>';return;}
+  PA.ball=$("#pBall").value;
+  PA.M = pendModel(PA.ball, +$("#pLen").value);
+  PA.th = (+$("#pAng").value)*Math.PI/180; PA.w=0; PA.t=0; PA.pw=0; PA.cyc=0; PA.stopT=null;
+  const N=+$("#pN").value;
+  $("#pMsg").innerHTML="";
+  $("#btnRecordP").disabled=true;
+
+  if($("#pMode").value==="auto"){
+    const tTrue = simPeriods(PA.M, PA.th, N);
+    // 放開即自動起錶 → 起點無誤差；只有「停錶」一次人為誤差：
+    // 隨機部分取單次反應時間散佈 σ ≈ 0.10 s，系統部分取預期性提前按停 −0.03 s
+    const tMeas = Math.max(0.01, tTrue + randn()*0.10 - 0.03);
+    PA.stopT = Math.round(tMeas*100)/100; PA.cyc=N;
+    $("#swatch").textContent=PA.stopT.toFixed(2); $("#cyc").textContent=N;
+    $("#pMsg").innerHTML='<div class="okbox">模擬計時完成：'+N+' 個週期共 <b>'+PA.stopT.toFixed(2)+
+      '</b> s，T = <b>'+(PA.stopT/N).toFixed(4)+'</b> s。</div>';
+    $("#btnRecordP").disabled=false;
+    drawPendulum();
+    return;
+  }
+  // 手動：即時動畫 + 你自己的碼錶
+  PA.run=true; PA.last=performance.now();
+  $("#btnRelease").disabled=true; $("#btnStop").disabled=false;
+  const loop=(now)=>{
+    let dtReal=Math.min((now-PA.last)/1000,0.05); PA.last=now;
+    const h=5e-4; let acc=dtReal;
+    while(acc>0){
+      const dt=Math.min(h,acc);
+      const a=pendAcc(PA.M,PA.th,PA.w); PA.w+=a*dt; PA.th+=PA.w*dt; PA.t+=dt; acc-=dt;
+      if(PA.pw>0&&PA.w<=0)PA.cyc++;
+      PA.pw=PA.w;
+    }
+    $("#swatch").textContent=PA.t.toFixed(2);
+    $("#cyc").textContent=PA.cyc;
+    drawPendulum();
+    if(PA.t>N*2*Math.PI/Math.sqrt(PA.M.w2)+20){ // 逾時保護
+      stopAnim();$("#btnRelease").disabled=false;$("#btnStop").disabled=true;
+      $("#pMsg").innerHTML='<div class="warnbox">計時逾時，請重新放開。</div>';return;
+    }
+    PA.raf=requestAnimationFrame(loop);
+  };
+  PA.raf=requestAnimationFrame(loop);
+});
+
+$("#btnStop").addEventListener("click",()=>{
+  if(!PA.run)return;
+  stopAnim();
+  PA.stopT=Math.round(PA.t*100)/100;
+  $("#btnRelease").disabled=false; $("#btnStop").disabled=true;
+  const N=+$("#pN").value;
+  const msg = (PA.cyc!==N)
+    ? '<div class="warnbox">你在完成 <b>'+PA.cyc+'</b> 個週期時按停，但設定的是 '+N+
+      ' 個。記入數據表時將以你實際計到的 '+PA.cyc+' 個週期計算。</div>'
+    : '<div class="okbox">'+N+' 個週期共 <b>'+PA.stopT.toFixed(2)+'</b> s，T = <b>'+
+      (PA.stopT/N).toFixed(4)+'</b> s。</div>';
+  $("#pMsg").innerHTML=msg;
+  $("#btnRecordP").disabled = PA.cyc<1;
+});
+$("#btnResetP").addEventListener("click",()=>{
+  stopAnim(); PA.th=(+$("#pAng").value)*Math.PI/180; PA.w=0;PA.t=0;PA.cyc=0;PA.stopT=null;
+  $("#swatch").textContent="0.00";$("#cyc").textContent="0";
+  $("#btnRelease").disabled=false;$("#btnStop").disabled=true;$("#btnRecordP").disabled=true;
+  drawPendulum();
+});
+
+$("#btnRecordP").addEventListener("click",()=>{
+  const N = ($("#pMode").value==="auto")? +$("#pN").value : PA.cyc;
+  if(!PA.stopT||N<1)return;
+  const dm=measuredD(PA.ball);
+  S.pend.push({ball:PA.ball, L:PA.lenRead, r:dm/20, N:N, t:PA.stopT, ang:PA.angRead,
+                nominal:PA.nominal});
+  $("#btnRecordP").disabled=true;
+  $("#pMsg").innerHTML='<div class="okbox">已記入數據表（目前共 '+S.pend.length+' 組）。</div>';
+  renderPendTable(); renderFit();
+});
+$("#btnClearP").addEventListener("click",()=>{
+  if(!confirm("清除全部單擺數據？"))return;
+  S.pend=[]; renderPendTable(); renderFit();
+});
+
+function renderGate(){
+  const nb=S.cal.big.length, ns=S.cal.small.length;
+  $("#gateCal").innerHTML = (nb>=10&&ns>=10)
+    ? '<div class="okbox" style="margin:0">已取得 d̄(大) = <b>'+fmt(mean(S.cal.big),3)+
+      '</b> mm、d̄(小) = <b>'+fmt(mean(S.cal.small),3)+'</b> mm，可用來換算擺長。</div>'
+    : '尚未完成第一部分（大 '+nb+'/10、小 '+ns+'/10）。擺長需要球半徑才能算，請先回第 ② 分頁完成量測。';
+}
+function renderPendTable(){
+  let h='<tr><th>#</th><th>擺錘</th><th>L 繩長 (cm)</th><th>d̄/2 (cm)</th><th>ℓ (cm)</th>'+
+        '<th>θ₀ (°)</th><th>N</th><th>t (s)</th><th>T (s)</th><th>T² (s²)</th><th></th></tr>';
+  S.pend.forEach((r,i)=>{
+    const ell=r.L+r.r, T=r.t/r.N;
+    h+='<tr class="'+(r.ball==="big"?"big-row":"small-row")+'"><td>'+(i+1)+'</td><td>'+
+      (r.ball==="big"?"大":"小")+'</td>'+
+      '<td><input type="number" step="0.05" class="pcell" data-i="'+i+'" data-f="L" value="'+r.L.toFixed(2)+'"></td>'+
+      '<td>'+fmt(r.r,3)+'</td><td><b>'+fmt(ell,3)+'</b></td>'+
+      '<td>'+fmt(r.ang,1)+'</td><td>'+r.N+'</td>'+
+      '<td><input type="number" step="0.01" class="pcell" data-i="'+i+'" data-f="t" value="'+r.t.toFixed(2)+'"></td>'+
+      '<td>'+fmt(T,4)+'</td><td>'+fmt(T*T,4)+'</td>'+
+      '<td><button class="act danger" style="padding:1px 7px;font-size:12px" data-delp="'+i+'">×</button></td></tr>';
+  });
+  $("#tblPend").innerHTML=h;
+  // 覆蓋度檢查
+  const lens={big:new Set(),small:new Set()};
+  S.pend.forEach(r=>lens[r.ball].add(r.nominal));
+  const okB=lens.big.size>=4, okS=lens.small.size>=4;
+  $("#pendCover").innerHTML='<div class="'+((okB&&okS)?"okbox":"note")+'">'+
+    '題目要求 4 種擺長 × 2 種擺錘。目前：大鋼珠 <b>'+lens.big.size+'</b> 種擺長 '+
+    (okB?'<span class="badge-ok">✔</span>':'<span class="badge-no">✘</span>')+
+    '、小鋼珠 <b>'+lens.small.size+'</b> 種擺長 '+
+    (okS?'<span class="badge-ok">✔</span>':'<span class="badge-no">✘</span>')+'</div>';
+}
+document.addEventListener("input",e=>{
+  if(e.target.classList.contains("pcell")){
+    const v=parseFloat(e.target.value);
+    if(isFinite(v)){S.pend[+e.target.dataset.i][e.target.dataset.f]=v; renderPendTable(); renderFit();}
+  }
+});
+
+/* ========================================================================
+   TAB 4：迴歸
+   ======================================================================== */
+function linfit(pts){
+  const n=pts.length; if(n<2)return null;
+  const xb=mean(pts.map(p=>p[0])), yb=mean(pts.map(p=>p[1]));
+  let Sxx=0,Sxy=0,Syy=0;
+  pts.forEach(p=>{Sxx+=(p[0]-xb)**2;Sxy+=(p[0]-xb)*(p[1]-yb);Syy+=(p[1]-yb)**2;});
+  const b=Sxy/Sxx, a=yb-b*xb;
+  let ss=0; pts.forEach(p=>{const e=p[1]-a-b*p[0]; ss+=e*e;});
+  const s2 = n>2? ss/(n-2) : 0;
+  return {a,b,Sxx,n,
+    sb: n>2? Math.sqrt(s2/Sxx):NaN,
+    sa: n>2? Math.sqrt(s2*(1/n+xb*xb/Sxx)):NaN,
+    r2: 1-ss/(Syy||1e-18)};
+}
+function plot(el, series, fits, xlab, ylab){
+  const W=680,H=400,mL=76,mR=20,mT=20,mB=52;
+  let xs=[],ys=[];
+  series.forEach(s=>s.pts.forEach(p=>{xs.push(p[0]);ys.push(p[1]);}));
+  if(!xs.length){el.innerHTML='<div class="stub">尚無數據可作圖</div>';return;}
+  let x0=Math.min(0,...xs), x1=Math.max(...xs)*1.06;
+  let y0=Math.min(0,...ys), y1=Math.max(...ys)*1.08;
+  if(x1-x0<1e-9)x1=x0+1; if(y1-y0<1e-9)y1=y0+1;
+  const X=v=>mL+(v-x0)/(x1-x0)*(W-mL-mR);
+  const Y=v=>H-mB-(v-y0)/(y1-y0)*(H-mT-mB);
+  let s='<svg viewBox="0 0 '+W+' '+H+'">';
+  s+='<rect x="'+mL+'" y="'+mT+'" width="'+(W-mL-mR)+'" height="'+(H-mT-mB)+'" fill="#fdfdff" stroke="#dde3ee"/>';
+  const nt=6;
+  for(let i=0;i<=nt;i++){
+    const xv=x0+(x1-x0)*i/nt, yv=y0+(y1-y0)*i/nt;
+    s+='<line x1="'+X(xv)+'" y1="'+mT+'" x2="'+X(xv)+'" y2="'+(H-mB)+'" stroke="#eef1f7"/>';
+    s+='<line x1="'+mL+'" y1="'+Y(yv)+'" x2="'+(W-mR)+'" y2="'+Y(yv)+'" stroke="#eef1f7"/>';
+    s+='<text x="'+X(xv)+'" y="'+(H-mB+16)+'" font-size="11" text-anchor="middle" fill="#5b6880">'+xv.toFixed(2)+'</text>';
+    s+='<text x="'+(mL-7)+'" y="'+(Y(yv)+4)+'" font-size="11" text-anchor="end" fill="#5b6880">'+yv.toFixed(2)+'</text>';
+  }
+  fits.forEach(f=>{
+    if(!f.fit)return;
+    s+='<line x1="'+X(x0)+'" y1="'+Y(f.fit.a+f.fit.b*x0)+'" x2="'+X(x1)+'" y2="'+Y(f.fit.a+f.fit.b*x1)+
+       '" stroke="'+f.color+'" stroke-width="1.8" stroke-dasharray="'+(f.dash||"")+'"/>';
+  });
+  series.forEach(se=>se.pts.forEach(p=>{
+    s+='<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="5" fill="'+se.color+'" stroke="#fff" stroke-width="1.4"/>';
+  }));
+  s+='<text x="'+((mL+W-mR)/2)+'" y="'+(H-10)+'" font-size="13" text-anchor="middle" fill="#33415c">'+xlab+'</text>';
+  s+='<text x="16" y="'+((mT+H-mB)/2)+'" font-size="13" text-anchor="middle" fill="#33415c" transform="rotate(-90,16,'+((mT+H-mB)/2)+')">'+ylab+'</text>';
+  let lx=mL+14, ly=mT+18;
+  series.forEach(se=>{
+    if(!se.pts.length)return;
+    s+='<circle cx="'+lx+'" cy="'+(ly-4)+'" r="5" fill="'+se.color+'"/>';
+    s+='<text x="'+(lx+10)+'" y="'+ly+'" font-size="12" fill="#33415c">'+se.label+'</text>';
+    ly+=18;
+  });
+  s+='</svg>';
+  el.innerHTML=s;
+}
+function renderFit(){
+  const useEll = $("#fitX").value==="ell";
+  const mode   = $("#fitMode").value;
+  const pick = r => ({x:(useEll? r.L+r.r : r.L)/100, y:(r.t/r.N)**2});
+  const bigPts   = S.pend.filter(r=>r.ball==="big").map(r=>{const p=pick(r);return [p.x,p.y];});
+  const smallPts = S.pend.filter(r=>r.ball==="small").map(r=>{const p=pick(r);return [p.x,p.y];});
+  const allPts   = bigPts.concat(smallPts);
+
+  const fitAll=linfit(allPts), fitB=linfit(bigPts), fitS=linfit(smallPts);
+  const series=[{pts:bigPts,color:"#1d4ed8",label:"大鋼珠"},{pts:smallPts,color:"#b45309",label:"小鋼珠"}];
+  const fits = (mode==="all")
+    ? [{fit:fitAll,color:"#0f7b4f"}]
+    : [{fit:fitB,color:"#1d4ed8"},{fit:fitS,color:"#b45309",dash:"6 4"}];
+  plot($("#fitPlot"), series, fits, (useEll?"擺長 ℓ = L + d̄/2  (m)":"繩長 L  (m)"), "週期平方 T²  (s²)");
+
+  const card=(name,f,col)=>{
+    if(!f) return '<div class="note">'+name+'：數據不足（至少 2 組）。</div>';
+    const g=4*Math.PI*Math.PI/f.b, sg=isFinite(f.sb)? g*f.sb/f.b : NaN;
+    return '<div class="card" style="box-shadow:none;margin:8px 0"><h3 style="color:'+col+'">'+name+'（N = '+f.n+'）</h3>'+
+      '<div class="kv">'+
+      '<div>斜率 k = <b>'+fmt(f.b,4)+'</b> ± '+fmt(f.sb,4)+' s²/m</div>'+
+      '<div>截距 a = <b>'+fmt(f.a,4)+'</b> ± '+fmt(f.sa,4)+' s²</div>'+
+      '<div>r² = <b>'+fmt(f.r2,5)+'</b></div></div>'+
+      '<div class="readout">g = 4π²/k = <b>'+fmt(g,4)+'</b> ± '+fmt(sg,4)+' m/s²</div>'+
+      (isFinite(f.a)&&isFinite(f.b)&&f.b!==0 ?
+        '<div class="mini">截距換算的等效長度偏移：a/k = <b>'+fmt(f.a/f.b*100,3)+'</b> cm</div>':'')+
+      '</div>';
+  };
+  let out="";
+  if(mode==="all") out += card("全部數據合併迴歸", fitAll, "#0f7b4f");
+  else out += card("大鋼珠", fitB, "#1d4ed8") + card("小鋼珠", fitS, "#b45309");
+
+  if(fitAll){
+    const off = fitAll.a/fitAll.b*100;
+    out += '<div class="note"><b>截距在告訴你什麼？</b>理論上 T² = (4π²/g)ℓ 通過原點。'+
+      '目前截距對應的長度偏移為 <b>'+fmt(off,3)+' cm</b>。'+
+      (useEll
+        ? '若這個值明顯不為零（超過幾個 mm），代表擺長裡還有一個你量不到的固定偏移——例如夾子內的真正支點位置。'+
+          '<b>重點是：斜率並不會因此受影響</b>，所以 g 仍然準確。'
+        : '你現在用的是繩長 L 而非 ℓ，理論上截距應該正好等於 (4π²/g)·(d̄/2)，'+
+          '也就是長度偏移 ≈ 球半徑 <b>'+fmt(measuredD("big")?measuredD("big")/20:0,3)+' cm</b>（大鋼珠）。'+
+          '請切換橫軸比較看看斜率有沒有變——這正是迴歸法優於單點法的地方。')+
+      '</div>';
+  }
+  $("#fitOut").innerHTML=out;
+
+  // 單點法對照
+  let h='<tr><th>#</th><th>擺錘</th><th>ℓ (m)</th><th>T (s)</th><th>g<sub>i</sub> = 4π²ℓ/T² (m/s²)</th></tr>';
+  const gs=[];
+  S.pend.forEach((r,i)=>{
+    const ell=(r.L+r.r)/100, T=r.t/r.N, gi=4*Math.PI*Math.PI*ell/(T*T);
+    gs.push(gi);
+    h+='<tr class="'+(r.ball==="big"?"big-row":"small-row")+'"><td>'+(i+1)+'</td><td>'+
+      (r.ball==="big"?"大":"小")+'</td><td>'+fmt(ell,4)+'</td><td>'+fmt(T,4)+'</td><td>'+fmt(gi,4)+'</td></tr>';
+  });
+  $("#tblSingle").innerHTML=h;
+  if(gs.length>1){
+    const m=mean(gs), s=sdev(gs);
+    const gReg = fitAll? 4*Math.PI*Math.PI/fitAll.b : NaN;
+    $("#singleOut").innerHTML='<div class="kv"><div>單點法平均 = <b>'+fmt(m,4)+'</b> m/s²</div>'+
+      '<div>標準差 = <b>'+fmt(s,4)+'</b></div><div>標準誤 = <b>'+fmt(s/Math.sqrt(gs.length),4)+'</b></div>'+
+      '<div>迴歸法 = <b>'+fmt(gReg,4)+'</b> m/s²</div></div>'+
+      '<div class="note">若兩者有系統性差距，通常代表擺長裡存在<b>固定偏移</b>（單點法會被它拉偏，迴歸法不會）；'+
+      '若兩者接近但都偏低，則要懷疑<b>釋放角度太大</b>造成的週期偏長（第 ⑥ 分頁會量化）。</div>';
+  } else $("#singleOut").innerHTML='<div class="mini">數據不足</div>';
+}
+["fitX","fitMode"].forEach(id=>$("#"+id).addEventListener("change",renderFit));
+
+/* ========================================================================
+   TAB 5：圓錐擺（完整球面擺，θ–φ 方程 RK4 積分）
+   ======================================================================== */
+function coneModel(ball, nominalCm){
+  const M = pendModel(ball, nominalCm);          // 同一套 ℓ、浮力、附加質量、繩質量
+  M.c = 0.5*RHO_AIR*CD*M.bp.A/M.bp.m;            // 二次阻力係數 (1/m)
+  return M;
+}
+// s = [θ, θ', φ, φ']
+function coneDeriv(M, s){
+  const th=s[0], thd=s[1], phd=s[3];
+  const sn=Math.sin(th), cs=Math.cos(th);
+  const v = M.ell*Math.sqrt(thd*thd + sn*sn*phd*phd);
+  const dmp = M.c*v + M.kl;
+  return [thd,
+          sn*cs*phd*phd - M.w2*sn - dmp*thd,
+          phd,
+          -2*(cs/sn)*thd*phd - dmp*phd];
+}
+function coneStep(M, s, h){
+  const k1=coneDeriv(M,s);
+  const s2=s.map((v,i)=>v+0.5*h*k1[i]); const k2=coneDeriv(M,s2);
+  const s3=s.map((v,i)=>v+0.5*h*k2[i]); const k3=coneDeriv(M,s3);
+  const s4=s.map((v,i)=>v+h*k3[i]);     const k4=coneDeriv(M,s4);
+  return s.map((v,i)=>v+h*(k1[i]+2*k2[i]+2*k3[i]+k4[i])/6);
+}
+// 手推出：實際拉開角度有 ±0.5° 手感誤差；推出速率與徑向方向各有 skill 比例的誤差
+function coneLaunch(M, knobDeg, skill){
+  const th0 = (knobDeg + randn()*0.5)*Math.PI/180;
+  const phIdeal = Math.sqrt(M.w2/Math.cos(th0));        // 正圓所需角速度
+  const phd0 = phIdeal*(1 + randn()*skill);
+  const thd0 = randn()*skill*Math.sin(th0)*phd0;        // 徑向速度分量
+  return [th0, thd0, 0, phd0];
+}
+function newConeStats(){return {thMax:-1, thMin:9, n:0};}
+function coneUpd(st, th){ if(th>st.thMax)st.thMax=th; if(th<st.thMin)st.thMin=th; st.n++; }
+// 自動：積分直到 φ 轉滿 N 圈，回傳精確時刻與軌道統計
+function coneRunAuto(M, s, N){
+  const h=1e-3, target=2*Math.PI*N, st=newConeStats();
+  let t=0, guard=0;
+  while(guard++<4e6){
+    const ns=coneStep(M,s,h);
+    coneUpd(st, ns[0]);
+    if(ns[2]>=target){ return {t: t + h*(target-s[2])/(ns[2]-s[2]), st, s:ns}; }
+    s=ns; t+=h;
+  }
+  return {t:NaN, st, s};
+}
+
+let CA = {M:null, s:null, t:0, run:false, raf:null, last:0, st:newConeStats(), trail:[],
+          lenRead:null, angRead:null, Dread:null, stopT:null, revs:0, ball:"big", nominal:50, knob:25};
+
+function coneStopAnim(){ if(CA.raf)cancelAnimationFrame(CA.raf); CA.raf=null; CA.run=false; }
+function coneResetUI(){
+  coneStopAnim();
+  CA.s=null; CA.t=0; CA.revs=0; CA.stopT=null; CA.st=newConeStats(); CA.trail=[];
+  CA.angRead=null; CA.Dread=null;
+  $("#coneAngRead").textContent=""; $("#coneDRead").textContent="";
+  $("#cSwatch").textContent="0.00"; $("#cRev").textContent="0";
+  $("#btnConeGo").disabled=false; $("#btnConeStop").disabled=true;
+  $("#btnConeRec").disabled=true; $("#btnConeAng").disabled=true; $("#btnConeD").disabled=true;
+  drawCone();
+}
+
+function drawCone(){
+  const nominal=+$("#cLen").value, ball=$("#cBall").value;
+  const bp=ballProps(ball), rCm=bp.d*100/2;
+  const ellCm = actualHang(nominal)+rCm+TRUTH.pivot;
+  let th, ph;
+  if(CA.s){th=CA.s[0]; ph=CA.s[2];} else {th=(+$("#cAng").value)*Math.PI/180; ph=0;}
+  // ---- 側視 ----
+  const scale=4.3, W=430, H=500, px=215, py=48;
+  const Lpx=ellCm*scale;
+  const bx=px+Lpx*Math.sin(th)*Math.cos(ph), by=py+Lpx*Math.cos(th);
+  const depth=Math.sin(ph);                        // 前後位置，用於遮擋與大小
+  let s='<svg viewBox="0 0 '+W+' '+H+'">';
+  s+='<rect x="20" y="452" width="150" height="16" rx="3" fill="#7a869c"/>';
+  s+='<rect x="30" y="58" width="13" height="398" fill="#8e9ab0"/>';
+  s+='<rect x="30" y="52" width="'+(px-10)+'" height="12" rx="3" fill="#8e9ab0"/>';
+  s+='<rect x="'+(px-16)+'" y="40" width="32" height="18" rx="3" fill="#5c6a84"/>';
+  // 量角器
+  s+='<path d="M'+(px-92)+' '+py+' A 92 92 0 0 0 '+(px+92)+' '+py+'" fill="#fff8e7" stroke="#d9a441" opacity=".55"/>';
+  for(let a=-50;a<=50;a+=5){
+    const r1=92,r2=(a%10===0)?78:84,rad=a*Math.PI/180;
+    s+='<line x1="'+(px+r1*Math.sin(rad))+'" y1="'+(py+r1*Math.cos(rad))+'" x2="'+(px+r2*Math.sin(rad))+'" y2="'+(py+r2*Math.cos(rad))+'" stroke="#d9a441"/>';
+    if(a%10===0)s+='<text x="'+(px+68*Math.sin(rad))+'" y="'+(py+68*Math.cos(rad)+4)+'" font-size="9" text-anchor="middle" fill="#a97b1c">'+Math.abs(a)+'</text>';
+  }
+  s+='<line x1="'+px+'" y1="'+py+'" x2="'+px+'" y2="'+(H-40)+'" stroke="#c6cfe0" stroke-dasharray="5 5"/>';
+  // 軌道平面（透視橢圓）
+  const orx=Lpx*Math.sin(th), oy=py+Lpx*Math.cos(th);
+  s+='<ellipse cx="'+px+'" cy="'+oy+'" rx="'+orx+'" ry="'+(orx*0.2)+'" fill="none" stroke="#c2410c" stroke-width="1" stroke-dasharray="4 3" opacity=".7"/>';
+  // 水平直尺（量軌跡直徑）
+  const ry=oy+Math.max(18,orx*0.2+10);
+  s+='<rect x="'+(px-50*scale*0.9)+'" y="'+ry+'" width="'+(100*scale*0.9)+'" height="14" fill="#fdf8e6" stroke="#cbbf92"/>';
+  for(let c=-50;c<=50;c+=5){
+    const x=px+c*scale*0.9;
+    s+='<line x1="'+x+'" y1="'+ry+'" x2="'+x+'" y2="'+(ry+(c%10===0?9:5))+'" stroke="#8a7a45"/>';
+  }
+  const ballSvg='<circle cx="'+bx+'" cy="'+by+'" r="'+(rCm*scale*(1+0.12*depth))+'" fill="'+(ball==="big"?"#1d4ed8":"#b45309")+'"/>';
+  const stringSvg='<line x1="'+px+'" y1="'+py+'" x2="'+bx+'" y2="'+by+'" stroke="#33415c" stroke-width="1.5"/>';
+  s+=stringSvg+ballSvg;
+  s+='</svg>';
+  $("#coneSide").innerHTML=s;
+  // ---- 俯視 ----
+  const TW=260, c0=TW/2, ts=1.8;   // px per cm
+  let t='<svg viewBox="0 0 '+TW+' '+TW+'">';
+  t+='<rect x="0" y="0" width="'+TW+'" height="'+TW+'" fill="#fbfcfe"/>';
+  for(let r=5;r<=70;r+=5) t+='<circle cx="'+c0+'" cy="'+c0+'" r="'+(r*ts)+'" fill="none" stroke="'+(r%10===0?"#dfe5f0":"#eef1f7")+'"/>';
+  t+='<line x1="0" y1="'+c0+'" x2="'+TW+'" y2="'+c0+'" stroke="#e3e8f1"/><line x1="'+c0+'" y1="0" x2="'+c0+'" y2="'+TW+'" stroke="#e3e8f1"/>';
+  if(CA.trail.length>1){
+    t+='<polyline fill="none" stroke="#c2410c" stroke-width="1" opacity=".75" points="'+
+      CA.trail.map(p=>(c0+p[0]*ts).toFixed(1)+","+(c0-p[1]*ts).toFixed(1)).join(" ")+'"/>';
+  }
+  const rr=ellCm*Math.sin(th);
+  t+='<circle cx="'+(c0+rr*Math.cos(ph)*ts)+'" cy="'+(c0-rr*Math.sin(ph)*ts)+'" r="'+Math.max(3,rCm*ts)+'" fill="'+(ball==="big"?"#1d4ed8":"#b45309")+'"/>';
+  t+='<circle cx="'+c0+'" cy="'+c0+'" r="2" fill="#33415c"/>';
+  t+='</svg>';
+  $("#coneTop").innerHTML=t;
+  $("#cLenLab").textContent="（約 "+nominal+" cm）";
+  $("#cAngLab").textContent="（約 "+(+$("#cAng").value)+"°）";
+  $("#coneLive").innerHTML = CA.st.n>0
+    ? '<div>本次軌道球心半徑範圍 <b>'+fmt(ellCm*Math.sin(CA.st.thMin),1)+' ～ '+fmt(ellCm*Math.sin(CA.st.thMax),1)+'</b> cm</div>'
+    : '';
+}
+
+["cLen","cAng","cBall"].forEach(id=>$("#"+id).addEventListener("input",()=>{
+  if(CA.run)return;
+  if(id!=="cAng"){CA.lenRead=null;$("#coneLenRead").textContent="";}
+  coneResetUI();
+}));
+$("#btnConeLen").addEventListener("click",()=>{
+  const nominal=+$("#cLen").value;
+  CA.lenRead=quant(actualHang(nominal)+randn()*0.04,0.05); CA.nominal=nominal;
+  $("#coneLenRead").innerHTML='讀數 <b>'+CA.lenRead.toFixed(2)+'</b> cm（懸點→球頂）';
+});
+
+function coneReadyMeasure(){
+  const ok = CA.revs>=1;
+  $("#btnConeAng").disabled=!ok; $("#btnConeD").disabled=!ok;
+}
+$("#btnConeAng").addEventListener("click",()=>{
+  if(CA.st.n===0)return;
+  const thMid=(CA.st.thMax+CA.st.thMin)/2*180/Math.PI;
+  CA.angRead=quant(thMid+randn()*0.8,0.5);
+  $("#coneAngRead").innerHTML='θ ≈ <b>'+CA.angRead.toFixed(1)+'</b>°';
+  coneCanRecord();
+});
+$("#btnConeD").addEventListener("click",()=>{
+  if(CA.st.n===0)return;
+  const ellCm=CA.M.ell*100;
+  const D=ellCm*(Math.sin(CA.st.thMax)+Math.sin(CA.st.thMin));
+  CA.Dread=quant(D+randn()*0.4,0.1);
+  $("#coneDRead").innerHTML='D ≈ <b>'+CA.Dread.toFixed(1)+'</b> cm';
+  coneCanRecord();
+});
+function coneCanRecord(){
+  $("#btnConeRec").disabled = !(CA.stopT && (CA.angRead!==null || CA.Dread!==null));
+}
+
+$("#btnConeGo").addEventListener("click",()=>{
+  const ball=$("#cBall").value;
+  if(CA.lenRead===null){$("#cMsg").innerHTML='<div class="warnbox">請先用直尺量出繩長。</div>';return;}
+  if(!measuredD(ball)){$("#cMsg").innerHTML='<div class="warnbox">請先回第 ② 分頁量出這顆鋼珠的直徑。</div>';return;}
+  coneResetUI();
+  CA.ball=ball; CA.knob=+$("#cAng").value;
+  CA.M=coneModel(ball, CA.nominal);
+  CA.s=coneLaunch(CA.M, CA.knob, +$("#cSkill").value);
+  const N=+$("#cN").value;
+  $("#cMsg").innerHTML="";
+  if($("#cMode").value==="auto"){
+    const r=coneRunAuto(CA.M, CA.s.slice(), N);
+    CA.st=r.st; CA.s=r.s; CA.revs=N;
+    const ellCm=CA.M.ell*100;
+    // 俯視圖：補畫最後兩圈的軌跡
+    let s2=r.s.slice(); CA.trail=[];
+    for(let i=0;i<4000;i++){s2=coneStep(CA.M,s2,1e-3);
+      if(i%8===0)CA.trail.push([ellCm*Math.sin(s2[0])*Math.cos(s2[2]),ellCm*Math.sin(s2[0])*Math.sin(s2[2])]);}
+    CA.stopT=Math.round(Math.max(0.01,r.t+randn()*0.10-0.03)*100)/100;
+    $("#cSwatch").textContent=CA.stopT.toFixed(2); $("#cRev").textContent=N;
+    $("#cMsg").innerHTML='<div class="okbox">'+N+' 圈共 <b>'+CA.stopT.toFixed(2)+'</b> s，T = <b>'+(CA.stopT/N).toFixed(4)+
+      '</b> s。請用量角器與直尺量取張角與軌跡直徑。</div>';
+    coneReadyMeasure(); drawCone(); return;
+  }
+  CA.run=true; CA.last=performance.now();
+  $("#btnConeGo").disabled=true; $("#btnConeStop").disabled=false;
+  const ellCm=CA.M.ell*100;
+  const loop=(now)=>{
+    let acc=Math.min((now-CA.last)/1000,0.05); CA.last=now;
+    while(acc>1e-9){const h=Math.min(1e-3,acc); CA.s=coneStep(CA.M,CA.s,h); CA.t+=h; acc-=h; coneUpd(CA.st,CA.s[0]);}
+    CA.revs=Math.floor(CA.s[2]/(2*Math.PI));
+    CA.trail.push([ellCm*Math.sin(CA.s[0])*Math.cos(CA.s[2]),ellCm*Math.sin(CA.s[0])*Math.sin(CA.s[2])]);
+    if(CA.trail.length>500)CA.trail.shift();
+    $("#cSwatch").textContent=CA.t.toFixed(2); $("#cRev").textContent=CA.revs;
+    coneReadyMeasure(); drawCone();
+    if(CA.t>N*2*Math.PI/Math.sqrt(CA.M.w2)+30){coneStopAnim();$("#btnConeGo").disabled=false;$("#btnConeStop").disabled=true;
+      $("#cMsg").innerHTML='<div class="warnbox">計時逾時，請重新推出。</div>';return;}
+    CA.raf=requestAnimationFrame(loop);
+  };
+  CA.raf=requestAnimationFrame(loop);
+});
+$("#btnConeStop").addEventListener("click",()=>{
+  if(!CA.run)return;
+  coneStopAnim();
+  CA.stopT=Math.round(CA.t*100)/100;
+  $("#btnConeGo").disabled=false; $("#btnConeStop").disabled=true;
+  const N=+$("#cN").value;
+  $("#cMsg").innerHTML = (CA.revs!==N)
+    ? '<div class="warnbox">你在完成 <b>'+CA.revs+'</b> 圈時按停（設定 '+N+' 圈），記錄時以 '+CA.revs+' 圈計算。</div>'
+    : '<div class="okbox">'+N+' 圈共 <b>'+CA.stopT.toFixed(2)+'</b> s，T = <b>'+(CA.stopT/N).toFixed(4)+'</b> s。</div>';
+  coneReadyMeasure(); coneCanRecord();
+});
+$("#btnConeReset").addEventListener("click",coneResetUI);
+$("#btnConeRec").addEventListener("click",()=>{
+  const N = ($("#cMode").value==="auto")? +$("#cN").value : CA.revs;
+  if(!CA.stopT||N<1)return;
+  S.cone.push({ball:CA.ball, L:CA.lenRead, r:measuredD(CA.ball)/20, ang:CA.angRead, D:CA.Dread,
+               N:N, t:CA.stopT, nominal:CA.nominal, knob:CA.knob});
+  $("#btnConeRec").disabled=true;
+  $("#cMsg").innerHTML='<div class="okbox">已記入數據表（目前共 '+S.cone.length+' 組）。</div>';
+  renderConeTable();
+});
+$("#btnClearCone").addEventListener("click",()=>{
+  if(!confirm("清除全部圓錐擺數據？"))return; S.cone=[]; renderConeTable();
+});
+
+function coneRowCalc(r){
+  const ell=r.L+r.r, T=r.t/r.N;
+  const hTh = (r.ang!==null&&isFinite(r.ang)) ? ell*Math.cos(r.ang*Math.PI/180) : null;
+  const rr  = (r.D!==null&&isFinite(r.D)) ? r.D/2 : null;
+  const hR  = (rr!==null && rr<ell) ? Math.sqrt(ell*ell-rr*rr) : null;
+  return {ell,T,T2:T*T,hTh,hR,rr};
+}
+function renderConeTable(){
+  let h='<tr><th>#</th><th>擺錘</th><th>L (cm)</th><th>ℓ (cm)</th><th>θ (°)</th><th>D (cm)</th>'+
+        '<th>N</th><th>t (s)</th><th>T (s)</th><th>T² (s²)</th><th>h<sub>θ</sub> (cm)</th><th>h<sub>r</sub> (cm)</th><th></th></tr>';
+  S.cone.forEach((r,i)=>{
+    const c=coneRowCalc(r);
+    const cell=(f,v,st,d)=>'<input type="number" step="'+st+'" class="ccell" data-i="'+i+'" data-f="'+f+'" value="'+(v===null?"":v.toFixed(d))+'">';
+    h+='<tr class="'+(r.ball==="big"?"big-row":"small-row")+'"><td>'+(i+1)+'</td><td>'+(r.ball==="big"?"大":"小")+'</td>'+
+       '<td>'+cell("L",r.L,0.05,2)+'</td><td>'+fmt(c.ell,2)+'</td>'+
+       '<td>'+cell("ang",r.ang,0.5,1)+'</td><td>'+cell("D",r.D,0.1,1)+'</td>'+
+       '<td>'+r.N+'</td><td>'+cell("t",r.t,0.01,2)+'</td><td>'+fmt(c.T,4)+'</td><td>'+fmt(c.T2,4)+'</td>'+
+       '<td>'+fmt(c.hTh,2)+'</td><td>'+fmt(c.hR,2)+'</td>'+
+       '<td><button class="act danger" style="padding:1px 7px;font-size:12px" data-delc="'+i+'">×</button></td></tr>';
+  });
+  $("#tblCone").innerHTML=h;
+  const n=S.cone.length;
+  $("#coneCover").innerHTML='<div class="'+(n>=4?"okbox":"note")+'">目前 <b>'+n+'</b> 組。建議至少 4 組不同的 h（改變繩長，或同一繩長改變張角）。</div>';
+  renderConeFit();
+}
+document.addEventListener("input",e=>{
+  if(e.target.classList.contains("ccell")){
+    const raw=e.target.value, v=parseFloat(raw), r=S.cone[+e.target.dataset.i], f=e.target.dataset.f;
+    if(raw.trim()===""&&(f==="ang"||f==="D")){r[f]=null;}
+    else if(isFinite(v)) r[f]=v; else return;
+    const c=coneRowCalc(r); const tr=e.target.closest("tr").children;
+    tr[3].textContent=fmt(c.ell,2); tr[8].textContent=fmt(c.T,4); tr[9].textContent=fmt(c.T2,4);
+    tr[10].textContent=fmt(c.hTh,2); tr[11].textContent=fmt(c.hR,2);
+    renderConeFit();
+  }
+});
+document.addEventListener("click",e=>{
+  if(e.target.dataset.delc!==undefined){ S.cone.splice(+e.target.dataset.delc,1); renderConeTable(); }
+});
+
+function coneFits(){
+  const pTh=[], pR=[];
+  S.cone.forEach(r=>{const c=coneRowCalc(r);
+    if(c.hTh!==null)pTh.push([c.hTh/100,c.T2]);
+    if(c.hR!==null)pR.push([c.hR/100,c.T2]);});
+  return {pTh,pR,fTh:linfit(pTh),fR:linfit(pR)};
+}
+function gFromFit(f){ if(!f)return null; const g=4*Math.PI*Math.PI/f.b; return {g, sg: isFinite(f.sb)? g*f.sb/f.b : NaN}; }
+function renderConeFit(){
+  const {pTh,pR,fTh,fR}=coneFits();
+  plot($("#conePlot"),
+    [{pts:pTh,color:"#2f5bd0",label:"量角器路線 h = ℓ cos θ"},{pts:pR,color:"#c2410c",label:"直尺路線 h = √(ℓ² − r²)"}],
+    [{fit:fTh,color:"#2f5bd0"},{fit:fR,color:"#c2410c",dash:"6 4"}],
+    "鉛直高度 h  (m)","週期平方 T²  (s²)");
+  const card=(name,f,col)=>{
+    if(!f)return '<div class="note">'+name+'：數據不足（至少 2 組）。</div>';
+    const G=gFromFit(f);
+    return '<div class="card" style="box-shadow:none;margin:8px 0"><h3 style="color:'+col+'">'+name+'（N = '+f.n+'）</h3>'+
+      '<div class="kv"><div>斜率 k = <b>'+fmt(f.b,4)+'</b> ± '+fmt(f.sb,4)+' s²/m</div>'+
+      '<div>截距 a = <b>'+fmt(f.a,4)+'</b> ± '+fmt(f.sa,4)+' s²</div><div>r² = <b>'+fmt(f.r2,5)+'</b></div></div>'+
+      '<div class="readout">g = 4π²/k = <b>'+fmt(G.g,4)+'</b> ± '+fmt(G.sg,4)+' m/s²</div></div>';
+  };
+  $("#coneFitOut").innerHTML = card("量角器路線",fTh,"#2f5bd0")+card("直尺路線",fR,"#c2410c");
+  // 以學生數據估算兩路放大倍率
+  const rows=S.cone.map(coneRowCalc).filter(c=>c.hTh!==null||c.hR!==null);
+  if(rows.length){
+    const angs=S.cone.filter(r=>r.ang!==null).map(r=>r.ang*Math.PI/180);
+    const thb = angs.length? mean(angs) : mean(rows.map(c=>c.rr!==null?Math.asin(Math.min(.99,c.rr/c.ell)):0));
+    const rb = mean(rows.filter(c=>c.rr!==null).map(c=>c.rr).concat([]))||NaN;
+    const sA=(+$("#eA").value||0.8)*Math.PI/180, sR=(+$("#eD").value||0.4)/2;
+    $("#coneAmp").innerHTML='以你的數據：平均張角 θ̄ ≈ <b>'+fmt(thb*180/Math.PI,1)+'°</b>，tan θ̄ = '+fmt(Math.tan(thb),3)+
+      '、tan²θ̄ = '+fmt(Math.tan(thb)**2,3)+'。若 σ<sub>θ</sub> = '+fmt(sA*180/Math.PI,1)+'°、σ<sub>r</sub> = '+fmt(sR,2)+' cm：'+
+      '量角器路線 Δh/h ≈ <b>'+fmt(100*Math.tan(thb)*sA,2)+'%</b>；直尺路線 Δh/h ≈ <b>'+
+      (isFinite(rb)?fmt(100*Math.tan(thb)**2*sR/rb,2)+'%':'—')+'</b>。';
+  } else $("#coneAmp").innerHTML='';
+}
+
+/* ========================================================================
+   TAB 6：誤差預算與真值揭曉
+   ======================================================================== */
+function budgetHTML(items){
+  const tot=items.reduce((s,it)=>s+it.rel*it.rel,0)||1e-30;
+  let h='<table><tr><th style="text-align:left">誤差來源</th><th>性質</th><th>δg/g</th><th>佔比</th><th style="width:34%"></th></tr>';
+  items.forEach(it=>{
+    const sh=100*it.rel*it.rel/tot;
+    h+='<tr><td style="text-align:left">'+it.name+(it.note?'<div class="mini">'+it.note+'</div>':'')+'</td>'+
+       '<td>'+it.kind+'</td><td>'+fmt(100*it.rel,3)+' %</td><td><b>'+fmt(sh,1)+' %</b></td>'+
+       '<td style="text-align:left"><div style="height:12px;border-radius:3px;background:'+(it.kind==="系統"?"#c2410c":"#2f5bd0")+
+       ';width:'+Math.max(0.5,sh).toFixed(1)+'%"></div></td></tr>';
+  });
+  h+='<tr><th style="text-align:left">合成（平方和開根號）</th><th></th><th>'+fmt(100*Math.sqrt(tot),3)+' %</th><th>100 %</th><th></th></tr></table>';
+  return h;
+}
+function pendAngleFactor(deg){ const a=(deg||0)*Math.PI/180; return 1+a*a/16+11*a**4/3072; }
+function pendFit(corrected){
+  const pts=S.pend.map(r=>{const T=r.t/r.N; let y=T*T; if(corrected){const f=pendAngleFactor(r.ang); y/=f*f;}
+    return [(r.L+r.r)/100,y];});
+  const f=linfit(pts); return f? Object.assign({fit:f},gFromFit(f)) : null;
+}
+function renderT6(){
+  const sT=+$("#eT").value||0.10, sL=+$("#eL").value||0.05, sA=(+$("#eA").value||0.8)*Math.PI/180, sD=+$("#eD").value||0.4;
+  // ---- A 單擺 ----
+  if(S.pend.length){
+    const ellb=mean(S.pend.map(r=>r.L+r.r)), tb=mean(S.pend.map(r=>r.t));
+    const angb=mean(S.pend.map(r=>(r.ang||0)*Math.PI/180));
+    const sdB=S.cal.big.length>1? sdev(S.cal.big)/Math.sqrt(S.cal.big.length):0.02;
+    const f=pendFit(false);
+    const items=[
+      {name:"停錶反應時間",kind:"隨機",rel:2*sT/tb,note:"δg/g = 2σ<sub>t</sub>/t̄，t̄ = "+fmt(tb,2)+" s"},
+      {name:"直尺量繩長",kind:"隨機",rel:(sL)/ellb,note:"δg/g = σ<sub>L</sub>/ℓ̄，ℓ̄ = "+fmt(ellb,2)+" cm"},
+      {name:"游標尺量直徑（半徑）",kind:"隨機",rel:(sdB/20)/ellb,note:"δg/g = (σ<sub>d̄</sub>/2)/ℓ̄"},
+      {name:"有限振幅（大角度）",kind:"系統",rel:angb*angb/8,note:"δg/g ≈ θ̄₀²/8，θ̄₀ = "+fmt(angb*180/Math.PI,1)+"°；使 g 偏低"},
+      {name:"空氣浮力＋附加質量",kind:"系統",rel:1.5*RHO_AIR/RHO_STEEL,note:"δg/g ≈ 1.5ρ<sub>air</sub>/ρ<sub>steel</sub>；使 g 偏低"}
+    ];
+    const offCm = f? f.fit.a/f.fit.b*100 : NaN, offSig = f? Math.abs(f.fit.sa/f.fit.b*100) : NaN;
+    $("#budPend").innerHTML=budgetHTML(items)+
+      (f? '<div class="note"><b>不列入上表的一項：擺長的固定偏移。</b>迴歸截距換算為 a/k = <b>'+fmt(offCm,3)+'</b> ± '+fmt(offSig,3)+
+        ' cm。它只會進入截距、不影響斜率，所以對迴歸得到的 g 沒有貢獻；但若改用單點法，它會造成約 '+
+        fmt(100*Math.abs(offCm)/ellb,3)+' % 的偏差。'+
+        (Math.abs(offCm)<2*offSig? '目前這個值在 2 倍標準誤以內，<b>無法和零區分</b>，主要是計時雜訊造成的。':
+         '目前這個值超過 2 倍標準誤，<b>確實存在</b>一個固定偏移。')+'</div>' : '')+
+      '<div class="note">藍色為隨機誤差（多次量測可平均掉），橘色為系統誤差（只能靠修正或改變實驗設計消除）。'+
+      (f? '迴歸實際得到的 σ<sub>g</sub>/g = <b>'+fmt(100*f.sg/f.g,3)+' %</b>，可與上表的合成值比較——若迴歸值明顯較大，代表還有表中沒列到的誤差來源。':'')+'</div>';
+    const f0=pendFit(false), f1=pendFit(true);
+    $("#corrPend").innerHTML = (f0&&f1)
+      ? '<div class="kv"><div>未修正 g = <b>'+fmt(f0.g,4)+'</b> ± '+fmt(f0.sg,4)+'</div><div>大角度修正後 g = <b>'+fmt(f1.g,4)+'</b> ± '+fmt(f1.sg,4)+
+        '</div><div>差異 <b>'+fmt(100*(f1.g-f0.g)/f0.g,3)+' %</b></div></div>'+
+        '<div class="mini">若你的釋放角度都很小（< 5°），修正量會小於 0.05%，遠小於計時誤差；角度越大修正越重要。</div>'
+      : '<div class="mini">數據不足。</div>';
+  } else { $("#budPend").innerHTML='<div class="mini">尚無單擺數據。</div>'; $("#corrPend").innerHTML=''; }
+  // ---- C 圓錐擺 ----
+  const rows=S.cone.map(coneRowCalc);
+  if(rows.length){
+    const tb=mean(S.cone.map(r=>r.t)), ellb=mean(rows.map(c=>c.ell));
+    const thList=S.cone.filter(r=>r.ang!==null).map(r=>r.ang*Math.PI/180);
+    const rList=rows.filter(c=>c.rr!==null).map(c=>c.rr);
+    const thb=thList.length? mean(thList) : Math.asin(Math.min(.99,mean(rList)/ellb));
+    const rb=rList.length? mean(rList) : ellb*Math.sin(thb);
+    const tn=Math.tan(thb), c2=Math.cos(thb)**2;
+    const common=[{name:"停錶反應時間",kind:"隨機",rel:2*sT/tb,note:"2σ<sub>t</sub>/t̄，t̄ = "+fmt(tb,2)+" s"}];
+    const thItems=common.concat([
+      {name:"量角器讀張角",kind:"隨機",rel:tn*sA,note:"tan θ̄ · σ<sub>θ</sub>，θ̄ = "+fmt(thb*180/Math.PI,1)+"°"},
+      {name:"直尺量繩長（經 ℓ cos θ）",kind:"隨機",rel:sL/ellb,note:"σ<sub>L</sub>/ℓ̄"}]);
+    const rItems=common.concat([
+      {name:"直尺量軌跡直徑",kind:"隨機",rel:tn*tn*(sD/2)/rb,note:"tan²θ̄ · σ<sub>r</sub>/r̄，r̄ = "+fmt(rb,1)+" cm"},
+      {name:"直尺量繩長（經 √(ℓ²−r²)）",kind:"隨機",rel:sL/(ellb*c2),note:"σ<sub>L</sub>/(ℓ̄ cos²θ̄)"}]);
+    const {fTh,fR}=coneFits(); const gT=gFromFit(fTh), gR=gFromFit(fR);
+    $("#budCone").innerHTML='<h3 style="color:#2f5bd0">量角器路線</h3>'+budgetHTML(thItems)+
+      (gT?'<div class="mini">迴歸實際 σ<sub>g</sub>/g = '+fmt(100*gT.sg/gT.g,3)+' %</div>':'')+
+      '<h3 style="color:#c2410c">直尺路線</h3>'+budgetHTML(rItems)+
+      (gR?'<div class="mini">迴歸實際 σ<sub>g</sub>/g = '+fmt(100*gR.sg/gR.g,3)+' %</div>':'')+
+      '<div class="note">表中沒有列入的一項：<b>手推造成的橢圓軌道</b>。它讓張角與半徑在擺動中持續變化，'+
+      '你讀到的只是某種「平均」，而且不同圈讀到的值不同——這個誤差很難事先估計，只能靠迴歸殘差反映出來。</div>';
+  } else $("#budCone").innerHTML='<div class="mini">尚無圓錐擺數據。</div>';
+  renderReveal();
+}
+["eT","eL","eA","eD"].forEach(id=>$("#"+id).addEventListener("input",()=>{renderT6();renderConeFit();}));
+$("#btnReveal6").addEventListener("click",()=>{
+  if(!S.revealed && !confirm("確定要揭曉真值嗎？"))return;
+  S.revealed=true; renderReveal();
+});
+function zRow(name,val,sig,tru,unit,dp){
+  if(val===null||!isFinite(val)) return '<tr><td style="text-align:left">'+name+'</td><td colspan="5" class="mini">無數據</td></tr>';
+  const z=(isFinite(sig)&&sig>0)?(val-tru)/sig:NaN, az=Math.abs(z);
+  const grade=!isFinite(z)?'—':az<1?'<span class="badge-ok">優（|z| < 1）</span>':az<2?'<span class="badge-ok">良（|z| < 2）</span>':
+    az<3?'<span style="color:#b45309;font-weight:700">可（|z| < 3）</span>':'<span class="badge-no">有未處理的系統誤差</span>';
+  return '<tr><td style="text-align:left">'+name+'</td><td>'+fmt(val,dp)+' ± '+fmt(sig,dp)+'</td><td>'+fmt(tru,dp)+'</td><td>'+
+    fmt(100*(val-tru)/tru,3)+' %</td><td>'+fmt(z,2)+'</td><td>'+grade+'</td></tr>';
+}
+function renderReveal(){
+  if(!S.revealed){$("#revealOut").innerHTML='';return;}
+  const g=TRUTH.g;
+  const dB=S.cal.big.length?mean(S.cal.big):null, dS=S.cal.small.length?mean(S.cal.small):null;
+  const eB=S.cal.big.length>1?sdev(S.cal.big)/Math.sqrt(S.cal.big.length):NaN;
+  const eS=S.cal.small.length>1?sdev(S.cal.small)/Math.sqrt(S.cal.small.length):NaN;
+  const p0=pendFit(false), p1=pendFit(true), {fTh,fR}=coneFits(), cT=gFromFit(fTh), cR=gFromFit(fR);
+  let h='<div class="tablewrap"><table><tr><th style="text-align:left">量</th><th>你的結果</th><th>真值</th><th>偏差</th><th>z</th><th>評等</th></tr>';
+  h+=zRow("大鋼珠直徑 (mm)",dB,eB,TRUTH.ball.big.d,"mm",3);
+  h+=zRow("小鋼珠直徑 (mm)",dS,eS,TRUTH.ball.small.d,"mm",3);
+  h+=zRow("單擺 g，迴歸 (m/s²)",p0?p0.g:null,p0?p0.sg:NaN,g,"",4);
+  h+=zRow("單擺 g，大角度修正後 (m/s²)",p1?p1.g:null,p1?p1.sg:NaN,g,"",4);
+  h+=zRow("圓錐擺 g，量角器路線 (m/s²)",cT?cT.g:null,cT?cT.sg:NaN,g,"",4);
+  h+=zRow("圓錐擺 g，直尺路線 (m/s²)",cR?cR.g:null,cR?cR.sg:NaN,g,"",4);
+  h+='</table></div><div class="mini">z = (你的結果 − 真值) / 你的標準誤。直徑的標準誤取 s/√N；g 取迴歸斜率的標準誤。</div>';
+  h+='<h3>隱藏參數</h3><div class="kv">'+
+    '<div>本地 g 真值 = <b>'+fmt(g,5)+'</b> m/s²</div>'+
+    '<div>（板橋 25.01°N、海拔約 10 m 的 GRS80 正常重力 9.7895，另加地區重力異常 '+fmt((g-9.7895)*1e5,0)+' mGal）</div>'+
+    '<div>游標尺零點誤差 = <b>'+fmt(TRUTH.zero,2)+'</b> mm</div>'+
+    '<div>大鋼珠真圓度 ±<b>'+fmt(TRUTH.ball.big.ov,3)+'</b> mm、小鋼珠 ±<b>'+fmt(TRUTH.ball.small.ov,3)+'</b> mm</div>'+
+    '<div>夾子內支點偏移 δ = <b>'+fmt(TRUTH.pivot,3)+'</b> cm</div>'+
+    '<div>樞軸阻尼 γ = <b>'+TRUTH.gam.toExponential(2)+'</b> s⁻¹</div>'+
+    '<div>細繩線密度 λ = <b>'+(TRUTH.lam*1e3).toFixed(3)+'</b> g/m</div></div>';
+  let notes=[];
+  if(TRUTH.zero!==0) notes.push('游標尺零點誤差為 '+fmt(TRUTH.zero,2)+' mm：若你沒有做歸零檢查並扣除，直徑會系統性偏'+(TRUTH.zero>0?'大':'小')+
+    ' '+Math.abs(TRUTH.zero).toFixed(2)+' mm——對直徑的 z 影響很大，但對 g 的影響只有 '+fmt(100*Math.abs(TRUTH.zero)/20/ (S.pend.length?mean(S.pend.map(r=>r.L+r.r)):50),3)+' %（且被迴歸截距吸收）。');
+  if(p0){ notes.push('單擺迴歸截距換算的長度偏移為 '+fmt(p0.fit.a/p0.fit.b*100,3)+' cm，隱藏支點偏移為 '+fmt(TRUTH.pivot,3)+' cm。'); }
+  if(p0&&p1) notes.push('大角度修正把 g 從 '+fmt(p0.g,4)+' 移到 '+fmt(p1.g,4)+'，是否更接近真值？');
+  if(cT&&cR) notes.push('圓錐擺兩條路線：量角器 '+fmt(cT.g,4)+'、直尺 '+fmt(cR.g,4)+'。哪一條的誤差棒比較小？是否和上面 C 表預測的一致？');
+  h+=notes.length? '<div class="note"><ul class="tight">'+notes.map(n=>'<li>'+n+'</li>').join('')+'</ul></div>':'';
+  $("#revealOut").innerHTML=h;
+}
+
+/* ========================================================================
+   初始化（所有宣告完成後才執行，避免暫時性死區）
+   ======================================================================== */
+function bootAll(){
+  renderCal(); drawCaliper(null);
+  renderPendTable(); renderGate(); drawPendulum();
+  renderFit();
+  coneResetUI(); renderConeTable(); renderT6();
+}
+bootAll();
+</script>
+</body>
+</html>

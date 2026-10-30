@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>排水孔徑虛擬實驗室（100學年度全國決賽）</title>
+<style>
+:root{--ink:#1f2933;--muted:#667085;--line:#d9dee5;--bg:#f5f6f8;--card:#fff;--acc:#1d6fb8;--acc2:#c2410c;--ok:#15803d;--warn:#b45309;--water:#3b82c4}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:15px}
+header{background:#12324f;color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:1.25rem;font-weight:700}
+header .sub{font-size:.85rem;opacity:.85}
+header .seed{float:right;font-size:.85rem;text-align:right}
+header button{background:#fff2;color:#fff;border:1px solid #fff6}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.92rem}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+nav button.todo{color:#98a2b3}
+main{padding:16px;max-width:1280px;margin:0 auto}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:1.08rem}
+.card h3{margin:12px 0 6px;font-size:.98rem;color:#12324f}
+.grid2{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:14px}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}
+button{font:inherit;padding:5px 12px;border-radius:6px;border:1px solid #b8c2cf;background:#f8fafc;cursor:pointer}
+button:hover{background:#eef3f8}
+button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+button.hot{background:var(--acc2);color:#fff;border-color:var(--acc2)}
+button:disabled{opacity:.45;cursor:not-allowed}
+select,input[type=number]{font:inherit;padding:3px 6px;border:1px solid #b8c2cf;border-radius:5px}
+input[type=range]{width:180px}
+table{border-collapse:collapse;font-size:.88rem;width:100%}
+th,td{border:1px solid var(--line);padding:3px 6px;text-align:center}
+th{background:#eef2f6;font-weight:600}
+td input{width:86px;border:1px solid transparent;background:transparent;text-align:center;font:inherit}
+td input:focus{border-color:var(--acc);background:#fff}
+.tbl{max-height:320px;overflow:auto}
+.sw{font-family:"Consolas","Menlo",monospace;font-size:1.9rem;background:#111;color:#7CFC9A;padding:2px 12px;border-radius:6px;display:inline-block;min-width:150px;text-align:right}
+.note{font-size:.86rem;color:var(--muted)}
+.msg{font-size:.9rem;padding:6px 10px;border-radius:6px;background:#eef6ff;border:1px solid #cfe3f7;margin:6px 0;min-height:1.4em}
+.msg.w{background:#fff7ed;border-color:#fed7aa;color:#7c2d12}
+.fx{font-family:"Times New Roman",serif;font-style:italic}
+.eq{background:#f7f9fc;border-left:3px solid var(--acc);padding:6px 12px;margin:6px 0;font-family:"Times New Roman","Noto Serif TC",serif;font-size:1.05rem;overflow-x:auto}
+.fix{background:#fff8f1;border:1px solid #f5c89a;border-radius:8px;padding:8px 14px}
+.fix li{margin:4px 0}
+.kv{display:grid;grid-template-columns:auto auto;gap:2px 12px;font-size:.92rem}
+.kv b{font-weight:600}
+.ctabs{display:flex;gap:6px;margin-bottom:6px}
+.ctabs button.on{background:#12324f;color:#fff;border-color:#12324f}
+svg{width:100%;height:auto;display:block}
+svg[id^=pl]{max-width:540px;margin:0 auto}
+.zoomwrap{display:flex;gap:10px;align-items:center;margin-top:6px}
+.zoomwrap svg{width:170px;flex:none;border:1px solid var(--line);border-radius:6px;background:#fafafa}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;background:#eef2f6;font-size:.82rem}
+.flash{animation:fl .35s}
+@keyframes fl{0%{background:#fde68a}100%{background:#111}}
+.placeholder{color:var(--muted);text-align:center;padding:40px 10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="seed">實驗編號（隱藏真值種子）：<b id="seedShow"></b><br>
+    <button id="btnReseed">重新抽取隱藏真值</button></div>
+  <h1>排水孔徑虛擬實驗室</h1>
+  <div class="sub">教育部 100 學年度高級中學數理及資訊學科能力競賽　物理科決賽實驗試題　｜　不得使用直尺，以單擺自製尺標，由液面下降求三個排水孔直徑 2<span class="fx">r</span></div>
+</header>
+<nav id="nav">
+  <button data-t="1" class="on">① 原理推導</button>
+  <button data-t="2">② 單擺尺標與量 R</button>
+  <button data-t="3">③ 三孔排水量測</button>
+  <button data-t="4">④ 作圖與迴歸</button>
+  <button data-t="5">⑤ 誤差討論</button>
+  <button data-t="6">⑥ 真值揭曉</button>
+</nav>
+<main>
+
+<!-- ============ ① ============ -->
+<section id="tab1" class="on">
+<div class="card">
+<h2>題目要求</h2>
+<p>三個白色（乳白色）圓柱形容器底部各有一個小圓孔。不得使用直尺，請完成以下各項：</p>
+<ul>
+<li>(a) 記錄液面高度 <span class="fx">H</span> 與時間 <span class="fx">t</span> 的對應表。</li>
+<li>(b) 畫出 <span class="fx">H</span>–<span class="fx">t</span> 圖。</li>
+<li>(c) 畫出液面下降速率 <span class="fx">v</span>–<span class="fx">t</span> 圖。</li>
+<li>(d) 求出三個孔的直徑 2<span class="fx">r</span>。</li>
+<li>(e) 判斷測得孔徑大於、等於或小於實際孔徑，並說明原因。</li>
+</ul>
+<p class="note">可用器材包括棉線、釣魚線、螺帽、電子碼錶、量筒（10、50 mL）、燒杯、奇異筆、透明膠帶、隱形膠帶、方格紙（格距非 1 mm）等。沒有可直接讀出長度的量具，長度必須自行校正。</p>
+</div>
+
+<div class="card">
+<h2>1. 理想模型（準穩態 Torricelli）</h2>
+<p>設容器內半徑為 <span class="fx">R</span>，孔半徑為 <span class="fx">r</span>，液面下降速率為 <span class="fx">v</span>，孔口出流速率為 <span class="fx">v</span><sub>2</sub>。</p>
+<div class="eq">連續方程：πR²·v = πr²·v₂　⇒　v₂ = v (R/r)²</div>
+<div class="eq">白努利（液面與孔口皆為大氣壓）：½ρv² + ρgH = ½ρv₂²</div>
+<div class="eq">⇒　v² = 2aH，　a = g / [ (R/r)⁴ − 1 ]</div>
+<p>對時間微分：2v·dv/dt = 2a·dH/dt。因為液面下降，dH/dt = −v，所以</p>
+<div class="eq">dv/dt = −a　（液面下降速率以 a <b>等減速</b>）</div>
+<div class="eq">√H = √H₀ − √(a/2)·t　⇒　√H–t 圖為直線，斜率 = −√(a/2)，故 a = 2·(斜率)²</div>
+<div class="eq">反解孔徑：　r = R · [ a / (g + a) ]<sup>1/4</sup></div>
+<p class="note">「準穩態」指忽略液體加速所需的非定常項。因為 (R/r)⁴ 高達 10⁶ 以上，這個近似非常好。</p>
+</div>
+
+<div class="card">
+<h2>2. 真實孔口：縮流與流量係數 <span class="fx">C</span><sub>d</sub></h2>
+<p>水從銳緣孔流出時，流線無法急轉彎，噴流在孔外會收縮成更細的「縮流頸」（vena contracta），截面積約為孔面積的 <span class="fx">C</span><sub>c</sub> ≈ 0.61–0.65 倍。加上孔緣黏滯損耗使出流速度打折（<span class="fx">C</span><sub>v</sub> ≈ 0.97–0.99），實際流量為：</p>
+<div class="eq">Q = C<sub>d</sub> · πr² · √(2gH)，　C<sub>d</sub> = C<sub>c</sub>·C<sub>v</sub> ≈ 0.60–0.66（薄壁銳緣孔）</div>
+<p>若仍用上面的理想式求孔徑，得到的其實是「等效孔徑」：</p>
+<div class="eq">r<sub>測</sub> ≈ √C<sub>d</sub> · r<sub>真</sub> ≈ 0.78 r<sub>真</sub>　⇒　(e) 的答案是「<b>小於</b>」</div>
+
+<h3>表面張力（小孔特別明顯）</h3>
+<p>半徑 <span class="fx">r</span><sub>j</sub> 的圓柱噴流，內部壓力比大氣壓高 σ/<span class="fx">r</span><sub>j</sub>（拉普拉斯壓力），因此有效水頭變成：</p>
+<div class="eq">H<sub>eff</sub> = H − σ/(ρ g r<sub>j</sub>)</div>
+<p>孔直徑約 1.4 mm 時，這一項約 1 cm 以上。所以小孔在水位接近 1–2 cm 時，噴流會斷成水滴，最後停流並殘留一層水，√H–t 圖的尾端也會偏離直線。本模擬把這個效應一併放進去。</p>
+</div>
+
+<div class="card fix">
+<h2>參考解需要修正或補強之處</h2>
+<ol>
+<li><b>(e) 的主因是縮流（<span class="fx">C</span><sub>d</sub>）。</b>參考解把原因寫成「水流旋轉、水平速度、黏滯損耗」。正確說法是：噴流有效截面小於孔面積，這個效應約占 35–40%，是主因。黏滯只讓 <span class="fx">C</span><sub>v</sub> 略小於 1。</li>
+<li><b>(c) 的 v–t 圖不應由 a 反算。</b>參考解先由 √H–t 求出 a，再用 v = √(2aH) 畫 v–t，這樣的圖一定是直線，屬於循環論證。本模擬在 ④ 會改由相鄰數據 ΔH/Δt 求 v，作 v–t 迴歸得到斜率 −a，再和 √H–t 的結果獨立比對。</li>
+<li><b>2R 必須交代量法。</b>參考解直接寫 2R = 10.4115 cm，沒有說明怎麼量。本模擬在 ② 提供兩種方法：體積法（V–h 迴歸）與棉線繞圓周法。</li>
+<li><b>方向：</b>a 是液面下降速率的「減速度」，應寫成 dv/dt = −a。</li>
+</ol>
+</div>
+
+<div class="card">
+<h2>互動：理想 vs 真實孔口的 √H–t</h2>
+<div class="grid2">
+<div>
+<div class="row">孔直徑 d：<input type="range" id="t1d" min="0.8" max="8" step="0.1" value="1.4"><span id="t1dv"></span></div>
+<div class="row"><span class="fx">C</span><sub>d</sub>：<input type="range" id="t1cd" min="0.55" max="1" step="0.01" value="0.62"><span id="t1cdv"></span></div>
+<div class="row">起始水位 H₀：<input type="range" id="t1h" min="6" max="20" step="0.5" value="18"><span id="t1hv"></span></div>
+<div class="row"><label><input type="checkbox" id="t1sig" checked> 含表面張力</label></div>
+<p class="note">容器內半徑固定 R = 5.20 cm，σ = 0.072 N/m。</p>
+<div class="kv" id="t1out"></div>
+</div>
+<svg id="t1plot" viewBox="0 0 440 280"></svg>
+</div>
+</div>
+
+<div class="card">
+<h2>本模擬的真實度設定（全開）</h2>
+<ul class="note">
+<li>每次開啟隨機抽出隱藏真值：容器內半徑、壁厚、底厚、三孔真實直徑、各孔 <span class="fx">C</span><sub>d</sub>、水溫（影響 σ 與黏度）。</li>
+<li>單擺：擺角有限造成的週期增長、螺帽是物理擺（有自身轉動慣量）、按碼錶反應時間（由你親手按）、把擺長轉成棉線尺時的轉印誤差。</li>
+<li>讀數：棉線尺只能讀到自己對折出的最小刻度；乳白色桶壁看不清液面（約 ±0.8 mm）；畫記號有手部延遲。</li>
+<li>流動：縮流、低雷諾數修正、噴流拉普拉斯壓力、小孔斷流殘水。</li>
+</ul>
+</div>
+</section>
+
+<!-- ============ ② ============ -->
+<section id="tab2">
+<div class="grid2">
+<div class="card">
+<h2>A. 螺帽單擺</h2>
+<svg id="pendSvg" viewBox="0 0 300 380"></svg>
+<div class="row">繩長調整（棉線上沒有刻度）：<input type="range" id="pL" min="0.05" max="0.60" step="0.005" value="0.30"></div>
+<div class="row">釋放角：<input type="range" id="pA" min="3" max="30" step="1" value="8"><span id="pAv"></span><span class="note">（無量角器，僅供參考）</span></div>
+</div>
+<div class="card">
+<h2>計時：放手即同步啟動碼錶</h2>
+<div class="row"><span class="sw" id="pSw">0.00</span>
+  <span>已擺 <b id="pCnt">0</b> 次</span> <label class="note"><input type="checkbox" id="pShowCnt" checked> 顯示計數輔助</label></div>
+<div class="row">每次計
+  <select id="pN"><option>10</option><option selected>20</option><option>30</option></select> 個週期
+  <button class="pri" id="pGo">放手（碼錶啟動）</button>
+  <button class="hot" id="pStop" disabled>停止碼錶</button>
+  <button id="pHalt">停止擺動</button></div>
+<div class="msg" id="pMsg">數到設定的週期數時按「停止碼錶」。按下的時刻就是你的反應時間，模擬不另外加誤差。</div>
+<div class="tbl"><table><thead><tr><th>#</th><th>週期數 N</th><th>總時間 (s)</th><th>T (s)</th><th></th></tr></thead><tbody id="pTb"></tbody></table></div>
+<div class="row">計算用 g =<input type="number" id="pG" value="9.8" step="0.001" style="width:80px"> m/s²</div>
+<div class="kv" id="pStat"></div>
+
+<h3>以擺長製作棉線尺</h3>
+<p class="note">把懸點到螺帽中心的棉線長度轉印到另一條棉線上，再對折得到單位與細分刻度。對折次數越多，單位越短；細分越細，讀數解析度越高。</p>
+<div class="row">單位 = 擺長 ÷
+  <select id="rFold"><option>1</option><option>2</option><option selected>4</option><option>8</option><option>16</option></select>
+  細分到 1/<select id="rSub"><option>4</option><option>8</option><option selected>16</option></select> 單位
+  <button class="pri" id="rMake">製作棉線尺</button></div>
+<div class="msg" id="rMsg">尚未製作棉線尺。</div>
+</div>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h2>B1. 體積法量 R（V–h 迴歸）</h2>
+<svg id="volSvg" viewBox="0 0 300 300"></svg>
+<div class="row"><label><input type="checkbox" id="vSeal" checked> 用隱形膠帶封住底孔</label></div>
+<div class="row"><button id="vP50">以 50 mL 量筒倒入 50 mL</button><button id="vP250">以 250 mL 燒杯倒入 250 mL</button></div>
+<div class="row"><button class="pri" id="vMeas">用棉線尺量水位（自桶底外緣起）</button><button id="vDump">倒掉重來</button></div>
+<div class="msg" id="vMsg">累計倒入 0 mL</div>
+</div>
+<div class="card">
+<h2>V–h 數據</h2>
+<div class="tbl"><table><thead><tr><th>#</th><th>累計 V (mL)</th><th>水位 h (單位)</th><th></th></tr></thead><tbody id="vTb"></tbody></table></div>
+<svg id="vPlot" viewBox="0 0 440 260"></svg>
+<div class="kv" id="vStat"></div>
+<p class="note">V = πR²·(h·u − 底厚)，其中 u 為一個棉線單位的長度。斜率 = πR²·u，截距吸收了桶底厚度，所以不必知道底厚。</p>
+
+<h3>B2. 圓周法（對照）</h3>
+<div class="row"><button id="cMeas">棉線繞桶身外圍一圈，量長度</button><button id="cClr">清除</button></div>
+<div class="kv" id="cStat"></div>
+<p class="note">注意：繞在外面量到的是<b>外</b>圓周，但流體公式需要的是<b>內</b>半徑。</p>
+</div>
+</div>
+</section>
+
+<!-- ============ ③ ============ -->
+<section id="tab3">
+<div class="grid2">
+<div class="card">
+<div class="ctabs" id="ctabs"></div>
+<svg id="rig" viewBox="0 0 380 470"></svg>
+<div class="zoomwrap"><svg id="zoom" viewBox="0 0 160 160"></svg>
+<div class="note">液面放大鏡：乳白色桶壁透光差，液面只能看出一條模糊帶。左側為刻度膠帶（整數單位），右側黑線為奇異筆記號。</div></div>
+</div>
+<div class="card">
+<h2>排水量測</h2>
+<div class="row">裝水量：<input type="range" id="fV" min="200" max="1800" step="50" value="1400"><b id="fVv"></b>
+  <button id="fFill">封孔並加水</button><button id="fWipe">擦掉奇異筆記號</button></div>
+<div class="row">方法：
+  <label><input type="radio" name="meth" value="mark" checked> 定時畫記號</label>
+  <label><input type="radio" name="meth" value="lap"> 刻度膠帶・通過計時</label>
+  <label><input type="radio" name="meth" value="rev"> 逆向・到流完時間</label></div>
+<div class="row">模擬速度：<select id="spd"><option value="1">1×</option><option value="2">2×</option><option value="5" selected>5×</option><option value="10">10×</option><option value="20">20×</option></select>
+  <span class="note">加速時，手的反應誤差仍以真實時間計，不會被放大。</span></div>
+<div class="row"><span class="sw" id="cSw">0.00</span><span id="cStatus" class="pill">空桶</span></div>
+
+<div id="ctlMark" class="row">
+  <button class="pri" id="bOpenM">撕開膠帶（碼錶同步啟動）</button>
+  <button class="hot" id="bMark" disabled>畫記號</button>
+  提示音每 <select id="beep"><option value="0">不用</option><option value="15">15</option><option value="30">30</option><option value="60" selected>60</option></select> s
+  <button id="bRead">用棉線尺量記號 → 填表</button></div>
+<div id="ctlLap" class="row" style="display:none">
+  <button class="pri" id="bOpenL">撕開膠帶（碼錶同步啟動）</button>
+  <button class="hot" id="bLap" disabled>液面通過刻度！</button></div>
+<div id="ctlRev" class="row" style="display:none">
+  從第 <select id="revK"></select> 格起算
+  <button class="pri" id="bOpenR">撕開膠帶（碼錶不動）</button>
+  <button class="hot" id="bRevStart" disabled>水位過該格：開始</button>
+  <button class="hot" id="bRevStop" disabled>流完：停止</button></div>
+<div class="msg" id="cMsg">先在 ② 製作棉線尺，再選容器、封孔加水。</div>
+<div class="tbl" id="cTbl"></div>
+<div class="row"><button id="bCsv">匯出三孔數據 CSV</button><span class="note">表格數值可直接點選修改；按 × 刪除該列。</span></div>
+</div>
+</div>
+</section>
+
+<section id="tab4">
+<div class="card">
+<h2>④ 作圖與迴歸</h2>
+<div class="ctabs" id="ctabs4"></div>
+<div class="row">數據來源：<select id="a4src"><option value="mark">定時畫記號</option><option value="lap">刻度膠帶通過計時</option><option value="ml">記號＋膠帶合併</option><option value="rev">逆向・到流完時間</option></select>
+  迴歸只用 H ≥ <input type="number" id="a4hmin" value="3" step="0.5" min="0" style="width:64px"> cm
+  g = <input type="number" id="a4g" value="9.8" step="0.001" style="width:76px"> m/s²</div>
+<div class="row">容器內半徑 R 來源：<select id="a4R"><option value="vol">體積法（V–h 迴歸）</option><option value="circ">圓周法</option><option value="man">手動輸入</option></select>
+  <input type="number" id="a4Rman" value="5.20" step="0.01" style="width:76px"> cm（手動時使用）</div>
+<div class="msg" id="a4msg"></div>
+<p class="note">單位：H 以 cm 表示，換算用的是 ② 由擺長推算的棉線單位 u。所有記號都從桶底外緣量起，也就是孔口出水面，所以 H 就是孔口上方的水頭，不必扣除底厚。</p>
+</div>
+<div class="grid2">
+<div class="card"><h2 id="h4a">(b) H–t 圖</h2><svg id="pl4a" viewBox="0 0 440 260"></svg></div>
+<div class="card"><h2 id="h4b">√H–t 圖（線性化）</h2><svg id="pl4b" viewBox="0 0 440 260"></svg><div class="kv" id="k4b"></div></div>
+</div>
+<div class="grid2">
+<div class="card"><h2 id="h4c">(c) v–t 圖（由相鄰數據 ΔH/Δt 求 v）</h2><svg id="pl4c" viewBox="0 0 440 260"></svg>
+<div class="row"><label><input type="checkbox" id="a4ref"> 疊上參考解作法 v = √(2aH)（虛線）</label></div>
+<div class="kv" id="k4c"></div>
+<p class="note">虛線是先用 √H–t 求出 a，再代回 v = √(2aH) 畫成的。它必然落在直線上，因為 a 本身就是從同一組數據擬合出來的，這條線並不能檢驗「等減速」。實心點直接由數據差分而來，才是獨立的檢驗。</p></div>
+<div class="card"><h2>差分表</h2><div class="tbl" id="t4v"></div></div>
+</div>
+<div class="card">
+<h2>(d) 三孔直徑總表</h2>
+<div class="eq">r = R · [ a / (g + a) ]<sup>1/4</sup>　　σ<sub>r</sub>/r = √[ (σ<sub>R</sub>/R)² + ( g/(4(g+a)) · σ<sub>a</sub>/a )² ]</div>
+<div class="tbl" id="sum4"></div>
+<p class="note">a 的相對誤差會被 1/4 次方縮小，所以 2r 的精度主要受 R 和棉線單位 u 限制，見 ⑤。表中的「兩法差」以兩者合成標準差為單位；超過 2σ 表示兩條路徑之間有系統差異。</p>
+</div>
+</section>
+
+<section id="tab5">
+<div class="card">
+<h2>(e) 測得孔徑比實際大、相等還是小？</h2>
+<p>理想式假設「孔口截面上處處流速都是 √(2gH)，而且流量 = 孔面積 × 流速」。真實的銳緣孔有兩個效應：</p>
+<ol>
+<li><b>縮流（主因）</b>：流線在孔緣無法急轉，噴流在孔外收縮成縮流頸，面積只有孔面積的 C<sub>c</sub> ≈ 0.61–0.65。</li>
+<li><b>黏滯損耗（次要）</b>：出流速度略小於 √(2gH)，C<sub>v</sub> ≈ 0.97–0.99。小孔的雷諾數較低，這一項會稍大。</li>
+</ol>
+<div class="eq">實際流量 Q = C<sub>d</sub>·πr²√(2gH)，理想式卻當成 Q = πr<sub>測</sub>²√(2gH)　⇒　r<sub>測</sub> = √C<sub>d</sub>·r　⇒　<b>測得孔徑小於實際孔徑</b>，約小 20%</div>
+<p>下表以你輸入的 C<sub>d</sub> 修正測得值：2r<sub>修正</sub> = 2r<sub>測</sub> / √C<sub>d</sub>。薄壁銳緣孔的文獻值約 0.60–0.64；桶底有厚度時，孔比較接近短管，C<sub>d</sub> 可能較大。</p>
+<div class="row">假設 C<sub>d</sub> = <input type="number" id="e5cd" value="0.62" step="0.01" min="0.5" max="1" style="width:70px"></div>
+<div class="tbl" id="t5e"></div>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h2>√H–t 殘差：表面張力造成的尾端偏離</h2>
+<div class="ctabs" id="ctabs5"></div>
+<svg id="pl5r" viewBox="0 0 440 260"></svg>
+<p class="note">橫軸是 H，縱軸是實測值減去迴歸直線（逆向法為時間殘差）。空心灰點是被截止條件排除的低水位數據。噴流內部壓力比大氣高 σ/r<sub>j</sub>，等效水頭變成 H − σ/(ρgr<sub>j</sub>)；水位越低，這個修正占的比例越大，所以小孔在低水位的點會系統性偏離直線。</p>
+</div>
+<div class="card">
+<h2>截止高度對 2r 的影響</h2>
+<div class="tbl" id="t5h"></div>
+<p class="note">截止太低會把非線性的尾端納入迴歸；截止太高則點數少、σ 變大。好的選擇是 2r 對截止高度不再敏感的區段。</p>
+</div>
+</div>
+
+<div class="card">
+<h2>誤差預算</h2>
+<div class="tbl" id="t5b"></div>
+<h3>棉線單位 u 的共同誤差（不會出現在迴歸 σ 裡）</h3>
+<p>所有長度都用同一個 u 換算，所以 u 偏差 1% 時，每一筆數據都朝同一方向偏，迴歸看不出來：</p>
+<ul>
+<li>a ∝ u（H 以 u 為單位）→ a 的 1/4 次方只貢獻 u<sup>1/4</sup>。</li>
+<li>體積法：斜率 = πR²u，所以 R ∝ u<sup>−1/2</sup> → 2r ∝ u<sup>−1/2</sup>·u<sup>1/4</sup> = <b>u<sup>−1/4</sup></b>，u 偏 1% 時 2r 只偏 −0.25%。</li>
+<li>圓周法：R ∝ u → 2r ∝ <b>u<sup>5/4</sup></b>，u 偏 1% 時 2r 偏 +1.25%。</li>
+</ul>
+<p>所以用體積法量 R 還有額外好處：它幾乎抵消了尺標本身的誤差。</p>
+<div class="kv" id="k5u"></div>
+</div>
+
+<div class="card">
+<h2>單擺造尺的系統誤差</h2>
+<ul>
+<li><b>有限擺角</b>：T ≈ T₀(1 + θ₀²/16)，以 T 反推的 ℓ 會偏大 (1 + θ₀²/8) 倍。<span id="k5amp"></span></li>
+<li><b>螺帽是物理擺</b>：T = 2π√[(L² + k²)/(gL)]，k 為螺帽對自身質心的迴轉半徑。由 T 算出的是等效擺長 L + k²/L，比「懸點到螺帽中心」的繩長略長。M8 螺帽 k ≈ 0.45 cm，L = 30 cm 時只偏大約 0.02%，可以忽略；擺長很短時才需要注意。</li>
+<li><b>轉印</b>：把擺長轉印到另一條棉線、再對折時，每一步都有約 1 mm 的誤差，而且對折會把誤差平均分到每一段。</li>
+<li><b>g 取值</b>：ℓ ∝ g。g 取 9.80 或 9.789（臺灣地區）差約 0.1%，對 2r 的影響只有 0.03%（體積法）。</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>其他誤差來源</h2>
+<ul>
+<li><b>圓周法量到外徑</b>：棉線繞在桶外，R<sub>圓周</sub> − R<sub>體積</sub> ≈ 壁厚＋棉線鬆弛。<span id="k5c"></span></li>
+<li><b>反應時間</b>：定時畫記號時，手的延遲約 0.2–0.3 s 且方向固定（記號畫得偏低），這只會讓 √H–t 截距變小，斜率幾乎不受影響。逆向法的「開始」與「停止」反應互相抵消一部分。</li>
+<li><b>液面判讀</b>：乳白色桶壁使液面模糊約 ±0.8 mm；大孔液面下降快，時間誤差換算成高度誤差也較大。</li>
+<li><b>差分求 v</b>：v = ΔH/Δt 對讀數解析度很敏感，所以 v–t 圖的點比 √H–t 散。這是 (c) 直接作圖的代價，也是用 √H–t 迴歸為主的理由。</li>
+<li><b>v–t 斜率常略大於 √H 路徑</b>：表面張力使低水位的 v 額外變小，v–t 圖尾端被往下拉，擬合斜率因此變陡；√H–t 迴歸對這個尾端比較不敏感。</li>
+<li><b>準穩態近似</b>：(R/r)⁴ 在 10⁶ 以上，非定常項可以完全忽略。</li>
+</ul>
+</div>
+</section>
+
+<section id="tab6">
+<div class="card">
+<h2>⑥ 真值揭曉</h2>
+<p>揭曉後可以把自己的測量值和隱藏真值比較，差距以你自己估計的標準差為單位（z = (測量 − 真值)/σ）。|z| &lt; 2 表示差距在誤差範圍內；|z| 很大則表示有系統誤差，而且這個系統誤差沒有被 σ 涵蓋。</p>
+<div class="row"><button class="hot" id="b6">揭曉隱藏真值</button><span class="note">實驗編號 <b id="seed6"></b></span></div>
+</div>
+<div id="r6"></div>
+</section>
+</main>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const PI=Math.PI;
+const fmt=(x,n)=>Number.isFinite(x)?x.toFixed(n):'—';
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let _sp=null;
+function N(m,s){if(_sp!==null){const v=_sp;_sp=null;return m+s*v;}let u,v,r;do{u=2*Math.random()-1;v=2*Math.random()-1;r=u*u+v*v;}while(r>=1||r===0);const f=Math.sqrt(-2*Math.log(r)/r);_sp=v*f;return m+s*u*f;}
+
+/* ---------------- hidden truth ---------------- */
+let T=null;
+function makeTruth(sd){
+  const r=mulberry32(sd), u=(a,b)=>a+(b-a)*r();
+  const Tc=u(22,28);
+  T={seed:sd,g:9.789,rho:997,Tc,
+     sigma:0.0728-0.00016*(Tc-20),
+     nu:1.004e-6*Math.exp(-0.0233*(Tc-20)),
+     R:u(0.0510,0.0530),tw:u(0.0012,0.0018),tb:u(0.0012,0.0020),H:0.24,
+     nutK2:u(1.5e-5,2.2e-5),
+     holes:[{key:'A',name:'小孔',d:u(1.25e-3,1.55e-3),Cd0:u(0.60,0.66)},
+            {key:'B',name:'中孔',d:u(3.5e-3,4.1e-3),Cd0:u(0.60,0.66)},
+            {key:'C',name:'大孔',d:u(5.8e-3,6.6e-3),Cd0:u(0.60,0.66)}]};
+  T.AT=PI*T.R*T.R;
+  T.holes.forEach(h=>{h.Ah=PI*h.d*h.d/4;const Cc=Math.min(0.99,h.Cd0/0.97);h.rj=h.d/2*Math.sqrt(Cc);
+    h.hs=T.sigma/(T.rho*T.g*h.rj);h.AT=T.AT;h.g=T.g;h.nu=T.nu;h.re=true;});
+}
+
+/* ---------------- flow physics ---------------- */
+function dydt(p,y){
+  const head=y-p.hs; if(head<=5e-4) return 0;
+  let Cd=p.Cd0;
+  if(p.re){const Re=Math.sqrt(2*p.g*y)*p.d/p.nu;Cd=p.Cd0/Math.sqrt(1+50/Re);}
+  const beta=Cd*p.Ah/p.AT;
+  const vj=Math.sqrt(2*p.g*head/(1-beta*beta));
+  return -Cd*p.Ah*vj/p.AT;
+}
+function buildTraj(p,y0,dt){
+  const ys=[y0];let y=y0,t=0,tBreak=null;
+  while(t<6000){
+    const k1=dydt(p,y); if(k1===0)break;
+    const k2=dydt(p,y+0.5*dt*k1),k3=dydt(p,y+0.5*dt*k2),k4=dydt(p,y+dt*k3);
+    y+=dt*(k1+2*k2+2*k3+k4)/6; t+=dt; ys.push(y);
+    if(tBreak===null&&y-p.hs<0.003)tBreak=t;
+  }
+  return {dt,ys:Float64Array.from(ys),tEnd:t,tBreak:tBreak===null?t:tBreak};
+}
+function yAt(tr,t){if(t<=0)return tr.ys[0];const i=t/tr.dt,n=tr.ys.length;if(i>=n-1)return tr.ys[n-1];const k=Math.floor(i),f=i-k;return tr.ys[k]*(1-f)+tr.ys[k+1]*f;}
+function tAt(tr,y){const ys=tr.ys,n=ys.length;if(y>=ys[0])return 0;if(y<=ys[n-1])return null;let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(ys[m]>y)lo=m;else hi=m;}return (lo+(ys[lo]-y)/(ys[lo]-ys[hi]))*tr.dt;}
+function vSurf(tr,t){return Math.abs(yAt(tr,t+0.5)-yAt(tr,Math.max(0,t-0.5)))/(t>0.5?1:(t+0.5));}
+
+/* ---------------- stats & plot ---------------- */
+function linreg(x,y){const n=x.length;if(n<2)return null;let sx=0,sy=0;for(let i=0;i<n;i++){sx+=x[i];sy+=y[i];}const mx=sx/n,my=sy/n;let sxx=0,sxy=0,syy=0;for(let i=0;i<n;i++){const dx=x[i]-mx,dy=y[i]-my;sxx+=dx*dx;sxy+=dx*dy;syy+=dy*dy;}if(sxx===0)return null;const m=sxy/sxx,b=my-m*mx;let sse=0;for(let i=0;i<n;i++){const e=y[i]-(m*x[i]+b);sse+=e*e;}const s2=n>2?sse/(n-2):NaN;return{m,b,sm:Math.sqrt(s2/sxx),sb:Math.sqrt(s2*(1/n+mx*mx/sxx)),r2:syy>0?1-sse/syy:1,n};}
+function meanSd(a){const n=a.length;if(!n)return{m:NaN,s:NaN,n};const m=a.reduce((p,c)=>p+c,0)/n;const s=n>1?Math.sqrt(a.reduce((p,c)=>p+(c-m)*(c-m),0)/(n-1)):NaN;return{m,s,n};}
+function ticks(lo,hi,n){const span=hi-lo||1;const s0=span/n;const mag=Math.pow(10,Math.floor(Math.log10(s0)));const f=s0/mag;const st=(f<1.5?1:f<3?2:f<7?5:10)*mag;const out=[];for(let v=Math.ceil(lo/st-1e-9)*st;v<=hi+1e-9*st;v+=st)out.push(+v.toPrecision(10));return out;}
+function tl(v){const a=Math.abs(v);if(a===0)return'0';if(a>=1e4||a<1e-3)return v.toExponential(1);return +v.toPrecision(4)+'';}
+function plot(svg,o){
+  const W=o.w||440,H=o.h||260,L=62,R=14,Tp=16,B=40;
+  const xs=[],ys=[];o.series.forEach(s=>s.pts.forEach(p=>{xs.push(p[0]);ys.push(p[1]);}));
+  if(!xs.length){svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#98a2b3" font-size="14">尚無數據</text>`;return;}
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(o.zeroX)x0=Math.min(0,x0);if(o.zeroY)y0=Math.min(0,y0);
+  if(x1===x0){x1+=1;x0-=1;}if(y1===y0){y1+=1;y0-=1;}
+  const py=(y1-y0)*0.06;y1+=py;if(!o.zeroY)y0-=py;
+  const X=v=>L+(v-x0)/(x1-x0)*(W-L-R),Y=v=>H-B-(v-y0)/(y1-y0)*(H-B-Tp);
+  let s=`<rect x="${L}" y="${Tp}" width="${W-L-R}" height="${H-B-Tp}" fill="#fbfcfe" stroke="#cfd6df"/>`;
+  ticks(x0,x1,6).forEach(v=>{s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${Tp}" y2="${H-B}" stroke="#eef1f5"/><text x="${X(v)}" y="${H-B+14}" font-size="10.5" text-anchor="middle" fill="#555">${tl(v)}</text>`;});
+  ticks(y0,y1,5).forEach(v=>{s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eef1f5"/><text x="${L-5}" y="${Y(v)+3.5}" font-size="10.5" text-anchor="end" fill="#555">${tl(v)}</text>`;});
+  o.series.forEach(se=>{
+    if(se.line){s+=`<polyline fill="none" stroke="${se.color}" stroke-width="${se.lw||1.8}" ${se.dash?'stroke-dasharray="5 4"':''} points="${se.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')}"/>`;}
+    else se.pts.forEach(p=>{s+=`<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="3.2" fill="${se.color}"/>`;});
+  });
+  if(o.fit){const f=o.fit;s+=`<line x1="${X(x0)}" y1="${Y(f.m*x0+f.b)}" x2="${X(x1)}" y2="${Y(f.m*x1+f.b)}" stroke="${f.color||'#c2410c'}" stroke-width="1.5"/>`;}
+  let ly=Tp+14;o.series.forEach(se=>{if(se.label){s+=`<rect x="${W-R-150}" y="${ly-9}" width="10" height="10" fill="${se.color}"/><text x="${W-R-136}" y="${ly}" font-size="11">${se.label}</text>`;ly+=15;}});
+  s+=`<text x="${(L+W-R)/2}" y="${H-6}" font-size="12" text-anchor="middle">${o.xl||''}</text><text transform="translate(14 ${(Tp+H-B)/2}) rotate(-90)" font-size="12" text-anchor="middle">${o.yl||''}</text>`;
+  svg.innerHTML=s;
+}
+
+/* ---------------- tabs ---------------- */
+let curTab=1;
+$('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;curTab=+b.dataset.t;
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='tab'+curTab));
+  if(curTab===3)renderAll3();if(curTab===4)render4();if(curTab===5)render5();if(curTab===6)render6();});
+
+/* ---------------- ① interactive ---------------- */
+function t1(){
+  const d=+$('t1d').value*1e-3,Cd=+$('t1cd').value,H0=+$('t1h').value/100,sig=$('t1sig').checked;
+  $('t1dv').textContent=(d*1e3).toFixed(1)+' mm';$('t1cdv').textContent=Cd.toFixed(2);$('t1hv').textContent=(H0*100).toFixed(1)+' cm';
+  const R=0.052,AT=PI*R*R,g=9.8,Ah=PI*d*d/4;
+  const rj=d/2*Math.sqrt(Math.min(0.99,Cd/0.97));
+  const pI={d,Cd0:1,hs:0,Ah,AT,g,nu:1e-6,re:false};
+  const pR={d,Cd0:Cd,hs:sig?0.072/(1000*g*rj):0,Ah,AT,g,nu:1e-6,re:true};
+  const dt=d<2e-3?0.05:0.01;
+  const tI=buildTraj(pI,H0,dt),tR=buildTraj(pR,H0,dt);
+  const samp=(tr)=>{const out=[];const n=tr.ys.length,step=Math.max(1,Math.floor(n/200));for(let i=0;i<n;i+=step)out.push([i*tr.dt,Math.sqrt(tr.ys[i])]);out.push([(n-1)*tr.dt,Math.sqrt(tr.ys[n-1])]);return out;};
+  const pts=samp(tR).filter(p=>p[1]*p[1]>=0.03);
+  const f=linreg(pts.map(p=>p[0]),pts.map(p=>p[1]));
+  let rows='';
+  rows+=`<b>理想排空時間</b><span>${fmt(tI.tEnd,1)} s</span>`;
+  rows+=`<b>真實停流時間</b><span>${fmt(tR.tEnd,1)} s</span>`;
+  rows+=`<b>真實停流殘水高</b><span>${fmt(tR.ys[tR.ys.length-1]*100,2)} cm</span>`;
+  if(f){const a=2*f.m*f.m;const r=R*Math.pow(a/(g+a),0.25);
+    rows+=`<b>真實曲線 H≥3 cm 段迴歸</b><span>a = ${a.toExponential(3)} m/s²</span>`;
+    rows+=`<b>以理想式反推 2r</b><span>${fmt(2*r*1e3,3)} mm（真值 ${fmt(d*1e3,2)} mm，比值 ${fmt(2*r/d,3)}；√C<sub>d</sub> = ${fmt(Math.sqrt(Cd),3)}）</span>`;}
+  $('t1out').innerHTML=rows;
+  plot($('t1plot'),{w:440,h:280,xl:'t (s)',yl:'√H (m^½)',zeroY:true,series:[{pts:samp(tI),color:'#94a3b8',line:true,dash:true,label:'理想 (C_d=1)'},{pts:samp(tR),color:'#1d6fb8',line:true,label:'真實孔口'}]});
+}
+['t1d','t1cd','t1h','t1sig'].forEach(id=>$(id).addEventListener('input',t1));
+
+/* ---------------- ② pendulum ---------------- */
+const P={L:0.30,amp:8,running:false,timing:false,t:0,th:0,om:0,count:0,trials:[]};
+let ruler=null; // {uTrue,uAss,fold,sub,ellEst,L}
+function pendAcc(th,om){const L=P.L;const w2=T.g*L/(L*L+T.nutK2);return -w2*Math.sin(th)-0.012*om;}
+function pendStep(dt){const n=Math.ceil(dt/0.0005),h=dt/n;for(let i=0;i<n;i++){
+  const a1=pendAcc(P.th,P.om),v1=P.om;const a2=pendAcc(P.th+0.5*h*v1,P.om+0.5*h*a1),v2=P.om+0.5*h*a1;
+  const a3=pendAcc(P.th+0.5*h*v2,P.om+0.5*h*a2),v3=P.om+0.5*h*a2;const a4=pendAcc(P.th+h*v3,P.om+h*a3),v4=P.om+h*a3;
+  const omOld=P.om;P.th+=h*(v1+2*v2+2*v3+v4)/6;P.om+=h*(a1+2*a2+2*a3+a4)/6;
+  if(omOld>0&&P.om<=0)P.count++;}}
+function drawPend(){
+  const s=520,px=150,py=16,L=P.L;const x=px+Math.sin(P.th)*L*s,y=py+Math.cos(P.th)*L*s;
+  let g=`<rect x="60" y="4" width="180" height="12" fill="#8b6b4a"/><line x1="${px}" y1="${py}" x2="${x}" y2="${y}" stroke="#555" stroke-width="1.2"/>`;
+  const rr=9;let hex='';for(let k=0;k<6;k++){const a=P.th+PI/6+k*PI/3;hex+=`${x+rr*Math.sin(a)},${y+rr*Math.cos(a)} `;}
+  g+=`<polygon points="${hex}" fill="#9aa4ae" stroke="#4b5563"/><circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#4b5563"/>`;
+  g+=`<line x1="${px}" y1="${py}" x2="${px}" y2="${py+L*s+20}" stroke="#cbd5e1" stroke-dasharray="3 4"/>`;
+  $('pendSvg').innerHTML=g;
+}
+function renderPTable(){
+  $('pTb').innerHTML=P.trials.map((r,i)=>`<tr><td>${i+1}</td><td>${r.N}</td><td>${r.t.toFixed(2)}</td><td>${(r.t/r.N).toFixed(4)}</td><td><button data-i="${i}" class="pdel">×</button></td></tr>`).join('');
+  const Ts=P.trials.map(r=>r.t/r.N),ms=meanSd(Ts),g=+$('pG').value;
+  const ell=g*ms.m*ms.m/(4*PI*PI),sell=ms.n>1?2*ell*(ms.s/Math.sqrt(ms.n))/ms.m:NaN;
+  P.ellEst=ell;P.ellSig=sell;
+  $('pStat').innerHTML=ms.n?`<b>平均週期 T̄</b><span>${fmt(ms.m,4)} s（SD ${fmt(ms.s,4)}，n = ${ms.n}）</span><b>擺長 ℓ = gT̄²/4π²</b><span>${fmt(ell*100,3)} ± ${fmt(sell*100,3)} cm（平均值標準誤差）</span>`:'';
+}
+$('pTb').addEventListener('click',e=>{const b=e.target.closest('.pdel');if(!b)return;P.trials.splice(+b.dataset.i,1);renderPTable();});
+$('pG').addEventListener('input',renderPTable);
+$('pA').addEventListener('input',()=>{$('pAv').textContent=$('pA').value+'°';if(!P.running){P.th=+$('pA').value*PI/180;drawPend();}});
+$('pL').addEventListener('input',e=>{
+  if(P.trials.length&&!confirm('改變繩長會清除目前的計時數據，確定？')){e.target.value=P.L;return;}
+  P.trials=[];P.L=+e.target.value;P.running=false;P.timing=false;P.th=+$('pA').value*PI/180;P.om=0;renderPTable();drawPend();});
+$('pGo').onclick=()=>{P.th=+$('pA').value*PI/180;P.om=0;P.t=0;P.count=0;P.running=true;P.timing=true;$('pStop').disabled=false;$('pGo').disabled=true;
+  $('pMsg').textContent='擺動中，碼錶已同步啟動。數到 '+$('pN').value+' 個週期時按「停止碼錶」。';};
+$('pStop').onclick=()=>{if(!P.timing)return;P.timing=false;const t=Math.round(P.t*100)/100;P.trials.push({N:+$('pN').value,t});
+  $('pStop').disabled=true;$('pGo').disabled=false;$('pMsg').textContent=`記錄：${$('pN').value} 個週期共 ${t.toFixed(2)} s。可再放手重測。`;renderPTable();};
+$('pHalt').onclick=()=>{P.running=false;P.timing=false;P.th=+$('pA').value*PI/180;P.om=0;$('pStop').disabled=true;$('pGo').disabled=false;drawPend();};
+
+/* ruler */
+function readUnits(y,extra){
+  const v=(y+N(0,extra||0)+N(0,0.0002))/ruler.uTrue;return Math.round(v*ruler.sub)/ruler.sub;}
+function unitsDataExist(){return V.rows.length||V.circ.length||C.some(c=>c.rows.mark.length||c.rows.lap.length||c.rows.rev.length);}
+$('rMake').onclick=()=>{
+  if(!P.trials.length||!Number.isFinite(P.ellEst)){$('rMsg').textContent='請先完成單擺計時，才能算出擺長。';$('rMsg').classList.add('w');return;}
+  if(ruler&&unitsDataExist()&&!confirm('重新製作棉線尺，所有以舊尺讀出的數據（② 的 V–h、圓周，③ 的三孔數據）都會清除，確定？'))return;
+  const fold=+$('rFold').value,sub=+$('rSub').value;
+  ruler={uTrue:(P.L+N(0,0.0010))/fold,uAss:P.ellEst/fold,fold,sub,ellEst:P.ellEst,ellSig:P.ellSig,L:P.L};
+  V.rows=[];V.circ=[];C.forEach(c=>{c.rows={mark:[],lap:[],rev:[]};c.tape=null;c.marks=[];});
+  $('rMsg').classList.remove('w');
+  $('rMsg').innerHTML=`棉線尺完成：1 單位 = 擺長/${fold} ≈ <b>${fmt(ruler.uAss*100,4)} cm</b>（依你的擺長推算），讀數解析度 1/${sub} 單位 ≈ ${fmt(ruler.uAss*100/sub,3)} cm。`;
+  renderV();renderAll3();};
+
+/* ---------------- ② volume ---------------- */
+const V={Vtrue:0,Vnom:0,rows:[],circ:[]};
+function drawVol(){
+  const s=900,xL=150-T.R*s,w=2*T.R*s,yB=280,y=T.tb+V.Vtrue*1e-6/T.AT;
+  let g=`<rect x="${xL}" y="${yB-T.H*s}" width="${w}" height="${T.H*s}" fill="#f7f7f4" stroke="#8a8f98" stroke-width="2" rx="4"/>`;
+  if(V.Vtrue>0)g+=`<rect x="${xL+2}" y="${yB-y*s}" width="${w-4}" height="${(y-T.tb)*s}" fill="#3b82c4" opacity=".28"/>`;
+  g+=`<rect x="${xL}" y="${yB-T.H*s}" width="${w}" height="${T.H*s}" fill="#fff" opacity=".45"/>`;
+  if($('vSeal').checked)g+=`<rect x="140" y="${yB-2}" width="20" height="5" fill="#e5e7eb" stroke="#9ca3af"/>`;
+  $('volSvg').innerHTML=g;}
+function renderV(){
+  $('vMsg').textContent=`累計倒入 ${V.Vnom} mL（名目值；量器本身有讀數誤差）`;
+  $('vTb').innerHTML=V.rows.map((r,i)=>`<tr><td>${i+1}</td><td><input data-i="${i}" data-k="V" value="${r.V}"></td><td><input data-i="${i}" data-k="h" value="${r.h}"></td><td><button class="vdel" data-i="${i}">×</button></td></tr>`).join('');
+  const f=linreg(V.rows.map(r=>r.h),V.rows.map(r=>r.V));
+  plot($('vPlot'),{xl:'h (棉線單位)',yl:'V (mL)',series:[{pts:V.rows.map(r=>[r.h,r.V]),color:'#1d6fb8'}],fit:f?{m:f.m,b:f.b}:null});
+  let s='';
+  if(f&&ruler){const hs=V.rows.map(r=>r.h),hm=hs.reduce((a,b)=>a+b,0)/hs.length,sxx=hs.reduce((a,b)=>a+(b-hm)*(b-hm),0);
+    const smF=f.m*(1/ruler.sub/Math.sqrt(12))/Math.sqrt(sxx||1),sm=Math.max(Number.isFinite(f.sm)?f.sm:0,smF);
+    const Rm=Math.sqrt(f.m*1e-6/(PI*ruler.uAss)),sR=Rm/2*sm/f.m;
+    s=`<b>斜率 πR²u</b><span>${fmt(f.m,2)} ± ${fmt(sm,2)} mL/單位${sm>f.sm?'（以讀數解析度為下限）':''}</span><b>截距</b><span>${fmt(f.b,2)} mL</span><b>R（體積法）</b><span>${fmt(Rm*100,3)} ± ${fmt(sR*100,3)} cm　→ 2R = ${fmt(2*Rm*100,3)} cm</span><b>R²</b><span>${fmt(f.r2,5)}</span>`;V.Rvol=Rm;V.sRvol=sR;}
+  $('vStat').innerHTML=s;drawVol();renderC();}
+$('vTb').addEventListener('change',e=>{const t=e.target;if(!t.dataset.k)return;V.rows[+t.dataset.i][t.dataset.k]=+t.value;renderV();});
+$('vTb').addEventListener('click',e=>{const b=e.target.closest('.vdel');if(!b)return;V.rows.splice(+b.dataset.i,1);renderV();});
+function pour(nom,sd){
+  if(!$('vSeal').checked){V.Vtrue=0;V.Vnom=0;$('vMsg').textContent='水從底孔流光了！請先用隱形膠帶封孔，再重新倒水。';$('vMsg').classList.add('w');drawVol();return;}
+  $('vMsg').classList.remove('w');
+  const y=T.tb+(V.Vtrue+nom)*1e-6/T.AT;if(y>T.H-0.01){$('vMsg').textContent='快滿了，不能再倒。';return;}
+  V.Vtrue+=nom+N(0,sd);V.Vnom+=nom;renderV();}
+$('vP50').onclick=()=>pour(50,0.4);
+$('vP250').onclick=()=>pour(250,6);
+$('vSeal').onchange=()=>{if(!$('vSeal').checked&&V.Vtrue>0){V.Vtrue=0;V.Vnom=0;$('vMsg').textContent='撕開膠帶，水全流掉了。';}drawVol();};
+$('vDump').onclick=()=>{V.Vtrue=0;V.Vnom=0;renderV();};
+$('vMeas').onclick=()=>{if(!ruler){$('vMsg').textContent='請先製作棉線尺。';return;}if(V.Vtrue<=0){$('vMsg').textContent='桶內沒有水。';return;}
+  const y=T.tb+V.Vtrue*1e-6/T.AT;V.rows.push({V:V.Vnom,h:readUnits(y,0.0008)});renderV();};
+function renderC(){
+  if(!V.circ.length||!ruler){$('cStat').innerHTML='';return;}
+  const ms=meanSd(V.circ);const Rc=ms.m*ruler.uAss/(2*PI);V.Rcirc=Rc;
+  $('cStat').innerHTML=`<b>周長讀數</b><span>${V.circ.map(x=>x.toFixed(4)).join('、')} 單位</span><b>R = C/2π（圓周法）</b><span>${fmt(Rc*100,3)} cm　→ 2R = ${fmt(2*Rc*100,3)} cm</span>`+
+   (V.Rvol?`<b>與體積法差</b><span>${fmt((Rc-V.Rvol)*1000,2)} mm</span>`:'');}
+$('cMeas').onclick=()=>{if(!ruler){alert('請先製作棉線尺。');return;}
+  const C0=2*PI*(T.R+T.tw)+Math.abs(N(0.0012,0.0008));V.circ.push(Math.round(C0/ruler.uTrue*ruler.sub)/ruler.sub);renderC();};
+$('cClr').onclick=()=>{V.circ=[];renderC();};
+
+/* ---------------- ③ drain ---------------- */
+let C=[],ci=0;
+function initC(){C=T.holes.map(h=>({h,y:T.tb,filled:false,run:null,simT:0,running:false,swOn:false,method:'mark',marks:[],tape:null,lapDone:new Set(),
+  rows:{mark:[],lap:[],rev:[]},rev:{phase:'idle',k:5,tS:null,tSraw:null},beepIdx:0}));}
+let speed=5,audio=null;
+function beep(){try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=880;g.gain.value=0.08;o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+0.12);}catch(e){}
+  const s=$('cSw');s.classList.remove('flash');void s.offsetWidth;s.classList.add('flash');}
+function curY(c){return c.run?yAt(c.run.tr,c.simT):c.y;}
+function msg3(t,w){$('cMsg').textContent=t;$('cMsg').classList.toggle('w',!!w);}
+function ensureTape(c){if(c.tape||!ruler)return;c.tape=[];for(let k=1;k*ruler.uTrue<T.H-0.01;k++)c.tape.push(k*ruler.uTrue+N(0,0.0003));}
+function setMethodUI(){const m=C[ci].method;
+  document.querySelectorAll('input[name=meth]').forEach(r=>r.checked=r.value===m);
+  $('ctlMark').style.display=m==='mark'?'flex':'none';$('ctlLap').style.display=m==='lap'?'flex':'none';$('ctlRev').style.display=m==='rev'?'flex':'none';}
+function statusText(c){if(c.running)return c.run&&curY(c)-c.h.hs<0.003?'滴流中':'排水中';if(c.run)return'已停流（殘水）';return c.filled?'已封孔裝水':'空桶';}
+function renderCTabs(){$('ctabs').innerHTML=C.map((c,i)=>`<button data-i="${i}" class="${i===ci?'on':''}">容器 ${c.h.key}（${c.h.name}）</button>`).join('');}
+$('ctabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ci=+b.dataset.i;renderAll3();});
+document.querySelectorAll('input[name=meth]').forEach(r=>r.addEventListener('change',()=>{const c=C[ci];if(c.running){msg3('排水進行中，請等這一趟結束再換方法。',1);setMethodUI();return;}c.method=r.value;setMethodUI();renderTable3();updButtons();}));
+$('spd').onchange=e=>speed=+e.target.value;
+$('fV').oninput=()=>$('fVv').textContent=$('fV').value+' mL';
+$('fFill').onclick=()=>{const c=C[ci];if(c.running){msg3('還在排水中。',1);return;}
+  const y=curY(c);const yn=Math.max(y,T.tb)+(+$('fV').value)*1e-6/T.AT;if(yn>T.H-0.008){msg3('水太多會溢出，請減少裝水量。',1);return;}
+  if(c.marks.some(m=>!m.read)&&!confirm('還有奇異筆記號尚未量測，重新加水會擦掉它們，確定？'))return;
+  c.marks=[];c.y=yn;c.run=null;c.filled=true;c.simT=0;c.swOn=false;c.rev.phase='idle';
+  msg3(`以膠帶封孔，倒入 ${$('fV').value} mL。${y>T.tb+1e-4?'（桶底原有殘水也算在內）':''}`);renderAll3();};
+$('fWipe').onclick=()=>{C[ci].marks=[];renderAll3();};
+function openHole(sync){const c=C[ci];if(!c.filled||c.running){msg3(c.running?'已在排水。':'請先封孔並加水。',1);return false;}
+  const dt=c.h.key==='A'?0.05:0.01;c.run={tr:buildTraj(c.h,c.y,dt)};c.simT=0;c.running=true;c.filled=false;c.swOn=sync;c.beepIdx=0;c.lapDone=new Set();return true;}
+$('bOpenM').onclick=()=>{if(openHole(true))msg3('撕開膠帶，碼錶同步啟動。邊看碼錶邊按「畫記號」，實際記錄的是你按下當下碼錶顯示的時間。');updButtons();};
+$('bOpenL').onclick=()=>{if(!ruler){msg3('刻度膠帶需要棉線尺，請先到 ② 製作。',1);return;}ensureTape(C[ci]);if(openHole(true))msg3('撕開膠帶，碼錶同步啟動。液面經過每一格刻度時按「液面通過刻度！」。');updButtons();};
+$('bOpenR').onclick=()=>{if(!ruler){msg3('刻度膠帶需要棉線尺，請先到 ② 製作。',1);return;}const c=C[ci];ensureTape(c);c.rev.k=+$('revK').value;
+  if(c.tape[c.rev.k-1]>c.y-0.002){msg3('起始水位要高於第 '+c.rev.k+' 格才量得到，請多加一點水。',1);return;}
+  if(openHole(false)){c.rev.phase='wait';msg3('水已開始流，碼錶未啟動。液面經過第 '+c.rev.k+' 格時按「開始」，噴流斷成水滴時按「停止」。');}updButtons();};
+function human(dtTrue){return Math.max(1,0.8*speed);}
+$('bMark').onclick=()=>{const c=C[ci];if(!c.running)return;
+  const lag=Math.abs(N(0.25,0.1));const ym=yAt(c.run.tr,c.simT+lag)+N(0,0.0008);
+  c.marks.push({t:Math.round(c.simT*100)/100,y:ym,read:false});renderTable3();};
+$('bRead').onclick=()=>{const c=C[ci];if(!ruler){msg3('請先在 ② 製作棉線尺。',1);return;}
+  const un=c.marks.filter(m=>!m.read);if(!un.length){msg3('沒有未量測的記號。',1);return;}
+  un.forEach(m=>{c.rows.mark.push({t:m.t,H:readUnits(m.y,0)});m.read=true;});
+  c.rows.mark.sort((a,b)=>a.t-b.t);msg3(`已用棉線尺量出 ${un.length} 個記號的高度（自桶底外緣起算，讀到 1/${ruler.sub} 單位）。`);renderTable3();};
+$('bLap').onclick=()=>{const c=C[ci];if(!c.running)return;const tr=c.run.tr,W=Math.max(1,0.8*speed);
+  let best=null;c.tape.forEach((yk,i)=>{if(c.lapDone.has(i))return;const tk=tAt(tr,yk);if(tk===null||tk===0)return;const d=Math.abs(tk-c.simT);if(!best||d<best.d)best={i,tk,d};});
+  if(best&&best.d<=W){const vs=Math.max(vSurf(tr,best.tk),1e-5);const tr_=best.tk+N(0,0.06)+N(0,0.0008/vs);
+    c.lapDone.add(best.i);c.rows.lap.push({t:Math.round(tr_*100)/100,H:best.i+1});}
+  else{const y=curY(c);let k=0,dm=1;c.tape.forEach((yk,i)=>{if(Math.abs(yk-y)<dm){dm=Math.abs(yk-y);k=i;}});
+    c.lapDone.add(k);c.rows.lap.push({t:Math.round(c.simT*100)/100,H:k+1});msg3('這一下按得離液面通過刻度的時刻太遠，照實記錄。',1);}
+  c.rows.lap.sort((a,b)=>a.t-b.t);renderTable3();};
+$('bRevStart').onclick=()=>{const c=C[ci];if(c.rev.phase!=='wait')return;const tr=c.run.tr,yk=c.tape[c.rev.k-1],tk=tAt(tr,yk),W=Math.max(1,0.8*speed);
+  if(tk!==null&&Math.abs(tk-c.simT)<=W){const vs=Math.max(vSurf(tr,tk),1e-5);c.rev.tS=tk+N(0,0.06)+N(0,0.0008/vs);}else{c.rev.tS=c.simT;msg3('按得太早或太晚，照實記錄。',1);}
+  c.rev.tSraw=c.simT;c.rev.phase='timing';c.swOn=true;updButtons();};
+$('bRevStop').onclick=()=>{const c=C[ci];if(c.rev.phase!=='timing')return;const tr=c.run.tr,W=Math.max(1.5,0.8*speed);
+  let te;if(Math.abs(tr.tBreak-c.simT)<=W)te=tr.tBreak+N(0,0.3);else{te=c.simT;msg3('離「噴流斷成水滴」的時刻太遠，照實記錄。',1);}
+  const dur=Math.round((te-c.rev.tS)*100)/100;c.rows.rev.push({k:c.rev.k,t:dur});c.rows.rev.sort((a,b)=>b.k-a.k);
+  c.rev.phase='done';c.swOn=false;c.rev.shown=dur;msg3(`記錄：第 ${c.rev.k} 格 → 流完 ${dur.toFixed(2)} s。重新封孔加水，換下一格再量。`);updButtons();renderTable3();};
+function updButtons(){const c=C[ci];
+  $('bMark').disabled=!(c.running&&c.method==='mark');$('bLap').disabled=!(c.running&&c.method==='lap');
+  $('bRevStart').disabled=c.rev.phase!=='wait'||!c.running;$('bRevStop').disabled=c.rev.phase!=='timing';
+  ['bOpenM','bOpenL','bOpenR'].forEach(id=>$(id).disabled=c.running||!c.filled);}
+function renderRevK(){const c=C[ci];const n=ruler?Math.floor((T.H-0.01)/ruler.uTrue):10;const cur=+$('revK').value||5;
+  $('revK').innerHTML=Array.from({length:n},(_,i)=>`<option ${i+1===cur?'selected':''}>${i+1}</option>`).join('');}
+function renderTable3(){const c=C[ci],m=c.method,u=ruler?ruler.uAss*100:NaN;let h='';
+  if(m==='rev'){h=`<table><thead><tr><th>#</th><th>起算刻度 k</th><th>H (cm)</th><th>到流完時間 t<sub>k</sub> (s)</th><th></th></tr></thead><tbody>`+
+    c.rows.rev.map((r,i)=>`<tr><td>${i+1}</td><td><input data-i="${i}" data-k="k" value="${r.k}"></td><td>${fmt(r.k*u,3)}</td><td><input data-i="${i}" data-k="t" value="${r.t}"></td><td><button class="del" data-i="${i}">×</button></td></tr>`).join('')+'</tbody></table>';}
+  else{const rows=c.rows[m];const pend=m==='mark'?c.marks.filter(x=>!x.read).length:0;
+    h=`<table><thead><tr><th>#</th><th>t (s)</th><th>H (棉線單位)</th><th>H (cm)</th><th></th></tr></thead><tbody>`+
+    rows.map((r,i)=>`<tr><td>${i+1}</td><td><input data-i="${i}" data-k="t" value="${r.t}"></td><td><input data-i="${i}" data-k="H" value="${r.H}"></td><td>${fmt(r.H*u,3)}</td><td><button class="del" data-i="${i}">×</button></td></tr>`).join('')+
+    (pend?`<tr><td colspan="5" class="note">另有 ${pend} 個記號畫在桶壁上，尚未量測（t = ${c.marks.filter(x=>!x.read).map(x=>x.t.toFixed(2)).join('、')} s）</td></tr>`:'')+'</tbody></table>';}
+  $('cTbl').innerHTML=`<h3>容器 ${c.h.key}（${c.h.name}）・${m==='mark'?'定時畫記號':m==='lap'?'刻度膠帶通過計時':'逆向到流完'}</h3>`+h;}
+$('cTbl').addEventListener('change',e=>{const t=e.target;if(!t.dataset.k)return;const c=C[ci];c.rows[c.method][+t.dataset.i][t.dataset.k]=+t.value;renderTable3();});
+$('cTbl').addEventListener('click',e=>{const b=e.target.closest('.del');if(!b)return;const c=C[ci];c.rows[c.method].splice(+b.dataset.i,1);renderTable3();});
+$('bCsv').onclick=()=>{let s='\ufeff容器,方法,t或t_k(s),H或k(棉線單位),H(cm)\n';const u=ruler?ruler.uAss*100:NaN;
+  C.forEach(c=>{['mark','lap','rev'].forEach(m=>c.rows[m].forEach(r=>{const Hu=m==='rev'?r.k:r.H;s+=`${c.h.key},${m},${r.t},${Hu},${fmt(Hu*u,4)}\n`;}));});
+  s+=`\n棉線單位(cm, 依擺長推算),${fmt(u,5)}\n`;if(V.Rvol)s+=`R 體積法(cm),${fmt(V.Rvol*100,4)}\n`;if(V.Rcirc)s+=`R 圓周法(cm),${fmt(V.Rcirc*100,4)}\n`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='排水孔徑數據_'+T.seed+'.csv';a.click();};
+
+function renderRig(){
+  const c=C[ci],s=1500,w=2*T.R*s,xL=190-w/2,xR=xL+w,xc=190,yB=380,y=curY(c);
+  let g='';
+  g+=`<path d="M60 425 L320 425 L308 466 L72 466 Z" fill="#dbe7f3" stroke="#7b8794"/>`;
+  g+=`<rect x="${xL-8}" y="${yB}" width="${w/2-14}" height="26" fill="#c8a57a" stroke="#8b6b4a"/><rect x="${xc+22}" y="${yB}" width="${w/2-14}" height="26" fill="#c8a57a" stroke="#8b6b4a"/>`;
+  const yTop=yB-T.H*s;
+  if(y>T.tb+1e-5)g+=`<rect x="${xL+3}" y="${yB-y*s}" width="${w-6}" height="${(y-T.tb)*s}" fill="#3b82c4" opacity=".3"/>`;
+  g+=`<rect x="${xL}" y="${yTop}" width="${w}" height="${T.H*s}" rx="5" fill="#fbfbf8" opacity=".55" stroke="#8a8f98" stroke-width="2.4"/>`;
+  g+=`<line x1="${xL}" y1="${yB-T.tb*s}" x2="${xR}" y2="${yB-T.tb*s}" stroke="#b0b4ba"/>`;
+  if(y>T.tb+1e-5)g+=`<line x1="${xL+3}" y1="${yB-y*s}" x2="${xR-3}" y2="${yB-y*s}" stroke="#3b82c4" stroke-width="3" opacity=".25"/>`;
+  if(c.running){const head=y-c.h.hs;
+    if(head>0.003){const jw=Math.max(1.2,c.h.rj*2*s*2.2);g+=`<rect x="${xc-jw/2}" y="${yB}" width="${jw}" height="${440-yB}" fill="#3b82c4" opacity=".7"/>`;}
+    else{const ph=(c.simT*1.5)%1;for(let k=0;k<3;k++){const yy=yB+((ph+k/3)%1)*60;g+=`<circle cx="${xc}" cy="${yy}" r="2.2" fill="#3b82c4"/>`;}}}
+  else if(c.filled)g+=`<rect x="${xc-8}" y="${yB-1}" width="16" height="4" fill="#e5e7eb" stroke="#9ca3af"/>`;
+  if(c.tape&&c.method!=='mark'){g+=`<rect x="${xL+4}" y="${yTop+6}" width="9" height="${T.H*s-6-T.tb*s}" fill="#fef3c7" opacity=".8"/>`;
+    c.tape.forEach((yk,i)=>{const yy=yB-yk*s;g+=`<line x1="${xL+3}" x2="${xL+15}" y1="${yy}" y2="${yy}" stroke="#92400e"/><text x="${xL-6}" y="${yy+4}" font-size="10" text-anchor="end" fill="#92400e">${i+1}</text>`;});}
+  c.marks.forEach(m=>{const yy=yB-m.y*s;g+=`<line x1="${xR-16}" x2="${xR-3}" y1="${yy}" y2="${yy}" stroke="#111" stroke-width="1.4"/>`;});
+  g+=`<text x="${xc}" y="${yTop-8}" font-size="13" text-anchor="middle">容器 ${c.h.key}（${c.h.name}）</text>`;
+  $('rig').innerHTML=g;
+  // zoom
+  const z=9000,yc=Math.max(y,0.01);const Y=v=>80-(v-yc)*z;
+  let q=`<rect x="0" y="0" width="160" height="160" fill="#fafaf8"/>`;
+  if(y>T.tb+1e-5)q+=`<rect x="20" y="${Math.max(0,Y(y))}" width="120" height="160" fill="#3b82c4" opacity=".22"/><rect x="20" y="${Y(y)-2.5}" width="120" height="5" fill="#3b82c4" opacity=".18"/>`;
+  q+=`<rect x="20" y="0" width="120" height="160" fill="#fff" opacity=".35"/>`;
+  if(c.tape&&c.method!=='mark')c.tape.forEach((yk,i)=>{const yy=Y(yk);if(yy<-5||yy>165)return;q+=`<line x1="20" x2="48" y1="${yy}" y2="${yy}" stroke="#92400e" stroke-width="1.5"/><text x="52" y="${yy+4}" font-size="11" fill="#92400e">${i+1}</text>`;});
+  c.marks.forEach(m=>{const yy=Y(m.y);if(yy<-5||yy>165)return;q+=`<line x1="112" x2="140" y1="${yy}" y2="${yy}" stroke="#111" stroke-width="1.6"/>`;});
+  $('zoom').innerHTML=q;
+  $('cStatus').textContent=statusText(c);
+  let sw=0;if(c.method==='rev'){if(c.rev.phase==='timing')sw=c.simT-c.rev.tSraw;else if(c.rev.phase==='done')sw=c.rev.shown;}else if(c.run)sw=Math.min(c.simT,c.run.tr.tEnd+3);
+  $('cSw').textContent=sw.toFixed(2);}
+function renderAll3(){renderCTabs();setMethodUI();renderRevK();renderTable3();updButtons();renderRig();}
+
+/* ---------------- main loop ---------------- */
+let last=performance.now();
+function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(P.running){pendStep(dt);if(P.timing)P.t+=dt;if(curTab===2){drawPend();$('pSw').textContent=P.t.toFixed(2);$('pCnt').textContent=$('pShowCnt').checked?P.count:'–';}}
+  C.forEach((c,i)=>{if(!c.running)return;c.simT+=dt*speed;
+    if(c.method==='mark'){const bi=+$('beep').value;if(bi>0&&i===ci&&curTab===3){const k=Math.floor(c.simT/bi);if(k>c.beepIdx){c.beepIdx=k;beep();}}}
+    if(c.simT>c.run.tr.tEnd+3){c.running=false;if(c.rev.phase==='wait'){c.rev.phase='idle';}
+      if(i===ci){msg3(`容器 ${c.h.key} 已停流，桶底殘留約一層水。`);updButtons();}}});
+  if(curTab===3){renderRig();updButtons();}
+  requestAnimationFrame(loop);}
+
+/* ---------------- ④ analysis ---------------- */
+let ci4=0,revealed=false;
+const S4=[{src:null},{src:null},{src:null}];
+const SRCN={mark:'定時畫記號',lap:'刻度膠帶',ml:'記號＋膠帶',rev:'逆向到流完'};
+function autoSrc(c){if(c.rows.mark.length>=3)return'mark';if(c.rows.lap.length>=3)return'lap';if(c.rows.rev.length>=3)return'rev';return'mark';}
+function srcOf(i){return S4[i].src||autoSrc(C[i]);}
+function getR(){
+  const sel=$('a4R').value;
+  if(sel==='vol'){if(V.Rvol)return{R:V.Rvol*100,s:V.sRvol*100,src:'體積法'};return null;}
+  if(sel==='circ'){if(!V.Rcirc||!ruler)return null;const ms=meanSd(V.circ);
+    const su=ms.n>1?ms.s/Math.sqrt(ms.n):1/ruler.sub/Math.sqrt(12);return{R:V.Rcirc*100,s:su*ruler.uAss*100/(2*PI),src:'圓周法'};}
+  const v=+$('a4Rman').value;return v>0?{R:v,s:0,src:'手動輸入'}:null;}
+function getData(c,src){
+  const u=ruler.uAss*100;
+  if(src==='rev')return c.rows.rev.map(r=>({t:+r.t,H:+r.k*u})).filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.H)).sort((a,b)=>b.H-a.H);
+  const rows=src==='ml'?c.rows.mark.concat(c.rows.lap):c.rows[src];
+  return rows.map(r=>({t:+r.t,H:+r.H*u})).filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.H)&&p.H>0).sort((a,b)=>a.t-b.t);}
+function rFrom(a,sa,Ri,g){const r=Ri.R*Math.pow(a/(g+a),0.25);const rel=Math.sqrt(Math.pow(Ri.s/Ri.R,2)+Math.pow(g/(4*(g+a))*sa/a,2));return{r,sr:r*rel};}
+function analyze(i,o){
+  const c=C[i],src=o.src||srcOf(i),hmin=o.hmin,g=o.g,Ri=o.Ri;
+  const out={src,all:[],used:[],fit:null,vpts:[],vfit:null};
+  if(!ruler)return out;
+  const all=getData(c,src);out.all=all;const used=all.filter(p=>p.H>=hmin);out.used=used;
+  if(src==='rev'){
+    const f=linreg(used.map(p=>Math.sqrt(p.H)),used.map(p=>p.t));out.fit=f;
+    if(f&&f.m>0){out.a1=2/(f.m*f.m);out.sa1=2*out.a1*f.sm/f.m;}
+    for(let k=0;k+1<used.length;k++){const p=used[k],q=used[k+1],dt=p.t-q.t;if(dt<=0)continue;out.vpts.push({t:(p.t+q.t)/2,v:(p.H-q.H)/dt,H:(p.H+q.H)/2});}
+    const fv=linreg(out.vpts.map(p=>p.t),out.vpts.map(p=>p.v));out.vfit=fv;if(fv){out.a2=fv.m;out.sa2=fv.sm;}
+  }else{
+    const f=linreg(used.map(p=>p.t),used.map(p=>Math.sqrt(p.H)));out.fit=f;
+    if(f&&f.m<0){out.a1=2*f.m*f.m;out.sa1=4*Math.abs(f.m)*f.sm;}
+    for(let k=0;k+1<used.length;k++){const p=used[k],q=used[k+1],dt=q.t-p.t;if(dt<=0)continue;out.vpts.push({t:(p.t+q.t)/2,v:(p.H-q.H)/dt,H:(p.H+q.H)/2});}
+    const fv=linreg(out.vpts.map(p=>p.t),out.vpts.map(p=>p.v));out.vfit=fv;if(fv){out.a2=-fv.m;out.sa2=fv.sm;}
+  }
+  if(Ri){if(out.a1>0){const q=rFrom(out.a1,out.sa1,Ri,g);out.r1=q.r;out.sr1=q.sr;}
+         if(out.a2>0){const q=rFrom(out.a2,out.sa2,Ri,g);out.r2=q.r;out.sr2=q.sr;}}
+  return out;}
+function opts4(){return{hmin:Math.max(0,+$('a4hmin').value||0),g:(+$('a4g').value||9.8)*100,Ri:getR()};}
+function computeAll(){const o=opts4();return C.map((c,i)=>analyze(i,o));}
+function tabs4(id,cur){$(id).innerHTML=C.map((c,i)=>`<button data-i="${i}" class="${i===cur?'on':''}">容器 ${c.h.key}（${c.h.name}）</button>`).join('');}
+$('ctabs4').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ci4=+b.dataset.i;render4();});
+$('ctabs5').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ci4=+b.dataset.i;render5();});
+$('a4src').onchange=()=>{S4[ci4].src=$('a4src').value;render4();};
+['a4hmin','a4g','a4R','a4Rman','a4ref'].forEach(id=>$(id).addEventListener('input',render4));
+$('a4R').addEventListener('change',render4);
+const pm=(x,s,n)=>Number.isFinite(x)?(fmt(x,n)+(Number.isFinite(s)?' ± '+fmt(s,n):'')):'—';
+const ex=(x,s)=>Number.isFinite(x)?(x.toExponential(3)+(Number.isFinite(s)?' ± '+s.toExponential(1):'')):'—';
+function render4(){
+  tabs4('ctabs4',ci4);const o=opts4();
+  $('a4src').value=srcOf(ci4);
+  const w=[];if(!ruler)w.push('尚未在 ② 製作棉線尺。');if(!o.Ri)w.push('尚未取得 R（請在 ② 完成體積法或圓周法，或改用手動輸入）。');
+  const A=analyze(ci4,o),rev=A.src==='rev';
+  if(ruler&&A.used.length<3)w.push(`容器 ${C[ci4].h.key} 以「${SRCN[A.src]}」的有效數據不足 3 點，請回 ③ 量測或換數據來源。`);
+  $('a4msg').textContent=w.length?w.join(' '):`容器 ${C[ci4].h.key}：${SRCN[A.src]}，共 ${A.all.length} 點，迴歸採用 ${A.used.length} 點；R = ${o.Ri.R.toFixed(3)} ± ${o.Ri.s.toFixed(3)} cm（${o.Ri.src}）。`;
+  $('a4msg').classList.toggle('w',w.length>0);
+  const ex_=A.all.filter(p=>p.H<o.hmin);
+  // H–t
+  $('h4a').textContent=rev?'(b) 逆向法：t_k–H_k 圖':'(b) H–t 圖';
+  plot($('pl4a'),{xl:rev?'從水位 H_k 到流完的時間 t_k (s)':'t (s)',yl:'H (cm)',zeroX:true,zeroY:true,
+    series:[{pts:A.used.map(p=>[p.t,p.H]),color:'#1d6fb8',label:'採用'},{pts:ex_.map(p=>[p.t,p.H]),color:'#b0b8c4',label:ex_.length?'排除（H 太低）':''}]});
+  // sqrt
+  let kb='';
+  if(rev){$('h4b').textContent='t_k–√H_k 圖（線性化）';
+    plot($('pl4b'),{xl:'√H_k (cm^½)',yl:'t_k (s)',zeroX:true,zeroY:true,series:[{pts:A.used.map(p=>[Math.sqrt(p.H),p.t]),color:'#1d6fb8'},{pts:ex_.map(p=>[Math.sqrt(p.H),p.t]),color:'#b0b8c4'}],fit:A.fit?{m:A.fit.m,b:A.fit.b}:null});
+    if(A.fit)kb=`<b>t_k = s·√H_k + b</b><span>s = ${pm(A.fit.m,A.fit.sm,3)} s/cm^½，b = ${pm(A.fit.b,A.fit.sb,1)} s</span><b>R²</b><span>${fmt(A.fit.r2,5)}</span><b>a = 2/s²</b><span>${ex(A.a1,A.sa1)} cm/s²</span><b>2r</b><span>${pm(A.r1*20,A.sr1*20,3)} mm</span><b>截距 b 的意義</b><span>低於截止高度之後的「尾端」時間，包含表面張力造成的滴流段</span>`;}
+  else{$('h4b').textContent='√H–t 圖（線性化）';
+    plot($('pl4b'),{xl:'t (s)',yl:'√H (cm^½)',zeroX:true,zeroY:true,series:[{pts:A.used.map(p=>[p.t,Math.sqrt(p.H)]),color:'#1d6fb8'},{pts:ex_.map(p=>[p.t,Math.sqrt(p.H)]),color:'#b0b8c4'}],fit:A.fit?{m:A.fit.m,b:A.fit.b}:null});
+    if(A.fit)kb=`<b>√H = m·t + √H₀</b><span>m = ${ex(A.fit.m,A.fit.sm)} cm^½/s，√H₀ = ${pm(A.fit.b,A.fit.sb,4)}</span><b>R²</b><span>${fmt(A.fit.r2,5)}</span><b>a = 2m²</b><span>${ex(A.a1,A.sa1)} cm/s²</span><b>2r</b><span>${pm(A.r1*20,A.sr1*20,3)} mm</span>`;}
+  $('k4b').innerHTML=kb;
+  // v–t
+  $('h4c').textContent=rev?'(c) v–τ 圖（τ = 距流完的時間）':'(c) v–t 圖（由相鄰數據 ΔH/Δt 求 v）';
+  const ser=[{pts:A.vpts.map(p=>[p.t,p.v]),color:'#1d6fb8',label:'ΔH/Δt'}];
+  if($('a4ref').checked&&A.a1>0){ser.push({pts:A.used.map(p=>[p.t,Math.sqrt(2*A.a1*p.H)]),color:'#c2410c',line:true,dash:true,label:'參考解 √(2aH)'});}
+  plot($('pl4c'),{xl:rev?'τ (s)':'t (s)',yl:'v (cm/s)',zeroX:true,zeroY:true,series:ser,fit:A.vfit?{m:A.vfit.m,b:A.vfit.b,color:'#15803d'}:null});
+  $('k4c').innerHTML=A.vfit?`<b>v–${rev?'τ':'t'} 斜率</b><span>${ex(A.vfit.m,A.vfit.sm)} cm/s²（${rev?'正斜率 = a':'負斜率 = −a'}）</span><b>R²</b><span>${fmt(A.vfit.r2,4)}</span><b>2r（v–t 路徑）</b><span>${pm(A.r2*20,A.sr2*20,3)} mm</span>`:'<span class="note">差分點不足</span>';
+  $('t4v').innerHTML=`<table><thead><tr><th>${rev?'τ̄':'t̄'} (s)</th><th>H̄ (cm)</th><th>v = ΔH/Δt (cm/s)</th></tr></thead><tbody>`+A.vpts.map(p=>`<tr><td>${fmt(p.t,2)}</td><td>${fmt(p.H,3)}</td><td>${fmt(p.v,5)}</td></tr>`).join('')+'</tbody></table>';
+  // summary
+  const RES=computeAll();
+  let s=`<table><thead><tr><th>容器</th><th>數據</th><th>n</th><th>a（√H 迴歸）<br>cm/s²</th><th>2r（√H）<br>mm</th><th>a（v–t）<br>cm/s²</th><th>2r（v–t）<br>mm</th><th>兩法差</th></tr></thead><tbody>`;
+  RES.forEach((q,i)=>{const d=(q.r1-q.r2)*20,sd=Math.hypot(q.sr1,q.sr2)*20;
+    s+=`<tr><td>${C[i].h.key}（${C[i].h.name}）</td><td>${SRCN[q.src]}</td><td>${q.used.length}</td><td>${ex(q.a1,q.sa1)}</td><td><b>${pm(q.r1*20,q.sr1*20,3)}</b></td><td>${ex(q.a2,q.sa2)}</td><td>${pm(q.r2*20,q.sr2*20,3)}</td><td>${Number.isFinite(d/sd)?fmt(d/sd,2)+'σ':'—'}</td></tr>`;});
+  $('sum4').innerHTML=s+'</tbody></table><p class="note">以 √H 迴歸（粗體）為主要結果；v–t 路徑作為獨立檢驗。</p>';
+}
+
+/* ---------------- ⑤ ---------------- */
+$('e5cd').addEventListener('input',()=>{render5();if(revealed)render6();});
+function render5(){
+  tabs4('ctabs5',ci4);const o=opts4(),RES=computeAll(),Cd=+$('e5cd').value||0.62;
+  let t=`<table><thead><tr><th>容器</th><th>2r 測（理想式）mm</th><th>2r 修正 = 2r/√C<sub>d</sub> mm</th></tr></thead><tbody>`;
+  RES.forEach((q,i)=>{t+=`<tr><td>${C[i].h.key}</td><td>${pm(q.r1*20,q.sr1*20,3)}</td><td>${pm(q.r1*20/Math.sqrt(Cd),q.sr1*20/Math.sqrt(Cd),3)}</td></tr>`;});
+  $('t5e').innerHTML=t+'</tbody></table>';
+  // residuals
+  const A=RES[ci4],rev=A.src==='rev',f=A.fit;
+  if(f){const res=p=>rev?p.t-(f.m*Math.sqrt(p.H)+f.b):Math.sqrt(p.H)-(f.m*p.t+f.b);
+    const all=A.all.map(p=>[p.H,res(p)]);
+    plot($('pl5r'),{xl:'H (cm)',yl:rev?'時間殘差 (s)':'√H 殘差 (cm^½)',zeroX:true,
+      series:[{pts:all.filter(p=>p[0]>=o.hmin),color:'#1d6fb8',label:'採用'},{pts:all.filter(p=>p[0]<o.hmin),color:'#b0b8c4',label:'排除'},{pts:[[0,0],[Math.max(...all.map(p=>p[0]),1),0]],color:'#94a3b8',line:true,lw:1}]});}
+  else $('pl5r').innerHTML='<text x="220" y="130" text-anchor="middle" fill="#98a2b3" font-size="14">尚無迴歸結果</text>';
+  // cutoff table
+  let h=`<table><thead><tr><th>截止 H<sub>min</sub> (cm)</th><th>n</th><th>R²</th><th>2r（√H）mm</th></tr></thead><tbody>`;
+  [0,1,2,3,4,5,6,8].forEach(hm=>{const q=analyze(ci4,{hmin:hm,g:o.g,Ri:o.Ri});h+=`<tr${Math.abs(hm-o.hmin)<1e-9?' style="background:#eef6ff"':''}><td>${hm}</td><td>${q.used.length}</td><td>${q.fit?fmt(q.fit.r2,5):'—'}</td><td>${pm(q.r1*20,q.sr1*20,3)}</td></tr>`;});
+  $('t5h').innerHTML=h+'</tbody></table>';
+  // budget
+  let b=`<table><thead><tr><th>容器</th><th>σ<sub>R</sub>/R</th><th>¼·σ<sub>a</sub>/a</th><th>σ<sub>2r</sub>/2r 合成</th><th>主導項</th></tr></thead><tbody>`;
+  RES.forEach((q,i)=>{if(!o.Ri||!(q.a1>0)){b+=`<tr><td>${C[i].h.key}</td><td colspan="4">—</td></tr>`;return;}
+    const e1=o.Ri.s/o.Ri.R,e2=o.g/(4*(o.g+q.a1))*q.sa1/q.a1;
+    b+=`<tr><td>${C[i].h.key}</td><td>${fmt(e1*100,3)}%</td><td>${fmt(e2*100,3)}%</td><td>${fmt(Math.hypot(e1,e2)*100,3)}%</td><td>${e1>e2?'R':'a（排水數據）'}</td></tr>`;});
+  $('t5b').innerHTML=b+'</tbody></table>';
+  $('k5u').innerHTML=ruler?`<b>你的單位 u</b><span>${fmt(ruler.uAss*100,4)} cm（擺長 ${fmt(ruler.ellEst*100,3)} ± ${fmt(ruler.ellSig*100,3)} cm ÷ ${ruler.fold}）</span><b>u 的相對不確定度</b><span>${Number.isFinite(ruler.ellSig)?fmt(ruler.ellSig/ruler.ellEst*100,3)+'%':'只測 1 次，無法估計（建議多測幾次）'}</span>`:'';
+  const th=(+$('pA').value)*PI/180;$('k5amp').textContent=`你的釋放角 ${$('pA').value}° → ℓ 偏大約 ${fmt(th*th/8*100,3)}%。`;
+  $('k5c').textContent=(V.Rvol&&V.Rcirc)?`你的數據：R圓周 − R體積 = ${fmt((V.Rcirc-V.Rvol)*1000,2)} mm。`:'';
+}
+
+/* ---------------- ⑥ ---------------- */
+$('b6').onclick=()=>{if(!revealed&&!confirm('揭曉後就知道答案了。確定數據都量完了？'))return;revealed=true;render6();};
+const zf=(m,s,t)=>{if(!Number.isFinite(m)||!Number.isFinite(s)||s<=Math.abs(t)*1e-6)return'—';const z=(m-t)/s;const c=Math.abs(z)<2?'#15803d':Math.abs(z)<3?'#b45309':'#b91c1c';return`<b style="color:${c}">${z>=0?'+':''}${z.toFixed(2)}σ</b>`;};
+function perfect(i,hmin,H0){const h=T.holes[i];const tr=buildTraj(h,H0,i===0?0.05:0.01);const x=[],y=[];
+  for(let k=0;k<=200;k++){const t=tr.tEnd*k/200,Y=yAt(tr,t);if(Y*100>=hmin&&Y-h.hs>0.003){x.push(t);y.push(Math.sqrt(Y));}}
+  const f=linreg(x,y);if(!f)return NaN;const a=2*f.m*f.m;return 2*T.R*Math.pow(a/(T.g+a),0.25)*1000;}
+function cdEff(h,H){const Re=Math.sqrt(2*T.g*H)*h.d/T.nu;return h.Cd0/Math.sqrt(1+50/Re);}
+function render6(){
+  $('seed6').textContent=T.seed;$('b6').disabled=revealed;
+  if(!revealed){$('r6').innerHTML='';return;}
+  const o=opts4(),RES=computeAll(),Cd=+$('e5cd').value||0.62;let s='';
+  s+=`<div class="card"><h2>實驗條件</h2><div class="kv"><b>水溫</b><span>${fmt(T.Tc,1)} °C（σ = ${fmt(T.sigma*1000,1)} mN/m，ν = ${fmt(T.nu*1e6,3)} mm²/s）</span><b>當地 g</b><span>${T.g} m/s²（你計算用 ${fmt(o.g/100,3)}）</span><b>桶壁厚／底厚</b><span>${fmt(T.tw*1000,2)} mm ／ ${fmt(T.tb*1000,2)} mm</span></div></div>`;
+  if(ruler){const r=ruler.uAss/ruler.uTrue-1;
+    s+=`<div class="card"><h2>尺標</h2><table><thead><tr><th></th><th>你的值</th><th>真值</th><th>相對差</th><th>z</th></tr></thead><tbody>
+    <tr><td>擺長（懸點→螺帽中心）</td><td>${pm(ruler.ellEst*100,ruler.ellSig*100,3)} cm</td><td>${fmt(ruler.L*100,3)} cm</td><td>${fmt((ruler.ellEst/ruler.L-1)*100,2)}%</td><td>${zf(ruler.ellEst,ruler.ellSig,ruler.L)}</td></tr>
+    <tr><td>棉線單位 u（含轉印誤差）</td><td>${fmt(ruler.uAss*100,4)} cm</td><td>${fmt(ruler.uTrue*100,4)} cm</td><td>${fmt(r*100,2)}%</td><td></td></tr></tbody></table>
+    <p class="note">${Math.abs(ruler.ellEst/ruler.L-1)>0.02?'擺長偏差超過 2%，遠大於擺角與物理擺的系統效應（約 0.1–0.5%），多半是計時時漏數或多數了週期，或碼錶按得太早或太晚。u 錯了，後面所有長度都會跟著錯，建議回 ② 重測。':'由週期算出的擺長會略大於繩長，原因是有限擺角與螺帽的物理擺效應（系統性），加上按碼錶的反應時間（隨機）。u 的真值另外包含把擺長轉印到棉線上的誤差。'}</p></div>`;}
+  s+=`<div class="card"><h2>容器內半徑 R</h2><table><thead><tr><th>方法</th><th>你的值 (cm)</th><th>應比較的真值</th><th>z</th></tr></thead><tbody>`;
+  if(V.Rvol)s+=`<tr><td>體積法</td><td>${pm(V.Rvol*100,V.sRvol*100,3)}</td><td>內半徑 ${fmt(T.R*100,3)}</td><td>${zf(V.Rvol*100,V.sRvol*100,T.R*100)}</td></tr>`;
+  if(V.Rcirc)s+=`<tr><td>圓周法</td><td>${fmt(V.Rcirc*100,3)}</td><td>外半徑 ${fmt((T.R+T.tw)*100,3)}（內半徑 ${fmt(T.R*100,3)}）</td><td>比內半徑大 ${fmt((V.Rcirc-T.R)*1000,2)} mm</td></tr>`;
+  s+=`</tbody></table></div>`;
+  s+=`<div class="card"><h2>三孔直徑</h2><table><thead><tr><th>容器</th><th>真實孔徑 d</th><th>C<sub>d</sub>（高 Re）</th><th>C<sub>d</sub> 有效（H=8 cm）</th><th>完美量測應得<br>（理想式、同截止）</th><th>你的 2r（√H）</th><th>2r/d</th><th>z 對 d</th><th>z 對完美量測</th><th>你的修正 2r/√${Cd}</th><th>z 對 d</th></tr></thead><tbody>`;
+  const pts=[],pts2=[];
+  const PF=RES.map((q,i)=>{const H0=q.all.length?Math.min(T.H-0.01,Math.max(...q.all.map(p=>p.H))/100):0.18;return perfect(i,o.hmin,Math.max(H0,o.hmin/100+0.02));});
+  RES.forEach((q,i)=>{const h=T.holes[i],ce=cdEff(h,0.08),dm=h.d*1000,de=PF[i],m=q.r1*20,sm=q.sr1*20,mc=m/Math.sqrt(Cd),smc=sm/Math.sqrt(Cd);
+    if(Number.isFinite(m)){pts.push([dm,m]);pts2.push([dm,mc]);}
+    s+=`<tr><td>${h.key}（${h.name}）</td><td><b>${fmt(dm,3)} mm</b></td><td>${fmt(h.Cd0,3)}</td><td>${fmt(ce,3)}</td><td>${fmt(de,3)}</td><td>${pm(m,sm,3)}</td><td>${fmt(m/dm,3)}</td><td>${zf(m,sm,dm)}</td><td>${zf(m,sm,de)}</td><td>${pm(mc,smc,3)}</td><td>${zf(mc,smc,dm)}</td></tr>`;});
+  s+=`</tbody></table><p class="note">「完美量測應得」是把隱藏的真實液面曲線（含縮流、黏滯、表面張力）不加任何雜訊，用和你相同的截止高度與同一條理想公式處理所得的 2r，也就是這套方法本身最好能得到的值。「z 對 d」很大、「z 對完美量測」卻在 ±2σ 內，表示差距全來自方法本身（(e) 的縮流等效應），你的量測沒有問題。小孔的比值通常更低：雷諾數小、黏滯損耗大，表面張力也使低水位的液面下降變慢。</p>
+  <svg id="pl6" viewBox="0 0 440 280"></svg></div>`;
+  const good=RES.filter(q=>Number.isFinite(q.r1)).length;
+  const rat=RES.map((q,i)=>q.r1*20/PF[i]).filter(Number.isFinite);
+  const consistent=rat.length===3&&Math.max(...rat)-Math.min(...rat)<0.08;
+  const okAll=rat.length>0&&rat.every(x=>Math.abs(x-1)<0.06);
+  const verdict=!rat.length?'':okAll?'你的結果與預期相符。':'你的結果與完美量測有明顯落差（你的 2r ÷ 完美量測 = '+rat.map(x=>fmt(x,3)).join('、')+'，理想應接近 1），請先檢查尺標 u 與 R。';
+  s+=`<div class="card"><h2>結論</h2><ul>
+  <li>(e) 的答案：測得孔徑<b>小於</b>實際孔徑。本組 2r/d = ${RES.map((q,i)=>fmt(q.r1*20/(T.holes[i].d*1000),3)).join('、')}；完美量測應得的比值為 ${PF.map((x,i)=>fmt(x/(T.holes[i].d*1000),3)).join('、')}（約等於 √C<sub>d</sub>）。${verdict}</li>
+  <li>參考解把原因歸於「水流旋轉、水平速度、黏滯損耗」。這幾項確實存在，但量級遠小於縮流；縮流單獨就讓面積少了約 35–40%。</li>
+  <li>${good<3?'還有容器沒有足夠數據，請回 ③ 補量。':(consistent?'三個孔的比值相近，說明這是孔口本身的系統效應，與孔大小無關。':'三個孔的比值不一致，表示除了縮流之外，量測還有其他問題，請對照上表的 z 值找出是哪一孔。')}</li></ul>
+  <div class="row"><button id="b6re">換一組隱藏真值重做</button></div></div>`;
+  $('r6').innerHTML=s;
+  const mx=Math.max(8,...pts.map(p=>p[0]));
+  plot($('pl6'),{w:440,h:280,xl:'真實孔徑 d (mm)',yl:'測得 2r (mm)',zeroX:true,zeroY:true,series:[
+    {pts:[[0,0],[mx,mx]],color:'#94a3b8',line:true,dash:true,label:'2r = d'},
+    {pts:[[0,0],[mx,mx*0.787]],color:'#f59e0b',line:true,dash:true,label:'2r = √0.62·d'},
+    {pts,color:'#1d6fb8',label:'理想式測得'},{pts:pts2,color:'#15803d',label:'除以 √C_d 修正後'}]});
+  $('b6re').onclick=()=>$('btnReseed').click();
+}
+
+/* ---------------- init ---------------- */
+function resetAll(sd){makeTruth(sd);$('seedShow').textContent=sd;
+  P.trials=[];P.running=false;P.timing=false;P.th=+$('pA').value*PI/180;P.om=0;ruler=null;
+  V.Vtrue=0;V.Vnom=0;V.rows=[];V.circ=[];V.Rvol=null;V.Rcirc=null;initC();ci=0;
+  revealed=false;ci4=0;S4.forEach(x=>x.src=null);if(curTab===4)render4();if(curTab===5)render5();render6();
+  $('rMsg').textContent='尚未製作棉線尺。';renderPTable();drawPend();renderV();renderAll3();t1();}
+$('btnReseed').onclick=()=>{if(!confirm('重新抽取隱藏真值會清除全部數據，確定？'))return;resetAll(Math.floor(Math.random()*900000)+100000);};
+$('pAv').textContent=$('pA').value+'°';$('fVv').textContent=$('fV').value+' mL';
+resetAll(Math.floor(Math.random()*900000)+100000);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -27,7 +27,7 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 :root{
   --desk:#dfe2e6; --paper:#fbfaf7; --paper-2:#f2f0ea; --ink:#1d2333; --muted:#5f6576; --rule:#d9d6cd;
   --cover:#25306b; --cover-ink:#f3f1ea; --accent:#2f3f94;
-  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a; --c4:#1d6f8a; --c5:#6b6a1f; --c6:#3f4fa8;
+  --w-refr:#2a62c4; --w-int:#1a8762; --w-lens:#a8680c; --w-pol:#6c43b8; --c1:#8c3a5e; --c2:#a4492a; --c4:#1d6f8a; --c5:#6b6a1f; --c6:#3f4fa8; --c7:#7a3fa0; --c8:#16797a;
   --shadow:0 18px 40px rgba(29,35,51,.18);
   --f-display:"LXGW WenKai TC","Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
   --f-body:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
@@ -36,12 +36,12 @@ body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef; --c7:#c79be6; --c8:#5fd0c9;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
   --desk:#101318; --paper:#1d2027; --paper-2:#181b21; --ink:#e7e5de; --muted:#a2a6b2; --rule:#343843;
   --cover:#2b3780; --cover-ink:#f3f1ea; --accent:#9aa8f0;
-  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef;
+  --w-refr:#7ea6f0; --w-int:#58c49c; --w-lens:#e5ac55; --w-pol:#ad8fec; --c1:#e48db3; --c2:#ec9a78; --c4:#6cc3df; --c5:#c9c66a; --c6:#9fa9ef; --c7:#c79be6; --c8:#5fd0c9;
   --shadow:0 18px 40px rgba(0,0,0,.5); color-scheme:dark}
 
 body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75}
@@ -187,6 +187,24 @@ html.lab-open,html.lab-open body{overflow:hidden}
 const SITE="https://sites.google.com/ms.mingdao.edu.tw/sim/";
 const SPEC=["#e5484d","#f08c2e","#e9c22b","#3fa65b","#2f78d6","#6a4fc6"];
 const ART={
+  pendulum:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <line x1="96" y1="8" x2="204" y2="8" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="150" y1="8" x2="150" y2="100" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 4"/>
+        <line x1="150" y1="8" x2="112" y2="92" stroke="var(--c7)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="112" cy="92" r="9" fill="var(--paper)" stroke="var(--c7)" stroke-width="3"/>
+        <path d="M150 40 A 32 32 0 0 0 137 37" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="134" y="56" font-size="13" fill="var(--ink)" font-style="italic">θ</text>
+        <text x="206" y="66" font-size="13" fill="var(--ink)" font-style="italic">T² = (4π²/g)·ℓ</text>
+      </svg>`,
+  jet:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
+        <rect x="30" y="10" width="90" height="98" rx="4" fill="none" stroke="var(--ink)" stroke-width="2.5"/>
+        <rect x="32" y="34" width="86" height="72" fill="var(--c8)" opacity=".22"/>
+        <line x1="32" y1="34" x2="118" y2="34" stroke="var(--c8)" stroke-width="2"/>
+        <path d="M120 86 Q 190 86 246 112" fill="none" stroke="var(--c8)" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="128" y1="34" x2="128" y2="86" stroke="var(--muted)" stroke-width="1.2"/>
+        <text x="134" y="64" font-size="13" fill="var(--ink)" font-style="italic">h</text>
+        <text x="166" y="40" font-size="13" fill="var(--ink)" font-style="italic">v = √(2gh)</text>
+      </svg>`,
   balance:`<svg class="prism" viewBox="0 0 300 120" aria-hidden="true">
         <line x1="150" y1="104" x2="150" y2="34" stroke="var(--ink)" stroke-width="2.5"/>
         <polygon points="138,110 162,110 150,98" fill="var(--ink)"/>
@@ -292,6 +310,18 @@ const ROT_EXP=[
   {t:"簡諧運動求轉動慣量",slug:"簡諧運動求出物體之轉動慣量",lab:"rot-physical-pendulum",src:"106 學年度 中區第五區（彰雲嘉）複賽",d:"用物理擺量銅環與金屬條的轉動慣量，器材裡沒有秤，量長度的尺也被收走。質量在公式中會消掉，真正的難點是先用時間「造出一把尺」，再以 d² 對 gT²d/4π² 作圖，斜率應為 1，截距即轉動慣量項。",f:["物理擺（質量 M 消去）","gT²d / 4π² = β(R₁² + R₂²) + d²"],tabs:["原理與規劃","長度校準實驗室","待測物尺寸量測","銅環物理擺","金屬條物理擺","數據分析"]}
 ];
 
+const G_EXP=[
+  {t:"重力加速度 g 測定（單擺）",slug:"重力加速度-g-測定",lab:"g-pendulum",src:"93 學年度 臺南區複賽 實驗第二題",d:"用棉線、底片盒和硬幣做單擺。擺錘的質心在盒子裡量不到，所以把有效擺長拆成量得到的線長 ℓ 加上未知的偏移 d，以 T² 對 ℓ 作圖：斜率求 g，與 d 無關；截距還能反推質心位置。",f:["有效擺長 L = ℓ + d","T² = (4π² / g)·ℓ + (4π² / g)·d"],tabs:["實驗原理","器材與組裝","擺動與計時","數據與迴歸","系統誤差探討","結果與真值揭曉"],rnd:true},
+  {t:"測 g 值（單擺與圓錐擺）",slug:"測g值",lab:"g-conical",src:"92 學年度 台灣省第二區（板橋高中）",d:"三個部分環環相扣：先用游標尺量大、小鋼珠直徑，因為擺長要量到球心；再以 4 種擺長、2 種擺錘做單擺，由 T²–ℓ 斜率求 g；最後用圓錐擺再量一次 g，比較兩種方法的誤差。",f:["單擺斜率求 g","g = 4π² / k　（k 為 T²–ℓ 斜率）"],tabs:["原理與器材","第一部分：游標尺量珠徑","第二部分：單擺計時","第二部分：T²–ℓ 迴歸求 g","第三部分：圓錐擺","誤差分析與真值揭曉"],rnd:true}
+];
+
+const FLUID_EXP=[
+  {t:"圓筒排水求孔徑",slug:"圓筒排水",lab:"fluid-drain",src:"100 學年度 全國決賽",d:"不准用直尺。先用單擺自製尺標量出容器半徑，再記錄液面高度隨時間下降，作 H–t、v–t 圖。依準穩態 Torricelli 模型，√H 對 t 是直線，由斜率反推三個排水孔的直徑，並判斷測得值偏大或偏小。",f:["液面以 a 等減速（a = 2·斜率²）","r = R · [ a / (g + a) ]^(1/4)"],tabs:["原理推導","單擺尺標與量 R","三孔排水量測","作圖與迴歸","誤差討論","真值揭曉"],rnd:true},
+  {t:"溶質對水表面張力的影響",slug:"溶質對水表面張力的影響",lab:"fluid-surface-tension",src:"90 學年度 高屏區複賽 實驗第一題",d:"寶特瓶側面有一個約 1 mm 的小孔，液面只比孔高一點時，水被表面張力托住不會流出。找出剛好撐得住的臨界高度差 hc，算出表面張力；再配不同濃度的食鹽水，比較濃度對表面張力的影響。",f:["臨界條件（孔口鼓成半球）","T = ρ g hc a / 2"],tabs:["題目與推導","孔口液面形狀互動","配製溶液與量密度","量臨界高度","數據整理：h–c 圖與 T–c 圖"],rnd:true},
+  {t:"小孔流速與深度",slug:"流速與深度關係",lab:"fluid-torricelli",src:"104 學年度 臺灣省第 6 區（臺南區）複賽 實驗第二題",d:"器材裡沒有計時器，流速要從水柱的運動算出來：管口水平量射程，或管口朝上量噴高。改變液面深度 h，作 v²–h 圖檢驗 Torricelli 定律，再比較三種內徑的 PU 管，討論細管造成的能量損失。",f:["由水平射程求流速","v = x · √(g / 2y)"],tabs:["原理推導","器材組裝","流速量測","數據與作圖","孔徑比較與誤差","真值揭曉"],rnd:true},
+  {t:"沙漏漏完所需時間",slug:"沙漏漏完所需時間",lab:"fluid-hourglass",src:"98 學年度 第十區（屏東區）複賽 實驗第二題",d:"器材裡沒有任何計時器，要自己造一個鐘。用棉線和 50 g 掛碼做單擺，翻轉沙漏的同時放開擺錘，數漏完時擺了幾次，換算成時間。再用彈簧振子對照，說明為什麼單擺當時鐘比較可靠。",f:["單擺當時鐘","t = N · 2π √(ℓ / g)"],tabs:["實驗原理","器材組裝","漏沙計數","數據迴歸","彈簧對照與誤差","真值揭曉"],rnd:true}
+];
+
 /* 每一章一個物件；ready:true 的章才會排進書頁 */
 const CHAPTERS=[
   {no:"一",num:1,name:"基礎能力",path:"基礎能力/",ready:true,color:"var(--c1)",art:"fit",
@@ -317,8 +347,12 @@ const CHAPTERS=[
   {no:"六",num:6,name:"轉動",path:"主題分類/轉動/",ready:true,color:"var(--c6)",art:"roll",
    intro:"球在凹槽、V 型軌道上滾動時，接觸點不在球的正下方，滾動半徑跟著改變，轉動動能的比例也不同。另外還有靠表面張力自己轉起來的浮盤，以及用物理擺量轉動慣量。",
    sections:null,exps:ROT_EXP},
-  {no:"七",num:7,name:"重力加速度 g",path:"主題分類/g值/"},
-  {no:"八",num:8,name:"流體",path:"主題分類/流體/"},
+  {no:"七",num:7,name:"重力加速度 g",path:"主題分類/g值/",ready:true,color:"var(--c7)",art:"pendulum",
+   intro:"兩道用單擺量 g 的題目。擺長要量到擺錘的質心，但質心往往量不到，所以都改用 T² 對擺長作圖，讓量不準的偏移量跑進截距，斜率才是乾淨的 g。第二題再加上圓錐擺做交叉驗證。",
+   sections:null,exps:G_EXP},
+  {no:"八",num:8,name:"流體",path:"主題分類/流體/",ready:true,color:"var(--c8)",art:"jet",
+   intro:"水從孔裡流出來的四種問法：用液面下降求孔徑、用表面張力托住水滴、用水柱軌跡求流速，以及沒有碼表時怎麼量沙漏的時間。好幾題都不給尺或計時器，要先自己造出量具。",
+   sections:null,exps:FLUID_EXP},
   {no:"九",num:9,name:"黏滯",path:"主題分類/黏滯/"},
   {no:"十",num:10,name:"密度",path:"主題分類/密度/"},
   {no:"十一",num:11,name:"電學",path:"主題分類/電學/"}

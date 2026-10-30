@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>表面張力虛擬實驗室｜90學年度高屏區複賽</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#1c2632;--muted:#5d6b7a;--line:#d6dde6;--acc:#1f6fd1;--acc-soft:#e6f0fc;--ok:#0e8a64;--warn:#b8460b;--warn-soft:#fdf0e6}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+header{background:#18324f;color:#fff;padding:12px 18px;display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;justify-content:space-between}
+header h1{font-size:18px;margin:0;font-weight:600}
+header .sub{font-size:13px;opacity:.8}
+.clock{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.clock b{font-family:ui-monospace,Consolas,monospace;font-size:17px;background:#0e2238;padding:2px 8px;border-radius:5px}
+.spd button{background:#2a4a6e;color:#fff;border:0;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:13px;margin-left:2px}
+.spd button.on{background:#f0a830;color:#1c2632;font-weight:600}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px 0;background:#e3e8ef;border-bottom:1px solid var(--line)}
+nav button{border:1px solid var(--line);border-bottom:0;background:#eef2f6;padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:14px;color:var(--ink)}
+nav button.on{background:var(--card);font-weight:600;color:var(--acc)}
+nav button.todo{color:#98a4b0}
+main{max-width:1200px;margin:0 auto;padding:16px}
+section.tab{display:none}section.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h3{margin:0 0 8px;font-size:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid2>.card,.grid3>.card{margin-bottom:0}
+.grid2,.grid3{margin-bottom:14px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:6px;padding:6px 11px;margin:3px 4px 3px 0;cursor:pointer;font-size:13.5px}
+.btn.alt{background:#fff;color:var(--acc);border:1px solid var(--acc)}
+.btn.warn{background:var(--warn)}
+.btn.sel{background:var(--ok)}
+input[type=number],select{padding:4px 6px;border:1px solid var(--line);border-radius:5px;font-size:13.5px;width:90px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:#eef2f7;font-weight:600}
+td input{width:80px}
+.note{background:var(--acc-soft);border-left:4px solid var(--acc);padding:8px 12px;border-radius:6px;font-size:14px;margin:8px 0}
+.warnbox{background:var(--warn-soft);border-left:4px solid var(--warn);padding:8px 12px;border-radius:6px;font-size:14px;margin:8px 0}
+.msg{min-height:22px;color:var(--warn);font-size:13.5px}
+.lcd{font-family:ui-monospace,Consolas,monospace;background:#1b2a1f;color:#9dfc9d;font-size:26px;padding:6px 12px;border-radius:6px;display:inline-block;min-width:170px;text-align:right;margin:4px 0}
+.log{font-size:13px;height:170px;overflow:auto;background:#f7f9fb;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:ui-monospace,Consolas,monospace}
+.formula{font-family:"Cambria Math","Times New Roman",serif;font-size:18px;text-align:center;margin:8px 0}
+.scroll{height:420px;overflow:auto;border:1px solid var(--line);border-radius:6px;background:#fbfcfd}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:14px;margin-top:6px}
+.kv span:nth-child(odd){color:var(--muted)}
+.muted{color:var(--muted);font-size:13px}
+ol,ul{padding-left:22px;margin:6px 0}
+label{display:block;margin:6px 0}
+.row{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:6px 0}
+</style>
+</head>
+<body>
+<header>
+ <div><h1>溶質對水表面張力的影響 — 虛擬實驗室</h1>
+ <div class="sub">九十學年度 高屏區高級中學數學及自然學科競賽複賽　物理科實驗試題第一題</div></div>
+ <div class="clock">實驗時間 <b id="clk">00:00</b><span class="spd" id="spd"></span>
+ <button class="btn warn" onclick="resetAll()">新實驗（重抽隱藏值）</button></div>
+</header>
+<nav id="nav"></nav>
+<main>
+
+<!-- ================= ① 原理 ================= -->
+<section class="tab" id="t1">
+<div class="grid2">
+ <div class="card"><h3>題目在問什麼</h3>
+  <p>寶特瓶側面有一個直徑約 1 mm 的小孔。瓶內液面只比孔高一點時，水不會流出，因為孔口的液面被表面張力「托住」。液面再高一些，水就會漏出來。</p>
+  <p>本實驗要找出孔口剛好撐得住時的<b>臨界高度差 h<sub>c</sub></b>，算出表面張力 T，再比較不同食鹽濃度下的 T。</p>
+  <div id="p1bottle"></div>
+ </div>
+ <div class="card"><h3>推導</h3>
+  <ol>
+   <li>孔中心在液面下方 h 處，孔口內外的壓力差為 ΔP = ρgh。</li>
+   <li>孔口液面向外鼓成球冠（曲率半徑 R），沿孔緣一圈（周長 2πa）受表面張力拉住。</li>
+   <li>沿孔軸方向力平衡：ΔP·πa² = 2πa·T·sinφ，其中 sinφ = a/R，得 <b>ΔP = 2T/R</b>。</li>
+   <li>h 愈大，R 愈小。但球冠最多只能鼓成半球（R = a），這時表面張力的合力達到最大值 2πaT。</li>
+   <li>h 再增加就沒有平衡解，液滴會長大後脫落。所以臨界條件是：</li>
+  </ol>
+  <div class="formula">ρ g h<sub>c</sub> = 2T / a　⟹　T = ρ g h<sub>c</sub> a / 2</div>
+  <p>這和題目的定義一致：T = 液面所受總力最大值 ÷ 圓周長 = (ρgh<sub>c</sub>·πa²) ÷ (2πa)。</p>
+  <p>若 T 採用題目慣用的單位 gw/cm（1 gw = 1 g × g），g 會消去：</p>
+  <div class="formula">T (gw/cm) = ρ h<sub>c</sub> a / 2　（ρ：g/cm³；h<sub>c</sub>、a：cm）</div>
+  <p class="muted">換算：1 gw/cm = 978.8 dyn/cm = 978.8 mN/m（g = 978.8 cm/s²，屏東地區）；例如 0.054 gw/cm ≈ 52.9 mN/m。</p>
+ </div>
+</div>
+<div class="card"><h3>互動：孔口液面的形狀</h3>
+ <div class="grid2" style="margin-bottom:0">
+  <div id="p1hole"></div>
+  <div>
+   <label>液面高於孔中心 h：<b id="p1hv"></b> cm<input type="range" id="p1h" min="0" max="4" step="0.01" value="1.20" style="width:100%"></label>
+   <label>孔半徑 a：<b id="p1av"></b> mm<input type="range" id="p1a" min="0.30" max="0.80" step="0.01" value="0.50" style="width:100%"></label>
+   <label>表面張力 T：<b id="p1tv"></b> mN/m<input type="range" id="p1t" min="50" max="85" step="0.5" value="72" style="width:100%"></label>
+   <div class="kv" id="p1out"></div>
+   <p class="muted">這個互動圖的液體密度固定為 1.000 g/cm³，只用來說明原理；圖中尺寸已大幅放大。</p>
+  </div>
+ </div>
+</div>
+<div class="grid2">
+ <div class="card"><h3>兩種判定臨界高度的方法</h3>
+  <p><b>放水停止法</b>：先讓液面高出孔口數公分，放水流出。水流會由細流變成滴水，最後停止；停止時的液面就是臨界高度。</p>
+  <p><b>加水起漏法</b>：先讓液面低於臨界高度，把孔口外緣擦乾，再用注射筒一次加少量溶液；掉下第一滴時的液面就是臨界高度。</p>
+  <p class="note">想一想：兩種方法量到的 h 一定相同嗎？孔口外緣是乾的還是濕的，會不會影響公式裡的「a」該用多少？</p>
+ </div>
+ <div class="card"><h3>實驗前的預測</h3>
+  <p>公式 T = ρh<sub>c</sub>a/2 中，除了 h<sub>c</sub> 還有 ρ 和 a。<b>ρ 要怎麼得到？</b>器材表中有哪些東西用得上？</p>
+  <p>你預測加入食鹽後，水的表面張力會：</p>
+  <div id="p1pred"></div>
+  <p class="muted">你的預測會保留到「⑥ 真值揭曉」時對照。</p>
+ </div>
+</div>
+</section>
+
+<!-- ================= ② 溶液配製與密度 ================= -->
+<section class="tab" id="t2">
+<div class="card"><h3>實驗桌（點燒杯即可選取）</h3>
+ <div id="bench"></div>
+ <div>目前選取：<b id="selName"></b>　<span class="muted">燒杯容量 600 mL（刻度標到 500 mL），共 6 個。</span></div>
+ <div class="msg" id="msg2"></div>
+</div>
+<div class="grid2">
+ <div class="card"><h3>A. 用大量筒量取 RO 水</h3>
+  <p class="muted">大量筒 500 mL，最小刻度 5 mL。讀數時看凹液面的最低點，並估讀到最小刻度的下一位。</p>
+  <div class="row">RO 水倒入量筒至約 <input type="number" id="wTarget" value="400" min="10" max="500"> mL <button class="btn" onclick="fillWater()">倒水</button></div>
+  <button class="btn" onclick="cylToBeaker()">量筒內液體倒入選取的燒杯</button>
+  <button class="btn alt" onclick="dryCyl()">用抹布擦乾量筒</button>
+  <div id="cylZoomA"></div>
+ </div>
+ <div class="card"><h3>B. 用電子秤秤食鹽</h3>
+  <p class="muted">電子秤最大秤量 1000 g，顯示到 0.1 g（器材表未註明規格，此為本模擬的設定）。</p>
+  <div class="lcd" id="lcdB">0.0 g</div>
+  <div><button class="btn alt" onclick="balPaper()">放上秤量紙</button><button class="btn alt" onclick="balTare()">歸零</button><button class="btn alt" onclick="balClear()">取下秤盤上的東西</button></div>
+  <div>舀鹽：<button class="btn" onclick="scoop(10)">一大匙（約 10 g）</button><button class="btn" onclick="scoop(1)">一小撮（約 1 g）</button><button class="btn" onclick="scoop(0.2)">一點點</button><button class="btn alt" onclick="scoop(-1)">撥掉一些</button></div>
+  <button class="btn" onclick="saltToBeaker()">秤量紙上的鹽倒入選取的燒杯</button>
+ </div>
+ <div class="card"><h3>C. 攪拌溶解、測溫度</h3>
+  <button class="btn" onclick="stir()">用玻璃棒攪拌 30 秒</button>
+  <button class="btn alt" onclick="waitMin(5)">靜置 5 分鐘</button>
+  <div id="dissolveInfo" class="muted" style="margin:4px 0"></div>
+  <div class="row" style="align-items:flex-start"><div id="thZoom2"></div>
+  <div class="muted" style="max-width:260px">溫度計插在選取的燒杯中，最小刻度 1 °C。<br>食鹽溶解會吸熱，剛溶完時溶液會比室溫略低，靜置後才回到室溫。</div></div>
+ </div>
+ <div class="card"><h3>D. 量溶液密度（量筒＋電子秤）</h3>
+  <div class="lcd" id="lcdD">0.0 g</div>
+  <div><button class="btn alt" onclick="cylOnBal()">量筒放上電子秤</button><button class="btn alt" onclick="balClear()">取下</button><button class="btn alt" onclick="balTare()">歸零</button></div>
+  <div class="row">由選取的燒杯倒入量筒約 <input type="number" id="dTarget" value="300" min="20" max="500"> mL <button class="btn" onclick="beakerToCyl()">倒入量筒</button></div>
+  <div id="cylZoomD"></div>
+  <p class="muted">量完後按 A 區的「量筒內液體倒入選取的燒杯」倒回。倒完後管壁仍會附著少量液體。</p>
+ </div>
+</div>
+<div class="card"><h3>數據記錄：溶液配製與密度</h3>
+ <div style="overflow-x:auto"><table id="tbl2"></table></div>
+ <p class="muted">ρ 與濃度由你填入的讀數自動計算；濃度以「每 100 mL 清水加入的食鹽克數」表示。</p>
+</div>
+</section>
+
+<!-- ================= ③ 臨界高度量測 ================= -->
+<section class="tab" id="t3">
+<div class="grid2">
+ <div class="card"><h3>寶特瓶與小臉盆</h3>
+  <div id="scene"></div>
+  <div class="kv" id="stat3"></div>
+ </div>
+ <div class="card"><h3>直尺放大檢視（最小刻度 1 mm）</h3>
+  <div class="scroll" id="rulerBox"></div>
+  <p class="muted">直尺立在桌面上、緊貼瓶身。黑色粗線是你用奇異筆畫的記號（線寬約 0.5 mm），數字是畫線順序。淡藍色是目前瓶內液體。</p>
+ </div>
+</div>
+<div class="grid3">
+ <div class="card"><h3>溶液</h3>
+  <div class="row">燒杯 <select id="bSel3" onchange="selBeaker(+this.value)"></select></div>
+  <div class="row">倒入瓶中約 <input type="number" id="pourV" value="350" min="5" max="560"> mL <button class="btn" onclick="pourBottle()">倒入</button></div>
+  <button class="btn alt" onclick="rinseBottle()">用此溶液潤洗瓶子</button>
+  <button class="btn alt" onclick="emptyBottle()">瓶子與臉盆的溶液倒回燒杯</button>
+  <button class="btn alt" onclick="discardBasin()">倒掉臉盆中的液體</button>
+ </div>
+ <div class="card"><h3>操作</h3>
+  <button class="btn" id="bFinger" onclick="toggleFinger()"></button>
+  <button class="btn" id="bCap" onclick="toggleCap()"></button>
+  <button class="btn alt" onclick="wipeRim()">用抹布擦乾孔口外緣</button>
+  <div class="row">注射筒（30 mL）<button class="btn alt" onclick="syrFill()">吸取溶液</button></div>
+  <div class="row">推入 <button class="btn" onclick="syrPush(0.5)">0.5</button><button class="btn" onclick="syrPush(1)">1</button><button class="btn" onclick="syrPush(2)">2</button><button class="btn" onclick="syrPush(5)">5</button> mL</div>
+  <div class="muted" id="syrInfo"></div>
+ </div>
+ <div class="card"><h3>記號與溫度</h3>
+  <button class="btn" onclick="markHole()">奇異筆標記孔中心</button>
+  <button class="btn" onclick="markLevel()">奇異筆在液面處畫線</button>
+  <div id="thZoom3"></div>
+ </div>
+</div>
+<div class="grid2">
+ <div class="card"><h3>觀察紀錄</h3><div class="log" id="log3"></div><div class="msg" id="msg3"></div></div>
+ <div class="card"><h3>操作提示</h3>
+  <p><b>放水停止法</b>：按住孔 → 倒入溶液 → 移開手指 → 等水流由細流變滴水，最後停止 → 在液面處畫線 → 讀直尺 → 溶液倒回燒杯。</p>
+  <p><b>加水起漏法</b>：按住孔 → 倒入少量溶液，使液面約高出孔 1 cm → 移開手指 → 擦乾孔口外緣 → 注射筒每次加少量 → <b>第一滴掉下時立刻畫線</b>。</p>
+  <p class="muted">放水時可用上方的時間倍速（×20、×60）加快，要畫線前再調回 ×1 或暫停。奇異筆是油性的，畫了就擦不掉，請記下每條線的編號。</p>
+ </div>
+</div>
+<div class="card"><h3>數據記錄：臨界高度</h3>
+ <div class="row">燒杯 <select id="f3b"></select>
+  方法 <select id="f3m" style="width:120px"><option>放水停止法</option><option>加水起漏法</option></select>
+  孔中心讀數 <input id="f3r0" type="number" step="any"> cm
+  液面線讀數 <input id="f3r1" type="number" step="any"> cm
+  溫度 <input id="f3T" type="number" step="any"> °C
+  <button class="btn" onclick="add3()">加入紀錄</button></div>
+ <div class="msg" id="msg3b"></div>
+ <div style="overflow-x:auto"><table id="tbl3"></table></div>
+ <h3 style="margin-top:14px">各溶液平均</h3>
+ <div style="overflow-x:auto"><table id="sum3"></table></div>
+</div>
+</section>
+
+<!-- ================= ④ 數據與作圖 ================= -->
+<section class="tab" id="t4">
+<div class="card"><h3>分析設定</h3>
+ <div class="row">孔半徑 a <input type="number" id="anA" step="0.001" min="0.01" max="0.2"> cm
+  <span class="muted">（題目只說「直徑約 1 mm」，預設 a = 0.050 cm）</span></div>
+ <div class="row">分析的方法 <select id="anM" style="width:180px"><option value="放水停止法">放水停止法</option><option value="加水起漏法">加水起漏法</option><option value="both">兩種方法並列</option></select>
+  密度來源 <select id="anR" style="width:260px"><option value="meas">② 自己量測的 ρ</option><option value="one">全部當作 1.000 g/cm³（忽略密度變化）</option></select></div>
+ <p class="muted">濃度 c 與密度 ρ 取自 ② 的數據表，h 取自 ③ 的紀錄。② 缺資料的燒杯會列在表中，但不列入迴歸。T 以兩種單位表示：T (gw/cm) = ρ h a / 2；T (mN/m) = ρ g h a / 2（g = 978.8 cm/s²）。</p>
+</div>
+<div class="card"><h3>數據整理</h3><div style="overflow-x:auto"><table id="tbl4"></table></div></div>
+<div class="grid2">
+ <div class="card"><h3>h–c 圖</h3><div id="plotH"></div><div id="fitH" class="kv"></div></div>
+ <div class="card"><h3>T–c 圖</h3><div id="plotT"></div><div id="fitT" class="kv"></div></div>
+</div>
+<div class="card"><h3>結論</h3><div id="concl4"></div>
+ <p class="muted">誤差棒為平均值的標準誤（SEM），只反映重複量測的隨機誤差；孔徑、密度等其他誤差在 ⑤ 討論。</p></div>
+</section>
+
+<!-- ================= ⑤ 誤差討論 ================= -->
+<section class="tab" id="t5">
+<div class="card"><h3>A. 誤差傳播：T = ρ h a / 2</h3>
+ <div class="formula">δT / T = √[ (δρ/ρ)² + (δh/h)² + (δa/a)² ]</div>
+ <div class="row">孔半徑不確定度 δa <input type="number" id="erA" step="0.001" min="0"> cm
+  量筒體積不確定度 δV <input type="number" id="erV" step="0.5" min="0"> mL
+  直尺讀數不確定度（單次高度差）δh<sub>讀</sub> <input type="number" id="erH" step="0.01" min="0"> cm</div>
+ <p class="muted">δρ 由 δV 與電子秤 0.1 g 解析度傳播而得；δh = √(SEM² + δh<sub>讀</sub>²/n)。條狀圖顯示三項對 (δT/T)² 的貢獻比例。</p>
+ <div style="overflow-x:auto"><table id="tbl5"></table></div>
+ <div id="note5a"></div>
+</div>
+<div class="grid2">
+ <div class="card"><h3>B. 溫度的影響</h3><div id="temp5"></div></div>
+ <div class="card"><h3>C. 孔緣乾濕：兩種方法的差異</h3><div id="hyst5"></div></div>
+</div>
+<div class="card"><h3>D. 討論題</h3>
+ <ol>
+  <li><b>鹽加愈多，h 愈小，是否表示 T 愈小？</b>
+   <details><summary class="muted">參考答案</summary><p>不一定。T = ρha/2，h 下降可能只是因為 ρ 上升。食鹽水 ρ 在 400 g／1500 mL 時約增加 16 %，但 T 只增加約 10 %，所以 h 會下降約 5 %。必須用正確的 ρ 算出 T 才能下結論。</p></details></li>
+  <li><b>用 a = 0.050 cm 算出的 T 為什麼常比文獻值 72 mN/m 小很多？</b>
+   <details><summary class="muted">參考答案</summary><p>放水停止時孔口外緣已經濕了，液面可以擴張到孔緣外，有效半徑比孔半徑大。若仍代入 a = 0.050 cm，T 就會被低估。打孔留下的毛邊、孔不圓也有類似效果。</p></details></li>
+  <li><b>如果 a 不準，「食鹽使 T 變大或變小」的結論會受影響嗎？</b>
+   <details><summary class="muted">參考答案</summary><p>只要所有溶液都用同一個孔、同一種方法量，a 是共同的比例因子：它讓所有 T 同比例放大或縮小，但不改變 T/T₀ 與斜率的正負。所以「相對變化」比「絕對值」可靠得多。</p></details></li>
+  <li><b>各次量測的溫度差 3 °C，影響有多大？</b>
+   <details><summary class="muted">參考答案</summary><p>水的表面張力約 −0.15 mN/m/°C，3 °C 約 0.45 mN/m，相當於每 100 mL 水加入約 1.6 g 鹽的效果。和整個濃度範圍的變化相比雖小，但不能忽略，應盡量在同一溫度下量測，並記錄溫度。</p></details></li>
+  <li><b>奇異筆的線寬約 0.5 mm，要讀線的哪個位置？</b>
+   <details><summary class="muted">參考答案</summary><p>孔中心線與液面線要用同一種讀法（例如都讀線的中央），相減時線寬的影響才會抵消。若一條讀上緣、一條讀下緣，就多出約 0.5 mm 的系統誤差，約占 h 的 2 %。</p></details></li>
+  <li><b>範例數據的「溶液密度」欄可能怎麼來的？應如何改進？</b>
+   <details><summary class="muted">參考答案</summary><p>範例的 1.005～1.05 明顯偏低，可能是估計值而非量測值。器材中已有量筒與電子秤，應實際量測：秤空量筒、裝入已知體積的溶液再秤一次，ρ = ΔM / V。</p></details></li>
+ </ol>
+</div>
+</section>
+
+<!-- ================= ⑥ 真值揭曉 ================= -->
+<section class="tab" id="t6">
+<div id="pre6" class="card"><h3>準備好揭曉了嗎？</h3>
+ <p>揭曉後會公開本次實驗的隱藏參數：孔的乾、濕有效半徑，純水表面張力，食鹽效應，以及各器材的校正誤差。你仍然可以繼續做實驗，但就不再是「盲測」了。</p>
+ <button class="btn warn" onclick="reveal()">揭曉真值</button>
+</div>
+<div id="post6" style="display:none">
+ <div class="grid2">
+  <div class="card"><h3>隱藏參數</h3><div class="kv" id="hid6"></div></div>
+  <div class="card"><h3>你的預測</h3><div id="pred6"></div></div>
+ </div>
+ <div class="card"><h3>逐杯比對</h3>
+  <div style="overflow-x:auto"><table id="cmp6"></table></div>
+  <p class="muted">z = (你的值 − 真值) ÷ 你的不確定度，δT 取自 ⑤ 的誤差傳播；|z| ≤ 2 表示在誤差範圍內相符。「修正後 T」使用真實的 ρ 與對應的有效半徑（放水停止法用濕孔緣的半徑，加水起漏法用乾孔緣的半徑），用來檢查剩下的誤差是否只來自 h。</p>
+ </div>
+ <div class="card"><h3>斜率比對：食鹽效應 dT/dc</h3><div id="slope6"></div></div>
+</div>
+<div class="card"><h3>屏東高中範例數據：以正確密度重算</h3>
+ <p>範例數據（每杯 RO 水 1500 mL，孔半徑取 0.050 cm）的溶液密度欄為 1.005～1.05 g/cm³，比實際的食鹽水密度低得多。下表以 CRC 手冊的食鹽水密度重算。範例未記錄溫度，這裡以 25 °C 估計。</p>
+ <div style="overflow-x:auto"><table id="ex6"></table></div>
+ <div class="grid2" style="margin-top:12px;margin-bottom:0">
+  <div id="exPlot"></div>
+  <div id="exNote"></div>
+ </div>
+</div>
+</section>
+</main>
+
+<script>
+"use strict";
+/* ======================= 物理常數與物性 ======================= */
+const G=978.8;               // cm/s²，屏東地區（約北緯 22.7°）
+const MN=58.44;              // NaCl 莫耳質量 g/mol
+const BOT_R=3.25, BOT_A=Math.PI*BOT_R*BOT_R, BOT_H=17;  // 寶特瓶內半徑 cm、截面積 cm²、直筒段高度 cm
+const CD=0.62;               // 小孔流量係數
+const BASIN_A=Math.PI*7.5*7.5-BOT_A;                    // 臉盆扣掉瓶底後的面積 cm²
+const $=id=>document.getElementById(id);
+const U=(a,b)=>a+Math.random()*(b-a);
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+// NaCl 水溶液 20 °C 密度（CRC Handbook），w 為質量分率
+const WT=[0,.01,.02,.04,.06,.08,.10,.12,.14,.16,.18,.20,.22,.24,.26];
+const RT=[.99820,1.00534,1.01246,1.02680,1.04127,1.05589,1.07068,1.08566,1.10085,1.11621,1.13190,1.14779,1.16395,1.18040,1.19717];
+function rho20(w){w=Math.max(0,Math.min(.26,w));for(let i=1;i<WT.length;i++){if(w<=WT[i]){const f=(w-WT[i-1])/(WT[i]-WT[i-1]);return RT[i-1]+f*(RT[i]-RT[i-1]);}}return RT[RT.length-1];}
+function rhoW(T){const d=T-20;return .99820-.000207*d-.0000045*d*d;}
+function rhoSol(w,T){return rho20(w)+(rhoW(T)-.99820)-.0013*w*(T-20);}
+function solub(T){return 35.8+.012*T;}   // g NaCl / 100 g 水
+
+/* 容器：mw 水質量、ms 已溶解的鹽質量、T 溫度 */
+const mass=c=>c.mw+c.ms;
+const wOf=c=>mass(c)>1e-9?c.ms/mass(c):0;
+const rhoOf=c=>rhoSol(wOf(c),c.T);
+const volOf=c=>mass(c)>1e-9?mass(c)/rhoOf(c):0;
+const molal=c=>c.mw>1e-6?(c.ms/MN)/(c.mw/1000):0;
+// 表面張力 dyn/cm（= mN/m）：純水溫度相依 + 食鹽線性效應（約 1.64 mN/m 每 mol/kg）
+function gammaOf(c){return 72.75-.1514*(c.T-20)-H.gOff+1.64*molal(c);}
+function hcrit(c,r){return 2*gammaOf(c)/(rhoOf(c)*G*r);}
+function moveMass(src,dst,M){const Ms=mass(src);if(Ms<=1e-9||M<=0)return 0;M=Math.min(M,Ms);const f=M/Ms,a=src.mw*f,b=src.ms*f,Md=mass(dst);
+ dst.T=Md>1e-9?(dst.T*Md+src.T*M)/(Md+M):src.T;dst.mw+=a;dst.ms+=b;src.mw-=a;src.ms-=b;return M;}
+function moveVol(src,dst,v){const r=rhoOf(src);return moveMass(src,dst,v*r)/r;}
+
+/* ======================= 狀態 ======================= */
+let H,S,curTab=1;
+function init(){
+ const rDry=U(.0500,.0560);
+ H={rDry, rWet:rDry*U(1.15,1.40), gOff:U(0,.8), roomT:U(24.5,28.5), holeY:U(3.7,4.3),
+    cylMass:U(150,190), cal:1+U(-.0015,.0015), paper:U(.6,.9), rulerBase:U(.35,.65),
+    thOff:U(-.5,.5), cylScale:1+U(-.004,.004)};
+ const T=H.roomT, C=()=>({mw:0,ms:0,T});
+ S={t:0,speed:1,sel:0,
+  beakers:[0,1,2,3,4,5].map(()=>Object.assign(C(),{mu:0})),
+  cyl:C(), bal:{load:'none',tare:0}, pile:0,
+  bottle:Object.assign(C(),{src:null,finger:true,cap:false,rimWet:false,flowing:false,epsStart:gauss()*.012,epsStop:0,holeMark:null,marks:[],nMark:0,q:0,dh:0}),
+  basin:Object.assign(C(),{src:null}), syr:Object.assign(C(),{src:null}),
+  log:[], rows2:[0,1,2,3,4,5].map(()=>({})), rows3:[], predict:null,
+  an:{a:.050,method:'放水停止法',rhoSrc:'meas',da:.005,dV:1,dh:.03}, revealed:false};
+}
+
+/* ======================= 時間推進 ======================= */
+function relax(c,tau,dt){if(mass(c)>1e-6)c.T+=(H.roomT-c.T)*(1-Math.exp(-dt/tau));else c.T=H.roomT;}
+function dissolve(b,frac,extra){
+ if(b.mu<=1e-6||b.mw<1)return;
+ const cap=solub(b.T)/100*b.mw-b.ms; if(cap<=0)return;
+ const d=Math.min(b.mu,cap,b.mu*frac+extra); if(d<=0)return;
+ b.mu-=d;b.ms+=d;
+ // 溶解熱：積分溶解熱約 +3.9 kJ/mol（稀薄）並隨濃度遞減（近似）
+ const q=Math.max(1.8,3.9-.3*molal(b))*1000, C=b.mw*4.18+b.ms*.86;
+ b.T-=(d/MN)*q/C;
+}
+function step(dt){
+ S.t+=dt;
+ S.beakers.forEach(b=>{relax(b,900,dt);if(b.mu>0)dissolve(b,.0006*dt,0);});
+ relax(S.cyl,600,dt);relax(S.bottle,700,dt);relax(S.basin,500,dt);relax(S.syr,300,dt);
+ const B=S.bottle; B.q=0;B.dh=0;
+ const h=volOf(B)/BOT_A-H.holeY;
+ if(B.finger||B.cap){
+  if(B.flowing){B.flowing=false;B.epsStart=gauss()*.012;log(B.cap?'蓋上瓶蓋後，孔口停止出水':'手指按住孔，停止出水');}
+  return;
+ }
+ if(!B.flowing&&mass(B)>1){
+  const r=B.rimWet?H.rWet:H.rDry;
+  if(h>hcrit(B,r)*(1+B.epsStart)){
+   B.flowing=true;B.rimWet=true;B.epsStop=gauss()*.01;
+   log(B.src!=null?`孔口開始出水（燒杯 #${B.src+1}）`:'孔口開始出水');
+  }
+ }
+ if(B.flowing){
+  const dh=h-hcrit(B,H.rWet)*(1+B.epsStop);
+  if(dh<=0){B.flowing=false;B.epsStart=B.epsStop+.006+Math.abs(gauss())*.006;log('孔口停止滴水');}
+  else{
+   const q=CD*Math.PI*H.rDry*H.rDry*Math.sqrt(2*G*dh);B.q=q;B.dh=dh;
+   if(mass(S.basin)<5)S.basin.src=B.src; else if(S.basin.src!==B.src)S.basin.src='mix';
+   moveVol(B,S.basin,q*dt);
+  }
+ }
+}
+function advance(sec){if(sec<=0)return;const n=Math.ceil(sec/.05),dt=sec/n;for(let i=0;i<n;i++)step(dt);}
+
+/* ======================= 共用 ======================= */
+const pad=n=>String(n).padStart(2,'0');
+function fmtT(s){const h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=Math.floor(s%60);return (h?h+':':'')+pad(m)+':'+pad(ss);}
+function log(m){S.log.unshift(`[${fmtT(S.t)}] ${m}`);if(S.log.length>80)S.log.pop();const el=$('log3');if(el)el.innerHTML=S.log.join('<br>');}
+function msg(id,t){const el=$(id);el.textContent=t||'';if(t){clearTimeout(el._t);el._t=setTimeout(()=>el.textContent='',6000);}}
+const msg2=t=>msg('msg2',t), msg3=t=>msg('msg3',t);
+
+const TABS=['① 原理','② 溶液配製與密度','③ 臨界高度量測','④ 數據與作圖','⑤ 誤差討論','⑥ 真值揭曉'];
+function buildNav(){
+ $('nav').innerHTML=TABS.map((t,i)=>`<button class="${i+1===curTab?'on':''}" onclick="showTab(${i+1})">${t}</button>`).join('');
+ $('spd').innerHTML=[['暫停',0],['×1',1],['×5',5],['×20',20],['×60',60]].map(([l,v])=>`<button class="${S.speed===v?'on':''}" onclick="setSpeed(${v})">${l}</button>`).join('');
+}
+function setSpeed(v){S.speed=v;buildNav();}
+function showTab(n){curTab=n;document.querySelectorAll('section.tab').forEach((s,i)=>s.classList.toggle('on',i+1===n));buildNav();renderAll();window.scrollTo(0,0);}
+function selBeaker(i){S.sel=i;renderAll();}
+function resetAll(){if(!confirm('重新開始會清除所有溶液與數據，並重新抽取隱藏值。確定嗎？'))return;init();build();showTab(1);}
+
+/* ======================= ① 原理 ======================= */
+function p1BottleSVG(){
+ return `<svg viewBox="0 0 340 250" width="100%" style="max-width:340px">
+ <defs><marker id="ar1" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f6fd1"/></marker></defs>
+ <rect x="0" y="232" width="340" height="18" fill="#d9ccb0"/>
+ <path d="M60 232 L60 72 Q60 52 86 44 L86 20 L124 20 L124 44 Q150 52 150 72 L150 232 Z" fill="#fff" stroke="#6b7c8c" stroke-width="2"/>
+ <rect x="62" y="112" width="86" height="118" fill="#8cc8ec" opacity=".8"/>
+ <circle cx="150" cy="192" r="3" fill="#1c2632"/>
+ <path d="M151 188 A4 4 0 0 1 151 196" fill="#8cc8ec" stroke="#3b82c4"/>
+ <line x1="156" y1="112" x2="212" y2="112" stroke="#1f6fd1" stroke-dasharray="4 3"/>
+ <line x1="156" y1="192" x2="212" y2="192" stroke="#1f6fd1" stroke-dasharray="4 3"/>
+ <line x1="200" y1="115" x2="200" y2="189" stroke="#1f6fd1" stroke-width="1.6" marker-start="url(#ar1)" marker-end="url(#ar1)"/>
+ <text x="208" y="157" font-size="16" font-style="italic" fill="#1f6fd1">h</text>
+ <text x="160" y="214" font-size="12" fill="#333">小孔（直徑約 1 mm）</text>
+ <text x="72" y="102" font-size="12" fill="#333">溶液</text>
+ <text x="228" y="116" font-size="12" fill="#555">瓶內液面</text>
+ <text x="228" y="196" font-size="12" fill="#555">孔中心</text></svg>`;
+}
+function drawP1(){
+ const h=+$('p1h').value, amm=+$('p1a').value, T=+$('p1t').value, a=amm/10;
+ $('p1hv').textContent=h.toFixed(2);$('p1av').textContent=amm.toFixed(2);$('p1tv').textContent=T.toFixed(1);
+ const dP=G*h, hc=2*T/(G*a), R=dP>0?2*T/dP:Infinity, stable=h<=hc;
+ const sc=1500, ap=a*sc, cy=165, xw=245, W=520, Ht=330;
+ let s=`<svg viewBox="0 0 ${W} ${Ht}" width="100%" style="max-width:${W}px">
+ <defs><marker id="arR" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#d0342c"/></marker><marker id="arB" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1f4e8c"/></marker></defs>
+ <rect x="0" y="0" width="200" height="${Ht}" fill="#9fd3f0"/>
+ <rect x="200" y="0" width="45" height="${cy-ap}" fill="#c9d2dc"/><rect x="200" y="${cy+ap}" width="45" height="${Ht-cy-ap}" fill="#c9d2dc"/>
+ <rect x="200" y="${cy-ap}" width="45" height="${2*ap}" fill="#9fd3f0"/>
+ <text x="12" y="22" font-size="13">瓶內溶液</text><text x="204" y="22" font-size="13">瓶壁</text><text x="${W-60}" y="22" font-size="13">空氣</text>`;
+ if(stable){
+  if(isFinite(R)){const Rp=R*sc, back=Math.sqrt(Math.max(0,R*R-a*a))*sc;
+   s+=`<path d="M${xw} ${cy-ap} A${Rp} ${Rp} 0 0 1 ${xw} ${cy+ap} Z" fill="#9fd3f0" stroke="#2b78c2" stroke-width="2"/>`;
+   const L=55, ux=-ap/Rp, uy=back/Rp;
+   s+=`<line x1="${xw}" y1="${cy-ap}" x2="${xw+ux*L}" y2="${cy-ap-uy*L}" stroke="#d0342c" stroke-width="2.5" marker-end="url(#arR)"/>`;
+   s+=`<line x1="${xw}" y1="${cy+ap}" x2="${xw+ux*L}" y2="${cy+ap+uy*L}" stroke="#d0342c" stroke-width="2.5" marker-end="url(#arR)"/>`;
+   s+=`<text x="${xw+ux*L+4}" y="${cy-ap-uy*L-6}" font-size="13" fill="#d0342c">T</text>`;
+  } else s+=`<line x1="${xw}" y1="${cy-ap}" x2="${xw}" y2="${cy+ap}" stroke="#2b78c2" stroke-width="2"/>`;
+  if(h>0)s+=`<line x1="120" y1="${cy}" x2="${xw+8}" y2="${cy}" stroke="#1f4e8c" stroke-width="2.5" marker-end="url(#arB)"/><text x="120" y="${cy-8}" font-size="13" fill="#1f4e8c">ΔP = ρgh</text>`;
+ } else {
+  const t=(performance.now()/900)%1, rr=ap*(1.1+.5*t);
+  s+=`<circle cx="${xw+rr*.85}" cy="${cy+rr*.25+t*25}" r="${rr}" fill="#9fd3f0" stroke="#2b78c2" stroke-width="2"/>
+  <text x="${xw+10}" y="${Ht-20}" font-size="14" fill="#b8460b">h &gt; h꜀：沒有平衡解，液滴長大後滴落</text>`;
+ }
+ s+=`<text x="${xw+8}" y="${cy-ap-6}" font-size="12" fill="#333">孔緣</text></svg>`;
+ $('p1hole').innerHTML=s;
+ const Fp=dP*Math.PI*a*a, Fmax=2*Math.PI*a*T;
+ $('p1out').innerHTML=`<span>壓力差 ΔP = ρgh</span><span>${dP.toFixed(0)} dyn/cm²（${(dP/10).toFixed(1)} Pa）</span>
+ <span>球冠曲率半徑 R = 2T/ΔP</span><span>${isFinite(R)?(R*10).toFixed(2)+' mm':'∞（液面平直）'}</span>
+ <span>壓力推力 ΔP·πa²</span><span>${Fp.toFixed(2)} dyn</span>
+ <span>表面張力最大拉力 2πaT</span><span>${Fmax.toFixed(2)} dyn</span>
+ <span>臨界高度 h꜀ = 2T/(ρga)</span><span><b>${hc.toFixed(2)} cm</b></span>
+ <span>狀態</span><span style="color:${stable?'#0e8a64':'#b8460b'}">${stable?(R>=1e6?'液面平直':`穩定（球冠比半球「扁」，R ${R>a*1.02?'&gt;':'≈'} a）`):'不穩定 → 滴落'}</span>`;
+}
+function renderPred(){
+ $('p1pred').innerHTML=['變大','變小','幾乎不變'].map(o=>`<button class="btn ${S.predict===o?'sel':'alt'}" onclick="S.predict='${o}';renderPred()">${o}</button>`).join('');
+}
+
+/* ======================= ② 溶液配製與密度 ======================= */
+function balRaw(){if(S.bal.load==='paper')return H.paper+S.pile;if(S.bal.load==='cyl')return H.cylMass+mass(S.cyl);return 0;}
+function lcdText(){const r=balRaw();if(r>1000)return 'OL';return (Math.round((r*H.cal-S.bal.tare)*10)/10).toFixed(1)+' g';}
+function updLCD(){const t=lcdText();$('lcdB').textContent=t;$('lcdD').textContent=t;}
+function balPaper(){if(S.bal.load!=='none')return msg2('秤盤上已經有東西了');S.bal.load='paper';S.pile=0;render2();}
+function balTare(){S.bal.tare=balRaw()*H.cal;render2();}
+function balClear(){if(S.bal.load==='paper'&&S.pile>.1)return msg2('秤量紙上還有鹽，請先倒入燒杯');S.bal.load='none';S.pile=0;render2();}
+function scoop(x){
+ if(S.bal.load!=='paper')return msg2('請先在電子秤上放秤量紙');
+ if(x>0)S.pile+=x*U(.6,1.4);else S.pile=Math.max(0,S.pile-Math.min(S.pile,U(.5,1.5)));
+ render2();
+}
+function saltToBeaker(){
+ if(S.bal.load!=='paper'||S.pile<.05)return msg2('秤量紙上沒有鹽');
+ const b=S.beakers[S.sel], stuck=Math.min(S.pile,.03);
+ b.mu+=S.pile-stuck;S.pile=stuck;render2();
+ msg2(`鹽已倒入燒杯 #${S.sel+1}（秤量紙上會殘留極少量）`);
+}
+function fillWater(){
+ const t=+$('wTarget').value;if(!(t>0))return;
+ if(volOf(S.cyl)>3&&S.cyl.ms>.2)return msg2('量筒裡是鹽水，請先倒掉或擦乾');
+ const v0=volOf(S.cyl);let dv=t-v0+gauss()*1.5;
+ if(dv<=0)return msg2('量筒內的液體已超過這個量');
+ dv=Math.min(dv,520-v0);
+ const tmp={mw:dv*rhoW(H.roomT),ms:0,T:H.roomT};moveMass(tmp,S.cyl,tmp.mw);render2();
+}
+function cylToBeaker(){
+ const V=volOf(S.cyl);if(V<3)return msg2('量筒是空的');
+ const b=S.beakers[S.sel];if(volOf(b)+V>620)return msg2('燒杯裝不下，會溢出來');
+ moveMass(S.cyl,b,mass(S.cyl)-1.2);render2();
+}
+function dryCyl(){S.cyl.mw=0;S.cyl.ms=0;render2();msg2('量筒已擦乾');}
+function beakerToCyl(){
+ if(volOf(S.cyl)>3)return msg2('量筒裡已有液體，請先倒掉');
+ const b=S.beakers[S.sel],t=+$('dTarget').value;if(!(t>0))return;
+ const v=Math.min(t+gauss()*2,510);
+ if(volOf(b)<v)return msg2('燒杯中的溶液不夠');
+ if(S.cyl.mw+S.cyl.ms>.3&&S.cyl.ms/(S.cyl.mw+S.cyl.ms+1e-9)<.001&&b.ms>1)msg2('提醒：量筒壁附著的清水會讓鹽水略為變稀');
+ if(b.mu>.3)msg2('提醒：燒杯底還有未溶解的鹽');
+ moveVol(b,S.cyl,v);render2();
+}
+function cylOnBal(){if(S.bal.load==='paper')return msg2('請先取下秤量紙');S.bal.load='cyl';render2();}
+function stir(){
+ const b=S.beakers[S.sel];if(b.mw<1)return msg2('燒杯裡沒有水');
+ for(let i=0;i<6;i++){advance(5);dissolve(b,.2,.15);}render2();
+}
+function waitMin(m){advance(m*60);renderAll();}
+
+function beakerFill(b){return b.ms>.5?'#a8d8e8':'#a7d4f2';}
+function benchSVG(){
+ const W=900,Ht=260,base=225;let s=`<svg viewBox="0 0 ${W} ${Ht}" width="100%">`;
+ s+=`<rect x="0" y="${base}" width="${W}" height="${Ht-base}" fill="#d9ccb0"/>`;
+ S.beakers.forEach((b,i)=>{
+  const x=18+i*90,w=66,h=110,top=base-h,V=volOf(b),lh=Math.min(h-4,V/650*h);
+  s+=`<g onclick="selBeaker(${i})" style="cursor:pointer">`;
+  s+=`<rect x="${x-8}" y="${top-14}" width="${w+16}" height="${h+36}" rx="8" fill="${i===S.sel?'#e6f0fc':'transparent'}" stroke="${i===S.sel?'#1f6fd1':'none'}" stroke-dasharray="5 3"/>`;
+  if(lh>0)s+=`<rect x="${x+2}" y="${base-2-lh}" width="${w-4}" height="${lh}" fill="${beakerFill(b)}" opacity=".85"/>`;
+  if(b.mu>.05){const n=Math.min(40,Math.ceil(b.mu/1.5));for(let k=0;k<n;k++){const px=x+6+((k*37+i*11)%(w-12)),py=base-4-((k*13)%5)-(k>20?3:0);s+=`<rect x="${px}" y="${py}" width="2.4" height="2.4" fill="#fff" stroke="#9aa" stroke-width=".4"/>`;}}
+  for(let v=100;v<=500;v+=100){const y=base-v/650*h;s+=`<line x1="${x}" x2="${x+10}" y1="${y}" y2="${y}" stroke="#7b8a98" stroke-width="1"/>`;}
+  s+=`<path d="M${x-3} ${top} L${x} ${top+4} L${x} ${base} L${x+w} ${base} L${x+w} ${top}" fill="none" stroke="#6b7c8c" stroke-width="2"/>`;
+  s+=`<text x="${x+w/2}" y="${base+20}" text-anchor="middle" font-size="13">燒杯 #${i+1}</text></g>`;
+ });
+ // 量筒
+ const onBal=S.bal.load==='cyl', cx=onBal?790:600, cb=onBal?base-40:base, ch=190, cw=26, cv=volOf(S.cyl), cl=Math.min(ch-6,cv/560*ch);
+ s+=`<rect x="${cx-18}" y="${cb-4}" width="${cw+36}" height="4" fill="#8a99a8"/>`;
+ if(cl>0)s+=`<rect x="${cx+1}" y="${cb-4-cl}" width="${cw-2}" height="${cl}" fill="${S.cyl.ms>.2?'#a8d8e8':'#a7d4f2'}"/>`;
+ s+=`<rect x="${cx}" y="${cb-4-ch}" width="${cw}" height="${ch}" fill="none" stroke="#6b7c8c" stroke-width="1.8"/>`;
+ for(let v=100;v<=500;v+=100){const y=cb-4-v/560*ch;s+=`<line x1="${cx}" x2="${cx+8}" y1="${y}" y2="${y}" stroke="#7b8a98"/>`;}
+ s+=`<text x="${cx+cw/2}" y="${onBal?cb-ch-10:base+20}" text-anchor="middle" font-size="13">量筒</text>`;
+ // 電子秤
+ s+=`<rect x="700" y="${base-34}" width="180" height="34" rx="4" fill="#dfe4ea" stroke="#8a99a8"/>
+ <rect x="720" y="${base-40}" width="140" height="6" fill="#b8c2cc"/>
+ <rect x="712" y="${base-27}" width="84" height="20" rx="2" fill="#1b2a1f"/><text x="790" y="${base-12}" text-anchor="end" font-size="13" fill="#9dfc9d" font-family="monospace">${lcdText()}</text>
+ <text x="840" y="${base+20}" text-anchor="middle" font-size="13">電子秤</text>`;
+ if(S.bal.load==='paper'){s+=`<rect x="740" y="${base-43}" width="100" height="3" fill="#fff" stroke="#bbb"/>`;if(S.pile>.05){const r=Math.min(22,4+Math.sqrt(S.pile)*3.2);s+=`<path d="M${790-r} ${base-43} Q790 ${base-43-r*.9} ${790+r} ${base-43}Z" fill="#fff" stroke="#aab"/>`;}}
+ return s+'</svg>';
+}
+function cylSVG(){
+ const V=volOf(S.cyl)*H.cylScale;
+ if(V<3)return `<p class="muted">量筒是空的${mass(S.cyl)>.1?'（管壁附著少量液體）':''}。</p>`;
+ const k=3.6,lo=Math.max(0,Math.round(V)-45),hi=lo+90,top=14,Ht=90*k+28,y=v=>top+(hi-v)*k,yV=y(V);
+ let s=`<svg viewBox="0 0 260 ${Ht}" width="260">`;
+ s+=`<rect x="60" y="${top-8}" width="140" height="${Ht-top}" fill="#f7fbfd"/>`;
+ s+=`<path d="M60 ${yV-8} Q130 ${yV+8} 200 ${yV-8} L200 ${Ht} L60 ${Ht} Z" fill="${S.cyl.ms>.2?'#b5e0ec':'#b7dcf5'}"/>`;
+ s+=`<path d="M60 ${yV-8} Q130 ${yV+8} 200 ${yV-8}" fill="none" stroke="#3b82c4" stroke-width="1.5"/>`;
+ for(let v=Math.ceil(lo/5)*5;v<=hi;v+=5){const L=v%50===0?62:v%25===0?44:28;s+=`<line x1="60" x2="${60+L}" y1="${y(v)}" y2="${y(v)}" stroke="#222" stroke-width="1.2"/>`;if(v%50===0)s+=`<text x="${60+L+6}" y="${y(v)+4}" font-size="13">${v}</text>`;}
+ s+=`<line x1="60" y1="0" x2="60" y2="${Ht}" stroke="#6b7c8c" stroke-width="2"/><line x1="200" y1="0" x2="200" y2="${Ht}" stroke="#6b7c8c" stroke-width="2"/>`;
+ s+=`<text x="210" y="16" font-size="11" fill="#5d6b7a">mL</text></svg>`;
+ return s;
+}
+function thermoSVG(T,label){
+ const Tr=T+H.thOff,lo=Math.floor(Tr)-4,hi=lo+9,k=26,top=16,Ht=(hi-lo)*k+34,y=v=>top+(hi-v)*k;
+ let s=`<svg viewBox="0 0 210 ${Ht}" width="210"><rect x="40" y="4" width="40" height="${Ht-8}" rx="10" fill="#f4f7fa" stroke="#9aa7b4"/>`;
+ s+=`<rect x="57" y="${y(Tr)}" width="6" height="${Ht-8-y(Tr)}" fill="#d0342c"/>`;
+ for(let v=lo;v<=hi;v++){s+=`<line x1="66" x2="${v%5===0?92:84}" y1="${y(v)}" y2="${y(v)}" stroke="#333" stroke-width="1.1"/><text x="98" y="${y(v)+4}" font-size="12">${v}</text>`;}
+ return s+`<text x="126" y="22" font-size="12" fill="#5d6b7a">${label}</text><text x="126" y="38" font-size="12" fill="#5d6b7a">°C</text></svg>`;
+}
+const F2=[['vw','清水體積 V<sub>w</sub> (mL)'],['ms','食鹽質量 m (g)'],['T','溫度 (°C)'],['m1','空量筒 M₁ (g)'],['m2','量筒＋溶液 M₂ (g)'],['vs','溶液體積 V (mL)']];
+function buildTbl2(){
+ let s='<tr><th>燒杯</th>'+F2.map(f=>`<th>${f[1]}</th>`).join('')+'<th>密度 ρ = (M₂−M₁)/V<br>(g/cm³)</th><th>濃度<br>(g／100 mL 水)</th></tr>';
+ for(let i=0;i<6;i++){const r=S.rows2[i];s+=`<tr><td>#${i+1}</td>`+F2.map(f=>`<td><input type="number" step="any" value="${r[f[0]]??''}" oninput="set2(${i},'${f[0]}',this.value)"></td>`).join('')+`<td id="rho${i}"></td><td id="con${i}"></td></tr>`;}
+ $('tbl2').innerHTML=s;for(let i=0;i<6;i++)upd2(i);
+}
+function set2(i,k,v){S.rows2[i][k]=v===''?undefined:+v;upd2(i);}
+function upd2(i){
+ const r=S.rows2[i],ok=x=>typeof x==='number'&&isFinite(x);
+ $('rho'+i).textContent=(ok(r.m1)&&ok(r.m2)&&ok(r.vs)&&r.vs>0)?((r.m2-r.m1)/r.vs).toFixed(4):'';
+ $('con'+i).textContent=(ok(r.ms)&&ok(r.vw)&&r.vw>0)?(r.ms/r.vw*100).toFixed(2):'';
+}
+function render2(){
+ $('bench').innerHTML=benchSVG();$('selName').textContent='燒杯 #'+(S.sel+1);
+ const c=cylSVG();$('cylZoomA').innerHTML=c;$('cylZoomD').innerHTML=c;updLCD();live2();
+}
+function live2(){
+ const b=S.beakers[S.sel];
+ $('thZoom2').innerHTML=b.mw>1?thermoSVG(b.T,'燒杯 #'+(S.sel+1)):'<p class="muted">燒杯是空的，溫度計量到的是室溫。</p>'+thermoSVG(H.roomT,'室溫');
+ let t;
+ if(b.mw<1)t=b.mu>.05?'杯中只有鹽，還沒加水。':'燒杯是空的。';
+ else if(b.mu>.05)t=(solub(b.T)/100*b.mw-b.ms<.5)?'杯底還有鹽粒，而且看起來已經溶不下了（飽和）。':'杯底還看得到鹽粒，請繼續攪拌。';
+ else t=b.ms>.1?'看不到鹽粒，已完全溶解。':'清水。';
+ $('dissolveInfo').textContent=t;
+}
+
+/* ======================= ③ 臨界高度量測 ======================= */
+function sceneSVG(){
+ const B=S.bottle,k=16,W=440,Ht=440,floor=426,bBot=420,bL=30,bR=bL+15*k,bTop=bBot-8*k;
+ const x0=bL+6,x1=x0+6.5*k,yb=bBot-.35*k,Y=y=>yb-y*k;
+ const yL=volOf(B)/BOT_A, bd=volOf(S.basin)/BASIN_A, ySurf=bBot-bd*k;
+ let s=`<svg viewBox="0 0 ${W} ${Ht}" width="100%" style="max-width:${W}px">`;
+ s+=`<rect x="0" y="${floor}" width="${W}" height="${Ht-floor}" fill="#d9ccb0"/>`;
+ if(bd>.02)s+=`<rect x="${bL}" y="${ySurf}" width="${bR-bL}" height="${bBot-ySurf}" fill="${S.basin.ms>.5?'#a8d8e8':'#a7d4f2'}" opacity=".9"/>`;
+ // 瓶身
+ const nx0=x0+(x1-x0)/2-18,nx1=nx0+36;
+ if(yL>.01)s+=`<rect x="${x0+2}" y="${Y(Math.min(yL,BOT_H))}" width="${x1-x0-4}" height="${yb-Y(Math.min(yL,BOT_H))}" fill="${B.ms>.5?'#a8d8e8':'#a7d4f2'}"/>`;
+ s+=`<path d="M${x0} ${yb+.35*k} L${x0} ${Y(BOT_H)} Q${x0} ${Y(19)} ${nx0} ${Y(19.8)} L${nx0} ${Y(21.8)} M${nx1} ${Y(21.8)} L${nx1} ${Y(19.8)} Q${x1} ${Y(19)} ${x1} ${Y(BOT_H)} L${x1} ${yb+.35*k}" fill="none" stroke="#6b7c8c" stroke-width="2"/>`;
+ s+=`<line x1="${x0}" y1="${yb+.35*k}" x2="${x1}" y2="${yb+.35*k}" stroke="#6b7c8c" stroke-width="2"/>`;
+ if(B.cap)s+=`<rect x="${nx0-3}" y="${Y(22.6)}" width="${nx1-nx0+6}" height="${.9*k}" rx="2" fill="#2f7d4f"/>`;
+ // 溫度計
+ if(yL>1){const tx=nx0+10;s+=`<line x1="${tx}" y1="${Y(23.5)}" x2="${tx}" y2="${Y(Math.max(.5,yL-3))}" stroke="#9aa7b4" stroke-width="4"/><circle cx="${tx}" cy="${Y(Math.max(.5,yL-3))}" r="3" fill="#d0342c"/>`;}
+ // 記號
+ const hy=Y(H.holeY);
+ if(B.holeMark!=null){const my=Y(B.holeMark);s+=`<line x1="${x1-30}" x2="${x1-6}" y1="${my}" y2="${my}" stroke="#111" stroke-width="1.6"/><line x1="${x1-18}" x2="${x1-18}" y1="${my-5}" y2="${my+5}" stroke="#111" stroke-width="1.2"/>`;}
+ B.marks.slice(-10).forEach(m=>{const my=Y(m.y);s+=`<line x1="${x1-44}" x2="${x1-4}" y1="${my}" y2="${my}" stroke="#111" stroke-width="1.6"/><text x="${x1-58}" y="${my+4}" font-size="10">${m.n}</text>`;});
+ s+=`<circle cx="${x1}" cy="${hy}" r="2" fill="#1c2632"/>`;
+ // 出水
+ if(B.flowing){
+  if(B.dh>.8){const v=.97*Math.sqrt(2*G*B.dh);let pts=[];for(let t=0;t<.5;t+=.004){const px=x1+v*t*k,py=hy+.5*G*t*t*k;pts.push(px.toFixed(1)+','+py.toFixed(1));if(px>=bR-2||py>=ySurf)break;}
+   s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="#4d9fdc" stroke-width="${Math.min(3,1+B.q)}"/>`;}
+  else{for(let j=0;j<3;j++){const ph=((performance.now()/650)+j/3)%1;s+=`<circle cx="${x1+3}" cy="${hy+4+ph*(ySurf-hy-4)}" r="2.2" fill="#4d9fdc"/>`;}
+   s+=`<circle cx="${x1+2}" cy="${hy+1}" r="2.6" fill="#4d9fdc"/>`;}
+ } else if(!B.finger&&yL>H.holeY+.05){const ratio=Math.min(1,(yL-H.holeY)/hcrit(B,B.rimWet?H.rWet:H.rDry));s+=`<path d="M${x1} ${hy-2} A2 2 0 0 1 ${x1} ${hy+2}" transform="translate(${ratio*.8},0)" fill="#4d9fdc"/>`;}
+ if(B.finger)s+=`<ellipse cx="${x1+10}" cy="${hy}" rx="11" ry="7" fill="#e8b999" stroke="#b98463"/>`;
+ // 臉盆
+ s+=`<path d="M${bL-10} ${bTop} L${bL} ${floor} L${bR} ${floor} L${bR+10} ${bTop}" fill="none" stroke="#c96b2c" stroke-width="3"/>`;
+ s+=`<text x="${bR+14}" y="${bTop+14}" font-size="12" fill="#555">小臉盆</text><text x="${x1+8}" y="${Y(14)}" font-size="12" fill="#555">寶特瓶</text>`;
+ return s+'</svg>';
+}
+function rulerSVG(){
+ const B=S.bottle,k=80,yL=volOf(B)/BOT_A,base=H.rulerBase;
+ const ys=[H.holeY];if(B.holeMark!=null)ys.push(B.holeMark);B.marks.forEach(m=>ys.push(m.y));
+ const lo=Math.max(-base,Math.min(...ys)-.6), hi=Math.max(...ys,H.holeY+3.2)+.6;
+ const Ht=(hi-lo)*k+10, Y=y=>5+(hi-y)*k;
+ let s=`<svg viewBox="0 0 360 ${Ht}" width="360">`;
+ s+=`<rect x="108" y="0" width="252" height="${Ht}" fill="#eef3f7"/>`;
+ if(yL>lo){const top=Y(Math.min(yL,hi));s+=`<rect x="108" y="${top}" width="252" height="${Ht-top}" fill="#a7d4f2" opacity=".45"/>`;if(yL<hi)s+=`<line x1="108" x2="360" y1="${top}" y2="${top}" stroke="#3b82c4" stroke-width="1.2"/>`;}
+ s+=`<rect x="20" y="0" width="84" height="${Ht}" fill="#f5e6b3" stroke="#b79a4b"/>`;
+ for(let i=Math.ceil((lo+base)*10);i<=Math.floor((hi+base)*10);i++){
+  const yy=Y(i/10-base),L=i%10===0?34:i%5===0?24:14;
+  s+=`<line x1="${104-L}" x2="104" y1="${yy}" y2="${yy}" stroke="#222" stroke-width="1"/>`;
+  if(i%10===0)s+=`<text x="30" y="${yy+5}" font-size="14" font-weight="600">${i/10}</text>`;
+ }
+ s+=`<circle cx="230" cy="${Y(H.holeY)}" r="${Math.max(2.5,H.rDry*k)}" fill="#1c2632"/>`;
+ if(B.holeMark!=null){const yy=Y(B.holeMark);s+=`<line x1="110" x2="210" y1="${yy}" y2="${yy}" stroke="#111" stroke-width="${.05*k}"/><text x="112" y="${yy-6}" font-size="11">孔中心</text>`;}
+ B.marks.forEach(m=>{const yy=Y(m.y);s+=`<line x1="110" x2="330" y1="${yy}" y2="${yy}" stroke="#111" stroke-width="${.05*k}" opacity=".9"/><text x="336" y="${yy+4}" font-size="12" font-weight="600">${m.n}</text>`;});
+ return s+'</svg>';
+}
+function stat3(){
+ const B=S.bottle,V=volOf(B);
+ const flow=B.finger?'（手指按住）':B.cap&&!B.flowing?'不出水（瓶蓋蓋著）':B.flowing?(B.dh>.8?'細流噴出':'一滴一滴滴下'):'不出水';
+ const bs=volOf(S.basin)>3?(S.basin.src==='mix'?'有溶液（混到不同燒杯）':'有溶液（燒杯 #'+(S.basin.src+1)+'）'):'空';
+ $('stat3').innerHTML=`<span>瓶中溶液</span><span>${V>4?'燒杯 #'+(B.src+1):'（空）'}</span>
+ <span>孔口</span><span>${B.finger?'手指按住':'打開'}；外緣${B.rimWet?'<b>濕</b>':'乾'}</span>
+ <span>瓶蓋</span><span>${B.cap?'蓋上':'打開'}</span><span>出水情形</span><span>${flow}</span><span>臉盆</span><span>${bs}</span>`;
+ $('bFinger').textContent=B.finger?'移開按住孔的手指':'用手指按住孔';
+ $('bCap').textContent=B.cap?'打開瓶蓋':'蓋上瓶蓋';
+}
+function pourBottle(){
+ const b=S.beakers[S.sel],B=S.bottle;
+ if(B.cap)return msg3('瓶蓋蓋著，倒不進去');
+ if(volOf(b)<1)return msg3('這個燒杯沒有溶液');
+ if(volOf(B)>4&&B.src!==S.sel)return msg3(`瓶中還有燒杯 #${B.src+1} 的溶液，請先倒回`);
+ const room=BOT_H*BOT_A-volOf(B);let v=Math.min(+$('pourV').value||0,room,volOf(b));
+ if(v<=0)return msg3('瓶子已經滿了');
+ if(b.mu>.3)msg3('提醒：燒杯底還有未溶解的鹽，倒出的溶液濃度會比預期低');
+ moveVol(b,B,v*(1+gauss()*.02));B.src=S.sel;log(`倒入燒杯 #${S.sel+1} 的溶液`);renderAll();
+}
+function emptyBottle(){
+ const B=S.bottle;if(B.src==null||volOf(B)<4&&volOf(S.basin)<4)return msg3('瓶子和臉盆都沒有可倒回的溶液');
+ const b=S.beakers[B.src];moveMass(B,b,mass(B)-2);
+ if(volOf(S.basin)>3){if(S.basin.src===B.src)moveMass(S.basin,b,mass(S.basin)-3);else msg3('臉盆中的液體不是這杯溶液（或已混合），沒有倒回；可以直接倒掉');}
+ B.flowing=false;B.epsStart=gauss()*.012;log(`溶液倒回燒杯 #${B.src+1}（瓶壁仍附著少量液體）`);renderAll();
+}
+function discardBasin(){S.basin.mw=0;S.basin.ms=0;S.basin.src=null;log('倒掉臉盆中的液體');renderAll();}
+function rinseBottle(){
+ const B=S.bottle,b=S.beakers[S.sel];
+ if(volOf(B)>4)return msg3('瓶中還有液體，請先倒回');
+ if(volOf(b)<15)return msg3('燒杯中的溶液不夠潤洗');
+ moveVol(b,B,10);const f=2/mass(B);B.mw*=f;B.ms*=f;B.src=S.sel;B.rimWet=true;
+ log(`用燒杯 #${S.sel+1} 的溶液潤洗瓶子（孔口外緣沾濕）`);renderAll();
+}
+function toggleFinger(){
+ const B=S.bottle;B.finger=!B.finger;
+ if(!B.finger){const wet=volOf(B)/BOT_A>H.holeY-.05;if(wet)B.rimWet=true;log('移開手指'+(wet?'（孔口外緣被沾濕）':''));}
+ else log('用手指按住孔');renderAll();
+}
+function toggleCap(){S.bottle.cap=!S.bottle.cap;log(S.bottle.cap?'蓋上瓶蓋':'打開瓶蓋');renderAll();}
+function wipeRim(){
+ const B=S.bottle;
+ if(B.finger)return msg3('手指還按著孔');
+ if(B.flowing)return msg3('孔口正在出水，擦乾後馬上又會濕');
+ B.rimWet=false;B.epsStart=gauss()*.012;log('用抹布擦乾孔口外緣');renderAll();
+}
+function syrFill(){
+ const src=S.bottle.src!=null&&volOf(S.bottle)>4?S.bottle.src:S.sel,b=S.beakers[src];
+ if(volOf(S.syr)>.2&&S.syr.src!==src){S.syr.mw=0;S.syr.ms=0;}
+ const need=30-volOf(S.syr);if(volOf(b)<need)return msg3('燒杯中的溶液不夠');
+ moveVol(b,S.syr,need);S.syr.src=src;renderAll();
+}
+function syrPush(x){
+ const B=S.bottle;
+ if(B.cap)return msg3('瓶蓋蓋著');
+ if(volOf(S.syr)<.2)return msg3('注射筒是空的，請先吸取');
+ if(volOf(B)>4&&S.syr.src!==B.src)return msg3('注射筒中的溶液和瓶中不同');
+ moveVol(S.syr,B,Math.min(x*(1+gauss()*.02),volOf(S.syr)));if(B.src==null||volOf(B)<4)B.src=S.syr.src;renderAll();
+}
+function markHole(){const B=S.bottle;if(B.holeMark!=null)return msg3('孔中心已經標記過了（油性筆擦不掉）');B.holeMark=H.holeY+gauss()*.015;log('奇異筆標記孔中心');renderAll();}
+function markLevel(){
+ const B=S.bottle,yL=volOf(B)/BOT_A;if(yL<.3)return msg3('瓶中沒有液體');
+ B.nMark++;B.marks.push({y:yL+gauss()*.012,n:B.nMark});
+ log(`在液面處畫第 ${B.nMark} 條線（燒杯 #${B.src+1}${B.flowing?'，孔口仍在出水':''}）`);renderAll();
+}
+function add3(){
+ const r0=parseFloat($('f3r0').value),r1=parseFloat($('f3r1').value),T=parseFloat($('f3T').value);
+ if(!isFinite(r0)||!isFinite(r1))return msg('msg3b','請填入孔中心與液面線的直尺讀數');
+ S.rows3.push({b:+$('f3b').value,m:$('f3m').value,r0,r1,T:isFinite(T)?T:null});$('f3r1').value='';buildTbl3();
+}
+function del3(i){S.rows3.splice(i,1);buildTbl3();}
+function buildTbl3(){
+ let s='<tr><th>#</th><th>燒杯</th><th>方法</th><th>孔中心讀數 (cm)</th><th>液面線讀數 (cm)</th><th>高度差 h (cm)</th><th>溫度 (°C)</th><th></th></tr>';
+ S.rows3.forEach((r,i)=>{s+=`<tr><td>${i+1}</td><td>#${r.b+1}</td><td>${r.m}</td><td>${r.r0.toFixed(2)}</td><td>${r.r1.toFixed(2)}</td><td><b>${(r.r1-r.r0).toFixed(2)}</b></td><td>${r.T??''}</td><td><button class="btn alt" onclick="del3(${i})">刪除</button></td></tr>`;});
+ if(!S.rows3.length)s+='<tr><td colspan="8" class="muted">尚無紀錄</td></tr>';
+ $('tbl3').innerHTML=s;
+ const g={};S.rows3.forEach(r=>{const key=r.b+'|'+r.m;(g[key]=g[key]||[]).push(r.r1-r.r0);});
+ let t='<tr><th>燒杯</th><th>方法</th><th>次數</th><th>平均 h (cm)</th><th>標準差 (cm)</th></tr>';
+ Object.keys(g).sort().forEach(key=>{const [b,m]=key.split('|'),a=g[key],n=a.length,mu=a.reduce((p,c)=>p+c,0)/n,sd=n>1?Math.sqrt(a.reduce((p,c)=>p+(c-mu)**2,0)/(n-1)):NaN;
+  t+=`<tr><td>#${+b+1}</td><td>${m}</td><td>${n}</td><td>${mu.toFixed(3)}</td><td>${isFinite(sd)?sd.toFixed(3):'—'}</td></tr>`;});
+ if(!Object.keys(g).length)t+='<tr><td colspan="5" class="muted">尚無紀錄</td></tr>';
+ $('sum3').innerHTML=t;
+}
+function live3(){
+ $('scene').innerHTML=sceneSVG();stat3();
+}
+let lastSlow=0;
+function slow3(){
+ const box=$('rulerBox'),st=box.scrollTop;box.innerHTML=rulerSVG();box.scrollTop=st;
+ const B=S.bottle;
+ $('thZoom3').innerHTML=volOf(B)>20?thermoSVG(B.T,'瓶中溶液'):'<p class="muted">瓶中液體太少，溫度計碰不到液體。</p>';
+ $('syrInfo').textContent=`注射筒內約 ${(Math.round(volOf(S.syr)*2)/2).toFixed(1)} mL`+(volOf(S.syr)>.2?`（燒杯 #${S.syr.src+1}）`:'');
+}
+function render3(){
+ const opts=[0,1,2,3,4,5].map(i=>`<option value="${i}">燒杯 #${i+1}</option>`).join('');
+ $('bSel3').innerHTML=opts;$('bSel3').value=S.sel;
+ if(!$('f3b').options.length)$('f3b').innerHTML=opts;
+ if(S.bottle.src!=null&&S.bottle.src!==render3.lastSrc){$('f3b').value=S.bottle.src;render3.lastSrc=S.bottle.src;}
+ live3();slow3();
+}
+
+/* ======================= ④ 數據與作圖 ======================= */
+const METHODS=['放水停止法','加水起漏法'];
+const MCOL={'放水停止法':'#1f6fd1','加水起漏法':'#c0392b'};
+const isNum=x=>typeof x==='number'&&isFinite(x);
+const fmt=(x,d)=>isNum(x)?x.toFixed(d):'—';
+function rhoMeas(i){const r=S.rows2[i];return (isNum(r.m1)&&isNum(r.m2)&&isNum(r.vs)&&r.vs>0)?(r.m2-r.m1)/r.vs:null;}
+function concMeas(i){const r=S.rows2[i];return (isNum(r.ms)&&isNum(r.vw)&&r.vw>0)?r.ms/r.vw*100:null;}
+function rhoUse(i){return S.an.rhoSrc==='one'?1:rhoMeas(i);}
+function drhoOf(i){ // 量測密度的不確定度（g/cm³）
+ if(S.an.rhoSrc==='one')return null;const r=S.rows2[i],rho=rhoMeas(i);if(rho==null)return null;
+ const dM=Math.SQRT2*.1/Math.sqrt(3), M=r.m2-r.m1;
+ return rho*Math.sqrt((S.an.dV/r.vs)**2+(dM/M)**2);
+}
+function stats(a){const n=a.length,mu=a.reduce((p,c)=>p+c,0)/n,sd=n>1?Math.sqrt(a.reduce((p,c)=>p+(c-mu)**2,0)/(n-1)):0;return {n,mu,sd,sem:n>1?sd/Math.sqrt(n):0};}
+function groupData(method){
+ const out=[];
+ for(let i=0;i<6;i++){
+  const rs=S.rows3.filter(r=>r.b===i&&r.m===method);if(!rs.length)continue;
+  const st=stats(rs.map(r=>r.r1-r.r0)),Ts=rs.map(r=>r.T).filter(isNum);
+  const Tc=Ts.length?Ts.reduce((p,c)=>p+c,0)/Ts.length:null;
+  const c=concMeas(i),rho=rhoUse(i),a=S.an.a;
+  const TN=rho!=null?rho*G*st.mu*a/2:null;
+  const eT=rho!=null?rho*G*st.sem*a/2:null;
+  // 完整誤差傳播（⑤）
+  const dh=Math.sqrt(st.sem**2+S.an.dh**2/st.n), drho=drhoOf(i);
+  const fr=drho!=null?drho/rho:0, fh=dh/st.mu, fa=S.an.da/a, ftot=Math.sqrt(fr*fr+fh*fh+fa*fa);
+  out.push({i,m:method,c,rho,h:st,Tc,Tg:rho!=null?rho*st.mu*a/2:null,TN,eT,dh,fr,fh,fa,ftot,dTN:TN!=null?TN*ftot:null});
+ }
+ return out;
+}
+function linreg(p){
+ const n=p.length;if(n<2)return null;
+ let mx=0,my=0;p.forEach(q=>{mx+=q.x/n;my+=q.y/n;});
+ let sxx=0,sxy=0,syy=0;p.forEach(q=>{sxx+=(q.x-mx)**2;sxy+=(q.x-mx)*(q.y-my);syy+=(q.y-my)**2;});
+ if(sxx<=0)return null;
+ const m=sxy/sxx,b=my-m*mx;let sse=0;p.forEach(q=>{sse+=(q.y-m*q.x-b)**2;});
+ const s2=n>2?sse/(n-2):NaN;
+ return {m,b,sm:Math.sqrt(s2/sxx),sb:Math.sqrt(s2*(1/n+mx*mx/sxx)),r2:syy>0?1-sse/syy:1,n};
+}
+function niceStep(span,n){const raw=span/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return (f<1.5?1:f<3?2:f<7?5:10)*p;}
+let plotUid=0;
+function plotSVG(o){
+ const nL=o.series.length>1?o.series.length:0,W=540,Hh=330+nL*18,L=66,R=16,T=16,B=48+nL*18;
+ const xs=[],ys=[];
+ o.series.forEach(s=>s.pts.forEach(q=>{xs.push(q.x);ys.push(q.y-(q.ey||0),q.y+(q.ey||0));}));
+ if(!xs.length)return '<p class="muted">資料不足，無法作圖。</p>';
+ let xlo=Math.min(0,...xs),xhi=Math.max(...xs);if(xhi<=xlo)xhi=xlo+1;
+ let ylo=Math.min(...ys),yhi=Math.max(...ys);
+ if(o.ylo!=null)ylo=Math.min(ylo,o.ylo);if(o.yhi!=null)yhi=Math.max(yhi,o.yhi);
+ const pd=(yhi-ylo)*.12||Math.abs(yhi)*.03||1;ylo-=pd;yhi+=pd;
+ const sx=niceStep(xhi-xlo,6),sy=niceStep(yhi-ylo,6);
+ xlo=Math.floor(xlo/sx)*sx;xhi=Math.ceil(xhi/sx)*sx;ylo=Math.floor(ylo/sy)*sy;yhi=Math.ceil(yhi/sy)*sy;
+ const X=x=>L+(x-xlo)/(xhi-xlo)*(W-L-R),Y=y=>T+(yhi-y)/(yhi-ylo)*(Hh-T-B);
+ const dx=Math.max(0,-Math.floor(Math.log10(sx)+1e-9)),dy=Math.max(0,-Math.floor(Math.log10(sy)+1e-9));
+ const id='clp'+(++plotUid);
+ let s=`<svg viewBox="0 0 ${W} ${Hh}" width="100%" style="max-width:${W}px"><defs><clipPath id="${id}"><rect x="${L}" y="${T}" width="${W-L-R}" height="${Hh-T-B}"/></clipPath></defs>`;
+ for(let v=xlo;v<=xhi+sx*1e-6;v+=sx)s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${Hh-B}" stroke="#eef1f4"/><text x="${X(v)}" y="${Hh-B+16}" text-anchor="middle" font-size="11" fill="#5d6b7a">${v.toFixed(dx)}</text>`;
+ for(let v=ylo;v<=yhi+sy*1e-6;v+=sy)s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eef1f4"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="#5d6b7a">${v.toFixed(dy)}</text>`;
+ s+=`<line x1="${L}" x2="${L}" y1="${T}" y2="${Hh-B}" stroke="#8a99a8"/><line x1="${L}" x2="${W-R}" y1="${Hh-B}" y2="${Hh-B}" stroke="#8a99a8"/>`;
+ s+=`<text x="${(L+W-R)/2}" y="${Hh-B+34}" text-anchor="middle" font-size="12">${o.xl}</text><text transform="translate(15 ${(T+Hh-B)/2}) rotate(-90)" text-anchor="middle" font-size="12">${o.yl}</text>`;
+ o.series.forEach(sr=>{
+  if(sr.fit)s+=`<line clip-path="url(#${id})" x1="${X(xlo)}" y1="${Y(sr.fit.m*xlo+sr.fit.b)}" x2="${X(xhi)}" y2="${Y(sr.fit.m*xhi+sr.fit.b)}" stroke="${sr.color}" stroke-width="1.6" ${sr.dash?`stroke-dasharray="${sr.dash}"`:''}/>`;
+  sr.pts.forEach(q=>{
+   if(q.ey)s+=`<line x1="${X(q.x)}" x2="${X(q.x)}" y1="${Y(q.y-q.ey)}" y2="${Y(q.y+q.ey)}" stroke="${sr.color}" stroke-width="1.3"/><line x1="${X(q.x)-4}" x2="${X(q.x)+4}" y1="${Y(q.y-q.ey)}" y2="${Y(q.y-q.ey)}" stroke="${sr.color}"/><line x1="${X(q.x)-4}" x2="${X(q.x)+4}" y1="${Y(q.y+q.ey)}" y2="${Y(q.y+q.ey)}" stroke="${sr.color}"/>`;
+   s+=sr.shape==='sq'?`<rect x="${X(q.x)-4.5}" y="${Y(q.y)-4.5}" width="9" height="9" fill="${sr.color}" stroke="#fff"/>`
+    :sr.shape==='tri'?`<path d="M${X(q.x)} ${Y(q.y)-6}L${X(q.x)+5.5} ${Y(q.y)+4}L${X(q.x)-5.5} ${Y(q.y)+4}Z" fill="${sr.color}" stroke="#fff"/>`
+    :`<circle cx="${X(q.x)}" cy="${Y(q.y)}" r="4.8" fill="${sr.color}" stroke="#fff"/>`;
+  });
+ });
+ if(nL)o.series.forEach((sr,k)=>{const yy=Hh-B+46+k*18;s+=`<rect x="${L}" y="${yy}" width="11" height="11" fill="${sr.color}"/><text x="${L+16}" y="${yy+10}" font-size="12">${sr.name}</text>`;});
+ return s+'</svg>';
+}
+const shapeOf=m=>m==='加水起漏法'?'sq':'';
+function mPerC(){return 10/(MN*rhoW(20));}  // c (g/100 mL 水) → 重量莫耳濃度 (mol/kg) 的比例
+function analyse(){
+ const ms=S.an.method==='both'?METHODS:[S.an.method],res={};
+ ms.forEach(m=>{
+  const g=groupData(m);
+  const ph=g.filter(d=>d.c!=null).map(d=>({x:d.c,y:d.h.mu,ey:d.h.sem}));
+  const pt=g.filter(d=>d.c!=null&&d.TN!=null).map(d=>({x:d.c,y:d.TN,ey:d.eT}));
+  res[m]={g,ph,pt,fh:linreg(ph),ft:linreg(pt)};
+ });
+ return res;
+}
+function syncInputs(){
+ const a=S.an;
+ [['anA','a'],['erA','da'],['erV','dV'],['erH','dh']].forEach(([id,k])=>{if(document.activeElement!==$(id))$(id).value=a[k];});
+ $('anM').value=a.method;$('anR').value=a.rhoSrc;
+}
+function fitLines(f,unit,dec,extra){
+ if(!f)return '<span>迴歸</span><span class="muted">至少需要 2 種濃度</span>';
+ const sig=isNum(f.sm)&&f.sm>0?Math.abs(f.m)/f.sm:NaN;
+ return `<span>斜率</span><span>${f.m.toFixed(dec+2)} ${isNum(f.sm)?'± '+f.sm.toFixed(dec+2):''} ${unit}</span>
+ <span>截距</span><span>${f.b.toFixed(dec)} ${isNum(f.sb)?'± '+f.sb.toFixed(dec):''}</span>
+ <span>R²</span><span>${f.r2.toFixed(4)}（n = ${f.n}）</span>
+ <span>斜率 ÷ 標準誤</span><span>${isNum(sig)?sig.toFixed(1)+(sig>=2?'（顯著不為零）':'（不顯著）'):'—（n ≥ 3 才能估計）'}</span>${extra||''}`;
+}
+function render4(){
+ syncInputs();
+ const res=analyse();
+ let t='<tr><th>方法</th><th>燒杯</th><th>濃度 c<br>(g/100 mL 水)</th><th>ρ<br>(g/cm³)</th><th>n</th><th>h̄ (cm)</th><th>SEM (cm)</th><th>溫度<br>(°C)</th><th>T<br>(gw/cm)</th><th>T<br>(mN/m)</th><th>T / T₀</th></tr>';
+ let any=false;
+ for(const m in res){const r=res[m],T0=r.ft?r.ft.b:null;
+  r.g.forEach(d=>{any=true;t+=`<tr><td>${m}</td><td>#${d.i+1}</td><td>${d.c!=null?d.c.toFixed(2):'<span style="color:#b8460b">② 缺資料</span>'}</td><td>${d.rho!=null?d.rho.toFixed(4):'<span style="color:#b8460b">② 缺資料</span>'}</td><td>${d.h.n}</td><td>${d.h.mu.toFixed(3)}</td><td>${d.h.n>1?d.h.sem.toFixed(3):'—'}</td><td>${fmt(d.Tc,1)}</td><td>${fmt(d.Tg,4)}</td><td>${fmt(d.TN,1)}</td><td>${d.TN!=null&&T0?(d.TN/T0).toFixed(3):'—'}</td></tr>`;});}
+ if(!any)t+='<tr><td colspan="11" class="muted">③ 尚無這個方法的紀錄</td></tr>';
+ $('tbl4').innerHTML=t;
+ const sH=[],sT=[];let fH='',fT='';
+ for(const m in res){const r=res[m];
+  sH.push({name:m,color:MCOL[m],pts:r.ph,fit:r.fh,shape:shapeOf(m)});
+  sT.push({name:m,color:MCOL[m],pts:r.pt,fit:r.ft,shape:shapeOf(m)});
+  const hdr=Object.keys(res).length>1?`<span style="grid-column:1/3;color:${MCOL[m]};font-weight:600;margin-top:6px">${m}</span>`:'';
+  fH+=hdr+fitLines(r.fh,'cm／(g/100 mL)',3);
+  const ex=r.ft?`<span>換算</span><span>${(r.ft.m/mPerC()).toFixed(2)} mN/m 每 mol/kg</span><span>相對斜率</span><span>${(r.ft.m/r.ft.b*100).toFixed(3)} % 每 (g/100 mL)</span>`:'';
+  fT+=hdr+fitLines(r.ft,'mN/m／(g/100 mL)',2,ex);
+ }
+ $('plotH').innerHTML=plotSVG({series:sH,xl:'c（g／100 mL 水）',yl:'h̄（cm）'});
+ $('plotT').innerHTML=plotSVG({series:sT,xl:'c（g／100 mL 水）',yl:'T（mN/m）'});
+ $('fitH').innerHTML=fH;$('fitT').innerHTML=fT;
+ let c='';
+ for(const m in res){const r=res[m];if(!r.fh||!r.ft)continue;
+  const sig=isNum(r.ft.sm)&&r.ft.sm>0?Math.abs(r.ft.m)/r.ft.sm:NaN;
+  if(r.fh.m<0&&r.ft.m>0)c+=`<div class="warnbox"><b>${m}：h 隨濃度下降，T 卻隨濃度上升。</b>只看 h 會得到「食鹽使表面張力變小」的相反結論；h 下降是因為密度 ρ 增加得比 T 更多。</div>`;
+  c+=`<div class="note"><b>${m}：</b>T 對 c 的斜率為 ${r.ft.m.toFixed(3)}${isNum(r.ft.sm)?' ± '+r.ft.sm.toFixed(3):''} mN/m 每 (g/100 mL 水)。${isNum(sig)?(sig>=2?`斜率是標準誤的 ${sig.toFixed(1)} 倍，可以判定食鹽使表面張力<b>${r.ft.m>0?'變大':'變小'}</b>。`:`斜率只有標準誤的 ${sig.toFixed(1)} 倍，在誤差範圍內<b>無法判定</b>食鹽的影響，請增加重複次數或擴大濃度範圍。`):'需要至少 3 種濃度才能判斷斜率是否顯著。'}</div>`;
+ }
+ if(S.an.rhoSrc==='one')c+=`<div class="warnbox">目前把所有溶液的密度都當作 1.000 g/cm³。請切換回「自己量測的 ρ」，比較結論有什麼不同。</div>`;
+ $('concl4').innerHTML=c||'<p class="muted">至少需要 2 種濃度（② 與 ③ 都有資料）才能做迴歸。建議至少 4–5 種濃度，每種重複 3–5 次。</p>';
+}
+
+/* ======================= ⑤ 誤差討論 ======================= */
+function bar(fr,fh,fa){
+ const t=fr*fr+fh*fh+fa*fa||1,w=160;
+ return `<svg width="${w}" height="14"><rect x="0" y="2" width="${w*fr*fr/t}" height="10" fill="#0e8a64"/><rect x="${w*fr*fr/t}" y="2" width="${w*fh*fh/t}" height="10" fill="#1f6fd1"/><rect x="${w*(fr*fr+fh*fh)/t}" y="2" width="${w*fa*fa/t}" height="10" fill="#e08a1e"/></svg>`;
+}
+function render5(){
+ syncInputs();
+ const res=analyse();
+ let t='<tr><th>方法</th><th>燒杯</th><th>δρ/ρ</th><th>δh/h</th><th>δa/a</th><th>δT/T</th><th>T ± δT (mN/m)</th><th><span style="color:#0e8a64">■ρ</span> <span style="color:#1f6fd1">■h</span> <span style="color:#e08a1e">■a</span> 貢獻</th></tr>';
+ let any=false,maxA=1;
+ for(const m in res)res[m].g.forEach(d=>{if(d.TN==null)return;any=true;maxA=Math.min(maxA,d.fa*d.fa/(d.ftot*d.ftot));
+  t+=`<tr><td>${m}</td><td>#${d.i+1}</td><td>${(d.fr*100).toFixed(2)} %</td><td>${(d.fh*100).toFixed(2)} %</td><td>${(d.fa*100).toFixed(1)} %</td><td><b>${(d.ftot*100).toFixed(1)} %</b></td><td>${d.TN.toFixed(1)} ± ${d.dTN.toFixed(1)}</td><td>${bar(d.fr,d.fh,d.fa)}</td></tr>`;});
+ if(!any)t+='<tr><td colspan="8" class="muted">需要 ② 的密度與 ③ 的 h 紀錄</td></tr>';
+ $('tbl5').innerHTML=t;
+ $('note5a').innerHTML=any?`<div class="note">孔半徑的相對誤差 δa/a 占 (δT/T)² 的 ${Math.floor(maxA*100)} % 以上，是 T <b>絕對值</b>的最大誤差來源。但 a 對所有燒杯都相同，是<b>系統誤差</b>：它讓每個 T 同比例放大或縮小，不影響 T/T₀，也不影響斜率的正負。所以判斷「食鹽的影響」時，應看 ④ 的斜率與它的標準誤（隨機誤差），而不是 T 的絕對值。</div>`:'';
+ // B 溫度
+ let temps=[];for(const m in res)res[m].g.forEach(d=>{if(d.Tc!=null)temps.push({m,i:d.i,T:d.Tc});});
+ let tb='';
+ if(temps.length<2)tb='<p class="muted">③ 的紀錄中至少要有 2 組溫度。</p>';
+ else{const lo=Math.min(...temps.map(x=>x.T)),hi=Math.max(...temps.map(x=>x.T)),dT=hi-lo,eff=.15*dT;
+  tb=`<div class="kv"><span>溫度範圍</span><span>${lo.toFixed(1)} – ${hi.toFixed(1)} °C（差 ${dT.toFixed(1)} °C）</span><span>對應的 T 變化</span><span>約 ${eff.toFixed(2)} mN/m（純水約 −0.15 mN/m/°C）</span>`;
+  const f=Object.values(res).map(r=>r.ft).find(x=>x);
+  if(f){const cs=Object.values(res)[0].pt.map(q=>q.x),span=f.m*(Math.max(...cs)-Math.min(...cs));
+   tb+=`<span>濃度造成的 T 變化</span><span>約 ${span.toFixed(2)} mN/m（由 ④ 的斜率）</span><span>溫度效應 ÷ 濃度效應</span><span><b>${span!==0?Math.abs(eff/span*100).toFixed(0):'—'} %</b></span>`;}
+  tb+='</div><p class="muted">若溫度效應超過濃度效應的 10–20 %，應讓各溶液靜置到室溫再量，或把溫度列入修正。食鹽溶解吸熱，剛配好的溶液溫度較低，表面張力會略偏大。</p>';}
+ $('temp5').innerHTML=tb;
+ // C 乾濕
+ const gr=groupData('放水停止法'),ga=groupData('加水起漏法');
+ let hy='';const pairs=gr.map(r=>({r,a:ga.find(x=>x.i===r.i)})).filter(p=>p.a);
+ if(!pairs.length)hy='<p class="muted">同一個燒杯要用兩種方法都量過，才能比較。</p>';
+ else{hy='<table><tr><th>燒杯</th><th>h̄ 放水停止</th><th>h̄ 加水起漏</th><th>比值</th></tr>';
+  pairs.forEach(p=>{hy+=`<tr><td>#${p.r.i+1}</td><td>${p.r.h.mu.toFixed(3)}</td><td>${p.a.h.mu.toFixed(3)}</td><td><b>${(p.a.h.mu/p.r.h.mu).toFixed(3)}</b></td></tr>`;});
+  const ratio=pairs.reduce((s,p)=>s+p.a.h.mu/p.r.h.mu,0)/pairs.length;
+  hy+=`</table><p>加水起漏法的 h 約為放水停止法的 <b>${ratio.toFixed(2)}</b> 倍。T 相同時，h ∝ 1/a<sub>有效</sub>，所以孔緣濕潤時的有效半徑約為乾燥時的 ${ratio.toFixed(2)} 倍。若乾孔緣的有效半徑就是孔半徑 ${S.an.a.toFixed(3)} cm，濕孔緣約為 ${(S.an.a*ratio).toFixed(3)} cm。</p>
+  <p class="muted">這就是「接觸角遲滯」：孔緣乾燥時，液面被孔的邊緣固定住；孔緣一旦沾濕，液面就能擴張到孔外，較低的高度就撐不住。放水停止法量到的是「濕孔緣」的臨界高度。</p>`;}
+ $('hyst5').innerHTML=hy;
+}
+
+/* ======================= ⑥ 真值揭曉 ======================= */
+function reveal(){if(!confirm('揭曉後隱藏參數就會公開，確定嗎？'))return;S.revealed=true;render6();}
+function trueState(i){ // 燒杯 i 目前溶液（燒杯空了就找瓶子、臉盆、注射筒）
+ const cand=[S.beakers[i]];[S.bottle,S.basin,S.syr].forEach(c=>{if(c.src===i)cand.push(c);});
+ return cand.reduce((a,b)=>mass(b)>mass(a)?b:a);
+}
+function render6(){
+ renderEx();
+ $('pre6').style.display=S.revealed?'none':'';$('post6').style.display=S.revealed?'':'none';
+ if(!S.revealed)return;
+ const g20=72.75-H.gOff, kTrue=1.64*10/(MN*rhoW(H.roomT));
+ $('hid6').innerHTML=`<span>孔緣乾燥時有效半徑 a<sub>乾</sub></span><span><b>${(H.rDry*10).toFixed(3)} mm</b>（題目標示「約 0.5 mm」）</span>
+ <span>孔緣濕潤時有效半徑 a<sub>濕</sub></span><span><b>${(H.rWet*10).toFixed(3)} mm</b>（a<sub>濕</sub>／a<sub>乾</sub> = ${(H.rWet/H.rDry).toFixed(3)}）</span>
+ <span>純水表面張力（20 °C）</span><span>${g20.toFixed(2)} mN/m（這批 RO 水略低於文獻 72.75）</span>
+ <span>溫度係數</span><span>−0.151 mN/m/°C</span>
+ <span>食鹽效應</span><span>+1.64 mN/m 每 mol/kg（= ${kTrue.toFixed(3)} mN/m 每 g/100 mL 水）</span>
+ <span>室溫</span><span>${H.roomT.toFixed(2)} °C</span>
+ <span>溫度計零點誤差</span><span>${H.thOff>=0?'+':''}${H.thOff.toFixed(2)} °C（讀數 − 真實值）</span>
+ <span>電子秤比例誤差</span><span>${((H.cal-1)*100).toFixed(2)} %</span>
+ <span>量筒刻度誤差</span><span>${((H.cylScale-1)*100).toFixed(2)} %（讀數偏${H.cylScale>1?'大':'小'}）</span>
+ <span>空量筒質量</span><span>${H.cylMass.toFixed(1)} g</span>`;
+ const P=S.predict;
+ $('pred6').innerHTML=`<p>你的預測：<b>${P||'（未作答）'}</b>　正確答案：<b style="color:#0e8a64">變大</b> ${P==='變大'?'✔':''}</p>
+ <p>食鹽的 Na⁺、Cl⁻ 在水中被水分子包圍（水合），傾向留在溶液內部，表面層的離子濃度比內部低（負吸附）。依 Gibbs 吸附式，負吸附的溶質會使表面張力<b>上升</b>，約每 1 mol/kg 增加 1.6–1.8 mN/m。肥皂、酒精等會聚集在表面的溶質（正吸附）則使表面張力下降。</p>`;
+ const res={};METHODS.forEach(m=>{res[m]=groupData(m);});
+ let t='<tr><th>方法</th><th>燒杯</th><th>c 你的／真值</th><th>ρ 你的／真值</th><th>真實溫度 (°C)</th><th>T 你的 ± δT (mN/m)</th><th>T 真值 (mN/m)</th><th>z</th><th>修正後 T (mN/m)</th></tr>',any=false;
+ METHODS.forEach(m=>res[m].forEach(d=>{
+  const st=trueState(d.i),tT=d.Tc!=null?d.Tc-H.thOff:H.roomT,c={mw:st.mw,ms:st.ms,T:tT};
+  const gT=gammaOf(c),rT=rhoOf(c),cT=st.mw>0?100*st.ms/(st.mw/rhoW(H.roomT)):0;
+  const aT=m==='加水起漏法'?H.rDry:H.rWet,Tfix=rT*G*d.h.mu*aT/2;
+  const z=d.TN!=null&&d.dTN>0?(d.TN-gT)/d.dTN:NaN;any=true;
+  t+=`<tr><td>${m}</td><td>#${d.i+1}</td><td>${fmt(d.c,2)}／${cT.toFixed(2)}</td><td>${fmt(d.rho,4)}／${rT.toFixed(4)}</td><td>${tT.toFixed(1)}</td><td>${d.TN!=null?d.TN.toFixed(1)+' ± '+d.dTN.toFixed(1):'—'}</td><td><b>${gT.toFixed(2)}</b></td><td style="color:${Math.abs(z)<=2?'#0e8a64':'#b8460b'}">${fmt(z,2)}</td><td>${Tfix.toFixed(2)}</td></tr>`;
+ }));
+ if(!any)t+='<tr><td colspan="9" class="muted">③ 尚無紀錄</td></tr>';
+ $('cmp6').innerHTML=t;
+ let sl='<table><tr><th>方法</th><th>你的斜率 (mN/m 每 g/100 mL)</th><th>真值</th><th>z</th><th>你的相對斜率 (%)</th><th>真值 (%)</th></tr>';
+ const saved=S.an.method;let has=false;
+ METHODS.forEach(m=>{S.an.method=m;const r=analyse()[m];if(!r.ft)return;has=true;
+  const z=isNum(r.ft.sm)&&r.ft.sm>0?(r.ft.m-kTrue)/r.ft.sm:NaN,gw=g20-.1514*(H.roomT-20);
+  sl+=`<tr><td>${m}</td><td>${r.ft.m.toFixed(3)} ${isNum(r.ft.sm)?'± '+r.ft.sm.toFixed(3):''}</td><td>${kTrue.toFixed(3)}</td><td style="color:${Math.abs(z)<=2?'#0e8a64':'#b8460b'}">${fmt(z,2)}</td><td>${(r.ft.m/r.ft.b*100).toFixed(3)}</td><td>${(kTrue/gw*100).toFixed(3)}</td></tr>`;});
+ S.an.method=saved;
+ sl+='</table><p class="muted">斜率受孔半徑影響（同比例縮放），相對斜率（斜率 ÷ 截距 T₀）則與 a 無關。若你的斜率 z 偏大、相對斜率卻相符，差異主要來自 a 的系統誤差。</p>';
+ $('slope6').innerHTML=has?sl:'<p class="muted">需要 ④ 能做出迴歸（至少 2 種濃度）。</p>';
+}
+const EX={m:[0,100,200,300,400],h:[2.14,2.06,2.04,1.96,1.88],rho:[1,1.005,1.015,1.03,1.05]};
+function renderEx(){
+ const Tk=25,mw=1500*rhoW(Tk),a=.05,gL=72.75-.1514*(Tk-20);
+ const rows=EX.m.map((m,k)=>{const w=m/(mw+m),rho=rhoSol(w,Tk),c=100*m/1500,mol=(m/MN)/(mw/1000);
+  return {m,c,h:EX.h[k],re:EX.rho[k],rho,Te:EX.rho[k]*EX.h[k]*a/2,Tc:rho*EX.h[k]*a/2,lit:gL+1.64*mol};});
+ const aEff=2*rows[0].lit/(rows[0].rho*G*rows[0].h);
+ let t='<tr><th>加食鹽 (g)</th><th>c (g/100 mL 水)</th><th>h̄ (cm)</th><th>範例 ρ</th><th>範例 T (gw/cm)</th><th>正確 ρ (25 °C)</th><th>重算 T (gw/cm)</th><th>重算 T (mN/m)</th><th>以 a<sub>有效</sub> 校正 (mN/m)</th><th>文獻值 (mN/m)</th></tr>';
+ rows.forEach(r=>{t+=`<tr><td>${r.m}</td><td>${r.c.toFixed(2)}</td><td>${r.h.toFixed(2)}</td><td>${r.re.toFixed(3)}</td><td>${r.Te.toFixed(4)}</td><td><b>${r.rho.toFixed(4)}</b></td><td><b>${r.Tc.toFixed(4)}</b></td><td>${(r.Tc*G).toFixed(1)}</td><td>${(r.rho*G*r.h*aEff/2).toFixed(1)}</td><td>${r.lit.toFixed(1)}</td></tr>`;});
+ $('ex6').innerHTML=t;
+ const pe=rows.map(r=>({x:r.c,y:r.Te*G})),pc=rows.map(r=>({x:r.c,y:r.Tc*G})),pk=rows.map(r=>({x:r.c,y:r.rho*G*r.h*aEff/2})),pl=rows.map(r=>({x:r.c,y:r.lit}));
+ const fe=linreg(pe),fc=linreg(pc),fk=linreg(pk),fl=linreg(pl);
+ $('exPlot').innerHTML=plotSVG({series:[
+  {name:'範例（錯誤密度）',color:'#8a99a8',pts:pe,fit:fe,shape:'tri',dash:'5 3'},
+  {name:'正確密度重算（a = 0.050 cm）',color:'#1f6fd1',pts:pc,fit:fc},
+  {name:'以純水校正 a（a = '+aEff.toFixed(4)+' cm）',color:'#0e8a64',pts:pk,fit:fk,shape:'sq'},
+  {name:'文獻值（25 °C）',color:'#c0392b',pts:pl,fit:fl,shape:'tri'}],xl:'c（g／100 mL 水）',yl:'T（mN/m）'});
+ const se=v=>isNum(v)?' ± '+v.toFixed(3):'';
+ $('exNote').innerHTML=`<div class="kv">
+ <span>範例斜率</span><span>${fe.m.toFixed(3)}${se(fe.sm)} mN/m 每 (g/100 mL)</span>
+ <span>正確密度重算</span><span>${fc.m.toFixed(3)}${se(fc.sm)}</span>
+ <span>以 a<sub>有效</sub> 校正</span><span>${fk.m.toFixed(3)}${se(fk.sm)}</span>
+ <span>文獻值</span><span>${fl.m.toFixed(3)}</span></div>
+ <div class="warnbox" style="margin-top:10px"><b>範例的結論要修正。</b>範例的密度欄低估了食鹽水的密度（400 g 時用 1.05，實際約 ${rows[4].rho.toFixed(3)}），所以把「h 下降」誤判為「T 下降」。用正確密度重算後，斜率只有標準誤的 ${(Math.abs(fc.m)/fc.sm).toFixed(1)} 倍，在誤差範圍內<b>看不出 T 有變化</b>，並不支持「T 下降」。</div>
+ <div class="note"><b>範例的 h 下降得比預期多。</b>文獻上 T 在 0–400 g 之間增加約 ${((rows[4].lit/rows[0].lit-1)*100).toFixed(1)} %，密度增加約 ${((rows[4].rho/rows[0].rho-1)*100).toFixed(1)} %，所以 h ∝ T/ρ 應只下降約 ${((1-(rows[4].lit/rows[0].lit)/(rows[4].rho/rows[0].rho))*100).toFixed(1)} %；範例的 h 卻下降了 ${((1-rows[4].h/rows[0].h)*100).toFixed(1)} %。多出來的部分可能來自：孔緣殘留鹽結晶、使孔緣更易濕潤而加大有效半徑；各濃度量測時的溫度不同；h 只讀到 0.1 cm。這些都無法從範例數據中分辨。</div>
+ <div class="note"><b>絕對值偏低的原因：</b>用 a = 0.050 cm 算出純水的 T 只有 ${(rows[0].Tc*G).toFixed(1)} mN/m，比文獻值 ${rows[0].lit.toFixed(1)} mN/m 低約 ${((1-rows[0].Tc*G/rows[0].lit)*100).toFixed(0)} %。若以純水的文獻值反推，有效半徑約 ${(aEff*10).toFixed(2)} mm，比標示的 0.5 mm 大，符合「放水停止時孔緣已濕、液面擴張到孔外」的情形。</div>
+ <p class="muted">範例每種濃度只量 5 次，而且 h 只讀到 0.1 cm，單點的隨機誤差約 ±0.05 cm（2–3 %），和整個濃度範圍的效應差不多大，所以重算後的斜率不確定度仍然不小。</p>`;
+}
+
+/* ======================= 主迴圈 ======================= */
+function renderAll(){
+ $('clk').textContent=fmtT(S.t);
+ if(curTab===1)drawP1();
+ if(curTab===2)render2();
+ if(curTab===3)render3();
+ if(curTab===4)render4();
+ if(curTab===5)render5();
+ if(curTab===6)render6();
+}
+function build(){
+ $('p1bottle').innerHTML=p1BottleSVG();renderPred();buildTbl2();buildTbl3();
+ $('f3b').innerHTML='';$('log3').innerHTML='';buildNav();
+}
+[['anA','a'],['erA','da'],['erV','dV'],['erH','dh']].forEach(([id,k])=>$(id).addEventListener('input',e=>{const v=parseFloat(e.target.value);if(isNum(v)&&v>=0&&(k!=='a'||v>0)){S.an[k]=v;renderAll();}}));
+$('anM').addEventListener('change',e=>{S.an.method=e.target.value;renderAll();});
+$('anR').addEventListener('change',e=>{S.an.rhoSrc=e.target.value;renderAll();});
+let last=performance.now(),acc=0,accSlow=0,accBench=0;
+function frame(now){
+ const real=Math.min(.1,(now-last)/1000);last=now;
+ advance(real*S.speed);
+ acc+=real;accSlow+=real;accBench+=real;
+ if(acc>1/30){acc=0;$('clk').textContent=fmtT(S.t);
+  if(curTab===1&&+$('p1h').value>2*(+$('p1t').value)/(G*(+$('p1a').value/10)))drawP1();
+  if(curTab===2){updLCD();if(accSlow>.3){accSlow=0;live2();const c=cylSVG();$('cylZoomA').innerHTML=c;$('cylZoomD').innerHTML=c;}if(accBench>1.5){accBench=0;$('bench').innerHTML=benchSVG();}}
+  if(curTab===3){live3();if(accSlow>.15){accSlow=0;slow3();}}
+ }
+ requestAnimationFrame(frame);
+}
+['p1h','p1a','p1t'].forEach(id=>$(id).addEventListener('input',drawP1));
+init();build();showTab(1);requestAnimationFrame(frame);
+</script>
+</body>
+</html>
