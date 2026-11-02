@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>開管 vs 閉管 · 駐波比較</title>
+<style>
+  :root{
+    --shell:#0b1220; --panel:#101a2c; --panel-2:#0a1322; --ink:#e9f0fa;
+    --muted:#8ea0bd; --faint:#5b6c8a; --teal:#37e3c4; --teal-dim:#1d8a78;
+    --hot:#ff5d6c; --cold:#4aa3ff; --grid:#1d2942; --line:#22324f;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:radial-gradient(1200px 600px at 50% -10%,#13203a 0%,transparent 60%),var(--shell);
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5;min-height:100vh;}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px 18px 40px;}
+
+  header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 22px;margin-bottom:14px;}
+  h1{font-size:clamp(19px,2.5vw,27px);font-weight:650;letter-spacing:-.01em;margin:0;
+     display:flex;align-items:baseline;gap:.5em;flex-wrap:wrap;}
+  h1 .en{font-family:var(--mono);font-size:.6em;font-weight:500;color:var(--teal);letter-spacing:.04em;}
+  header p{margin:.35em 0 0;color:var(--muted);font-size:13.5px;max-width:62ch;}
+
+  /* dual readout */
+  .compare{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;}
+  .pipecard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 12px;min-width:150px;}
+  .pipecard .h{font-size:12px;font-weight:650;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+  .pipecard.open  .h{color:var(--teal);}
+  .pipecard.closed .h{color:#ffce5a;}
+  .pipecard .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);gap:14px;}
+  .pipecard .row b{font-family:var(--mono);color:var(--ink);font-weight:500;}
+
+  .stage{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
+    border:1px solid var(--line);border-radius:16px;padding:10px 12px 6px;box-shadow:0 18px 50px -28px #000;}
+  canvas{display:block;width:100%;height:auto;border-radius:8px;touch-action:none;}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:8px 6px 8px;color:var(--muted);font-size:12px;}
+  .legend .item{display:flex;align-items:center;gap:6px;}
+  .sw{width:22px;height:3px;border-radius:2px;display:inline-block;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  .controls{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 13px;}
+  .card>.lab{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-bottom:9px;}
+
+  .steppers{display:flex;align-items:center;gap:10px;}
+  .nbtn{width:38px;height:38px;flex:none;border-radius:9px;border:1px solid var(--line);background:var(--panel-2);
+    color:var(--ink);font-size:20px;cursor:pointer;display:grid;place-items:center;transition:.15s;}
+  .nbtn:hover{border-color:var(--teal);color:var(--teal);}
+  .nbtn:disabled{opacity:.3;cursor:not-allowed;}
+  .nval{flex:1;text-align:center;}
+  .nval .big{font-family:var(--mono);font-size:24px;line-height:1;}
+  .nval .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+
+  input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;
+    background:linear-gradient(90deg,var(--teal-dim),var(--teal));outline:none;margin:4px 0 2px;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+    background:var(--teal);border:3px solid #06251f;cursor:pointer;box-shadow:0 2px 8px #000a;}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--teal);border:3px solid #06251f;cursor:pointer;}
+  .rangerow{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);margin-top:2px;}
+
+  .playrow{display:flex;gap:10px;align-items:stretch;}
+  .play{flex:none;width:46px;border-radius:10px;border:1px solid var(--teal);background:var(--teal);
+    color:#06251f;cursor:pointer;font-size:17px;display:grid;place-items:center;}
+  .play:hover{filter:brightness(1.08);}
+
+  .toggles{display:flex;flex-direction:column;gap:7px;}
+  .tg{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink);cursor:pointer;user-select:none;}
+  .tg input{position:absolute;opacity:0;width:0;height:0;}
+  .tg .box{width:34px;height:19px;border-radius:11px;background:var(--panel-2);border:1px solid var(--line);position:relative;transition:.15s;flex:none;}
+  .tg .box::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--faint);transition:.15s;}
+  .tg input:checked + .box{background:var(--teal-dim);border-color:var(--teal);}
+  .tg input:checked + .box::after{transform:translateX(15px);background:var(--teal);}
+
+  .note{margin-top:16px;color:var(--muted);font-size:12.5px;border-left:2px solid var(--teal-dim);padding:2px 0 2px 12px;}
+  .note b{color:var(--ink);font-weight:600;}
+  footer{margin-top:18px;color:var(--faint);font-size:11.5px;text-align:center;}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+  @media (max-width:560px){.compare{margin-left:0;width:100%;}.pipecard{flex:1;min-width:0;}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>開管 vs 閉管 · 駐波比較 <span class="en">open vs closed pipe</span></h1>
+      <p>同一個「節點數」同時驅動兩根管。<b style="color:var(--teal)">開管</b>兩端都是位移波腹;<b style="color:#ffce5a">閉管</b>封閉端是位移節點、開口端是波腹。相同節點數下,兩者的波長與頻率並不一樣——這就是重點。</p>
+    </div>
+    <div class="compare">
+      <div class="pipecard open">
+        <div class="h"><span class="dot" style="background:var(--teal)"></span>開管(兩端開口)</div>
+        <div class="row"><span>諧波</span><b id="oHarm">第 3 諧波</b></div>
+        <div class="row"><span>波長 λ</span><b id="oLam">0.67 L</b></div>
+        <div class="row"><span>頻率 f</span><b id="oFreq">3 f₁</b></div>
+      </div>
+      <div class="pipecard closed">
+        <div class="h"><span class="dot" style="background:#ffce5a"></span>閉管(一端封閉)</div>
+        <div class="row"><span>諧波</span><b id="cHarm">第 5 諧波</b></div>
+        <div class="row"><span>波長 λ</span><b id="cLam">0.80 L</b></div>
+        <div class="row"><span>頻率 f</span><b id="cFreq">5 f₁</b></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="stage">
+    <canvas id="cv" width="1040" height="860" aria-label="開管與閉管駐波比較動畫"></canvas>
+    <div class="legend">
+      <span class="item"><span class="dot" style="background:var(--hot)"></span>壓縮 · 高壓</span>
+      <span class="item"><span class="dot" style="background:var(--cold)"></span>稀疏 · 低壓</span>
+      <span class="item"><span class="sw" style="background:var(--teal)"></span>位移波</span>
+      <span class="item"><span class="sw" style="background:var(--faint)"></span>振幅包絡</span>
+      <span class="item">N = 節點　A = 波腹</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="card">
+      <div class="lab">節點數(兩管同步)</div>
+      <div class="steppers">
+        <button class="nbtn" id="nDown" aria-label="減少節點">−</button>
+        <div class="nval"><div class="big" id="nVal">3</div><div class="sub">個位移節點</div></div>
+        <button class="nbtn" id="nUp" aria-label="增加節點">＋</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="lab">振幅</div>
+      <input type="range" id="amp" min="0" max="100" value="60">
+      <div class="rangerow"><span>小</span><span>大</span></div>
+    </div>
+    <div class="card">
+      <div class="lab">相位(時間)</div>
+      <div class="playrow">
+        <button class="play" id="play" aria-label="播放或暫停">⏸</button>
+        <div style="flex:1">
+          <input type="range" id="phase" min="0" max="360" value="0">
+          <div class="rangerow"><span>0°</span><span id="phaseLab">ωt = 0°</span><span>360°</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="lab">速度</div>
+      <input type="range" id="speed" min="10" max="200" value="75">
+      <div class="rangerow"><span>慢</span><span>快</span></div>
+    </div>
+    <div class="card">
+      <div class="lab">顯示</div>
+      <div class="toggles">
+        <label class="tg"><input type="checkbox" id="tMol" checked><span class="box"></span>氣體分子</label>
+        <label class="tg"><input type="checkbox" id="tGuide" checked><span class="box"></span>節點 / 波腹對應線</label>
+        <label class="tg"><input type="checkbox" id="tEnv" checked><span class="box"></span>振幅包絡</label>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    <b>同樣 3 個節點,兩管不一樣:</b>開管是<b>第 3 諧波</b>(λ = 2L/3、f = 3f₁);閉管是<b>第 5 諧波</b>(λ = 4L/5、f = 5f₁)。
+    閉管只能產生<b>奇數諧波</b>(1、3、5…),所以泛音比開管稀疏。每管下方各有位移波與壓力波:位移節點(N)恰好是壓力波腹(A),沿管軸錯開 ¼ 波長。
+    <br><span style="color:var(--faint)">註:f 以各自管的基音 f₁ 為單位;動畫頻率為視覺固定值,方便並排比較波形。</span>
+  </p>
+
+  <footer>單一 HTML 檔 · 無外部相依 · 可直接嵌入 Google Sites</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+  const sans='system-ui,"PingFang TC","Microsoft JhengHei",sans-serif';
+  const mono='ui-monospace,Menlo,Consolas,monospace';
+  const C={teal:'#37e3c4',gold:'#ffce5a',faint:'#5b6c8a',muted:'#8ea0bd',ink:'#e9f0fa',
+           hot:'#ff5d6c',cold:'#4aa3ff',grid:'#1d2942',line:'#22324f'};
+  const HOT=[255,93,108],COLD=[74,163,255],NEUT=[150,168,200];
+
+  const state={N:3,amp:0.60,phase:0,playing:true,speed:0.75,showMol:true,showGuide:true,showEnv:true};
+  const MAXN=5;
+
+  // ---- physics shapes for each pipe, given node count N ----
+  // open pipe (open-open): N nodes -> harmonic N ; f=cos(Nπu), g=sin(Nπu)
+  // closed pipe (closed at u=0, open u=1): N nodes -> harmonic h=2N-1 ; f=sin(hπu/2), g=-cos(hπu/2)
+  function modeOpen(N){const k=N*Math.PI;return{f:u=>Math.cos(k*u),g:u=>Math.sin(k*u),harm:N,lam:2/N,freq:N};}
+  function modeClosed(N){const h=2*N-1,k=h*Math.PI/2;return{f:u=>Math.sin(k*u),g:u=>-Math.cos(k*u),harm:h,lam:4/h,freq:h};}
+
+  function openNodes(N){const o=[];for(let k=1;k<=N;k++)o.push((2*k-1)/(2*N));return o;}      // cos zeros
+  function openAnti(N){const o=[];for(let k=0;k<=N;k++)o.push(k/N);return o;}                  // cos=±1 (ends incl.)
+  function closedNodes(N){const h=2*N-1,o=[];for(let m=0;m<N;m++){const u=2*m/h;if(u<=1.0001)o.push(u);}return o;} // sin zeros (incl. closed end)
+  function closedAnti(N){const h=2*N-1,o=[];for(let m=1;m<=N;m++){const u=(2*m-1)/h;if(u<=1.0001)o.push(u);}return o;} // sin=±1 (incl. open end)
+
+  // ---- layout ----
+  let W=1040,H=860,DPR=1;
+  const pad={l:60,r:28,t:8,b:8};
+  let X0,X1,span;
+  const sys={open:{},closed:{}};
+
+  function computeLayout(){
+    X0=pad.l;X1=W-pad.r;span=X1-X0;
+    const usable=H-pad.t-pad.b, blockGap=20;
+    const blockH=(usable-blockGap)/2;
+    layoutBlock(sys.open, pad.t, blockH);
+    layoutBlock(sys.closed, pad.t+blockH+blockGap, blockH);
+  }
+  function layoutBlock(s, top, blockH){
+    const headH=20, g=12;
+    const inner=blockH-headH, tubeH=inner*0.40, gH=(inner-tubeH-2*g)/2;
+    s.headY=top;
+    s.tube={y:top+headH,h:tubeH,cy:top+headH+tubeH/2};
+    s.disp={y:s.tube.y+tubeH+g,h:gH}; s.disp.cy=s.disp.y+gH/2;
+    s.pres={y:s.disp.y+gH+g,h:gH};   s.pres.cy=s.pres.y+gH/2;
+    s.bottom=s.pres.y+gH;
+  }
+  const mapX=u=>X0+u*span;
+
+  function resize(){
+    const cssW=cv.clientWidth||cv.parentElement.clientWidth;
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    W=cssW; H=Math.max(700,Math.min(Math.round(cssW*0.83),1000));
+    cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); cv.style.height=H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    computeLayout();
+  }
+
+  // ---- molecules (shared equilibrium grid) ----
+  let molU=[],molV=[];
+  function seedMolecules(){
+    molU=[];molV=[];const cols=130,rows=5;
+    for(let i=0;i<cols;i++){const u=(i+0.5)/cols;
+      for(let r=0;r<rows;r++){molU.push(u);molV.push((r+0.5)/rows+(Math.random()-0.5)*0.04);}}
+  }
+
+  // ---- helpers ----
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function lerp(a,b,t){return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+  function panelBg(y,h,label){
+    ctx.fillStyle=C.panelB||'#0a1322';ctx.fillStyle='#0a1322';roundRect(X0-6,y,span+12,h,8);ctx.fill();
+    ctx.strokeStyle=C.grid;ctx.lineWidth=1;ctx.globalAlpha=0.5;
+    for(let i=0;i<=8;i++){const x=X0+span*i/8;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+h);ctx.stroke();}
+    ctx.globalAlpha=1;ctx.fillStyle=C.faint;ctx.font='600 11px '+sans;ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(label,X0-2,y+4);
+  }
+  function curve(yfn){ctx.beginPath();for(let i=0;i<=240;i++){const u=i/240,x=mapX(u),y=yfn(u);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}
+  function markNA(us,letter,cy,color){
+    ctx.fillStyle=color;ctx.font='700 11px '+mono;ctx.textAlign='center';
+    us.forEach(u=>{const x=mapX(u);ctx.beginPath();ctx.arc(x,cy,2.6,0,6.283);ctx.fill();
+      ctx.textBaseline='top';ctx.fillText(letter,x,cy+5);});
+  }
+  function tinyLabel(txt,x,y,align,color){ctx.font='600 10.5px '+sans;ctx.textAlign=align;ctx.textBaseline='bottom';
+    ctx.fillStyle=color;ctx.fillText(txt,x,y);}
+
+  // ---- draw one pipe system ----
+  function drawSystem(s,opt){
+    const {mode,nodes,antinodes,title,titleColor,closedLeft,closedRight}=opt;
+    const cp=Math.cos(state.phase),A=state.amp;
+
+    // header
+    ctx.fillStyle=titleColor;ctx.font='650 13px '+sans;ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(title,X0-6,s.headY+10);
+
+    // guide lines across this block
+    if(state.showGuide){
+      ctx.save();ctx.setLineDash([3,5]);ctx.lineWidth=1;
+      ctx.strokeStyle='rgba(255,93,108,0.42)';
+      nodes.forEach(u=>{const x=mapX(u);ctx.beginPath();ctx.moveTo(x,s.tube.y);ctx.lineTo(x,s.bottom);ctx.stroke();});
+      ctx.strokeStyle='rgba(55,227,196,0.28)';
+      antinodes.forEach(u=>{const x=mapX(u);ctx.beginPath();ctx.moveTo(x,s.disp.y);ctx.lineTo(x,s.bottom);ctx.stroke();});
+      ctx.restore();
+    }
+
+    // ---- tube + molecules ----
+    const T=s.tube;
+    ctx.fillStyle='#070d18';roundRect(X0-6,T.y,span+12,T.h,8);ctx.fill();
+    ctx.fillStyle='#2a3a59';
+    if(closedLeft) ctx.fillRect(X0-6,T.y,7,T.h);
+    if(closedRight)ctx.fillRect(X1-1,T.y,7,T.h);
+    if(state.showMol){
+      const maxOff=(span/130)*0.85,ry=T.y+T.h*0.16,rh=T.h*0.68;
+      for(let i=0;i<molU.length;i++){
+        const u=molU[i],s2=A*mode.f(u)*cp,x=mapX(u)+s2*maxOff,y=ry+molV[i]*rh;
+        const p=mode.g(u)*cp,t=Math.abs(p),col=p>=0?lerp(NEUT,HOT,t):lerp(NEUT,COLD,t);
+        ctx.fillStyle=`rgba(${col[0]|0},${col[1]|0},${col[2]|0},${0.55+0.4*t})`;
+        ctx.beginPath();ctx.arc(x,y,1.8,0,6.283);ctx.fill();
+      }
+    }
+    ctx.strokeStyle=C.line;ctx.lineWidth=1.5;roundRect(X0-6,T.y,span+12,T.h,8);ctx.stroke();
+    tinyLabel(closedLeft?'封閉端':'開口端',X0+3,T.y+T.h-7,'left',C.faint);
+    tinyLabel(closedRight?'封閉端':'開口端',X1-3,T.y+T.h-7,'right',C.faint);
+
+    // ---- displacement ----
+    const D=s.disp;panelBg(D.y,D.h,'位移 s(x,t)');
+    const ampD=(D.h/2)*0.80;
+    ctx.strokeStyle='rgba(142,160,189,0.35)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(X0,D.cy);ctx.lineTo(X1,D.cy);ctx.stroke();
+    if(state.showEnv){ctx.strokeStyle='rgba(91,108,138,0.7)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      curve(u=>D.cy-A*Math.abs(mode.f(u))*ampD);curve(u=>D.cy+A*Math.abs(mode.f(u))*ampD);ctx.setLineDash([]);}
+    ctx.strokeStyle=C.teal;ctx.lineWidth=2.3;ctx.shadowColor='rgba(55,227,196,.5)';ctx.shadowBlur=7;
+    curve(u=>D.cy-A*mode.f(u)*cp*ampD);ctx.shadowBlur=0;
+    markNA(nodes,'N',D.cy,'rgba(255,93,108,0.9)');
+    markNA(antinodes,'A',D.cy,'rgba(55,227,196,0.95)');
+
+    // ---- pressure ----
+    const P=s.pres;panelBg(P.y,P.h,'壓力 P(x,t)');
+    const ampP=(P.h/2)*0.78;
+    ctx.strokeStyle='rgba(142,160,189,0.45)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(X0,P.cy);ctx.lineTo(X1,P.cy);ctx.stroke();
+    ctx.fillStyle=C.muted;ctx.font='600 10px '+mono;ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText('P₀',X0-8,P.cy);
+    ctx.fillStyle='rgba(255,93,108,.8)';ctx.fillText('+ΔP',X0-8,P.y+P.h*0.14);
+    ctx.fillStyle='rgba(74,163,255,.8)';ctx.fillText('−ΔP',X0-8,P.y+P.h*0.86);
+    if(state.showEnv){ctx.strokeStyle='rgba(91,108,138,0.7)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      curve(u=>P.cy-A*Math.abs(mode.g(u))*ampP);curve(u=>P.cy+A*Math.abs(mode.g(u))*ampP);ctx.setLineDash([]);}
+    const pts=[];for(let i=0;i<=240;i++){const u=i/240;pts.push([mapX(u),P.cy-A*mode.g(u)*cp*ampP]);}
+    // signed fill
+    ctx.beginPath();ctx.moveTo(pts[0][0],P.cy);pts.forEach(p=>ctx.lineTo(p[0],Math.min(p[1],P.cy)));
+    ctx.lineTo(pts[pts.length-1][0],P.cy);ctx.closePath();ctx.fillStyle='rgba(255,93,108,0.16)';ctx.fill();
+    ctx.beginPath();ctx.moveTo(pts[0][0],P.cy);pts.forEach(p=>ctx.lineTo(p[0],Math.max(p[1],P.cy)));
+    ctx.lineTo(pts[pts.length-1][0],P.cy);ctx.closePath();ctx.fillStyle='rgba(74,163,255,0.16)';ctx.fill();
+    ctx.strokeStyle=C.teal;ctx.lineWidth=2.1;ctx.beginPath();
+    pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();
+    markNA(antinodes,'N',P.cy,'rgba(74,163,255,0.85)'); // pressure node = disp antinode
+    markNA(nodes,'A',P.cy,'rgba(255,93,108,0.95)');     // pressure antinode = disp node
+  }
+
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    const N=state.N;
+    drawSystem(sys.open,{mode:modeOpen(N),nodes:openNodes(N),antinodes:openAnti(N),
+      title:'開管 · 兩端開口',titleColor:C.teal,closedLeft:false,closedRight:false});
+    drawSystem(sys.closed,{mode:modeClosed(N),nodes:closedNodes(N),antinodes:closedAnti(N),
+      title:'閉管 · 一端封閉(左)',titleColor:C.gold,closedLeft:true,closedRight:false});
+  }
+
+  // ---- readouts ----
+  function updateReadouts(){
+    const N=state.N,o=modeOpen(N),c=modeClosed(N);
+    document.getElementById('nVal').textContent=N;
+    document.getElementById('oHarm').textContent='第 '+o.harm+' 諧波';
+    document.getElementById('oLam').textContent=o.lam.toFixed(2)+' L';
+    document.getElementById('oFreq').textContent=o.freq+' f₁';
+    document.getElementById('cHarm').textContent='第 '+c.harm+' 諧波';
+    document.getElementById('cLam').textContent=c.lam.toFixed(2)+' L';
+    document.getElementById('cFreq').textContent=c.freq+' f₁';
+    document.getElementById('nDown').disabled=N<=1;
+    document.getElementById('nUp').disabled=N>=MAXN;
+  }
+
+  // ---- loop ----
+  let last=performance.now();
+  function tick(now){
+    const dt=(now-last)/1000;last=now;
+    if(state.playing){state.phase+=dt*state.speed*Math.PI;if(state.phase>6.283)state.phase-=6.283;syncPhase();}
+    render();requestAnimationFrame(tick);
+  }
+  function syncPhase(){const deg=Math.round(state.phase*180/Math.PI)%360;
+    document.getElementById('phase').value=deg;document.getElementById('phaseLab').textContent='ωt = '+deg+'°';}
+
+  // ---- events ----
+  const playBtn=document.getElementById('play');
+  document.getElementById('nUp').onclick=()=>{if(state.N<MAXN){state.N++;updateReadouts();}};
+  document.getElementById('nDown').onclick=()=>{if(state.N>1){state.N--;updateReadouts();}};
+  document.getElementById('amp').oninput=e=>state.amp=e.target.value/100;
+  document.getElementById('speed').oninput=e=>state.speed=e.target.value/100;
+  playBtn.onclick=()=>{state.playing=!state.playing;playBtn.textContent=state.playing?'⏸':'▶';};
+  document.getElementById('phase').oninput=e=>{state.playing=false;playBtn.textContent='▶';
+    state.phase=e.target.value*Math.PI/180;document.getElementById('phaseLab').textContent='ωt = '+e.target.value+'°';};
+  document.getElementById('tMol').onchange=e=>state.showMol=e.target.checked;
+  document.getElementById('tGuide').onchange=e=>state.showGuide=e.target.checked;
+  document.getElementById('tEnv').onchange=e=>state.showEnv=e.target.checked;
+  window.addEventListener('resize',resize);
+  document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
+    if(e.code==='Space'){e.preventDefault();playBtn.click();}
+    else if(e.code==='ArrowUp'){document.getElementById('nUp').click();}
+    else if(e.code==='ArrowDown'){document.getElementById('nDown').click();}});
+
+  seedMolecules();resize();updateReadouts();requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中子內部結構</title>
+<style>
+/* 版面：左為 1:1 模擬視窗（單位 fm），右為讀數與說明；窄螢幕上下堆疊。刻意採單一深色主題，像在暗室看探測器顯示。 */
+:root{
+  color-scheme: dark;
+  --bg:#0b0d14; --panel:#131725; --line:#262c40; --fg:#e7e9f2; --muted:#9097ad;
+  --accent:#ffcf8a;
+  --qr:#ff4d5e; --qg:#36e08a; --qb:#4d8dff;
+  --ar:#2fe0ee; --ag:#ff5ce1; --ab:#ffd23f;
+  --pos:#ffae42; --neg:#9b7bff;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Heiti TC",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 32px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header h1{margin:0;font-size:1.6rem;letter-spacing:.04em;text-wrap:balance}
+header p{margin:4px 0 0;color:var(--muted);max-width:68ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;width:100%;max-width:min(100%,82vh);aspect-ratio:1;margin:0 auto;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#07080d;touch-action:none}
+canvas{display:block;width:100%;height:100%;cursor:grab}
+canvas.drag{cursor:grabbing}
+.hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:var(--muted);pointer-events:none}
+.side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.box h2{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--muted)}
+.big{font-size:1.25rem;font-weight:700}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 6px;border-radius:13px;font-family:var(--mono);font-weight:700;color:#0b0d14}
+.controls{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-size:14px;background:#1d2335;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+label.tg{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:10px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+ul.log{list-style:none;margin:0;padding:0;font-size:13px;display:flex;flex-direction:column;gap:6px}
+ul.log li{border-left:2px solid var(--accent);padding-left:8px;color:var(--fg)}
+ul.log li.empty{border-color:var(--line);color:var(--muted)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.notes p,.notes li{color:#c9cddc;font-size:14px}
+.notes ul{margin:0;padding-left:1.2em}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.ring{width:12px;height:12px;border-radius:50%;display:inline-block;border:3px solid}
+.bar{display:flex;height:14px;border-radius:4px;overflow:hidden;margin:6px 0}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>中子內部結構</h1>
+    <p>三個價夸克（u d d）以膠子交換色荷、被色通量管綁在一起，四周不斷有虛夸克對生成又湮滅。拖曳任一顆夸克，看看把它拉出來會發生什麼。</p>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="stage" id="stage">
+        <canvas id="cv" aria-label="中子內部模擬畫面，可拖曳夸克"></canvas>
+        <div class="hint">按住夸克向外拖 · 尺度單位 fm（10⁻¹⁵ m）</div>
+      </div>
+      <div class="legend" style="margin-top:10px">
+        <span><i class="dot" style="background:var(--qr)"></i>紅</span>
+        <span><i class="dot" style="background:var(--qg)"></i>綠</span>
+        <span><i class="dot" style="background:var(--qb)"></i>藍</span>
+        <span><i class="ring" style="border-color:var(--ar)"></i>反紅</span>
+        <span><i class="ring" style="border-color:var(--ag)"></i>反綠</span>
+        <span><i class="ring" style="border-color:var(--ab)"></i>反藍</span>
+        <span>實心＝夸克，空心環＝反夸克，半色點＝膠子（色＋反色）</span>
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="box">
+        <h2>目前的粒子</h2>
+        <div class="big" id="pname">中子 n</div>
+        <div class="row"><span>夸克組成</span><span class="mono" id="pcomp">udd</span></div>
+        <div class="row"><span>總電荷</span><span class="mono" id="pcharge">+⅔ −⅓ −⅓ = 0</span></div>
+      </div>
+
+      <div class="box">
+        <h2>色荷</h2>
+        <div class="chips" id="colors"></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px" id="colornote">紅＋綠＋藍＝白（色中性）</div>
+      </div>
+
+      <div class="box">
+        <h2>色通量管（Y 形弦）</h2>
+        <div class="row"><span>總弦長 L</span><span class="mono" id="slen">0.00 fm</span></div>
+        <div class="row"><span>拉伸多出的能量 ΔE</span><span class="mono" id="sE">0.00 GeV</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">ΔE ≈ σ·(L − L₀)，弦張力 σ ≈ 0.9 GeV/fm；拉到約 1.3 fm 弦會斷。</div>
+      </div>
+
+      <div class="box">
+        <h2>操作</h2>
+        <div class="controls">
+          <button id="play">暫停</button>
+          <button id="reset">重設成中子</button>
+        </div>
+        <label for="speed" style="display:block;margin-top:10px;font-size:14px">時間流速 <span class="mono" id="speedv">1.0×</span></label>
+        <input id="speed" type="range" min="0.1" max="2" step="0.1" value="1">
+        <div class="toggles">
+          <label class="tg"><input type="checkbox" id="tGluon" checked>膠子交換</label>
+          <label class="tg"><input type="checkbox" id="tSea" checked>海夸克對</label>
+          <label class="tg"><input type="checkbox" id="tTube" checked>色通量管</label>
+          <label class="tg"><input type="checkbox" id="tCharge">電荷分布</label>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>事件紀錄</h2>
+        <ul class="log" id="log"><li class="empty">尚無事件。試著把一顆夸克拖離中心。</li></ul>
+      </div>
+    </aside>
+  </div>
+
+  <section class="notes">
+    <div class="box">
+      <h2>質量從哪裡來</h2>
+      <p>中子質量 939.57 MeV/c²。三個價夸克本身的質量只有 m<sub>u</sub> + 2m<sub>d</sub> ≈ 2.2 + 2×4.7 ≈ 11.6 MeV，約 1%。</p>
+      <div class="bar" aria-hidden="true"><div style="width:1.2%;background:var(--accent)"></div><div style="flex:1;background:#2b3350"></div></div>
+      <p>其餘約 99% 來自夸克的動能與膠子場的能量（E = mc²），也就是強交互作用本身。</p>
+    </div>
+    <div class="box">
+      <h2>幾個實測數字</h2>
+      <ul>
+        <li>大小：半徑約 0.8 fm</li>
+        <li>電荷均方半徑 ⟨r²⟩ = −0.116 fm²：負號代表中心偏正、外圍偏負（勾選「電荷分布」）</li>
+        <li>磁矩 −1.913 μ<sub>N</sub>：總電荷為零卻有磁矩，證明內部有帶電的組成</li>
+        <li>自由中子會 β 衰變，平均壽命約 880 s：d → u + e⁻ + ν̄<sub>e</sub></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>這張圖簡化了什麼</h2>
+      <ul>
+        <li>夸克不是小球，「顏色」也不是真的顏色，而是一種量子數；真實狀態是各種色組合的疊加。</li>
+        <li>夸克以接近光速運動，畫面時間放慢了約 10²³ 倍。</li>
+        <li>真實的海夸克與膠子數量遠比畫面多，而且多寡取決於用多高能量去「看」。</li>
+        <li>弦斷裂的距離與產物是示意，實際由量子機率決定。</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+(()=>{
+const COL=['#ff4d5e','#36e08a','#4d8dff'], ANTI=['#2fe0ee','#ff5ce1','#ffd23f'];
+const CN=['紅','綠','藍'];
+const CHARGE={u:2/3,d:-1/3,s:-1/3};
+const FRAC={u:'+⅔',d:'−⅓',s:'−⅓'};
+const VIEW=2.0;          // 畫面半寬 (fm)
+const SIGMA=0.9;         // 弦張力 GeV/fm
+const BREAK=1.3;         // 斷弦距離 (fm)
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let quarks, gluons, sea, mesons, running=true, speed=reduce?0.4:1, L0=0.75, drag=null, gluonTimer=0, seaTimer=0, J={x:0,y:0}, time=0;
+$('speed').value=speed;
+
+function init(){
+  const fl=['u','d','d'];
+  quarks=fl.map((f,i)=>{const a=-Math.PI/2+i*2*Math.PI/3;return{x:0.32*Math.cos(a),y:0.32*Math.sin(a),vx:0,vy:0,f,c:i}});
+  gluons=[];sea=[];mesons=[];drag=null;
+}
+init();
+
+function randn(){let u=1-Math.random(),v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function steiner(p){let x=(p[0].x+p[1].x+p[2].x)/3,y=(p[0].y+p[1].y+p[2].y)/3;
+  for(let i=0;i<40;i++){let nx=0,ny=0,w=0;for(const q of p){const d=Math.hypot(q.x-x,q.y-y);if(d<1e-6)return{x:q.x,y:q.y};nx+=q.x/d;ny+=q.y/d;w+=1/d}x=nx/w;y=ny/w}
+  return{x,y}}
+
+/* ---------- 膠子：發射者 A 由 cA 變成 cB；膠子帶 (cA, 反cB)；吸收者 B 由 cB 變成 cA ---------- */
+function emitGluon(){
+  const i=Math.floor(Math.random()*3);let j=Math.floor(Math.random()*2);if(j>=i)j++;
+  const A=quarks[i],B=quarks[j];
+  if(A.c===B.c)return;                       // 此刻同色（已有膠子在途中）就跳過
+  if(gluons.some(g=>g.from===A||g.to===A||g.from===B||g.to===B))return;
+  const cA=A.c,cB=B.c;
+  A.c=cB;
+  gluons.push({from:A,to:B,c:cA,ac:cB,sx:A.x,sy:A.y,t:0,dur:0.35+Math.random()*0.2});
+}
+function absorbAll(){for(const g of gluons)g.to.c=g.c;gluons=[]}
+
+/* ---------- 海夸克對 ---------- */
+function spawnSea(){
+  const r=Math.sqrt(Math.random())*0.8,a=Math.random()*Math.PI*2;
+  const p=Math.random();const f=p<0.4?'u':p<0.8?'d':'s';
+  sea.push({x:J.x+r*Math.cos(a),y:J.y+r*Math.sin(a),th:Math.random()*Math.PI*2,f,c:Math.floor(Math.random()*3),t:0,life:0.5+Math.random()*0.7});
+}
+
+/* ---------- 弦斷裂 ---------- */
+function baryonName(fs){
+  const k=fs.slice().sort().join('');
+  return {udd:['中子 n','udd'],uud:['質子 p','uud'],ddd:['Δ⁻ 重子','ddd'],uuu:['Δ⁺⁺ 重子','uuu']}[k]||['重子',k];
+}
+function mesonName(q,aq){
+  if(q===aq)return 'π⁰';
+  if(q==='u'&&aq==='d')return 'π⁺';
+  if(q==='d'&&aq==='u')return 'π⁻';
+  return q+aq+'̄';
+}
+function breakString(q){
+  absorbAll();
+  const dx=q.x-J.x,dy=q.y-J.y,d=Math.hypot(dx,dy),ux=dx/d,uy=dy/d;
+  const nf=Math.random()<0.5?'u':'d';
+  const before=baryonName(quarks.map(o=>o.f))[0];
+  // 新夸克留在重子內，顏色與被拉走的夸克相同 → 重子仍為紅綠藍
+  const nq={x:J.x+ux*0.35,y:J.y+uy*0.35,vx:-ux*0.5,vy:-uy*0.5,f:nf,c:q.c};
+  const idx=quarks.indexOf(q);quarks[idx]=nq;
+  // 被拉走的夸克與新反夸克（反色）組成色中性介子
+  const name=mesonName(q.f,nf);
+  mesons.push({qx:q.x,qy:q.y,ax:q.x-ux*0.16,ay:q.y-uy*0.16,f:q.f,af:nf,c:q.c,vx:ux*1.2,vy:uy*1.2,t:0,name});
+  drag=null;cv.classList.remove('drag');
+  const after=baryonName(quarks.map(o=>o.f));
+  let msg=`弦斷裂：拉出的 ${q.f} 與新生的 ${nf}${'̄'} 組成 ${name}（${q.f}${nf}̄）飛離；新生的 ${nf} 留下，剩下 ${after[1]} ＝ ${after[0]}。`;
+  if(name==='π⁰')msg+='（π⁰ 實為 uū 與 dd̄ 的疊加）';
+  if(after[1]==='ddd')msg+=' ddd 只能是自旋 3/2 的激發態。';
+  log(msg);
+  if(before!==after[0])log(`${before} → ${after[0]}：能量來自你拉伸弦所做的功。`);
+}
+
+const logEl=$('log');
+function log(t){const e=logEl.querySelector('.empty');if(e)e.remove();const li=document.createElement('li');li.textContent=t;logEl.prepend(li);while(logEl.children.length>5)logEl.lastChild.remove()}
+
+/* ---------- 物理更新 ---------- */
+function step(dt){
+  time+=dt;
+  J=steiner(quarks);
+  const cx=(quarks[0].x+quarks[1].x+quarks[2].x)/3,cy=(quarks[0].y+quarks[1].y+quarks[2].y)/3;
+  for(const q of quarks){
+    if(q===drag)continue;
+    let ax=0,ay=0;
+    const dx=J.x-q.x,dy=J.y-q.y,d=Math.hypot(dx,dy);
+    if(d>1e-4){const F=drag?14:10;ax+=F*dx/d;ay+=F*dy/d}           // 線性禁閉位能 → 指向接點的定力
+    for(const o of quarks){if(o===q)continue;const rx=q.x-o.x,ry=q.y-o.y,r=Math.hypot(rx,ry)||1e-4;if(r<0.42){ax+=30*(0.42-r)*rx/r;ay+=30*(0.42-r)*ry/r}}
+    if(!drag){ax-=3*cx;ay-=3*cy;const R=Math.hypot(q.x,q.y);if(R>0.7){ax-=40*(R-0.7)*q.x/R;ay-=40*(R-0.7)*q.y/R}}
+    const n=2.2*Math.sqrt(dt);
+    q.vx+=ax*dt+randn()*n;q.vy+=ay*dt+randn()*n;
+    const damp=Math.exp(-3*dt);q.vx*=damp;q.vy*=damp;
+  }
+  for(const q of quarks){if(q!==drag){q.x+=q.vx*dt;q.y+=q.vy*dt}}
+
+  const Lnow=quarks.reduce((a,q)=>a+Math.hypot(q.x-J.x,q.y-J.y),0);
+  if(!drag)L0+= (Lnow-L0)*Math.min(1,dt*0.5);
+
+  if(drag&&Math.hypot(drag.x-J.x,drag.y-J.y)>BREAK)breakString(drag);
+
+  if($('tGluon').checked){gluonTimer-=dt;if(gluonTimer<=0){emitGluon();gluonTimer=0.25+Math.random()*0.45}}
+  for(const g of gluons)g.t+=dt/g.dur;
+  gluons=gluons.filter(g=>{if(g.t>=1){g.to.c=g.c;return false}return true});
+
+  if($('tSea').checked){seaTimer-=dt;if(seaTimer<=0){spawnSea();seaTimer=0.12+Math.random()*0.25}}
+  for(const s of sea)s.t+=dt;
+  sea=sea.filter(s=>s.t<s.life);
+
+  for(const m of mesons){m.t+=dt;m.qx+=m.vx*dt;m.qy+=m.vy*dt;m.ax+=m.vx*dt;m.ay+=m.vy*dt}
+  mesons=mesons.filter(m=>m.t<3.5);
+}
+
+/* ---------- 繪圖 ---------- */
+let W=0,S=1,dpr=1;
+function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);W=cv.width;S=W/(2*VIEW)}
+new ResizeObserver(resize).observe(cv);resize();
+const X=x=>W/2+x*S, Y=y=>W/2+y*S;
+
+function drawQuark(x,y,f,c,anti,alpha=1,rad=0.11){
+  const px=X(x),py=Y(y),r=rad*S;
+  ctx.globalAlpha=alpha;
+  const g=ctx.createRadialGradient(px,py,0,px,py,r*2.4);
+  g.addColorStop(0,(anti?ANTI:COL)[c]+'88');g.addColorStop(1,(anti?ANTI:COL)[c]+'00');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(px,py,r*2.4,0,7);ctx.fill();
+  ctx.beginPath();ctx.arc(px,py,r,0,7);
+  if(anti){ctx.fillStyle='#07080d';ctx.fill();ctx.lineWidth=r*0.45;ctx.strokeStyle=ANTI[c];ctx.stroke();}
+  else{ctx.fillStyle=COL[c];ctx.fill();}
+  if(rad>0.08){ctx.fillStyle=anti?ANTI[c]:'#0b0d14';ctx.font=`700 ${Math.round(r*1.15)}px ${getComputedStyle(document.body).getPropertyValue('--mono')}`;
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f,px,py+r*0.05);
+    if(anti){ctx.fillRect(px-r*0.3,py-r*0.55,r*0.6,Math.max(1,r*0.1))}}
+  ctx.globalAlpha=1;
+}
+function tube(ax,ay,bx,by,w,a){
+  ctx.lineCap='round';
+  ctx.strokeStyle=`rgba(255,207,138,${a*0.18})`;ctx.lineWidth=w*S;ctx.beginPath();ctx.moveTo(X(ax),Y(ay));ctx.lineTo(X(bx),Y(by));ctx.stroke();
+  ctx.strokeStyle=`rgba(255,235,200,${a*0.55})`;ctx.lineWidth=Math.max(1,w*0.18*S);ctx.stroke();
+}
+
+function draw(){
+  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#07080d';ctx.fillRect(0,0,W,W);
+  // 背景格線 0.5 fm
+  ctx.strokeStyle='rgba(144,151,173,0.07)';ctx.lineWidth=1;
+  for(let v=-VIEW;v<=VIEW+1e-6;v+=0.5){ctx.beginPath();ctx.moveTo(X(v),0);ctx.lineTo(X(v),W);ctx.stroke();ctx.beginPath();ctx.moveTo(0,Y(v));ctx.lineTo(W,Y(v));ctx.stroke()}
+  const cx=(quarks[0].x+quarks[1].x+quarks[2].x)/3,cy=(quarks[0].y+quarks[1].y+quarks[2].y)/3;
+  // 中子的雲
+  const halo=ctx.createRadialGradient(X(cx),Y(cy),0,X(cx),Y(cy),0.95*S);
+  halo.addColorStop(0,'rgba(120,135,190,0.16)');halo.addColorStop(0.75,'rgba(90,100,150,0.07)');halo.addColorStop(1,'rgba(90,100,150,0)');
+  ctx.fillStyle=halo;ctx.beginPath();ctx.arc(X(cx),Y(cy),0.95*S,0,7);ctx.fill();
+  if($('tCharge').checked){
+    // 示意：中心淨正、外圍淨負（對應 ⟨r²⟩ < 0）
+    const g=ctx.createRadialGradient(X(cx),Y(cy),0,X(cx),Y(cy),1.0*S);
+    g.addColorStop(0,'rgba(255,174,66,0.42)');g.addColorStop(0.28,'rgba(255,174,66,0.18)');g.addColorStop(0.4,'rgba(155,123,255,0.0)');
+    g.addColorStop(0.62,'rgba(155,123,255,0.26)');g.addColorStop(1,'rgba(155,123,255,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(X(cx),Y(cy),1.0*S,0,7);ctx.fill();
+    ctx.font=`600 ${Math.round(12*dpr)}px ${getComputedStyle(document.body).fontFamily}`;ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    ctx.fillStyle='#ffae42';ctx.fillText('中心淨正電',X(cx)+0.12*S,Y(cy)-0.02*S);
+    ctx.fillStyle='#b79dff';ctx.fillText('外圍淨負電',X(cx)+0.6*S,Y(cy)+0.62*S);
+  }
+  // 0.8 fm 半徑參考圈
+  ctx.setLineDash([4*dpr,6*dpr]);ctx.strokeStyle='rgba(144,151,173,0.35)';ctx.lineWidth=dpr;
+  ctx.beginPath();ctx.arc(X(cx),Y(cy),0.8*S,0,7);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(144,151,173,0.8)';ctx.font=`${Math.round(11*dpr)}px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.textAlign='center';ctx.fillText('r ≈ 0.8 fm',X(cx),Y(cy)-0.8*S-6*dpr);
+  // 比例尺
+  const sx=W-16*dpr-0.5*S,sy=W-18*dpr;ctx.strokeStyle='rgba(231,233,242,0.7)';ctx.lineWidth=2*dpr;
+  ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx+0.5*S,sy);ctx.stroke();
+  ctx.fillStyle='rgba(231,233,242,0.8)';ctx.fillText('0.5 fm',sx+0.25*S,sy-6*dpr);
+
+  // 海夸克對
+  for(const s of sea){
+    const ph=s.t/s.life,sep=0.13*Math.sin(Math.PI*ph),a=Math.sin(Math.PI*ph)*0.85;
+    const ox=Math.cos(s.th)*sep,oy=Math.sin(s.th)*sep;
+    drawQuark(s.x+ox,s.y+oy,s.f,s.c,false,a,0.05);
+    drawQuark(s.x-ox,s.y-oy,s.f,s.c,true,a,0.05);
+  }
+  // 色通量管
+  if($('tTube').checked){
+    const L=quarks.reduce((a,q)=>a+Math.hypot(q.x-J.x,q.y-J.y),0);
+    const strain=Math.min(1,Math.max(0,(L-L0)/1.2));
+    for(const q of quarks)tube(J.x,J.y,q.x,q.y,0.16,0.7+strain*0.8);
+    ctx.fillStyle=`rgba(255,235,200,${0.6+strain*0.4})`;ctx.beginPath();ctx.arc(X(J.x),Y(J.y),Math.max(2,0.025*S),0,7);ctx.fill();
+  }
+  // 介子
+  for(const m of mesons){
+    const a=Math.max(0,1-m.t/3.5);
+    tube(m.qx,m.qy,m.ax,m.ay,0.12,a);
+    drawQuark(m.ax,m.ay,m.af,m.c,true,a,0.09);
+    drawQuark(m.qx,m.qy,m.f,m.c,false,a,0.09);
+    ctx.globalAlpha=a;ctx.fillStyle='#ffcf8a';ctx.font=`700 ${Math.round(15*dpr)}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.textAlign='center';ctx.fillText(m.name,X((m.qx+m.ax)/2),Y((m.qy+m.ay)/2)-0.22*S);ctx.globalAlpha=1;
+  }
+  // 膠子（彈簧狀傳播線＋色/反色點）
+  for(const g of gluons){
+    const ex=g.sx+(g.to.x-g.sx)*g.t,ey=g.sy+(g.to.y-g.sy)*g.t;
+    const dx=ex-g.sx,dy=ey-g.sy,len=Math.hypot(dx,dy)||1e-4,nx=-dy/len,ny=dx/len;
+    ctx.strokeStyle='rgba(231,233,242,0.55)';ctx.lineWidth=1.4*dpr;ctx.beginPath();
+    const N=Math.max(8,Math.round(len*60));
+    for(let k=0;k<=N;k++){const u=k/N,amp=0.03*Math.sin(u*len*55);const px=g.sx+dx*u+nx*amp,py=g.sy+dy*u+ny*amp;k?ctx.lineTo(X(px),Y(py)):ctx.moveTo(X(px),Y(py))}
+    ctx.stroke();
+    const r=0.05*S,px=X(ex),py=Y(ey);
+    ctx.fillStyle=COL[g.c];ctx.beginPath();ctx.arc(px,py,r,Math.PI/2,Math.PI*1.5);ctx.fill();
+    ctx.fillStyle=ANTI[g.ac];ctx.beginPath();ctx.arc(px,py,r,-Math.PI/2,Math.PI/2);ctx.fill();
+  }
+  // 價夸克
+  for(const q of quarks)drawQuark(q.x,q.y,q.f,q.c,false,1,0.11);
+  if(drag){const d=Math.hypot(drag.x-J.x,drag.y-J.y);
+    ctx.setLineDash([3*dpr,5*dpr]);ctx.strokeStyle='rgba(255,207,138,0.35)';ctx.lineWidth=dpr;ctx.beginPath();ctx.arc(X(J.x),Y(J.y),BREAK*S,0,7);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,207,138,0.85)';ctx.textAlign='center';ctx.font=`${Math.round(11*dpr)}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.fillText(`距接點 ${d.toFixed(2)} fm／斷弦約 ${BREAK} fm`,X(J.x),Y(J.y)+BREAK*S+14*dpr);}
+}
+
+/* ---------- 讀數 ---------- */
+const frac=f=>FRAC[f];
+function updateUI(){
+  const fs=quarks.map(q=>q.f);const [nm,comp]=baryonName(fs);
+  $('pname').textContent=nm;$('pcomp').textContent=comp;
+  const sorted=quarks.slice().sort((a,b)=>CHARGE[b.f]-CHARGE[a.f]);
+  const Q=fs.reduce((a,f)=>a+CHARGE[f],0);const Qs=Math.abs(Q)<1e-9?'0':(Q>0?'+':'−')+Math.round(Math.abs(Q));
+  $('pcharge').textContent=sorted.map(q=>frac(q.f)).join(' ')+' = '+Qs;
+  const ch=$('colors');ch.innerHTML='';
+  for(const q of quarks){const s=document.createElement('span');s.className='chip';s.style.background=COL[q.c];s.textContent=q.f;s.title=CN[q.c];ch.appendChild(s)}
+  for(const g of gluons){const s=document.createElement('span');s.className='chip';s.style.background=`linear-gradient(90deg,${COL[g.c]} 50%,${ANTI[g.ac]} 50%)`;s.textContent='g';s.title=`膠子：${CN[g.c]}＋反${CN[g.ac]}`;ch.appendChild(s)}
+  $('colornote').textContent=gluons.length?`膠子在途中：發射者已換色，總和（含膠子）仍為白`:`${quarks.map(q=>CN[q.c]).join('＋')}＝白（色中性）`;
+  const L=quarks.reduce((a,q)=>a+Math.hypot(q.x-J.x,q.y-J.y),0);
+  $('slen').textContent=L.toFixed(2)+' fm';
+  $('sE').textContent=(drag?Math.max(0,SIGMA*(L-L0)):0).toFixed(2)+' GeV';
+}
+
+/* ---------- 互動 ---------- */
+function toWorld(e){const r=cv.getBoundingClientRect();return{x:((e.clientX-r.left)/r.width*2-1)*VIEW,y:((e.clientY-r.top)/r.height*2-1)*VIEW}}
+cv.addEventListener('pointerdown',e=>{const p=toWorld(e);let best=null,bd=0.25;for(const q of quarks){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<bd){bd=d;best=q}}
+  if(best){drag=best;drag.vx=drag.vy=0;cv.setPointerCapture(e.pointerId);cv.classList.add('drag')}});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const p=toWorld(e);drag.x=Math.max(-VIEW,Math.min(VIEW,p.x));drag.y=Math.max(-VIEW,Math.min(VIEW,p.y))});
+const end=()=>{if(drag){drag=null;cv.classList.remove('drag')}};
+cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+
+$('play').onclick=()=>{running=!running;$('play').textContent=running?'暫停':'播放'};
+$('reset').onclick=()=>{init();log('重設為中子 udd。')};
+$('speed').oninput=e=>{speed=+e.target.value;$('speedv').textContent=speed.toFixed(1)+'×'};
+$('speedv').textContent=speed.toFixed(1)+'×';
+
+let last=performance.now(),uiT=0;
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(running||drag){const h=dt*speed,n=Math.ceil(h/0.01);for(let i=0;i<n;i++)step(h/n)}
+  draw();uiT+=dt;if(uiT>0.1){updateUI();uiT=0}
+  requestAnimationFrame(frame);
+}
+J=steiner(quarks);draw();updateUI();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

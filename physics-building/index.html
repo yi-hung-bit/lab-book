@@ -1,0 +1,577 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>物理大樓</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3347">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="物理大樓">
+
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 左邊是大樓立面（每層樓一冊、窗戶＝教室），右邊是選到的樓層走廊（教室門牌），點門進教室全螢幕開模擬 */
+:root{
+  --sky:#dfe7ec; --ground:#c9d1c4; --paper:#f7f6f2; --ink:#1c2228; --muted:#5b6670; --line:#cfd4d6;
+  --wall:#d8cfc2; --wall-2:#c9bfb1; --wall-edge:#8d8272; --glass:#5f7a8c; --glass-lit:#ffd978;
+  --plate:#1f3347; --plate-ink:#f4f1e8; --rail:#9aa3a8;
+  --f1:#3d7d4c; --f2:#c2652a; --f3:#2b64b8; --f4:#7a4fb5; --f5:#167a82; --f6:#b03a4a; --f7:#5a5f9e; --fr:#8a6a12;
+  --shadow:0 12px 30px rgba(28,34,40,.14);
+  --sky-top:#a9c8dc; --slab:#eeeae2; --trim:#3a4650; --leaf:#5f8f4e; --trunk:#6b4f36; --lawn:#9cbf7f; --night:0;
+  --f-sign:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sky:#141b22; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
+  --wall:#4a4540; --wall-2:#3e3a35; --wall-edge:#24211e; --glass:#22333f; --glass-lit:#ffcf5a;
+  --plate:#0f1c28; --plate-ink:#f4f1e8; --rail:#56616a;
+  --f1:#7cc58c; --f2:#f0a06b; --f3:#86aef2; --f4:#bc9df0; --f5:#64cbd2; --f6:#ef8d9a; --f7:#a7acee; --fr:#e3c056;
+  --sky-top:#05080d; --slab:#6b6660; --trim:#11171c; --leaf:#2e4a2a; --trunk:#3b2b1e; --lawn:#24331f; --night:1;
+  --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --sky:#141b22; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
+  --wall:#4a4540; --wall-2:#3e3a35; --wall-edge:#24211e; --glass:#22333f; --glass-lit:#ffcf5a;
+  --plate:#0f1c28; --plate-ink:#f4f1e8; --rail:#56616a;
+  --f1:#7cc58c; --f2:#f0a06b; --f3:#86aef2; --f4:#bc9df0; --f5:#64cbd2; --f6:#ef8d9a; --f7:#a7acee; --fr:#e3c056;
+  --sky-top:#05080d; --slab:#6b6660; --trim:#11171c; --leaf:#2e4a2a; --trunk:#3b2b1e; --lawn:#24331f; --night:1;
+  --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}
+
+[hidden]{display:none!important}
+body{margin:0;overflow-wrap:anywhere;background:var(--sky);color:var(--ink);font-family:var(--f-sign);font-size:15px;line-height:1.65}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+h1,h2,h3{margin:0;text-wrap:balance}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--glass-lit);outline-offset:2px}
+
+.top{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.top h1{font-size:clamp(28px,4.4vw,40px);font-weight:900;letter-spacing:.04em}
+.top p{margin:2px 0 0;color:var(--muted)}
+.top>div:first-child{flex:1 1 260px;min-width:0}
+.count{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+
+.site{display:grid;grid-template-columns:minmax(320px,500px) minmax(0,1fr);gap:28px;align-items:start}
+
+/* ---------- 3D building ---------- */
+.scene{position:relative;height:640px;border-radius:18px;overflow:hidden;background:linear-gradient(to bottom,var(--sky-top) 0%,var(--sky) 62%,var(--ground) 100%);box-shadow:var(--shadow);touch-action:pan-y;cursor:grab}
+.scene:active{cursor:grabbing}
+.scene canvas{display:block;width:100%;height:100%}
+.labels{position:absolute;inset:0;pointer-events:none}
+.flabel{position:absolute;left:0;top:0;pointer-events:auto;display:flex;align-items:center;gap:7px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 11px 3px 4px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:opacity .2s,background .2s,color .2s}
+.flabel i{font-style:normal;font-family:var(--f-mono);font-size:11.5px;min-width:26px;height:22px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--fc);color:var(--paper)}
+.flabel.on{background:var(--fc);color:var(--paper)}
+.flabel.on i{background:var(--paper);color:var(--fc)}
+.flabel:hover{outline:2px solid var(--fc)}
+.scene.narrow .flabel{padding:3px}
+.scene.narrow .flabel .nm{display:none}
+.replay{position:absolute;left:14px;bottom:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.replay:hover{outline:2px solid var(--glass-lit)}
+.hint{position:absolute;right:14px;bottom:12px;font-size:12px;color:var(--muted);background:color-mix(in srgb,var(--paper) 80%,transparent);padding:3px 10px;border-radius:999px;pointer-events:none}
+.building{position:relative}
+.fallback{padding-top:8px}
+.roof-sign{margin:0 26px;background:var(--plate);color:var(--plate-ink);text-align:center;padding:6px 0 7px;border-radius:4px 4px 0 0;font-weight:900;letter-spacing:.5em;font-size:18px;position:relative}
+.roof-sign small{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.6em;opacity:.7;font-weight:500}
+.tower{background:var(--wall-2);border:2px solid var(--wall-edge);border-bottom:0;display:flex;flex-direction:column}
+.floor{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:stretch;border-top:2px solid var(--wall-edge);background:var(--wall);cursor:pointer;text-align:left;padding:0;border-left:0;border-right:0;border-bottom:0;position:relative;transition:background .2s}
+.floor:first-child{border-top:0}
+.floor .lvl{display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-weight:600;font-size:14px;background:var(--wall-2);border-right:2px solid var(--wall-edge);color:var(--ink)}
+.floor .face{padding:10px 12px 8px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.floor .wins{display:flex;gap:8px;flex-wrap:wrap}
+.win{width:30px;height:24px;background:var(--glass);border:2px solid var(--wall-edge);border-radius:2px;position:relative;transition:background .25s,box-shadow .25s}
+.win::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--wall-edge)}
+.floor .tag{display:flex;align-items:baseline;gap:8px;min-width:0}
+.floor .tag b{font-size:15px;font-weight:700;white-space:nowrap}
+.floor .tag span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.floor:hover,.floor:focus-visible{background:color-mix(in srgb,var(--wall) 82%,var(--fc))}
+.floor:hover .win,.floor.on .win{background:var(--glass-lit);box-shadow:0 0 10px color-mix(in srgb,var(--glass-lit) 60%,transparent)}
+.floor.on{background:color-mix(in srgb,var(--wall) 72%,var(--fc))}
+.floor.on .lvl{background:var(--fc);color:var(--paper)}
+.floor.on::after{content:"";position:absolute;right:-16px;top:50%;width:0;height:0;border:9px solid transparent;border-left-color:var(--fc);transform:translateY(-50%)}
+.lobby{background:var(--wall);border:2px solid var(--wall-edge);border-top:2px solid var(--wall-edge);display:flex;justify-content:center;align-items:end;gap:10px;padding:10px 0 0;height:66px}
+.door-main{width:44px;height:54px;background:var(--glass);border:2px solid var(--wall-edge);border-bottom:0}
+.lobby-sign{align-self:center;font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.2em}
+.ground{height:14px;background:var(--ground);border-radius:0 0 8px 8px;margin:0 -10px}
+
+/* ---------- right panel ---------- */
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+.panel-head{display:flex;align-items:center;gap:16px;padding:18px 22px;border-bottom:4px solid var(--fc,var(--plate))}
+.badge{font-family:var(--f-mono);font-weight:600;font-size:26px;min-width:58px;height:58px;border-radius:10px;background:var(--fc,var(--plate));color:var(--paper);display:flex;align-items:center;justify-content:center}
+.panel-head h2{font-size:24px;font-weight:900}
+.panel-head p{margin:0;color:var(--muted);font-size:14px}
+.elevator{display:flex;gap:6px;flex-wrap:wrap;padding:12px 22px;border-bottom:1px solid var(--line);align-items:center}
+.elevator .lab{font-size:12px;color:var(--muted);margin-right:4px;letter-spacing:.1em}
+.ebtn{width:38px;height:38px;border-radius:50%;border:2px solid var(--rail);background:var(--paper);font-family:var(--f-mono);font-weight:600;font-size:13px;cursor:pointer}
+.ebtn[aria-current="true"]{border-color:var(--glass-lit);box-shadow:0 0 0 3px color-mix(in srgb,var(--glass-lit) 45%,transparent);background:var(--plate);color:var(--plate-ink)}
+
+/* directory (lobby view) */
+.dir{padding:20px 22px 24px;display:flex;flex-direction:column;gap:2px}
+.dir h3{font-size:14px;letter-spacing:.3em;color:var(--muted);margin-bottom:8px}
+.dir-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 6px;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer;border-radius:6px}
+.dir-row:hover{background:color-mix(in srgb,var(--paper) 85%,var(--fc))}
+.dir-row .n{font-family:var(--f-mono);font-weight:600;font-size:18px;color:var(--fc)}
+.dir-row b{font-size:16px}
+.dir-row small{display:block;color:var(--muted);font-size:13px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dir-row .k{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+/* corridor */
+.corridor{padding:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;background:linear-gradient(to bottom,transparent 0,transparent calc(100% - 28px),color-mix(in srgb,var(--line) 70%,transparent) calc(100% - 28px))}
+.room{display:flex;flex-direction:column;align-items:stretch;background:none;border:0;padding:0;cursor:pointer;text-align:left;min-width:0}
+.room .plate{background:var(--plate);color:var(--plate-ink);border-radius:6px 6px 0 0;padding:8px 12px 9px;display:flex;flex-direction:column;gap:1px}
+.room .plate .no{font-family:var(--f-mono);font-size:12px;opacity:.75;letter-spacing:.1em}
+.room .plate b{font-size:16px;line-height:1.35}
+.room .door{position:relative;border:3px solid var(--wall-edge);border-top:0;background:color-mix(in srgb,var(--wall) 70%,var(--fc));padding:14px 14px 16px;display:flex;flex-direction:column;gap:8px;min-height:150px;transition:transform .2s}
+.room .door::before{content:"";position:absolute;right:14px;top:14px;width:34px;height:44px;background:var(--glass);border:2px solid var(--wall-edge);border-radius:2px}
+.room .door::after{content:"";position:absolute;right:12px;top:50%;width:8px;height:20px;background:var(--rail);border-radius:4px}
+.room .door p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink);padding-right:48px}
+.room .door .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.tag2{font-size:11.5px;padding:1px 7px;border-radius:4px;background:var(--paper);color:var(--muted);border:1px solid var(--line)}
+.tag2.net{color:var(--f2);border-color:currentColor}
+.room:hover .door,.room:focus-visible .door{transform:translateY(-3px)}
+.room:hover .door::before,.room:focus-visible .door::before{background:var(--glass-lit)}
+
+/* classroom overlay */
+.classroom{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--sky)}
+.cbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--plate);color:var(--plate-ink);padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.cbar .back{border:1px solid color-mix(in srgb,var(--plate-ink) 40%,transparent);background:none;color:var(--plate-ink);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:700}
+.cbar .no{font-family:var(--f-mono);font-size:13px;opacity:.75}
+.cbar b{font-size:18px}
+.modes{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.modes button{border:1px solid color-mix(in srgb,var(--plate-ink) 40%,transparent);background:none;color:var(--plate-ink);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:14px}
+.modes button[aria-pressed="true"]{background:var(--plate-ink);color:var(--plate)}
+.classroom iframe{flex:1;width:100%;border:0;background:#fff;padding-bottom:env(safe-area-inset-bottom,0px)}
+html.in-class,html.in-class body{overflow:hidden}
+
+@media (max-width:820px){
+  .site{grid-template-columns:1fr}
+  .floor.on::after{display:none}
+  .building{max-width:560px;margin:0 auto;width:100%}
+  .scene{height:480px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>物理大樓</h1>
+      <p>一層樓一冊，每間教室一個物理模擬。點樓層進走廊，點門進教室。</p>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+  <div class="site">
+    <div class="building">
+      <div class="scene" id="scene" role="group" aria-label="物理大樓 3D 模型，可拖曳旋轉，點樓層進入">
+        <div class="labels" id="labels"></div>
+        <div class="hint">拖曳旋轉・點樓層進入</div>
+      </div>
+      <div class="fallback" id="fallback" hidden aria-label="大樓立面">
+        <div class="roof-sign">物理大樓<small>PHYSICS</small></div>
+        <div class="tower" id="tower"></div>
+        <div class="lobby"><span class="lobby-sign">大廳</span><span class="door-main"></span><span class="door-main"></span><span class="lobby-sign">入口</span></div>
+        <div class="ground"></div>
+      </div>
+    </div>
+    <section class="panel" id="panel" aria-live="polite"></section>
+  </div>
+</div>
+
+<section class="classroom" id="classroom" hidden aria-label="教室">
+  <div class="cbar">
+    <button type="button" class="back" id="leave">← 回到走廊</button>
+    <span class="no" id="cNo"></span><b id="cName"></b>
+    <div class="modes" id="cModes"></div>
+  </div>
+  <iframe id="cFrame" title="物理模擬" src="about:blank"></iframe>
+</section>
+
+<script src="vendor/three.min.js"></script>
+<script>
+const FLOORS=[
+  {id:"R",lvl:"RF",name:"競賽研究室",sub:"學科能力競賽試題",color:"var(--fr)",rooms:[
+    {t:"雙彈簧懸掛木塊的簡諧振盪",d:"兩條彈簧固定在相距 2ℓ 的兩點，下掛木塊。用完整非線性力以 RK4 積分，再和近似公式比較平衡位置與週期。可直接拖曳木塊。",sims:[["","comp-double-spring"]]},
+    {t:"韋伯擺（Wilberforce 擺）",d:"垂直振動和扭轉之間來回交換能量，出現拍現象。記錄 z(t)，由拍的節點間隔求耦合係數 ε 與自然角頻率 ω₀。",sims:[["","comp-wilberforce"]]}
+  ]},
+  {id:"7",lvl:"7F",name:"選修物理五",sub:"近代物理",color:"var(--f7)",rooms:[
+    {t:"戴維森－革末實驗",d:"先調整電子的加速電壓，再轉動探測器，找出散射強度最強的角度，觀察散射強度隨角度的分布。",sims:[["","e5-davisson"]],net:true},
+    {t:"中子內部結構",d:"三個價夸克 u d d 以膠子交換色荷，被色通量管綁在一起。拖曳夸克往外拉，看弦拉伸的能量與斷裂。",sims:[["","e5-neutron"]]}
+  ]},
+  {id:"6",lvl:"6F",name:"選修物理四",sub:"電磁學",color:"var(--f6)",rooms:[
+    {t:"電磁感應",d:"以動畫呈現電磁感應現象（感應模式）。",sims:[["","e4-induction"]],net:true},
+    {t:"圓形線圈磁場分布",d:"用完整橢圓積分計算圓形線圈平面內的磁場 B(r)，看 r 接近線圈半徑時磁場急劇增加。",sims:[["","e4-loop-field"]],net:true}
+  ]},
+  {id:"5",lvl:"5F",name:"選修物理三",sub:"波動",color:"var(--f5)",rooms:[
+    {t:"水波干涉",d:"在 3D 水面上放置多個波源，波依疊加原理合成，可以移動波源觀察干涉圖樣。",sims:[["","e3-ripple"]],net:true},
+    {t:"共鳴空氣柱：開管與閉管",d:"同一個節點數同時驅動開管與閉管，比較兩者的波長、頻率與諧波次序，並顯示氣體分子的疏密。",sims:[["","e3-air-column"]]}
+  ]},
+  {id:"4",lvl:"4F",name:"選修物理二",sub:"力學二",color:"var(--f4)",rooms:[
+    {t:"衛星軌道模擬器",d:"在圓形與橢圓軌道上放衛星，也可以建立雙星系統，觀察軌道週期與速度變化，有平面與立體視角。",sims:[["","e2-orbit"]],net:true},
+    {t:"鉛直面半圓軌道（考慮摩擦）",d:"木塊進入鉛直半圓軌道，正向力和摩擦力隨位置改變，以 RK4 積分求最高點速度與是否脫離軌道。",sims:[["","e2-semicircle"]]}
+  ]},
+  {id:"3",lvl:"3F",name:"選修物理一",sub:"力學一",color:"var(--f3)",rooms:[
+    {t:"碗中的圓周運動",d:"鋼球在光滑半球形碗內做等速率圓周運動。調整它與鉛直方向的夾角，看圓周半徑、速率等計算結果。",sims:[["","e1-bowl"]],net:true},
+    {t:"連接體：施力與摩擦力",d:"木塊疊在金屬板上，對上方木塊施力 F，看兩者一起加速或相對滑動時摩擦力 f 如何變化。",sims:[["","e1-blocks"]]},
+    {t:"三體引力",d:"兩個固定質量對第三個質量的引力，調整位置與初速，看圓周、往返、逃逸等運動模式。",sims:[["","e1-three-body"]],net:true}
+  ]},
+  {id:"2",lvl:"2F",name:"基礎物理",sub:"",color:"var(--f2)",rooms:[
+    {t:"布朗運動",d:"橘色大粒子受到大量藍色小分子不均勻碰撞而不規則運動。可調整分子運動速度、顯示軌跡，並紀錄數據匯出 CSV。",sims:[["","b-brownian"]],net:true},
+    {t:"都卜勒效應",d:"波源與觀察者相對運動時，觀測到的頻率改變。三種模式：直線運動、圓周運動、簡諧運動。",sims:[["直線運動","b-doppler-linear"],["圓周運動","b-doppler-circle"],["簡諧運動","b-doppler-shm"]]},
+    {t:"麥克風運作原理",d:"動圈式、電容式、碳粒式三種麥克風，看振膜振動如何變成電訊號，並在示波器上比較輸出。",sims:[["","b-microphone"]]},
+    {t:"電子雙狹縫",d:"電子一顆一顆打在屏上，累積出干涉條紋。調整加速電壓、狹縫間距與屏距，看物質波波長如何決定條紋間距。",sims:[["","b-electron-slit"]]}
+  ]},
+  {id:"1",lvl:"1F",name:"國中自然",sub:"",color:"var(--f1)",rooms:[
+    {t:"台灣電力系統：電壓相位",d:"比較住宅的單相三線制和工廠的三相四線制，看各線電壓的波形、相位差與相量圖。",sims:[["","j-power-phase"]]}
+  ]}
+];
+FLOORS.forEach(f=>f.rooms.forEach((r,i)=>{r.no=(f.id==="R"?"R":f.id)+String(i+1).padStart(2,"0");r.f=f;}));
+const ROOMS=FLOORS.flatMap(f=>f.rooms);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+document.getElementById("count").textContent=`${FLOORS.length} 層樓・${ROOMS.length} 間教室`;
+
+/* building */
+function buildTower(){
+  const t=$("#tower");t.innerHTML="";
+  FLOORS.forEach(f=>{
+    const b=document.createElement("button");b.type="button";b.className="floor";b.id="fl-"+f.id;
+    b.style.setProperty("--fc",f.color);
+    b.setAttribute("aria-label",`${f.lvl} ${f.name}，${f.rooms.length} 間教室`);
+    b.innerHTML=`<span class="lvl">${f.lvl}</span><span class="face"><span class="wins">${f.rooms.map(()=>'<i class="win"></i>').join("")}</span><span class="tag"><b>${esc(f.name)}</b><span>${esc(f.sub)}</span></span></span>`;
+    b.onclick=()=>{location.hash="f"+f.id;};
+    t.appendChild(b);
+  });
+}
+
+function elevator(cur){
+  return `<div class="elevator"><span class="lab">電梯</span>${[...FLOORS].reverse().map(f=>`<button type="button" class="ebtn" data-f="${f.id}" aria-label="${f.lvl} ${esc(f.name)}" aria-current="${cur===f.id}">${f.id==="R"?"R":f.id}</button>`).join("")}<button type="button" class="ebtn" data-f="" aria-label="大廳樓層指南" aria-current="${cur===null}">大</button></div>`;
+}
+
+function showLobby(){
+  const p=$("#panel");p.style.removeProperty("--fc");
+  p.innerHTML=`<div class="panel-head"><div class="badge">B</div><div><h2>大廳・樓層指南</h2><p>由下往上，從國中自然到競賽研究室</p></div></div>`+elevator(null)+
+  `<div class="dir"><h3>樓層指南</h3>${FLOORS.map(f=>`<button type="button" class="dir-row" data-f="${f.id}" style="--fc:${f.color}"><span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${f.rooms.map(r=>esc(r.t)).join("・")}</small></span><span class="k">${f.rooms.length} 間</span></button>`).join("")}</div>`;
+  wire(p);
+}
+
+function showFloor(f){
+  const p=$("#panel");p.style.setProperty("--fc",f.color);
+  p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><h2>${esc(f.name)}</h2><p>${f.sub?esc(f.sub)+"・":""}${f.rooms.length} 間教室</p></div></div>`+elevator(f.id)+
+  `<div class="corridor">${f.rooms.map(r=>`<button type="button" class="room" data-r="${r.no}" style="--fc:${f.color}"><span class="plate"><span class="no">${r.no}</span><b>${esc(r.t)}</b></span><span class="door"><p>${esc(r.d)}</p><span class="tags">${r.sims.length>1?`<span class="tag2">${r.sims.length} 種模式</span>`:""}${r.net?`<span class="tag2 net">需要網路</span>`:""}</span></span></button>`).join("")}</div>`;
+  wire(p);
+}
+function wire(p){
+  p.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{location.hash=b.dataset.f?"f"+b.dataset.f:"lobby";});
+  p.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{location.hash="r"+b.dataset.r;});
+}
+
+/* classroom */
+const cls=$("#classroom"),frame=$("#cFrame");let opener=null;
+function enter(r,mode=0){
+  $("#cNo").textContent=r.no;$("#cName").textContent=r.t;
+  const m=$("#cModes");m.innerHTML="";
+  if(r.sims.length>1){r.sims.forEach(([label],i)=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.setAttribute("aria-pressed",String(i===mode));b.onclick=()=>enter(r,i);m.appendChild(b);});}
+  frame.src="sims/"+r.sims[mode][1]+".html";
+  if(cls.hidden){opener=document.activeElement;cls.hidden=false;document.documentElement.classList.add("in-class");$("#leave").focus();}
+}
+function leave(){
+  cls.hidden=true;frame.src="about:blank";document.documentElement.classList.remove("in-class");
+}
+$("#leave").onclick=()=>{const r=current();location.hash=r?"f"+r.f.id:"lobby";};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!cls.hidden)$("#leave").click();});
+
+/* routing */
+function current(){const m=/^#r(\w+)$/.exec(location.hash);return m?ROOMS.find(r=>r.no===m[1]):null;}
+function route(){
+  const h=location.hash;
+  document.querySelectorAll(".floor").forEach(b=>b.classList.remove("on"));
+  const rm=current();
+  if(rm){showFloor(rm.f);$("#fl-"+rm.f.id).classList.add("on");enter(rm);return;}
+  if(!cls.hidden)leave();
+  const fm=/^#f(\w+)$/.exec(h);const f=fm&&FLOORS.find(x=>x.id===fm[1]);
+  if(f){showFloor(f);$("#fl-"+f.id).classList.add("on");}else showLobby();
+}
+buildTower();
+/* ---------- 3D building ---------- */
+function selectedFloorId(){
+  const r=current(); if(r) return r.f.id;
+  const m=/^#f(\w+)$/.exec(location.hash); return m?m[1]:null;
+}
+function init3D(){
+  if(!window.THREE) return false;
+  const box=document.getElementById("scene"), labelBox=document.getElementById("labels");
+  let renderer;
+  try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch(e){return false;}
+  if(!renderer.getContext()) return false;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  box.insertBefore(renderer.domElement,labelBox);
+
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const col=v=>{const m=/var\((--[\w-]+)\)/.exec(v);const name=m?m[1]:(v.startsWith("--")?v:null);return new THREE.Color(name?(css(name)||"#999999"):v).convertSRGBToLinear();};
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(30,1,0.1,300);
+
+  /* lights */
+  const hemi=new THREE.HemisphereLight(0xffffff,0x88907a,0.75); scene.add(hemi);
+  const sun=new THREE.DirectionalLight(0xffffff,0.95);
+  sun.position.set(14,26,18); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  Object.assign(sun.shadow.camera,{left:-16,right:16,top:20,bottom:-6,near:1,far:80});
+  sun.shadow.bias=-0.0008; scene.add(sun);
+  const glow=new THREE.PointLight(0xffd27a,0,14); scene.add(glow);
+
+  /* materials (colors filled by applyTheme) */
+  const M={
+    wall:new THREE.MeshStandardMaterial({roughness:.85}),
+    slab:new THREE.MeshStandardMaterial({roughness:.7}),
+    trim:new THREE.MeshStandardMaterial({roughness:.5,metalness:.3}),
+    glass:new THREE.MeshStandardMaterial({roughness:.15,metalness:.55}),
+    lawn:new THREE.MeshStandardMaterial({roughness:1}),
+    pave:new THREE.MeshStandardMaterial({roughness:.95}),
+    leaf:new THREE.MeshStandardMaterial({roughness:.9,flatShading:true}),
+    trunk:new THREE.MeshStandardMaterial({roughness:.9})
+  };
+  const mesh=(g,m,x,y,z,cast=true,recv=true)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=recv;return o;};
+  const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
+
+  const W=8, D=5, H=1.2, BASE=1.5;
+  const tower=new THREE.Group(); scene.add(tower);
+
+  /* ground */
+  const lawn=mesh(new THREE.CylinderGeometry(18,18,.3,64),M.lawn,0,-.15,0,false,true); scene.add(lawn);
+  scene.add(mesh(B(3.2,.04,9),M.pave,0,.02,D/2+4.5,false,true));
+  scene.add(mesh(B(W+3,.06,D+3),M.pave,0,.03,0,false,true));
+
+  /* lobby */
+  const lobby=new THREE.Group(); tower.add(lobby);
+  lobby.add(mesh(B(W-.6,BASE,D-.6),M.wall,0,BASE/2,0));
+  lobby.add(mesh(B(W-1.4,BASE*.78,.06),M.glass,0,BASE*.42,(D-.6)/2+.03,false,false));
+  for(let i=-3;i<=3;i++) lobby.add(mesh(B(.08,BASE*.8,.1),M.trim,i*(W-1.4)/6,BASE*.42,(D-.6)/2+.07,false,false));
+  lobby.add(mesh(B(3.4,.14,1.6),M.slab,0,BASE*.86,(D-.6)/2+.8));
+  [-1.5,1.5].forEach(x=>lobby.add(mesh(new THREE.CylinderGeometry(.07,.07,BASE*.86,10),M.trim,x,BASE*.43,(D-.6)/2+1.5)));
+  lobby.add(mesh(B(3,.1,.5),M.slab,0,.05,(D-.6)/2+1.9));
+
+  /* floors */
+  const floorObjs={}; const pickables=[];
+  const upper=FLOORS.filter(f=>f.id!=="R").slice().reverse();      // 1F … 7F
+  const roofY=BASE+upper.length*H;
+  function buildFloor(f,y,w,d,h){
+    const g=new THREE.Group(); g.position.y=y; tower.add(g);
+    const accentMat=new THREE.MeshStandardMaterial({roughness:.5});
+    const lit=new THREE.MeshStandardMaterial({roughness:.2,metalness:.2,emissive:new THREE.Color(0),emissiveIntensity:1});
+    const slab=mesh(B(w+.3,h*.16,d+.3),M.slab,0,h*.08,0); g.add(slab);
+    const body=mesh(B(w,h*.84,d),M.wall,0,h*.16+h*.42,0); g.add(body);
+    const band=mesh(B(w+.32,h*.05,.05),accentMat,0,h*.13,(d+.3)/2+.01,false,false); g.add(band);
+    const n=f.rooms.length, span=(w-.8)/n, wins=[];
+    for(let i=0;i<n;i++){
+      const x=-(w-.8)/2+span*(i+.5);
+      const pane=mesh(B(span*.8,h*.52,.06),lit,x,h*.16+h*.44,d/2+.02,false,false); g.add(pane); wins.push(pane);
+      g.add(mesh(B(.06,h*.52,.09),M.trim,x,h*.16+h*.44,d/2+.05,false,false));
+      g.add(mesh(B(span*.86,.05,.16),M.trim,x,h*.16+h*.17,d/2+.06,false,false));
+    }
+    [-1,1].forEach(s=>{for(let k=0;k<2;k++){g.add(mesh(B(.06,h*.46,d*.28),M.glass,s*(w/2+.02),h*.16+h*.44,-d/4+k*d/2,false,false));}});
+    [slab,body,band,...wins].forEach(o=>{o.userData.floor=f.id;pickables.push(o);});
+    floorObjs[f.id]={f,g,lit,accentMat,y,h,w,d,off:0,glow:0};
+    return g;
+  }
+  upper.forEach((f,i)=>buildFloor(f,BASE+i*H,W,D,H));
+  /* roof deck + parapet */
+  tower.add(mesh(B(W+.3,.18,D+.3),M.slab,0,roofY+.09,0));
+  [[0,(D+.3)/2,W+.3,.08],[0,-(D+.3)/2,W+.3,.08]].forEach(([x,z,w,d])=>tower.add(mesh(B(w,.35,d),M.slab,x,roofY+.35,z)));
+  [[(W+.3)/2,0],[-(W+.3)/2,0]].forEach(([x,z])=>tower.add(mesh(B(.08,.35,D+.3),M.slab,x,roofY+.35,z)));
+  /* RF penthouse */
+  const rf=FLOORS.find(f=>f.id==="R");
+  if(rf){const g=buildFloor(rf,roofY+.18,4.4,3.2,1.15); g.position.x=-1.2; g.position.z=-.4;}
+  /* rooftop sign */
+  const sc=document.createElement("canvas"); sc.width=1024; sc.height=256;
+  const cx=sc.getContext("2d");
+  const signTex=new THREE.CanvasTexture(sc); signTex.encoding=THREE.sRGBEncoding; signTex.anisotropy=4;
+  const sign=mesh(new THREE.PlaneGeometry(3.2,.8),new THREE.MeshBasicMaterial({map:signTex,transparent:true}),2.2,roofY+1.05,D/2-.1,false,false);
+  tower.add(sign);
+  [1.0,3.4].forEach(x=>tower.add(mesh(B(.06,.7,.06),M.trim,x,roofY+.55,D/2-.12,false,false)));
+  tower.add(mesh(new THREE.CylinderGeometry(.03,.03,1.6,8),M.trim,-2.6,roofY+2.3,-1.2));
+  tower.add(mesh(new THREE.SphereGeometry(.08,10,8),new THREE.MeshBasicMaterial({color:0xff5a4a}),-2.6,roofY+3.1,-1.2,false,false));
+  function drawSign(){
+    cx.clearRect(0,0,1024,256);
+    cx.fillStyle=css("--plate")||"#1f3347"; roundRect(cx,8,8,1008,240,28); cx.fill();
+    cx.fillStyle=css("--plate-ink")||"#f4f1e8"; cx.textAlign="center";
+    cx.font='900 120px "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif'; cx.fillText("物 理 大 樓",512,150);
+    cx.font='600 40px "IBM Plex Mono",monospace'; cx.globalAlpha=.7; cx.fillText("P H Y S I C S",512,212); cx.globalAlpha=1;
+    signTex.needsUpdate=true;
+  }
+  function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+
+  /* trees */
+  const trees=[[-7.5,3.5],[-8.5,-1],[7.6,3.2],[8.3,-1.6],[-5.6,7.5],[5.8,7.8],[-10,4.2],[10.2,4.4],[0,-8]];
+  trees.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
+    scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
+    scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
+    scene.add(mesh(new THREE.IcosahedronGeometry(.65*s,0),M.leaf,x+.3*s,2.1*s,z-.1));});
+
+  /* glass elevator (front-right corner) */
+  const EX=W/2+.62, EZ=D/2-.55, shaftH=roofY+1.5;
+  const shaftMat=new THREE.MeshStandardMaterial({color:0xaed3e6,transparent:true,opacity:.2,roughness:.1,metalness:.2,depthWrite:false});
+  tower.add(mesh(B(.95,shaftH,.95),shaftMat,EX,shaftH/2,EZ,false,false));
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>tower.add(mesh(B(.06,shaftH,.06),M.trim,EX+a*.47,shaftH/2,EZ+b*.47)));
+  for(let y=BASE;y<shaftH;y+=H) tower.add(mesh(B(1,.05,1),M.trim,EX,y,EZ,false,false));
+  tower.add(mesh(B(1,.06,1),M.trim,EX,shaftH,EZ,false,false));
+  const cabMat=new THREE.MeshStandardMaterial({color:0xfff3d6,roughness:.4,emissive:new THREE.Color(0xffe2a0).convertSRGBToLinear(),emissiveIntensity:.6});
+  const cab=new THREE.Group(); tower.add(cab); cab.position.set(EX,.06,EZ);
+  cab.add(mesh(B(.84,.06,.84),M.trim,0,0,0)); cab.add(mesh(B(.84,.06,.84),M.trim,0,1.08,0));
+  cab.add(mesh(B(.62,.03,.62),cabMat,0,1.04,0,false,false));
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>cab.add(mesh(B(.04,1.08,.04),M.trim,a*.4,.54,b*.4,false,false)));
+  scene.add(mesh(B(1.2,.05,1.6),M.pave,EX,.04,EZ+.9,false,true));
+
+  /* a student */
+  const lin=h=>new THREE.Color(h).convertSRGBToLinear();
+  const mat=h=>new THREE.MeshStandardMaterial({color:lin(h),roughness:.8});
+  const skinM=mat("#e8c09a"), shirtM=mat("#f4f4f0"), pantsM=mat("#25344a"), hairM=mat("#2a2420"), bagM=mat("#c2652a"), shoeM=mat("#1b1b1b");
+  const person=new THREE.Group(); tower.add(person);
+  const body=new THREE.Group(); person.add(body); body.scale.setScalar(.95);
+  const limb=(m,w,h,d,px,py)=>{const g=new THREE.Group();g.position.set(px,py,0);const o=mesh(B(w,h,d),m,0,-h/2,0);g.add(o);body.add(g);return g;};
+  const legL=limb(pantsM,.12,.44,.14,-.08,.46), legR=limb(pantsM,.12,.44,.14,.08,.46);
+  [legL,legR].forEach(l=>l.add(mesh(B(.13,.06,.2),shoeM,0,-.44,.03)));
+  body.add(mesh(B(.36,.44,.22),shirtM,0,.68,0));
+  body.add(mesh(B(.28,.32,.12),bagM,0,.7,-.17));
+  const armL=limb(shirtM,.09,.4,.11,-.23,.88), armR=limb(shirtM,.09,.4,.11,.23,.88);
+  [armL,armR].forEach(a=>a.add(mesh(B(.08,.08,.09),skinM,0,-.42,0)));
+  body.add(mesh(new THREE.SphereGeometry(.14,16,12),skinM,0,1.04,0));
+  body.add(mesh(new THREE.SphereGeometry(.145,16,10,0,Math.PI*2,0,Math.PI*.55),hairM,0,1.06,-.01));
+
+  const P0=new THREE.Vector3(0,0,D/2+7), P1=new THREE.Vector3(.9,0,D/2+2.6), P2=new THREE.Vector3(EX,0,EZ+1.15), P3=new THREE.Vector3(EX,.06,EZ);
+  let route=[P1], inside=false, cabY=.06, cabTarget=.06, revealed=null, wantFloor, walkT=0, arriveAt=0;
+  person.position.copy(P0);
+  const floorY=id=>{if(!id)return .06;const o=floorObjs[id];return o.y+o.h*.16;};
+  function restartWalk(){person.position.copy(P0);person.visible=true;inside=false;cabY=cabTarget=.06;revealed=null;route=[P1];wantFloor=undefined;}
+  const replay=document.createElement("button");replay.type="button";replay.className="replay";replay.textContent="重新走進大樓";
+  replay.onclick=restartWalk; box.appendChild(replay);
+
+  function stepPerson(sel,dt,now){
+    if(reduce){revealed=sel;cabY=floorY(sel);cab.position.y=cabY;person.visible=!sel;if(!sel)person.position.copy(P1);return;}
+    if(sel!==wantFloor){
+      wantFloor=sel; revealed=null;
+      if(sel){
+        if(inside){cabTarget=floorY(sel);person.visible=true;}
+        else{const far=person.position.z>P1.z+.2;route=far?[P1,P2,P3]:[P2,P3];}
+      }else{
+        if(inside){cabTarget=.06;person.visible=true;}
+        else if(!route.length) route=[P1];
+      }
+    }
+    if(route.length){
+      const tgt=route[0], dx=tgt.x-person.position.x, dz=tgt.z-person.position.z, d=Math.hypot(dx,dz), sp=3.2*dt;
+      if(d<=sp){person.position.x=tgt.x;person.position.z=tgt.z;route.shift();
+        if(!route.length&&tgt===P3){inside=true;cabTarget=floorY(wantFloor);}}
+      else{person.position.x+=dx/d*sp;person.position.z+=dz/d*sp;person.rotation.y=Math.atan2(dx,dz);}
+      walkT+=dt*9;
+      const sw=Math.sin(walkT)*.6; legL.rotation.x=sw; legR.rotation.x=-sw; armL.rotation.x=-sw*.8; armR.rotation.x=sw*.8;
+      body.position.y=Math.abs(Math.cos(walkT))*.03;
+    }else{
+      legL.rotation.x*=.8;legR.rotation.x*=.8;armL.rotation.x*=.8;armR.rotation.x*=.8;body.position.y*=.8;
+      if(!inside&&!wantFloor) person.rotation.y+=(Math.PI-person.rotation.y)*.08;
+    }
+    if(inside){
+      const dy=cabTarget-cabY, sp=3.2*dt;
+      if(Math.abs(dy)<=sp){
+        cabY=cabTarget;
+        if(wantFloor){ if(!revealed){ if(!arriveAt) arriveAt=now+350; if(now>=arriveAt){revealed=wantFloor;person.visible=false;arriveAt=0;} } }
+        else{inside=false;person.visible=true;person.position.set(P3.x,0,P3.z);person.rotation.y=0;route=[P2,P1];}
+      }else{cabY+=Math.sign(dy)*sp;person.visible=true;person.rotation.y=0;}
+      person.position.set(P3.x,cabY,P3.z);
+    }
+    cab.position.y=cabY;
+  }
+
+  /* labels */
+  const labels={};
+  FLOORS.forEach(f=>{const b=document.createElement("button");b.type="button";b.className="flabel";b.style.setProperty("--fc",f.color);
+    b.innerHTML=`<i>${f.lvl}</i><span class="nm">${esc(f.name)}</span>`;b.setAttribute("aria-label",`${f.lvl} ${f.name}，${f.rooms.length} 間教室`);
+    b.onclick=()=>{location.hash="f"+f.id;};labelBox.appendChild(b);labels[f.id]=b;});
+
+  let night=false;
+  function applyTheme(){
+    night=css("--night")==="1";
+    M.wall.color=col("--wall"); M.slab.color=col("--slab"); M.trim.color=col("--trim");
+    M.glass.color=col("--glass"); M.lawn.color=col("--lawn"); M.pave.color=col("--ground");
+    M.leaf.color=col("--leaf"); M.trunk.color=col("--trunk");
+    Object.values(floorObjs).forEach(o=>{o.accentMat.color=col(o.f.color); o.lit.color=col("--glass");});
+    hemi.intensity=night?.28:.75; sun.intensity=night?.22:.95; sun.color=new THREE.Color(night?0x9fb4d9:0xfff4e0);
+    drawSign();
+  }
+  applyTheme();
+  const mq=window.matchMedia("(prefers-color-scheme: dark)");
+  (mq.addEventListener?mq.addEventListener("change",applyTheme):mq.addListener(applyTheme));
+  new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+  /* camera orbit */
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let az=.55, el=.24, dist=30, lastUser=-1e9, t0=performance.now();
+  const target=new THREE.Vector3(0,(roofY+2)/2,0);
+  function fit(){
+    const w=box.clientWidth,h=box.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; box.classList.toggle("narrow",w<480);
+    const vf=THREE.MathUtils.degToRad(cam.fov)/2, hf=Math.atan(Math.tan(vf)*cam.aspect);
+    dist=Math.max((roofY+3.4)/2/Math.tan(vf),(W+D+3)/2/Math.tan(hf))*1.12;
+    cam.updateProjectionMatrix();
+  }
+  fit(); new ResizeObserver(fit).observe(box);
+
+  let drag=null, moved=0;
+  const ray=new THREE.Raycaster(), ptr=new THREE.Vector2();
+  function pick(e){const r=renderer.domElement.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);const hit=ray.intersectObjects(pickables,false)[0];return hit?hit.object.userData.floor:null;}
+  let hover=null;
+  renderer.domElement.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,az,el};moved=0;});
+  window.addEventListener("pointermove",e=>{
+    if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;moved=Math.max(moved,Math.abs(dx)+Math.abs(dy));
+      if(moved>4){az=drag.az-dx*.008; el=Math.min(.62,Math.max(.04,drag.el+dy*.004)); lastUser=performance.now();}}
+    else if(e.target===renderer.domElement){hover=pick(e);renderer.domElement.style.cursor=hover?"pointer":"";}
+  });
+  window.addEventListener("pointerup",e=>{if(drag&&moved<=4&&e.target===renderer.domElement){const id=pick(e);if(id)location.hash="f"+id;}drag=null;});
+  renderer.domElement.addEventListener("pointerleave",()=>{hover=null;});
+
+  const v=new THREE.Vector3(), lit=new THREE.Color(css("--glass-lit")||"#ffd978");
+  let last=performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    const dt=Math.min(.05,(now-last)/1000); last=now;
+    if(!document.getElementById("classroom").hidden) return;
+    const idle=now-lastUser>3500 && !drag && !reduce;
+    const a=az+(idle?Math.sin((now-t0)/5200)*.22:0);
+    cam.position.set(target.x+dist*Math.sin(a)*Math.cos(el),target.y+dist*Math.sin(el),target.z+dist*Math.cos(a)*Math.cos(el));
+    cam.lookAt(target);
+    const sel=selectedFloorId(); lit.set(css("--glass-lit")||"#ffd978").convertSRGBToLinear();
+    stepPerson(sel,dt,now);
+    let gl=null;
+    Object.values(floorObjs).forEach(o=>{
+      const on=o.f.id===revealed, hv=o.f.id===hover||(o.f.id===sel&&!on);
+      const tOff=on?.85:(hv?.25:0), tGlow=on?1:(hv?.65:(night?.22:0));
+      o.off+= (tOff-o.off)*(reduce?1:.12); o.glow+=(tGlow-o.glow)*(reduce?1:.12);
+      o.g.position.z=(o.f.id==="R"?-.4:0)+o.off;
+      o.lit.emissive.copy(lit).multiplyScalar(o.glow*1.1);
+      if(on) gl=o;
+      const lb=labels[o.f.id];
+      v.set(o.g.position.x-o.w/2-.15,o.y+o.h*.55,o.g.position.z+o.d/2).project(cam);
+      const x=(v.x*.5+.5)*box.clientWidth, y=(-v.y*.5+.5)*box.clientHeight;
+      lb.style.transform=`translate(${Math.max(Math.min(x, box.clientWidth-8), lb.offsetWidth+8)-lb.offsetWidth}px,${y-12}px)`;
+      lb.classList.toggle("on",o.f.id===sel);
+    });
+    if(gl){glow.position.set(0,gl.y+gl.h*.6,gl.g.position.z+gl.d/2+1.2);glow.intensity+=((night?1.4:.6)-glow.intensity)*.1;}else glow.intensity*=.9;
+    renderer.render(scene,cam);
+  }
+  requestAnimationFrame(frame);
+  return true;
+}
+if(!init3D()){document.getElementById("scene").hidden=true;document.getElementById("fallback").hidden=false;}
+route();
+window.addEventListener("hashchange",route);
+</script>
+
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").then(r=>r.update()).catch(()=>{}));
+  let reloaded=false; const hadController=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(hadController&&!reloaded){reloaded=true;location.reload();}});
+}
+</script>
+</body></html>

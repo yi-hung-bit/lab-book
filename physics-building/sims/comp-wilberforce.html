@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wilberforce 擺：拍現象與耦合參數量測</title>
+<style>
+:root{
+  --bg:#e9eef1; --panel:#ffffff; --ink:#18242f; --mut:#5d6b76; --line:#cfd8de; --grid:#e3e9ed;
+  --z:#1f5fa8; --th:#7a3fa0; --node:#c2272d; --ok:#23794a; --soft:#f3f6f8;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;font-variant-numeric:tabular-nums}
+header{background:var(--ink);color:#fff;padding:16px 24px 0}
+header h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.02em}
+header p{margin:2px 0 12px;color:#b9c6d0;font-size:13px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav button{border:0;background:#2a3947;color:#c9d4dc;font:inherit;font-size:14px;padding:8px 18px;cursor:pointer;border-radius:6px 6px 0 0}
+nav button.on{background:var(--bg);color:var(--ink);font-weight:700}
+nav button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--z);outline-offset:2px}
+main{padding:18px 24px 40px;max-width:1300px;margin:auto}
+.tab{display:none}.tab.on{display:block}
+.grid{display:grid;grid-template-columns:330px 1fr;gap:18px;align-items:start}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media(max-width:960px){.grid,.grid2{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px 16px;margin-bottom:16px}
+.panel h2{font-size:15px;margin:0 0 8px;color:var(--ink)}
+.panel h3{font-size:14px;margin:12px 0 4px}
+label.row{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;margin:10px 0 0}
+input[type=range]{width:100%;accent-color:var(--z)}
+select{font:inherit;font-size:13px;padding:3px 4px}
+.v{font-weight:700}
+button.b{font:inherit;font-size:13.5px;padding:6px 12px;border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:3px;cursor:pointer;margin:4px 4px 0 0}
+button.b.pri{background:var(--ink);color:#fff}
+button.b.red{border-color:var(--node);color:var(--node)}
+button.b:disabled{opacity:.35;cursor:default}
+canvas{width:100%;display:block;background:#fff;border:1px solid var(--line)}
+.note{font-size:12.8px;color:var(--mut);margin:6px 0}
+.warn{color:var(--node);font-size:13px;margin:6px 0}
+.good{color:var(--ok)}
+.eq{font-family:"Cambria Math","Times New Roman",serif;font-size:16.5px;background:var(--soft);padding:6px 12px;border-left:3px solid var(--z);margin:8px 0;overflow-x:auto;white-space:nowrap}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{background:var(--soft);font-weight:600}
+th,td{border-bottom:1px solid var(--line);padding:3px 6px;text-align:center}
+td input{width:84px;font:inherit;text-align:center;border:1px solid transparent;background:transparent;padding:1px}
+td input:hover{border-color:var(--line)}
+td input:focus{border-color:var(--z);background:#fff}
+td button{border:0;background:none;color:var(--node);cursor:pointer;font-size:15px}
+.tblwrap{max-height:260px;overflow-y:auto;border:1px solid var(--line)}
+.appwrap{display:flex;justify-content:center}
+.appwrap svg{width:100%;max-width:260px;height:auto}
+.ebar{display:flex;gap:6px;align-items:center;font-size:13px;margin:4px 0}
+.ebar .track{flex:1;height:12px;background:var(--grid);border-radius:2px;overflow:hidden}
+.ebar .fill{height:100%}
+.res td{text-align:left}
+.res td:first-child{color:var(--mut);width:48%}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:3px;overflow:hidden;margin:4px 0}
+.seg button{border:0;background:#fff;font:inherit;font-size:13px;padding:5px 10px;cursor:pointer}
+.seg button.on{background:var(--ink);color:#fff}
+.readout{font-size:13px;color:var(--mut);min-height:20px}
+.truth{display:none;border:2px solid var(--node);padding:10px 12px;border-radius:4px;margin-top:10px}
+.legend{font-size:12.5px;color:var(--mut)}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:4px}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+.grid>*,.grid2>*{min-width:0}
+@media(max-width:600px){main{padding:12px 12px 32px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Wilberforce 擺：拍現象與耦合參數量測</h1>
+  <p>由垂直振動 z(t) 的拍現象求耦合係數 ε 與自然角頻率 ω₀</p>
+  <nav>
+    <button class="on" data-tab="t1">1　原理與動畫</button>
+    <button data-tab="t2">2　虛擬實驗：記錄 z(t)</button>
+    <button data-tab="t3">3　數據分析與驗證</button>
+  </nav>
+</header>
+
+<main>
+<!-- ================= TAB 1 ================= -->
+<section class="tab on" id="t1">
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2>系統參數</h2>
+        <label class="row">耦合係數 ε <span class="v" id="o_eps"></span></label>
+        <input type="range" id="s_eps" min="0" max="0.3" step="0.005" value="0.1">
+        <label class="row">自然頻率 f₀ <span class="v" id="o_f0"></span></label>
+        <input type="range" id="s_f0" min="1" max="8" step="0.1" value="5">
+        <label class="row">初始下拉 z₀ <span class="v" id="o_z0"></span></label>
+        <input type="range" id="s_z0" min="0.5" max="3" step="0.1" value="2">
+        <label class="row">初始扭轉 θ(0) <span class="v" id="o_th0"></span></label>
+        <input type="range" id="s_th0" min="-30" max="30" step="1" value="0">
+        <label class="row">阻尼係數 γ <span class="v" id="o_g"></span></label>
+        <input type="range" id="s_g" min="0" max="0.5" step="0.01" value="0">
+        <label class="row">播放速度 <span class="v" id="o_sp"></span></label>
+        <input type="range" id="s_sp" min="0.05" max="1" step="0.05" value="0.25">
+        <div style="margin-top:10px">
+          <button class="b pri" id="b_run">釋放</button>
+          <button class="b" id="b_reset">重置</button>
+          <button class="b" id="b_exam">載入題目參數</button>
+        </div>
+        <p class="note">m₀ = 0.50 kg，I₀ = 2.0×10⁻⁴ kg·m²（僅影響 θ 的幅度，不影響頻率）。</p>
+      </div>
+      <div class="panel">
+        <h2>能量分配</h2>
+        <div class="ebar"><span style="width:62px">振動</span><div class="track"><div class="fill" id="eZ" style="background:var(--z);width:100%"></div></div><span id="eZt" style="width:40px;text-align:right"></span></div>
+        <div class="ebar"><span style="width:62px">轉動</span><div class="track"><div class="fill" id="eH" style="background:var(--th);width:0"></div></div><span id="eHt" style="width:40px;text-align:right"></span></div>
+        <p class="note">能量在兩種運動間來回交換，交換一次所需時間即為拍的節點間隔 2π/(ω₊−ω₋)。</p>
+      </div>
+    </div>
+    <div>
+      <div class="grid2">
+        <div class="panel">
+          <h2>裝置 <span class="note" id="tnow"></span></h2>
+          <div class="appwrap" id="app1"></div>
+        </div>
+        <div class="panel">
+          <h2>即時曲線（最近 6 秒）</h2>
+          <canvas id="cz" style="height:170px"></canvas>
+          <canvas id="ch" style="height:170px;margin-top:6px"></canvas>
+          <p class="legend"><i style="background:var(--z)"></i>z(t)（cm）　<i style="background:var(--th)"></i>θ(t)（度）</p>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>z(t) 的 0–5 秒完整波形（對照題目圖 14）</h2>
+        <canvas id="cfull" style="height:220px"></canvas>
+        <p class="legend"><i style="background:var(--z)"></i>精確解　<i style="background:var(--node)"></i>近似包絡 ±z₀|cos(εω₀t/2)|（θ(0)=0、γ=0 時成立）</p>
+      </div>
+      <div class="panel">
+        <h2>理論推導</h2>
+        <p>令 z̃ = √m₀ z、θ̃ = √I₀ θ，動能與位能化為</p>
+        <div class="eq">T = ½(ż̃² + θ̃̇²)，　V = ½ω₀²(z̃² + 2ε z̃θ̃ + θ̃²)</div>
+        <p>取常態座標 q<sub>±</sub> = (z̃ ± θ̃)/√2，兩者各自做簡諧振動，角頻率為</p>
+        <div class="eq">ω<sub>±</sub> = ω₀√(1 ± ε) ≈ ω₀(1 ± ε/2)</div>
+        <p>初始條件 z̃(0) = z̃₀、θ̃(0) = 0、靜止釋放，得</p>
+        <div class="eq">z̃(t) = ½z̃₀(cos ω₊t + cos ω₋t) = z̃₀ cos(ω̄t) cos(Δt/2)，　ω̄ = (ω₊+ω₋)/2，Δ = ω₊−ω₋</div>
+        <p>因此量測兩個量即可求兩個未知數：</p>
+        <div class="eq">節點間隔 T<sub>b</sub> = 2π/Δ，　載波週期 T<sub>c</sub> = 2π/ω̄</div>
+        <div class="eq">精確反解：ω₀ = √(ω̄² + Δ²/4)，　ε = ω̄Δ / (ω̄² + Δ²/4)</div>
+        <div class="eq">ε ≪ 1 近似：ω₀ ≈ ω̄，　ε ≈ Δ/ω̄ = T<sub>c</sub>/T<sub>b</sub></div>
+        <p class="note">題目圖 14：節點約在 t = 1、3 s（T<sub>b</sub> = 2 s），載波週期約 0.2 s，故 ω₀ = 10π ≈ 31.4 rad/s、ε = 0.2/2 = 0.1。<br>
+        注意：包絡通過節點時載波相位翻轉 180°，所以量載波週期時要在同一個拍之內計數，不能跨越節點。實驗頁改用「上升零點」而非波峰，因為包絡斜率會讓波峰位置偏移。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section class="tab" id="t2">
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2>實驗設定</h2>
+        <p class="note">每次「新實驗」都會隨機產生隱藏的 ε、ω₀、阻尼與釋放時的微小扭轉。z₀ = 2.00 cm。</p>
+        <button class="b pri" id="b_new">新實驗（隨機參數）</button>
+        <button class="b" id="b_newExam">題目參數實驗</button>
+        <p class="note" id="expTag">尚未建立實驗</p>
+        <label class="row">位移感測器取樣率
+          <select id="sel_fs"><option value="50">50 Hz</option><option value="100" selected>100 Hz</option><option value="200">200 Hz</option></select></label>
+        <label class="row">記錄時間
+          <select id="sel_dur"><option value="10">10 s</option><option value="20" selected>20 s</option><option value="30">30 s</option><option value="40">40 s</option></select></label>
+        <label class="row">播放速度
+          <select id="sel_rs"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="4">4×</option><option value="0">立即完成</option></select></label>
+        <button class="b pri" id="b_rec" disabled>釋放並開始記錄</button>
+        <p class="note">感測器雜訊標準差 0.02 cm，解析度 0.01 cm；節點標記的時間取到 0.01 s，內插零點取到 0.001 s。</p>
+      </div>
+      <div class="panel">
+        <h2>裝置</h2>
+        <div class="appwrap" id="app2"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <h2>z(t) 記錄</h2>
+        <div>
+          <span class="note">點擊曲線的動作：</span>
+          <span class="seg" id="modeSeg">
+            <button data-m="node" class="on">標記節點</button>
+            <button data-m="peak">標記上升零點（自動內插）</button>
+            <button data-m="del">刪除標記</button>
+          </span>
+        </div>
+        <canvas id="cv" style="height:320px;cursor:crosshair"></canvas>
+        <div class="readout" id="readout">移動滑鼠可讀取 t 與 z</div>
+        <label class="row">視窗起點 <span class="v" id="o_ws">0.00 s</span></label>
+        <input type="range" id="s_ws" min="0" max="10" step="0.01" value="0">
+        <label class="row">視窗寬度
+          <select id="sel_ww"><option value="1">1 s</option><option value="2">2 s</option><option value="5" selected>5 s</option><option value="10">10 s</option><option value="0">全部</option></select></label>
+        <p class="note">建議流程：先用「全部」或 10 s 視窗找出所有節點（振幅最小處），點擊標記；再放大到 1–2 s，在<b>同一個拍內</b>逐一點擊 z 由負變正的零點，並<b>只取拍中央的一半範圍</b>（避開節點前後各 1/4 個節點間隔）。程式會找出點擊處附近的上升零點，並在相鄰兩個取樣點間線性內插求時刻。<br>為什麼不用波峰？z = z₀cos(ω̄t)cos(Δt/2) 的極大值會被包絡的斜率拉偏：拍的前半段波峰延後、後半段提前，使波峰間隔系統性偏短（ε = 0.1 時約 0.3%）；零點則恰好落在載波零點上，沒有這個偏差。</p>
+        <p class="legend"><i style="background:var(--node)"></i>節點標記　<i style="background:var(--z)"></i>零點標記（圓點）</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section class="tab" id="t3">
+  <div class="grid2">
+    <div class="panel">
+      <h2>A. 節點時刻 t<sub>n</sub> 對序號 n</h2>
+      <label class="note"><input type="checkbox" id="autoA" checked> 新增時自動依時間編號（若跳過某個節點，請取消勾選並手動修改 n）</label>
+      <div class="tblwrap"><table><thead><tr><th>n</th><th>t<sub>n</sub> (s)</th><th></th></tr></thead><tbody id="tbA"></tbody></table></div>
+      <button class="b" id="addA">新增一列</button><button class="b red" id="clrA">清除</button>
+      <canvas id="cA" style="height:200px;margin-top:8px"></canvas>
+      <div id="fitA" class="note"></div>
+    </div>
+    <div class="panel">
+      <h2>B. 上升零點時刻 t<sub>k</sub> 對序號 k</h2>
+      <label class="note"><input type="checkbox" id="autoB" checked> 新增時自動依時間編號</label>
+      <div class="tblwrap"><table><thead><tr><th>k</th><th>t<sub>k</sub> (s)</th><th></th></tr></thead><tbody id="tbB"></tbody></table></div>
+      <button class="b" id="addB">新增一列</button><button class="b red" id="clrB">清除</button>
+      <canvas id="cB" style="height:200px;margin-top:8px"></canvas>
+      <div id="fitB" class="note"></div>
+      <div id="warnB" class="warn"></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h2>結果（最小平方法斜率 ± 標準誤差，誤差依偏微分傳遞）</h2>
+      <p class="note">斜率的標準誤差取「回歸殘差估計值」與「儀器解析度下限」兩者較大者：節點時刻單點不確定度取 0.01/√12 s，零點時刻取 0.0005 s，避免資料點少時殘差碰巧極小而低估誤差。</p>
+      <table class="res"><tbody id="resT"><tr><td colspan="2">A、B 兩表各需至少 3 筆資料。</td></tr></tbody></table>
+    </div>
+    <div class="panel">
+      <h2>驗證</h2>
+      <p class="note">完成分析後再揭曉隱藏參數。偏差以「幾個標準差」表示：|偏差| &lt; 2σ 可視為與真值一致。</p>
+      <button class="b red" id="b_reveal" disabled>揭曉真值</button>
+      <div class="truth" id="truthBox"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const M0=0.50, I0=2.0e-4, TWO_PI=2*Math.PI;
+
+/* ---------- 物理：常態模態精確解（含阻尼） ---------- */
+function wilber(p,t){
+  const wp=p.w0*Math.sqrt(1+p.eps), wm=p.w0*Math.sqrt(1-p.eps), g=p.gamma||0;
+  const Z0=p.z0*Math.sqrt(M0), H0=(p.th0||0)*Math.sqrt(I0);
+  const ap=(Z0+H0)/2, am=(Z0-H0)/2, e=Math.exp(-g*t);
+  const Q=w=>{const wd=Math.sqrt(Math.max(w*w-g*g,1e-12));
+    return [e*(Math.cos(wd*t)+g/wd*Math.sin(wd*t)), -e*(w*w/wd)*Math.sin(wd*t)];};
+  const P=Q(wp), N=Q(wm);
+  const zt=ap*P[0]+am*N[0], ht=ap*P[0]-am*N[0];
+  const vz=ap*P[1]+am*N[1], vh=ap*P[1]-am*N[1];
+  return {z:zt/Math.sqrt(M0), th:ht/Math.sqrt(I0), zt, ht, vz, vh};
+}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(TWO_PI*v);}
+
+/* ---------- 裝置 SVG ---------- */
+function makeApp(host){
+  host.innerHTML=`<svg viewBox="0 0 260 400" role="img" aria-label="Wilberforce 擺裝置">
+   <rect x="40" y="14" width="180" height="14" fill="#18242f"/>
+   <g stroke="#18242f" stroke-width="1">${Array.from({length:12},(_,i)=>`<line x1="${46+i*15}" y1="14" x2="${40+i*15}" y2="6"/>`).join('')}</g>
+   <line x1="20" x2="240" y1="268" y2="268" stroke="#9aa7b1" stroke-dasharray="5 4"/>
+   <text x="236" y="262" font-size="11" fill="#5d6b76" text-anchor="end">平衡位置</text>
+   <path class="sp" fill="none" stroke="#3b4a57" stroke-width="2.2"/>
+   <line class="rod" stroke="#3b4a57" stroke-width="3"/>
+   <g class="body"></g>
+  </svg>`;
+  return {sp:host.querySelector('.sp'),rod:host.querySelector('.rod'),body:host.querySelector('.body')};
+}
+function drawApp(A,z,th){
+  const top=28,cx=130,yEq=250,y=yEq+z*3000; // 1 cm = 30 px
+  const N=20,R=24,len=y-top-10,M=N*14;
+  let d='';
+  for(let i=0;i<=M;i++){const s=i/M,phi=TWO_PI*N*s+th*s;
+    d+=(i?'L':'M')+(cx+R*Math.sin(phi)).toFixed(1)+' '+(top+2+s*len).toFixed(1);}
+  A.sp.setAttribute('d',d);
+  A.rod.setAttribute('x1',cx);A.rod.setAttribute('x2',cx);A.rod.setAttribute('y1',y-8);A.rod.setAttribute('y2',y+10);
+  const yb=y+18,L=92,dx=L*Math.cos(th),dy=L*Math.sin(th)*0.3;
+  const nut=(f)=>{const x=cx+f*dx,yy=yb+f*dy,dep=1+0.18*f*Math.sin(th);
+    return `<ellipse cx="${x.toFixed(1)}" cy="${yy.toFixed(1)}" rx="${(7*dep).toFixed(1)}" ry="${(11*dep).toFixed(1)}" fill="#c9a227" stroke="#6b5510"/>`;};
+  const front=Math.sin(th)>=0?1:-1;
+  A.body.innerHTML=
+    nut(-0.72*front)+
+    `<line x1="${(cx-dx).toFixed(1)}" y1="${(yb-dy).toFixed(1)}" x2="${(cx+dx).toFixed(1)}" y2="${(yb+dy).toFixed(1)}" stroke="#56626b" stroke-width="7" stroke-linecap="round"/>`+
+    `<rect x="${cx-13}" y="${yb-14}" width="26" height="28" rx="3" fill="#18242f"/>`+
+    nut(0.72*front);
+}
+
+/* ---------- 繪圖 ---------- */
+function setupCanvas(cv){
+  const dpr=window.devicePixelRatio||1,r=cv.getBoundingClientRect();
+  cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,w:r.width,h:r.height};
+}
+function ticks(a,b,n){
+  const span=b-a;if(!(span>0))return [a];
+  const s0=span/n,mag=Math.pow(10,Math.floor(Math.log10(s0))),f=s0/mag;
+  const st=(f<1.5?1:f<3?2:f<7?5:10)*mag,out=[];
+  for(let v=Math.ceil(a/st-1e-9)*st;v<=b+1e-9;v+=st)out.push(Math.abs(v)<st*1e-6?0:v);
+  return out;
+}
+function fmtTick(v,step){const d=Math.max(0,-Math.floor(Math.log10(step)+1e-9));return v.toFixed(Math.min(d,4));}
+function plot(cv,o){
+  const {ctx,w,h}=setupCanvas(cv);
+  const pad={l:50,r:12,t:10,b:30};
+  const [x0,x1]=o.xr,[y0,y1]=o.yr;
+  const X=x=>pad.l+(x-x0)/(x1-x0)*(w-pad.l-pad.r);
+  const Y=y=>h-pad.b-(y-y0)/(y1-y0)*(h-pad.t-pad.b);
+  ctx.clearRect(0,0,w,h);
+  ctx.font='11px system-ui,sans-serif';ctx.lineWidth=1;
+  const xt=ticks(x0,x1,8),yt=ticks(y0,y1,5);
+  const xs=xt.length>1?xt[1]-xt[0]:1,ys=yt.length>1?yt[1]-yt[0]:1;
+  ctx.strokeStyle='#e3e9ed';ctx.fillStyle='#5d6b76';
+  ctx.textAlign='center';ctx.textBaseline='top';
+  xt.forEach(v=>{ctx.beginPath();ctx.moveTo(X(v),pad.t);ctx.lineTo(X(v),h-pad.b);ctx.stroke();ctx.fillText(fmtTick(v,xs),X(v),h-pad.b+4);});
+  ctx.textAlign='right';ctx.textBaseline='middle';
+  yt.forEach(v=>{ctx.beginPath();ctx.moveTo(pad.l,Y(v));ctx.lineTo(w-pad.r,Y(v));ctx.stroke();ctx.fillText(fmtTick(v,ys),pad.l-5,Y(v));});
+  if(y0<0&&y1>0){ctx.strokeStyle='#9aa7b1';ctx.beginPath();ctx.moveTo(pad.l,Y(0));ctx.lineTo(w-pad.r,Y(0));ctx.stroke();}
+  ctx.strokeStyle='#18242f';ctx.strokeRect(pad.l,pad.t,w-pad.l-pad.r,h-pad.t-pad.b);
+  ctx.fillStyle='#5d6b76';ctx.textAlign='right';ctx.textBaseline='bottom';
+  if(o.xlabel)ctx.fillText(o.xlabel,w-pad.r,h-1);
+  ctx.textAlign='left';ctx.textBaseline='top';
+  if(o.ylabel)ctx.fillText(o.ylabel,pad.l+4,pad.t+2);
+  ctx.save();ctx.beginPath();ctx.rect(pad.l,pad.t,w-pad.l-pad.r,h-pad.t-pad.b);ctx.clip();
+  (o.series||[]).forEach(s=>{
+    ctx.strokeStyle=s.color;ctx.fillStyle=s.color;ctx.lineWidth=s.lw||1.5;ctx.setLineDash(s.dash||[]);
+    const i0=s.i0||0,i1=s.i1==null?s.xs.length:s.i1;
+    if(s.line!==false){ctx.beginPath();for(let i=i0;i<i1;i++){const px=X(s.xs[i]),py=Y(s.ys[i]);i===i0?ctx.moveTo(px,py):ctx.lineTo(px,py);}ctx.stroke();}
+    if(s.dots){for(let i=i0;i<i1;i++){ctx.beginPath();ctx.arc(X(s.xs[i]),Y(s.ys[i]),s.dots,0,TWO_PI);ctx.fill();}}
+    ctx.setLineDash([]);
+  });
+  if(o.after)o.after(ctx,X,Y,w,h,pad);
+  ctx.restore();
+  cv._m={X,Y,pad,w,h,x0,x1,y0,y1};
+}
+
+/* ================= TAB 切換 ================= */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.tab));
+  redrawAll();
+});
+
+/* ================= TAB 1 ================= */
+const app1=makeApp($('app1'));
+const T1={t:0,run:false,last:null};
+function p1(){return {eps:+$('s_eps').value,w0:TWO_PI*+$('s_f0').value,z0:+$('s_z0').value/100,
+  th0:+$('s_th0').value*Math.PI/180,gamma:+$('s_g').value};}
+function labels1(){
+  const p=p1();
+  $('o_eps').textContent=p.eps.toFixed(3);
+  $('o_f0').textContent=`${(+$('s_f0').value).toFixed(1)} Hz｜ω₀ = ${p.w0.toFixed(2)}`;
+  $('o_z0').textContent=(+$('s_z0').value).toFixed(1)+' cm';
+  $('o_th0').textContent=$('s_th0').value+'°';
+  $('o_g').textContent=p.gamma.toFixed(2)+' s⁻¹';
+  $('o_sp').textContent=(+$('s_sp').value).toFixed(2)+'×';
+}
+function drawFull(){
+  const p=p1(),n=2000,xs=[],ys=[],ex=[],eu=[],el=[];
+  const D=p.w0*(Math.sqrt(1+p.eps)-Math.sqrt(1-p.eps));
+  for(let i=0;i<=n;i++){const t=5*i/n;xs.push(t);ys.push(wilber(p,t).z*100);
+    const env=p.z0*100*Math.abs(Math.cos(D*t/2));eu.push(env);el.push(-env);}
+  const A=p.z0*100*1.15;
+  plot($('cfull'),{xr:[0,5],yr:[-A,A],xlabel:'t (s)',ylabel:'z (cm)',series:[
+    {xs,ys,color:'#1f5fa8',lw:1.4},
+    {xs,ys:eu,color:'#c2272d',lw:1,dash:[4,4]},{xs,ys:el,color:'#c2272d',lw:1,dash:[4,4]}]});
+}
+function draw1(){
+  const p=p1(),s=wilber(p,T1.t);
+  drawApp(app1,s.z,s.th);
+  $('tnow').textContent=`t = ${T1.t.toFixed(2)} s`;
+  const t1=Math.max(6,T1.t),t0=t1-6,n=900,xs=[],zs=[],hs=[],I=[];
+  for(let i=0;i<=n;i++){const t=t0+6*i/n;xs.push(t);if(t<=T1.t+1e-9)I.push(i);
+    const q=wilber(p,Math.max(t,0));zs.push(q.z*100);hs.push(q.th*180/Math.PI);}
+  const i1=I.length;
+  const Az=p.z0*100*1.15;
+  const Ah=Math.max(5,(p.z0*Math.sqrt(M0)+Math.abs(p.th0)*Math.sqrt(I0))/Math.sqrt(I0)*180/Math.PI*1.1);
+  plot($('cz'),{xr:[t0,t1],yr:[-Az,Az],ylabel:'z (cm)',series:[{xs,ys:zs,color:'#1f5fa8',i1}]});
+  plot($('ch'),{xr:[t0,t1],yr:[-Ah,Ah],xlabel:'t (s)',ylabel:'θ (°)',series:[{xs,ys:hs,color:'#7a3fa0',i1}]});
+  const Ez=0.5*s.vz*s.vz+0.5*p.w0*p.w0*s.zt*s.zt, Eh=0.5*s.vh*s.vh+0.5*p.w0*p.w0*s.ht*s.ht, E=Ez+Eh||1;
+  $('eZ').style.width=(100*Ez/E)+'%';$('eH').style.width=(100*Eh/E)+'%';
+  $('eZt').textContent=Math.round(100*Ez/E)+'%';$('eHt').textContent=Math.round(100*Eh/E)+'%';
+}
+function loop1(ts){
+  if(!T1.run){T1.last=null;return;}
+  if(T1.last!=null)T1.t+=Math.min(0.05,(ts-T1.last)/1000)*+$('s_sp').value;
+  T1.last=ts;draw1();requestAnimationFrame(loop1);
+}
+$('b_run').onclick=()=>{T1.run=!T1.run;$('b_run').textContent=T1.run?'暫停':'繼續';if(T1.run)requestAnimationFrame(loop1);};
+$('b_reset').onclick=()=>{T1.run=false;T1.t=0;$('b_run').textContent='釋放';draw1();};
+$('b_exam').onclick=()=>{$('s_eps').value=0.1;$('s_f0').value=5;$('s_z0').value=2;$('s_th0').value=0;$('s_g').value=0;
+  labels1();T1.t=0;drawFull();draw1();};
+['s_eps','s_f0','s_z0','s_th0','s_g','s_sp'].forEach(id=>$(id).oninput=()=>{labels1();
+  if(id!=='s_sp'){T1.t=0;drawFull();} if(!T1.run)draw1();});
+
+/* ================= TAB 2 ================= */
+const app2=makeApp($('app2'));
+const L={truth:null,fs:100,dur:20,T:null,Z:null,n:0,simT:0,rec:false,last:null,mode:'node',nodes:[],peaks:[],revealed:false,label:''};
+const Z0LAB=0.02;
+function newExp(exam){
+  L.rec=false;
+  if(exam){L.truth={eps:0.1,w0:10*Math.PI,gamma:0.02,th0:0.005*Z0LAB*Math.sqrt(M0/I0),z0:Z0LAB};L.label='題目參數實驗（隱藏值與題目相同，外加微小阻尼與釋放擾動）';}
+  else{
+    const f0=3+3*Math.random(), eps=0.05+0.10*Math.random();
+    const delta=(Math.random()*2-1)*0.005;           // 釋放時的相對扭轉擾動
+    L.truth={eps,w0:TWO_PI*f0,gamma:0.01+0.03*Math.random(),th0:delta*Z0LAB*Math.sqrt(M0/I0),z0:Z0LAB};
+    L.label='隨機實驗 #'+Math.floor(1000+Math.random()*9000);
+  }
+  L.T=null;L.Z=null;L.n=0;L.simT=0;L.nodes=[];L.peaks=[];L.revealed=false;
+  $('truthBox').style.display='none';$('b_reveal').disabled=true;
+  $('expTag').textContent=L.label+'：請按「釋放並開始記錄」';
+  $('b_rec').disabled=false;
+  drawApp(app2,L.truth.z0,L.truth.th0);
+  renderTables();drawViewer();
+}
+function startRec(){
+  if(!L.truth)return;
+  L.fs=+$('sel_fs').value;L.dur=+$('sel_dur').value;
+  const N=Math.round(L.fs*L.dur)+1;
+  L.T=new Float64Array(N);L.Z=new Float64Array(N);
+  for(let i=0;i<N;i++){const t=i/L.fs;L.T[i]=t;
+    const z=wilber(L.truth,t).z*100+0.02*gauss();
+    L.Z[i]=Math.round(z*100)/100;}
+  L.nodes=[];L.peaks=[];renderTables();
+  $('s_ws').max=Math.max(0,L.dur-1);$('s_ws').value=0;
+  const rs=+$('sel_rs').value;
+  $('b_rec').disabled=true;
+  if(rs===0){L.simT=L.dur;L.n=N;finishRec();return;}
+  L.simT=0;L.n=0;L.rec=true;L.last=null;requestAnimationFrame(loopRec);
+}
+function finishRec(){
+  L.rec=false;L.n=L.T.length;$('b_rec').disabled=false;$('b_rec').textContent='重新記錄（同一組參數）';
+  $('expTag').textContent=L.label+'：記錄完成，請標記節點與上升零點';
+  const s=wilber(L.truth,L.dur);drawApp(app2,s.z,s.th);drawViewer();
+}
+function loopRec(ts){
+  if(!L.rec)return;
+  const rs=+$('sel_rs').value||1;
+  if(L.last!=null)L.simT+=Math.min(0.05,(ts-L.last)/1000)*rs;
+  L.last=ts;
+  if(L.simT>=L.dur){finishRec();return;}
+  L.n=Math.min(L.T.length,Math.floor(L.simT*L.fs)+1);
+  const s=wilber(L.truth,L.simT);drawApp(app2,s.z,s.th);
+  const ww=winW();
+  if(L.simT>ww){$('s_ws').value=Math.min(+$('s_ws').max,L.simT-ww);}
+  $('expTag').textContent=`${L.label}：記錄中 t = ${L.simT.toFixed(2)} s`;
+  drawViewer();requestAnimationFrame(loopRec);
+}
+function winW(){const v=+$('sel_ww').value;return v===0?L.dur:v;}
+function viewRange(){
+  const ww=winW();let ws=+$('s_ws').value;
+  if(ww>=L.dur)ws=0;ws=Math.min(ws,Math.max(0,L.dur-ww));
+  return [ws,ws+ww];
+}
+function drawViewer(){
+  const cv=$('cv');
+  $('o_ws').textContent=(+$('s_ws').value).toFixed(2)+' s';
+  const A=Z0LAB*100*1.2;
+  if(!L.T){plot(cv,{xr:[0,5],yr:[-A,A],xlabel:'t (s)',ylabel:'z (cm)',after:(c,X,Y,w,h)=>{c.fillStyle='#5d6b76';c.textAlign='center';c.font='14px system-ui';c.fillText('按「新實驗」，再按「釋放並開始記錄」',w/2,h/2-10);}});return;}
+  const [a,b]=viewRange();
+  const i0=Math.max(0,Math.floor(a*L.fs)-1),i1=Math.min(L.n,Math.ceil(b*L.fs)+2);
+  const dense=(b-a)*L.fs<=250;
+  plot(cv,{xr:[a,b],yr:[-A,A],xlabel:'t (s)',ylabel:'z (cm)',
+    series:[{xs:L.T,ys:L.Z,color:'#1f5fa8',lw:1.3,i0,i1,dots:dense?1.8:0}],
+    after:(c,X,Y,w,h,pad)=>{
+      c.strokeStyle='#c2272d';c.fillStyle='#c2272d';c.setLineDash([5,4]);c.lineWidth=1.3;c.textAlign='left';c.textBaseline='top';c.font='11px system-ui';
+      L.nodes.forEach(m=>{if(m.t<a||m.t>b)return;c.beginPath();c.moveTo(X(m.t),pad.t);c.lineTo(X(m.t),h-pad.b);c.stroke();c.fillText('n='+m.n,X(m.t)+3,pad.t+2);});
+      c.setLineDash([]);
+      L.peaks.forEach(m=>{if(m.t<a||m.t>b)return;c.fillStyle='#fff';c.strokeStyle='#1f5fa8';c.lineWidth=2;c.beginPath();c.arc(X(m.t),Y(m.z),5,0,TWO_PI);c.fill();c.stroke();});
+    }});
+}
+function cvTime(ev){const cv=$('cv'),m=cv._m,r=cv.getBoundingClientRect();
+  const x=ev.clientX-r.left;return {x,t:m.x0+(x-m.pad.l)/(m.w-m.pad.l-m.pad.r)*(m.x1-m.x0),m};}
+$('cv').addEventListener('mousemove',ev=>{
+  if(!L.T||!L.n)return;const {t}=cvTime(ev);
+  const i=Math.max(0,Math.min(L.n-1,Math.round(t*L.fs)));
+  $('readout').textContent=`t = ${Math.max(0,t).toFixed(2)} s　　最近取樣點：t = ${L.T[i].toFixed(2)} s，z = ${L.Z[i].toFixed(2)} cm`;
+});
+$('cv').addEventListener('click',ev=>{
+  if(!L.T||L.rec)return;
+  const {x,t,m}=cvTime(ev);if(t<0||t>L.dur)return;
+  const pxT=(m.x1-m.x0)/(m.w-m.pad.l-m.pad.r);
+  if(L.mode==='node'){
+    L.nodes.push({n:0,t:Math.round(t*100)/100});
+    sortNum(L.nodes,'n',$('autoA').checked);
+  }else if(L.mode==='peak'){
+    const c=Math.round(t*L.fs),k=Math.max(1,Math.round(15*pxT*L.fs));
+    let best=null,bd=Infinity;
+    for(let i=Math.max(0,c-k);i<Math.min(L.n-1,c+k);i++){
+      if(L.Z[i]<0&&L.Z[i+1]>=0){const tz=L.T[i]+(-L.Z[i])/(L.Z[i+1]-L.Z[i])/L.fs;
+        if(Math.abs(tz-t)<bd){bd=Math.abs(tz-t);best=tz;}}}
+    if(best==null)return;
+    const tt=Math.round(best*1000)/1000;
+    if(L.peaks.some(p=>Math.abs(p.t-tt)<1e-6))return;
+    L.peaks.push({k:0,t:tt,z:0});
+    sortNum(L.peaks,'k',$('autoB').checked);
+  }else{
+    let bi=-1,bd=10,arr=null;
+    [[L.nodes,'n'],[L.peaks,'k']].forEach(([A])=>A.forEach((p,i)=>{const d=Math.abs(m.X(p.t)-x);if(d<bd){bd=d;bi=i;arr=A;}}));
+    if(arr)arr.splice(bi,1);
+  }
+  renderTables();drawViewer();
+});
+function sortNum(arr,key,auto){arr.sort((p,q)=>p.t-q.t);if(auto)arr.forEach((p,i)=>p[key]=i+1);}
+$('modeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{L.mode=b.dataset.m;
+  $('modeSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  $('cv').style.cursor=L.mode==='del'?'not-allowed':'crosshair';});
+$('b_new').onclick=()=>newExp(false);
+$('b_newExam').onclick=()=>newExp(true);
+$('b_rec').onclick=startRec;
+$('s_ws').oninput=drawViewer;
+$('sel_ww').onchange=()=>{$('s_ws').max=Math.max(0,L.dur-winW());drawViewer();};
+
+/* ================= TAB 3 ================= */
+function renderTables(){
+  const mk=(arr,key,tb)=>{
+    $(tb).innerHTML=arr.map((p,i)=>`<tr><td><input data-i="${i}" data-f="${key}" value="${p[key]}"></td><td><input data-i="${i}" data-f="t" value="${p.t.toFixed(key==='k'?3:2)}"></td><td><button data-i="${i}" aria-label="刪除此列">✕</button></td></tr>`).join('')||`<tr><td colspan="3" class="note">尚無資料：在實驗頁點擊曲線即可加入</td></tr>`;
+    $(tb).querySelectorAll('input').forEach(inp=>inp.onchange=()=>{
+      const v=parseFloat(inp.value);if(!isFinite(v))return;arr[+inp.dataset.i][inp.dataset.f]=v;analyze();drawViewer();});
+    $(tb).querySelectorAll('button').forEach(bt=>bt.onclick=()=>{arr.splice(+bt.dataset.i,1);renderTables();drawViewer();});
+  };
+  mk(L.nodes,'n','tbA');mk(L.peaks,'k','tbB');analyze();
+}
+$('addA').onclick=()=>{const l=L.nodes[L.nodes.length-1];L.nodes.push({n:l?l.n+1:1,t:l?l.t:0});renderTables();};
+$('addB').onclick=()=>{const l=L.peaks[L.peaks.length-1];L.peaks.push({k:l?l.k+1:1,t:l?l.t:0,z:0});renderTables();};
+$('clrA').onclick=()=>{L.nodes.length=0;renderTables();drawViewer();};
+$('clrB').onclick=()=>{L.peaks.length=0;renderTables();drawViewer();};
+
+function linreg(x,y){
+  const n=x.length;if(n<2)return null;
+  const mx=x.reduce((a,b)=>a+b)/n,my=y.reduce((a,b)=>a+b)/n;
+  let sxx=0,sxy=0,syy=0;for(let i=0;i<n;i++){sxx+=(x[i]-mx)**2;sxy+=(x[i]-mx)*(y[i]-my);syy+=(y[i]-my)**2;}
+  if(sxx===0)return null;
+  const b=sxy/sxx,a=my-b*mx;let ss=0;for(let i=0;i<n;i++)ss+=(y[i]-a-b*x[i])**2;
+  const s2=n>2?ss/(n-2):NaN;
+  return {a,b,sb:Math.sqrt(s2/sxx),sa:Math.sqrt(s2*(1/n+mx*mx/sxx)),r:syy>0?sxy/Math.sqrt(sxx*syy):1,n};
+}
+const f4=(v,d=4)=>isFinite(v)?v.toFixed(d):'—';
+function fitPlot(cv,arr,key,fit,col){
+  if(!arr.length){plot(cv,{xr:[0,5],yr:[0,5],xlabel:key,ylabel:'t (s)'});return;}
+  const xs=arr.map(p=>p[key]),ys=arr.map(p=>p.t);
+  let xa=Math.min(...xs),xb=Math.max(...xs),ya=Math.min(...ys),yb=Math.max(...ys);
+  const px=(xb-xa)*0.08||1,py=(yb-ya)*0.08||0.5;
+  plot(cv,{xr:[xa-px,xb+px],yr:[ya-py,yb+py],xlabel:key,ylabel:'t (s)',
+    series:fit?[{xs:[xa-px,xb+px],ys:[fit.a+fit.b*(xa-px),fit.a+fit.b*(xb+px)],color:'#18242f',lw:1,dash:[5,4]},{xs,ys,color:col,line:false,dots:3.5}]:[{xs,ys,color:col,line:false,dots:3.5}]});
+}
+let RES=null;
+function analyze(){
+  const FA=L.nodes.length>=2?linreg(L.nodes.map(p=>p.n),L.nodes.map(p=>p.t)):null;
+  const FB=L.peaks.length>=2?linreg(L.peaks.map(p=>p.k),L.peaks.map(p=>p.t)):null;
+  fitPlot($('cA'),L.nodes,'n',FA,'#c2272d');fitPlot($('cB'),L.peaks,'k',FB,'#1f5fa8');
+  $('fitA').innerHTML=FA?`t<sub>n</sub> = (${f4(FA.b)} ± ${f4(FA.sb)}) n + (${f4(FA.a)} ± ${f4(FA.sa)})　r = ${FA.r.toFixed(5)}　（N = ${FA.n}）`:'';
+  $('fitB').innerHTML=FB?`t<sub>k</sub> = (${f4(FB.b,5)} ± ${f4(FB.sb,5)}) k + (${f4(FB.a)} ± ${f4(FB.sa)})　r = ${FB.r.toFixed(6)}　（N = ${FB.n}）`:'';
+  // 跨越節點檢查
+  let w='';
+  if(L.peaks.length>=2&&L.nodes.length){
+    const a=Math.min(...L.peaks.map(p=>p.t)),b=Math.max(...L.peaks.map(p=>p.t));
+    if(L.nodes.some(nd=>nd.t>a&&nd.t<b))w='注意：零點資料跨越了節點。節點兩側載波相位差 180°，會使斜率偏差，請只取同一個拍內的零點。';
+  }
+  if(FA&&FB&&FA.b>0&&L.nodes.length){const q=0.25*FA.b;if(L.peaks.some(p=>L.nodes.some(nd=>Math.abs(p.t-nd.t)<q)))w+=(w?'<br>':'')+'有零點距離節點不到 1/4 個節點間隔（'+q.toFixed(2)+' s）。節點附近振幅小、相位變化快，對雜訊與釋放擾動很敏感，建議只取拍中央的零點。';}
+  if(FB&&FB.n>2){const res=L.peaks.map(p=>p.t-FB.a-FB.b*p.k);if(Math.max(...res.map(Math.abs))>0.3*FB.b)w+=(w?'<br>':'')+'有殘差超過 0.3 個週期：檢查是否漏標或重複標記某個零點（序號 k 是否連續）。';}
+  $('warnB').innerHTML=w;
+  if(!(FA&&FB&&FA.n>=3&&FB.n>=3&&FA.b>0&&FB.b>0)){RES=null;
+    $('resT').innerHTML='<tr><td colspan="2">A、B 兩表各需至少 3 筆資料，且斜率為正。</td></tr>';$('b_reveal').disabled=true;return;}
+  // 不確定度下限：節點時刻讀取解析度 0.01 s → 0.01/√12；零點時刻受雜訊與 0.001 s 捨入限制，取 0.0005 s
+  const sxx=a=>{const m=a.reduce((p,q)=>p+q,0)/a.length;return a.reduce((p,q)=>p+(q-m)**2,0);};
+  const fA=0.01/Math.sqrt(12)/Math.sqrt(sxx(L.nodes.map(p=>p.n))), fB=0.0005/Math.sqrt(sxx(L.peaks.map(p=>p.k)));
+  const Tb=FA.b,sTb=Math.max(FA.sb,fA),Tc=FB.b,sTc=Math.max(FB.sb,fB);
+  const calc=(tb,tc)=>{const D=TWO_PI/tb,wb=TWO_PI/tc,w0=Math.sqrt(wb*wb+D*D/4);return {D,wb,w0,eps:wb*D/(wb*wb+D*D/4)};};
+  const c=calc(Tb,Tc),h1=Tb*1e-6,h2=Tc*1e-6;
+  const cA=calc(Tb+h1,Tc),cB=calc(Tb,Tc+h2);
+  const sig=k=>Math.hypot((cA[k]-c[k])/h1*sTb,(cB[k]-c[k])/h2*sTc);
+  const epsA=Tc/Tb,sEpsA=epsA*Math.hypot(sTb/Tb,sTc/Tc);
+  RES={w0:c.w0,sw0:sig('w0'),eps:c.eps,seps:sig('eps'),epsA,sEpsA,w0A:c.wb,sw0A:c.wb*sTc/Tc};
+  $('resT').innerHTML=`
+   <tr><td>節點間隔 T<sub>b</sub></td><td>${f4(Tb)} ± ${f4(sTb)} s</td></tr>
+   <tr><td>載波週期 T<sub>c</sub></td><td>${f4(Tc,5)} ± ${f4(sTc,5)} s</td></tr>
+   <tr><td>Δ = ω₊ − ω₋ = 2π/T<sub>b</sub></td><td>${f4(c.D)} ± ${f4(sig('D'))} rad/s</td></tr>
+   <tr><td>ω̄ = (ω₊ + ω₋)/2 = 2π/T<sub>c</sub></td><td>${f4(c.wb,3)} ± ${f4(sig('wb'),3)} rad/s</td></tr>
+   <tr><td><b>ω₀（精確反解）</b></td><td><b>${f4(c.w0,3)} ± ${f4(RES.sw0,3)} rad/s</b>（f₀ = ${f4(c.w0/TWO_PI,3)} Hz）</td></tr>
+   <tr><td><b>ε（精確反解）</b></td><td><b>${f4(c.eps)} ± ${f4(RES.seps)}</b></td></tr>
+   <tr><td>近似：ω₀ ≈ ω̄</td><td>${f4(c.wb,3)} rad/s</td></tr>
+   <tr><td>近似：ε ≈ T<sub>c</sub>/T<sub>b</sub></td><td>${f4(epsA)} ± ${f4(sEpsA)}</td></tr>
+   <tr><td>相對不確定度</td><td>ω₀：${f4(100*RES.sw0/c.w0,3)} %　ε：${f4(100*RES.seps/c.eps,2)} %</td></tr>`;
+  $('b_reveal').disabled=!L.truth;
+  if(L.revealed)showTruth();
+}
+function showTruth(){
+  if(!L.truth)return;L.revealed=true;
+  const t=L.truth,box=$('truthBox');box.style.display='block';
+  const dev=(m,s,tv)=>{if(!RES)return '';if(!(s>0))return '（標準誤差為 0，無法換算）';const k=(m-tv)/s;
+    return `偏差 ${(m-tv>=0?'+':'')}${(100*(m-tv)/tv).toFixed(2)} %，<span class="${Math.abs(k)<2?'good':''}" style="${Math.abs(k)<2?'':'color:var(--node)'}">${k>=0?'+':''}${k.toFixed(2)} σ</span>`;};
+  box.innerHTML=`<b>隱藏參數</b><br>
+    ε = ${t.eps.toFixed(4)}　${RES?'｜ 你的結果 '+dev(RES.eps,RES.seps,t.eps):''}<br>
+    ω₀ = ${t.w0.toFixed(3)} rad/s（f₀ = ${(t.w0/TWO_PI).toFixed(3)} Hz）　${RES?'｜ 你的結果 '+dev(RES.w0,RES.sw0,t.w0):''}<br>
+    <span class="note">阻尼 γ = ${t.gamma.toFixed(3)} s⁻¹；釋放時扭轉 θ(0) = ${(t.th0*180/Math.PI).toFixed(2)}°。
+    阻尼使模態頻率變為 √(ω² − γ²)，相對修正約 ${(50*t.gamma**2/t.w0**2).toExponential(1)} %，可忽略。
+    θ(0) ≠ 0 使兩模態振幅不等，節點處振幅不會降到零，並使零點間隔出現相位調制：在拍中央的相對偏移約 ${(Math.abs(t.th0*Math.sqrt(I0)/(t.z0*Math.sqrt(M0)))*t.eps/2*100).toFixed(2)} %，愈靠近節點愈大，這就是只取拍中央零點的原因。
+    近似式 ε ≈ T<sub>c</sub>/T<sub>b</sub> 本身的相對誤差約為 ε²/8 量級。</span>`;
+}
+$('b_reveal').onclick=()=>{if(confirm('揭曉後就無法再作為盲測。確定要揭曉嗎？'))showTruth();};
+
+/* ================= 初始化 ================= */
+function redrawAll(){drawFull();draw1();drawViewer();analyze();}
+window.addEventListener('resize',redrawAll);
+labels1();drawApp(app2,Z0LAB,0);renderTables();redrawAll();
+</script>
+</body>
+</html>

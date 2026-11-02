@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣電力系統模擬器 - 單相三線 vs 三相四線</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #0F2027;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .system-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .system-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: 3px solid #2C5364;
+            background: white;
+            color: #2C5364;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .system-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .system-btn.active {
+            background: linear-gradient(135deg, #2C5364 0%, #0F2027 100%);
+            color: white;
+            border-color: #0F2027;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .panel-title {
+            font-size: 1.5em;
+            color: #0F2027;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2C5364;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 350px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+
+        .transformer-diagram {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .diagram-title {
+            color: #0F2027;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        /* 單相三線變壓器 */
+        .single-phase-coil {
+            position: relative;
+            width: 120px;
+            height: 220px;
+            border: 4px solid #2C5364;
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #FF6B6B 0%, #666 50%, #FFE66D 100%);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+        }
+
+        /* 三相四線變壓器 */
+        .three-phase-coils {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .phase-coil {
+            position: relative;
+            width: 100px;
+            height: 180px;
+            border: 4px solid #2C5364;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+        }
+
+        .phase-coil.r-phase {
+            background: linear-gradient(to bottom, #FF6B6B 0%, #666 100%);
+        }
+
+        .phase-coil.s-phase {
+            background: linear-gradient(to bottom, #4ECDC4 0%, #666 100%);
+        }
+
+        .phase-coil.t-phase {
+            background: linear-gradient(to bottom, #FFE66D 0%, #666 100%);
+        }
+
+        .terminal {
+            background: white;
+            border: 3px solid #333;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 0 auto;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .terminal.hot1 { color: #FF6B6B; border-color: #FF6B6B; }
+        .terminal.hot2 { color: #FFE66D; border-color: #FFE66D; }
+        .terminal.neutral { color: #666; border-color: #666; }
+        .terminal.r-phase { color: #FF6B6B; border-color: #FF6B6B; }
+        .terminal.s-phase { color: #4ECDC4; border-color: #4ECDC4; }
+        .terminal.t-phase { color: #FFE66D; border-color: #FFE66D; }
+
+        .voltage-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #2C5364;
+        }
+
+        .voltage-info-item {
+            margin: 8px 0;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #0F2027;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2C5364;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2C5364;
+            cursor: pointer;
+        }
+
+        .value-display {
+            min-width: 80px;
+            text-align: right;
+            font-weight: bold;
+            color: #2C5364;
+            font-size: 1.1em;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2C5364;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0F2027;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 5px solid #2196F3;
+        }
+
+        .info-box.warning {
+            background: #fff3e0;
+            border-left-color: #FF9800;
+        }
+
+        .info-box.success {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-box.warning .info-title {
+            color: #F57C00;
+        }
+
+        .info-box.success .info-title {
+            color: #388E3C;
+        }
+
+        .info-text {
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .voltage-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .voltage-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .voltage-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .voltage-label-card {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .formula-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px solid #2C5364;
+            text-align: center;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #0F2027;
+            margin: 8px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: #2C5364;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .system-selector {
+                flex-direction: column;
+            }
+
+            .system-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ 台灣電力系統模擬器</h1>
+            <p class="subtitle">
+                完整模擬單相三線制（住宅）與三相四線制（工廠）的電壓波形與相位關係
+            </p>
+            
+            <div class="system-selector">
+                <button class="system-btn active" id="singlePhaseBtn">
+                    🏠 單相三線制（住宅）
+                </button>
+                <button class="system-btn" id="threePhaseBtn">
+                    🏭 三相四線制（工廠）
+                </button>
+            </div>
+        </div>
+
+        <!-- 單相三線制內容 -->
+        <div id="singlePhaseContent">
+            <div class="main-grid">
+                <div class="panel">
+                    <h2 class="panel-title">🔌 單相三線變壓器</h2>
+                    <div class="transformer-diagram">
+                        <div class="diagram-title">中間抽頭變壓器</div>
+                        
+                        <div class="single-phase-coil">
+                            <div class="terminal hot1">L1</div>
+                            <div class="terminal neutral">N</div>
+                            <div class="terminal hot2">L2</div>
+                        </div>
+
+                        <div class="voltage-info">
+                            <div class="voltage-info-item" style="color: #FF6B6B;">
+                                L1 ↔ N: <span id="sp-v1n">110</span>V
+                            </div>
+                            <div class="voltage-info-item" style="color: #666;">
+                                N (中性點): 0V
+                            </div>
+                            <div class="voltage-info-item" style="color: #FFE66D;">
+                                L2 ↔ N: <span id="sp-v2n">110</span>V
+                            </div>
+                            <div class="voltage-info-item" style="color: #764ba2; font-size: 1.2em; margin-top: 10px;">
+                                L1 ↔ L2: <span id="sp-v12">220</span>V
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-box success">
+                        <div class="info-title">✅ 關鍵原理</div>
+                        <div class="info-text">
+                            • 相位差：<strong>180°</strong><br>
+                            • L1 與 L2 方向相反<br>
+                            • 線間電壓 = 2 × 相電壓<br>
+                            • 220V = 2 × 110V
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2 class="panel-title">📊 電壓波形</h2>
+                    <canvas id="singlePhaseWaveform"></canvas>
+                    
+                    <div class="voltage-display">
+                        <div class="voltage-card">
+                            <div class="voltage-value"><span id="sp-display-v1n">110</span>V</div>
+                            <div class="voltage-label-card">L1-N</div>
+                        </div>
+                        <div class="voltage-card">
+                            <div class="voltage-value"><span id="sp-display-v2n">110</span>V</div>
+                            <div class="voltage-label-card">L2-N</div>
+                        </div>
+                        <div class="voltage-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);">
+                            <div class="voltage-value"><span id="sp-display-v12">220</span>V</div>
+                            <div class="voltage-label-card">L1-L2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2 class="panel-title">🔍 相量圖</h2>
+                    <canvas id="singlePhasePhasor"></canvas>
+                    
+                    <div class="formula-box">
+                        <div style="color: #666; font-size: 0.9em; margin-bottom: 10px;">相位差 180°</div>
+                        <div class="formula">V<sub>L1</sub> = V × sin(ωt)</div>
+                        <div class="formula">V<sub>L2</sub> = V × sin(ωt + 180°)</div>
+                        <div class="formula" style="color: #999;">= -V × sin(ωt)</div>
+                        <div style="border-top: 2px solid #2C5364; margin: 12px 0;"></div>
+                        <div class="formula" style="color: #764ba2;">V<sub>L1-L2</sub> = 2V × sin(ωt)</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2 class="panel-title">🎮 控制面板</h2>
+                    <div class="controls">
+                        <div class="control-group">
+                            <label class="control-label">相電壓 (V)</label>
+                            <div class="slider-container">
+                                <input type="range" id="sp-voltageSlider" min="90" max="130" value="110" step="1">
+                                <span class="value-display" id="sp-voltageValue">110 V</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">頻率 (Hz)</label>
+                            <div class="slider-container">
+                                <input type="range" id="sp-frequencySlider" min="50" max="70" value="60" step="1">
+                                <span class="value-display" id="sp-frequencyValue">60 Hz</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">動畫速度</label>
+                            <div class="slider-container">
+                                <input type="range" id="sp-speedSlider" min="1" max="10" value="5" step="1">
+                                <span class="value-display" id="sp-speedValue">5x</span>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn-primary" id="sp-playPauseBtn">⏸️ 暫停</button>
+                            <button class="btn-secondary" id="sp-resetBtn">🔄 重置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 三相四線制內容 -->
+        <div id="threePhaseContent" class="hidden">
+            <div class="main-grid">
+                <div class="panel">
+                    <h2 class="panel-title">🔌 三相四線變壓器 (Y接)</h2>
+                    <div class="transformer-diagram">
+                        <div class="diagram-title">三相Y型連接</div>
+                        
+                        <div class="three-phase-coils">
+                            <div class="phase-coil r-phase">
+                                <div class="terminal r-phase">R</div>
+                                <div class="terminal neutral" style="font-size: 0.9em;">N</div>
+                            </div>
+                            <div class="phase-coil s-phase">
+                                <div class="terminal s-phase">S</div>
+                                <div class="terminal neutral" style="font-size: 0.9em;">N</div>
+                            </div>
+                            <div class="phase-coil t-phase">
+                                <div class="terminal t-phase">T</div>
+                                <div class="terminal neutral" style="font-size: 0.9em;">N</div>
+                            </div>
+                        </div>
+
+                        <div class="voltage-info">
+                            <div class="voltage-info-item" style="color: #FF6B6B;">
+                                R-N: <span id="tp-vrn">127</span>V (相電壓)
+                            </div>
+                            <div class="voltage-info-item" style="color: #4ECDC4;">
+                                S-N: <span id="tp-vsn">127</span>V (相電壓)
+                            </div>
+                            <div class="voltage-info-item" style="color: #FFE66D;">
+                                T-N: <span id="tp-vtn">127</span>V (相電壓)
+                            </div>
+                            <div style="border-top: 2px solid #ccc; margin: 10px 0;"></div>
+                            <div class="voltage-info-item" style="color: #764ba2; font-size: 1.1em;">
+                                R-S, S-T, T-R: <span id="tp-vline">220</span>V (線電壓)
+                            </div>
+                            <div style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                                線電壓 = √3 × 相電壓
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-box success">
+                        <div class="info-title">✅ 關鍵原理</div>
+                        <div class="info-text">
+                            • 相位差：<strong>120°</strong><br>
+                            • 三相平衡系統<br>
+                            • 線間電壓 = √3 × 相電壓<br>
+                            • 220V ≈ √3 × 127V
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2 class="panel-title">📊 三相電壓波形</h2>
+                    <canvas id="threePhaseWaveform"></canvas>
+                    
+                    <div class="voltage-display">
+                        <div class="voltage-card" style="background: linear-gradient(135deg, #FF6B6B, #C92A2A);">
+                            <div class="voltage-value"><span id="tp-display-vrn">127</span>V</div>
+                            <div class="voltage-label-card">R-N (0°)</div>
+                        </div>
+                        <div class="voltage-card" style="background: linear-gradient(135deg, #4ECDC4, #1A936F);">
+                            <div class="voltage-value"><span id="tp-display-vsn">127</span>V</div>
+                            <div class="voltage-label-card">S-N (-120°)</div>
+                        </div>
+                        <div class="voltage-card" style="background: linear-gradient(135deg, #FFE66D, #F4A261);">
+                            <div class="voltage-value"><span id="tp-display-vtn">127</span>V</div>
+                            <div class="voltage-label-card">T-N (-240°)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2 class="panel-title">🔌 線間電壓波形</h2>
+                    <canvas id="lineVoltageWaveform"></canvas>
+                    
+                    <div class="voltage-display">
+                        <div class="voltage-card" style="background: linear-gradient(135deg, #9B59B6, #6C3483);">
+                            <div class="voltage-value"><span id="tp-display-vrs">220</span>V</div>
+                            <div class="voltage-label-card">R-S 線電壓</div>
+                        </div>
+                        <div class="voltage-card" style="background: linear-gradient(135deg, #3498DB, #1F618D);">
+                            <div class="voltage-value"><span id="tp-display-vst">220</span>V</div>
+                            <div class="voltage-label-card">S-T 線電壓</div>
+                        </div>
+                        <div class="voltage-card" style="background: linear-gradient(135deg, #E74C3C, #A93226);">
+                            <div class="voltage-value"><span id="tp-display-vtr">220</span>V</div>
+                            <div class="voltage-label-card">T-R 線電壓</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2 class="panel-title">🔍 相量圖</h2>
+                    <canvas id="threePhasePhasor"></canvas>
+                    
+                    <div class="formula-box">
+                        <div style="color: #666; font-size: 0.9em; margin-bottom: 10px;">相位差 120°</div>
+                        <div class="formula">V<sub>R</sub> = V × sin(ωt)</div>
+                        <div class="formula">V<sub>S</sub> = V × sin(ωt - 120°)</div>
+                        <div class="formula">V<sub>T</sub> = V × sin(ωt - 240°)</div>
+                        <div style="border-top: 2px solid #2C5364; margin: 12px 0;"></div>
+                        <div class="formula" style="color: #764ba2;">V<sub>線</sub> = √3 × V<sub>相</sub></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2 class="panel-title">🎮 控制面板</h2>
+                    <div class="controls">
+                        <div class="control-group">
+                            <label class="control-label">相電壓 (V)</label>
+                            <div class="slider-container">
+                                <input type="range" id="tp-voltageSlider" min="100" max="150" value="127" step="1">
+                                <span class="value-display" id="tp-voltageValue">127 V</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">頻率 (Hz)</label>
+                            <div class="slider-container">
+                                <input type="range" id="tp-frequencySlider" min="50" max="70" value="60" step="1">
+                                <span class="value-display" id="tp-frequencyValue">60 Hz</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">動畫速度</label>
+                            <div class="slider-container">
+                                <input type="range" id="tp-speedSlider" min="1" max="10" value="5" step="1">
+                                <span class="value-display" id="tp-speedValue">5x</span>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn-primary" id="tp-playPauseBtn">⏸️ 暫停</button>
+                            <button class="btn-secondary" id="tp-resetBtn">🔄 重置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 比較說明 -->
+        <div class="panel full-width" style="margin-top: 20px;">
+            <h2 class="panel-title">📊 系統比較</h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>單相三線制（住宅）</th>
+                        <th>三相四線制（工廠）</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>線路數量</strong></td>
+                        <td>3條（L1、N、L2）</td>
+                        <td>4條（R、S、T、N）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>相位差</strong></td>
+                        <td>180°（兩相相反）</td>
+                        <td>120°（三相平衡）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>相電壓</strong></td>
+                        <td>110V（對中性線）</td>
+                        <td>127V（對中性線）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>線間電壓</strong></td>
+                        <td>220V = 2 × 110V</td>
+                        <td>220V = √3 × 127V</td>
+                    </tr>
+                    <tr>
+                        <td><strong>數學關係</strong></td>
+                        <td>V<sub>線</sub> = 2 × V<sub>相</sub></td>
+                        <td>V<sub>線</sub> = √3 × V<sub>相</sub></td>
+                    </tr>
+                    <tr>
+                        <td><strong>主要用途</strong></td>
+                        <td>住宅、小商店<br>110V 電器、220V 冷氣</td>
+                        <td>工廠、大型商業<br>馬達、工業設備</td>
+                    </tr>
+                    <tr>
+                        <td><strong>優點</strong></td>
+                        <td>• 簡單經濟<br>• 適合住宅負載<br>• 易於配線</td>
+                        <td>• 功率傳輸效率高<br>• 適合馬達運轉<br>• 負載平衡</td>
+                    </tr>
+                    <tr>
+                        <td><strong>接線方式</strong></td>
+                        <td>變壓器中間抽頭</td>
+                        <td>Y型連接（星形）</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box warning" style="margin-top: 20px;">
+                <div class="info-title">💡 重要觀念</div>
+                <div class="info-text">
+                    <strong>為什麼兩種系統都是 220V？</strong><br><br>
+                    
+                    <strong>單相三線制：</strong><br>
+                    • L1 = +110V，L2 = -110V（相位差 180°）<br>
+                    • 電壓差 = 110 - (-110) = 220V<br>
+                    • 就像「山頂到山谷」的高度差<br><br>
+                    
+                    <strong>三相四線制：</strong><br>
+                    • R、S、T 三相各為 127V（相位差 120°）<br>
+                    • 任意兩相透過向量相減得到線電壓<br>
+                    • √3 × 127 ≈ 220V<br>
+                    • 三個向量形成等邊三角形，邊長是半徑的 √3 倍<br><br>
+                    
+                    <strong>雖然原理不同，但最終都提供 220V！</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 全域變數 ====================
+        let currentSystem = 'single'; // 'single' or 'three'
+        
+        // 單相系統參數
+        let sp_voltage = 110;
+        let sp_frequency = 60;
+        let sp_speed = 5;
+        let sp_time = 0;
+        let sp_isPlaying = true;
+
+        // 三相系統參數
+        let tp_voltage = 127;
+        let tp_frequency = 60;
+        let tp_speed = 5;
+        let tp_time = 0;
+        let tp_isPlaying = true;
+
+        // ==================== 系統切換 ====================
+        const singlePhaseBtn = document.getElementById('singlePhaseBtn');
+        const threePhaseBtn = document.getElementById('threePhaseBtn');
+        const singlePhaseContent = document.getElementById('singlePhaseContent');
+        const threePhaseContent = document.getElementById('threePhaseContent');
+
+        singlePhaseBtn.addEventListener('click', () => {
+            currentSystem = 'single';
+            singlePhaseBtn.classList.add('active');
+            threePhaseBtn.classList.remove('active');
+            singlePhaseContent.classList.remove('hidden');
+            threePhaseContent.classList.add('hidden');
+            resizeCanvas();
+        });
+
+        threePhaseBtn.addEventListener('click', () => {
+            currentSystem = 'three';
+            threePhaseBtn.classList.add('active');
+            singlePhaseBtn.classList.remove('active');
+            threePhaseContent.classList.remove('hidden');
+            singlePhaseContent.classList.add('hidden');
+            resizeCanvas();
+        });
+
+        // ==================== Canvas 設置 ====================
+        const sp_waveformCanvas = document.getElementById('singlePhaseWaveform');
+        const sp_phasorCanvas = document.getElementById('singlePhasePhasor');
+        const tp_waveformCanvas = document.getElementById('threePhaseWaveform');
+        const tp_lineVoltageCanvas = document.getElementById('lineVoltageWaveform');
+        const tp_phasorCanvas = document.getElementById('threePhasePhasor');
+
+        const sp_ctx1 = sp_waveformCanvas.getContext('2d');
+        const sp_ctx2 = sp_phasorCanvas.getContext('2d');
+        const tp_ctx1 = tp_waveformCanvas.getContext('2d');
+        const tp_ctx2 = tp_lineVoltageCanvas.getContext('2d');
+        const tp_ctx3 = tp_phasorCanvas.getContext('2d');
+
+        function resizeCanvas() {
+            const canvases = [
+                sp_waveformCanvas, sp_phasorCanvas,
+                tp_waveformCanvas, tp_lineVoltageCanvas, tp_phasorCanvas
+            ];
+            canvases.forEach(canvas => {
+                if (canvas) {
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                }
+            });
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // ==================== 單相三線制 ====================
+        
+        // UI 更新
+        function sp_updateDisplays() {
+            document.getElementById('sp-voltageValue').textContent = sp_voltage + ' V';
+            document.getElementById('sp-frequencyValue').textContent = sp_frequency + ' Hz';
+            document.getElementById('sp-speedValue').textContent = sp_speed + 'x';
+
+            const lineVoltage = sp_voltage * 2;
+            document.getElementById('sp-v1n').textContent = sp_voltage;
+            document.getElementById('sp-v2n').textContent = sp_voltage;
+            document.getElementById('sp-v12').textContent = lineVoltage;
+            document.getElementById('sp-display-v1n').textContent = sp_voltage;
+            document.getElementById('sp-display-v2n').textContent = sp_voltage;
+            document.getElementById('sp-display-v12').textContent = lineVoltage;
+        }
+
+        // 繪製波形
+        function sp_drawWaveforms() {
+            const canvas = sp_waveformCanvas;
+            const ctx = sp_ctx1;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+            drawGrid(ctx, width, height);
+
+            const amplitude = height * 0.22; // 降低振幅，讓差值波形（2倍）能完整顯示
+            const centerY = height / 2;
+            const omega = 2 * Math.PI * sp_frequency / 60;
+
+            // 中性線
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // L1 波形
+            drawWaveform(ctx, width, amplitude, centerY, omega, sp_time, 0, '#FF6B6B', 'L1 (0°)', 3);
+
+            // L2 波形
+            drawWaveform(ctx, width, amplitude, centerY, omega, sp_time, 180, '#FFE66D', 'L2 (180°)', 3);
+
+            // L1-L2 差值
+            drawDifferenceWaveform(ctx, width, amplitude, centerY, omega, sp_time, '#9B59B6', 'L1-L2 (220V)');
+        }
+
+        // 繪製相量圖
+        function sp_drawPhasorDiagram() {
+            const canvas = sp_phasorCanvas;
+            const ctx = sp_ctx2;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) * 0.3;
+
+            // 繪製參考圓
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 坐標軸
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+
+            const omega = 2 * Math.PI * sp_frequency / 60;
+            const angle = omega * sp_time;
+
+            // L1 向量（向上）
+            drawPhasor(ctx, centerX, centerY, radius, angle, '#FF6B6B', 'L1', 4);
+
+            // L2 向量（向下）
+            drawPhasor(ctx, centerX, centerY, radius, angle + Math.PI, '#FFE66D', 'L2', 4);
+
+            // L1-L2 向量（兩倍長）
+            drawPhasor(ctx, centerX, centerY, radius * 2, angle, '#9B59B6', 'L1-L2', 3, 0.6);
+
+            // 中心點
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('N', centerX + 15, centerY + 5);
+        }
+
+        // ==================== 三相四線制 ====================
+        
+        // UI 更新
+        function tp_updateDisplays() {
+            document.getElementById('tp-voltageValue').textContent = tp_voltage + ' V';
+            document.getElementById('tp-frequencyValue').textContent = tp_frequency + ' Hz';
+            document.getElementById('tp-speedValue').textContent = tp_speed + 'x';
+
+            const lineVoltage = Math.round(tp_voltage * Math.sqrt(3) * 10) / 10;
+            document.getElementById('tp-vrn').textContent = tp_voltage;
+            document.getElementById('tp-vsn').textContent = tp_voltage;
+            document.getElementById('tp-vtn').textContent = tp_voltage;
+            document.getElementById('tp-vline').textContent = lineVoltage;
+            
+            document.getElementById('tp-display-vrn').textContent = tp_voltage;
+            document.getElementById('tp-display-vsn').textContent = tp_voltage;
+            document.getElementById('tp-display-vtn').textContent = tp_voltage;
+            document.getElementById('tp-display-vrs').textContent = lineVoltage;
+            document.getElementById('tp-display-vst').textContent = lineVoltage;
+            document.getElementById('tp-display-vtr').textContent = lineVoltage;
+        }
+
+        // 繪製三相波形
+        function tp_drawThreePhaseWaveforms() {
+            const canvas = tp_waveformCanvas;
+            const ctx = tp_ctx1;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+            drawGrid(ctx, width, height);
+
+            const amplitude = height * 0.28; // 調整振幅確保三相波形不重疊且完整顯示
+            const centerY = height / 2;
+            const omega = 2 * Math.PI * tp_frequency / 60;
+
+            // 中性線
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // R相
+            drawWaveform(ctx, width, amplitude, centerY, omega, tp_time, 0, '#FF6B6B', 'R (0°)', 3);
+
+            // S相
+            drawWaveform(ctx, width, amplitude, centerY, omega, tp_time, -120, '#4ECDC4', 'S (-120°)', 3);
+
+            // T相
+            drawWaveform(ctx, width, amplitude, centerY, omega, tp_time, -240, '#FFE66D', 'T (-240°)', 3);
+        }
+
+        // 繪製線間電壓波形
+        function tp_drawLineVoltageWaveforms() {
+            const canvas = tp_lineVoltageCanvas;
+            const ctx = tp_ctx2;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+            drawGrid(ctx, width, height);
+
+            const amplitude = height * 0.24; // 調整振幅，因為線電壓是√3倍，需要更小的基礎振幅
+            const centerY = height / 2;
+            const omega = 2 * Math.PI * tp_frequency / 60;
+
+            // 中性線
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+
+            const lineAmplitude = amplitude * Math.sqrt(3);
+
+            // R-S
+            drawLineVoltage(ctx, width, lineAmplitude, centerY, omega, tp_time, 0, -120, '#9B59B6', 'R-S');
+
+            // S-T
+            drawLineVoltage(ctx, width, lineAmplitude, centerY, omega, tp_time, -120, -240, '#3498DB', 'S-T');
+
+            // T-R
+            drawLineVoltage(ctx, width, lineAmplitude, centerY, omega, tp_time, -240, 0, '#E74C3C', 'T-R');
+        }
+
+        // 繪製三相相量圖
+        function tp_drawPhasorDiagram() {
+            const canvas = tp_phasorCanvas;
+            const ctx = tp_ctx3;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) * 0.28;
+
+            // 繪製參考圓
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 線電壓圓
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * Math.sqrt(3), 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 坐標軸
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+
+            const omega = 2 * Math.PI * tp_frequency / 60;
+            const angle = omega * tp_time;
+
+            // 相電壓向量
+            drawPhasor(ctx, centerX, centerY, radius, angle, '#FF6B6B', 'R', 3);
+            drawPhasor(ctx, centerX, centerY, radius, angle - 2 * Math.PI / 3, '#4ECDC4', 'S', 3);
+            drawPhasor(ctx, centerX, centerY, radius, angle - 4 * Math.PI / 3, '#FFE66D', 'T', 3);
+
+            // 線電壓向量
+            const lineRadius = radius * Math.sqrt(3);
+            drawPhasor(ctx, centerX, centerY, lineRadius, angle + Math.PI / 6, '#9B59B6', 'RS', 2, 0.5);
+            drawPhasor(ctx, centerX, centerY, lineRadius, angle - Math.PI / 2, '#3498DB', 'ST', 2, 0.5);
+            drawPhasor(ctx, centerX, centerY, lineRadius, angle + 5 * Math.PI / 6, '#E74C3C', 'TR', 2, 0.5);
+
+            // 中心點
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('N', centerX + 15, centerY + 5);
+        }
+
+        // ==================== 共用繪圖函數 ====================
+        
+        function drawGrid(ctx, width, height) {
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < height; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(width, i);
+                ctx.stroke();
+            }
+        }
+
+        function drawWaveform(ctx, width, amplitude, centerY, omega, time, phaseShift, color, label, lineWidth = 2) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+
+            const phaseRad = phaseShift * Math.PI / 180;
+
+            for (let x = 0; x < width; x++) {
+                const t = time - (width - x) * 0.01;
+                const y = centerY - amplitude * Math.sin(omega * t + phaseRad);
+                
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 13px Arial';
+            // 調整標籤位置，根據相位決定上下位置
+            let yOffset;
+            if (phaseShift === 0) {
+                yOffset = -amplitude - 20; // 0度在上方
+            } else if (phaseShift === 180) {
+                yOffset = amplitude + 30; // 180度在下方
+            } else if (phaseShift === -120) {
+                yOffset = -15; // -120度在中間偏上
+            } else if (phaseShift === -240) {
+                yOffset = amplitude + 25; // -240度在下方
+            } else {
+                yOffset = -amplitude - 20;
+            }
+            ctx.fillText(label, 10, centerY + yOffset);
+        }
+
+        function drawDifferenceWaveform(ctx, width, amplitude, centerY, omega, time, color, label) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+
+            for (let x = 0; x < width; x++) {
+                const t = time - (width - x) * 0.01;
+                const v1 = Math.sin(omega * t);
+                const v2 = Math.sin(omega * t + Math.PI);
+                const vDiff = v1 - v2;
+                const y = centerY - amplitude * vDiff;
+                
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 13px Arial';
+            ctx.fillText(label, width - 120, 25);
+        }
+
+        function drawLineVoltage(ctx, width, amplitude, centerY, omega, time, phase1, phase2, color, label) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+
+            const phase1Rad = phase1 * Math.PI / 180;
+            const phase2Rad = phase2 * Math.PI / 180;
+
+            for (let x = 0; x < width; x++) {
+                const t = time - (width - x) * 0.01;
+                const v1 = Math.sin(omega * t + phase1Rad);
+                const v2 = Math.sin(omega * t + phase2Rad);
+                const vLine = v1 - v2;
+                const y = centerY - (amplitude / Math.sqrt(3)) * vLine;
+                
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 12px Arial';
+            const yPos = 20 + (label === 'R-S' ? 0 : label === 'S-T' ? 17 : 34);
+            ctx.fillText(label, width - 45, yPos);
+        }
+
+        function drawPhasor(ctx, cx, cy, length, angle, color, label, lineWidth = 2, alpha = 1) {
+            const x = cx + length * Math.cos(angle - Math.PI / 2);
+            const y = cy - length * Math.sin(angle - Math.PI / 2);
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.globalAlpha = alpha;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            const arrowSize = 12;
+            const arrowAngle = Math.PI / 6;
+            const headAngle = angle - Math.PI / 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(
+                x - arrowSize * Math.cos(headAngle - arrowAngle),
+                y + arrowSize * Math.sin(headAngle - arrowAngle)
+            );
+            ctx.lineTo(
+                x - arrowSize * Math.cos(headAngle + arrowAngle),
+                y + arrowSize * Math.sin(headAngle + arrowAngle)
+            );
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.globalAlpha = 1;
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 15px Arial';
+            const labelX = cx + (length + 25) * Math.cos(angle - Math.PI / 2);
+            const labelY = cy - (length + 25) * Math.sin(angle - Math.PI / 2);
+            ctx.fillText(label, labelX, labelY);
+        }
+
+        // ==================== 動畫循環 ====================
+        
+        function animate() {
+            if (currentSystem === 'single') {
+                if (sp_isPlaying) {
+                    sp_time += 0.02 * sp_speed;
+                }
+                sp_drawWaveforms();
+                sp_drawPhasorDiagram();
+            } else {
+                if (tp_isPlaying) {
+                    tp_time += 0.02 * tp_speed;
+                }
+                tp_drawThreePhaseWaveforms();
+                tp_drawLineVoltageWaveforms();
+                tp_drawPhasorDiagram();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // ==================== 事件監聽器 - 單相 ====================
+        
+        document.getElementById('sp-voltageSlider').addEventListener('input', (e) => {
+            sp_voltage = parseInt(e.target.value);
+            sp_updateDisplays();
+        });
+
+        document.getElementById('sp-frequencySlider').addEventListener('input', (e) => {
+            sp_frequency = parseInt(e.target.value);
+            sp_updateDisplays();
+        });
+
+        document.getElementById('sp-speedSlider').addEventListener('input', (e) => {
+            sp_speed = parseInt(e.target.value);
+            sp_updateDisplays();
+        });
+
+        document.getElementById('sp-playPauseBtn').addEventListener('click', function() {
+            sp_isPlaying = !sp_isPlaying;
+            this.textContent = sp_isPlaying ? '⏸️ 暫停' : '▶️ 播放';
+        });
+
+        document.getElementById('sp-resetBtn').addEventListener('click', () => {
+            sp_time = 0;
+            sp_voltage = 110;
+            sp_frequency = 60;
+            sp_speed = 5;
+            document.getElementById('sp-voltageSlider').value = 110;
+            document.getElementById('sp-frequencySlider').value = 60;
+            document.getElementById('sp-speedSlider').value = 5;
+            sp_updateDisplays();
+        });
+
+        // ==================== 事件監聽器 - 三相 ====================
+        
+        document.getElementById('tp-voltageSlider').addEventListener('input', (e) => {
+            tp_voltage = parseInt(e.target.value);
+            tp_updateDisplays();
+        });
+
+        document.getElementById('tp-frequencySlider').addEventListener('input', (e) => {
+            tp_frequency = parseInt(e.target.value);
+            tp_updateDisplays();
+        });
+
+        document.getElementById('tp-speedSlider').addEventListener('input', (e) => {
+            tp_speed = parseInt(e.target.value);
+            tp_updateDisplays();
+        });
+
+        document.getElementById('tp-playPauseBtn').addEventListener('click', function() {
+            tp_isPlaying = !tp_isPlaying;
+            this.textContent = tp_isPlaying ? '⏸️ 暫停' : '▶️ 播放';
+        });
+
+        document.getElementById('tp-resetBtn').addEventListener('click', () => {
+            tp_time = 0;
+            tp_voltage = 127;
+            tp_frequency = 60;
+            tp_speed = 5;
+            document.getElementById('tp-voltageSlider').value = 127;
+            document.getElementById('tp-frequencySlider').value = 60;
+            document.getElementById('tp-speedSlider').value = 5;
+            tp_updateDisplays();
+        });
+
+        // ==================== 初始化 ====================
+        
+        sp_updateDisplays();
+        tp_updateDisplays();
+        animate();
+    </script>
+</body>
+</html>

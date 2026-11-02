@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>都卜勒效應 - 簡諧運動版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1400px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 8px; }
+        .main-content { padding: 25px; }
+        .controls-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .control-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 3px solid;
+        }
+        .control-card.source {
+            border-color: #1976d2;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+        .control-card.observer {
+            border-color: #c62828;
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        .control-card.source .card-header { color: #1976d2; border-color: #1976d2; }
+        .control-card.observer .card-header { color: #c62828; border-color: #c62828; }
+        .control-section { margin-bottom: 15px; }
+        .control-label {
+            font-size: 0.9em;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #11998e;
+            cursor: pointer;
+        }
+        .value-display {
+            min-width: 75px;
+            text-align: right;
+            font-weight: 700;
+            font-size: 1em;
+        }
+        .control-card.source .value-display { color: #1976d2; }
+        .control-card.observer .value-display { color: #c62828; }
+        .direction-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .dir-btn {
+            padding: 12px;
+            border: 2px solid;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        .control-card.source .dir-btn { border-color: #1976d2; }
+        .control-card.observer .dir-btn { border-color: #c62828; }
+        .dir-btn:hover { transform: scale(1.02); }
+        .control-card.source .dir-btn:hover { background: #e3f2fd; }
+        .control-card.observer .dir-btn:hover { background: #ffebee; }
+        .control-card.source .dir-btn.active { background: #1976d2; color: white; }
+        .control-card.observer .dir-btn.active { background: #c62828; color: white; }
+        canvas {
+            width: 100%;
+            height: 550px;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            display: block;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .sim-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .sim-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .sim-btn.start {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        .sim-btn.start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+        }
+        .sim-btn.reset { background: #e9ecef; color: #333; }
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .stats-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .stats-card h3 {
+            color: #11998e;
+            margin-bottom: 15px;
+            font-size: 1.15em;
+            border-bottom: 2px solid #11998e;
+            padding-bottom: 8px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #666; font-weight: 500; font-size: 0.95em; }
+        .stat-value {
+            color: #11998e;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .status-approaching { background: #ffebee; color: #c62828; }
+        .status-receding { background: #e3f2fd; color: #1565c0; }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .chart-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .chart-box h4 { color: #333; margin-bottom: 8px; font-size: 0.9em; }
+        .chart-canvas { width: 100%; height: 80px; display: block; }
+        .global-params {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .param-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .param-box label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        .info-box {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #11998e;
+        }
+        .info-box p {
+            color: #0d5c4f;
+            font-size: 0.85em;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .dir-btn.setting-mode {
+            background: #fff3cd;
+            border-color: #ff9800;
+            color: #e65100;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1200px) {
+            .controls-row, .bottom-section, .global-params, .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>↔️ 都卜勒效應 - 簡諧運動版</h1>
+            <p>探討振動系統中的頻率變化</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls-row">
+                <div class="control-card source">
+                    <div class="card-header">🔵 波源簡諧運動</div>
+                    
+                    <div class="control-section">
+                        <span class="control-label">振動中心位置 (點擊畫布設定)</span>
+                        <div style="display: flex; gap: 10px; margin-top: 5px;">
+                            <span style="flex: 1; padding: 8px; background: white; border-radius: 6px; text-align: center; font-weight: 600; color: #1976d2;" id="sourceCenterDisplay">X: 500, Y: 275</span>
+                            <button class="dir-btn" style="padding: 8px 15px;" id="setSourceCenterBtn">設定位置</button>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <span class="control-label">振幅 (m)</span>
+                        <div class="slider-row">
+                            <input type="range" id="sourceAmplitude" min="50" max="250" value="150" step="10">
+                            <span class="value-display" id="sourceAmplitudeValue">150 m</span>
+                        </div>
+                    </div>
+                    <div class="control-section">
+                        <span class="control-label">角頻率 (rad/s)</span>
+                        <div class="slider-row">
+                            <input type="range" id="sourceOmega" min="0" max="2" value="0.8" step="0.1">
+                            <span class="value-display" id="sourceOmegaValue">0.8 rad/s</span>
+                        </div>
+                    </div>
+                    <div class="control-section">
+                        <span class="control-label">初相位 (度)</span>
+                        <div class="slider-row">
+                            <input type="range" id="sourcePhase" min="0" max="360" value="0" step="15">
+                            <span class="value-display" id="sourcePhaseValue">0°</span>
+                        </div>
+                    </div>
+                    <div class="control-section">
+                        <span class="control-label">振動方向</span>
+                        <div class="direction-buttons">
+                            <button class="dir-btn source-dir active" data-dir="horizontal">水平 ↔</button>
+                            <button class="dir-btn source-dir" data-dir="vertical">垂直 ↕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-card observer">
+                    <div class="card-header">🔴 觀察者設定</div>
+                    
+                    <div class="control-section">
+                        <span class="control-label">觀察者位置 (點擊畫布放置)</span>
+                        <div style="display: flex; gap: 10px; margin-top: 5px;">
+                            <span style="flex: 1; padding: 8px; background: white; border-radius: 6px; text-align: center; font-weight: 600; color: #c62828;" id="observerPosDisplay">未放置</span>
+                            <button class="dir-btn" style="padding: 8px 15px;" id="placeObserverBtn">放置觀察者</button>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <span class="control-label">啟用簡諧運動</span>
+                        <div style="margin-top: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="observerSHMEnabled" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span style="font-size: 0.9em; color: #666;">讓觀察者做簡諧運動</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="observerSHMControls" style="display: none;">
+                        <div class="control-section">
+                            <span class="control-label">振幅 (m)</span>
+                            <div class="slider-row">
+                                <input type="range" id="observerAmplitude" min="10" max="250" value="100" step="10">
+                                <span class="value-display" id="observerAmplitudeValue">100 m</span>
+                            </div>
+                        </div>
+                        <div class="control-section">
+                            <span class="control-label">角頻率 (rad/s)</span>
+                            <div class="slider-row">
+                                <input type="range" id="observerOmega" min="0" max="2" value="0.8" step="0.1">
+                                <span class="value-display" id="observerOmegaValue">0.8 rad/s</span>
+                            </div>
+                        </div>
+                        <div class="control-section">
+                            <span class="control-label">初相位 (度)</span>
+                            <div class="slider-row">
+                                <input type="range" id="observerPhase" min="0" max="360" value="180" step="15">
+                                <span class="value-display" id="observerPhaseValue">180°</span>
+                            </div>
+                        </div>
+                        <div class="control-section">
+                            <span class="control-label">振動方向</span>
+                            <div class="direction-buttons">
+                                <button class="dir-btn observer-dir active" data-dir="horizontal">水平 ↔</button>
+                                <button class="dir-btn observer-dir" data-dir="vertical">垂直 ↕</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="global-params">
+                <div class="param-box">
+                    <label>📡 發射頻率</label>
+                    <div class="slider-row">
+                        <input type="range" id="frequency" min="1" max="10" value="5" step="0.5">
+                        <span class="value-display" style="color: #11998e;" id="frequencyValue">5 Hz</span>
+                    </div>
+                </div>
+                <div class="param-box">
+                    <label>🌡️ 聲速</label>
+                    <div class="slider-row">
+                        <input type="range" id="soundSpeed" min="300" max="400" value="340" step="5">
+                        <span class="value-display" style="color: #11998e;" id="soundSpeedValue">340 m/s</span>
+                    </div>
+                </div>
+            </div>
+
+            <canvas id="canvas"></canvas>
+
+            <div class="sim-controls">
+                <button class="sim-btn start" id="startBtn">暫停模擬</button>
+                <button class="sim-btn reset" id="resetBtn">重置</button>
+            </div>
+
+            <div class="info-box">
+                <p>💡 <strong>提示：</strong>點擊「設定位置」設定波源振動中心，點擊「放置觀察者」在畫布上放置觀察者。可選擇讓觀察者靜止或進行簡諧運動。簡諧運動 x = A·cos(ωt + φ)，速度 v = -A·ω·sin(ωt + φ)。週期 T = 2π/ω。</p>
+            </div>
+
+            <div class="bottom-section">
+                <div class="stats-card">
+                    <h3>📊 即時觀測數據</h3>
+                    <div class="stat-row">
+                        <span class="stat-label">觀測頻率:</span>
+                        <span class="stat-value" id="freqValue">5.00 Hz</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">觀測波長:</span>
+                        <span class="stat-value" id="wavelengthValue">68.00 m</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">觀測波速:</span>
+                        <span class="stat-value" id="speedValue">340 m/s</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">相對徑向速度:</span>
+                        <span class="stat-value" id="relativeVelValue">0.0 m/s</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">波源速度:</span>
+                        <span class="stat-value" id="sourceSpeedValue">120.0 m/s</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">觀察者速度:</span>
+                        <span class="stat-value" id="observerSpeedValue">0.0 m/s</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">狀態:</span>
+                        <span id="statusBadge">--</span>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <h3>📈 變化趨勢圖</h3>
+                    <div class="charts-grid">
+                        <div class="chart-box">
+                            <h4>頻率</h4>
+                            <canvas id="freqChart" class="chart-canvas" width="360" height="160"></canvas>
+                        </div>
+                        <div class="chart-box">
+                            <h4>波長</h4>
+                            <canvas id="wavelengthChart" class="chart-canvas" width="360" height="160"></canvas>
+                        </div>
+                        <div class="chart-box">
+                            <h4>波速</h4>
+                            <canvas id="speedChart" class="chart-canvas" width="360" height="160"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../vendor/three.min.js"></script>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 1000;
+        canvas.height = 550;
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        // Center positions for oscillations
+        let sourceCenterX = centerX;
+        let sourceCenterY = centerY;
+        
+        // Observer position (can be placed anywhere)
+        let observerX = null;
+        let observerY = null;
+        let observerSHMEnabled = false;
+        let observerSHMCenterX = centerX;
+        let observerSHMCenterY = centerY;
+
+        // Position setting mode
+        let settingMode = null; // null, 'source', or 'observer'
+
+        let sourceAmplitude = 150, sourceOmega = 0.8, sourcePhase = 0, sourceDirection = 'horizontal';
+        let observerAmplitude = 100, observerOmega = 0.8, observerPhase = Math.PI, observerDirection = 'horizontal';
+        let frequency = 5, soundSpeed = 340, isRunning = true, time = 0, waves = [];
+
+        const MAX_HISTORY = 200;
+        let history = { frequency: [], wavelength: [], waveSpeed: [] };
+
+        const sourceAmplitudeSlider = document.getElementById('sourceAmplitude');
+        const sourceOmegaSlider = document.getElementById('sourceOmega');
+        const sourcePhaseSlider = document.getElementById('sourcePhase');
+        const sourceDirBtns = document.querySelectorAll('.source-dir');
+        const setSourceCenterBtn = document.getElementById('setSourceCenterBtn');
+        const sourceCenterDisplay = document.getElementById('sourceCenterDisplay');
+        
+        const placeObserverBtn = document.getElementById('placeObserverBtn');
+        const observerPosDisplay = document.getElementById('observerPosDisplay');
+        const observerSHMEnabledCheckbox = document.getElementById('observerSHMEnabled');
+        const observerSHMControls = document.getElementById('observerSHMControls');
+        const observerAmplitudeSlider = document.getElementById('observerAmplitude');
+        const observerOmegaSlider = document.getElementById('observerOmega');
+        const observerPhaseSlider = document.getElementById('observerPhase');
+        const observerDirBtns = document.querySelectorAll('.observer-dir');
+        
+        const frequencySlider = document.getElementById('frequency');
+        const soundSpeedSlider = document.getElementById('soundSpeed');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function updateDisplays() {
+            document.getElementById('sourceAmplitudeValue').textContent = `${sourceAmplitude} m`;
+            document.getElementById('sourceOmegaValue').textContent = `${sourceOmega.toFixed(1)} rad/s`;
+            document.getElementById('sourcePhaseValue').textContent = `${Math.round(sourcePhase * 180 / Math.PI)}°`;
+            document.getElementById('observerAmplitudeValue').textContent = `${observerAmplitude} m`;
+            document.getElementById('observerOmegaValue').textContent = `${observerOmega.toFixed(1)} rad/s`;
+            document.getElementById('observerPhaseValue').textContent = `${Math.round(observerPhase * 180 / Math.PI)}°`;
+            document.getElementById('frequencyValue').textContent = `${frequency} Hz`;
+            document.getElementById('soundSpeedValue').textContent = `${soundSpeed} m/s`;
+        }
+
+        sourceAmplitudeSlider.addEventListener('input', (e) => { sourceAmplitude = parseInt(e.target.value); updateDisplays(); });
+        sourceOmegaSlider.addEventListener('input', (e) => { sourceOmega = parseFloat(e.target.value); updateDisplays(); });
+        sourcePhaseSlider.addEventListener('input', (e) => { sourcePhase = parseInt(e.target.value) * Math.PI / 180; updateDisplays(); });
+        sourceDirBtns.forEach(btn => btn.addEventListener('click', () => { sourceDirBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); sourceDirection = btn.dataset.dir; }));
+        observerSHMEnabledCheckbox.addEventListener('change', (e) => {
+            observerSHMEnabled = e.target.checked;
+            observerSHMControls.style.display = observerSHMEnabled ? 'block' : 'none';
+            if (observerSHMEnabled && observerX !== null && observerY !== null) {
+                // 當啟用SHM時，將當前觀察者位置設為振動中心
+                observerSHMCenterX = observerX;
+                observerSHMCenterY = observerY;
+            }
+        });
+
+        observerAmplitudeSlider.addEventListener('input', (e) => { observerAmplitude = parseInt(e.target.value); updateDisplays(); });
+        observerOmegaSlider.addEventListener('input', (e) => { observerOmega = parseFloat(e.target.value); updateDisplays(); });
+        observerPhaseSlider.addEventListener('input', (e) => { observerPhase = parseInt(e.target.value) * Math.PI / 180; updateDisplays(); });
+        observerDirBtns.forEach(btn => btn.addEventListener('click', () => { observerDirBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); observerDirection = btn.dataset.dir; }));
+        
+        frequencySlider.addEventListener('input', (e) => { frequency = parseFloat(e.target.value); updateDisplays(); });
+        soundSpeedSlider.addEventListener('input', (e) => { soundSpeed = parseInt(e.target.value); updateDisplays(); });
+        startBtn.addEventListener('click', () => { isRunning = !isRunning; startBtn.textContent = isRunning ? '暫停模擬' : '開始模擬'; if (isRunning) animate(); });
+        resetBtn.addEventListener('click', () => { 
+            time = 0; 
+            waves = []; 
+            history = { frequency: [], wavelength: [], waveSpeed: [] }; 
+            observerX = null;
+            observerY = null;
+            observerPosDisplay.textContent = '未放置';
+            draw(); 
+            updateStats(); 
+            updateCharts(); 
+        });
+
+        // Position setting buttons
+        setSourceCenterBtn.addEventListener('click', () => {
+            settingMode = settingMode === 'source' ? null : 'source';
+            setSourceCenterBtn.classList.toggle('setting-mode', settingMode === 'source');
+            placeObserverBtn.classList.remove('setting-mode');
+            if (settingMode === 'source') {
+                setSourceCenterBtn.textContent = '點擊畫布...';
+            } else {
+                setSourceCenterBtn.textContent = '設定位置';
+            }
+            placeObserverBtn.textContent = '放置觀察者';
+        });
+
+        placeObserverBtn.addEventListener('click', () => {
+            settingMode = settingMode === 'observer' ? null : 'observer';
+            placeObserverBtn.classList.toggle('setting-mode', settingMode === 'observer');
+            setSourceCenterBtn.classList.remove('setting-mode');
+            if (settingMode === 'observer') {
+                placeObserverBtn.textContent = '點擊畫布...';
+            } else {
+                placeObserverBtn.textContent = '放置觀察者';
+            }
+            setSourceCenterBtn.textContent = '設定位置';
+        });
+
+        // Canvas click handler
+        canvas.addEventListener('click', (e) => {
+            if (!settingMode) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            if (settingMode === 'source') {
+                sourceCenterX = x;
+                sourceCenterY = y;
+                sourceCenterDisplay.textContent = `X: ${Math.round(x)}, Y: ${Math.round(y)}`;
+                setSourceCenterBtn.textContent = '設定位置';
+                setSourceCenterBtn.classList.remove('setting-mode');
+                settingMode = null;
+            } else if (settingMode === 'observer') {
+                observerX = x;
+                observerY = y;
+                observerPosDisplay.textContent = `X: ${Math.round(x)}, Y: ${Math.round(y)}`;
+                placeObserverBtn.textContent = '放置觀察者';
+                placeObserverBtn.classList.remove('setting-mode');
+                settingMode = null;
+                
+                // 如果啟用了SHM，將放置位置設為振動中心
+                if (observerSHMEnabled) {
+                    observerSHMCenterX = x;
+                    observerSHMCenterY = y;
+                }
+            }
+        });
+
+        function getSourcePosition() {
+            const disp = sourceAmplitude * Math.cos(sourceOmega * time + sourcePhase);
+            return sourceDirection === 'horizontal' ? { x: sourceCenterX + disp, y: sourceCenterY } : { x: sourceCenterX, y: sourceCenterY + disp };
+        }
+
+        function getObserverPosition() {
+            if (!observerSHMEnabled || observerX === null) {
+                // 靜止觀察者或未放置
+                return observerX !== null ? { x: observerX, y: observerY } : null;
+            } else {
+                // SHM模式
+                const disp = observerAmplitude * Math.cos(observerOmega * time + observerPhase);
+                return observerDirection === 'horizontal' 
+                    ? { x: observerSHMCenterX + disp, y: observerSHMCenterY } 
+                    : { x: observerSHMCenterX, y: observerSHMCenterY + disp };
+            }
+        }
+
+        function getSourceVelocity() {
+            const vel = -sourceAmplitude * sourceOmega * Math.sin(sourceOmega * time + sourcePhase);
+            return sourceDirection === 'horizontal' ? { vx: vel, vy: 0, speed: Math.abs(vel) } : { vx: 0, vy: vel, speed: Math.abs(vel) };
+        }
+
+        function getObserverVelocity() {
+            if (!observerSHMEnabled || observerX === null) {
+                // 靜止觀察者
+                return { vx: 0, vy: 0, speed: 0 };
+            } else {
+                // SHM模式
+                const vel = -observerAmplitude * observerOmega * Math.sin(observerOmega * time + observerPhase);
+                return observerDirection === 'horizontal' 
+                    ? { vx: vel, vy: 0, speed: Math.abs(vel) } 
+                    : { vx: 0, vy: vel, speed: Math.abs(vel) };
+            }
+        }
+
+        function calculateStats() {
+            const sourcePos = getSourcePosition();
+            const observerPos = getObserverPosition();
+            
+            if (!observerPos) return null; // 觀察者未放置
+            
+            const sourceVel = getSourceVelocity();
+            const observerVel = getObserverVelocity();
+            const dx = observerPos.x - sourcePos.x, dy = observerPos.y - sourcePos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance === 0) return { observedFreq: frequency, wavelength: soundSpeed / frequency, waveSpeed: soundSpeed, relativeVelocity: 0, sourceSpeed: sourceVel.speed, observerSpeed: observerVel.speed };
+            const cosTheta = dx / distance, sinTheta = dy / distance;
+            const sourceRadialVel = sourceVel.vx * cosTheta + sourceVel.vy * sinTheta;
+            const observerRadialVel = observerVel.vx * cosTheta + observerVel.vy * sinTheta;
+            const relativeVelocity = sourceRadialVel - observerRadialVel;
+            const observedFreq = frequency * soundSpeed / (soundSpeed - relativeVelocity);
+            const observedWaveSpeed = soundSpeed + observerRadialVel;
+            const wavelength = observedWaveSpeed / observedFreq;
+            return { observedFreq, wavelength, waveSpeed: observedWaveSpeed, relativeVelocity, sourceSpeed: sourceVel.speed, observerSpeed: observerVel.speed };
+        }
+
+        function updateStats() {
+            const stats = calculateStats();
+            if (!stats) {
+                document.getElementById('freqValue').textContent = '--';
+                document.getElementById('wavelengthValue').textContent = '--';
+                document.getElementById('speedValue').textContent = '--';
+                document.getElementById('relativeVelValue').textContent = '--';
+                document.getElementById('sourceSpeedValue').textContent = `${getSourceVelocity().speed.toFixed(1)} m/s`;
+                document.getElementById('observerSpeedValue').textContent = '--';
+                document.getElementById('statusBadge').innerHTML = '<span class="status-badge" style="background: #e0e0e0; color: #666;">未放置觀察者</span>';
+                return;
+            }
+            document.getElementById('freqValue').textContent = `${stats.observedFreq.toFixed(2)} Hz`;
+            document.getElementById('wavelengthValue').textContent = `${stats.wavelength.toFixed(2)} m`;
+            document.getElementById('speedValue').textContent = `${stats.waveSpeed.toFixed(1)} m/s`;
+            document.getElementById('relativeVelValue').textContent = `${stats.relativeVelocity.toFixed(1)} m/s`;
+            document.getElementById('sourceSpeedValue').textContent = `${stats.sourceSpeed.toFixed(1)} m/s`;
+            document.getElementById('observerSpeedValue').textContent = `${stats.observerSpeed.toFixed(1)} m/s`;
+            const statusBadge = document.getElementById('statusBadge');
+            if (Math.abs(stats.relativeVelocity) < 0.5) statusBadge.innerHTML = '<span class="status-badge" style="background: #f3e5f5; color: #7b1fa2;">靜止/切向 ⚪</span>';
+            else if (stats.relativeVelocity > 0) statusBadge.innerHTML = '<span class="status-badge status-approaching">接近中 🔴</span>';
+            else statusBadge.innerHTML = '<span class="status-badge status-receding">遠離中 🔵</span>';
+            if (isRunning) {
+                history.frequency.push(stats.observedFreq);
+                history.wavelength.push(stats.wavelength);
+                history.waveSpeed.push(stats.waveSpeed);
+                if (history.frequency.length > MAX_HISTORY) {
+                    history.frequency.shift(); history.wavelength.shift(); history.waveSpeed.shift();
+                }
+            }
+        }
+
+        function drawChart(canvasId, data, color) {
+            const chartCanvas = document.getElementById(canvasId);
+            const ctx = chartCanvas.getContext('2d');
+            const width = chartCanvas.width, height = chartCanvas.height;
+            ctx.fillStyle = 'white'; ctx.fillRect(0, 0, width, height);
+            if (data.length < 2) {
+                ctx.fillStyle = '#999'; ctx.font = '16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('等待數據...', width / 2, height / 2);
+                return;
+            }
+            const min = Math.min(...data), max = Math.max(...data), range = max - min || 1;
+            const padding = 50, graphHeight = height - 30;
+            ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = 15 + (graphHeight - 15) * i / 5;
+                ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(width - 10, y); ctx.stroke();
+            }
+            ctx.fillStyle = '#666'; ctx.font = '12px Arial'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            for (let i = 0; i <= 5; i++) {
+                const y = 15 + (graphHeight - 15) * i / 5, value = max - ((max - min) * i / 5);
+                ctx.fillText(value.toFixed(1), padding - 5, y);
+            }
+            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath();
+            data.forEach((value, index) => {
+                const x = padding + ((width - padding - 10) * index / (data.length - 1));
+                const normalizedValue = (value - min) / range, y = 15 + (graphHeight - 15) * (1 - normalizedValue);
+                if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            const lastValue = data[data.length - 1], lastX = padding + (width - padding - 10);
+            const normalizedLast = (lastValue - min) / range, lastY = 15 + (graphHeight - 15) * (1 - normalizedLast);
+            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(lastX, lastY, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = color; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center';
+            ctx.fillText(lastValue.toFixed(2), width / 2, height - 5);
+        }
+
+        function updateCharts() {
+            if (history.frequency.length > 1) {
+                drawChart('freqChart', history.frequency, '#ff5722');
+                drawChart('wavelengthChart', history.wavelength, '#2196f3');
+                drawChart('speedChart', history.waveSpeed, '#4caf50');
+            }
+        }
+
+        function animate() {
+            if (!isRunning) return;
+            const dt = 0.03; time += dt;
+            const sourcePos = getSourcePosition();
+            if (time % (1 / frequency) < dt) waves.push({ x: sourcePos.x, y: sourcePos.y, radius: 0, birthTime: time });
+            waves = waves.filter(wave => { wave.radius = soundSpeed * (time - wave.birthTime); return wave.radius < Math.max(canvas.width, canvas.height); });
+            updateStats(); updateCharts(); draw(); requestAnimationFrame(animate);
+        }
+
+        function draw() {
+            ctx.fillStyle = '#f8f9fa'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製波源軌跡和中心
+            if (sourceAmplitude > 0) {
+                ctx.strokeStyle = 'rgba(25, 118, 210, 0.3)'; ctx.lineWidth = 2; ctx.setLineDash([10, 5]); ctx.beginPath();
+                if (sourceDirection === 'horizontal') { 
+                    ctx.moveTo(sourceCenterX - sourceAmplitude, sourceCenterY); 
+                    ctx.lineTo(sourceCenterX + sourceAmplitude, sourceCenterY); 
+                } else { 
+                    ctx.moveTo(sourceCenterX, sourceCenterY - sourceAmplitude); 
+                    ctx.lineTo(sourceCenterX, sourceCenterY + sourceAmplitude); 
+                }
+                ctx.stroke(); ctx.setLineDash([]);
+            }
+            // 波源中心點
+            ctx.beginPath();
+            ctx.arc(sourceCenterX, sourceCenterY, 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(25, 118, 210, 0.4)';
+            ctx.fill();
+
+            // 繪製觀察者軌跡（如果啟用SHM）
+            if (observerSHMEnabled && observerX !== null && observerAmplitude > 0) {
+                ctx.strokeStyle = 'rgba(198, 40, 40, 0.3)'; ctx.lineWidth = 2; ctx.setLineDash([10, 5]); ctx.beginPath();
+                if (observerDirection === 'horizontal') { 
+                    ctx.moveTo(observerSHMCenterX - observerAmplitude, observerSHMCenterY); 
+                    ctx.lineTo(observerSHMCenterX + observerAmplitude, observerSHMCenterY); 
+                } else { 
+                    ctx.moveTo(observerSHMCenterX, observerSHMCenterY - observerAmplitude); 
+                    ctx.lineTo(observerSHMCenterX, observerSHMCenterY + observerAmplitude); 
+                }
+                ctx.stroke(); ctx.setLineDash([]);
+                // 觀察者中心點
+                ctx.beginPath();
+                ctx.arc(observerSHMCenterX, observerSHMCenterY, 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(198, 40, 40, 0.4)';
+                ctx.fill();
+            }
+
+            // 繪製波紋
+            waves.forEach(wave => {
+                ctx.beginPath(); ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(17, 153, 142, 0.25)'; ctx.lineWidth = 2; ctx.stroke();
+            });
+            
+            const sourcePos = getSourcePosition();
+            const observerPos = getObserverPosition();
+            
+            if (observerPos) {
+                const sourceVel = getSourceVelocity(), observerVel = getObserverVelocity();
+                ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.moveTo(sourcePos.x, sourcePos.y); ctx.lineTo(observerPos.x, observerPos.y);
+                ctx.strokeStyle = 'rgba(158, 158, 158, 0.5)'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+                
+                // 繪製波源
+                ctx.beginPath(); ctx.arc(sourcePos.x, sourcePos.y, 18, 0, Math.PI * 2);
+                ctx.fillStyle = '#1976d2'; ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.stroke();
+                if (sourceVel.speed > 1) {
+                    const arrowLen = Math.min(50, sourceVel.speed);
+                    const endX = sourcePos.x + (sourceVel.vx > 0 ? arrowLen : sourceVel.vx < 0 ? -arrowLen : 0);
+                    const endY = sourcePos.y + (sourceVel.vy > 0 ? arrowLen : sourceVel.vy < 0 ? -arrowLen : 0);
+                    ctx.beginPath(); ctx.moveTo(sourcePos.x, sourcePos.y); ctx.lineTo(endX, endY);
+                    const angle = Math.atan2(endY - sourcePos.y, endX - sourcePos.x), headLen = 12;
+                    ctx.lineTo(endX - headLen * Math.cos(angle - Math.PI / 6), endY - headLen * Math.sin(angle - Math.PI / 6));
+                    ctx.moveTo(endX, endY); ctx.lineTo(endX - headLen * Math.cos(angle + Math.PI / 6), endY - headLen * Math.sin(angle + Math.PI / 6));
+                    ctx.strokeStyle = '#1976d2'; ctx.lineWidth = 3; ctx.stroke();
+                }
+                ctx.fillStyle = '#1976d2'; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center'; ctx.fillText('波源', sourcePos.x, sourcePos.y - 30);
+                
+                // 繪製觀察者
+                ctx.beginPath(); ctx.arc(observerPos.x, observerPos.y, 18, 0, Math.PI * 2);
+                ctx.fillStyle = '#c62828'; ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.stroke();
+                if (observerVel.speed > 1) {
+                    const arrowLen = Math.min(50, observerVel.speed);
+                    const endX = observerPos.x + (observerVel.vx > 0 ? arrowLen : observerVel.vx < 0 ? -arrowLen : 0);
+                    const endY = observerPos.y + (observerVel.vy > 0 ? arrowLen : observerVel.vy < 0 ? -arrowLen : 0);
+                    ctx.beginPath(); ctx.moveTo(observerPos.x, observerPos.y); ctx.lineTo(endX, endY);
+                    const angle = Math.atan2(endY - observerPos.y, endX - observerPos.x), headLen = 12;
+                    ctx.lineTo(endX - headLen * Math.cos(angle - Math.PI / 6), endY - headLen * Math.sin(angle - Math.PI / 6));
+                    ctx.moveTo(endX, endY); ctx.lineTo(endX - headLen * Math.cos(angle + Math.PI / 6), endY - headLen * Math.sin(angle + Math.PI / 6));
+                    ctx.strokeStyle = '#c62828'; ctx.lineWidth = 3; ctx.stroke();
+                }
+                ctx.fillStyle = '#c62828'; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center'; ctx.fillText('觀察者', observerPos.x, observerPos.y - 30);
+            } else {
+                // 只繪製波源
+                ctx.beginPath(); ctx.arc(sourcePos.x, sourcePos.y, 18, 0, Math.PI * 2);
+                ctx.fillStyle = '#1976d2'; ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.stroke();
+                const sourceVel = getSourceVelocity();
+                if (sourceVel.speed > 1) {
+                    const arrowLen = Math.min(50, sourceVel.speed);
+                    const endX = sourcePos.x + (sourceVel.vx > 0 ? arrowLen : sourceVel.vx < 0 ? -arrowLen : 0);
+                    const endY = sourcePos.y + (sourceVel.vy > 0 ? arrowLen : sourceVel.vy < 0 ? -arrowLen : 0);
+                    ctx.beginPath(); ctx.moveTo(sourcePos.x, sourcePos.y); ctx.lineTo(endX, endY);
+                    const angle = Math.atan2(endY - sourcePos.y, endX - sourcePos.x), headLen = 12;
+                    ctx.lineTo(endX - headLen * Math.cos(angle - Math.PI / 6), endY - headLen * Math.sin(angle - Math.PI / 6));
+                    ctx.moveTo(endX, endY); ctx.lineTo(endX - headLen * Math.cos(angle + Math.PI / 6), endY - headLen * Math.sin(angle + Math.PI / 6));
+                    ctx.strokeStyle = '#1976d2'; ctx.lineWidth = 3; ctx.stroke();
+                }
+                ctx.fillStyle = '#1976d2'; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center'; ctx.fillText('波源', sourcePos.x, sourcePos.y - 30);
+            }
+            
+            // 繪製設定模式提示
+            if (settingMode) {
+                ctx.fillStyle = 'rgba(255, 152, 0, 0.9)';
+                ctx.font = 'bold 18px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                const text = settingMode === 'source' ? '👆 點擊畫布設定波源中心位置' : '👆 點擊畫布放置觀察者';
+                ctx.fillText(text, canvas.width / 2, 20);
+            }
+        }
+
+        updateDisplays(); animate();
+    </script>
+</body>
+</html>

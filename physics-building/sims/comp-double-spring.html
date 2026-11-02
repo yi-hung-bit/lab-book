@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雙彈簧懸掛木塊的簡諧振盪</title>
+<style>
+:root{
+  --bg:#f3f6f8; --paper:#ffffff; --grid:#e3eaf0; --ink:#1b2a4a; --mute:#5d6b80;
+  --line:#c9d4de; --blue:#1f3fa8; --red:#d0312d; --green:#1e7b3c; --spring:#2b3445; --block:#1b2a4a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151c; --paper:#181e27; --grid:#222a36; --ink:#e4e9f2; --mute:#98a3b5;
+    --line:#333d4c; --blue:#7fa2ff; --red:#ff6b62; --green:#5fd48a; --spring:#c9d3e3; --block:#e4e9f2;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151c; --paper:#181e27; --grid:#222a36; --ink:#e4e9f2; --mute:#98a3b5;
+  --line:#333d4c; --blue:#7fa2ff; --red:#ff6b62; --green:#5fd48a; --spring:#c9d3e3; --block:#e4e9f2;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC","Heiti TC",system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 40px}
+h1{font-size:1.45rem;margin:0 0 2px;font-weight:700;letter-spacing:.02em}
+.sub{color:var(--mute);margin:0 0 14px;font-size:.95rem}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px}
+@media (max-width:880px){.grid{grid-template-columns:1fr}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px}
+canvas{display:block;width:100%;touch-action:none}
+#scene{height:380px;border-radius:6px}
+.plots{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:880px){.plots{grid-template-columns:1fr}}
+.plots canvas{height:240px}
+h2{font-size:1rem;margin:0 0 6px}
+.ctl{margin:8px 0}
+.ctl label{display:flex;justify-content:space-between;font-size:.9rem}
+.ctl output{font-variant-numeric:tabular-nums;color:var(--blue);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 4px}
+button{font:inherit;font-size:.9rem;padding:7px 8px;border-radius:7px;border:1px solid var(--line);
+  background:var(--bg);color:var(--ink);cursor:pointer}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+table{width:100%;border-collapse:collapse;font-size:.86rem;font-variant-numeric:tabular-nums}
+td{padding:3px 2px;border-bottom:1px dashed var(--line)}
+td:last-child{text-align:right}
+.g{color:var(--green);font-weight:600}.r{color:var(--red);font-weight:600}
+.hint{font-size:.82rem;color:var(--mute);margin:4px 0 0}
+.legend{font-size:.8rem;color:var(--mute);margin-top:4px}
+.legend span{display:inline-block;margin-right:10px}
+.note{margin-top:14px;font-size:.92rem;max-width:78ch}
+.note p{margin:.4em 0}
+.warn{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>雙彈簧懸掛木塊的簡諧振盪</h1>
+  <p class="sub">兩條原長 ℓ、彈力常數 k 的彈簧固定於相距 2ℓ 的 A、B 兩點，下掛質量 m 的木塊。模擬採用<b>完整非線性力</b>（不做 x ≪ ℓ 近似）以 RK4 積分，再與近似公式比較。</p>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <canvas id="scene" aria-label="彈簧與木塊動畫"></canvas>
+        <p class="hint">可直接拖曳木塊到任意位置後放開。紅色虛線：近似公式的平衡位置；綠色虛線：精確平衡位置。</p>
+      </div>
+      <div class="plots">
+        <div class="card">
+          <h2>位移－時間 x(t)</h2>
+          <canvas id="xt"></canvas>
+          <div class="legend"><span style="color:var(--blue)">━ x(t)</span><span style="color:var(--green)">┅ 精確 x₀</span><span style="color:var(--red)">┅ 近似 x₀</span></div>
+        </div>
+        <div class="card">
+          <h2>位能曲線 U(x)</h2>
+          <canvas id="ux"></canvas>
+          <div class="legend"><span style="color:var(--blue)">━ 精確 U</span><span style="color:var(--red)">┅ 近似 kx⁴/4ℓ² − mgx</span><span style="color:var(--green)">┅ 平衡點拋物線</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>參數</h2>
+      <div class="ctl"><label>質量 m <output id="mO"></output></label><input id="m" type="range" min="0.02" max="1" step="0.01" value="0.1"></div>
+      <div class="ctl"><label>彈力常數 k <output id="kO"></output></label><input id="k" type="range" min="10" max="1000" step="10" value="100"></div>
+      <div class="ctl"><label>原長 ℓ <output id="LO"></output></label><input id="L" type="range" min="0.2" max="1" step="0.05" value="0.5"></div>
+      <div class="ctl"><label>重力加速度 g <output id="gO"></output></label><input id="g" type="range" min="1" max="20" step="0.1" value="9.8"></div>
+      <div class="ctl"><label>下拉距離 Δ <output id="AO"></output></label><input id="A" type="range" min="0" max="0.2" step="0.005" value="0.03"></div>
+      <div class="ctl"><label>阻尼係數 b <output id="bO"></output></label><input id="b" type="range" min="0" max="1" step="0.01" value="0"></div>
+      <div class="ctl"><label>播放速率 <output id="spO"></output></label><input id="sp" type="range" min="0.05" max="1" step="0.05" value="0.5"></div>
+      <div class="btns">
+        <button class="primary" id="release">由平衡點下拉釋放</button>
+        <button id="pause">暫停</button>
+        <button id="drop">由 x = 0 靜止釋放</button>
+        <button id="reset">回到平衡點</button>
+      </div>
+
+      <h2 style="margin-top:14px">理論與量測</h2>
+      <table>
+        <tr><td>β = mg/(kℓ)</td><td id="beta"></td></tr>
+        <tr><td>x₀（近似）= (mgℓ²/k)<sup>1/3</sup></td><td id="x0a" class="r"></td></tr>
+        <tr><td>x₀（精確）</td><td id="x0e" class="g"></td></tr>
+        <tr><td>f（近似）= β<sup>1/3</sup></td><td id="fa" class="r"></td></tr>
+        <tr><td>f（精確線性化）</td><td id="fe" class="g"></td></tr>
+        <tr><td>T 近似</td><td id="Ta" class="r"></td></tr>
+        <tr><td>T 精確線性化</td><td id="Te" class="g"></td></tr>
+        <tr><td>T 模擬量測</td><td id="Tm"></td></tr>
+        <tr><td>近似 T 相對誤差</td><td id="err"></td></tr>
+      </table>
+      <p class="hint" id="valid"></p>
+    </div>
+  </div>
+
+  <div class="note card">
+    <h2>物理說明</h2>
+    <p>木塊下降 x 時，每條彈簧長度 r = √(ℓ² + x²)，伸長量 r − ℓ。精確位能 U(x) = k(r − ℓ)² − mgx，鉛直合力 F = mg − 2k x (1 − ℓ/r)。</p>
+    <p>精確的等效彈力常數 k<sub>eff</sub> = U″(x₀) = 2k[1 − ℓ/r + ℓx₀²/r³]；當 x₀ ≪ ℓ 時化為 3kx₀²/ℓ²，得 ω = √(3k/m)·(mg/kℓ)<sup>1/3</sup>，即 f = (mg/kℓ)<sup>1/3</sup>。</p>
+    <p>此近似成立的條件是 x₀/ℓ = β<sup>1/3</sup> ≪ 1。注意立方根讓條件很嚴苛：β = 0.001 時 x₀/ℓ 已達 0.1。另外，下拉距離 Δ 較大時，振盪本身也不再是簡諧（位能非拋物線），量測週期會偏離線性化結果。</p>
+    <p>筆記中紅字「等效 k」建議寫成 k<sub>eff</sub>，避免與彈簧本身的 k 混淆；最後的 ω = √(k<sub>eff</sub>/m) 推導是正確的。</p>
+  </div>
+</div>
+
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const P = {};
+const keys = ['m','k','L','g','A','b','sp'];
+let x=0, v=0, t=0, running=false, paused=false, dragging=false;
+let hist=[], lastCross=null, periods=[];
+let X0e=0, X0a=0, KEFF=0, XMAX=1;
+
+function css(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+// ---------- physics ----------
+function Fs(x){ const r=Math.hypot(P.L,x); return 2*P.k*x*(1-P.L/r); }   // net upward spring force (for x>0)
+function accel(x,v){ return (P.m*P.g - Fs(x) - P.b*v)/P.m; }
+function Ue(x){ const r=Math.hypot(P.L,x); return P.k*(r-P.L)**2 - P.m*P.g*x; }
+function Ua(x){ return P.k*x**4/(4*P.L*P.L) - P.m*P.g*x; }
+function keff(x){ const r=Math.hypot(P.L,x); return 2*P.k*(1-P.L/r + P.L*x*x/r**3); }
+function solveEq(){
+  const W=P.m*P.g; let lo=0, hi=P.L;
+  while(Fs(hi)<W) hi*=2;
+  for(let i=0;i<200;i++){ const mid=(lo+hi)/2; if(Fs(mid)<W) lo=mid; else hi=mid; }
+  return (lo+hi)/2;
+}
+function rk4(h){
+  const a1=accel(x,v),           v1=v;
+  const a2=accel(x+v1*h/2, v+a1*h/2), v2=v+a1*h/2;
+  const a3=accel(x+v2*h/2, v+a2*h/2), v3=v+a2*h/2;
+  const a4=accel(x+v3*h,   v+a3*h),   v4=v+a3*h;
+  const xp=x;
+  x += h*(v1+2*v2+2*v3+v4)/6;
+  v += h*(a1+2*a2+2*a3+a4)/6;
+  t += h;
+  if(v>0 && xp<X0e && x>=X0e){
+    const tc = t - h + h*(X0e-xp)/(x-xp);
+    if(lastCross!==null){ periods.push(tc-lastCross); if(periods.length>5) periods.shift(); }
+    lastCross = tc;
+  }
+}
+
+// ---------- params ----------
+const fmt = {
+  m:v=>v.toFixed(2)+' kg', k:v=>v.toFixed(0)+' N/m', L:v=>v.toFixed(2)+' m', g:v=>v.toFixed(1)+' m/s²',
+  A:v=>(v*100).toFixed(1)+' cm', b:v=>v.toFixed(2)+' kg/s', sp:v=>v.toFixed(2)+'×'
+};
+function readParams(){
+  keys.forEach(k=>{ P[k]=parseFloat($(k).value); $(k+'O').textContent=fmt[k](P[k]); });
+  X0e = solveEq();
+  X0a = Math.cbrt(P.m*P.g*P.L*P.L/P.k);
+  KEFF = keff(X0e);
+  XMAX = Math.max(1.7*X0e, X0e+P.A, X0a)*1.12 + 0.02*P.L;
+  const beta = P.m*P.g/(P.k*P.L);
+  const wa = Math.sqrt(3*P.k/P.m)*Math.cbrt(beta);
+  const we = Math.sqrt(KEFF/P.m);
+  const norm = Math.sqrt(3*P.k/P.m);
+  $('beta').textContent = beta.toPrecision(3);
+  $('x0a').textContent = (X0a*100).toFixed(2)+' cm';
+  $('x0e').textContent = (X0e*100).toFixed(2)+' cm';
+  $('fa').textContent = Math.cbrt(beta).toFixed(4);
+  $('fe').textContent = (we/norm).toFixed(4);
+  $('Ta').textContent = (2*Math.PI/wa).toFixed(4)+' s';
+  $('Te').textContent = (2*Math.PI/we).toFixed(4)+' s';
+  $('err').textContent = ((we/wa-1)*100).toFixed(2)+' %';
+  const ratio = X0e/P.L;
+  $('valid').innerHTML = ratio<0.1
+    ? `x₀/ℓ = ${ratio.toFixed(3)}，小於 0.1，近似良好。`
+    : `<span class="warn">x₀/ℓ = ${ratio.toFixed(3)}，不滿足 x₀ ≪ ℓ，近似公式誤差明顯。</span>`;
+}
+function startFrom(x_init){
+  x=x_init; v=0; t=0; hist=[]; lastCross=null; periods=[];
+  running=true; paused=false; $('pause').textContent='暫停';
+}
+function toEq(){ x=X0e; v=0; t=0; hist=[]; lastCross=null; periods=[]; running=false; }
+
+keys.forEach(k=>$(k).addEventListener('input',()=>{
+  const dyn = (k==='b'||k==='sp');
+  readParams();
+  if(!dyn) toEq();
+}));
+$('release').onclick=()=>startFrom(X0e+P.A);
+$('drop').onclick=()=>startFrom(0);
+$('reset').onclick=toEq;
+$('pause').onclick=()=>{ paused=!paused; $('pause').textContent=paused?'繼續':'暫停'; };
+
+// ---------- canvas helpers ----------
+function fit(c){
+  const d=window.devicePixelRatio||1, r=c.getBoundingClientRect();
+  if(c.width!==Math.round(r.width*d)||c.height!==Math.round(r.height*d)){
+    c.width=Math.round(r.width*d); c.height=Math.round(r.height*d);
+  }
+  const g=c.getContext('2d'); g.setTransform(d,0,0,d,0,0);
+  return {g,W:r.width,H:r.height};
+}
+function drawSpring(g,x1,y1,x2,y2,turns,amp){
+  const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy), ux=dx/len, uy=dy/len, px=-uy, py=ux;
+  const lead=Math.min(10,len*0.08), body=len-2*lead, N=turns*24;
+  g.beginPath(); g.moveTo(x1,y1); g.lineTo(x1+ux*lead,y1+uy*lead);
+  for(let i=0;i<=N;i++){
+    const u=i/N, ph=2*Math.PI*turns*u;
+    const s=lead + u*body - amp*0.45*Math.sin(ph);   // loop-back gives a coil look
+    const p=amp*Math.sin(ph+Math.PI/2)*(i===0||i===N?0:1)*Math.min(1,Math.min(u,1-u)*turns*2);
+    g.lineTo(x1+ux*s+px*p, y1+uy*s+py*p);
+  }
+  g.lineTo(x2,y2); g.stroke();
+}
+function dash(g,on){ g.setLineDash(on?[6,5]:[]); }
+
+// ---------- scene ----------
+const scene=$('scene');
+let geo={};
+function drawScene(){
+  const {g,W,H}=fit(scene);
+  const C={grid:css('--grid'),ink:css('--ink'),mute:css('--mute'),blue:css('--blue'),red:css('--red'),green:css('--green'),spring:css('--spring'),block:css('--block'),paper:css('--paper')};
+  g.fillStyle=C.paper; g.fillRect(0,0,W,H);
+  g.strokeStyle=C.grid; g.lineWidth=1;
+  for(let i=0;i<W;i+=20){g.beginPath();g.moveTo(i,0);g.lineTo(i,H);g.stroke();}
+  for(let j=0;j<H;j+=20){g.beginPath();g.moveTo(0,j);g.lineTo(W,j);g.stroke();}
+  const top=70, cx=W/2;
+  const s=Math.min((W*0.78)/(2*P.L),(H-top-40)/XMAX);
+  geo={top,cx,s};
+  const Ax=cx-P.L*s, Bx=cx+P.L*s;
+  // ceiling
+  g.strokeStyle=C.ink; g.lineWidth=2.5; g.beginPath(); g.moveTo(Ax-30,top); g.lineTo(Bx+30,top); g.stroke();
+  g.lineWidth=1;
+  for(let q=Ax-30;q<Bx+30;q+=10){g.beginPath();g.moveTo(q,top);g.lineTo(q+8,top-8);g.stroke();}
+  g.fillStyle=C.ink; g.font='bold 15px sans-serif';
+  g.fillText('A',Ax-5,top-14); g.fillText('B',Bx-5,top-14);
+  g.beginPath();g.arc(Ax,top,3.5,0,7);g.arc(Bx,top,3.5,0,7);g.fill();
+  // natural length marks
+  g.font='13px sans-serif'; g.fillStyle=C.mute;
+  g.fillText('ℓ',(Ax+cx)/2-3,top-12); g.fillText('ℓ',(Bx+cx)/2-3,top-12);
+  // equilibrium lines
+  g.lineWidth=1.3; dash(g,true);
+  g.strokeStyle=C.red; g.beginPath(); g.moveTo(cx-110,top+X0a*s); g.lineTo(cx+110,top+X0a*s); g.stroke();
+  g.strokeStyle=C.green; g.beginPath(); g.moveTo(cx-110,top+X0e*s); g.lineTo(cx+110,top+X0e*s); g.stroke();
+  g.strokeStyle=C.mute; g.beginPath(); g.moveTo(cx,top); g.lineTo(cx,top+Math.max(x,0)*s); g.stroke();
+  dash(g,false);
+  // springs
+  const my=top+x*s;
+  const r=Math.hypot(P.L,x);
+  g.strokeStyle=C.spring; g.lineWidth=1.6;
+  drawSpring(g,Ax,top,cx,my,14,7); drawSpring(g,Bx,top,cx,my,14,7);
+  // x label
+  g.fillStyle=C.ink; g.font='italic 15px serif';
+  if(Math.abs(x*s)>18) g.fillText('x',cx+8,top+x*s/2+5);
+  // block
+  const bs=22;
+  g.fillStyle=C.block; g.fillRect(cx-bs/2,my-bs/2,bs,bs);
+  g.fillStyle=C.paper; g.font='bold 12px sans-serif'; g.fillText('m',cx-5,my+4);
+  // gravity arrow
+  g.strokeStyle=C.ink; g.fillStyle=C.ink; g.lineWidth=1.5;
+  g.beginPath(); g.moveTo(cx,my+bs/2+4); g.lineTo(cx,my+bs/2+34); g.stroke();
+  g.beginPath(); g.moveTo(cx,my+bs/2+40); g.lineTo(cx-5,my+bs/2+31); g.lineTo(cx+5,my+bs/2+31); g.fill();
+  g.font='italic 14px serif'; g.fillText('mg',cx+8,my+bs/2+34);
+  // readout
+  g.font='13px sans-serif'; g.fillStyle=C.mute;
+  g.fillText(`t = ${t.toFixed(2)} s`,12,H-44);
+  g.fillText(`x = ${(x*100).toFixed(2)} cm　v = ${(v*100).toFixed(1)} cm/s`,12,H-26);
+  g.fillText(`彈簧長 r = ${(r*100).toFixed(2)} cm，伸長 ${((r-P.L)*100).toFixed(3)} cm`,12,H-8);
+}
+
+// drag
+scene.addEventListener('pointerdown',e=>{
+  const b=scene.getBoundingClientRect(), px=e.clientX-b.left, py=e.clientY-b.top;
+  if(Math.abs(px-geo.cx)<30 && Math.abs(py-(geo.top+x*geo.s))<30){
+    dragging=true; running=false; scene.setPointerCapture(e.pointerId);
+  }
+});
+scene.addEventListener('pointermove',e=>{
+  if(!dragging) return;
+  const b=scene.getBoundingClientRect();
+  x=Math.max(-0.3*XMAX,Math.min(XMAX,(e.clientY-b.top-geo.top)/geo.s)); v=0;
+});
+scene.addEventListener('pointerup',()=>{ if(dragging){ dragging=false; startFrom(x); } });
+
+// ---------- x(t) plot ----------
+function drawXT(){
+  const c=$('xt'), {g,W,H}=fit(c);
+  const C={ink:css('--ink'),mute:css('--mute'),blue:css('--blue'),red:css('--red'),green:css('--green'),line:css('--line')};
+  g.clearRect(0,0,W,H);
+  const L=46,R=8,T=8,B=24, span=4;
+  const t1=Math.max(t,span), t0=t1-span;
+  const ymin=-0.05*XMAX, ymax=XMAX;
+  const X=tt=>L+(tt-t0)/span*(W-L-R), Y=xx=>T+(xx-ymin)/(ymax-ymin)*(H-T-B); // downward positive
+  g.strokeStyle=C.line; g.lineWidth=1; g.strokeRect(L,T,W-L-R,H-T-B);
+  g.fillStyle=C.mute; g.font='11px sans-serif';
+  for(let i=0;i<=4;i++){ const xx=ymin+(ymax-ymin)*i/4; g.fillText((xx*100).toFixed(1),4,Y(xx)+4); }
+  for(let s=Math.ceil(t0);s<=t1;s++) g.fillText(s+'s',X(s)-6,H-8);
+  g.fillText('cm',4,T+10);
+  dash(g,true); g.lineWidth=1.2;
+  g.strokeStyle=C.green; g.beginPath(); g.moveTo(L,Y(X0e)); g.lineTo(W-R,Y(X0e)); g.stroke();
+  g.strokeStyle=C.red; g.beginPath(); g.moveTo(L,Y(X0a)); g.lineTo(W-R,Y(X0a)); g.stroke();
+  dash(g,false);
+  g.strokeStyle=C.blue; g.lineWidth=1.8; g.beginPath();
+  let first=true;
+  for(const p of hist){ if(p.t<t0) continue; const px=X(p.t), py=Y(Math.max(ymin,Math.min(ymax,p.x)));
+    if(first){g.moveTo(px,py);first=false;} else g.lineTo(px,py); }
+  g.stroke();
+}
+
+// ---------- U(x) plot ----------
+function drawUX(){
+  const c=$('ux'), {g,W,H}=fit(c);
+  const C={ink:css('--ink'),mute:css('--mute'),blue:css('--blue'),red:css('--red'),green:css('--green'),line:css('--line')};
+  g.clearRect(0,0,W,H);
+  const L=10,R=8,T=8,B=24;
+  const xa=-0.1*XMAX, xb=XMAX;
+  const Umin=Ue(X0e), sc=Math.abs(Umin)||1;
+  const ua=Umin-0.25*sc, ub=Umin+2.2*sc;
+  const X=xx=>L+(xx-xa)/(xb-xa)*(W-L-R), Y=u=>T+(ub-u)/(ub-ua)*(H-T-B);
+  g.strokeStyle=C.line; g.lineWidth=1; g.strokeRect(L,T,W-L-R,H-T-B);
+  g.fillStyle=C.mute; g.font='11px sans-serif';
+  g.fillText('0',X(0)-3,H-8); g.fillText('x →',W-R-24,H-8);
+  g.save(); g.beginPath(); g.rect(L,T,W-L-R,H-T-B); g.clip();
+  const curve=(f,col,dsh,w)=>{ g.strokeStyle=col; g.lineWidth=w; dash(g,dsh); g.beginPath();
+    for(let i=0;i<=200;i++){ const xx=xa+(xb-xa)*i/200; const px=X(xx), py=Y(f(xx)); i?g.lineTo(px,py):g.moveTo(px,py);} g.stroke(); dash(g,false); };
+  curve(xx=>Umin+0.5*KEFF*(xx-X0e)**2, C.green, true, 1.2);
+  curve(Ua, C.red, true, 1.2);
+  curve(Ue, C.blue, false, 2);
+  g.fillStyle=C.blue; g.beginPath(); g.arc(X(x),Y(Ue(x)),5,0,7); g.fill();
+  g.restore();
+}
+
+// ---------- loop ----------
+let last=performance.now();
+function frame(now){
+  const dtReal=Math.min(0.05,(now-last)/1000); last=now;
+  if(running && !paused && !dragging){
+    const dt=dtReal*P.sp, n=Math.max(1,Math.ceil(dt/0.0002)), h=dt/n;
+    for(let i=0;i<n;i++) rk4(h);
+    hist.push({t,x});
+    while(hist.length && hist[0].t < t-4.2) hist.shift();
+  }
+  $('Tm').textContent = periods.length ? (periods.reduce((a,b)=>a+b,0)/periods.length).toFixed(4)+' s' : '—';
+  drawScene(); drawXT(); drawUX();
+  requestAnimationFrame(frame);
+}
+readParams(); toEq();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

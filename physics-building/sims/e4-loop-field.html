@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圓形線圈磁場分佈模擬器</title>
+    <style>*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.static{position:static}.sticky{position:sticky}.top-0{top:0}.z-30{z-index:30}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.flex{display:flex}.grid{display:grid}.h-1\.5{height:.375rem}.h-16{height:4rem}.h-2{height:.5rem}.h-3{height:.75rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-8{height:2rem}.h-\[400px\]{height:400px}.w-3{width:.75rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-8{width:2rem}.w-full{width:100%}.max-w-7xl{max-width:80rem}.flex-1{flex:1 1 0%}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.appearance-none{-webkit-appearance:none;-moz-appearance:none;appearance:none}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-8{gap:2rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138/var(--tw-border-opacity,1))}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254/var(--tw-border-opacity,1))}.border-green-200{--tw-border-opacity:1;border-color:rgb(187 247 208/var(--tw-border-opacity,1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240/var(--tw-border-opacity,1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11/var(--tw-bg-opacity,1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244/var(--tw-bg-opacity,1))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94/var(--tw-bg-opacity,1))}.bg-science-500{--tw-bg-opacity:1;background-color:rgb(14 165 233/var(--tw-bg-opacity,1))}.bg-science-600{--tw-bg-opacity:1;background-color:rgb(2 132 199/var(--tw-bg-opacity,1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249/var(--tw-bg-opacity,1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240/var(--tw-bg-opacity,1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252/var(--tw-bg-opacity,1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-amber-50{--tw-gradient-from:#fffbeb var(--tw-gradient-from-position);--tw-gradient-to:rgba(255,251,235,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-slate-50{--tw-gradient-from:#f8fafc var(--tw-gradient-from-position);--tw-gradient-to:rgba(248,250,252,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.to-orange-50{--tw-gradient-to:#fff7ed var(--tw-gradient-to-position)}.to-slate-100{--tw-gradient-to:#f1f5f9 var(--tw-gradient-to-position)}.p-3{padding:.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pt-2{padding-top:.5rem}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.italic{font-style:italic}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6/var(--tw-text-opacity,1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14/var(--tw-text-opacity,1))}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15/var(--tw-text-opacity,1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175/var(--tw-text-opacity,1))}.text-green-600{--tw-text-opacity:1;color:rgb(22 163 74/var(--tw-text-opacity,1))}.text-green-700{--tw-text-opacity:1;color:rgb(21 128 61/var(--tw-text-opacity,1))}.text-science-600{--tw-text-opacity:1;color:rgb(2 132 199/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105/var(--tw-text-opacity,1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85/var(--tw-text-opacity,1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59/var(--tw-text-opacity,1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.accent-science-600{accent-color:#0284c7}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.hover\:bg-science-700:hover{--tw-bg-opacity:1;background-color:rgb(3 105 161/var(--tw-bg-opacity,1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240/var(--tw-bg-opacity,1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252/var(--tw-bg-opacity,1))}@media (min-width:640px){.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width:1024px){.lg\:col-span-2{grid-column:span 2/span 2}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}</style>
+    <script src="../vendor/chart.umd.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .formula-text {
+            font-family: 'Georgia', serif;
+            font-style: italic;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased">
+    
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-science-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">B</div>
+                <h1 class="text-xl font-bold text-slate-800">磁場分佈模擬器</h1>
+            </div>
+            <div class="flex items-center gap-3" id="action-buttons">
+                <button 
+                    id="copyBtn"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm border bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    複製代碼
+                </button>
+                <button 
+                    id="downloadBtn"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm bg-science-600 hover:bg-science-700 text-white"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    下載 HTML
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Title Section -->
+        <div class="mb-8 animate-in">
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">圓形線圈磁場分佈</h2>
+            <p class="text-slate-600">使用完整橢圓積分計算圓形線圈內部的磁通密度 <span class="formula-text">B(r)</span> 分佈</p>
+        </div>
+
+        <!-- Formula Block -->
+        <div class="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl shadow-sm border border-slate-200 mb-8 animate-in">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-science-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                磁場計算公式
+            </h3>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 font-mono text-sm space-y-3">
+                <div class="text-slate-800">
+                    <strong>B(r)</strong> = <span class="text-science-600">(μ₀I / 2πR)</span> × 
+                    <span class="text-amber-600">[K(k) + (R² - r²)/(R - r)² × E(k)]</span> / <span class="text-slate-600">(R + r)</span>
+                </div>
+                <div class="text-slate-600 text-xs space-y-1 pt-2 border-t border-slate-200">
+                    <div>其中 <strong>k</strong> = √[4Rr/(R+r)²]</div>
+                    <div><strong>K(k)</strong>: 第一類完整橢圓積分</div>
+                    <div><strong>E(k)</strong>: 第二類完整橢圓積分</div>
+                    <div><strong>μ₀</strong> = 4π × 10⁻⁷ T·m/A (真空磁導率)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            
+            <!-- Chart Section -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 animate-in">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-slate-800">磁場分佈曲線（歸一化）</h3>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="w-3 h-3 bg-science-500 rounded-full"></span>
+                        <span class="text-slate-600">B / B₀</span>
+                    </div>
+                </div>
+                
+                <div class="h-[400px] w-full" id="chart-container">
+                    <canvas id="fieldChart"></canvas>
+                </div>
+                
+                <div class="mt-4 text-center text-sm text-slate-500">
+                    圖表顯示當 <strong>r</strong> 接近線圈半徑 <strong>R</strong> 時，磁場強度急劇增加
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                
+                <!-- Control Panel -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 animate-in">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-science-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        參數控制
+                    </h3>
+                    
+                    <div class="space-y-5">
+                        <!-- Radius Control -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-slate-700">線圈半徑 R</label>
+                                <span class="text-sm font-mono text-science-600" id="radiusValue">1.00 m</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                id="radiusSlider" 
+                                min="0.1" 
+                                max="5.0" 
+                                step="0.1" 
+                                value="1.0"
+                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-science-600"
+                            >
+                            <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                <span>0.1 m</span>
+                                <span>5.0 m</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Control -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-slate-700">電流 I</label>
+                                <span class="text-sm font-mono text-science-600" id="currentValue">1.0 A</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                id="currentSlider" 
+                                min="0.1" 
+                                max="10.0" 
+                                step="0.1" 
+                                value="1.0"
+                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-science-600"
+                            >
+                            <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                <span>0.1 A</span>
+                                <span>10.0 A</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Reset Button -->
+                        <button 
+                            id="resetBtn"
+                            class="w-full px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            重置參數
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 animate-in">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-science-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        驗證數據
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-slate-600">r = 0</span>
+                                <div class="text-right">
+                                    <div class="text-sm font-mono text-slate-800" id="result-r0">B/B₀ = 1.00</div>
+                                    <div class="text-xs text-slate-500">預期: 1.00</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="flex-1 bg-slate-200 rounded-full h-1.5">
+                                    <div class="bg-green-500 h-1.5 rounded-full transition-all" id="bar-r0" style="width: 100%"></div>
+                                </div>
+                                <span class="text-xs text-green-600 font-medium" id="status-r0">✓</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-slate-600">r = 0.5R</span>
+                                <div class="text-right">
+                                    <div class="text-sm font-mono text-slate-800" id="result-r05">B/B₀ = 1.25</div>
+                                    <div class="text-xs text-slate-500">預期: ≈ 1.25</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="flex-1 bg-slate-200 rounded-full h-1.5">
+                                    <div class="bg-green-500 h-1.5 rounded-full transition-all" id="bar-r05" style="width: 100%"></div>
+                                </div>
+                                <span class="text-xs text-green-600 font-medium" id="status-r05">✓</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-slate-600">r = 0.9R</span>
+                                <div class="text-right">
+                                    <div class="text-sm font-mono text-slate-800" id="result-r09">B/B₀ = 4.0</div>
+                                    <div class="text-xs text-slate-500">預期: ≈ 4.0</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="flex-1 bg-slate-200 rounded-full h-1.5">
+                                    <div class="bg-green-500 h-1.5 rounded-full transition-all" id="bar-r09" style="width: 100%"></div>
+                                </div>
+                                <span class="text-xs text-green-600 font-medium" id="status-r09">✓</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="text-xs text-blue-800">
+                            <div class="font-medium mb-1">圓心磁場 B₀</div>
+                            <div class="font-mono" id="b0-value">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 animate-in">
+            <h3 class="text-lg font-semibold text-amber-900 mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                重要說明
+            </h3>
+            <div class="text-sm text-amber-800 space-y-2">
+                <p>• 本模擬器使用完整橢圓積分（Complete Elliptic Integrals）進行精確計算</p>
+                <p>• 當 r → R 時，磁場強度趨近於無窮大（理論上）</p>
+                <p>• 實際應用中，導線具有有限半徑，因此磁場不會真正達到無窮大</p>
+                <p>• 圖表顯示範圍為 r/R ∈ [0, 0.96] 以避免奇異點</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="max-w-7xl mx-auto px-4 py-6 text-center text-slate-400 text-sm">
+        <p>圓形線圈磁場分佈模擬器 | 基於完整橢圓積分的精確計算</p>
+    </footer>
+
+    <script>
+        // =========================
+        // Physics Calculations
+        // =========================
+        
+        const mu0 = 4 * Math.PI * 1e-7; // Vacuum permeability (T·m/A)
+        
+        // Complete Elliptic Integral K(k) using AGM algorithm
+        function ellipticK(k) {
+            if (k === 1) return Infinity;
+            if (k === 0) return Math.PI / 2;
+            
+            let a = 1;
+            let b = Math.sqrt(1 - k * k);
+            
+            for (let i = 0; i < 20; i++) {
+                const an = (a + b) / 2;
+                const bn = Math.sqrt(a * b);
+                
+                if (Math.abs(a - b) < 1e-15) break;
+                
+                a = an;
+                b = bn;
+            }
+            
+            return Math.PI / (2 * a);
+        }
+        
+        // Complete Elliptic Integral E(k)
+        function ellipticE(k) {
+            if (k === 0) return Math.PI / 2;
+            if (k === 1) return 1;
+            
+            let a = 1;
+            let b = Math.sqrt(1 - k * k);
+            let sum = 0;
+            let pow2 = 1;
+            
+            for (let i = 0; i < 20; i++) {
+                const an = (a + b) / 2;
+                const bn = Math.sqrt(a * b);
+                const cn = (a - b) / 2;
+                
+                sum += pow2 * cn * cn;
+                pow2 *= 2;
+                
+                if (Math.abs(cn) < 1e-15) break;
+                
+                a = an;
+                b = bn;
+            }
+            
+            return (Math.PI / (2 * a)) * (1 - sum);
+        }
+        
+        // Calculate magnetic field B(r) at distance r from center
+        function calculateB(r, R, I) {
+            if (r === 0) {
+                // At center: B₀ = μ₀I / (2R)
+                return (mu0 * I) / (2 * R);
+            }
+            
+            if (Math.abs(r - R) < 1e-10) {
+                // Very close to R, return a large but finite value
+                return calculateB(R * 0.999, R, I);
+            }
+            
+            const k_squared = (4 * R * r) / Math.pow(R + r, 2);
+            const k = Math.sqrt(k_squared);
+            
+            const K_k = ellipticK(k);
+            const E_k = ellipticE(k);
+            
+            const factor = (mu0 * I) / (2 * Math.PI * R);
+            const term1 = K_k;
+            const term2 = ((R * R - r * r) / Math.pow(R - r, 2)) * E_k;
+            
+            const B = factor * (term1 + term2) / (R + r);
+            
+            return B;
+        }
+        
+        // Calculate B₀ (field at center)
+        function calculateB0(R, I) {
+            return (mu0 * I) / (2 * R);
+        }
+        
+        // =========================
+        // Chart Setup
+        // =========================
+        
+        let chart;
+        let params = {
+            radius: 1.0,
+            current: 1.0
+        };
+        
+        function initChart() {
+            const ctx = document.getElementById('fieldChart').getContext('2d');
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'B / B₀',
+                        data: [],
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'white',
+                            titleColor: '#1e293b',
+                            bodyColor: '#475569',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                title: function(context) {
+                                    const rRatio = context[0].parsed.x;
+                                    const r = rRatio * params.radius;
+                                    return `r = ${r.toFixed(3)} m (${rRatio.toFixed(2)}R)`;
+                                },
+                                label: function(context) {
+                                    return `B/B₀ = ${context.parsed.y.toFixed(3)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 0,
+                            max: 1,
+                            ticks: {
+                                stepSize: 0.1,
+                                color: '#64748b'
+                            },
+                            grid: {
+                                color: '#e2e8f0',
+                                drawBorder: false
+                            },
+                            title: {
+                                display: true,
+                                text: '距離比值 (r/R)',
+                                color: '#64748b',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#64748b'
+                            },
+                            grid: {
+                                color: '#e2e8f0',
+                                drawBorder: false
+                            },
+                            title: {
+                                display: true,
+                                text: '磁場比值 (B/B₀)',
+                                color: '#64748b',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+        
+        // =========================
+        // Update Functions
+        // =========================
+        
+        function updateChart() {
+            const R = params.radius;
+            const I = params.current;
+            const B0 = calculateB0(R, I);
+            
+            const steps = 100;
+            const maxRRatio = 0.96;
+            
+            const labels = [];
+            const data = [];
+            
+            for (let i = 0; i <= steps; i++) {
+                const rRatio = (maxRRatio / steps) * i;
+                const r = rRatio * R;
+                const B = calculateB(r, R, I);
+                const BNormalized = B / B0;
+                
+                labels.push(rRatio);
+                data.push(BNormalized);
+            }
+            
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update('none');
+            
+            updateResults(R, I, B0);
+        }
+        
+        function updateResults(R, I, B0) {
+            // Update verification points
+            const r0 = 0;
+            const r05 = 0.5 * R;
+            const r09 = 0.9 * R;
+            
+            const B_r0 = calculateB(r0, R, I);
+            const B_r05 = calculateB(r05, R, I);
+            const B_r09 = calculateB(r09, R, I);
+            
+            const ratio_r0 = B_r0 / B0;
+            const ratio_r05 = B_r05 / B0;
+            const ratio_r09 = B_r09 / B0;
+            
+            // Update displays
+            document.getElementById('result-r0').textContent = `B/B₀ = ${ratio_r0.toFixed(3)}`;
+            document.getElementById('result-r05').textContent = `B/B₀ = ${ratio_r05.toFixed(3)}`;
+            document.getElementById('result-r09').textContent = `B/B₀ = ${ratio_r09.toFixed(3)}`;
+            
+            // Update progress bars and status
+            updateVerificationBar('r0', ratio_r0, 1.0, 0.01);
+            updateVerificationBar('r05', ratio_r05, 1.25, 0.05);
+            updateVerificationBar('r09', ratio_r09, 4.0, 0.3);
+            
+            // Update B₀ value
+            document.getElementById('b0-value').textContent = `${(B0 * 1e6).toFixed(3)} μT`;
+        }
+        
+        function updateVerificationBar(id, calculated, expected, tolerance) {
+            const percentage = Math.min(100, (calculated / expected) * 100);
+            const isMatch = Math.abs(calculated - expected) < tolerance;
+            
+            const bar = document.getElementById(`bar-${id}`);
+            const status = document.getElementById(`status-${id}`);
+            
+            bar.style.width = `${percentage}%`;
+            
+            if (isMatch) {
+                bar.className = 'bg-green-500 h-1.5 rounded-full transition-all';
+                status.textContent = '✓';
+                status.className = 'text-xs text-green-600 font-medium';
+            } else {
+                bar.className = 'bg-amber-500 h-1.5 rounded-full transition-all';
+                status.textContent = '~';
+                status.className = 'text-xs text-amber-600 font-medium';
+            }
+        }
+        
+        function updateSliderDisplays() {
+            document.getElementById('radiusValue').textContent = `${params.radius.toFixed(2)} m`;
+            document.getElementById('currentValue').textContent = `${params.current.toFixed(1)} A`;
+        }
+        
+        // =========================
+        // Event Listeners
+        // =========================
+        
+        document.getElementById('radiusSlider').addEventListener('input', (e) => {
+            params.radius = parseFloat(e.target.value);
+            updateSliderDisplays();
+            updateChart();
+        });
+        
+        document.getElementById('currentSlider').addEventListener('input', (e) => {
+            params.current = parseFloat(e.target.value);
+            updateSliderDisplays();
+            updateChart();
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            params.radius = 1.0;
+            params.current = 1.0;
+            
+            document.getElementById('radiusSlider').value = params.radius;
+            document.getElementById('currentSlider').value = params.current;
+            
+            updateSliderDisplays();
+            updateChart();
+        });
+        
+        // =========================
+        // Export Functions
+        // =========================
+        
+        function generateStaticHTML() {
+            const html = document.documentElement.cloneNode(true);
+            
+            // Remove action buttons
+            const actionButtons = html.querySelector('#action-buttons');
+            if (actionButtons) actionButtons.remove();
+            
+            // Freeze input values
+            const inputs = html.querySelectorAll('input');
+            inputs.forEach((input, idx) => {
+                const originalInput = document.querySelectorAll('input')[idx];
+                input.value = originalInput.value;
+                input.setAttribute('disabled', 'true');
+            });
+            
+            // Export chart as static image
+            const chartCanvas = document.getElementById('fieldChart');
+            const chartImg = html.querySelector('#fieldChart');
+            if (chartCanvas && chartImg) {
+                const dataURL = chartCanvas.toDataURL('image/png');
+                const img = html.createElement('img');
+                img.src = dataURL;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                chartImg.parentNode.replaceChild(img, chartImg);
+            }
+            
+            // Add snapshot timestamp
+            const footer = html.querySelector('footer p');
+            if (footer) {
+                footer.innerHTML += `<br>快照生成時間: ${new Date().toLocaleString('zh-TW')}`;
+            }
+            
+            return '<!DOCTYPE html>\n' + html.outerHTML;
+        }
+        
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const htmlContent = generateStaticHTML();
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `magnetic-field-simulation-${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+        });
+        
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('copyBtn');
+            const htmlContent = generateStaticHTML();
+            
+            try {
+                await navigator.clipboard.writeText(htmlContent);
+                btn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    已複製！
+                `;
+                btn.className = 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm border bg-green-50 border-green-200 text-green-700';
+                
+                setTimeout(() => {
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        複製代碼
+                    `;
+                    btn.className = 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm border bg-white border-slate-200 text-slate-700 hover:bg-slate-50';
+                }, 2000);
+            } catch (err) {
+                alert('複製失敗，請嘗試下載功能');
+            }
+        });
+        
+        // =========================
+        // Initialize
+        // =========================
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            updateSliderDisplays();
+            updateChart();
+        });
+    </script>
+</body>
+</html>

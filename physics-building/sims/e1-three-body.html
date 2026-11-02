@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三體引力加速度模擬器</title>
+    <script src="../vendor/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+        text-align: center;
+        color: #2d3748;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #718096;
+        margin-bottom: 30px;
+        font-size: 1.1em;
+    }
+
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .panel {
+        background: #f7fafc;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .panel h2 {
+        color: #2d3748;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 10px;
+    }
+
+    #canvas {
+        width: 100%;
+        height: 450px;
+        border: 3px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8f9fa;
+    }
+
+    .control-group {
+        margin-bottom: 20px;
+    }
+
+    .control-group label {
+        display: block;
+        font-weight: bold;
+        color: #4a5568;
+        margin-bottom: 8px;
+        font-size: 0.95em;
+    }
+
+    .control-group input[type="range"] {
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #667eea;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .control-group input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #667eea;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        border: none;
+    }
+
+    .value-display {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        font-size: 0.9em;
+        color: #718096;
+    }
+
+    .value-display .current {
+        font-weight: bold;
+        color: #667eea;
+        font-family: 'Courier New', monospace;
+    }
+
+    .status-box {
+        background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .status-item {
+        text-align: center;
+    }
+
+    .status-item .label {
+        font-size: 0.85em;
+        color: #2d3748;
+        margin-bottom: 5px;
+    }
+
+    .status-item .value {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #16a34a;
+        font-family: 'Courier New', monospace;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    button {
+        flex: 1;
+        padding: 15px;
+        font-size: 1.1em;
+        font-weight: bold;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+
+    .btn-start {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        color: white;
+    }
+
+    .btn-pause {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+    }
+
+    .btn-reset {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        color: white;
+    }
+
+    .scenario-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .scenario-btn {
+        padding: 12px;
+        font-size: 0.95em;
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .scenario-btn:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .info-box {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 8px;
+    }
+
+    .info-box h3 {
+        color: #1e40af;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+    }
+
+    .info-box ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .info-box li {
+        color: #475569;
+        padding: 5px 0;
+        font-size: 0.9em;
+    }
+
+    .info-box li::before {
+        content: "• ";
+        color: #3b82f6;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .chart-container h2 {
+        color: #2d3748;
+        margin-bottom: 20px;
+    }
+
+    canvas.chart {
+        max-height: 300px;
+    }
+
+    @media (max-width: 1024px) {
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .status-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 15px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 三體引力加速度模擬器</h1>
+        <p class="subtitle">探索兩個固定質量對第三個質量的引力影響</p>
+
+```
+    <div class="main-grid">
+        <!-- 左側：視覺化 -->
+        <div class="panel">
+            <h2>系統視覺化</h2>
+            <canvas id="canvas"></canvas>
+
+            <div class="status-box">
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="label">加速度</div>
+                        <div class="value" id="accel">0.00</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="label">速度</div>
+                        <div class="value" id="velocity">0.00</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="label">位置</div>
+                        <div class="value" id="position">(4.0, 0.0)</div>
+                    </div>
+                </div>
+                <div id="timeInfo" style="text-align: center; color: #2d3748; font-weight: bold; display: none;">
+                    運行時間: <span id="elapsedTime">0.0</span>s |
+                    動能: <span id="kineticEnergy">0</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="startBtn" class="btn-start" onclick="toggleAnimation()">
+                    ▶ 開始動畫
+                </button>
+                <button class="btn-reset" onclick="resetSimulation()">
+                    🔄 重置
+                </button>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="showTrajectory" checked>
+                <label for="showTrajectory">顯示運動軌跡</label>
+            </div>
+
+            <div class="info-box">
+                <h3>快速場景</h3>
+                <div class="scenario-grid">
+                    <button class="scenario-btn" onclick="loadScenario('circular')">🔄 圓周運動</button>
+                    <button class="scenario-btn" onclick="loadScenario('oscillate')">↔️ 往返振盪</button>
+                    <button class="scenario-btn" onclick="loadScenario('escape')">🚀 逃逸軌道</button>
+                    <button class="scenario-btn" onclick="loadScenario('diagonal')">↗️ 斜向運動</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側：控制面板 -->
+        <div class="panel">
+            <h2>參數控制</h2>
+
+            <div class="control-group">
+                <label>質量 M (A 和 B 的質量)</label>
+                <input type="range" id="massM" min="50" max="300" step="10" value="100">
+                <div class="value-display">
+                    <span>50</span>
+                    <span class="current" id="massMValue">100</span>
+                    <span>300</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>距離 d (A 和 B 到原點的距離)</label>
+                <input type="range" id="distD" min="0.5" max="8" step="0.5" value="3">
+                <div class="value-display">
+                    <span>0.5</span>
+                    <span class="current" id="distDValue">3.0</span>
+                    <span>8.0</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>C 的初始位置 x</label>
+                <input type="range" id="posX" min="0.5" max="10" step="0.5" value="4">
+                <div class="value-display">
+                    <span>0.5</span>
+                    <span class="current" id="posXValue">4.0</span>
+                    <span>10.0</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>C 的初始位置 y</label>
+                <input type="range" id="posY" min="-8" max="8" step="0.5" value="0">
+                <div class="value-display">
+                    <span>-8.0</span>
+                    <span class="current" id="posYValue">0.0</span>
+                    <span>8.0</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>初始速度 vₓ</label>
+                <input type="range" id="velX" min="-5" max="5" step="0.5" value="0">
+                <div class="value-display">
+                    <span>-5.0</span>
+                    <span class="current" id="velXValue">0.0</span>
+                    <span>5.0</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>初始速度 vᵧ</label>
+                <input type="range" id="velY" min="-5" max="5" step="0.5" value="0">
+                <div class="value-display">
+                    <span>-5.0</span>
+                    <span class="current" id="velYValue">0.0</span>
+                    <span>5.0</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>動畫速度: <span id="speedValue">1</span>x</label>
+                <input type="range" id="animSpeed" min="0.5" max="3" step="0.5" value="1">
+                <div class="value-display">
+                    <span>0.5x</span>
+                    <span>3.0x</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>🔍 觀察重點</h3>
+                <ul>
+                    <li><strong>🟣 紫色軌跡</strong>：質點的運動路徑</li>
+                    <li><strong>🟠 橙色箭頭</strong>：速度向量 v</li>
+                    <li><strong>🟢 綠色箭頭</strong>：加速度向量 a</li>
+                    <li>調整參數，觀察不同的運動模式！</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 圖表區域 -->
+    <div class="chart-container" id="chartContainer" style="display: none;">
+        <h2>📊 速度與加速度 vs 位置 x</h2>
+        <p style="color: #64748b; margin-bottom: 15px;">觀察質點在不同 x 位置時的速度和加速度變化</p>
+        <canvas id="dataChart" class="chart"></canvas>
+    </div>
+</div>
+
+<script>
+    // 全域變數
+    const G = 1;
+    const m = 10;
+    let M = 100;
+    let d = 3;
+    let x = 4;
+    let y = 0;
+    let vx = 0;
+    let vy = 0;
+    let isAnimating = false;
+    let animationId = null;
+    let trajectory = [];
+    let timeData = [];
+    let elapsedTime = 0;
+    let animSpeed = 1;
+    let showTrajectory = true;
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 設置 canvas 尺寸
+    function resizeCanvas() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // 計算加速度
+    function calculateAcceleration(xPos, yPos, dPos) {
+        const dx_A = 0 - xPos;
+        const dy_A = dPos - yPos;
+        const rA = Math.sqrt(dx_A * dx_A + dy_A * dy_A);
+        const forceA_mag = G * M / (rA * rA + 0.01);
+        const forceA_x = forceA_mag * dx_A / rA;
+        const forceA_y = forceA_mag * dy_A / rA;
+
+        const dx_B = 0 - xPos;
+        const dy_B = -dPos - yPos;
+        const rB = Math.sqrt(dx_B * dx_B + dy_B * dy_B);
+        const forceB_mag = G * M / (rB * rB + 0.01);
+        const forceB_x = forceB_mag * dx_B / rB;
+        const forceB_y = forceB_mag * dy_B / rB;
+
+        const ax = (forceA_x + forceB_x) / m;
+        const ay = (forceA_y + forceB_y) / m;
+        const a_mag = Math.sqrt(ax * ax + ay * ay);
+
+        return { ax, ay, a_mag };
+    }
+
+    // 座標轉換
+    function worldToScreen(wx, wy) {
+        const scale = Math.min(canvas.width, canvas.height) / 26;
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        return {
+            x: cx + wx * scale,
+            y: cy - wy * scale
+        };
+    }
+
+    // 繪製函數
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 繪製網格
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        const scale = Math.min(canvas.width, canvas.height) / 26;
+        for (let i = -12; i <= 12; i++) {
+            const s = worldToScreen(i, -12);
+            const e = worldToScreen(i, 12);
+            ctx.beginPath();
+            ctx.moveTo(s.x, s.y);
+            ctx.lineTo(e.x, e.y);
+            ctx.stroke();
+
+            const s2 = worldToScreen(-12, i);
+            const e2 = worldToScreen(12, i);
+            ctx.beginPath();
+            ctx.moveTo(s2.x, s2.y);
+            ctx.lineTo(e2.x, e2.y);
+            ctx.stroke();
+        }
+
+        // 繪製座標軸
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 2;
+        const xAxis1 = worldToScreen(-12, 0);
+        const xAxis2 = worldToScreen(12, 0);
+        ctx.beginPath();
+        ctx.moveTo(xAxis1.x, xAxis1.y);
+        ctx.lineTo(xAxis2.x, xAxis2.y);
+        ctx.stroke();
+
+        const yAxis1 = worldToScreen(0, -12);
+        const yAxis2 = worldToScreen(0, 12);
+        ctx.beginPath();
+        ctx.moveTo(yAxis1.x, yAxis1.y);
+        ctx.lineTo(yAxis2.x, yAxis2.y);
+        ctx.stroke();
+
+        // 繪製軌跡
+        if (showTrajectory && trajectory.length > 1) {
+            ctx.strokeStyle = '#8b5cf6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            const first = worldToScreen(trajectory[0].x, trajectory[0].y);
+            ctx.moveTo(first.x, first.y);
+            for (let i = 1; i < trajectory.length; i++) {
+                const p = worldToScreen(trajectory[i].x, trajectory[i].y);
+                ctx.lineTo(p.x, p.y);
+            }
+            ctx.stroke();
+        }
+
+        // 繪製 A 點
+        const pA = worldToScreen(0, d);
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(pA.x, pA.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1e40af';
+        ctx.font = 'bold 18px Arial';
+        ctx.fillText('M', pA.x + 20, pA.y + 5);
+        ctx.font = '14px Arial';
+        ctx.fillText(`A(0, ${d.toFixed(1)})`, pA.x - 60, pA.y + 5);
+
+        // 繪製 B 點
+        const pB = worldToScreen(0, -d);
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(pB.x, pB.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1e40af';
+        ctx.font = 'bold 18px Arial';
+        ctx.fillText('M', pB.x + 20, pB.y + 5);
+        ctx.font = '14px Arial';
+        ctx.fillText(`B(0, ${(-d).toFixed(1)})`, pB.x - 60, pB.y + 5);
+
+        // 繪製 C 點
+        const pC = worldToScreen(x, y);
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(pC.x, pC.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#991b1b';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText('m', pC.x + 18, pC.y + 5);
+        ctx.font = '13px Arial';
+        ctx.fillText(`C(${x.toFixed(1)}, ${y.toFixed(1)})`, pC.x - 10, pC.y + 25);
+
+        // 繪製速度向量
+        const speed = Math.sqrt(vx * vx + vy * vy);
+        if (speed > 0.1) {
+            const vEnd = worldToScreen(x + vx * 0.5, y + vy * 0.5);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(pC.x, pC.y);
+            ctx.lineTo(vEnd.x, vEnd.y);
+            ctx.stroke();
+            drawArrow(ctx, pC.x, pC.y, vEnd.x, vEnd.y, '#f59e0b');
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('v', vEnd.x + 10, vEnd.y);
+        }
+
+        // 繪製加速度向量
+        const acc = calculateAcceleration(x, y, d);
+        if (acc.a_mag > 0.01) {
+            const aEnd = worldToScreen(x + acc.ax * 0.8, y + acc.ay * 0.8);
+            ctx.strokeStyle = '#16a34a';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(pC.x, pC.y);
+            ctx.lineTo(aEnd.x, aEnd.y);
+            ctx.stroke();
+            drawArrow(ctx, pC.x, pC.y, aEnd.x, aEnd.y, '#16a34a');
+            ctx.fillStyle = '#16a34a';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('a', aEnd.x + 10, aEnd.y);
+        }
+
+        // 更新顯示
+        document.getElementById('accel').textContent = acc.a_mag.toFixed(3);
+        document.getElementById('velocity').textContent = speed.toFixed(2);
+        document.getElementById('position').textContent = `(${x.toFixed(1)}, ${y.toFixed(1)})`;
+    }
+
+    // 繪製箭頭
+    function drawArrow(ctx, fromX, fromY, toX, toY, color) {
+        const headlen = 12;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // 動畫更新
+    function animate() {
+        if (!isAnimating) return;
+
+        const dt = 0.02 * animSpeed;
+        const acc = calculateAcceleration(x, y, d);
+
+        vx += acc.ax * dt;
+        vy += acc.ay * dt;
+        x += vx * dt;
+        y += vy * dt;
+        elapsedTime += dt;
+
+        // 邊界檢查
+        if (Math.abs(x) > 15 || Math.abs(y) > 15) {
+            toggleAnimation();
+            alert('質點已飛出邊界！');
+            return;
+        }
+
+        // 碰撞檢查
+        const distA = Math.sqrt(x * x + (y - d) * (y - d));
+        const distB = Math.sqrt(x * x + (y + d) * (y + d));
+        if (distA < 0.3 || distB < 0.3) {
+            toggleAnimation();
+            alert('質點太接近質量源！');
+            return;
+        }
+
+        // 記錄軌跡
+        if (showTrajectory) {
+            trajectory.push({ x, y });
+            if (trajectory.length > 500) trajectory.shift();
+        }
+
+        // 記錄數據（以 x 位置為橫軸）
+        const speed = Math.sqrt(vx * vx + vy * vy);
+        timeData.push({
+            x: x,
+            y: y,
+            speed: speed,
+            accel: acc.a_mag
+        });
+        if (timeData.length > 500) timeData.shift();
+
+        // 更新圖表
+        if (timeData.length > 5) {
+            document.getElementById('chartContainer').style.display = 'block';
+            updateChart();
+        }
+
+        // 更新時間和動能顯示
+        document.getElementById('timeInfo').style.display = 'block';
+        document.getElementById('elapsedTime').textContent = elapsedTime.toFixed(1);
+        document.getElementById('kineticEnergy').textContent = (0.5 * m * speed * speed).toFixed(1);
+
+        draw();
+        animationId = requestAnimationFrame(animate);
+    }
+
+    // 切換動畫
+    function toggleAnimation() {
+        isAnimating = !isAnimating;
+        const btn = document.getElementById('startBtn');
+        if (isAnimating) {
+            btn.textContent = '⏸ 暫停動畫';
+            btn.className = 'btn-pause';
+            animate();
+        } else {
+            btn.textContent = '▶ 開始動畫';
+            btn.className = 'btn-start';
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+    }
+
+    // 重置模擬
+    function resetSimulation() {
+        if (isAnimating) toggleAnimation();
+        x = 4;
+        y = 0;
+        vx = 0;
+        vy = 0;
+        trajectory = [];
+        timeData = [];
+        elapsedTime = 0;
+        document.getElementById('posX').value = 4;
+        document.getElementById('posY').value = 0;
+        document.getElementById('velX').value = 0;
+        document.getElementById('velY').value = 0;
+        updateSliderValues();
+        document.getElementById('timeInfo').style.display = 'none';
+        document.getElementById('chartContainer').style.display = 'none';
+        draw();
+    }
+
+    // 載入場景
+    function loadScenario(type) {
+        if (isAnimating) toggleAnimation();
+        trajectory = [];
+        timeData = [];
+        elapsedTime = 0;
+
+        switch(type) {
+            case 'circular':
+                x = 4; y = 0; vx = 0; vy = 3.5;
+                break;
+            case 'oscillate':
+                x = 4; y = 0; vx = 0; vy = 0;
+                break;
+            case 'escape':
+                x = 4; y = 0; vx = 0; vy = 6;
+                break;
+            case 'diagonal':
+                x = 4; y = 2; vx = -2; vy = 2;
+                break;
+        }
+
+        document.getElementById('posX').value = x;
+        document.getElementById('posY').value = y;
+        document.getElementById('velX').value = vx;
+        document.getElementById('velY').value = vy;
+        updateSliderValues();
+        draw();
+    }
+
+    // 更新滑桿值顯示
+    function updateSliderValues() {
+        document.getElementById('massMValue').textContent = M;
+        document.getElementById('distDValue').textContent = d.toFixed(1);
+        document.getElementById('posXValue').textContent = x.toFixed(1);
+        document.getElementById('posYValue').textContent = y.toFixed(1);
+        document.getElementById('velXValue').textContent = vx.toFixed(1);
+        document.getElementById('velYValue').textContent = vy.toFixed(1);
+        document.getElementById('speedValue').textContent = animSpeed;
+    }
+
+    // 事件監聽器
+    document.getElementById('massM').addEventListener('input', (e) => {
+        M = parseFloat(e.target.value);
+        updateSliderValues();
+        draw();
+    });
+
+    document.getElementById('distD').addEventListener('input', (e) => {
+        d = parseFloat(e.target.value);
+        updateSliderValues();
+        draw();
+    });
+
+    document.getElementById('posX').addEventListener('input', (e) => {
+        if (!isAnimating) {
+            x = parseFloat(e.target.value);
+            updateSliderValues();
+            draw();
+        }
+    });
+
+    document.getElementById('posY').addEventListener('input', (e) => {
+        if (!isAnimating) {
+            y = parseFloat(e.target.value);
+            updateSliderValues();
+            draw();
+        }
+    });
+
+    document.getElementById('velX').addEventListener('input', (e) => {
+        if (!isAnimating) {
+            vx = parseFloat(e.target.value);
+            updateSliderValues();
+        }
+    });
+
+    document.getElementById('velY').addEventListener('input', (e) => {
+        if (!isAnimating) {
+            vy = parseFloat(e.target.value);
+            updateSliderValues();
+        }
+    });
+
+    document.getElementById('animSpeed').addEventListener('input', (e) => {
+        animSpeed = parseFloat(e.target.value);
+        updateSliderValues();
+    });
+
+    document.getElementById('showTrajectory').addEventListener('change', (e) => {
+        showTrajectory = e.target.checked;
+        draw();
+    });
+
+    // Chart.js 圖表
+    let dataChart = null;
+
+    function updateChart() {
+        const ctx = document.getElementById('dataChart');
+
+        // 對數據按 x 排序
+        const sortedData = [...timeData].sort((a, b) => a.x - b.x);
+
+        if (!dataChart) {
+            dataChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedData.map(d => d.x.toFixed(2)),
+                    datasets: [{
+                        label: '速度大小',
+                        data: sortedData.map(d => d.speed),
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }, {
+                        label: '加速度大小',
+                        data: sortedData.map(d => d.accel),
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                title: function(context) {
+                                    return 'x = ' + context[0].label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '位置 x',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                color: '#2d3748'
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '數值',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                color: '#2d3748'
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            dataChart.data.labels = sortedData.map(d => d.x.toFixed(2));
+            dataChart.data.datasets[0].data = sortedData.map(d => d.speed);
+            dataChart.data.datasets[1].data = sortedData.map(d => d.accel);
+            dataChart.update('none');
+        }
+    }
+
+    // 初始化
+    updateSliderValues();
+    draw();
+</script>
+```
+
+</body>
+</html>

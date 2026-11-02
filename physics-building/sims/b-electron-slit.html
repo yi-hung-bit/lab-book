@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電子雙狹縫實驗模擬器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070a12;
+    --bg2:#0c111d;
+    --panel:#111726;
+    --panel2:#161d2e;
+    --line:#222c42;
+    --txt:#e8edf6;
+    --muted:#8492aa;
+    --dim:#5b6880;
+    --phos:#7dffc4;
+    --cyan:#43d6ff;
+    --amber:#ffcf6b;
+    --violet:#a98bff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);
+    font-family:"Noto Sans TC",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.6}
+  body{padding:clamp(14px,2.2vw,30px);
+    background:
+      radial-gradient(900px 500px at 78% -8%,rgba(67,214,255,.07),transparent 60%),
+      radial-gradient(700px 500px at 10% 110%,rgba(125,255,196,.06),transparent 55%),
+      var(--bg)}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  header{margin-bottom:20px}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;
+    letter-spacing:.32em;color:var(--cyan);text-transform:uppercase;margin-bottom:8px}
+  h1{font-size:clamp(24px,3.4vw,38px);font-weight:700;letter-spacing:-.01em;line-height:1.15}
+  h1 .sub{color:var(--phos)}
+  .lede{color:var(--muted);max-width:62ch;margin-top:8px;font-size:15px}
+
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;margin-top:22px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg2));
+    border:1px solid var(--line);border-radius:16px;overflow:hidden}
+
+  /* ---- stage ---- */
+  .stagehead{display:flex;justify-content:space-between;align-items:baseline;
+    padding:14px 16px 6px;flex-wrap:wrap;gap:6px}
+  .stagehead .t{font-family:"JetBrains Mono",monospace;font-size:12px;
+    letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+  .stagehead .n{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+  .stagehead .n b{color:var(--phos)}
+  .screenbox{position:relative;margin:6px 14px 2px;border-radius:10px;overflow:hidden;
+    border:1px solid #1b2336;background:#04060b}
+  canvas{display:block;width:100%}
+  #screen{height:230px}
+  #curve{height:118px}
+  .axis{padding:2px 16px 12px;display:flex;justify-content:space-between;
+    font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim)}
+  .legend{display:flex;gap:16px;padding:0 16px 10px;flex-wrap:wrap;
+    font-size:12px;color:var(--muted)}
+  .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;
+    vertical-align:middle;margin-right:6px}
+
+  /* ---- readouts ---- */
+  .readouts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+    border-radius:14px;overflow:hidden;margin-bottom:16px}
+  .ro{background:var(--panel2);padding:13px 14px}
+  .ro.big{grid-column:1 / -1;background:
+    linear-gradient(120deg,rgba(125,255,196,.10),rgba(67,214,255,.04))}
+  .ro .k{font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .ro .v{font-family:"JetBrains Mono",monospace;font-weight:700;
+    font-size:20px;color:var(--txt);margin-top:3px;line-height:1.1}
+  .ro.big .v{font-size:30px;color:var(--phos)}
+  .ro .u{font-size:12px;color:var(--dim);font-weight:400}
+
+  /* ---- controls ---- */
+  .panelpad{padding:16px}
+  .ctl{margin-bottom:15px}
+  .ctl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .ctl label{font-size:13px;color:var(--txt);font-weight:500}
+  .ctl .val{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--cyan)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;
+    background:#26314a;border-radius:4px;outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;
+    border-radius:50%;background:var(--cyan);cursor:pointer;border:3px solid #0c1322;
+    box-shadow:0 0 0 1px var(--cyan)}
+  input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:var(--cyan);cursor:pointer;border:3px solid #0c1322}
+  .wrow{display:flex;gap:8px;align-items:flex-end}
+  .wrow input[type=range]{flex:1}
+
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}
+  button{font-family:"Noto Sans TC",sans-serif;font-size:13px;font-weight:500;
+    border:1px solid var(--line);background:var(--panel2);color:var(--txt);
+    padding:8px 14px;border-radius:9px;cursor:pointer;transition:.15s}
+  button:hover{border-color:var(--cyan);color:var(--cyan)}
+  button.primary{background:var(--phos);color:#05140d;border-color:var(--phos);font-weight:700}
+  button.primary:hover{background:#9affd2;color:#05140d}
+  button.mini{padding:6px 11px;font-size:12px;white-space:nowrap}
+
+  .toggles{display:flex;flex-direction:column;gap:9px;
+    border-top:1px solid var(--line);padding-top:13px}
+  .tg{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);cursor:pointer}
+  .tg input{width:16px;height:16px;accent-color:var(--cyan);cursor:pointer}
+
+  .formula{margin-top:16px;padding:13px 14px;background:#0a0f1a;border:1px solid var(--line);
+    border-radius:11px;font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--muted)}
+  .formula b{color:var(--amber);font-weight:500}
+  .formula .l{color:var(--dim);font-size:11px;display:block;margin-bottom:7px;
+    font-family:"Noto Sans TC",sans-serif;letter-spacing:.05em}
+
+  footer{margin-top:20px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:80ch}
+  footer b{color:var(--muted);font-weight:500}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Electron Double-Slit · 物質波</div>
+    <h1>電子雙狹縫實驗模擬器<span class="sub"> </span></h1>
+    <p class="lede">電子一顆一顆打在偵測屏上——每一顆都是一個亮點(粒子),但累積起來會浮現干涉條紋(波)。調整加速電壓、狹縫間距與屏距,觀察 de Broglie 波長 λ 如何決定條紋間距 Δy。</p>
+  </header>
+
+  <div class="grid">
+    <!-- STAGE -->
+    <section class="card">
+      <div class="stagehead">
+        <span class="t">偵測屏 · 單電子累積</span>
+        <span class="n">已偵測 <b id="count">0</b> 顆電子</span>
+      </div>
+      <div class="screenbox"><canvas id="screen"></canvas></div>
+
+      <div class="stagehead" style="padding-bottom:0">
+        <span class="t">強度分布 I(x)</span>
+        <span class="n" id="visfr"></span>
+      </div>
+      <div class="screenbox"><canvas id="curve"></canvas></div>
+      <div class="axis"><span id="axL">−W/2</span><span>0</span><span id="axR">+W/2</span></div>
+      <div class="legend">
+        <span><i style="background:var(--phos)"></i>理論強度(雙縫干涉)</span>
+        <span><i style="background:var(--violet);opacity:.8"></i>單縫繞射包絡</span>
+        <span><i style="background:var(--cyan)"></i>實測統計</span>
+      </div>
+    </section>
+
+    <!-- PANEL -->
+    <section class="card">
+      <div class="panelpad">
+        <div class="readouts">
+          <div class="ro big">
+            <div class="k">de Broglie 波長 λ</div>
+            <div class="v"><span id="lam">—</span> <span class="u" id="lamnm"></span></div>
+          </div>
+          <div class="ro">
+            <div class="k">條紋間距 Δy</div>
+            <div class="v" id="dy">—</div>
+          </div>
+          <div class="ro">
+            <div class="k">電子動量 p</div>
+            <div class="v" id="mom">—<span class="u"> kg·m/s</span></div>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="primary" id="play">▶ 開始發射電子</button>
+          <button id="reset">重設屏幕</button>
+        </div>
+
+        <div class="ctl">
+          <div class="row"><label>加速電壓 V</label><span class="val" id="vV"></span></div>
+          <input type="range" id="sV" min="0" max="1000" value="847" step="1">
+        </div>
+        <div class="ctl">
+          <div class="row"><label>狹縫間距 d</label><span class="val" id="vD"></span></div>
+          <input type="range" id="sD" min="0.2" max="10" value="1" step="0.05">
+        </div>
+        <div class="ctl">
+          <div class="row"><label>狹縫寬度 a</label><span class="val" id="vA"></span></div>
+          <input type="range" id="sA" min="0.05" max="3" value="0.3" step="0.01">
+        </div>
+        <div class="ctl">
+          <div class="row"><label>狹縫到屏距離 L</label><span class="val" id="vL"></span></div>
+          <input type="range" id="sL" min="0.3" max="3" value="1.5" step="0.05">
+        </div>
+        <div class="ctl">
+          <div class="row"><label>顯示視窗寬度 W</label><span class="val" id="vW"></span></div>
+          <div class="wrow">
+            <input type="range" id="sW" min="0" max="1000" value="0" step="1">
+            <button class="mini" id="autoW">自動</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="row"><label>發射速率</label><span class="val" id="vR"></span></div>
+          <input type="range" id="sR" min="1" max="400" value="40" step="1">
+        </div>
+
+        <div class="toggles">
+          <label class="tg"><input type="checkbox" id="tRel" checked>相對論修正(高電壓必要)</label>
+          <label class="tg"><input type="checkbox" id="tEnv" checked>顯示單縫繞射包絡</label>
+          <label class="tg"><input type="checkbox" id="tHist" checked>顯示實測統計直方圖</label>
+        </div>
+
+        <div class="formula">
+          <span class="l">理論關係式</span>
+          λ = h / √(2meV) = <b>1.226/√V</b> nm<br>
+          Δy = <b>λL / d</b><br>
+          I(x) = cos²(πdx/λL) · sinc²(πax/λL)
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>教學提示:</b> 提高電壓 V → λ 變小 → 條紋變密(Δy ∝ 1/√V);拉開狹縫間距 d → 條紋變密(Δy ∝ 1/d);拉遠屏距 L → 條紋變寬(Δy ∝ L)。
+    縮小狹縫寬度 a 會讓繞射包絡變寬,中央可容納更多條亮紋。
+    真實電子雙狹縫(Jönsson 1961、Tonomura 1989)的 Δy 僅微米級,須靠電子光學放大;此處可用「自動」鍵把視窗縮放到看得清的範圍。
+  </footer>
+</div>
+
+<script>
+(()=>{
+  "use strict";
+  // ---- physics constants (SI) ----
+  const h=6.62607015e-34, me=9.1093837015e-31, qe=1.602176634e-19, c=299792458, mc2=me*c*c;
+
+  // ---- state ----
+  const st={V:0,d:0,a:0,L:0,W:0,rate:40,rel:true,env:true,hist:true,
+            lam:0,dy:0,p:0,playing:false,count:0};
+
+  // ---- elements ----
+  const $=id=>document.getElementById(id);
+  const sV=$('sV'),sD=$('sD'),sA=$('sA'),sL=$('sL'),sW=$('sW'),sR=$('sR');
+  const screen=$('screen'),curve=$('curve');
+  const sctx=screen.getContext('2d'), cctx=curve.getContext('2d');
+
+  // accumulation buffer (fixed resolution, decoupled from display)
+  const BW=1100, BH=300;
+  const buf=document.createElement('canvas'); buf.width=BW; buf.height=BH;
+  const bctx=buf.getContext('2d');
+
+  // histogram of real hits
+  const NB=140; let bins=new Float64Array(NB); let binMax=1;
+
+  // ---- slider value mappings ----
+  const vFromSlider=s=>10*Math.pow(10, (s/1000)*Math.log10(100000/10)); // 10..100000 V (log)
+  const sliderFromV=v=>1000*Math.log10(v/10)/Math.log10(100000/10);
+  const wFromSlider=s=>20e-6*Math.pow(10,(s/1000)*Math.log10(2000/20));  // 20..2000 µm (log)
+  const sliderFromW=w=>1000*Math.log10(w/20e-6)/Math.log10(2000/20);
+
+  // ---- formatting ----
+  const fmtLen=m=>{ // pick µm / mm
+    const um=m*1e6;
+    if(um>=1000) return (um/1000).toFixed(um/1000>=10?1:2)+" mm";
+    if(um>=10)   return um.toFixed(1)+" µm";
+    if(um>=1)    return um.toFixed(2)+" µm";
+    return (m*1e9).toFixed(0)+" nm";
+  };
+  const fmtLam=m=>{ // pm primary
+    const pm=m*1e12;
+    if(pm>=100) return {a:pm.toFixed(0), b:"pm  ("+(m*1e9).toFixed(3)+" nm)"};
+    return {a:pm.toFixed(2), b:"pm  ("+(m*1e9).toFixed(5)+" nm)"};
+  };
+
+  // ---- physics ----
+  function lambda(V,rel){
+    if(rel) return h*c/Math.sqrt(qe*V*(qe*V+2*mc2));
+    return h/Math.sqrt(2*me*qe*V);
+  }
+  function intensity(x,lam,L,d,a){
+    const k=Math.PI/(lam*L);
+    const ia=k*d*x, ea=k*a*x;
+    const co=Math.cos(ia); const inter=co*co;
+    const env = ea===0?1:Math.pow(Math.sin(ea)/ea,2);
+    return inter*env;
+  }
+
+  // ---- recompute derived quantities + readouts ----
+  function recompute(){
+    st.V=vFromSlider(+sV.value);
+    st.d=(+sD.value)*1e-6;
+    st.a=(+sA.value)*1e-6;
+    st.L=+sL.value;
+    st.W=wFromSlider(+sW.value);
+    st.rate=+sR.value;
+    st.lam=lambda(st.V,st.rel);
+    st.dy=st.lam*st.L/st.d;
+    st.p=h/st.lam;
+
+    // labels
+    $('vV').textContent = st.V>=1000? (st.V/1000).toFixed(st.V/1000>=10?0:1)+" kV" : st.V.toFixed(0)+" V";
+    $('vD').textContent = (st.d*1e6).toFixed(2)+" µm";
+    $('vA').textContent = (st.a*1e6).toFixed(2)+" µm";
+    $('vL').textContent = st.L.toFixed(2)+" m";
+    $('vW').textContent = fmtLen(st.W);
+    $('vR').textContent = st.rate+" 顆/幀";
+
+    const L=fmtLam(st.lam);
+    $('lam').textContent=L.a; $('lamnm').textContent=L.b;
+    $('dy').textContent=fmtLen(st.dy);
+    $('mom').innerHTML = st.p.toExponential(2)+'<span class="u"> kg·m/s</span>';
+
+    $('axL').textContent="−"+fmtLen(st.W/2);
+    $('axR').textContent="+"+fmtLen(st.W/2);
+    $('visfr').innerHTML="視窗內約 <b style='color:var(--phos)'>"+Math.max(0,Math.round(st.W/st.dy))+"</b> 條亮紋";
+  }
+
+  // clear accumulation when distribution/window changes
+  function clearScreen(){
+    bctx.clearRect(0,0,BW,BH);
+    bins=new Float64Array(NB); binMax=1; st.count=0; $('count').textContent='0';
+  }
+
+  // ---- emit electrons (rejection sampling within window) ----
+  function emit(n){
+    const {lam,L,d,a,W}=st;
+    bctx.globalCompositeOperation='lighter';
+    for(let i=0;i<n;i++){
+      let x,tries=0;
+      do{ x=(Math.random()-0.5)*W; tries++; }
+      while(Math.random()>intensity(x,lam,L,d,a) && tries<40);
+      const bx=((x+W/2)/W)*BW;
+      const by=Math.random()*BH;
+      // phosphor dot with soft glow (additive)
+      const r=1.7;
+      const g=bctx.createRadialGradient(bx,by,0,bx,by,r*2.2);
+      g.addColorStop(0,'rgba(150,255,205,0.55)');
+      g.addColorStop(1,'rgba(120,255,196,0)');
+      bctx.fillStyle=g;
+      bctx.beginPath(); bctx.arc(bx,by,r*2.2,0,6.2832); bctx.fill();
+      // histogram
+      const bi=Math.min(NB-1,Math.max(0,Math.floor((x+W/2)/W*NB)));
+      bins[bi]++; if(bins[bi]>binMax) binMax=bins[bi];
+    }
+    bctx.globalCompositeOperation='source-over';
+    st.count+=n;
+    $('count').textContent=st.count.toLocaleString();
+  }
+
+  // ---- rendering ----
+  function fit(cv){
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    const w=cv.clientWidth, hcss=cv.clientHeight;
+    cv.width=Math.round(w*dpr); cv.height=Math.round(hcss*dpr);
+    return {ctx:cv.getContext('2d'),w,h:hcss,dpr};
+  }
+
+  function drawScreen(){
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    if(screen.width!==Math.round(screen.clientWidth*dpr)){
+      screen.width=Math.round(screen.clientWidth*dpr);
+      screen.height=Math.round(screen.clientHeight*dpr);
+    }
+    sctx.setTransform(dpr,0,0,dpr,0,0);
+    const w=screen.clientWidth,hh=screen.clientHeight;
+    sctx.fillStyle='#04060b'; sctx.fillRect(0,0,w,hh);
+    sctx.imageSmoothingEnabled=true;
+    sctx.drawImage(buf,0,0,BW,BH,0,0,w,hh);
+    // center reference line
+    sctx.strokeStyle='rgba(67,214,255,.18)'; sctx.lineWidth=1;
+    sctx.beginPath(); sctx.moveTo(w/2,0); sctx.lineTo(w/2,hh); sctx.stroke();
+  }
+
+  function drawCurve(){
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    if(curve.width!==Math.round(curve.clientWidth*dpr)){
+      curve.width=Math.round(curve.clientWidth*dpr);
+      curve.height=Math.round(curve.clientHeight*dpr);
+    }
+    cctx.setTransform(dpr,0,0,dpr,0,0);
+    const w=curve.clientWidth,hh=curve.clientHeight, pad=6;
+    cctx.clearRect(0,0,w,hh);
+    cctx.fillStyle='#04060b'; cctx.fillRect(0,0,w,hh);
+    // grid baseline
+    cctx.strokeStyle='rgba(67,214,255,.15)'; cctx.lineWidth=1;
+    cctx.beginPath(); cctx.moveTo(w/2,0); cctx.lineTo(w/2,hh); cctx.stroke();
+
+    const {lam,L,d,a,W}=st;
+    const base=hh-pad, amp=hh-2*pad;
+    const xToReal=px=>((px/w)-0.5)*W;
+
+    // measured histogram (under everything)
+    if(st.hist && binMax>1){
+      cctx.fillStyle='rgba(67,214,255,.30)';
+      const bw=w/NB;
+      for(let i=0;i<NB;i++){
+        const v=bins[i]/binMax;
+        cctx.fillRect(i*bw, base-v*amp, bw+0.6, v*amp);
+      }
+    }
+    // envelope (sinc^2 only)
+    if(st.env){
+      cctx.strokeStyle='rgba(169,139,255,.65)'; cctx.lineWidth=1.4;
+      cctx.setLineDash([4,4]); cctx.beginPath();
+      for(let px=0;px<=w;px++){
+        const x=xToReal(px); const ea=Math.PI/(lam*L)*a*x;
+        const env=ea===0?1:Math.pow(Math.sin(ea)/ea,2);
+        const y=base-env*amp; px===0?cctx.moveTo(px,y):cctx.lineTo(px,y);
+      }
+      cctx.stroke(); cctx.setLineDash([]);
+    }
+    // full intensity
+    cctx.strokeStyle='var(--phos)'; cctx.strokeStyle='#7dffc4'; cctx.lineWidth=1.8;
+    cctx.shadowColor='rgba(125,255,196,.5)'; cctx.shadowBlur=6;
+    cctx.beginPath();
+    for(let px=0;px<=w;px++){
+      const x=xToReal(px);
+      const y=base-intensity(x,lam,L,d,a)*amp;
+      px===0?cctx.moveTo(px,y):cctx.lineTo(px,y);
+    }
+    cctx.stroke(); cctx.shadowBlur=0;
+  }
+
+  // ---- loop ----
+  let raf=null;
+  function loop(){
+    if(st.playing){ emit(st.rate); drawScreen(); }
+    drawCurve();
+    raf=requestAnimationFrame(loop);
+  }
+
+  // ---- wiring ----
+  function paramChanged(redrawWindowSlider){
+    recompute(); clearScreen(); drawScreen();
+  }
+  [sV,sD,sA,sL].forEach(s=>s.addEventListener('input',()=>paramChanged()));
+  sW.addEventListener('input',()=>paramChanged());
+  sR.addEventListener('input',recompute);
+
+  $('tRel').addEventListener('change',e=>{st.rel=e.target.checked;paramChanged();});
+  $('tEnv').addEventListener('change',e=>{st.env=e.target.checked;});
+  $('tHist').addEventListener('change',e=>{st.hist=e.target.checked;});
+
+  $('autoW').addEventListener('click',()=>{
+    recompute();
+    const target=Math.min(2000e-6,Math.max(20e-6,14*st.dy));
+    sW.value=sliderFromW(target).toFixed(0);
+    paramChanged();
+  });
+
+  $('play').addEventListener('click',()=>{
+    st.playing=!st.playing;
+    $('play').textContent=st.playing?'⏸ 暫停發射':'▶ 開始發射電子';
+    $('play').classList.toggle('primary',!st.playing);
+  });
+  $('reset').addEventListener('click',()=>{clearScreen();drawScreen();});
+
+  window.addEventListener('resize',()=>{drawScreen();drawCurve();});
+
+  // ---- init ----
+  // set a sensible window for the default 50 kV / 1 µm / 1.5 m setup
+  recompute();
+  sW.value=sliderFromW(Math.min(2000e-6,Math.max(20e-6,14*st.dy))).toFixed(0);
+  recompute(); clearScreen(); drawScreen(); drawCurve();
+  loop();
+})();
+</script>
+</body>
+</html>

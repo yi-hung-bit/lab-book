@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>麥克風如何把聲音變成電訊號</title>
+<style>
+:root{
+  --film:#E3E9ED; --paper:#F7F9FA; --ink:#1D2B3A; --ink2:#566574; --rule:#C3CDD4;
+  --press:#C8453B; --rare:#3A6EA5; --field:#2E7D6B; --amber:#D9831A;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Heiti TC",system-ui,sans-serif;
+  --serif:"Times New Roman","Noto Serif TC","PMingLiU",serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--film);color:var(--ink);font:15px/1.65 var(--sans)}
+.wrap{max-width:1220px;margin:0 auto;padding:22px 20px 40px}
+header h1{font-size:28px;line-height:1.3;letter-spacing:.03em;margin:0 0 6px;font-weight:700}
+header p{margin:0 0 18px;color:var(--ink2);font-size:14.5px;max-width:46em}
+.tabs{display:flex;flex-wrap:wrap;border-bottom:1.5px solid var(--ink)}
+.tabs button{appearance:none;font:inherit;color:var(--ink2);background:transparent;border:1.5px solid transparent;border-bottom:none;border-radius:7px 7px 0 0;margin-bottom:-1.5px;padding:9px 20px 8px;text-align:left;cursor:pointer}
+.tabs button b{display:block;font-size:17px;color:var(--ink);font-weight:700}
+.tabs button .kind{font-size:13px;margin-right:8px}
+.tabs button .eq{font-family:var(--serif);font-style:italic;font-size:15px}
+.tabs button[aria-selected="true"]{background:var(--paper);border-color:var(--ink)}
+.tabs button:not([aria-selected="true"]):hover{background:rgba(255,255,255,.45)}
+.sheet{display:grid;grid-template-columns:minmax(0,1fr) 312px;background:var(--paper);border:1.5px solid var(--ink);border-top:none}
+.stage-wrap{padding:10px 10px 6px;border-right:1px solid var(--rule);min-width:0}
+.panel{padding:14px 16px 16px;min-width:0}
+.scope-wrap{grid-column:1/-1;border-top:1px solid var(--rule);padding:10px;min-width:0}
+canvas{display:block}
+#stage{touch-action:auto}
+.ctl{margin-bottom:13px}
+.ctl .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ctl label,.ctl .lbl{font-size:13.5px;font-weight:600}
+.ctl output{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--ink);margin:4px 0 0}
+input[type=range]:disabled{opacity:.35}
+.seg{display:flex;border:1.2px solid var(--ink);border-radius:6px;overflow:hidden;margin-top:5px}
+.seg button{flex:1;font:inherit;font-size:13px;line-height:1.35;padding:6px 4px;border:none;background:transparent;color:var(--ink);cursor:pointer}
+.seg button+button{border-left:1px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.hint{font-size:12.5px;color:var(--ink2);margin:4px 0 0}
+.check{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600}
+.btns{display:flex;gap:8px;margin:4px 0 14px}
+.btn{font:inherit;font-size:13.5px;padding:6px 14px;border:1.2px solid var(--ink);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--ink);color:#fff}
+.readout{border-top:1px solid var(--rule);padding-top:10px}
+.readout h2{font-size:13.5px;margin:0 0 6px}
+dl{display:grid;grid-template-columns:auto auto;gap:3px 10px;margin:0;font-size:13px}
+dt{color:var(--ink2)}
+dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.notes{background:var(--paper);border:1.5px solid var(--ink);border-top:1px solid var(--rule);padding:6px 26px 22px}
+.notes article{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.notes h3{font-size:16px;margin:18px 0 6px}
+.notes p{margin:0 0 10px;max-width:40em}
+.notes .eq{font-family:var(--serif);font-style:italic;font-size:18px;margin:6px 0 12px;padding-left:14px;border-left:3px solid var(--ink)}
+.notes .eq .n{font-style:normal;font-family:var(--sans);font-size:14px;color:var(--ink2)}
+.notes .fix{border-left:3px solid var(--press);padding-left:12px}
+.foot{font-size:12.5px;color:var(--ink2);margin-top:12px}
+:focus-visible{outline:2px solid var(--rare);outline-offset:2px}
+[hidden]{display:none !important}
+@media (max-width:900px){
+  .sheet{grid-template-columns:1fr}
+  .stage-wrap{border-right:none;border-bottom:1px solid var(--rule)}
+  .notes article{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>麥克風如何把聲音變成電訊號</h1>
+  <p>三種麥克風都用振膜接收聲壓，但把「振動」轉成「電」的方法不同。切換分頁，觀察振膜、內部結構與下方示波器三個頻道之間的關係。</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="麥克風種類">
+  <button role="tab" data-type="dyn" aria-selected="true"><b>動圈式</b><span class="kind">磁生電</span><span class="eq">ε = NBℓv</span></button>
+  <button role="tab" data-type="cond" aria-selected="false"><b>電容式／駐極體</b><span class="kind">電容變化</span><span class="eq">V = Qd / ε₀A</span></button>
+  <button role="tab" data-type="carb" aria-selected="false"><b>碳粒式</b><span class="kind">電阻變化</span><span class="eq">I = E / (R + R<sub>L</sub>)</span></button>
+</nav>
+
+<main class="sheet">
+  <div class="stage-wrap" id="stageWrap"><canvas id="stage" aria-label="麥克風剖面與聲波動畫"></canvas></div>
+
+  <section class="panel" aria-label="控制">
+    <div class="ctl">
+      <span class="lbl">聲音來源</span>
+      <div class="seg" id="srcSeg">
+        <button data-v="sine" aria-pressed="true">純音</button>
+        <button data-v="voice" aria-pressed="false">複合音</button>
+        <button data-v="manual" aria-pressed="false">手動推振膜</button>
+      </div>
+    </div>
+    <div class="ctl" id="fCtl">
+      <div class="top"><label for="f">頻率 f</label><output id="fOut"></output></div>
+      <input type="range" id="f" min="200" max="2000" step="10" value="500">
+    </div>
+    <div class="ctl" id="splCtl">
+      <div class="top"><label for="spl">聲壓級</label><output id="splOut"></output></div>
+      <input type="range" id="spl" min="60" max="110" step="1" value="94">
+    </div>
+    <div class="ctl" id="manCtl" hidden>
+      <div class="top"><label for="man">振膜位置（停住不動）</label><output id="manOut"></output></div>
+      <input type="range" id="man" min="-100" max="100" step="1" value="0">
+      <p class="hint">也可以直接在圖上左右拖曳振膜，放開後會彈回原位。比較「移動中」與「停住」時的輸出。</p>
+    </div>
+
+    <div data-for="dyn">
+      <div class="ctl">
+        <div class="top"><label for="B">磁場 B</label><output id="BOut"></output></div>
+        <input type="range" id="B" min="0.2" max="1.5" step="0.05" value="1.0">
+      </div>
+      <div class="ctl">
+        <div class="top"><label for="N">音圈匝數 N</label><output id="NOut"></output></div>
+        <input type="range" id="N" min="20" max="200" step="10" value="100">
+      </div>
+    </div>
+    <div data-for="cond" hidden>
+      <div class="ctl">
+        <span class="lbl">極化方式</span>
+        <div class="seg" id="condSeg">
+          <button data-v="condenser" aria-pressed="true">電容式（外加 V₀）</button>
+          <button data-v="electret" aria-pressed="false">駐極體</button>
+        </div>
+      </div>
+    </div>
+    <div data-for="carb" hidden>
+      <div class="ctl">
+        <div class="top"><label for="E">電池電壓 E</label><output id="EOut"></output></div>
+        <input type="range" id="E" min="0" max="12" step="0.5" value="6">
+      </div>
+      <div class="ctl"><label class="check"><input type="checkbox" id="noise" checked> 碳粒接觸雜訊</label></div>
+    </div>
+
+    <div class="btns">
+      <button class="btn primary" id="play">暫停</button>
+      <button class="btn" id="clear">清除示波器</button>
+    </div>
+
+    <div class="readout">
+      <h2>即時讀數</h2>
+      <dl id="readout"></dl>
+    </div>
+  </section>
+
+  <div class="scope-wrap" id="scopeWrap"><canvas id="scope" aria-label="三頻道示波器"></canvas></div>
+</main>
+
+<section class="notes">
+  <article data-for="dyn">
+    <div>
+      <h3>原理：電磁感應</h3>
+      <p>聲壓推動振膜，振膜帶動黏在後方的音圈，在永久磁鐵與軟鐵形成的<b>徑向磁場</b>中前後移動。音圈導線切割磁感線，產生感應電動勢：</p>
+      <p class="eq">ε = N B ℓ v　<span class="n">（ℓ = 2πr，每匝周長）</span></p>
+      <p>關鍵是 ε 正比於振膜的<b>速度 v</b>，而不是位移。切到「手動推振膜」，把振膜推到一邊停住不動，輸出立刻歸零；推得越快，ε 越大。音圈上的 ⊙／⊗ 是由 <i>v</i> × <i>B</i> 決定的感應電流方向（⊙ 穿出紙面、⊗ 穿入紙面）。</p>
+      <p>實際的動圈振膜以阻尼控制，使振膜速度大致與聲壓成正比（本模擬設 v／p = 0.4 (mm/s)/Pa）。所以 ε 與聲壓同相、頻率響應平坦，而位移比聲壓落後 90°，且頻率越高位移越小。可在示波器上比較三個頻道。</p>
+    </div>
+    <div>
+      <h3>特性</h3>
+      <p>能量完全來自聲波本身，不需外部電源；結構堅固、耐高聲壓，適合舞台人聲。音圈與振膜質量較大，對微弱聲音與高頻細節反應較差，靈敏度較低（典型約 1.5–3 mV/Pa）。動圈麥克風與動圈喇叭結構相同，只是能量轉換方向相反。</p>
+      <h3>用語補充</h3>
+      <p class="fix">「產生感應電流」較精確的說法是「產生感應電動勢」。電路形成迴路時才有電流；麥克風接到高輸入阻抗的前級時，實際電流很小。</p>
+    </div>
+  </article>
+
+  <article data-for="cond" hidden>
+    <div>
+      <h3>原理：電容隨間距改變</h3>
+      <p>電容式麥克風由<b>一片</b>極薄的導電振膜（常為鍍金塑膠膜）與<b>一片固定、開孔的背極板</b>組成平行板電容。背極板上的孔讓空氣進出，並提供阻尼。</p>
+      <p class="eq">C = ε₀A / d　　V = Q / C = Qd / ε₀A</p>
+      <p>極化電壓 V₀ 經過極大的電阻 R（約 1 GΩ）充電，RC ≈ 0.1 s，遠大於聲波週期，所以在聲頻範圍內極板電荷 Q 幾乎不變。於是板間電場 E = Q / ε₀A 也不變，電壓變化完全來自間距：ΔV = V₀·Δd / d₀，輸出正比於振膜位移。</p>
+      <p>聲波壓縮時振膜靠近背極板，d 變小、極板電壓下降，所以 CH3 與聲壓反相（產品電路會再處理極性）。本模擬取 d₀ = 25 µm、C₀ = 100 pF、V₀ = 48 V，對應約 10 nm/Pa 的位移、20 mV/Pa 的靈敏度。</p>
+    </div>
+    <div>
+      <h3>駐極體</h3>
+      <p>在背極板（或振膜）上加一層經過充電、能長期保存電荷的駐極體薄膜，取代外加的極化電壓。但電容極板的輸出阻抗極高，仍需內建 JFET 做阻抗轉換，所以仍要小電池或偏壓（通常 1.5–10 V）。手機、耳機、筆電的麥克風多為駐極體或 MEMS 電容式。</p>
+      <h3>特性與常見說法的修正</h3>
+      <p class="fix">結構是「一片薄振膜＋一片固定背極板」，不是兩片薄膜。兩者都需要電，但原因不同：電容式需要極化電壓與前級電源（常由 48 V 幻象電源提供，實際極化電壓約 40–60 V）；駐極體的極化由永久電荷負責，電只供給 JFET。</p>
+      <p>振膜張得很緊、質量極小，共振頻率落在可聽頻段高端以上，位移大致與聲壓成正比，因此頻率響應平坦、細節豐富。靈敏度高（錄音室電容式約 10–40 mV/Pa，駐極體膠囊約 5–10 mV/Pa），但怕潮濕與撞擊。</p>
+    </div>
+  </article>
+
+  <article data-for="carb" hidden>
+    <div>
+      <h3>原理：接觸電阻隨壓力改變</h3>
+      <p>振膜推動前電極壓擠碳粒，碳粒之間的接觸點與接觸面積增加，電阻 R 下降。電池 E、碳粒電阻 R 與聽筒 R<sub>L</sub> 串聯：</p>
+      <p class="eq">I = E / (R + R<sub>L</sub>)</p>
+      <p>聲波讓 R 起伏，電池的直流電流就被「調變」成隨聲音起伏的電流。碳粒本身不產生電能，把電池電壓調到 0，輸出就消失。聲波只負責「控制」電流，輸出的電訊號功率可以大於輸入的聲功率，這是早期電話不必另加放大器的原因。</p>
+    </div>
+    <div>
+      <h3>非線性與雜訊</h3>
+      <p>接觸電阻與壓力不成線性關係（本模擬取 R = R₀ / (1 + c)，c 為壓縮量）：壓縮時 R 下降有限，放鬆時上升較多，聲壓大時電流波形上下不對稱而失真。碳粒接觸點不斷變化，形成嘶嘶雜訊。把聲壓調到 105 dB 以上觀察 CH3 的變形。</p>
+      <h3>特性</h3>
+      <p>結構簡單、輸出大、便宜；但頻率響應窄、失真與雜訊大，碳粒受潮或久用會結塊。R₀ = 100 Ω、R<sub>L</sub> = 100 Ω 與壓縮係數為示意值。</p>
+    </div>
+  </article>
+  <p class="foot">時間放慢 1000 倍：真實 500 Hz 的聲音在畫面上以 0.5 Hz 振動。畫面中的振膜位移已大幅放大，結構也非等比例；真實數值請看示波器與即時讀數。</p>
+</section>
+</div>
+
+<script>
+'use strict';
+/* ---------- 常數 ---------- */
+const SLOW = 1000, P_REF = 20e-6;
+const MW = 820, MH = 400, XD = 392, CY = 205, CVIS = 260;
+const PFULL = P_REF * Math.pow(10, 110/20) * Math.SQRT2;      // 110 dB 純音峰值聲壓
+const DYN  = { r: 8e-3, kv: 4e-4, xfull: 600e-9 };              // 音圈半徑、v/p、手動滿格位移
+const COND = { d0: 25e-6, C0: 100e-12, V0: 48 };
+COND.kx = COND.d0 * 0.020 / COND.V0;                            // 20 mV/Pa → Δd/p
+const ELEC = { d0: 20e-6, kx: 8e-9, S: 8e-3 };
+const CARB = { R0: 100, RL: 100, Pc: 20, cfull: 0.6 };
+const VOICE = { a: [1, 0.6, 0.35, 0.2], ph: [0, 0.7, 1.9, 2.6] };
+VOICE.norm = 1 / Math.sqrt(VOICE.a.reduce((s, a) => s + a*a, 0) / 2);
+const INK = '#1D2B3A', INK2 = '#566574', FONT = '"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif';
+
+/* ---------- 狀態 ---------- */
+const S = { type: 'dyn', src: 'sine', f: 500, spl: 94, playing: true, B: 1.0, N: 100, cond: 'condenser', E: 6, noise: true };
+const SIM = { p: 0, x: 0, v: 0, out: 0, uvis: 0, c: 0, R: CARB.R0, I: 0 };
+const PK = { w: 1, W: 1 };
+let tSim = 0, uTarget = 0, uS = 0, uM = 0, dragging = false, dragX0 = 0, dragBase = 0, nz = 0, dotPhase = 0;
+let HIST = [];
+const scl = { div: [0, 0, 0], ctr: [0, 0, 0] };
+
+/* ---------- 波形 ---------- */
+// 回傳單位有效值的聲壓波形 w 與其時間積分 W（真實秒）
+function wave(tr) {
+  const om = 2 * Math.PI * S.f;
+  if (S.src === 'voice') {
+    let w = 0, W = 0;
+    for (let i = 0; i < 4; i++) {
+      const k = i + 1, arg = k*om*tr + VOICE.ph[i];
+      w += VOICE.a[i] * Math.sin(arg);
+      W -= VOICE.a[i] * Math.cos(arg) / (k*om);
+    }
+    return { w: w * VOICE.norm, W: W * VOICE.norm };
+  }
+  const arg = om * tr;
+  return { w: Math.SQRT2 * Math.sin(arg), W: -Math.SQRT2 * Math.cos(arg) / om };
+}
+function computePeaks() {
+  let mw = 0, mW = 0; const T = 1 / S.f;
+  for (let i = 0; i < 720; i++) { const r = wave(T*i/720); mw = Math.max(mw, Math.abs(r.w)); mW = Math.max(mW, Math.abs(r.W)); }
+  PK.w = mw; PK.W = mW;
+}
+const prms = () => P_REF * Math.pow(10, S.spl / 20);
+const visAmp = () => 0.3 + 0.7 * (S.spl - 60) / 50;
+const kxCond = () => S.cond === 'condenser' ? COND.kx : ELEC.kx;
+function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v); }
+
+/* ---------- 物理步進 ---------- */
+function step(dt) {
+  if (!S.playing) return;
+  tSim += dt;
+  const tr = tSim / SLOW, man = S.src === 'manual';
+  let p = NaN, x = 0, v = 0, uvis = 0, c = 0;
+  if (!man) {
+    const r = wave(tr), va = visAmp(), pr = prms();
+    p = pr * r.w;
+    if (S.type === 'dyn') { v = DYN.kv * p; x = DYN.kv * pr * r.W; uvis = r.W / PK.W * va; }
+    else { uvis = r.w / PK.w * va; if (S.type === 'cond') x = kxCond() * p; else c = p / CARB.Pc; }
+  } else {
+    const k = 1 - Math.exp(-dt / (dragging ? 0.05 : 0.08));   // 二階平滑：模擬振膜慣性
+    uM += (uTarget - uM) * k; uS += (uM - uS) * k;
+    uvis = uS;
+    if (S.type === 'dyn') { x = uS * DYN.xfull; v = (x - SIM.x) * SLOW / dt; }
+    else if (S.type === 'cond') x = uS * kxCond() * PFULL;
+    else c = uS * CARB.cfull;
+  }
+  let out = 0;
+  if (S.type === 'dyn') out = S.N * S.B * 2 * Math.PI * DYN.r * v;
+  else if (S.type === 'cond') out = S.cond === 'condenser' ? -COND.V0 * x / COND.d0 : -ELEC.S * x / ELEC.kx;
+  else {
+    c = Math.max(-0.85, c);
+    nz = S.noise ? 0.85 * nz + 0.15 * gauss() * 0.012 : 0;
+    SIM.R = CARB.R0 / (1 + c) * (1 + nz);
+    SIM.I = S.E / (SIM.R + CARB.RL);
+    out = SIM.I;
+  }
+  SIM.p = p; SIM.x = x; SIM.v = v; SIM.out = out; SIM.uvis = uvis; SIM.c = c;
+  HIST.push({ t: tSim, p: p, x2: S.type === 'carb' ? c * 100 : x * 1e9, o: out * 1e3 });
+  while (HIST.length && HIST[0].t < tSim - 5) HIST.shift();
+  if (S.type === 'carb') dotPhase += dt * SIM.I * 2000;
+}
+function resetMotion() {
+  uS = 0; uM = 0; uTarget = 0; SIM.x = 0; SIM.v = 0; nz = 0;
+  $('man').value = 0; $('manOut').textContent = '0 %';
+  HIST = []; scl.div = [0, 0, 0];
+}
+
+/* ---------- 繪圖工具 ---------- */
+const $ = id => document.getElementById(id);
+const stage = $('stage'), sctx = stage.getContext('2d');
+const scope = $('scope'), cctx = scope.getContext('2d');
+let dpr = 1, sScale = 1, scopeW = 800, scopeH = 270;
+
+function txt(c, s, x, y, o = {}) {
+  c.font = `${o.weight || 400} ${o.size || 12}px ${o.serif ? '"Times New Roman",serif' : FONT}`;
+  c.fillStyle = o.color || INK; c.textAlign = o.align || 'left'; c.textBaseline = o.base || 'middle';
+  c.fillText(s, x, y);
+}
+function poly(c, pts, col, w, dash) {
+  c.strokeStyle = col; c.lineWidth = w; c.setLineDash(dash || []);
+  c.beginPath(); c.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]);
+  c.stroke(); c.setLineDash([]);
+}
+function arrow(c, x1, y1, x2, y2, col, w = 1.4, h = 5) {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  c.strokeStyle = col; c.fillStyle = col; c.lineWidth = w;
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - Math.cos(a)*h*0.7, y2 - Math.sin(a)*h*0.7); c.stroke();
+  c.beginPath(); c.moveTo(x2, y2);
+  c.lineTo(x2 - h*Math.cos(a - 0.45), y2 - h*Math.sin(a - 0.45));
+  c.lineTo(x2 - h*Math.cos(a + 0.45), y2 - h*Math.sin(a + 0.45));
+  c.closePath(); c.fill();
+}
+function head(c, x, y, a, col, h = 5) {
+  c.fillStyle = col; c.beginPath(); c.moveTo(x + Math.cos(a)*h*0.6, y + Math.sin(a)*h*0.6);
+  c.lineTo(x - h*Math.cos(a - 0.5), y - h*Math.sin(a - 0.5));
+  c.lineTo(x - h*Math.cos(a + 0.5), y - h*Math.sin(a + 0.5)); c.closePath(); c.fill();
+}
+function loopArrows(c, pts, col) {
+  poly(c, pts, col, 1.2, [4, 4]);
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [x1, y1] = pts[i], [x2, y2] = pts[i+1];
+    if (Math.hypot(x2 - x1, y2 - y1) < 30) continue;
+    head(c, (x1 + x2)/2, (y1 + y2)/2, Math.atan2(y2 - y1, x2 - x1), col, 6);
+  }
+}
+function housing(c, x0, x1) {
+  c.fillStyle = '#EDF1F3'; c.fillRect(x0, CY - 132, x1 - x0, 264);
+  poly(c, [[x0, CY - 132], [x1, CY - 132], [x1, CY + 132], [x0, CY + 132]], INK, 1.6);
+  poly(c, [[x0, CY - 132], [x0, CY + 132]], INK2, 2, [3, 5]);
+  txt(c, '防塵網', x0 - 4, CY + 146, { size: 11, color: INK2, align: 'center' });
+}
+function resistor(c, x1, x2, y) {
+  const n = 6, w = (x2 - x1) / n; c.strokeStyle = INK; c.lineWidth = 1.4;
+  c.beginPath(); c.moveTo(x1, y);
+  for (let i = 0; i < n; i++) c.lineTo(x1 + w*(i + 0.5), y + (i % 2 ? 6 : -6));
+  c.lineTo(x2, y); c.stroke();
+}
+function batteryH(c, x, y) { // 左 − 右 +
+  c.strokeStyle = INK; c.lineWidth = 3.5; c.beginPath(); c.moveTo(x, y - 7); c.lineTo(x, y + 7); c.stroke();
+  c.lineWidth = 1.5; c.beginPath(); c.moveTo(x + 8, y - 13); c.lineTo(x + 8, y + 13); c.stroke();
+}
+function batteryV(c, x, y) { // 上 + 下 −
+  c.strokeStyle = INK; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x - 13, y); c.lineTo(x + 13, y); c.stroke();
+  c.lineWidth = 3.5; c.beginPath(); c.moveTo(x - 7, y + 8); c.lineTo(x + 7, y + 8); c.stroke();
+}
+function meter(c, x, y, r, frac, center, sym) {
+  c.fillStyle = '#FCFDFD'; c.strokeStyle = INK; c.lineWidth = 1.5;
+  c.beginPath(); c.arc(x, y, r, 0, 2*Math.PI); c.fill(); c.stroke();
+  const px = x, py = y + r*0.45, L = r*0.86, A = 0.9;
+  c.strokeStyle = INK2; c.lineWidth = 1; c.beginPath(); c.arc(px, py, L, -Math.PI/2 - A, -Math.PI/2 + A); c.stroke();
+  for (let i = 0; i <= 10; i++) {
+    const a = -Math.PI/2 - A + 2*A*i/10, big = (i % 5 === 0), l0 = L - (big ? 7 : 4);
+    c.beginPath(); c.moveTo(px + Math.cos(a)*l0, py + Math.sin(a)*l0); c.lineTo(px + Math.cos(a)*L, py + Math.sin(a)*L); c.stroke();
+  }
+  let f = center ? Math.max(-1.12, Math.min(1.12, frac)) : Math.max(-0.04, Math.min(1.08, frac));
+  const a = center ? -Math.PI/2 + A*f : -Math.PI/2 - A + 2*A*f;
+  c.strokeStyle = '#C8453B'; c.lineWidth = 1.8; c.beginPath(); c.moveTo(px, py);
+  c.lineTo(px + Math.cos(a)*L*0.95, py + Math.sin(a)*L*0.95); c.stroke();
+  c.fillStyle = INK; c.beginPath(); c.arc(px, py, 2.6, 0, 2*Math.PI); c.fill();
+  txt(c, sym, x, y + r*0.72, { size: 12, weight: 700, align: 'center', serif: true });
+}
+function legend(c, items) {
+  let x = 18; const y = 388;
+  items.forEach(([col, label, kind]) => {
+    if (kind === 'dot') { c.fillStyle = col; c.beginPath(); c.arc(x + 6, y, 3, 0, 2*Math.PI); c.fill(); }
+    else if (kind === 'line') poly(c, [[x, y], [x + 13, y]], col, 2, [3, 2]);
+    else { c.fillStyle = col; c.fillRect(x, y - 5, 13, 10); }
+    txt(c, label, x + 18, y, { size: 12, color: INK2 });
+    c.font = `12px ${FONT}`; x += 18 + c.measureText(label).width + 16;
+  });
+}
+
+/* ---------- 空氣與聲源 ---------- */
+function drawAir(c) {
+  const man = S.src === 'manual', tr = tSim / SLOW, va = visAmp();
+  const X0 = 96, X1 = XD - 22, Y0 = CY - 116, Y1 = CY + 116;
+  if (!man) {
+    for (let x = X0; x < X1; x += 4) {
+      const q = wave(tr + (XD - x) / (CVIS*SLOW)).w / PK.w * va;
+      const a = Math.min(0.5, Math.abs(q) * 0.42);
+      c.fillStyle = q > 0 ? `rgba(200,69,59,${a})` : `rgba(58,110,165,${a})`;
+      c.fillRect(x, Y0, 4, Y1 - Y0);
+    }
+  }
+  c.fillStyle = man ? 'rgba(29,43,58,0.35)' : 'rgba(29,43,58,0.75)';
+  for (let x0 = X0 + 6; x0 < X1; x0 += 12) {
+    const xi = man ? 0 : 5.5 * va * wave(tr + (XD - x0) / (CVIS*SLOW)).W / PK.W;
+    for (let y = Y0 + 8; y < Y1; y += 13) {
+      const jx = ((x0*7 + y*13) % 5) - 2, jy = ((x0*3 + y) % 7) - 3;
+      c.beginPath(); c.arc(x0 + xi + jx*0.6, y + jy*0.5, 1.6, 0, 2*Math.PI); c.fill();
+    }
+  }
+  // 聲源（揚聲器）
+  const o = man ? 0 : 4 * va * wave(tr + (XD - 80) / (CVIS*SLOW)).W / PK.W;
+  c.globalAlpha = man ? 0.35 : 1;
+  c.fillStyle = '#5E6B77'; c.fillRect(22, CY - 26, 18, 52);
+  c.fillStyle = '#D5DCE1'; c.strokeStyle = INK; c.lineWidth = 1.4;
+  c.beginPath(); c.moveTo(40 + o, CY - 18); c.lineTo(80 + o, CY - 68); c.lineTo(80 + o, CY + 68); c.lineTo(40 + o, CY + 18); c.closePath(); c.fill(); c.stroke();
+  c.globalAlpha = 1;
+  txt(c, man ? '聲源（關閉）' : '聲源', 52, CY + 90, { size: 12, color: INK2, align: 'center' });
+  txt(c, man ? '手動模式：沒有聲波，用滑鼠拖曳振膜' : '空氣中的聲波　紅＝壓縮（p > 0）　藍＝稀疏（p < 0）', 20, 24, { size: 12.5, color: INK2 });
+  txt(c, '時間放慢 1000 倍', MW - 16, 24, { size: 12.5, color: INK2, align: 'right' });
+  if (man) {
+    arrow(c, XD - 40, CY, XD - 70, CY, '#C8453B', 1.6, 7); arrow(c, XD - 40, CY, XD - 10, CY, '#C8453B', 1.6, 7);
+    txt(c, '拖曳', XD - 40, CY - 14, { size: 12, color: '#C8453B', align: 'center', weight: 700 });
+  }
+}
+
+/* ---------- 動圈式 ---------- */
+function dynRef() { // 預設參數（N=100, B=1 T）下的峰值電動勢，作為指針滿格基準
+  const base = 100 * 1 * 2 * Math.PI * DYN.r;
+  return S.src === 'manual' ? 0.03 : base * DYN.kv * prms() * PK.w;
+}
+function drawDyn(c) {
+  const sh = SIM.uvis * 14, rc = 50, g = 9, XF = XD + 40, xd = XD + sh;
+  housing(c, XD - 16, XD + 206);
+  const IRON = '#A9B3BC', EDGE = '#6E7A85', TEAL = '#2E7D6B';
+  c.fillStyle = IRON; c.strokeStyle = EDGE; c.lineWidth = 1;
+  [[XF, CY - 116, 34, 116 - rc - g], [XF, CY + rc + g, 34, 116 - rc - g], [XF + 34, CY - 116, 124, 12], [XF + 34, CY + 104, 124, 12],
+   [XF + 146, CY - 116, 12, 232], [XF, CY - (rc - g), 62, 2*(rc - g)]].forEach(r => { c.fillRect(...r); c.strokeRect(...r); });
+  const my = CY - (rc - g), mh = 2*(rc - g);
+  c.fillStyle = '#C8453B'; c.fillRect(XF + 62, my, 42, mh);
+  c.fillStyle = '#3A6EA5'; c.fillRect(XF + 104, my, 42, mh);
+  c.strokeStyle = INK; c.strokeRect(XF + 62, my, 84, mh);
+  txt(c, 'N', XF + 83, CY, { size: 17, weight: 700, color: '#fff', align: 'center' });
+  txt(c, 'S', XF + 125, CY, { size: 17, weight: 700, color: '#fff', align: 'center' });
+  txt(c, '軟鐵', XF + 31, CY, { size: 11.5, color: INK, align: 'center' });
+  // 磁通迴路（虛線）
+  loopArrows(c, [[XF + 120, CY - 22], [XF + 14, CY - 22], [XF + 14, CY - 110], [XF + 152, CY - 110], [XF + 152, CY - 22], [XF + 120, CY - 22]], 'rgba(46,125,107,.8)');
+  loopArrows(c, [[XF + 120, CY + 22], [XF + 14, CY + 22], [XF + 14, CY + 110], [XF + 152, CY + 110], [XF + 152, CY + 22], [XF + 120, CY + 22]], 'rgba(46,125,107,.8)');
+  // 氣隙中的徑向 B
+  [XF + 5, XF + 29].forEach(x => {
+    arrow(c, x, CY - (rc - g) - 1, x, CY - (rc + g) + 1, TEAL, 1.6, 5);
+    arrow(c, x, CY + (rc - g) + 1, x, CY + (rc + g) - 1, TEAL, 1.6, 5);
+  });
+  txt(c, 'B', XF + 44, CY - rc - 22, { size: 14, weight: 700, color: TEAL, serif: true });
+  // 振膜
+  c.strokeStyle = INK; c.lineWidth = 2.4; c.beginPath();
+  c.moveTo(XD, CY - 104); c.quadraticCurveTo(XD - 6 + sh*0.5, CY - 99, xd, CY - 92);
+  c.quadraticCurveTo(xd - 28, CY, xd, CY + 92);
+  c.quadraticCurveTo(XD - 6 + sh*0.5, CY + 99, XD, CY + 104); c.stroke();
+  c.fillStyle = INK; c.fillRect(XD - 5, CY - 111, 8, 9); c.fillRect(XD - 5, CY + 102, 8, 9);
+  // 音圈骨架
+  poly(c, [[xd - 6, CY - rc], [xd + 72, CY - rc]], '#B79B6C', 3);
+  poly(c, [[xd - 6, CY + rc], [xd + 72, CY + rc]], '#B79B6C', 3);
+  // 引線
+  const WIRE = '#9A6418';
+  poly(c, [[xd + 46, CY - rc - 3], [xd + 30, CY - rc - 26], [XD + 10, CY - 100], [XD + 10, 58], [680, 58], [680, CY - 44]], WIRE, 1.4);
+  poly(c, [[xd + 46, CY + rc + 3], [xd + 30, CY + rc + 26], [XD + 10, CY + 100], [XD + 10, 352], [680, 352], [680, CY + 44]], WIRE, 1.4);
+  // 線圈截面與電流方向
+  const ref = dynRef(), e = SIM.out, al = Math.min(1, Math.abs(e) / (ref || 1) * 1.1);
+  for (let i = 0; i < 4; i++) {
+    const x = xd + 44 + i*9.5;
+    [[CY - rc, e > 0], [CY + rc, e < 0]].forEach(([y, outOfPage]) => {
+      c.fillStyle = '#B87333'; c.strokeStyle = '#6B3E14'; c.lineWidth = 0.8;
+      c.beginPath(); c.arc(x, y, 4.4, 0, 2*Math.PI); c.fill(); c.stroke();
+      if (al > 0.06) {
+        c.globalAlpha = al; c.strokeStyle = '#fff'; c.fillStyle = '#fff'; c.lineWidth = 1.2;
+        if (outOfPage) { c.beginPath(); c.arc(x, y, 1.7, 0, 2*Math.PI); c.fill(); }
+        else { c.beginPath(); c.moveTo(x - 2.5, y - 2.5); c.lineTo(x + 2.5, y + 2.5); c.moveTo(x + 2.5, y - 2.5); c.lineTo(x - 2.5, y + 2.5); c.stroke(); }
+        c.globalAlpha = 1;
+      }
+    });
+  }
+  txt(c, '音圈', xd + 20, CY - rc + 14, { size: 11.5, color: '#6B3E14', align: 'center' });
+  txt(c, '振膜', XD - 22, CY - 120, { size: 11.5, color: INK, align: 'center' });
+  // 輸出錶
+  meter(c, 680, CY, 44, e / (3*ref || 1), true, 'ε');
+  txt(c, '感應電動勢', 732, CY - 10, { size: 12, color: INK2 });
+  txt(c, fs(e*1e3) + ' mV', 732, CY + 9, { size: 13, weight: 700 });
+  legend(c, [['#A9B3BC', '軟鐵'], ['#C8453B', '磁鐵 N'], ['#3A6EA5', '磁鐵 S'], ['#B87333', '音圈（⊙ 出紙面　⊗ 入紙面）'], ['#2E7D6B', '磁場 B', 'line']]);
+}
+
+/* ---------- 電容式／駐極體 ---------- */
+function drawCond(c) {
+  const GAP = 40, R = 108, sh = SIM.uvis * 10, el = S.cond === 'electret', XB = XD + GAP;
+  housing(c, XD - 16, XB + 34);
+  c.fillStyle = '#D8CBA8'; c.fillRect(XD + 2, CY - R - 7, GAP + 14, 7); c.fillRect(XD + 2, CY + R, GAP + 14, 7);
+  c.fillStyle = '#8E99A3';
+  for (let y = CY - R + 6; y < CY + R - 6; y += 22) c.fillRect(XB, y, 16, Math.min(16, CY + R - 6 - y));
+  if (el) { c.fillStyle = '#7B5EA7'; c.fillRect(XB - 4, CY - R + 6, 4, 2*R - 12); }
+  const memX = y => { const t = (y - CY + R) / (2*R); return XD + 4*t*(1 - t)*sh; };
+  [-84, -56, -28, 0, 28, 56, 84].forEach(dy => {
+    const y = CY + dy + 11; arrow(c, memX(y) + 8, y, XB - (el ? 9 : 7), y, 'rgba(46,125,107,.8)', 1.2, 4);
+  });
+  c.strokeStyle = '#B8901C'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(XD, CY - R); c.quadraticCurveTo(XD + 2*sh, CY, XD, CY + R); c.stroke();
+  c.fillStyle = INK; c.fillRect(XD - 5, CY - R - 9, 8, 11); c.fillRect(XD - 5, CY + R - 2, 8, 11);
+  for (let i = 0; i < 9; i++) {
+    const y = CY - R + 2*R*(0.1 + 0.8*i/8);
+    txt(c, '+', memX(y) + 4, y, { size: 11, weight: 700, color: '#C8453B', align: 'center' });
+    txt(c, '−', el ? XB - 2 : XB - 4, y, { size: el ? 9 : 11, weight: 700, color: el ? '#fff' : '#3A6EA5', align: 'center' });
+  }
+  txt(c, '振膜', XD - 22, CY - R - 18, { size: 11.5, align: 'center' });
+  txt(c, '背極板', XB + 8, CY - R - 18, { size: 11.5, align: 'center' });
+  txt(c, 'E', XD + 20, CY - 3, { size: 13, weight: 700, color: '#2E7D6B', serif: true, align: 'center' });
+  // 電路
+  const TAP = 500;
+  poly(c, [[XD, CY - R - 9], [XD, 58], [el ? TAP : 540, 58]], INK, 1.4);
+  if (!el) {
+    resistor(c, 540, 600, 58); txt(c, 'R ≈ 1 GΩ', 570, 40, { size: 12, align: 'center' });
+    poly(c, [[600, 58], [650, 58]], INK, 1.4); batteryH(c, 650, 58);
+    txt(c, 'V₀ = 48 V', 654, 34, { size: 12, align: 'center' });
+    poly(c, [[658, 58], [770, 58], [770, 356], [XB + 8, 356], [XB + 8, CY + R - 6]], INK, 1.4);
+  } else {
+    poly(c, [[640, 356], [XB + 8, 356], [XB + 8, CY + R - 6]], INK, 1.4);
+  }
+  c.fillStyle = INK; c.beginPath(); c.arc(TAP, 58, 2.6, 0, 2*Math.PI); c.fill();
+  poly(c, [[TAP, 58], [TAP, 170]], INK, 1.4);
+  c.fillStyle = '#FCFDFD'; c.strokeStyle = INK; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(TAP, 170); c.lineTo(TAP, 240); c.lineTo(565, 205); c.closePath(); c.fill(); c.stroke();
+  txt(c, el ? 'JFET' : '前級', 524, 205, { size: 11.5, weight: 700, align: 'center' });
+  if (el) {
+    poly(c, [[515, 232], [515, 290]], INK, 1.4); batteryV(c, 515, 290); poly(c, [[515, 298], [515, 356]], INK, 1.4);
+    txt(c, '電池 1.5–10 V（只供 JFET）', 532, 294, { size: 11.5 });
+  } else {
+    poly(c, [[515, 232], [515, 356]], INK, 1.4);
+    txt(c, '前級電源', 522, 300, { size: 11.5, color: INK2 });
+  }
+  poly(c, [[565, 205], [606, 205]], INK, 1.4); poly(c, [[640, 239], [640, 356]], INK, 1.4);
+  const ref = S.src === 'manual' ? Math.abs(el ? ELEC.S*PFULL : COND.V0*COND.kx*PFULL/COND.d0) : (el ? ELEC.S : COND.V0*COND.kx/COND.d0) * prms() * PK.w;
+  meter(c, 640, CY, 34, SIM.out / (1.5*ref || 1), true, 'ΔV');
+  txt(c, el ? '輸出電壓變化' : '極板電壓變化', 682, CY - 10, { size: 12, color: INK2 });
+  txt(c, fs(SIM.out*1e3) + ' mV', 682, CY + 9, { size: 13, weight: 700 });
+  const lg = [['#B8901C', '振膜（鍍金薄膜）'], ['#8E99A3', '開孔背極板'], ['#D8CBA8', '絕緣環'], ['#2E7D6B', '電場 E', 'line']];
+  if (el) lg.splice(2, 0, ['#7B5EA7', '駐極體（永久電荷）']);
+  legend(c, lg);
+}
+
+/* ---------- 碳粒式 ---------- */
+const GRAN = [];
+(function () { let s = 7; const rnd = () => (s = (s*16807) % 2147483647) / 2147483647;
+  for (let row = 0; row < 11; row++) for (let col = 0; col < 9; col++)
+    GRAN.push({ f: Math.min(1, Math.max(0, (col + (rnd() - 0.5)*0.4) / 8)), y: CY - 50 + row*10 + (rnd() - 0.5)*3, r: 3.3 + rnd()*1.0 });
+})();
+function drawCarb(c) {
+  const R = 108, sh = SIM.uvis * 16, XBK = XD + 104;
+  housing(c, XD - 16, XBK + 30);
+  const I0 = S.E / (CARB.R0 + CARB.RL);
+  // 電路導線與電流點
+  const P = [[XD, CY - R - 9], [XD, 58], [770, 58], [770, 356], [XBK + 6, 356], [XBK + 6, CY + 66]];
+  poly(c, P, INK, 1.4);
+  const seg = []; let tot = 0;
+  for (let i = 0; i < P.length - 1; i++) { const l = Math.hypot(P[i+1][0] - P[i][0], P[i+1][1] - P[i][1]); seg.push(l); tot += l; }
+  c.fillStyle = '#D9831A';
+  if (SIM.I > 1e-6) for (let d = dotPhase % 18; d < tot; d += 18) {
+    let k = 0, dd = d; while (k < seg.length - 1 && dd > seg[k]) { dd -= seg[k]; k++; }
+    const t = dd / seg[k], x = P[k][0] + (P[k+1][0] - P[k][0])*t, y = P[k][1] + (P[k+1][1] - P[k][1])*t;
+    c.beginPath(); c.arc(x, y, 2.4, 0, 2*Math.PI); c.fill();
+  }
+  // 振膜、杯、電極
+  c.strokeStyle = '#7D8791'; c.lineWidth = 4; c.beginPath(); c.moveTo(XD, CY - R); c.quadraticCurveTo(XD + 2*sh, CY, XD, CY + R); c.stroke();
+  c.fillStyle = INK; c.fillRect(XD - 5, CY - R - 9, 8, 11); c.fillRect(XD - 5, CY + R - 2, 8, 11);
+  c.fillStyle = '#5A4636'; c.fillRect(XD + 14, CY - 66, XBK - XD - 14, 6); c.fillRect(XD + 14, CY + 60, XBK - XD - 14, 6);
+  c.fillStyle = '#B08D57'; c.fillRect(XBK, CY - 66, 12, 132);
+  const xf = XD + sh + 3; c.fillRect(xf, CY - 58, 9, 116);
+  const xa = xf + 9, span = XBK - xa, glow = Math.max(0.08, Math.min(0.95, 0.3 + 1.6*SIM.c));
+  GRAN.forEach(g => {
+    const x = XBK - g.r - g.f * (span - 2*g.r);
+    c.fillStyle = '#3B3F44'; c.beginPath(); c.arc(x, g.y, g.r, 0, 2*Math.PI); c.fill();
+    c.strokeStyle = `rgba(217,131,26,${glow})`; c.lineWidth = 1; c.stroke();
+  });
+  txt(c, '振膜', XD - 22, CY - R - 18, { size: 11.5, align: 'center' });
+  txt(c, '碳粒', XD + 58, CY - 80, { size: 11.5, align: 'center' });
+  txt(c, '後電極', XBK + 6, CY + 80, { size: 11.5, align: 'center' });
+  // 電池
+  c.fillStyle = '#F7F9FA'; c.fillRect(556, 40, 16, 36); batteryH(c, 560, 58);
+  txt(c, `E = ${S.E.toFixed(1)} V`, 564, 32, { size: 12, align: 'center' });
+  arrow(c, 620, 46, 660, 46, '#D9831A', 1.4, 6); txt(c, 'I', 670, 46, { size: 13, weight: 700, color: '#D9831A', serif: true });
+  // 聽筒
+  c.fillStyle = '#FCFDFD'; c.strokeStyle = INK; c.lineWidth = 1.4; c.fillRect(758, 160, 24, 90); c.strokeRect(758, 160, 24, 90);
+  c.beginPath(); for (let i = 0; i < 6; i++) c.arc(770, 170 + i*14, 7, -Math.PI/2, Math.PI/2); c.stroke();
+  txt(c, '聽筒', 748, 196, { size: 12, align: 'right' });
+  txt(c, '= 100 Ω', 748, 214, { size: 12, align: 'right', color: INK2 });
+  c.font = `12px ${FONT}`; const wq = c.measureText('= 100 Ω').width;
+  txt(c, 'L', 746 - wq, 218, { size: 9, align: 'right', color: INK2 });
+  c.font = `9px ${FONT}`; const wl = c.measureText('L').width;
+  txt(c, 'R', 745 - wq - wl, 214, { size: 12, align: 'right', color: INK2, serif: true });
+  // 電流計
+  meter(c, 620, 356, 28, I0 > 0 ? SIM.I / (2*I0) : 0, false, 'A');
+  txt(c, `I = ${(SIM.I*1e3).toFixed(2)} mA`, 620, 314, { size: 13, weight: 700, align: 'center' });
+  txt(c, `R = ${SIM.R.toFixed(1)} Ω`, XD + 58, CY + 146, { size: 12, align: 'center', color: INK2 });
+  legend(c, [['#7D8791', '鋁振膜'], ['#B08D57', '電極'], ['#3B3F44', '碳粒'], ['#5A4636', '絕緣杯壁'], ['#D9831A', '電流（直流被調變）', 'dot']]);
+}
+
+function drawStage() {
+  const c = sctx;
+  c.setTransform(dpr*sScale, 0, 0, dpr*sScale, 0, 0);
+  c.fillStyle = '#F7F9FA'; c.fillRect(0, 0, MW, MH);
+  c.strokeStyle = 'rgba(29,43,58,0.05)'; c.lineWidth = 1;
+  for (let x = 0; x <= MW; x += 20) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, MH); c.stroke(); }
+  for (let y = 0; y <= MH; y += 20) { c.beginPath(); c.moveTo(0, y); c.lineTo(MW, y); c.stroke(); }
+  drawAir(c);
+  if (S.type === 'dyn') drawDyn(c); else if (S.type === 'cond') drawCond(c); else drawCarb(c);
+}
+
+/* ---------- 示波器 ---------- */
+function chDefs() {
+  const p = { name: 'CH1 聲壓 p', unit: 'Pa', key: 'p', col: '#EE7A6F', min: 1e-3 };
+  if (S.type === 'dyn') return [p, { name: 'CH2 振膜位移 x', unit: 'nm', key: 'x2', col: '#6CC4B0', min: 1e-3 },
+    { name: 'CH3 感應電動勢 ε', unit: 'mV', key: 'o', col: '#F2AE4B', min: 1e-4 }];
+  if (S.type === 'cond') return [p, { name: 'CH2 振膜位移 x', unit: 'nm', key: 'x2', col: '#6CC4B0', min: 1e-3 },
+    { name: S.cond === 'condenser' ? 'CH3 極板電壓變化 ΔV' : 'CH3 輸出電壓 ΔV', unit: 'mV', key: 'o', col: '#F2AE4B', min: 1e-4 }];
+  return [p, { name: 'CH2 碳粒壓縮 c', unit: '%', key: 'x2', col: '#6CC4B0', min: 1e-3 },
+    { name: 'CH3 電流 I（含直流）', unit: 'mA', key: 'o', col: '#F2AE4B', min: 0.02, dc: true }];
+}
+function niceUp(v) { const e = Math.pow(10, Math.floor(Math.log10(v))), m = v / e; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * e; }
+function fDiv(v) { const d = Math.max(0, -Math.floor(Math.log10(v) + 1e-9)); return v.toFixed(Math.min(6, d)); }
+function drawScope() {
+  const c = cctx; c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = scopeW, H = scopeH;
+  c.fillStyle = '#17212B'; c.fillRect(0, 0, W, H);
+  const L = Math.round(Math.min(190, Math.max(130, W*0.2))), R = W - 10, T = 8, B = H - 24, sh = (B - T) / 3, t0 = tSim - 5;
+  const defs = chDefs();
+  for (let k = 0; k < 3; k++) {
+    const d = defs[k], y0 = T + k*sh, ym = y0 + sh/2;
+    c.strokeStyle = '#2A3A48'; c.lineWidth = 1;
+    for (let i = 0; i <= 10; i++) { const x = Math.round(L + (R - L)*i/10) + 0.5; c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y0 + sh); c.stroke(); }
+    for (let j = 0; j <= 4; j++) { const y = Math.round(y0 + sh*j/4) + 0.5; c.strokeStyle = j === 2 ? '#3A4F61' : '#2A3A48'; c.beginPath(); c.moveTo(L, y); c.lineTo(R, y); c.stroke(); }
+    txt(c, d.name, 10, y0 + 15, { size: 12.5, weight: 700, color: d.col });
+    const vals = []; HIST.forEach(h => { if (Number.isFinite(h[d.key])) vals.push(h[d.key]); });
+    if (!vals.length) {
+      txt(c, S.src === 'manual' && d.key === 'p' ? '手動模式：沒有聲波輸入' : '—', L + 12, ym, { size: 12, color: '#7F92A3' });
+      continue;
+    }
+    let mn = Infinity, mx = -Infinity, ma = 0;
+    vals.forEach(v => { if (v < mn) mn = v; if (v > mx) mx = v; if (Math.abs(v) > ma) ma = Math.abs(v); });
+    let tgt = d.dc ? niceUp(Math.max(mx - mn, d.min) / 3) : niceUp(Math.max(ma, d.min) / 1.8);
+    let cur = scl.div[k], changed = false;
+    if (!cur || tgt > cur || tgt < cur / 3) { cur = tgt; scl.div[k] = cur; changed = true; }
+    let ctr = 0;
+    if (d.dc) {
+      const mid = (mn + mx) / 2; ctr = scl.ctr[k];
+      if (changed || Math.abs(mid - ctr) > cur*0.8 || !Number.isFinite(ctr)) ctr = Math.round(mid / cur) * cur;
+      scl.ctr[k] = ctr;
+    }
+    c.save(); c.beginPath(); c.rect(L, y0, R - L, sh); c.clip();
+    c.strokeStyle = d.col; c.lineWidth = 1.7; c.beginPath(); let first = true;
+    HIST.forEach(h => {
+      const v = h[d.key]; if (!Number.isFinite(v)) { first = true; return; }
+      const x = L + (h.t - t0) / 5 * (R - L), y = ym - (v - ctr) / cur * (sh/4);
+      if (first) { c.moveTo(x, y); first = false; } else c.lineTo(x, y);
+    });
+    c.stroke(); c.restore();
+    txt(c, `每格 ${fDiv(cur)} ${d.unit}`, 10, y0 + 33, { size: 11.5, color: '#9FB0BF' });
+    if (d.dc) txt(c, `中線 ${ctr.toFixed(Math.max(0, -Math.floor(Math.log10(cur))))} ${d.unit}`, 10, y0 + 49, { size: 11.5, color: '#9FB0BF' });
+    txt(c, `${fs(vals[vals.length - 1])} ${d.unit}`, 10, y0 + (d.dc ? 65 : 50), { size: 12.5, color: '#E8EEF2' });
+  }
+  txt(c, '← 較早', L, H - 11, { size: 11.5, color: '#9FB0BF' });
+  txt(c, '橫軸每格 0.5 ms（真實時間）', (L + R)/2, H - 11, { size: 11.5, color: '#9FB0BF', align: 'center' });
+  txt(c, '現在 →', R, H - 11, { size: 11.5, color: '#9FB0BF', align: 'right' });
+}
+
+/* ---------- 讀數 ---------- */
+function fs(v) {
+  if (!Number.isFinite(v)) return '—';
+  const a = Math.abs(v), d = a >= 100 ? 1 : a >= 10 ? 2 : a >= 1 ? 3 : 4;
+  const s = a.toFixed(d); return (v < 0 && parseFloat(s) !== 0 ? '−' : '') + s;
+}
+function updateReadout() {
+  let rows = [];
+  if (S.type === 'dyn') {
+    const l = S.N * 2 * Math.PI * DYN.r, sens = S.N * S.B * 2 * Math.PI * DYN.r * DYN.kv;
+    rows = [['振膜速度 v', fs(SIM.v*1e3) + ' mm/s'], ['振膜位移 x', fs(SIM.x*1e9) + ' nm'],
+      ['導線長 ℓ = N·2πr', l.toFixed(2) + ' m'], ['感應電動勢 ε', fs(SIM.out*1e3) + ' mV'],
+      ['靈敏度 NBℓ·(v/p)', (sens*1e3).toFixed(2) + ' mV/Pa']];
+  } else if (S.type === 'cond') {
+    if (S.cond === 'condenser') {
+      const d = COND.d0 - SIM.x, C = COND.C0 * COND.d0 / d;
+      rows = [['靜止間距 d₀', '25 µm'], ['間距變化 Δd', fs(-SIM.x*1e9) + ' nm'], ['電容 C', (C*1e12).toFixed(4) + ' pF'],
+        ['電容變化 ΔC', fs((C - COND.C0)*1e15) + ' fF'], ['電荷 Q（固定）', (COND.C0*COND.V0*1e9).toFixed(2) + ' nC'],
+        ['極板電壓變化 ΔV', fs(SIM.out*1e3) + ' mV'], ['靈敏度 V₀·(Δd/p)/d₀', '20.0 mV/Pa']];
+    } else {
+      rows = [['靜止間距 d₀', '20 µm'], ['間距變化 Δd', fs(-SIM.x*1e9) + ' nm'],
+        ['ΔC / C₀', fs(SIM.x / (ELEC.d0 - SIM.x) * 1e6) + ' ppm'], ['輸出電壓變化', fs(SIM.out*1e3) + ' mV'],
+        ['靈敏度（典型值）', '8.0 mV/Pa'], ['外部供電用途', '只供 JFET']];
+    }
+  } else {
+    const sens = CARB.RL * S.E * CARB.R0 / Math.pow(CARB.R0 + CARB.RL, 2) / CARB.Pc;
+    rows = [['碳粒壓縮 c', fs(SIM.c*100) + ' %'], ['碳粒電阻 R', SIM.R.toFixed(2) + ' Ω'], ['電流 I', (SIM.I*1e3).toFixed(3) + ' mA'],
+      ['聽筒電壓 I·R<sub>L</sub>', (SIM.I*CARB.RL).toFixed(3) + ' V'], ['電池輸出功率 E·I', (S.E*SIM.I*1e3).toFixed(1) + ' mW'],
+      ['小訊號靈敏度（聽筒端）', (sens*1e3).toFixed(1) + ' mV/Pa']];
+  }
+  if (S.src !== 'manual') rows.unshift(['振膜處聲壓 p', fs(SIM.p) + ' Pa']);
+  $('readout').innerHTML = rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+}
+
+/* ---------- 版面 ---------- */
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const w = $('stageWrap').clientWidth - 20;
+  sScale = w / MW;
+  stage.style.width = w + 'px'; stage.style.height = (MH*sScale) + 'px';
+  stage.width = Math.round(w*dpr); stage.height = Math.round(MH*sScale*dpr);
+  scopeW = $('scopeWrap').clientWidth - 20; scopeH = 270;
+  scope.style.width = scopeW + 'px'; scope.style.height = scopeH + 'px';
+  scope.width = Math.round(scopeW*dpr); scope.height = Math.round(scopeH*dpr);
+}
+function showFor() {
+  document.querySelectorAll('[data-for]').forEach(el => { el.hidden = el.dataset.for !== S.type; });
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.type === S.type));
+  const man = S.src === 'manual';
+  $('manCtl').hidden = !man; $('f').disabled = man; $('spl').disabled = man;
+  stage.style.cursor = man ? 'grab' : 'default';
+  stage.style.touchAction = man ? 'none' : 'auto';
+}
+function labels() {
+  $('fOut').textContent = `${S.f} Hz（畫面 ${(S.f/SLOW).toFixed(2)} Hz）`;
+  $('splOut').textContent = `${S.spl} dB（有效值 ${prms().toPrecision(3)} Pa）`;
+  $('BOut').textContent = S.B.toFixed(2) + ' T';
+  $('NOut').textContent = S.N + ' 匝';
+  $('EOut').textContent = S.E.toFixed(1) + ' V';
+}
+
+/* ---------- 事件 ---------- */
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { S.type = b.dataset.type; resetMotion(); showFor(); }));
+function segBind(id, fn) {
+  const seg = $(id);
+  seg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    fn(b.dataset.v);
+  }));
+}
+segBind('srcSeg', v => { S.src = v; computePeaks(); resetMotion(); showFor(); });
+segBind('condSeg', v => { S.cond = v; resetMotion(); });
+$('f').addEventListener('input', e => { S.f = +e.target.value; computePeaks(); labels(); });
+$('spl').addEventListener('input', e => { S.spl = +e.target.value; labels(); });
+$('B').addEventListener('input', e => { S.B = +e.target.value; labels(); });
+$('N').addEventListener('input', e => { S.N = +e.target.value; labels(); });
+$('E').addEventListener('input', e => { S.E = +e.target.value; labels(); });
+$('noise').addEventListener('change', e => { S.noise = e.target.checked; });
+$('man').addEventListener('input', e => { uTarget = +e.target.value / 100; $('manOut').textContent = e.target.value + ' %'; });
+$('play').addEventListener('click', () => { S.playing = !S.playing; $('play').textContent = S.playing ? '暫停' : '繼續'; });
+$('clear').addEventListener('click', () => { HIST = []; scl.div = [0, 0, 0]; });
+stage.addEventListener('pointerdown', e => {
+  if (S.src !== 'manual') return;
+  dragging = true; dragX0 = e.clientX; dragBase = uTarget; stage.setPointerCapture(e.pointerId); stage.style.cursor = 'grabbing';
+});
+stage.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  uTarget = Math.max(-1, Math.min(1, dragBase + (e.clientX - dragX0) / sScale / 60));
+  $('man').value = Math.round(uTarget*100); $('manOut').textContent = Math.round(uTarget*100) + ' %';
+});
+const endDrag = () => { if (!dragging) return; dragging = false; uTarget = 0; $('man').value = 0; $('manOut').textContent = '0 %'; stage.style.cursor = 'grab'; };
+stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
+new ResizeObserver(resize).observe(document.querySelector('.sheet'));
+window.addEventListener('resize', resize);
+
+/* ---------- 主迴圈 ---------- */
+let last = performance.now(), lastRO = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  step(dt); drawStage(); drawScope();
+  if (now - lastRO > 120) { updateReadout(); lastRO = now; }
+  requestAnimationFrame(frame);
+}
+computePeaks(); labels(); showFor(); resize(); $('manOut').textContent = '0 %';
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
