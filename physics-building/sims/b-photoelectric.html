@@ -31,7 +31,9 @@ h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
 canvas{display:block;width:100%}
 #scene{height:330px}
 #graph{height:250px}
-@media(max-width:560px){#scene{height:270px}#graph{height:220px}}
+#ivg{height:260px}
+#sV{background:linear-gradient(90deg,#ff7a7a 0%,#3a2530 63.6%,#26314a 63.6%,#43d6ff 100%)}
+@media(max-width:560px){#scene{height:270px}#graph{height:220px}#ivg{height:230px}}
 .banner{margin:0 14px 10px;padding:8px 12px;border-radius:9px;font-size:13px;background:rgba(255,122,122,.12);border:1px solid rgba(255,122,122,.4);color:#ffc4c4}
 .ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
 .ro{background:var(--panel2);padding:10px 12px}
@@ -63,8 +65,11 @@ button.primary{background:var(--phos);border-color:var(--phos);color:#05140d;fon
 .legend{display:flex;flex-wrap:wrap;gap:12px;padding:0 16px 12px;font-size:12.5px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{display:inline-block;width:16px;height:3px;border-radius:2px}
-.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
-@media(max-width:760px){.three{grid-template-columns:1fr}}
+.legend .sw{cursor:pointer}
+.ivbtns{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px}
+.three{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+@media(max-width:980px){.three{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.three{grid-template-columns:1fr}}
 .law{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted)}
 .law h4{color:var(--txt);font-size:14px;margin-bottom:4px}
 .law .ok{color:var(--phos)} .law .ng{color:var(--red)}
@@ -76,7 +81,7 @@ footer b{color:var(--muted);font-weight:500}
 <div class="wrap">
   <div class="eyebrow">6-2 · Photoelectric Effect</div>
   <h1>光電效應：光是一顆一顆的光子</h1>
-  <p class="lede">讓光照在真空管裡的金屬板上。改變光的顏色（頻率）與強度，看看什麼時候打得出光電子、光電子跑多快。再切換到「古典電磁理論預測」，比較兩種理論的差別。</p>
+  <p class="lede">讓光照在真空管裡的金屬板上。改變光的顏色（頻率）與強度，看看什麼時候打得出光電子、光電子跑多快。調整兩板間的電壓，畫出光電流與電壓的 I–V 曲線，找出截止電壓。再切換到「古典電磁理論預測」，比較兩種理論的差別。</p>
 
   <div class="modebar" role="group" aria-label="理論">
     <button type="button" id="mQ" aria-pressed="true">光子理論（與實驗相符）</button>
@@ -95,6 +100,10 @@ footer b{color:var(--muted);font-weight:500}
         <span><i style="background:var(--amber)"></i>你記錄的數據點</span>
         <span id="lgC" hidden><i style="background:var(--red)"></i>古典預測（與頻率無關）</span>
       </div>
+      <div class="head" style="padding-top:2px"><span class="t">光電流 I − 電壓 V</span><span class="n" id="ivnote"></span></div>
+      <div class="box"><canvas id="ivg" aria-label="光電流對電壓圖"></canvas></div>
+      <div class="legend" id="ivlg"><span><i style="background:var(--phos)"></i>目前條件的 I–V 曲線</span><span><i style="background:#fff;height:8px;width:8px;border-radius:50%"></i>目前電壓</span></div>
+      <div class="ivbtns"><button class="primary" id="ivRec">＋ 保留這條曲線</button><button id="ivClr">清除保留的曲線</button></div>
     </section>
 
     <section class="card"><div class="pad">
@@ -104,7 +113,9 @@ footer b{color:var(--muted);font-weight:500}
         <div class="ro"><div class="k">金屬功函數 W</div><div class="v" id="wf">—</div></div>
         <div class="ro"><div class="k">入射光頻率 f</div><div class="v" id="freq">—</div></div>
         <div class="ro"><div class="k">底限頻率 f<sub>c</sub>（波長）</div><div class="v" id="fc">—</div></div>
-        <div class="ro"><div class="k">光電流（相對）</div><div class="v" id="cur">—</div></div>
+        <div class="ro"><div class="k">光電流 I（示意值）</div><div class="v" id="cur">—</div></div>
+        <div class="ro"><div class="k">截止電壓 V<sub>s</sub> = K<sub>max</sub>/e</div><div class="v" id="vs">—</div></div>
+        <div class="ro"><div class="k">飽和電流 I<sub>sat</sub></div><div class="v" id="isat">—</div></div>
         <div class="ro"><div class="k">實測最快電子</div><div class="v" id="meas">—</div></div>
       </div>
 
@@ -120,6 +131,11 @@ footer b{color:var(--muted);font-weight:500}
       <div class="ctl">
         <div class="row"><label for="sI">光強度</label><span class="val" id="vI"></span></div>
         <input type="range" id="sI" min="0" max="100" step="1" value="40">
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sV">收集板電壓 V（相對於金屬板）</label><span class="val" id="vV"></span></div>
+        <input type="range" id="sV" min="-7" max="4" step="0.05" value="2">
+        <div class="chips"><button type="button" id="vNeg">設為 −V<sub>s</sub>（截止）</button><button type="button" data-v="0">0 V</button><button type="button" data-v="3">+3 V</button><button type="button" id="sweep">▶ 自動掃描電壓</button></div>
       </div>
 
       <div class="btns">
@@ -139,10 +155,12 @@ footer b{color:var(--muted);font-weight:500}
     <div class="law"><h4>① 要有底限頻率</h4><span id="l1"></span></div>
     <div class="law"><h4>② 一照射幾乎立刻有光電流，大小與光強度成正比</h4><span id="l2"></span></div>
     <div class="law"><h4>③ 最大動能與頻率有關、與光強度無關</h4><span id="l3"></span></div>
+    <div class="law"><h4>④ I–V 曲線：截止電壓與飽和電流</h4><span id="l4"></span></div>
   </div>
 
   <footer>
-    <b>教學提示：</b>光子能量 E = hf = 1240 / λ（eV，λ 以 nm 計）。電子吸收一顆光子後，扣掉功函數 W 才是動能；有些電子在離開前還會碰撞損失能量，所以動能有大有小，最大值 K<sub>max</sub> = hf − W。把不同金屬的理論線都打開，會發現它們互相平行——斜率都是普朗克常數 h，只有截距（底限頻率）不同。
+    <b>教學提示：</b>光子能量 E = hf = 1240 / λ（eV，λ 以 nm 計）。電子吸收一顆光子後，扣掉功函數 W 才是動能；有些電子在離開前還會碰撞損失能量，所以動能有大有小，最大值 K<sub>max</sub> = hf − W。把不同金屬的理論線都打開，會發現它們互相平行——斜率都是普朗克常數 h，只有截距（底限頻率）不同。<br>
+    <b>I–V 曲線：</b>收集板加反向電壓（V &lt; 0）時，電子要「爬坡」，動能小於 e|V| 的電子會被推回去，電流變小；當 e|V<sub>s</sub>| = K<sub>max</sub> 時連最快的電子也到不了，電流變成 0，V<sub>s</sub> 稱為截止電壓。加正電壓時，射出方向偏斜的電子也被拉到收集板，電流增加到飽和電流後就不再變大。<b>光變強</b>：飽和電流變大，截止電壓不變；<b>頻率變高</b>：截止電壓變大（更負）。本模擬的「光強度」指每秒入射的光子數，電流數值為示意值。
   </footer>
 </div>
 
@@ -154,9 +172,17 @@ const H_EV=4.135667696e-15; // eV·s
 const METALS=[["銫",2.1],["鉀",2.3],["鈉",2.8],["鋰",2.9],["鋅",4.3],["鋁",4.3],["鐵",4.7],["金",5.1]];
 const MCOL={"銫":"#f6d48a","鉀":"#cfd6dc","鈉":"#d9dde0","鋰":"#c7ccd1","鋅":"#a9b4bd","鋁":"#d0d6db","鐵":"#8d949a","金":"#e8c15a"};
 const $=id=>document.getElementById(id);
-const st={mode:'q',metal:0,lam:500,I:40,paused:false,photons:[],elec:[],arrivals:[],kmaxSeen:0,seenWin:[],data:[],showAll:false,showCurve:true,
+const st={mode:'q',metal:0,lam:500,I:40,V:2,ivCurves:[],sweep:null,paused:false,photons:[],elec:[],arrivals:[],kmaxSeen:0,seenWin:[],data:[],showAll:false,showCurve:true,
   buckets:[],waveT:0,firstEjectAt:null,lightOnAt:0,t:0,emitAcc:0};
-const sc=$('scene'),gr=$('graph');
+const sc=$('scene'),gr=$('graph'),ivg=$('ivg');
+const VMIN=-7,VMAX=4,STRAY=0.3,VS_PX=160; // VS_PX: px/s per sqrt(eV)
+const Keff=()=>st.mode==='q'?Math.max(0,Kmax()):classicalK();
+const Isat=()=>(st.mode==='q'&&Kmax()<=0)?0:st.I/100*5; // μA (示意)
+function gV(V,K){ // fraction of emitted electrons reaching the collector
+  const stray=STRAY*Math.exp(-Math.max(V,0)/0.7);
+  if(V>=0)return 1-stray;
+  if(K<=0)return 0;const x=-V/K;return x>=1?0:(1-STRAY)*Math.pow(1-x,1.5);}
+const Inow=()=>Isat()*gV(st.V,Keff());
 
 function wl2rgb(w){let r=0,g=0,b=0;
   if(w>=380&&w<440){r=-(w-440)/60;b=1}else if(w>=440&&w<490){g=(w-440)/50;b=1}else if(w>=490&&w<510){g=1;b=-(w-510)/20}
@@ -175,11 +201,14 @@ const LCH=[["紅 700",700],["綠 551",551],["紫 400",400],["甲 400",400],["乙
 LCH.slice(0,3).concat(LCH.slice(6)).forEach(([n,l])=>{const b=document.createElement('button');b.textContent=n+' nm';b.onclick=()=>{$('sL').value=l;st.lam=l;onParam();};$('lchips').appendChild(b);});
 
 function resetClassical(){st.buckets=Array.from({length:9},()=>Math.random()*0.15);st.firstEjectAt=null;st.lightOnAt=st.t;}
-function onParam(){st.lam=+$('sL').value;st.I=+$('sI').value;st.metal=+$('metal').value;st.kmaxSeen=0;st.seenWin=[];
+function onParam(){st.lam=+$('sL').value;st.I=+$('sI').value;st.V=+$('sV').value;st.metal=+$('metal').value;st.kmaxSeen=0;st.seenWin=[];
   if(st.mode==='c')resetClassical();ui();}
 function ui(){
   const l=st.lam,E=Eph(),w=W(),K=Kmax();
   $('vL').textContent=`${l} nm・${bandName(l)}`;$('vI').textContent=st.I+' %';
+  $('vV').textContent=(st.V>0?'+':'')+st.V.toFixed(2)+' V'+(st.V<0?'・反向（減速）':st.V>0?'・正向（加速）':'');
+  const ke=Keff();$('vs').innerHTML=(st.mode==='q'&&Kmax()<=0)?'<span class="u">無光電子</span>':'−'+ke.toFixed(2)+'<span class="u"> V</span>';
+  $('isat').innerHTML=Isat().toFixed(2)+'<span class="u"> μA</span>';
   $('ephot').innerHTML=E.toFixed(2)+'<span class="u"> eV</span>';
   $('wf').innerHTML=w.toFixed(1)+'<span class="u"> eV</span>';
   $('freq').innerHTML=(E/H_EV/1e14).toFixed(2)+'<span class="u"> ×10¹⁴ Hz</span>';
@@ -202,6 +231,10 @@ function explain(){
   }else{
     s=`古典理論認為光是連續的波，強度越大、電場越強。每個電子持續吸收能量，累積到 ${w} eV 就跳出。所以預測：<b>任何頻率</b>只要等夠久都會有光電子；光很弱時要<b>等一段時間</b>；動能由<b>強度</b>決定。這三點都和實驗不符。`;
   }
+  if(st.I>0&&(st.mode==='c'||Kmax()>0)){const ke=Keff(),V=st.V;
+    s+='<br><br>'+(V<0?(-V>=ke?`收集板電壓 ${V.toFixed(2)} V：電子要克服 ${(-V).toFixed(2)} eV 的位能，比最大動能 ${ke.toFixed(2)} eV 還大，<b>所有電子都被推回去</b>，電流為 0。`
+      :`收集板電壓 ${V.toFixed(2)} V：只有動能大於 ${(-V).toFixed(2)} eV 的電子到得了收集板，電流比飽和電流小。調到 ${(-ke).toFixed(2)} V（截止電壓）電流就會變成 0。`)
+      :`收集板電壓 +${V.toFixed(2)} V：電子被加速，${V>=2?'幾乎全部':'大部分'}都被收集，電流${V>=2?'接近飽和':'隨電壓增加而變大'}。`);}
   $('explain').innerHTML=s;
 }
 function laws(){
@@ -210,10 +243,12 @@ function laws(){
     $('l1').innerHTML=ok+'一顆光子的能量 hf 必須大於 W，才能讓電子脫離。試試把紅光調到最強。';
     $('l2').innerHTML=ok+'光子一到就被吸收，不需累積時間；光強越大，每秒光子越多 → 光電子越多。';
     $('l3').innerHTML=ok+'K<sub>max</sub> = hf − W，只和單顆光子能量有關。';
+    $('l4').innerHTML=ok+'截止電壓 eV<sub>s</sub> = K<sub>max</sub> = hf − W：<b>光變強</b>只讓飽和電流變大，截止電壓不變；<b>頻率變高</b>截止電壓才變大。用「保留這條曲線」比較看看。';
   }else{
     $('l1').innerHTML=ng+'只要照得夠久，任何頻率都能累積到足夠能量 → 沒有底限頻率。';
     $('l2').innerHTML=ng+'光弱時能量累積慢，應該要等一段時間才出現光電子。';
     $('l3').innerHTML=ng+'光越強、電場振幅越大，電子被推得越快 → 動能應隨強度增加。';
+    $('l4').innerHTML=ng+'動能由強度決定 → 光越強截止電壓應該越大，而且與頻率無關。實驗卻發現截止電壓只和頻率有關。';
   }
 }
 
@@ -222,14 +257,18 @@ let G={};
 function layout(){const d=Math.min(2,devicePixelRatio||1);const w=sc.clientWidth,h=sc.clientHeight;sc.width=Math.round(w*d);sc.height=Math.round(h*d);
   G={w,h,d,tubeX:w*.2,tubeY:h*.2,tubeW:w*.72,tubeH:h*.48,cathX:w*.3,anodeX:w*.84,midY:h*.44,plateH:h*.34,lampX:w*.06,lampY:h*.07};
   G.hitY0=G.midY-G.plateH/2+8;G.hitY1=G.midY+G.plateH/2-8;
-  const d2=Math.min(2,devicePixelRatio||1);gr.width=Math.round(gr.clientWidth*d2);gr.height=Math.round(gr.clientHeight*d2);}
+  const d2=Math.min(2,devicePixelRatio||1);gr.width=Math.round(gr.clientWidth*d2);gr.height=Math.round(gr.clientHeight*d2);
+  ivg.width=Math.round(ivg.clientWidth*d2);ivg.height=Math.round(ivg.clientHeight*d2);}
 
 // ---- simulation ----
 function spawnPhoton(){const ty=G.hitY0+Math.random()*(G.hitY1-G.hitY0);const sx=G.lampX+18+Math.random()*10,sy=G.lampY+20+Math.random()*8;
   const dx=G.cathX-sx,dy=ty-sy,L=Math.hypot(dx,dy);st.photons.push({x:sx,y:sy,ux:dx/L,uy:dy/L,ty,ph:Math.random()*6});}
-function eject(y,K){const v=60+260*Math.sqrt(Math.max(0,K)/4);const ang=(Math.random()-.5)*1.1;
-  st.elec.push({x:G.cathX+4,y,vx:v*Math.cos(ang),vy:v*Math.sin(ang),K,trail:[]});
-  st.seenWin.push({t:st.t,K});}
+function eject(y,K){
+  const stray=Math.random()<STRAY*Math.exp(-Math.max(st.V,0)/0.7);
+  const v=VS_PX*Math.sqrt(Math.max(0,K));
+  const e=stray?{x:G.cathX+4,y,vx:v*0.25,vy:(Math.random()<.5?-1:1)*Math.max(40,v*0.97),K,trail:[],stray:true,age:0}
+               :{x:G.cathX+4,y,vx:v,vy:(Math.random()-.5)*30,K,trail:[],age:0};
+  st.elec.push(e);st.seenWin.push({t:st.t,K});}
 function step(dt){
   st.t+=dt;
   if(st.mode==='q'){
@@ -249,11 +288,15 @@ function step(dt){
     st.buckets.forEach((b,i)=>{st.buckets[i]+=rate*dt*(0.85+0.3*((i*37)%10)/10);
       if(st.buckets[i]>=W()){st.buckets[i]=0;const y=G.hitY0+(i+.5)/st.buckets.length*(G.hitY1-G.hitY0);eject(y,classicalK()*(0.75+0.25*Math.random()));if(st.firstEjectAt==null)st.firstEjectAt=st.t;}});
   }
-  // electrons: mild accelerating field toward anode
-  for(let i=st.elec.length-1;i>=0;i--){const e=st.elec[i];e.vx+=40*dt;e.vy*=1-1.6*dt;e.x+=e.vx*dt;e.y+=e.vy*dt;
+  // electrons: uniform field between plates. a chosen so an electron with K (eV) just stops at the collector when e|V| = K
+  const acc=VS_PX*VS_PX*st.V/(2*(G.anodeX-G.cathX));
+  for(let i=st.elec.length-1;i>=0;i--){const e=st.elec[i];e.age+=dt;e.vx+=acc*dt;e.x+=e.vx*dt;e.y+=e.vy*dt;
     e.trail.push([e.x,e.y]);if(e.trail.length>8)e.trail.shift();
-    if(e.y<G.tubeY+8||e.y>G.tubeY+G.tubeH-8)e.vy*=-.6,e.y=Math.max(G.tubeY+8,Math.min(G.tubeY+G.tubeH-8,e.y));
-    if(e.x>=G.anodeX){st.elec.splice(i,1);st.arrivals.push(st.t);}}
+    const wallHit=e.y<G.tubeY+8||e.y>G.tubeY+G.tubeH-8;
+    if(wallHit){if(e.stray){st.elec.splice(i,1);continue;}e.vy*=-.6;e.y=Math.max(G.tubeY+8,Math.min(G.tubeY+G.tubeH-8,e.y));}
+    if(e.x>=G.anodeX){st.elec.splice(i,1);st.arrivals.push(st.t);}
+    else if(e.x<G.cathX-2||e.age>8)st.elec.splice(i,1);}
+  if(st.sweep){st.V=Math.min(VMAX,st.V+dt*1.6);$('sV').value=st.V;if(st.V>=VMAX){st.sweep=null;$('sweep').textContent='▶ 自動掃描電壓';}ui();}
   while(st.arrivals.length&&st.arrivals[0]<st.t-1.5)st.arrivals.shift();
   while(st.seenWin.length&&st.seenWin[0].t<st.t-4)st.seenWin.shift();
   if(st.flash){st.flash.forEach(f=>f.a-=dt*3);st.flash=st.flash.filter(f=>f.a>0);}
@@ -309,14 +352,18 @@ function drawScene(){
   const cy=G.tubeY+G.tubeH+(h-G.tubeY-G.tubeH)*.55;
   x.strokeStyle='#c99a3d';x.lineWidth=2.5;x.beginPath();x.moveTo(G.cathX,G.midY+G.plateH/2);x.lineTo(G.cathX,cy);x.lineTo(G.anodeX+3,cy);x.lineTo(G.anodeX+3,G.midY+G.plateH/2-10);x.stroke();
   // battery
-  const bx=G.cathX+(G.anodeX-G.cathX)*.3;x.fillStyle='#04060b';x.fillRect(bx-14,cy-12,28,24);x.strokeStyle='#ddd';x.lineWidth=2;
-  x.beginPath();x.moveTo(bx-6,cy-12);x.lineTo(bx-6,cy+12);x.stroke();x.lineWidth=4;x.beginPath();x.moveTo(bx+6,cy-7);x.lineTo(bx+6,cy+7);x.stroke();
+  const bx=G.cathX+(G.anodeX-G.cathX)*.3;
+  if(Math.abs(st.V)>0.001){x.fillStyle='#04060b';x.fillRect(bx-14,cy-12,28,24);x.strokeStyle='#ddd';
+    const pos=st.V>0?6:-6; // long thin plate = positive terminal, on the collector side when V>0
+    x.lineWidth=2;x.beginPath();x.moveTo(bx+pos,cy-12);x.lineTo(bx+pos,cy+12);x.stroke();x.lineWidth=4;x.beginPath();x.moveTo(bx-pos,cy-7);x.lineTo(bx-pos,cy+7);x.stroke();
+    x.fillStyle='#ddd';x.font='bold 10px "JetBrains Mono"';x.textAlign='center';x.fillText('+',bx+pos*2.3,cy-8);x.fillText('−',bx-pos*2.3,cy-8);}
+  x.fillStyle=st.V<0?'#ff9a9a':'#8fe3ff';x.font='11px "JetBrains Mono"';x.textAlign='center';x.fillText((st.V>0?'+':'')+st.V.toFixed(2)+' V',bx,cy+26);
   // ammeter
   const ax=G.cathX+(G.anodeX-G.cathX)*.68,R=18;x.fillStyle='#0d1422';x.beginPath();x.arc(ax,cy,R,0,7);x.fill();x.strokeStyle='#ddd';x.lineWidth=1.5;x.stroke();
-  const cur=st.arrivals.length/1.5;const ang=-Math.PI*.85+Math.min(1,cur/50)*Math.PI*.7;
+  const cur=Inow();const ang=-Math.PI*.85+Math.min(1,cur/5)*Math.PI*.7;
   x.strokeStyle='#ff6b6b';x.lineWidth=2;x.beginPath();x.moveTo(ax,cy+5);x.lineTo(ax+Math.cos(ang)*(R-4),cy+5+Math.sin(ang)*(R-4));x.stroke();
   x.fillStyle='#ddd';x.font='bold 10px "JetBrains Mono"';x.textAlign='center';x.fillText('A',ax,cy+15);
-  $('cur').innerHTML=Math.round(cur)+'<span class="u"> 顆電子/秒</span>';
+  $('cur').innerHTML=cur.toFixed(2)+'<span class="u"> μA</span>';
 }
 function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
 
@@ -350,10 +397,44 @@ function drawGraph(){
   $('gnote').textContent=st.mode==='q'?'記錄 2 個以上有光電子的點，可算出普朗克常數':'';
 }
 
+const IVCOL=['#ffcf6b','#c792ff','#ff8fb1','#8fe3ff','#ffa25c','#b6f06a'];
+function drawIV(){
+  const d=Math.min(2,devicePixelRatio||1);const x=ivg.getContext('2d');x.setTransform(d,0,0,d,0,0);const w=ivg.clientWidth,h=ivg.clientHeight;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const L=44,R=14,T=14,B=34,pw=w-L-R,ph=h-T-B,IMAX=5.5;
+  const X=V=>L+(V-VMIN)/(VMAX-VMIN)*pw,Y=I=>T+ph-I/IMAX*ph;
+  x.strokeStyle='rgba(255,255,255,.07)';x.fillStyle='#6b7893';x.font='11px "JetBrains Mono"';x.textAlign='center';
+  for(let V=VMIN;V<=VMAX;V++){x.beginPath();x.moveTo(X(V),T);x.lineTo(X(V),T+ph);x.stroke();x.fillText(V,X(V),h-B+15);}
+  x.textAlign='right';for(let I=0;I<=5;I++){x.beginPath();x.moveTo(L,Y(I));x.lineTo(L+pw,Y(I));x.stroke();x.fillText(I,L-6,Y(I)+4);}
+  x.textAlign='center';x.fillText('收集板電壓 V（伏特）',L+pw/2,h-4);
+  x.save();x.translate(12,T+ph/2);x.rotate(-Math.PI/2);x.fillText('I（μA，示意）',0,0);x.restore();
+  x.strokeStyle='#3a4660';x.beginPath();x.moveTo(L,T+ph);x.lineTo(L+pw,T+ph);x.stroke();
+  x.strokeStyle='#56627c';x.beginPath();x.moveTo(X(0),T);x.lineTo(X(0),T+ph);x.stroke();
+  x.save();x.beginPath();x.rect(L,T-2,pw,ph+4);x.clip();
+  const curve=(K,Is,col,lw)=>{x.strokeStyle=col;x.lineWidth=lw;x.beginPath();for(let i=0;i<=220;i++){const V=VMIN+(VMAX-VMIN)*i/220,I=Is*gV(V,K);i?x.lineTo(X(V),Y(I)):x.moveTo(X(V),Y(I));}x.stroke();};
+  st.ivCurves.forEach((c,i)=>curve(c.K,c.Is,c.col,1.6));
+  const K=Keff(),Is=Isat(),main=st.mode==='q'?'#7dffc4':'#ff7a7a';
+  if(Is>0){
+    x.setLineDash([4,4]);x.strokeStyle='rgba(255,255,255,.35)';x.lineWidth=1;
+    x.beginPath();x.moveTo(X(-K),T);x.lineTo(X(-K),T+ph);x.stroke();
+    x.beginPath();x.moveTo(L,Y(Is));x.lineTo(L+pw,Y(Is));x.stroke();x.setLineDash([]);
+    curve(K,Is,main,2.4);
+    x.fillStyle='#e8edf6';x.font='11px "Noto Sans TC"';x.textAlign='center';
+    const lx=Math.max(L+30,X(-K));x.fillText('−Vₛ = −'+K.toFixed(2)+' V',lx,T+ph-8);
+    x.textAlign='right';x.fillText('Iₛₐₜ = '+Is.toFixed(2)+' μA',L+pw-4,Y(Is)-5);
+  }else{x.fillStyle='#ff9a9a';x.font='12px "Noto Sans TC"';x.textAlign='center';x.fillText(st.I===0?'沒有照光，電流為 0':'光子能量不足，任何電壓下電流都是 0',L+pw/2,T+ph/2);}
+  x.fillStyle='#fff';x.beginPath();x.arc(X(st.V),Y(Inow()),5,0,7);x.fill();
+  x.restore();
+  $('ivnote').textContent=st.ivCurves.length?`已保留 ${st.ivCurves.length} 條曲線`:'改變光強或波長，保留曲線來比較';
+}
+function renderIvLegend(){
+  const base='<span><i style="background:'+(st.mode==='q'?'var(--phos)':'var(--red)')+'"></i>目前條件的 I–V 曲線</span><span><i style="background:#fff;height:8px;width:8px;border-radius:50%"></i>目前電壓</span>';
+  $('ivlg').innerHTML=base+st.ivCurves.map(c=>`<span><i style="background:${c.col}"></i>${c.label}</span>`).join('');}
+
 // ---- loop ----
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!st.paused)step(dt);
-  drawScene();drawGraph();
+  drawScene();drawGraph();drawIV();
   const mx=st.seenWin.reduce((a,e)=>Math.max(a,e.K),0);
   $('meas').innerHTML=st.seenWin.length?mx.toFixed(2)+'<span class="u"> eV</span>':'<span class="u">尚無光電子</span>';
   let s='';if(st.mode==='q'){s=st.I===0?'沒有照光':Kmax()>0?'有光電子':'光子能量不足，沒有光電子';}
@@ -362,9 +443,18 @@ function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!st.pause
   requestAnimationFrame(frame);}
 
 // ---- wiring ----
-['sL','sI'].forEach(id=>$(id).addEventListener('input',onParam));$('metal').addEventListener('change',onParam);
-$('mQ').onclick=()=>{st.mode='q';$('mQ').setAttribute('aria-pressed','true');$('mC').setAttribute('aria-pressed','false');st.elec=[];st.photons=[];ui();};
-$('mC').onclick=()=>{st.mode='c';$('mC').setAttribute('aria-pressed','true');$('mQ').setAttribute('aria-pressed','false');st.elec=[];st.photons=[];resetClassical();ui();};
+['sL','sI','sV'].forEach(id=>$(id).addEventListener('input',onParam));
+$('sV').addEventListener('input',()=>{st.sweep=null;$('sweep').textContent='▶ 自動掃描電壓';});
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{$('sV').value=b.dataset.v;st.sweep=null;$('sweep').textContent='▶ 自動掃描電壓';onParam();});
+$('vNeg').onclick=()=>{$('sV').value=Math.max(VMIN,-Keff());st.sweep=null;$('sweep').textContent='▶ 自動掃描電壓';onParam();};
+$('sweep').onclick=()=>{if(st.sweep){st.sweep=null;$('sweep').textContent='▶ 自動掃描電壓';return;}
+  st.sweep=1;st.V=Math.max(VMIN,-Keff()-1);$('sV').value=st.V;$('sweep').textContent='⏹ 停止掃描';ui();};
+$('ivRec').onclick=()=>{if(st.ivCurves.length>=6)st.ivCurves.shift();
+  const used=st.ivCurves.map(c=>c.col);const col=IVCOL.find(c=>!used.includes(c))||IVCOL[0];
+  st.ivCurves.push({K:Keff(),Is:Isat(),col,label:`${METALS[st.metal][0]}・${st.lam} nm・強度 ${st.I}%${st.mode==='c'?'（古典）':''}`});renderIvLegend();};
+$('ivClr').onclick=()=>{st.ivCurves=[];renderIvLegend();};$('metal').addEventListener('change',onParam);
+$('mQ').onclick=()=>{st.mode='q';setTimeout(renderIvLegend);$('mQ').setAttribute('aria-pressed','true');$('mC').setAttribute('aria-pressed','false');st.elec=[];st.photons=[];ui();};
+$('mC').onclick=()=>{st.mode='c';setTimeout(renderIvLegend);$('mC').setAttribute('aria-pressed','true');$('mQ').setAttribute('aria-pressed','false');st.elec=[];st.photons=[];resetClassical();ui();};
 $('rec').onclick=()=>{const f=Eph()/H_EV/1e14;if(f>21)return;const K=st.mode==='q'?Kmax():classicalK();st.data.push({f,K,cls:st.mode==='c'});};
 $('clr').onclick=()=>{st.data=[];};
 $('pause').onclick=()=>{st.paused=!st.paused;$('pause').textContent=st.paused?'▶ 繼續':'⏸ 暫停';};
