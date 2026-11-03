@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>法蘭克－赫茲實驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#43d6ff;--phos:#7dffc4;--amber:#ffcf6b;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(67,214,255,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:68ch;margin-top:6px;font-size:15px}
+.modebar{display:flex;gap:0;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#04121a;font-weight:700}
+.modebar button.cls[aria-pressed="true"]{background:var(--red);color:#1a0505}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;position:relative}
+canvas{display:block;width:100%}
+#scene{height:330px}
+#graph{height:250px}
+#ivg{height:260px}
+@media(max-width:560px){#scene{height:270px}#graph{height:220px}#ivg{height:230px}}
+.banner{margin:0 14px 10px;padding:8px 12px;border-radius:9px;font-size:13px;background:rgba(255,122,122,.12);border:1px solid rgba(255,122,122,.4);color:#ffc4c4}
+.ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.ro{background:var(--panel2);padding:10px 12px}
+.ro .k{font-size:11.5px;color:var(--muted)}
+.ro .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:18px;margin-top:2px;line-height:1.2}
+.ro .u{font-size:12px;color:var(--dim);font-weight:400}
+.ro.big{grid-column:1/-1;background:linear-gradient(120deg,rgba(125,255,196,.10),rgba(67,214,255,.04))}
+.ro.big .v{font-size:24px;color:var(--phos)}
+.ctl{margin-bottom:13px}
+.ctl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px}
+.ctl label{font-size:13.5px;font-weight:500}
+.ctl .val{font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--acc);text-align:right}
+select{width:100%;font:inherit;font-size:14px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:7px 10px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:#26314a;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;box-shadow:0 0 0 1px #fff;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+.chips button{padding:4px 9px;font-size:12.5px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px}
+button.primary{background:var(--phos);border-color:var(--phos);color:#05140d;font-weight:700}
+.toggles{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.tg{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--muted);cursor:pointer}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13px;color:var(--muted)}
+.note b{color:var(--amber);font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:12px;padding:0 16px 12px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px}
+.legend .sw{cursor:pointer}
+.ivbtns{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px}
+.three{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+@media(max-width:980px){.three{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.three{grid-template-columns:1fr}}
+.law{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted)}
+.law h4{color:var(--txt);font-size:14px;margin-bottom:4px}
+.law .ok{color:var(--phos)} .law .ng{color:var(--red)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+
+#scene{height:300px}
+#graph{height:280px}
+@media(max-width:560px){#scene{height:240px}#graph{height:240px}}
+#sV{background:linear-gradient(90deg,#26314a,#43d6ff)}
+#sR{background:linear-gradient(90deg,#26314a,#ff7a7a)}
+.levels{display:flex;gap:10px;align-items:stretch;margin:4px 0 14px}
+.levels canvas{height:150px;flex:1;border:1px solid var(--line);border-radius:10px;background:#04060b}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">量子現象 · Franck–Hertz Experiment</div>
+  <h1>法蘭克－赫茲實驗：原子的能量是一階一階的</h1>
+  <p class="lede">燈絲放出的電子被加速電壓 V 加速，穿過管內的汞蒸氣（也可以換成氖氣），再克服一個小小的反向電壓才能到達板極。慢慢調高 V，記錄板極電流，看看電流為什麼不是一路上升，而是每隔固定電壓就掉下來一次。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">充氣管</span><span class="n" id="status"></span></div>
+      <div class="box"><canvas id="scene" aria-label="法蘭克－赫茲管動畫"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t">板極電流 I − 加速電壓 V</span><span class="n" id="gnote"></span></div>
+      <div class="box"><canvas id="graph" aria-label="電流對加速電壓圖"></canvas></div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i>你記錄的數據點</span>
+        <span><i style="background:var(--phos)"></i>理論曲線（可開關）</span>
+        <span><i style="background:rgba(255,255,255,.5)"></i>由數據找到的峰</span>
+      </div>
+    </section>
+
+    <section class="card"><div class="pad">
+      <div class="ro-grid">
+        <div class="ro big"><div class="k">板極電流 I（示意值）</div><div class="v" id="cur">—</div></div>
+        <div class="ro"><div class="k">電子最多獲得的動能</div><div class="v" id="kmax">—</div></div>
+        <div class="ro"><div class="k">原子的第一激發能 ΔE</div><div class="v" id="dE">—</div></div>
+        <div class="ro"><div class="k">每顆電子大約碰撞激發</div><div class="v" id="ncol">—</div></div>
+        <div class="ro"><div class="k" id="lamK">放出的光 λ = hc/ΔE</div><div class="v" id="lam">—</div></div>
+      </div>
+      <div class="levels"><canvas id="lv" aria-label="能階圖"></canvas></div>
+
+      <div class="ctl">
+        <div class="row"><label for="gas">管內氣體</label></div>
+        <select id="gas"><option value="hg">汞蒸氣 Hg（課本實驗）</option><option value="ne">氖氣 Ne（看得到發光層）</option></select>
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sV">加速電壓 V</label><span class="val" id="vV"></span></div>
+        <input type="range" id="sV" min="0" max="30" step="0.1" value="3">
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sR">反向電壓 V<sub>r</sub>（柵極 → 板極）</label><span class="val" id="vR"></span></div>
+        <input type="range" id="sR" min="0" max="3" step="0.1" value="1.5">
+      </div>
+      <div class="btns">
+        <button class="primary" id="sweep">▶ 自動掃描 0 → 最大電壓</button>
+        <button id="rec">＋ 記錄這個點</button>
+        <button id="clr">清除數據</button>
+        <button id="pause">⏸ 暫停</button>
+      </div>
+      <div class="toggles">
+        <label class="tg"><input type="checkbox" id="tTheory">圖上顯示理論曲線</label>
+        <label class="tg" id="uvRow"><input type="checkbox" id="tUV" checked>顯示原子放出的紫外光（肉眼看不到）</label>
+      </div>
+      <div class="note" id="explain"></div>
+    </div></section>
+  </div>
+
+  <div class="three">
+    <div class="law"><h4>① 電流不是一路上升</h4><span id="l1"></span></div>
+    <div class="law"><h4>② 動能不夠：彈性碰撞</h4><span id="l2"></span></div>
+    <div class="law"><h4>③ 動能夠了：把能量交給原子</h4><span id="l3"></span></div>
+    <div class="law"><h4>④ 結論：原子有能階</h4><span id="l4"></span></div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>1914 年法蘭克與赫茲做了這個實驗（1925 年諾貝爾物理獎）。峰與峰的間距就是原子的第一激發能：汞約 4.9 eV，激發後的汞原子放出 λ = 1240/4.9 ≈ 253 nm 的紫外光，實驗中也真的測到這條譜線。這和波耳模型「原子只能有特定能量」一致，而且是用<b>電子碰撞</b>、而不是用光譜證明的。<br>
+    <b>簡化說明：</b>真實儀器的第一個峰通常不在 4.9 V，而是稍微偏右（約 7 V），這是燈絲和柵極材料不同造成的接觸電位差；但峰與峰的<b>間距</b>不受影響。本模擬忽略接觸電位差，電流數值為示意值。氖氣的激發能取約 18.7 eV，激發後先放出約 2 eV 的橘紅色可見光，所以能在管中看到一層一層的發光區。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const GAS={
+  hg:{name:'汞',sym:'Hg',dE:4.9,lam:253,vmax:30,vr:1.5,vrMax:3,over:.45,sig:.22,light:'#b48cff',visible:false,lightName:'紫外光',lvls:[[0,'基態'],[4.9,'第一激發態'],[6.7,''],[10.4,'游離']]},
+  ne:{name:'氖',sym:'Ne',dE:18.7,lam:590,vmax:80,vr:6,vrMax:10,over:1.5,sig:.8,light:'#ff8a3d',visible:true,lightName:'橘紅光',lvls:[[0,'基態'],[16.7,''],[18.7,'激發態'],[21.6,'游離']]}
+};
+const st={g:'hg',V:3,Vr:1.5,paused:false,t:0,elec:[],emitAcc:0,flash:[],uv:[],glow:new Float32Array(120),data:[],sweep:false,sweepAcc:0,showTheory:false,showUV:true,anodeHits:[],gridHits:[]};
+const G0=()=>GAS[st.g];
+const sc=$('scene'),gr=$('graph'),lv=$('lv');
+
+// ---- theory: plate current ----
+// electrons gain energy; once their energy exceeds ΔE + δ (δ ~ exponential, mean "over": distance to the next atom) they excite an atom and lose ΔE.
+const QN=60,QU=Array.from({length:QN},(_,i)=>-Math.log(1-(i+.5)/QN));
+function Ef(V,d,g){const E=g.dE;if(V<E+d)return V;const n=Math.floor((V-E-d)/E)+1;return V-n*E;}
+function sigm(x){return 1/(1+Math.exp(-x));}
+function Ith(V,Vr,gk){const g=GAS[gk||st.g];if(V<=0)return 0;
+  let s=0;for(const u of QU){const e=Ef(V,u*g.over,g);s+=sigm((e-Vr)/g.sig);}
+  const bg=Math.pow(V/g.vmax,1.25);return 10*bg*s/QN;}
+function nTypical(){const g=G0();const d=g.over;return st.V<g.dE+d?0:Math.floor((st.V-g.dE-d)/g.dE)+1;}
+
+// ---- UI ----
+function setGas(){const g=G0();$('sV').max=g.vmax;$('sV').step=g.vmax/300;$('sR').max=g.vrMax;
+  st.V=Math.min(st.V,g.vmax);$('sV').value=st.V;st.Vr=g.vr;$('sR').value=g.vr;st.data=[];st.elec=[];st.glow.fill(0);
+  $('uvRow').hidden=g.visible;st.sweep=false;$('sweep').textContent='▶ 自動掃描 0 → 最大電壓';ui();}
+function ui(){const g=G0();
+  $('vV').textContent=st.V.toFixed(1)+' V';$('vR').textContent=st.Vr.toFixed(1)+' V';
+  $('kmax').innerHTML=st.V.toFixed(1)+'<span class="u"> eV</span>';
+  $('dE').innerHTML=g.dE.toFixed(1)+'<span class="u"> eV（'+g.name+'）</span>';
+  const n=nTypical();$('ncol').innerHTML=n+'<span class="u"> 次</span>';
+  $('lamK').textContent=g.visible?'看得到的光（18.7 → 16.7 eV）':'放出的光 λ = hc/ΔE';
+  $('lam').innerHTML=(g.visible?'≈ ':'')+g.lam+'<span class="u"> nm・'+g.lightName+'</span>';
+  explain();laws();drawLevels();}
+function explain(){const g=G0(),V=st.V,n=nTypical(),E=g.dE;let s;
+  if(V<st.Vr)s=`加速電壓只有 ${V.toFixed(1)} V，比反向電壓 ${st.Vr.toFixed(1)} V 還小，電子到了柵極也爬不過反向電壓，<b>板極電流幾乎為 0</b>。`;
+  else if(n===0)s=`電子最多只有 ${V.toFixed(1)} eV，<b>小於 ${g.name}原子的激發能 ${E} eV</b>。和${g.name}原子相撞只是彈性碰撞（像撞到很重的球彈開），幾乎不損失能量，所以 V 越大電流越大。`;
+  else s=`電子一路加速，每當動能累積到約 ${E} eV 就撞上${g.name}原子、把 ${E} eV 交給它（原子被激發），自己幾乎從頭開始。目前大約經歷 <b>${n} 次</b>這種碰撞，到柵極時剩下的動能${Ith(V+.05,st.Vr)<Ith(V-.05,st.Vr)?'<b>不夠越過反向電壓</b>，所以電流正在下降':'足以越過反向電壓，電流再度上升'}。被激發的原子回到基態時放出 hf = ${E} eV 的光（${g.lightName}，約 ${g.lam} nm${g.visible?'，實際是先放出約 2 eV 的可見光':''}）。`;
+  $('explain').innerHTML=s;}
+function laws(){const g=G0(),E=g.dE;
+  $('l1').innerHTML=`掃描加速電壓，電流每隔約 <b>${E} V</b> 就突然下降一次，下降的位置間距固定。`;
+  $('l2').innerHTML=`電子動能小於 ${E} eV 時，${g.name}原子不接受這麼少的能量，碰撞後電子幾乎保持原來的動能。`;
+  $('l3').innerHTML=`動能一到 ${E} eV，電子就把剛好 ${E} eV 交給原子，自己剩下很少，過不了反向電壓 → 電流下降；再加速又可以碰第二次……`;
+  $('l4').innerHTML=`原子只能吸收「剛好 ${E} eV」，代表它的能量不連續（能階）。放出的光 λ = 1240/${E} ≈ ${g.lam} nm 也和光譜吻合。`;}
+
+// ---- geometry ----
+let L={};
+function layout(){const d=Math.min(2,devicePixelRatio||1);
+  for(const c of [sc,gr,lv]){c.width=Math.round(c.clientWidth*d);c.height=Math.round(c.clientHeight*d);}
+  const w=sc.clientWidth,h=sc.clientHeight;
+  L={w,h,d,tx:w*.05,ty:h*.12,tw:w*.9,th:h*.5,cx:w*.12,gx:w*.78,ax:w*.9,my:h*.37};
+  L.y0=L.ty+14;L.y1=L.ty+L.th-14;
+  L.atoms=Array.from({length:Math.round(w*.09)},()=>({x:L.cx+12+Math.random()*(L.ax-L.cx-16),y:L.y0+Math.random()*(L.y1-L.y0),ex:0}));}
+
+// ---- electrons ----
+const SPD=55; // px/s per sqrt(eV)
+function step(dt){const g=G0();st.t+=dt;
+  if(st.sweep){st.sweepAcc+=dt;const rate=g.vmax/14;st.V=Math.min(g.vmax,st.V+rate*dt);$('sV').value=st.V;
+    while(st.sweepAcc>=.06){st.sweepAcc-=.06;record(true);}
+    if(st.V>=g.vmax){st.sweep=false;$('sweep').textContent='▶ 自動掃描 0 → 最大電壓';}ui();}
+  st.emitAcc+=dt*30;while(st.emitAcc>=1){st.emitAcc--;st.elec.push({x:L.cx+6,y:L.y0+Math.random()*(L.y1-L.y0),lost:0,d:-Math.log(Math.random())*g.over,back:false,vy:(Math.random()-.5)*20});}
+  const span=L.gx-L.cx;
+  for(let i=st.elec.length-1;i>=0;i--){const e=st.elec[i];
+    let E;
+    if(e.x<=L.gx)E=st.V*(e.x-L.cx)/span-e.lost;else E=st.V-e.lost-st.Vr*(e.x-L.gx)/(L.ax-L.gx);
+    if(!e.back&&e.x<=L.gx&&E>=g.dE+e.d){ // inelastic collision: excite an atom
+      e.lost+=g.dE;e.d=-Math.log(Math.random())*g.over;
+      st.flash.push({x:e.x,y:e.y,a:1});
+      const bin=Math.min(st.glow.length-1,Math.max(0,Math.floor((e.x-L.cx)/span*st.glow.length)));st.glow[bin]+=1;
+      if(!g.visible)st.uv.push({x:e.x,y:e.y,ang:Math.random()*6.28,r:0});
+      E=st.V*(e.x-L.cx)/span-e.lost;}
+    if(e.x>L.gx&&E<=0&&!e.back){e.back=true;}
+    const v=SPD*Math.sqrt(Math.max(E,.15))+8;
+    e.x+=(e.back?-1:1)*v*dt;e.y+=e.vy*dt;if(Math.random()<dt*3)e.vy=(Math.random()-.5)*40; // elastic bumps
+    if(e.y<L.y0||e.y>L.y1){e.vy*=-1;e.y=Math.max(L.y0,Math.min(L.y1,e.y));}
+    if(e.back&&e.x<=L.gx){st.elec.splice(i,1);st.gridHits.push(st.t);continue;}
+    if(e.x>=L.ax){st.elec.splice(i,1);st.anodeHits.push(st.t);}
+  }
+  for(let k=0;k<st.glow.length;k++)st.glow[k]*=Math.exp(-dt*1.2);
+  st.flash.forEach(f=>f.a-=dt*2.2);st.flash=st.flash.filter(f=>f.a>0);
+  st.uv.forEach(u=>u.r+=dt*220);st.uv=st.uv.filter(u=>u.r<70);
+  while(st.anodeHits.length&&st.anodeHits[0]<st.t-1)st.anodeHits.shift();
+  while(st.gridHits.length&&st.gridHits[0]<st.t-1)st.gridHits.shift();
+}
+function record(auto){const I=Ith(st.V,st.Vr)*(1+(Math.random()-.5)*.04)+(Math.random()-.5)*.03;st.data.push({V:st.V,I:Math.max(0,I)});if(!auto)drawGraph();}
+
+// ---- drawing ----
+function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
+function drawScene(){const g=G0(),x=sc.getContext('2d');x.setTransform(L.d,0,0,L.d,0,0);const {w,h}=L;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  x.fillStyle='rgba(120,190,255,.05)';x.strokeStyle='rgba(150,200,255,.35)';x.lineWidth=1.5;rr(x,L.tx,L.ty,L.tw,L.th,22);x.fill();x.stroke();
+  // glow layers (Ne visible; Hg only with UV toggle, drawn violet)
+  if(g.visible||st.showUV){const span=L.gx-L.cx,n=st.glow.length;
+    for(let k=0;k<n;k++){const a=Math.min(.55,st.glow[k]*.05);if(a<.01)continue;
+      const xx=L.cx+span*(k+.5)/n;const grd=x.createRadialGradient(xx,L.my,0,xx,L.my,(L.y1-L.y0)*.7);
+      const c=g.visible?'255,138,61':'180,140,255';grd.addColorStop(0,`rgba(${c},${a})`);grd.addColorStop(1,`rgba(${c},0)`);x.fillStyle=grd;x.fillRect(xx-span/n*1.5,L.y0-6,span/n*3,L.y1-L.y0+12);}}
+  // atoms
+  x.fillStyle='rgba(200,210,230,.18)';L.atoms.forEach(a=>{x.beginPath();x.arc(a.x,a.y,3.2,0,7);x.fill();});
+  // UV photons
+  if(!g.visible&&st.showUV){x.strokeStyle=g.light;x.lineWidth=1.3;st.uv.forEach(u=>{const ca=Math.cos(u.ang),sa=Math.sin(u.ang);x.globalAlpha=1-u.r/70;x.beginPath();
+    for(let s=0;s<=14;s++){const r=u.r+s,o=2.5*Math.sin(s*1.6);const X=u.x+ca*r-sa*o,Y=u.y+sa*r+ca*o;s?x.lineTo(X,Y):x.moveTo(X,Y);}x.stroke();});x.globalAlpha=1;}
+  // collision flashes
+  st.flash.forEach(f=>{x.fillStyle=g.visible?`rgba(255,160,90,${f.a*.8})`:`rgba(190,150,255,${f.a*.8})`;x.beginPath();x.arc(f.x,f.y,3+8*(1-f.a),0,7);x.fill();});
+  // cathode (filament), grid, anode
+  x.strokeStyle='#ff9d5c';x.lineWidth=2;x.beginPath();for(let k=0;k<=8;k++){const yy=L.y0+(L.y1-L.y0)*k/8;x.lineTo(L.cx-4+(k%2?6:0),yy);}x.stroke();
+  x.strokeStyle='#9aa3a8';x.lineWidth=1.5;x.setLineDash([3,4]);x.beginPath();x.moveTo(L.gx,L.ty+6);x.lineTo(L.gx,L.ty+L.th-6);x.stroke();x.setLineDash([]);
+  x.fillStyle='#9aa3a8';x.fillRect(L.ax,L.y0-4,6,L.y1-L.y0+8);
+  x.fillStyle='#c9d2dc';x.font='12px "Noto Sans TC"';x.textAlign='center';
+  x.fillText('燈絲',L.cx,L.ty-6);x.fillText('柵極',L.gx,L.ty-6);x.fillText('板極',L.ax+3,L.ty-6);
+  x.fillStyle='#5b6880';x.font='11px "Noto Sans TC"';x.fillText(`${g.name}${g.visible?'氣':'蒸氣'}`,(L.cx+L.gx)/2,L.ty+L.th-4);
+  // electrons
+  st.elec.forEach(e=>{x.fillStyle=e.back?'#ff8f8f':'#5ab8ff';x.beginPath();x.arc(e.x,e.y,2.6,0,7);x.fill();});
+  // energy bar under tube: electron energy vs position for a typical electron
+  const by=L.ty+L.th+16,bh=h-by-26,span=L.gx-L.cx,Emax=g.dE*1.3;
+  x.fillStyle='#8492aa';x.font='11px "Noto Sans TC"';x.textAlign='left';x.fillText('一顆電子的動能隨位置變化（典型）',L.tx,by-4);
+  x.strokeStyle='rgba(255,255,255,.08)';x.beginPath();x.moveTo(L.cx,by+bh);x.lineTo(L.ax,by+bh);x.stroke();
+  const Y=E=>by+bh-Math.min(1,E/Emax)*bh;
+  x.setLineDash([4,4]);x.strokeStyle='rgba(255,207,107,.6)';x.beginPath();x.moveTo(L.cx,Y(g.dE));x.lineTo(L.gx,Y(g.dE));x.stroke();x.setLineDash([]);
+  x.fillStyle='#ffcf6b';x.textAlign='right';x.fillText(`${g.dE} eV`,L.cx-4,Y(g.dE)+4);
+  x.strokeStyle='#43d6ff';x.lineWidth=2;x.beginPath();let lost=0;const d=g.over;
+  for(let i=0;i<=200;i++){const xx=L.cx+span*i/200;let E=st.V*i/200-lost;if(E>=g.dE+d){lost+=g.dE;E-=g.dE;x.lineTo(xx,Y(E+g.dE));}x.lineTo(xx,Y(E));}
+  let E=st.V-lost;const steps=20;for(let i=1;i<=steps;i++){const xx=L.gx+(L.ax-L.gx)*i/steps;const e2=E-st.Vr*i/steps;x.lineTo(xx,Y(Math.max(0,e2)));if(e2<=0)break;}
+  x.stroke();
+  x.fillStyle=E>st.Vr?'#7dffc4':'#ff9a9a';x.textAlign='left';x.font='11px "Noto Sans TC"';x.fillText(E>st.Vr?'到得了板極':'過不了反向電壓',Math.min(L.ax-60,L.gx+6),by+10);
+  // meter
+  const cur=Ith(st.V,st.Vr);$('cur').innerHTML=cur.toFixed(2)+'<span class="u"> nA</span>';
+  $('status').textContent=st.sweep?'自動掃描中…':(cur<.05?'板極幾乎沒有電流':'有板極電流');
+}
+function drawLevels(){const g=G0(),x=lv.getContext('2d'),d=Math.min(2,devicePixelRatio||1);x.setTransform(d,0,0,d,0,0);const w=lv.clientWidth,h=lv.clientHeight;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,h);const top=g.lvls[g.lvls.length-1][0];const Y=E=>h-16-E/top*(h-30);
+  x.font='11px "Noto Sans TC"';
+  let prevY=1e9;
+  g.lvls.forEach(([E,n],i)=>{const last=i===g.lvls.length-1;x.strokeStyle=last?'rgba(255,255,255,.3)':'#c9d2dc';x.setLineDash(last?[4,4]:[]);x.lineWidth=1.5;
+    x.beginPath();x.moveTo(w*.12,Y(E));x.lineTo(w*.58,Y(E));x.stroke();x.setLineDash([]);
+    const ly=Math.min(Y(E)+4,prevY-12);prevY=ly;
+    x.fillStyle='#8492aa';x.textAlign='left';x.fillText(`${E} eV ${n}`,w*.6,ly);});
+  if(g.visible){const xb=w*.46;x.strokeStyle=g.light;x.fillStyle=g.light;x.lineWidth=2;x.beginPath();x.moveTo(xb,Y(18.7));x.lineTo(xb,Y(16.7)-5);x.stroke();
+    x.beginPath();x.moveTo(xb,Y(16.7));x.lineTo(xb-4,Y(16.7)-7);x.lineTo(xb+4,Y(16.7)-7);x.fill();x.font='10px "Noto Sans TC"';x.textAlign='right';x.fillText('橘紅光',xb-6,Y(17.5)+12);}
+  // arrow ΔE
+  const xa=w*.3;x.strokeStyle=g.light;x.fillStyle=g.light;x.lineWidth=2;x.beginPath();x.moveTo(xa,Y(0));x.lineTo(xa,Y(g.dE)+6);x.stroke();
+  x.beginPath();x.moveTo(xa,Y(g.dE));x.lineTo(xa-5,Y(g.dE)+8);x.lineTo(xa+5,Y(g.dE)+8);x.fill();
+  x.textAlign='right';x.fillText(`ΔE = ${g.dE} eV`,xa-8,(Y(0)+Y(g.dE))/2+4);
+  x.fillStyle='#5b6880';x.textAlign='left';x.fillText(`${g.name}原子能階（示意）`,6,12);}
+
+function peaks(){if(st.data.length<20)return[];const g=G0();const pts=st.data.slice().sort((a,b)=>a.V-b.V);
+  const sm=pts.map((p,i)=>{let s=0,n=0;for(let j=Math.max(0,i-2);j<=Math.min(pts.length-1,i+2);j++){s+=pts[j].I;n++;}return {V:p.V,I:s/n};});
+  const win=g.dE*.4,out=[];
+  sm.forEach((p,i)=>{if(p.I<.15||p.V<st.Vr+1)return;let ok=true,hasL=false,hasR=false;
+    for(const q of sm){if(Math.abs(q.V-p.V)<=win&&q!==p){if(q.I>p.I){ok=false;break;}if(q.V<p.V-win*.6)hasL=true;if(q.V>p.V+win*.6)hasR=true;}}
+    if(ok&&hasL&&hasR&&(!out.length||p.V-out[out.length-1].V>win))out.push(p);});
+  return out;}
+function drawGraph(){const g=G0(),d=Math.min(2,devicePixelRatio||1),x=gr.getContext('2d');x.setTransform(d,0,0,d,0,0);const w=gr.clientWidth,h=gr.clientHeight;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const Lm=40,R=12,T=14,B=34,pw=w-Lm-R,ph=h-T-B,IM=Math.max(2,...st.data.map(p=>p.I),Ith(g.vmax,st.Vr))*1.12;
+  const X=V=>Lm+V/g.vmax*pw,Y=I=>T+ph-I/IM*ph;
+  x.strokeStyle='rgba(255,255,255,.07)';x.fillStyle='#6b7893';x.font='11px "JetBrains Mono"';x.textAlign='center';
+  const stp=g.vmax<=30?5:10;for(let V=0;V<=g.vmax;V+=stp){x.beginPath();x.moveTo(X(V),T);x.lineTo(X(V),T+ph);x.stroke();x.fillText(V,X(V),h-B+15);}
+  x.textAlign='right';const ist=IM>6?2:1;for(let I=0;I<=IM;I+=ist){x.beginPath();x.moveTo(Lm,Y(I));x.lineTo(Lm+pw,Y(I));x.stroke();x.fillText(I,Lm-6,Y(I)+4);}
+  x.textAlign='center';x.fillText('加速電壓 V（伏特）',Lm+pw/2,h-4);
+  x.save();x.translate(11,T+ph/2);x.rotate(-Math.PI/2);x.fillText('I（nA，示意）',0,0);x.restore();
+  x.strokeStyle='#3a4660';x.beginPath();x.moveTo(Lm,T);x.lineTo(Lm,T+ph);x.lineTo(Lm+pw,T+ph);x.stroke();
+  if(st.showTheory){x.strokeStyle='#7dffc4';x.lineWidth=1.8;x.beginPath();for(let i=0;i<=400;i++){const V=g.vmax*i/400;i?x.lineTo(X(V),Y(Ith(V,st.Vr))):x.moveTo(X(V),Y(0));}x.stroke();}
+  x.fillStyle='#ffcf6b';st.data.forEach(p=>{x.beginPath();x.arc(X(p.V),Y(p.I),2.4,0,7);x.fill();});
+  const pk=peaks();
+  if(pk.length){x.setLineDash([4,4]);x.strokeStyle='rgba(255,255,255,.45)';x.lineWidth=1;pk.forEach(p=>{x.beginPath();x.moveTo(X(p.V),T);x.lineTo(X(p.V),T+ph);x.stroke();});x.setLineDash([]);
+    x.fillStyle='#e8edf6';x.font='11px "JetBrains Mono"';x.textAlign='center';
+    for(let i=1;i<pk.length;i++){const a=pk[i-1],b=pk[i],yy=T+10+(i%2)*14;x.strokeStyle='#e8edf6';x.beginPath();x.moveTo(X(a.V),yy);x.lineTo(X(b.V),yy);x.stroke();x.fillText((b.V-a.V).toFixed(1)+' V',(X(a.V)+X(b.V))/2,yy-3);}}
+  // current operating point
+  x.strokeStyle='#fff';x.lineWidth=1.5;x.beginPath();x.arc(X(st.V),Y(Ith(st.V,st.Vr)),5,0,7);x.stroke();
+  if(pk.length>=2){const sp=(pk[pk.length-1].V-pk[0].V)/(pk.length-1);
+    $('gnote').innerHTML=`由你的數據：峰間距 ≈ <b style="color:#ffcf6b">${sp.toFixed(2)} V</b> → 激發能 ≈ ${sp.toFixed(2)} eV`+(G0().visible?'':` → λ ≈ ${Math.round(1240/sp)} nm`);}
+  else $('gnote').textContent=st.data.length?'再多記錄一些點，找出兩個以上的峰':'按「自動掃描」記錄 I–V 曲線';
+}
+
+// ---- loop ----
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!st.paused)step(dt);drawScene();drawGraph();requestAnimationFrame(frame);}
+$('gas').onchange=e=>{st.g=e.target.value;setGas();};
+$('sV').addEventListener('input',e=>{st.V=+e.target.value;st.sweep=false;$('sweep').textContent='▶ 自動掃描 0 → 最大電壓';ui();});
+$('sR').addEventListener('input',e=>{st.Vr=+e.target.value;st.data=[];ui();});
+$('sweep').onclick=()=>{if(st.sweep){st.sweep=false;$('sweep').textContent='▶ 自動掃描 0 → 最大電壓';return;}
+  st.data=[];st.V=0;st.sweepAcc=0;st.sweep=true;st.paused=false;$('pause').textContent='⏸ 暫停';$('sweep').textContent='⏹ 停止掃描';ui();};
+$('rec').onclick=()=>record(false);
+$('clr').onclick=()=>{st.data=[];};
+$('pause').onclick=()=>{st.paused=!st.paused;$('pause').textContent=st.paused?'▶ 繼續':'⏸ 暫停';};
+$('tTheory').onchange=e=>{st.showTheory=e.target.checked;};
+$('tUV').onchange=e=>{st.showUV=e.target.checked;};
+addEventListener('resize',()=>{layout();drawLevels();});
+layout();setGas();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>戴維森－革末實驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#43d6ff;--phos:#7dffc4;--amber:#ffcf6b;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(67,214,255,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:68ch;margin-top:6px;font-size:15px}
+.modebar{display:flex;gap:0;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#04121a;font-weight:700}
+.modebar button.cls[aria-pressed="true"]{background:var(--red);color:#1a0505}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;position:relative}
+canvas{display:block;width:100%}
+#scene{height:330px}
+#graph{height:250px}
+#ivg{height:260px}
+@media(max-width:560px){#scene{height:270px}#graph{height:220px}#ivg{height:230px}}
+.banner{margin:0 14px 10px;padding:8px 12px;border-radius:9px;font-size:13px;background:rgba(255,122,122,.12);border:1px solid rgba(255,122,122,.4);color:#ffc4c4}
+.ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.ro{background:var(--panel2);padding:10px 12px}
+.ro .k{font-size:11.5px;color:var(--muted)}
+.ro .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:18px;margin-top:2px;line-height:1.2}
+.ro .u{font-size:12px;color:var(--dim);font-weight:400}
+.ro.big{grid-column:1/-1;background:linear-gradient(120deg,rgba(125,255,196,.10),rgba(67,214,255,.04))}
+.ro.big .v{font-size:24px;color:var(--phos)}
+.ctl{margin-bottom:13px}
+.ctl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px}
+.ctl label{font-size:13.5px;font-weight:500}
+.ctl .val{font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--acc);text-align:right}
+select{width:100%;font:inherit;font-size:14px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:7px 10px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:#26314a;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;box-shadow:0 0 0 1px #fff;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+.chips button{padding:4px 9px;font-size:12.5px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px}
+button.primary{background:var(--phos);border-color:var(--phos);color:#05140d;font-weight:700}
+.toggles{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.tg{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--muted);cursor:pointer}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13px;color:var(--muted)}
+.note b{color:var(--amber);font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:12px;padding:0 16px 12px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px}
+.legend .sw{cursor:pointer}
+.ivbtns{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px}
+.three{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+@media(max-width:980px){.three{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.three{grid-template-columns:1fr}}
+.law{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted)}
+.law h4{color:var(--txt);font-size:14px;margin-bottom:4px}
+.law .ok{color:var(--phos)} .law .ng{color:var(--red)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+
+#scene{height:330px}
+#polar{height:300px}
+@media(max-width:560px){#scene{height:270px}#polar{height:250px}}
+#sV{background:linear-gradient(90deg,#26314a,#43d6ff)}
+#sA{background:linear-gradient(90deg,#26314a,#ffcf6b)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">量子現象 · Davisson–Germer Experiment</div>
+  <h1>戴維森－革末實驗：電子也會繞射</h1>
+  <p class="lede">把電子加速後垂直打在鎳晶體上，轉動偵測器，記錄每個角度收到多少電子。如果電子只是小球，強度應該隨角度平滑變化；實驗卻在某個角度出現一個「峰」——就像光通過光柵一樣。</p>
+
+  <div class="modebar" role="group" aria-label="模型">
+    <button type="button" id="mW" aria-pressed="true">實驗結果（電子有波動性）</button>
+    <button type="button" id="mP" class="cls" aria-pressed="false">若電子只是粒子</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">實驗裝置</span><span class="n" id="status"></span></div>
+      <div class="banner" id="pBanner" hidden>這是<b>「電子只是粒子」的預測</b>，不是實驗結果：電子像小球從鎳原子表面亂彈出去，強度隨角度平滑變化，不會在特定角度特別多。</div>
+      <div class="box"><canvas id="scene" aria-label="戴維森－革末實驗裝置動畫"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t">散射強度 − 偵測器角度（極座標圖）</span><span class="n" id="gnote"></span></div>
+      <div class="box"><canvas id="polar" aria-label="散射強度極座標圖"></canvas></div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i>你記錄的數據點</span>
+        <span><i style="background:var(--phos)"></i>理論曲線（可開關）</span>
+        <span><i style="background:#fff"></i>偵測器目前方向</span>
+      </div>
+    </section>
+
+    <section class="card"><div class="pad">
+      <div class="ro-grid">
+        <div class="ro big"><div class="k">德布羅意波長 λ = h / p</div><div class="v" id="lam">—</div></div>
+        <div class="ro"><div class="k">電子速率 v</div><div class="v" id="vel">—</div></div>
+        <div class="ro"><div class="k">電子動量 p = mv</div><div class="v" id="mom">—</div></div>
+        <div class="ro"><div class="k">鎳表面原子間距 d</div><div class="v">0.215<span class="u"> nm</span></div></div>
+        <div class="ro"><div class="k">預測峰的角度 sin φ = λ / d</div><div class="v" id="pk">—</div></div>
+        <div class="ro"><div class="k">偵測器計數率（示意）</div><div class="v" id="cnt">—</div></div>
+        <div class="ro"><div class="k">由數據的峰算出 λ = d sin φ</div><div class="v" id="lamD">—</div></div>
+      </div>
+
+      <div class="ctl">
+        <div class="row"><label for="sV">加速電壓 V</label><span class="val" id="vV"></span></div>
+        <input type="range" id="sV" min="20" max="100" step="1" value="54">
+        <div class="chips"><button type="button" data-v="40">40 V</button><button type="button" data-v="54">54 V（原始實驗）</button><button type="button" data-v="65">65 V</button><button type="button" data-v="80">80 V</button></div>
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sA">偵測器角度 φ</label><span class="val" id="vA"></span></div>
+        <input type="range" id="sA" min="0" max="90" step="1" value="30">
+      </div>
+      <div class="btns">
+        <button class="primary" id="sweep">▶ 自動掃描角度 0° → 90°</button>
+        <button id="rec">＋ 記錄這個點</button>
+        <button id="clr">清除數據</button>
+        <button id="pause">⏸ 暫停</button>
+      </div>
+      <div class="toggles">
+        <label class="tg"><input type="checkbox" id="tTheory">圖上顯示理論曲線</label>
+        <label class="tg"><input type="checkbox" id="tAtoms" checked>放大顯示鎳晶體表面（原子排列像光柵）</label>
+      </div>
+      <div class="note" id="explain"></div>
+    </div></section>
+  </div>
+
+  <div class="three">
+    <div class="law"><h4>① 1927 年的實驗結果</h4><span id="l1"></span></div>
+    <div class="law"><h4>② 粒子模型說不通</h4><span id="l2"></span></div>
+    <div class="law"><h4>③ 晶體表面就像光柵</h4><span id="l3"></span></div>
+    <div class="law"><h4>④ 和德布羅意波長吻合</h4><span id="l4"></span></div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>1927 年戴維森與革末在美國貝爾實驗室發現這個現象；同年英國的 G. P. 湯姆森讓電子穿過金屬薄膜也得到繞射環，兩人共獲 1937 年諾貝爾物理獎。電子經電壓 V 加速後 p = √(2meV)，所以 λ = h/√(2meV) ≈ 1.226/√V（nm）。54 V 時 λ ≈ 0.167 nm，和原子間距差不多，所以晶體能讓電子產生明顯的繞射——就像光柵的狹縫間距要和光的波長差不多一樣。<br>
+    <b>簡化說明：</b>本模擬只用表面原子排成的「光柵」d sin φ = λ 決定峰的角度。真實晶體內部還有一層層原子，只有在某些電壓（例如 54 V）各層的波也互相加強時，峰才特別明顯，所以模擬中峰在 54 V 附近最強、電壓偏離越多峰越弱。計數率為示意值。更完整的版本在 7F 選修物理五「戴維森－革末實驗」。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const H=6.62607015e-34,ME=9.1093837e-31,QE=1.602176634e-19,D=0.215;
+const st={mode:'w',V:54,phi:30,paused:false,t:0,elec:[],emitAcc:0,data:[],sweep:false,sweepAcc:0,showTheory:false,showAtoms:true,hits:[]};
+const sc=$('scene'),pl=$('polar');
+const lamNm=V=>H/Math.sqrt(2*ME*QE*V)*1e9;
+const peakDeg=V=>{const s=lamNm(V)/D;return s<1?Math.asin(s)*180/Math.PI:null;};
+const R2D=180/Math.PI;
+function bg(phi){const r=phi/R2D;return .32+.5*Math.cos(r)*Math.cos(r*.6);} // smooth "particle" scattering
+function amp(V){return Math.exp(-Math.pow((V-54)/13,2));}
+function Ith(phi,V,mode){const m=mode||st.mode;const b=bg(phi);if(m==='p')return b;
+  const p=peakDeg(V);if(p==null)return b;return b+.62*amp(V)*Math.exp(-Math.pow((phi-p)/6.5,2));}
+
+// ---- UI ----
+function ui(){const V=st.V,lam=lamNm(V),v=Math.sqrt(2*QE*V/ME),p=ME*v,pk=peakDeg(V);
+  $('vV').textContent=V+' V';$('vA').textContent=st.phi+'°';
+  $('lam').innerHTML=lam.toFixed(3)+'<span class="u"> nm</span>';
+  $('vel').innerHTML=(v/1e6).toFixed(2)+'<span class="u"> ×10⁶ m/s</span>';
+  $('mom').innerHTML=(p/1e-24).toFixed(2)+'<span class="u"> ×10⁻²⁴ kg·m/s</span>';
+  $('pk').innerHTML=pk==null?'<span class="u">λ &gt; d，沒有第一級峰</span>':pk.toFixed(1)+'<span class="u">°</span>';
+  $('pBanner').hidden=st.mode!=='p';explain();laws();}
+function explain(){const V=st.V,lam=lamNm(V),pk=peakDeg(V);let s;
+  if(st.mode==='p')s=`如果電子只是小球，它們打到鎳原子表面後會往各方向彈開，偵測器在每個角度收到的電子數應該<b>平滑變化</b>，而且<b>改變電壓也不會出現特定角度的峰</b>。掃描一次角度看看，再切回「實驗結果」比較。`;
+  else if(pk==null)s=`電壓 ${V} V 時 λ = ${lam.toFixed(3)} nm，比原子間距 d = ${D} nm 還長，sin φ = λ/d 大於 1，所以<b>沒有第一級繞射峰</b>——就像光的波長比光柵間距還長時看不到亮紋。`;
+  else s=`電壓 ${V} V 時電子的物質波波長 λ = h/p = <b>${lam.toFixed(3)} nm</b>。鎳表面原子間距 ${D} nm，相鄰原子反射的電子波路徑差 d sin φ 等於一個波長時互相加強，所以在 φ = <b>${pk.toFixed(1)}°</b> 出現峰。${Math.abs(V-54)>15?'（這個電壓下晶體內部各層的波沒有完全加強，峰比較弱。）':''}電壓越高 → λ 越短 → 峰的角度越小。`;
+  $('explain').innerHTML=s;}
+function laws(){
+  $('l1').innerHTML='用 54 V 加速的電子打在鎳晶體上，偵測器在 <b>φ ≈ 50°</b> 收到的電子特別多，強度圖上出現明顯的峰。';
+  $('l2').innerHTML='小球從表面亂彈，強度只會隨角度平滑變化，<b>解釋不了</b>為什麼偏偏是 50°，也解釋不了峰的角度會隨電壓改變。';
+  $('l3').innerHTML='表面原子規則排列，間距 d = 0.215 nm。由 d sin φ = λ 算出 λ = 0.215 × sin 50° ≈ <b>0.165 nm</b>。';
+  $('l4').innerHTML='德布羅意：λ = h/p = h/√(2meV)，54 V 時 ≈ <b>0.167 nm</b>，兩者幾乎相同 → 電子具有<b>波動性</b>（物質波）。';}
+
+// ---- geometry ----
+let G={};
+function layout(){const d=Math.min(2,devicePixelRatio||1);for(const c of [sc,pl]){c.width=Math.round(c.clientWidth*d);c.height=Math.round(c.clientHeight*d);}
+  const w=sc.clientWidth,h=sc.clientHeight;const cx=w*.42,cy=h*.8,R=Math.min(h*.66,w*.36);G={w,h,d,cx,cy,R,gy:h*.08};}
+
+// ---- simulation ----
+function sampleAngle(){for(let k=0;k<50;k++){const a=Math.random()*90;if(Math.random()*1.25<Ith(a,st.V))return (Math.random()<.5?-1:1)*a;}return 0;}
+function step(dt){st.t+=dt;
+  if(st.sweep){st.sweepAcc+=dt;while(st.sweepAcc>=.1){st.sweepAcc-=.1;record(true);st.phi=Math.min(90,st.phi+1);$('sA').value=st.phi;
+      if(st.phi>=90){record(true);st.sweep=false;$('sweep').textContent='▶ 自動掃描角度 0° → 90°';break;}}ui();}
+  st.emitAcc+=dt*45;while(st.emitAcc>=1){st.emitAcc--;st.elec.push({x:G.cx+(Math.random()-.5)*6,y:G.gy+30,ph:0,ang:0});}
+  const sp=170+12*Math.sqrt(st.V);
+  for(let i=st.elec.length-1;i>=0;i--){const e=st.elec[i];
+    if(e.ph===0){e.y+=sp*dt;if(e.y>=G.cy-4){e.ph=1;e.ang=sampleAngle();e.r=0;}}
+    else{e.r+=sp*dt;const a=e.ang/R2D;e.x=G.cx+Math.sin(a)*e.r;e.y=G.cy-4-Math.cos(a)*e.r;
+      if(e.r>=G.R-6){if(Math.abs(e.ang-st.phi)<3.5)st.hits.push(st.t);st.elec.splice(i,1);}}}
+  while(st.hits.length&&st.hits[0]<st.t-1)st.hits.shift();}
+function record(auto){const I=Ith(st.phi,st.V)*(1+(Math.random()-.5)*.05);
+  st.data=st.data.filter(p=>p.phi!==st.phi);st.data.push({phi:st.phi,I});}
+
+// ---- drawing ----
+function drawScene(){const x=sc.getContext('2d');x.setTransform(G.d,0,0,G.d,0,0);const {w,h,cx,cy,R}=G;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  // angle scale arc
+  x.strokeStyle='rgba(255,255,255,.08)';x.lineWidth=1;x.beginPath();x.arc(cx,cy-4,R,-Math.PI/2,0);x.stroke();
+  x.fillStyle='#5b6880';x.font='10px "JetBrains Mono"';x.textAlign='center';
+  for(let a=0;a<=90;a+=15){const r=a/R2D;const X=cx+Math.sin(r)*(R+12),Y=cy-4-Math.cos(r)*(R+12);x.fillText(a+'°',X,Y+3);
+    x.beginPath();x.moveTo(cx+Math.sin(r)*(R-4),cy-4-Math.cos(r)*(R-4));x.lineTo(cx+Math.sin(r)*R,cy-4-Math.cos(r)*R);x.stroke();}
+  // predicted peak direction (wave mode)
+  const pk=peakDeg(st.V);
+  if(st.mode==='w'&&pk!=null){const r=pk/R2D;x.setLineDash([3,5]);x.strokeStyle='rgba(125,255,196,.35)';x.beginPath();x.moveTo(cx,cy-4);x.lineTo(cx+Math.sin(r)*R,cy-4-Math.cos(r)*R);x.stroke();x.setLineDash([]);}
+  // gun
+  x.fillStyle='#3d4a66';x.fillRect(cx-9,G.gy,18,30);x.fillStyle='#ff9d5c';x.fillRect(cx-6,G.gy+3,12,3);
+  x.fillStyle='#8492aa';x.font='11px "Noto Sans TC"';x.textAlign='right';x.fillText(`電子槍 ${st.V} V`,cx-14,G.gy+18);
+  // crystal
+  x.fillStyle='#7f8a96';x.fillRect(cx-46,cy,92,14);x.fillStyle='#c9d2dc';x.textAlign='center';x.fillText('鎳晶體',cx,cy+28);
+  // electrons
+  x.fillStyle='#5ab8ff';st.elec.forEach(e=>{x.beginPath();x.arc(e.x,e.y,2.3,0,7);x.fill();});
+  // detector
+  const r=st.phi/R2D,dx=cx+Math.sin(r)*R,dy=cy-4-Math.cos(r)*R;
+  x.save();x.translate(dx,dy);x.rotate(r);x.fillStyle='#ffcf6b';x.fillRect(-11,-14,22,14);x.restore();
+  x.strokeStyle='rgba(255,207,107,.35)';x.beginPath();x.moveTo(cx,cy-4);x.lineTo(dx,dy);x.stroke();
+  const rate=Ith(st.phi,st.V)*100;x.fillStyle='#ffcf6b';x.font='11px "Noto Sans TC"';x.textAlign=st.phi>60?'right':'left';
+  x.fillText('偵測器',dx+(st.phi>60?-14:14),dy-12);
+  // zoomed surface
+  if(st.showAtoms){const bx=w-Math.min(190,w*.34)-10,by=h-118,bw=Math.min(190,w*.34),bh=106;
+    x.fillStyle='#0a0f1a';x.strokeStyle='#222c42';x.lineWidth=1;x.fillRect(bx,by,bw,bh);x.strokeRect(bx,by,bw,bh);
+    x.fillStyle='#8492aa';x.font='10px "Noto Sans TC"';x.textAlign='left';x.fillText('表面放大：相鄰原子路徑差 d sin φ',bx+6,by+13);
+    const ay=by+bh-22,dpx=bw*.26,ax0=bx+bw*.2;
+    for(let i=0;i<4;i++){x.fillStyle='#a9b4bd';x.beginPath();x.arc(ax0+i*dpx,ay,5,0,7);x.fill();}
+    const pa=st.phi/R2D;x.strokeStyle='#ffcf6b';x.lineWidth=1.3;
+    for(let i=0;i<2;i++){const X0=ax0+(i+1)*dpx;x.beginPath();x.moveTo(X0,ay-5);x.lineTo(X0+Math.sin(pa)*60,ay-5-Math.cos(pa)*60);x.stroke();}
+    // path difference segment
+    const X1=ax0+dpx,X2=ax0+2*dpx;const fx=X1+Math.sin(pa)*Math.sin(pa)*dpx,fy=ay-5-Math.cos(pa)*Math.sin(pa)*dpx;
+    x.strokeStyle='#ff7a7a';x.lineWidth=2.4;x.beginPath();x.moveTo(X1,ay-5);x.lineTo(fx,fy);x.stroke();
+    x.setLineDash([2,3]);x.strokeStyle='#8492aa';x.lineWidth=1;x.beginPath();x.moveTo(X2,ay-5);x.lineTo(fx,fy);x.stroke();x.setLineDash([]);
+    x.fillStyle='#c9d2dc';x.textAlign='center';x.fillText('d',(X1+X2)/2,ay+16);
+    x.fillStyle='#ff9a9a';x.textAlign='left';x.fillText(`路徑差 = ${(D*Math.sin(pa)).toFixed(3)} nm`,bx+6,by+28);
+    x.fillStyle='#7dffc4';x.fillText(`λ = ${lamNm(st.V).toFixed(3)} nm`,bx+6,by+42);}
+  $('cnt').innerHTML=Math.round(rate)+'<span class="u"> 顆/秒</span>';
+  $('status').textContent=st.sweep?'自動掃描中…':`偵測器在 ${st.phi}°`;
+}
+function findPeak(){if(st.data.length<25)return null;const pts=st.data.slice().sort((a,b)=>a.phi-b.phi);let best=null;
+  pts.forEach((p,i)=>{if(p.phi<12||p.phi>86)return;const near=pts.filter(q=>Math.abs(q.phi-p.phi)<=8&&q!==p);
+    if(near.some(q=>q.I>p.I))return;const wide=pts.filter(q=>Math.abs(q.phi-p.phi)<=18);const mn=Math.min(...wide.map(q=>q.I));
+    if(p.I-mn>.07&&(!best||p.I>best.I))best=p;});
+  return best;}
+function drawPolar(){const d=Math.min(2,devicePixelRatio||1),x=pl.getContext('2d');x.setTransform(d,0,0,d,0,0);const w=pl.clientWidth,h=pl.clientHeight;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const cx=w*.3,cy=h-26,R=Math.min(h-50,w*.62),IM=1.25,rad=I=>I/IM*R;
+  x.strokeStyle='rgba(255,255,255,.07)';x.fillStyle='#5b6880';x.font='10px "JetBrains Mono"';
+  for(let k=1;k<=4;k++){x.beginPath();x.arc(cx,cy,R*k/4,-Math.PI/2,0);x.stroke();}
+  for(let a=0;a<=90;a+=15){const r=a/R2D;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.sin(r)*R,cy-Math.cos(r)*R);x.stroke();
+    x.textAlign='center';x.fillText(a+'°',cx+Math.sin(r)*(R+12),cy-Math.cos(r)*(R+12)+3);}
+  x.fillStyle='#6b7893';x.font='11px "Noto Sans TC"';x.textAlign='left';x.fillText('原點到點的距離 = 散射強度',8,16);
+  x.textAlign='center';x.fillText('入射電子方向（向下打入）',cx,cy+18);
+  if(st.showTheory){x.strokeStyle=st.mode==='w'?'#7dffc4':'#ff7a7a';x.lineWidth=1.8;x.beginPath();
+    for(let a=0;a<=90;a+=.5){const r=a/R2D,q=rad(Ith(a,st.V));const X=cx+Math.sin(r)*q,Y=cy-Math.cos(r)*q;a?x.lineTo(X,Y):x.moveTo(X,Y);}x.stroke();}
+  x.fillStyle='#ffcf6b';st.data.forEach(p=>{const r=p.phi/R2D,q=rad(p.I);x.beginPath();x.arc(cx+Math.sin(r)*q,cy-Math.cos(r)*q,2.8,0,7);x.fill();});
+  const r=st.phi/R2D;x.strokeStyle='#fff';x.lineWidth=1.2;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.sin(r)*R,cy-Math.cos(r)*R);x.stroke();
+  const pk=findPeak();
+  if(pk){const r2=pk.phi/R2D,q=rad(pk.I);x.strokeStyle='#ffcf6b';x.lineWidth=1.5;x.beginPath();x.arc(cx+Math.sin(r2)*q,cy-Math.cos(r2)*q,7,0,7);x.stroke();
+    x.fillStyle='#ffcf6b';x.textAlign='left';x.font='11px "Noto Sans TC"';x.fillText(`峰：${pk.phi}°`,cx+Math.sin(r2)*q+10,cy-Math.cos(r2)*q-6);
+    const l=D*Math.sin(r2);$('lamD').innerHTML=l.toFixed(3)+'<span class="u"> nm（峰在 '+pk.phi+'°）</span>';
+    $('gnote').innerHTML=`${st.V} V：峰在 <b style="color:#ffcf6b">${pk.phi}°</b> → λ = d sin φ = ${l.toFixed(3)} nm；h/p = ${lamNm(st.V).toFixed(3)} nm`;}
+  else{$('lamD').innerHTML='<span class="u">'+(st.data.length<25?'先掃描一次角度':'沒有找到明顯的峰')+'</span>';
+    $('gnote').textContent=st.data.length<25?'按「自動掃描角度」記錄強度分布':'這組數據沒有明顯的峰';}
+}
+
+// ---- loop ----
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!st.paused)step(dt);drawScene();drawPolar();requestAnimationFrame(frame);}
+function stopSweep(){st.sweep=false;$('sweep').textContent='▶ 自動掃描角度 0° → 90°';}
+function setV(v){st.V=v;$('sV').value=v;st.data=[];stopSweep();ui();}
+$('sV').addEventListener('input',e=>setV(+e.target.value));
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>setV(+b.dataset.v));
+$('sA').addEventListener('input',e=>{st.phi=+e.target.value;stopSweep();ui();});
+$('sweep').onclick=()=>{if(st.sweep){stopSweep();return;}st.data=[];st.phi=0;$('sA').value=0;st.sweepAcc=0;st.sweep=true;st.paused=false;$('pause').textContent='⏸ 暫停';$('sweep').textContent='⏹ 停止掃描';ui();};
+$('rec').onclick=()=>record(false);
+$('clr').onclick=()=>{st.data=[];};
+$('pause').onclick=()=>{st.paused=!st.paused;$('pause').textContent=st.paused?'▶ 繼續':'⏸ 暫停';};
+$('tTheory').onchange=e=>{st.showTheory=e.target.checked;};
+$('tAtoms').onchange=e=>{st.showAtoms=e.target.checked;};
+const setMode=m=>{st.mode=m;$('mW').setAttribute('aria-pressed',m==='w');$('mP').setAttribute('aria-pressed',m==='p');st.data=[];stopSweep();ui();};
+$('mW').onclick=()=>setMode('w');$('mP').onclick=()=>setMode('p');
+addEventListener('resize',layout);
+layout();ui();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
