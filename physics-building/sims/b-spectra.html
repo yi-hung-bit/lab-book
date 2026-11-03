@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原子光譜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ff9ad5;--phos:#7dffc4;--amber:#ffcf6b;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,154,213,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:68ch;margin-top:6px;font-size:15px}
+.tabs{display:flex;flex-wrap:wrap;gap:0;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.tabs button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.tabs button[aria-selected="true"]{background:var(--acc);color:#2a0618;font-weight:700}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0;margin-top:14px}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted);font-family:"JetBrains Mono",monospace}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+#setup{height:260px}
+#strip{height:110px}
+#refs{height:340px}
+#star{height:110px}#starRef{height:300px}
+@media(max-width:560px){#setup{height:210px}#refs{height:300px}}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.row2{grid-template-columns:1fr}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button[aria-pressed="true"]{background:var(--acc);color:#2a0618;border-color:var(--acc);font-weight:700}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--phos);border-color:var(--phos);color:#05140d;font-weight:700}
+.lab{font-size:13px;color:var(--muted);margin-bottom:6px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;background:#26314a;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--acc);border:3px solid #0c1322;cursor:pointer}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--amber);font-weight:500}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.checks label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:9px;padding:6px 10px;cursor:pointer;font-size:14px;background:var(--panel2)}
+.checks input{width:17px;height:17px;accent-color:var(--acc)}
+.res{font-size:14px;margin-top:10px;min-height:1.6em}
+.res .ok{color:var(--phos)}.res .ng{color:var(--red)}
+.score{font-family:"JetBrains Mono",monospace;color:var(--amber);font-size:13px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">6-5 · Atomic Spectra</div>
+  <h1>原子光譜：三大類光譜與原子的身分證</h1>
+  <p class="lede">光通過三稜鏡會依波長分開。不同的光源產生不同的光譜；不同元素的氣體，亮線（或暗線）位置各不相同，就像原子的身分證。</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab1" aria-selected="true">① 三大類光譜</button>
+    <button role="tab" id="tab2" aria-selected="false">② 原子的身分證</button>
+    <button role="tab" id="tab3" aria-selected="false">③ 解讀星光</button>
+  </div>
+
+  <!-- PANEL 1 -->
+  <section id="p1">
+    <div class="card">
+      <div class="head"><span class="t">光譜量測裝置</span><span class="n" id="srcName"></span></div>
+      <div class="box"><canvas id="setup" aria-label="光源、三稜鏡與屏幕示意圖"></canvas></div>
+      <div class="head" style="padding-top:0"><span class="t">屏幕上的光譜</span><span class="n" id="hov1">點擊或移動在光譜上讀取波長</span></div>
+      <div class="box"><canvas id="strip" aria-label="光譜"></canvas></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="row2">
+          <div>
+            <div class="lab">光源</div>
+            <div class="seg" id="srcSeg">
+              <button data-s="cont" aria-pressed="true">白熾燈泡</button>
+              <button data-s="emis" aria-pressed="false">加熱後的元素氣體</button>
+              <button data-s="abs" aria-pressed="false">白熾燈穿過低溫氣體</button>
+            </div>
+            <div class="lab" style="margin-top:12px">元素氣體</div>
+            <div class="seg" id="elSeg"></div>
+          </div>
+          <div>
+            <div class="ctl" id="tempCtl">
+              <div class="r"><label for="sT">燈絲溫度</label><span id="vT"></span></div>
+              <input type="range" id="sT" min="1500" max="9000" step="50" value="3000">
+            </div>
+            <div class="note" id="ex1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 2 -->
+  <section id="p2" hidden>
+    <div class="card">
+      <div class="head"><span class="t">各元素的光譜</span><span class="n" id="hov2">點擊或移動讀取波長</span></div>
+      <div class="box"><canvas id="refs" aria-label="各元素光譜比較"></canvas></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg" id="refSeg">
+          <button data-m="emis" aria-pressed="true">發射光譜（亮線）</button>
+          <button data-m="abs" aria-pressed="false">吸收光譜（暗線）</button>
+        </div>
+        <div class="note">同一種元素的<b>發射亮線</b>和<b>吸收暗線</b>出現在完全相同的波長。切換上方按鈕比較看看。氫的四條可見光譜線：410、434、486、656 nm。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 3 -->
+  <section id="p3" hidden>
+    <div class="card">
+      <div class="head"><span class="t" id="starTitle">一顆神秘恆星的光譜</span><span class="score" id="score">答對 0 / 0</span></div>
+      <div class="box"><canvas id="star" aria-label="恆星光譜"></canvas></div>
+      <div class="pad" style="padding-top:2px">
+        <p style="font-size:14px;color:var(--muted)">恆星內部發出連續光譜，外層較冷的氣體吸收特定波長，形成暗線。對照下方的元素光譜，勾選這顆恆星外層含有哪些元素：</p>
+        <div class="checks" id="checks"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="primary" id="check">檢查答案</button>
+          <button id="next">換一顆恆星</button>
+          <button id="sun">看太陽光譜</button>
+        </div>
+        <div class="res" id="res"></div>
+      </div>
+      <div class="head"><span class="t">對照用：各元素吸收位置</span></div>
+      <div class="box"><canvas id="starRef" aria-label="對照光譜"></canvas></div>
+    </div>
+  </section>
+
+  <footer>
+    <b>教學提示：</b>連續光譜來自高溫的固體（或稠密物質）；發射光譜來自加熱的稀薄氣體，只在特定波長出現亮線；白光穿過低溫氣體，原本連續的光譜會在該元素的發射亮線位置出現暗線，形成吸收光譜。太陽光譜中的暗線（夫朗和斐譜線）是太陽外層氣體造成的吸收光譜，因此能知道太陽主要由氫與氦組成（氦的吸收在可見光很弱，最早是在日冕的發射光譜中發現的）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+// lines: [wavelength nm, relative strength]
+const EL={
+  H:{name:'氫',lines:[[410.2,.35],[434.0,.5],[486.1,.75],[656.3,1]]},
+  He:{name:'氦',lines:[[388.9,.6],[447.1,.6],[471.3,.3],[492.2,.35],[501.6,.55],[587.6,1],[667.8,.6],[706.5,.45]]},
+  Na:{name:'鈉',lines:[[498.3,.15],[568.8,.3],[589.0,1],[589.6,.9],[615.4,.2],[616.1,.25]]},
+  Hg:{name:'汞',lines:[[404.7,.8],[407.8,.3],[435.8,1],[491.6,.2],[546.1,1],[577.0,.7],[579.1,.75],[623.4,.15],[690.7,.2]]},
+  Ne:{name:'氖',lines:[[540.1,.4],[585.2,.9],[588.2,.5],[594.5,.6],[597.6,.35],[603.0,.45],[607.4,.6],[609.6,.6],[614.3,.75],[616.4,.45],[621.7,.45],[626.6,.6],[633.4,.7],[638.3,.7],[640.2,1],[650.7,.8],[659.9,.55],[692.9,.6],[703.2,.75]]},
+  Ca:{name:'鈣',lines:[[393.4,1],[396.8,.95],[422.7,.7],[430.8,.4],[445.5,.3]]},
+  Fe:{name:'鐵',lines:[[404.6,.5],[426.0,.4],[438.4,.6],[440.5,.45],[495.8,.4],[516.7,.45],[527.0,.8],[532.8,.5],[537.1,.4],[561.6,.3]]},
+  Mg:{name:'鎂',lines:[[383.8,.5],[516.7,.7],[517.3,.8],[518.4,1]]}
+};
+const SET1=['H','He','Na','Hg','Ne'];
+const STAR_POOL=['H','He','Na','Ca','Fe','Mg'];
+const LMIN=380,LMAX=750;
+function wl2rgb(w){let r=0,g=0,b=0;
+  if(w>=380&&w<440){r=-(w-440)/60;b=1}else if(w>=440&&w<490){g=(w-440)/50;b=1}else if(w>=490&&w<510){g=1;b=-(w-510)/20}
+  else if(w>=510&&w<580){r=(w-510)/70;g=1}else if(w>=580&&w<645){r=1;g=-(w-645)/65}else if(w>=645&&w<=780){r=1}
+  let f=0;if(w>=380&&w<420)f=.3+.7*(w-380)/40;else if(w>=420&&w<=700)f=1;else if(w>700&&w<=780)f=.3+.7*(780-w)/80;
+  return [r,g,b].map(v=>Math.round(255*Math.pow(v*f,.8)));}
+function planckRel(l,T){const x=1.4388e7/(l*T);return 1/(Math.pow(l,5)*Math.expm1(x));}
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+
+// generic strip renderer. type: 'cont' | 'emis' | 'abs'
+function drawStrip(x,X0,Y0,W,H,type,els,T,opt={}){
+  const X=l=>X0+(l-LMIN)/(LMAX-LMIN)*W;
+  if(type==='emis'){x.fillStyle='#000';x.fillRect(X0,Y0,W,H);
+    els.forEach(e=>EL[e].lines.forEach(([l,s])=>{if(l<LMIN||l>LMAX)return;const [r,g,b]=wl2rgb(l);x.fillStyle=`rgba(${r},${g},${b},${.35+.65*s})`;x.fillRect(X(l)-1.3,Y0,2.6,H);
+      x.fillStyle=`rgba(${r},${g},${b},${.15*s})`;x.fillRect(X(l)-4,Y0,8,H);}));}
+  else{const pk=T?Math.max(...Array.from({length:38},(_,i)=>planckRel(LMIN+i*10,T))):1;
+    for(let px=0;px<W;px++){const l=LMIN+px/W*(LMAX-LMIN);const [r,g,b]=wl2rgb(l);let k=T?Math.pow(planckRel(l,T)/pk,.55):1;k=Math.min(1,k);
+      x.fillStyle=`rgb(${r*k|0},${g*k|0},${b*k|0})`;x.fillRect(X0+px,Y0,1.5,H);}
+    if(type==='abs')els.forEach(e=>EL[e].lines.forEach(([l,s])=>{if(l<LMIN||l>LMAX)return;x.fillStyle=`rgba(0,0,0,${.55+.45*s})`;x.fillRect(X(l)-1.2,Y0,2.4,H);}));}
+  if(opt.ticks){x.fillStyle='#6b7893';x.font='10.5px "JetBrains Mono"';x.textAlign='center';for(let l=400;l<=750;l+=50){x.fillRect(X(l),Y0+H,1,4);x.fillText(l,X(l),Y0+H+15);}}
+}
+
+// ---------- PANEL 1 ----------
+const st={src:'cont',el:'H',T:3000,refMode:'emis',hx1:null,hx2:null};
+const elSeg=$('elSeg');SET1.forEach(k=>{const b=document.createElement('button');b.dataset.e=k;b.textContent=EL[k].name;b.setAttribute('aria-pressed',k===st.el);b.onclick=()=>{st.el=k;elSeg.querySelectorAll('button').forEach(z=>z.setAttribute('aria-pressed',z.dataset.e===k));draw1();};elSeg.appendChild(b);});
+$('srcSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.src=b.dataset.s;$('srcSeg').querySelectorAll('button').forEach(z=>z.setAttribute('aria-pressed',z===b));draw1();});
+$('sT').oninput=e=>{st.T=+e.target.value;draw1();};
+function draw1(){
+  const els=st.src==='cont'?[]:[st.el];
+  $('elSeg').style.opacity=st.src==='cont'?.4:1;$('tempCtl').style.opacity=st.src==='emis'?.4:1;
+  $('vT').textContent=st.T+' K';
+  const nm={cont:'白熾燈泡 → 連續光譜',emis:`加熱的${EL[st.el].name}氣體 → 發射光譜`,abs:`白光穿過${EL[st.el].name}氣體 → 吸收光譜`}[st.src];$('srcName').textContent=nm;
+  const ex={cont:`高溫燈絲發出所有波長的光，經過三稜鏡展開成彩虹般<b>連續</b>的光譜。溫度越高，藍紫色的部分越亮。`,
+    emis:`加熱的${EL[st.el].name}氣體只發出幾個特定波長的光，屏幕上只有幾條<b>亮線</b>，其餘是黑的。`,
+    abs:`白光通過較冷的${EL[st.el].name}氣體，特定波長被吸收，連續光譜上出現<b>暗線</b>——位置和${EL[st.el].name}的發射亮線完全一樣。`}[st.src];$('ex1').innerHTML=ex;
+  // setup diagram
+  const {x,w,h}=fit($('setup'));x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const sy=h*.5,bulbX=w*.08,gasX=w*.24,prX=w*.5,scrX=w*.9;
+  // source
+  if(st.src==='emis'){const g=x.createRadialGradient(bulbX+18,sy,2,bulbX+18,sy,34);const [r,gg,b]=wl2rgb(EL[st.el].lines.reduce((a,c)=>c[1]>a[1]?c:a)[0]);
+    g.addColorStop(0,`rgba(${r},${gg},${b},.95)`);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.beginPath();x.arc(bulbX+18,sy,34,0,7);x.fill();
+    x.fillStyle='#c9d2dc';x.font='11.5px "Noto Sans TC"';x.textAlign='center';x.fillText(`加熱的${EL[st.el].name}`,bulbX+18,sy+50);}
+  else{const g=x.createRadialGradient(bulbX+18,sy,2,bulbX+18,sy,28);g.addColorStop(0,'#fffbe8');g.addColorStop(1,'rgba(255,230,160,0)');x.fillStyle=g;x.beginPath();x.arc(bulbX+18,sy,28,0,7);x.fill();
+    x.fillStyle='#8a6a3a';x.fillRect(bulbX+10,sy+16,16,14);x.fillStyle='#c9d2dc';x.font='11.5px "Noto Sans TC"';x.textAlign='center';x.fillText('白熾燈泡',bulbX+18,sy+46);}
+  if(st.src==='abs'){x.fillStyle='rgba(120,200,255,.18)';x.beginPath();x.arc(gasX,sy,24,0,7);x.fill();x.strokeStyle='rgba(120,200,255,.4)';x.stroke();
+    x.fillStyle='#9fd8ff';x.font='11.5px "Noto Sans TC"';x.textAlign='center';x.fillText(`低溫${EL[st.el].name}氣體`,gasX,sy+42);}
+  // beam
+  x.strokeStyle=st.src==='emis'?'rgba(255,220,240,.5)':'rgba(255,250,230,.6)';x.lineWidth=5;x.beginPath();x.moveTo(bulbX+40,sy);x.lineTo(prX-22,sy);x.stroke();
+  // prism
+  const ps=Math.min(54,h*.24);x.fillStyle='rgba(180,220,255,.16)';x.strokeStyle='rgba(200,230,255,.6)';x.lineWidth=1.5;x.beginPath();x.moveTo(prX,sy-ps);x.lineTo(prX+ps*.95,sy+ps*.65);x.lineTo(prX-ps*.95,sy+ps*.65);x.closePath();x.fill();x.stroke();
+  x.fillStyle='#9fb0cc';x.font='11px "Noto Sans TC"';x.textAlign='center';x.fillText('三稜鏡',prX,sy+ps*.65+16);
+  // fan
+  const top=h*.12,bot=h*.88;const els2=st.src==='cont'?[]:[st.el];
+  const ybyl=l=>top+(LMAX-l)/(LMAX-LMIN)*(bot-top); // red at top? -> red bends least: put red top
+  if(st.src==='emis'){EL[st.el].lines.forEach(([l,s])=>{if(l<LMIN||l>LMAX)return;const [r,g,b]=wl2rgb(l);x.strokeStyle=`rgba(${r},${g},${b},${.4+.6*s})`;x.lineWidth=1.6;x.beginPath();x.moveTo(prX+10,sy);x.lineTo(scrX,ybyl(l));x.stroke();});}
+  else{for(let l=LMIN;l<=LMAX;l+=3){const [r,g,b]=wl2rgb(l);let a=.35;if(st.src==='abs'&&EL[st.el].lines.some(([q])=>Math.abs(q-l)<2))a=0;x.strokeStyle=`rgba(${r},${g},${b},${a})`;x.lineWidth=1.2;x.beginPath();x.moveTo(prX+10,sy);x.lineTo(scrX,ybyl(l));x.stroke();}}
+  // screen (vertical strip)
+  x.save();x.translate(scrX,bot);x.rotate(-Math.PI/2);drawStrip(x,0,0,bot-top,14,st.src,els2,st.src==='emis'?null:st.T);x.restore();
+  x.fillStyle='#9fb0cc';x.textAlign='center';x.fillText('屏幕',scrX+7,bot+16);
+  // strip
+  const s=fit($('strip'));s.x.fillStyle='#04060b';s.x.fillRect(0,0,s.w,s.h);
+  const M=14;drawStrip(s.x,M,8,s.w-2*M,s.h-36,st.src,els2,st.src==='emis'?null:st.T,{ticks:true});
+  s.x.fillStyle='#6b7893';s.x.font='10.5px "Noto Sans TC"';s.x.textAlign='right';s.x.fillText('nm',s.w-4,s.h-6);
+  if(st.hx1!=null){const l=LMIN+(st.hx1-M)/(s.w-2*M)*(LMAX-LMIN);if(l>=LMIN&&l<=LMAX){s.x.strokeStyle='#fff';s.x.lineWidth=1;s.x.beginPath();s.x.moveTo(st.hx1,4);s.x.lineTo(st.hx1,s.h-28);s.x.stroke();
+    let near='';if(st.src!=='cont'){const L2=EL[st.el].lines.reduce((a,c)=>Math.abs(c[0]-l)<Math.abs(a[0]-l)?c:a);if(Math.abs(L2[0]-l)<4)near=`・${EL[st.el].name} 譜線 ${L2[0]} nm`;}
+    $('hov1').textContent=`λ ≈ ${Math.round(l)} nm${near}`;}}
+}
+$('strip').addEventListener('pointermove',e=>{st.hx1=e.offsetX;draw1();});$('strip').addEventListener('pointerdown',e=>{st.hx1=e.offsetX;draw1();});
+
+// ---------- PANEL 2 ----------
+const REF=['H','He','Hg','Na','Ne'];
+$('refSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.refMode=b.dataset.m;$('refSeg').querySelectorAll('button').forEach(z=>z.setAttribute('aria-pressed',z===b));draw2();});
+function draw2(){const {x,w,h}=fit($('refs'));x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const L=46,R=12,T=10,gap=8,rows=REF.length,rh=(h-T-34-gap*(rows-1))/rows;
+  REF.forEach((k,i)=>{const y=T+i*(rh+gap);drawStrip(x,L,y,w-L-R,rh,st.refMode,[k],st.refMode==='abs'?null:null,{ticks:i===rows-1});
+    x.fillStyle='#e8edf6';x.font='bold 15px "Noto Sans TC"';x.textAlign='center';x.fillText(EL[k].name,L/2,y+rh/2+5);});
+  if(st.hx2!=null){const l=LMIN+(st.hx2-L)/(w-L-R)*(LMAX-LMIN);if(l>=LMIN&&l<=LMAX){x.strokeStyle='rgba(255,255,255,.8)';x.setLineDash([3,3]);x.beginPath();x.moveTo(st.hx2,T);x.lineTo(st.hx2,h-30);x.stroke();x.setLineDash([]);
+    const hits=REF.map(k=>{const c=EL[k].lines.find(([q])=>Math.abs(q-l)<2.5);return c?`${EL[k].name} ${c[0]}`:null;}).filter(Boolean);
+    $('hov2').textContent=`λ ≈ ${Math.round(l)} nm`+(hits.length?`・${hits.join('、')} nm`:'');}}
+}
+$('refs').addEventListener('pointermove',e=>{st.hx2=e.offsetX;draw2();});$('refs').addEventListener('pointerdown',e=>{st.hx2=e.offsetX;draw2();});
+
+// ---------- PANEL 3 ----------
+const game={answer:[],sun:false,right:0,total:0,checked:false};
+const checks=$('checks');STAR_POOL.forEach(k=>{const l=document.createElement('label');l.innerHTML=`<input type="checkbox" value="${k}">${EL[k].name}`;checks.appendChild(l);});
+function newStar(){game.sun=false;game.checked=false;const n=1+Math.floor(Math.random()*3);const pool=[...STAR_POOL];game.answer=[];
+  while(game.answer.length<n){game.answer.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);}
+  game.T=4000+Math.floor(Math.random()*6)*1000;
+  checks.querySelectorAll('input').forEach(i=>{i.checked=false;i.disabled=false;});$('res').innerHTML='';$('starTitle').textContent=`一顆神秘恆星的光譜（表面約 ${game.T} K）`;draw3();}
+function showSun(){game.sun=true;game.answer=['H','Na','Ca','Fe','Mg'];game.T=5800;game.checked=true;
+  checks.querySelectorAll('input').forEach(i=>{i.checked=game.answer.includes(i.value);i.disabled=true;});
+  $('starTitle').textContent='太陽光譜（夫朗和斐譜線，簡化）';
+  $('res').innerHTML='太陽的可見光暗線主要來自<b style="color:var(--amber)">氫、鈉、鈣、鐵、鎂</b>。氫的 656 nm（紅）、486 nm（藍綠）很明顯；鈉的 589 nm 是一對靠很近的暗線。按「換一顆恆星」繼續練習。';draw3();}
+function draw3(){const s=fit($('star'));s.x.fillStyle='#04060b';s.x.fillRect(0,0,s.w,s.h);drawStrip(s.x,14,8,s.w-28,s.h-36,'abs',game.answer,game.T,{ticks:true});
+  if(game.sun){s.x.fillStyle='#ffcf6b';s.x.font='10px "JetBrains Mono"';s.x.textAlign='center';[['C',656.3],['D',589.3],['F',486.1],['G',430.8],['H',396.8],['b',517.5],['E',527]].forEach(([n,l])=>{const X=14+(l-LMIN)/(LMAX-LMIN)*(s.w-28);s.x.fillText(n,X,s.h-34+0);});}
+  const r=fit($('starRef'));r.x.fillStyle='#04060b';r.x.fillRect(0,0,r.w,r.h);const L=46,R=14,T=8,gap=6,rows=STAR_POOL.length,rh=(r.h-T-30-gap*(rows-1))/rows;
+  STAR_POOL.forEach((k,i)=>{const y=T+i*(rh+gap);drawStrip(r.x,L,y,r.w-L-R,rh,'abs',[k],null,{ticks:i===rows-1});
+    r.x.fillStyle=game.checked&&game.answer.includes(k)?'#7dffc4':'#e8edf6';r.x.font='bold 14px "Noto Sans TC"';r.x.textAlign='center';r.x.fillText(EL[k].name,L/2,y+rh/2+5);});}
+$('check').onclick=()=>{if(game.sun)return;const pick=[...checks.querySelectorAll('input:checked')].map(i=>i.value);
+  const ok=pick.length===game.answer.length&&pick.every(p=>game.answer.includes(p));
+  if(!game.checked){game.total++;if(ok)game.right++;}game.checked=true;
+  const miss=game.answer.filter(a=>!pick.includes(a)).map(a=>EL[a].name),extra=pick.filter(p=>!game.answer.includes(p)).map(a=>EL[a].name);
+  $('res').innerHTML=ok?`<span class="ok">✔ 答對了！這顆恆星外層有 ${game.answer.map(a=>EL[a].name).join('、')}。</span>`:
+    `<span class="ng">✘ 還不對。</span>${miss.length?`漏掉：${miss.join('、')}。`:''}${extra.length?`不該選：${extra.join('、')}（它的暗線位置在恆星光譜裡找不到）。`:''}正確答案：${game.answer.map(a=>EL[a].name).join('、')}`;
+  $('score').textContent=`答對 ${game.right} / ${game.total}`;draw3();};
+$('next').onclick=newStar;$('sun').onclick=showSun;
+
+// ---------- tabs ----------
+const tabs=[['tab1','p1',draw1],['tab2','p2',draw2],['tab3','p3',draw3]];
+tabs.forEach(([t,p,fn])=>$(t).onclick=()=>{tabs.forEach(([t2,p2])=>{$(t2).setAttribute('aria-selected',t2===t);$(p2).hidden=p2!==p;});fn();});
+addEventListener('resize',()=>{draw1();if(!$('p2').hidden)draw2();if(!$('p3').hidden)draw3();});
+draw1();newStar();
+})();
+</script>
+</body>
+</html>

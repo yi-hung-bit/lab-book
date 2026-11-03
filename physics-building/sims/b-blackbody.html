@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黑體輻射</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffb35c;--cyan:#43d6ff;--phos:#7dffc4;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,179,92,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:66ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:18px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted);font-family:"JetBrains Mono",monospace}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;position:relative}
+canvas{display:block;width:100%;touch-action:none}
+#chart{height:360px}
+@media(max-width:560px){#chart{height:280px}}
+.ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.ro{background:var(--panel2);padding:11px 13px}
+.ro .k{font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+.ro .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:19px;margin-top:2px;line-height:1.15}
+.ro .u{font-size:12px;color:var(--dim);font-weight:400}
+.ro.big{grid-column:1/-1;display:flex;align-items:center;gap:14px}
+.swatch{width:58px;height:58px;border-radius:50%;flex:none;border:1px solid #333}
+.ctl{margin-bottom:14px}
+.ctl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.ctl label{font-size:13.5px;font-weight:500}
+.ctl .val{font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--acc)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;background:#26314a;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);border:3px solid #0c1322;box-shadow:0 0 0 1px var(--acc);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--acc);border:3px solid #0c1322;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc);color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#1d1205;font-weight:700}
+button.primary:hover{color:#1d1205;filter:brightness(1.08)}
+.chips button{padding:5px 10px;font-size:12.5px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 14px}
+.toggles{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.tg{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--muted);cursor:pointer}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;padding:0 16px 12px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px}
+.note{margin-top:14px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.note code{font-family:"JetBrains Mono",monospace;color:var(--txt)}
+.qcard{margin-top:16px}
+.qcard h3{font-size:15px;margin-bottom:6px}
+.ladder{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media(max-width:560px){.ladder{grid-template-columns:1fr}}
+#lad{height:200px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">6-1 · Thermal Radiation</div>
+  <h1>黑體輻射：普朗克的能量量子化</h1>
+  <p class="lede">任何物體都會發出電磁波，強度隨波長的分布只由溫度決定。調整溫度看曲線怎麼變，再打開「古典物理預測」，看看 19 世紀末的理論在短波長錯得多離譜。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">輻射強度 − 波長</span><span class="n" id="hover">在圖上移動可讀數值</span></div>
+      <div class="box"><canvas id="chart" aria-label="黑體輻射強度對波長的曲線"></canvas></div>
+      <div class="legend">
+        <span><i style="background:var(--acc)"></i>目前溫度（普朗克）</span>
+        <span><i style="background:var(--red);opacity:.9"></i>古典物理預測（瑞立－京士）</span>
+        <span><i style="background:#9aa6c0"></i>釘選的曲線</span>
+      </div>
+    </section>
+
+    <section class="card"><div class="pad">
+      <div class="ro-grid">
+        <div class="ro big"><div class="swatch" id="sw"></div><div><div class="k">看起來的顏色</div><div class="v" id="colName">—</div></div></div>
+        <div class="ro"><div class="k">峰值波長 λ<sub>max</sub></div><div class="v" id="peak">—</div></div>
+        <div class="ro"><div class="k">可見光所佔比例</div><div class="v" id="vis">—</div></div>
+        <div class="ro"><div class="k">總輻射功率（與太陽表面比）</div><div class="v" id="pow">—</div></div>
+        <div class="ro"><div class="k">峰值落在</div><div class="v" id="band">—</div></div>
+      </div>
+
+      <div class="ctl">
+        <div class="row"><label for="sT">溫度 T</label><span class="val" id="vT"></span></div>
+        <input type="range" id="sT" min="0" max="1000" step="1" value="0">
+        <div class="chips" id="presets"></div>
+      </div>
+
+      <div class="btns">
+        <button class="primary" id="pin">📌 釘選這條曲線</button>
+        <button id="clear">清除釘選</button>
+        <button id="auto">波長軸：0–3000 nm</button>
+      </div>
+
+      <div class="toggles">
+        <label class="tg"><input type="checkbox" id="tRJ">顯示古典物理預測</label>
+        <label class="tg"><input type="checkbox" id="tVis" checked>顯示可見光波段</label>
+        <label class="tg"><input type="checkbox" id="tNorm">每條曲線各自縮放到相同高度（比較形狀）</label>
+      </div>
+
+      <div class="note" id="explain"></div>
+    </div></section>
+  </div>
+
+  <section class="card qcard"><div class="pad">
+    <h3>普朗克的關鍵假設：振盪能量只能一階一階地改變</h3>
+    <div class="ladder">
+      <div>
+        <p style="font-size:13.5px;color:var(--muted)">物體內帶電質點的振盪能量只能是 <b style="color:var(--acc);font-family:'JetBrains Mono',monospace">E = nhf</b>（n = 0, 1, 2, …）。頻率越高，每一階的能量 hf 越大；溫度提供的熱能（約 kT）不夠爬上第一階時，這種高頻振盪幾乎不會被激發——於是短波長的輻射被壓下來，古典理論的「無限大」就消失了。</p>
+        <div class="ctl" style="margin-top:12px">
+          <div class="row"><label for="sF">振盪對應的波長</label><span class="val" id="vF"></span></div>
+          <input type="range" id="sF" min="200" max="3000" step="10" value="500">
+        </div>
+        <p style="font-size:13px;color:var(--muted)" id="ladTxt"></p>
+      </div>
+      <div class="box" style="margin:0"><canvas id="lad" aria-label="能階階梯"></canvas></div>
+    </div>
+  </div></section>
+
+  <footer>
+    <b>教學提示：</b>溫度升高時，曲線整體變高（總功率 ∝ T⁴），峰值往短波長移動（λ<sub>max</sub> = 2.898×10⁶ nm·K ÷ T）。燈絲約 2800 K，峰值在紅外線，所以鎢絲燈大部分能量變成熱；太陽表面約 5800 K，峰值剛好在可見光。古典預測在長波長和實驗吻合，但在短波長趨向無限大（紫外災變），這正是普朗克在 1900 年提出能量量子化的動機。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const h=6.62607015e-34,c=299792458,k=1.380649e-23,WIEN=2.897771955e6;
+const $=id=>document.getElementById(id);
+const sT=$('sT'),chart=$('chart'),ctx=chart.getContext('2d');
+const TMIN=300,TMAX=12000;
+const tFromS=s=>TMIN*Math.pow(TMAX/TMIN,s/1000);
+const sFromT=t=>1000*Math.log(t/TMIN)/Math.log(TMAX/TMIN);
+const st={T:5800,rj:false,vis:true,norm:false,pins:[],xmax:3000,autoX:false,hx:null};
+const PRESETS=[["人體",310],["電爐",1000],["蠟燭",1900],["鎢絲燈",2800],["太陽表面",5800],["藍色恆星",10000]];
+const PINCOL=['#9aa6c0','#7dd3fc','#c4b5fd','#86efac','#fda4af'];
+
+function planck(lnm,T){const l=lnm*1e-9;const x=h*c/(l*k*T);if(x>700)return 0;return 2*h*c*c/Math.pow(l,5)/(Math.expm1(x));}
+function rj(lnm,T){const l=lnm*1e-9;return 2*c*k*T/Math.pow(l,4);}
+function peakVal(T){return planck(WIEN/T,T);}
+function visFrac(T){ // integrate visible / total (sigma T^4 / pi)
+  let s=0;for(let l=380;l<=750;l+=1)s+=planck(l+.5,T)*1e-9;
+  const tot=5.670374419e-8*Math.pow(T,4)/Math.PI;return s/tot;}
+function wl2rgb(w){let r=0,g=0,b=0;
+  if(w>=380&&w<440){r=-(w-440)/60;b=1}else if(w>=440&&w<490){g=(w-440)/50;b=1}else if(w>=490&&w<510){g=1;b=-(w-510)/20}
+  else if(w>=510&&w<580){r=(w-510)/70;g=1}else if(w>=580&&w<645){r=1;g=-(w-645)/65}else if(w>=645&&w<=780){r=1}
+  let f=0;if(w>=380&&w<420)f=.3+.7*(w-380)/40;else if(w>=420&&w<=700)f=1;else if(w>700&&w<=780)f=.3+.7*(780-w)/80;
+  return [r,g,b].map(v=>Math.round(255*Math.pow(v*f,.8)));}
+function bbColor(T){ // Tanner Helland approximation
+  const t=T/100;let r,g,b;
+  if(t<=66){r=255;g=99.4708025861*Math.log(t)-161.1195681661;b=t<=19?0:138.5177312231*Math.log(t-10)-305.0447927307;}
+  else{r=329.698727446*Math.pow(t-60,-.1332047592);g=288.1221695283*Math.pow(t-60,-.0755148492);b=255;}
+  const cl=v=>Math.max(0,Math.min(255,v));return [cl(r),cl(g),cl(b)];}
+function bandOf(l){if(l<380)return'紫外線';if(l<=750)return'可見光';return'紅外線';}
+function fmtT(T){return Math.round(T).toLocaleString()+' K';}
+
+function presets(){const p=$('presets');PRESETS.forEach(([n,T])=>{const b=document.createElement('button');b.textContent=n+' '+T.toLocaleString()+'K';b.onclick=()=>{setT(T);};p.appendChild(b);});}
+function setT(T){st.T=T;sT.value=sFromT(T);if(st.autoX)st.xmax=autoMax();update();}
+function autoMax(){const all=[st.T,...st.pins.map(p=>p.T)];const lo=Math.min(...all);return Math.min(40000,Math.max(1500,Math.ceil(WIEN/lo*4/500)*500));}
+
+function update(){
+  const T=st.T;$('vT').textContent=fmtT(T);
+  const lp=WIEN/T;
+  $('peak').innerHTML=(lp>=10000?(lp/1000).toFixed(1)+'<span class="u"> μm</span>':Math.round(lp)+'<span class="u"> nm</span>');
+  $('band').textContent=bandOf(lp);
+  const vf=visFrac(T);$('vis').textContent=(vf*100).toFixed(vf<.01?3:1)+' %';
+  const pr=Math.pow(T/5800,4);$('pow').textContent=pr<.01?pr.toExponential(1)+' 倍':pr.toFixed(pr<10?2:0)+' 倍';
+  // perceived colour (only glows if hot enough)
+  const [r,g,b]=bbColor(T);const glow=Math.min(1,Math.max(0,(T-700)/900));
+  $('sw').style.background=glow<.02?'#14171d':`rgba(${r|0},${g|0},${b|0},${glow})`;
+  $('sw').style.boxShadow=glow>.1?`0 0 ${10+20*glow}px rgba(${r|0},${g|0},${b|0},${glow*.8})`:'none';
+  $('colName').textContent=T<800?'不發可見光（只有紅外線）':T<1300?'暗紅':T<2200?'橘紅':T<3500?'橘黃':T<5000?'黃白':T<7000?'白':'藍白';
+  $('auto').textContent=st.autoX?'波長軸：自動':'波長軸：0–3000 nm';
+  explain();draw();
+}
+function explain(){
+  const T=st.T,lp=WIEN/T;let s='';
+  if(st.rj) s+=`<b>古典預測</b>在長波長和實驗相符，但波長越短越高、最後衝向無限大——物體會放出無限多能量，這顯然不可能。<br>`;
+  if(lp>750) s+=`目前峰值 ${lp>=10000?(lp/1000).toFixed(1)+' μm':Math.round(lp)+' nm'} 在<b>紅外線</b>，大部分輻射人眼看不到。`;
+  else if(lp>=380) s+=`目前峰值在<b>可見光</b>範圍內。`;
+  else s+=`目前峰值在<b>紫外線</b>，可見光中藍色比紅色強，所以看起來偏藍白。`;
+  s+=` 溫度提高為 2 倍，峰值波長變為一半，總功率變為 16 倍。`;
+  $('explain').innerHTML=s;
+}
+
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,hh=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(hh*d)){cv.width=Math.round(w*d);cv.height=Math.round(hh*d);}const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h:hh};}
+function niceStep(range,n){const raw=range/n;const p=Math.pow(10,Math.floor(Math.log10(raw)));const m=raw/p;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+
+function draw(){
+  const {x,w,h:H}=fit(chart);const L=46,R=12,Tp=14,B=34;const pw=w-L-R,ph=H-Tp-B;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,H);
+  const xmax=st.xmax;const X=l=>L+l/xmax*pw;
+  // scaling
+  const curves=[...st.pins.map((p,i)=>({T:p.T,col:PINCOL[i%PINCOL.length],pin:true})),{T:st.T,col:'#ffb35c',pin:false}];
+  const visibleMax=T=>{const lp=WIEN/T;return lp<=xmax?peakVal(T):planck(xmax,T);};
+  let ymax=Math.max(...curves.map(cv=>visibleMax(cv.T)))*1.12;
+  const Y=v=>Tp+ph-Math.min(1.25,v/ymax)*ph;
+  // visible band
+  if(st.vis){for(let l=380;l<750;l+=2){const [r,g,b]=wl2rgb(l);x.fillStyle=`rgba(${r},${g},${b},.16)`;x.fillRect(X(l),Tp,Math.max(1,X(l+2)-X(l)+.5),ph);}
+    x.fillStyle='rgba(255,255,255,.45)';x.font='11px "Noto Sans TC"';x.textAlign='center';if(X(750)-X(380)>34)x.fillText('可見光',(X(380)+X(750))/2,Tp+13);
+    x.textAlign='left';if(X(380)>L+40)x.fillText('紫外',L+6,Tp+13);x.textAlign='right';if(X(750)<w-R-40)x.fillText('紅外 →',w-R-6,Tp+13);}
+  // grid
+  x.strokeStyle='rgba(255,255,255,.07)';x.lineWidth=1;x.fillStyle='#6b7893';x.font='11px "JetBrains Mono"';x.textAlign='center';
+  const step=niceStep(xmax,6);for(let l=0;l<=xmax+1e-6;l+=step){x.beginPath();x.moveTo(X(l),Tp);x.lineTo(X(l),Tp+ph);x.stroke();x.fillText(l>=10000?(l/1000)+'μm':l,X(l),H-B+15);}
+  x.fillText('波長 λ（nm）',L+pw/2,H-4);
+  x.save();x.translate(13,Tp+ph/2);x.rotate(-Math.PI/2);x.fillText('輻射強度（相對）',0,0);x.restore();
+  x.strokeStyle='#3a4660';x.beginPath();x.moveTo(L,Tp);x.lineTo(L,Tp+ph);x.lineTo(L+pw,Tp+ph);x.stroke();
+  x.save();x.beginPath();x.rect(L,Tp-2,pw,ph+2);x.clip();
+  // RJ
+  if(st.rj){x.strokeStyle='#ff7a7a';x.setLineDash([6,5]);x.lineWidth=2;x.beginPath();let first=true;
+    for(let px=1;px<=pw;px++){const l=px/pw*xmax;let v=rj(l,st.T);let yy=Y(v);if(yy<Tp-5)yy=Tp-5;first?(x.moveTo(L+px,yy),first=false):x.lineTo(L+px,yy);}x.stroke();x.setLineDash([]);
+    x.fillStyle='#ff7a7a';x.font='12px "Noto Sans TC"';x.textAlign='left';
+    const lx=Math.max(L+8,Math.min(L+pw-180,X(WIEN/st.T*0.55)));x.fillText('古典預測 → 衝向無限大',lx,Tp+30);}
+  // curves
+  curves.forEach(cv=>{const n=st.norm?visibleMax(cv.T)*1.12/ymax:1;x.strokeStyle=cv.col;x.lineWidth=cv.pin?1.6:2.6;
+    if(!cv.pin){x.shadowColor='rgba(255,179,92,.5)';x.shadowBlur=8;}
+    x.beginPath();for(let px=0;px<=pw;px++){const l=Math.max(1,px/pw*xmax);const v=planck(l,cv.T)/n;const yy=Y(v);px===0?x.moveTo(L+px,yy):x.lineTo(L+px,yy);}x.stroke();x.shadowBlur=0;
+    const lp=WIEN/cv.T;if(lp<=xmax){const vv=peakVal(cv.T)/n;x.fillStyle=cv.col;x.beginPath();x.arc(X(lp),Y(vv),3.5,0,7);x.fill();
+      x.font='11px "JetBrains Mono"';x.textAlign='left';x.fillText(Math.round(cv.T)+'K',X(lp)+6,Y(vv)-6);}
+    else{x.fillStyle=cv.col;x.font='11px "JetBrains Mono"';x.textAlign='right';x.fillText(Math.round(cv.T)+'K（峰值在右方 →）',L+pw-6,Math.max(Tp+28,Y(planck(xmax,cv.T)/n)-6));}
+  });
+  // hover
+  if(st.hx!=null&&st.hx>=L&&st.hx<=L+pw){const l=(st.hx-L)/pw*xmax;x.strokeStyle='rgba(255,255,255,.35)';x.beginPath();x.moveTo(st.hx,Tp);x.lineTo(st.hx,Tp+ph);x.stroke();
+    const rel=planck(l,st.T)/peakVal(st.T);$('hover').textContent=`λ = ${Math.round(l)} nm（${bandOf(l)}）・強度 = 峰值的 ${(rel*100).toFixed(1)}%`;}
+  x.restore();
+}
+function setHover(e){const r=chart.getBoundingClientRect();st.hx=e.clientX-r.left;draw();}
+chart.addEventListener('pointermove',setHover);chart.addEventListener('pointerdown',setHover);
+chart.addEventListener('pointerleave',()=>{st.hx=null;$('hover').textContent='在圖上移動可讀數值';draw();});
+
+sT.addEventListener('input',()=>{st.T=tFromS(+sT.value);if(st.autoX)st.xmax=autoMax();update();});
+$('tRJ').onchange=e=>{st.rj=e.target.checked;update();};
+$('tVis').onchange=e=>{st.vis=e.target.checked;draw();};
+$('tNorm').onchange=e=>{st.norm=e.target.checked;draw();};
+$('pin').onclick=()=>{if(st.pins.length>=5)st.pins.shift();st.pins.push({T:st.T});if(st.autoX)st.xmax=autoMax();update();};
+$('clear').onclick=()=>{st.pins=[];if(st.autoX)st.xmax=autoMax();update();};
+$('auto').onclick=()=>{st.autoX=!st.autoX;st.xmax=st.autoX?autoMax():3000;update();};
+addEventListener('resize',()=>{draw();drawLad();});
+
+// ---- energy ladder ----
+const sF=$('sF'),lad=$('lad');
+function drawLad(){
+  const lnm=+sF.value;const f=c/(lnm*1e-9);const eStep=h*f;const kT=k*st.T;const ratio=eStep/kT;
+  $('vF').textContent=lnm+' nm';
+  const pop=Math.exp(-ratio); // Boltzmann weight of n=1 relative to n=0
+  $('ladTxt').innerHTML=`每一階 hf = <b style="color:var(--acc)">${(eStep/1.602e-19).toFixed(2)} eV</b>，熱能約 kT = ${(kT/1.602e-19).toFixed(3)} eV（T = ${fmtT(st.T)}）。<br>第一階比基態少見約 ${ratio>40?'10^'+Math.round(ratio/Math.LN10):(1/pop).toFixed(pop<.01?0:1)} 倍${ratio>8?'——幾乎不會被激發，這個波長的輻射很弱。':ratio>1.5?'——偶爾被激發。':'——很容易被激發，接近古典的連續情形。'}`;
+  const {x,w,h:H}=fit(lad);x.fillStyle='#04060b';x.fillRect(0,0,w,H);
+  const maxE=Math.max(eStep*5.5,kT*3);const Y=E=>H-18-E/maxE*(H-36);
+  // thermal band
+  x.fillStyle='rgba(255,179,92,.13)';x.fillRect(0,Y(kT),w,Y(0)-Y(kT));
+  x.fillStyle='#ffb35c';x.font='11px "Noto Sans TC"';x.textAlign='right';x.fillText('熱能約 kT',w-8,Math.max(14,Y(kT)-4));
+  x.strokeStyle='#7dd3fc';x.lineWidth=2;x.textAlign='left';x.fillStyle='#9fb0cc';x.font='11px "JetBrains Mono"';
+  for(let n=0;n<=12;n++){const y=Y(n*eStep);if(y<8)break;x.beginPath();x.moveTo(40,y);x.lineTo(w*0.62,y);x.stroke();x.fillText('n='+n,6,y+4);}
+  // particles in levels (Boltzmann sample, deterministic count)
+  const N=24;let weights=[];for(let n=0;n<=8;n++)weights.push(Math.exp(-n*ratio));const Z=weights.reduce((a,b)=>a+b,0);
+  let placed=0;weights.forEach((wt,n)=>{let cnt=Math.round(N*wt/Z);if(n===0)cnt=Math.max(cnt,1);const y=Y(n*eStep);if(y<8)return;
+    for(let i=0;i<cnt&&placed<N;i++,placed++){x.fillStyle='#ffd27d';x.beginPath();x.arc(50+i*9%(w*0.55),y-5,3.2,0,7);x.fill();}});
+}
+sF.addEventListener('input',drawLad);
+
+presets();setT(5800);drawLad();
+const _u=update;sT.addEventListener('input',drawLad);
+document.querySelectorAll('#presets button').forEach(b=>b.addEventListener('click',drawLad));
+})();
+</script>
+</body>
+</html>

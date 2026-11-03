@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>波耳氫原子模型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:70ch;margin-top:6px;font-size:15px}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none;cursor:pointer}
+#atom,#levels{height:400px}
+@media(max-width:560px){#atom,#levels{height:320px}}
+#strip{height:96px;cursor:default}
+.ctlwrap{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctlwrap{grid-template-columns:1fr}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#4b3a7a 0%,#5a3b8a 47%,#7c3aed 49%,#3b82f6 54%,#10b981 59%,#facc15 63%,#ef4444 68%,#5a1414 72%,#2a0a0a 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.tg{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);cursor:pointer;margin-top:10px}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500;font-size:12px}
+td{font-family:"JetBrains Mono",monospace}
+td.zh{font-family:"Noto Sans TC",sans-serif}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.logbox{max-height:260px;overflow:auto}
+.big{font-family:"JetBrains Mono",monospace;font-size:22px;font-weight:700;color:var(--phos)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">6-5 · Bohr Model</div>
+  <h1>波耳氫原子模型：能階與躍遷</h1>
+  <p class="lede">電子只能待在特定的圓形軌道上，每個軌道對應一個能階 E<sub>n</sub> = −13.6 / n² eV。電子從高能階躍遷到低能階時放出光子，hf = E<sub>高</sub> − E<sub>低</sub>；吸收能量恰好等於能階差的光子，則躍遷到高能階。</p>
+
+  <div class="modebar" role="group" aria-label="模式">
+    <button type="button" data-m="emit" aria-pressed="true">① 放射光子</button>
+    <button type="button" data-m="absorb" aria-pressed="false">② 吸收光子</button>
+    <button type="button" data-m="cascade" aria-pressed="false">③ 連鎖掉落（範例 6-4）</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">軌道（示意）</span><span class="n" id="atomNote">點軌道讓電子躍遷</span></div>
+      <div class="box"><canvas id="atom" aria-label="氫原子軌道"></canvas></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">能階圖</span><span class="n" id="lvNote">點能階讓電子躍遷</span></div>
+      <div class="box"><canvas id="levels" aria-label="氫原子能階圖"></canvas></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <div class="head"><span class="t" id="stripTitle">記錄到的光譜（可見光 380–750 nm）</span><span class="n" id="stripNote"></span></div>
+    <div class="box"><canvas id="strip" aria-label="累積光譜"></canvas></div>
+  </section>
+
+  <div class="ctlwrap">
+    <section class="card"><div class="pad">
+      <!-- emit -->
+      <div id="cEmit">
+        <div class="lab">電子目前在 <b id="curN" style="color:var(--acc)">n = 1</b>。點選較高能階 → 以加熱或碰撞激發（不放光）；點選較低能階 → 放出光子。</div>
+        <div class="seg" id="lvBtns"></div>
+        <label class="tg"><input type="checkbox" id="tReal">軌道半徑依真實比例 r ∝ n²</label>
+        <label class="tg"><input type="checkbox" id="tZoom">能階圖改為真實能量比例（n ≥ 4 會擠在一起）</label>
+      </div>
+      <!-- absorb -->
+      <div id="cAbs" hidden>
+        <div class="lab">先讓電子待在哪一個能階？</div>
+        <div class="seg" id="startBtns"></div>
+        <div class="ctl" style="margin-top:12px">
+          <div class="r"><label for="sL">入射光子波長</label><span id="vL"></span></div>
+          <input type="range" id="sL" min="0" max="1000" value="700">
+          <div class="seg" style="margin-top:8px" id="lpre"></div>
+        </div>
+        <div class="seg" style="margin-top:12px">
+          <button class="primary" id="fire">射出一顆光子</button>
+          <button id="white">用白光照射（380–750 nm 掃一遍）</button>
+          <button id="restore">復原電子</button>
+        </div>
+      </div>
+      <!-- cascade -->
+      <div id="cCas" hidden>
+        <div class="lab">把電子激發到：</div>
+        <div class="seg" id="casBtns"></div>
+        <div class="seg" style="margin-top:12px">
+          <button class="primary" id="drop">激發並讓它自己掉回 n = 1</button>
+          <button id="drop20">快速重複 20 次</button>
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="big" id="found">0 / 0</span><span style="color:var(--muted);font-size:13.5px" id="foundTxt"></span></div>
+      </div>
+      <div class="seg" style="margin-top:14px"><button id="clearLog">清除光譜與紀錄</button></div>
+      <div class="note" id="explain"></div>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <div class="lab">躍遷紀錄</div>
+      <div class="logbox"><table><thead><tr><th>躍遷</th><th>光子能量</th><th>波長</th><th>波段</th></tr></thead><tbody id="log"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>可見光的四條氫譜線都是掉到 n = 2：6→2（410 nm）、5→2（434 nm）、4→2（486 nm）、3→2（656 nm）。掉到 n = 1 的光子能量大，屬於紫外線；掉到 n = 3 以上的光子能量小，屬於紅外線。從 n 開始往下掉，所有可能的躍遷組合共有 n(n−1)/2 種，例如 n = 4 有 6 種頻率。波耳的模型沒有說明「為什麼」只有這些軌道穩定，而是直接假設，再用能量守恆算出光譜，與實驗相當吻合。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const HC=1239.84,NMAX=6;
+const E=n=>-13.6/(n*n);
+const lamOf=(a,b)=>HC/Math.abs(E(a)-E(b));
+const SERIES={1:'萊曼系',2:'巴耳末系',3:'帕申系',4:'布拉克系',5:'蒲芬德系'};
+function band(l){return l<380?'紫外線':l>750?'紅外線':'可見光';}
+function wl2rgb(w){let r=0,g=0,b=0;
+  if(w>=380&&w<440){r=-(w-440)/60;b=1}else if(w>=440&&w<490){g=(w-440)/50;b=1}else if(w>=490&&w<510){g=1;b=-(w-510)/20}
+  else if(w>=510&&w<580){r=(w-510)/70;g=1}else if(w>=580&&w<645){r=1;g=-(w-645)/65}else if(w>=645&&w<=780){r=1}
+  let f=0;if(w>=380&&w<420)f=.3+.7*(w-380)/40;else if(w>=420&&w<=700)f=1;else if(w>700&&w<=780)f=.3+.7*(780-w)/80;
+  return [r,g,b].map(v=>Math.round(255*Math.pow(v*f,.8)));}
+function colOf(l){if(l<380)return'#c4a8ff';if(l>750)return'#b34a4a';const [r,g,b]=wl2rgb(l);return `rgb(${r},${g},${b})`;}
+
+const st={mode:'emit',n:1,ion:false,real:false,zoom:true,angle:0,anim:null,photons:[],queue:[],
+  rec:new Map(),absLines:new Set(),startN:2,casN:4,casFound:new Set(),busy:false,flash:null};
+const atom=$('atom'),lv=$('levels'),strip=$('strip');
+
+// ---------- geometry helpers ----------
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+function radius(n,maxR){if(st.real)return Math.max(3,maxR*n*n/36);return maxR*(.12+.88*(n-1)/(NMAX-1));}
+function lvY(e,h){const top=24,bot=h-26;let t;if(st.zoom){t=Math.sqrt(-e/13.6);}else t=-e/13.6;return top+t*(bot-top);}
+
+// ---------- transitions ----------
+function record(from,to){const key=from+'→'+to;const l=lamOf(from,to);if(!st.rec.has(key))st.rec.set(key,{from,to,l,dE:Math.abs(E(from)-E(to)),count:0});st.rec.get(key).count++;renderLog();}
+function jump(to,kind){ // kind: 'emit' | 'excite' | 'absorb'
+  if(st.anim||st.ion)return false;const from=st.n;if(to===from)return false;
+  st.anim={from,to,t:0,dur:st.fast?.14:.55,kind};
+  if(kind==='emit'){const l=lamOf(from,to);st.photons.push({out:true,l,t:0,ang:st.angle,from});record(from,to);}
+  return true;}
+function finishAnim(){const a=st.anim;st.n=a.to;st.anim=null;ui();
+  if(st.queue.length){const f=st.queue.shift();setTimeout(f,st.fast?30:(a.kind==='emit'?260:120));}}
+
+// ---------- absorb ----------
+const LMIN=60,LMAX=2000;
+const lFromS=s=>LMIN*Math.pow(LMAX/LMIN,s/1000),sFromL=l=>1000*Math.log(l/LMIN)/Math.log(LMAX/LMIN);
+function tryAbsorb(l,fromWhite){
+  if(st.anim||st.ion||st.pending)return 'busy';
+  const Eph=HC/l,n=st.n;
+  // ionization
+  if(Eph>=-E(n)){st.photons.push({out:false,l,t:0,ang:st.angle,hit:true});setTimeout(()=>{st.ion=true;st.ionT=0;ui();},350);return 'ion';}
+  for(let m=n+1;m<=40;m++){const lt=lamOf(n,m);if(Math.abs(lt-l)/lt<0.004&&m<=NMAX){
+      st.photons.push({out:false,l,t:0,ang:st.angle,hit:true});
+      if(fromWhite)st.absLines.add(Math.round(lt*10)/10);
+      st.pending=true;
+      setTimeout(()=>{st.pending=false;if(jump(m,'absorb')){const key=`吸收 ${n}→${m}`;if(!st.rec.has(key))st.rec.set(key,{from:n,to:m,l:lt,dE:Math.abs(E(n)-E(m)),count:0,abs:true});st.rec.get(key).count++;renderLog();
+        // spontaneous return after a moment
+        st.queue.push(()=>{setTimeout(()=>{if(!st.ion&&st.n===m){jump(n,'emit');}},fromWhite?150:900);});}},fromWhite?120:330);
+      return 'abs';}}
+  st.photons.push({out:false,l,t:0,ang:st.angle,hit:false});return 'pass';}
+let whiteTimer=null;
+function whiteLight(){if(whiteTimer||st.ion)return;st.absLines.clear();let l=380;const base=st.n;st.fast=true;let lastT=performance.now();
+  const lines=[];for(let m=base+1;m<=NMAX;m++)lines.push(lamOf(base,m));
+  whiteTimer=setInterval(()=>{const now=performance.now();const dt=Math.min(.1,(now-lastT)/1000);lastT=now;
+    if(st.n!==base||st.anim||st.pending||st.queue.length)return; // wait while excited
+    const nl=l+dt*90;const hit=lines.find(q=>q>l&&q<=nl);
+    if(hit){tryAbsorb(hit,true);l=hit+0.01;}else{if(Math.random()<.5)tryAbsorb(nl,true);l=nl;}
+    if(l>750){clearInterval(whiteTimer);whiteTimer=null;st.fast=false;ui();}drawStrip();},16);}
+// ---------- cascade ----------
+function cascadeOnce(fast){
+  if(st.busy||st.ion)return;st.busy=true;st.anim=null;st.queue=[];
+  st.fast=!!fast;
+  const start=st.casN;const goDown=()=>{if(st.n<=1){st.busy=false;if(fast&&fast.left>0){fast.left--;ui();setTimeout(()=>cascadeOnce(fast),40);}else{st.fast=false;ui();}return;}
+    const to=1+Math.floor(Math.random()*(st.n-1));const from=st.n;st.casFound.add(from+'→'+to);
+    jump(to,'emit');st.queue.push(goDown);ui();};
+  st.n=1;if(jump(start,'excite')){st.queue.push(goDown);}else{st.busy=false;}
+}
+
+// ---------- drawing ----------
+function drawAtom(dt){
+  const {x,w,h}=fit(atom);x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const cx=w/2,cy=h/2,maxR=Math.min(w,h)/2-18;
+  for(let n=1;n<=NMAX;n++){const r=radius(n,maxR);x.strokeStyle=n===st.n&&!st.anim?'rgba(255,209,102,.7)':'rgba(150,165,190,.35)';x.lineWidth=n===st.n?1.8:1.2;
+    x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();
+    if(r>10){x.fillStyle='#ff8fb6';x.font='bold 12px "JetBrains Mono"';x.textAlign='center';x.fillText(n,cx-r*Math.cos(Math.PI/4)-6,cy-r*Math.sin(Math.PI/4)-4);}}
+  // nucleus
+  x.fillStyle='#ff6b81';x.beginPath();x.arc(cx,cy,5,0,7);x.fill();x.fillStyle='#c9d2dc';x.font='10px "Noto Sans TC"';x.textAlign='center';x.fillText('原子核',cx,cy+18);
+  // electron
+  let r;if(st.anim){const a=st.anim;const k=Math.min(1,a.t/a.dur);const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;r=radius(a.from,maxR)+(radius(a.to,maxR)-radius(a.from,maxR))*e;}
+  else r=radius(st.n,maxR);
+  const n=st.anim?st.anim.to:st.n;st.angle+=dt*(2.2/Math.pow(n,1.2));
+  let ex=cx+r*Math.cos(st.angle),ey=cy+r*Math.sin(st.angle);
+  if(st.ion){st.ionT=(st.ionT||0)+dt;const R=r+st.ionT*140;ex=cx+R*Math.cos(st.angle);ey=cy+R*Math.sin(st.angle);
+    x.fillStyle='#ff9a9a';x.font='13px "Noto Sans TC"';x.fillText('電子脫離原子（游離）',cx,h-14);}
+  if(st.anim&&st.anim.kind==='excite'){x.fillStyle='#ffd166';x.font='13px "Noto Sans TC"';x.textAlign='center';x.fillText('⚡ 加熱／碰撞激發',cx,22);}
+  x.fillStyle='#5ab8ff';x.shadowColor='#5ab8ff';x.shadowBlur=10;x.beginPath();x.arc(ex,ey,6,0,7);x.fill();x.shadowBlur=0;
+  // photons
+  for(let i=st.photons.length-1;i>=0;i--){const p=st.photons[i];p.t+=dt;const col=colOf(p.l);
+    const L=Math.max(w,h);let px,py,dir;
+    if(p.out){const ang=p.ang;const d=radius(p.from,maxR)+p.t*260;px=cx+d*Math.cos(ang);py=cy+d*Math.sin(ang);dir=ang;if(d>L)st.photons.splice(i,1);}
+    else{const start=L*.7;let d=start-p.t*480;const minD=p.hit?radius(st.anim?st.anim.from:st.n,maxR):-start;if(p.hit&&d<=minD){st.photons.splice(i,1);continue;}if(d<-start){st.photons.splice(i,1);continue;}
+      const ang=Math.PI*1.08;px=cx+d*Math.cos(ang);py=cy+d*Math.sin(ang)*.6;dir=ang+Math.PI;}
+    x.strokeStyle=col;x.lineWidth=2;x.beginPath();const k=2*Math.PI/(5+Math.min(p.l,1900)/45);
+    for(let s=-22;s<=0;s++){const qx=px-Math.cos(dir)*(-s)*1,qy=py-Math.sin(dir)*(-s)*1,o=4*Math.sin(k*s+p.t*30);s===-22?x.moveTo(qx-Math.sin(dir)*o,qy+Math.cos(dir)*o):x.lineTo(qx-Math.sin(dir)*o,qy+Math.cos(dir)*o);}
+    x.stroke();if(p.out&&p.t<1.6){x.fillStyle=col;x.font='12px "JetBrains Mono"';x.textAlign='center';x.fillText(Math.round(p.l)+' nm',px,py-10);}}
+  if(st.anim){st.anim.t+=dt;if(st.anim.t>=st.anim.dur)finishAnim();}
+}
+function drawLevels(){
+  const {x,w,h}=fit(lv);x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const L=54,R=118;
+  // ionization line
+  const y0=lvY(0,h);x.strokeStyle='rgba(255,255,255,.25)';x.setLineDash([4,4]);x.beginPath();x.moveTo(L,y0);x.lineTo(w-R+60,y0);x.stroke();x.setLineDash([]);
+  x.fillStyle='#8492aa';x.font='11px "Noto Sans TC"';x.textAlign='left';x.fillText('E = 0（游離）',w-R+4,y0-4>10?y0-4:y0+12);
+  // recorded arrows
+  const arrs=[...st.rec.values()];arrs.forEach((r,i)=>{const xx=L+16+((i*23)%(w-L-R-30));const ya=lvY(E(r.from),h),yb=lvY(E(r.to),h);x.strokeStyle=colOf(r.l);x.lineWidth=2;x.globalAlpha=.8;
+    x.beginPath();x.moveTo(xx,ya);x.lineTo(xx,yb);x.stroke();const dir=yb>ya?1:-1;x.beginPath();x.moveTo(xx,yb);x.lineTo(xx-4,yb-6*dir);x.lineTo(xx+4,yb-6*dir);x.closePath();x.fillStyle=colOf(r.l);x.fill();x.globalAlpha=1;});
+  for(let n=1;n<=NMAX;n++){const y=lvY(E(n),h);const on=n===st.n&&!st.ion;x.strokeStyle=on?'#ffd166':'#9fb0cc';x.lineWidth=on?3:1.6;x.beginPath();x.moveTo(L,y);x.lineTo(w-R,y);x.stroke();
+    const lab=st.zoom||n<=3;
+    x.fillStyle=on?'#ffd166':'#c9d2dc';x.font='bold 12px "JetBrains Mono"';x.textAlign='right';if(lab)x.fillText('n='+n,L-8,y+4);else if(n===4)x.fillText('n≥4',L-8,y+4);
+    x.textAlign='left';x.font='11px "JetBrains Mono"';x.fillStyle='#8492aa';if(lab)x.fillText(E(n).toFixed(2)+' eV',w-R+6,y+4);}
+  if(!st.zoom){x.fillStyle='#5b6880';x.font='10px "JetBrains Mono"';x.textAlign='left';x.fillText('n=4,5,6: −0.85, −0.54, −0.38',L+4,lvY(E(3),h)+14);}
+  // electron dot
+  if(!st.ion){let y;if(st.anim){const a=st.anim;const k=Math.min(1,a.t/a.dur);y=lvY(E(a.from),h)+(lvY(E(a.to),h)-lvY(E(a.from),h))*k;}else y=lvY(E(st.n),h);
+    x.fillStyle='#5ab8ff';x.shadowColor='#5ab8ff';x.shadowBlur=8;x.beginPath();x.arc(w-R-10,y,6,0,7);x.fill();x.shadowBlur=0;}
+  x.save();x.translate(14,h/2);x.rotate(-Math.PI/2);x.fillStyle='#6b7893';x.font='11px "Noto Sans TC"';x.textAlign='center';x.fillText(st.zoom?'能量（上方放大，非等比例）':'能量（eV）',0,0);x.restore();
+}
+function drawStrip(){
+  const {x,w,h}=fit(strip);x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const M=50,X0=M,W=w-2*M,Y0=10,H=h-40,X=l=>X0+(l-380)/(370)*W;
+  const absMode=st.mode==='absorb';
+  if(absMode){for(let px=0;px<W;px++){const l=380+px/W*370;const [r,g,b]=wl2rgb(l);x.fillStyle=`rgb(${r},${g},${b})`;x.fillRect(X0+px,Y0,1.5,H);}
+    st.absLines.forEach(l=>{x.fillStyle='rgba(0,0,0,.92)';x.fillRect(X(l)-1.5,Y0,3,H);});}
+  else{x.fillStyle='#000';x.fillRect(X0,Y0,W,H);
+    [...st.rec.values()].filter(r=>!r.abs).forEach(r=>{if(r.l<380||r.l>750)return;const [R,G,B]=wl2rgb(r.l);const a=Math.min(1,.45+.12*r.count);x.fillStyle=`rgba(${R},${G},${B},${a})`;x.fillRect(X(r.l)-1.5,Y0,3,H);x.fillStyle=`rgba(${R},${G},${B},.18)`;x.fillRect(X(r.l)-5,Y0,10,H);});}
+  x.fillStyle='#6b7893';x.font='10.5px "JetBrains Mono"';x.textAlign='center';for(let l=400;l<=750;l+=50){x.fillRect(X(l),Y0+H,1,4);x.fillText(l,X(l),Y0+H+15);}
+  const recs=[...st.rec.values()].filter(r=>!r.abs);const uv=recs.filter(r=>r.l<380).length,ir=recs.filter(r=>r.l>750).length;
+  x.font='11px "Noto Sans TC"';x.fillStyle='#c4a8ff';x.fillText('紫外',M/2,Y0+H/2-2);x.fillText(absMode?'':uv+' 條',M/2,Y0+H/2+13);
+  x.fillStyle='#d47a7a';x.fillText('紅外',w-M/2,Y0+H/2-2);x.fillText(absMode?'':ir+' 條',w-M/2,Y0+H/2+13);
+  $('stripTitle').textContent=absMode?'吸收光譜（白光穿過氫原子後，可見光 380–750 nm）':'記錄到的發射光譜（可見光 380–750 nm）';
+  $('stripNote').textContent=absMode?(st.absLines.size?`暗線：${[...st.absLines].sort((a,b)=>a-b).map(l=>Math.round(l)).join('、')} nm`:''):'';
+}
+
+// ---------- UI ----------
+function renderLog(){const rows=[...st.rec.entries()].sort((a,b)=>b[1].dE-a[1].dE).map(([k,r])=>`<tr><td>${r.abs?'吸收 ':''}${r.from}→${r.to}${r.count>1?` <span style="color:#5b6880">×${r.count}</span>`:''}</td><td>${r.dE.toFixed(2)} eV</td><td><span class="sw" style="background:${colOf(r.l)}"></span>${r.l<1000?r.l.toFixed(1):Math.round(r.l)} nm</td><td class="zh">${band(r.l)}${!r.abs&&SERIES[Math.min(r.from,r.to)]?'・'+SERIES[Math.min(r.from,r.to)]:''}</td></tr>`);
+  $('log').innerHTML=rows.join('')||'<tr><td colspan="4" class="zh" style="color:#5b6880">尚無紀錄</td></tr>';drawStrip();}
+function mkBtns(id,from,to,on,cb){const el=$(id);el.innerHTML='';for(let n=from;n<=to;n++){const b=document.createElement('button');b.textContent='n = '+n;b.setAttribute('aria-pressed',n===on);b.onclick=()=>cb(n);el.appendChild(b);}}
+function ui(){
+  $('curN').textContent=st.ion?'已游離':'n = '+st.n;
+  mkBtns('lvBtns',1,NMAX,st.n,n=>{if(st.mode!=='emit')return;jump(n,n>st.n?'excite':'emit');});
+  mkBtns('startBtns',1,3,st.startN,n=>{st.startN=n;st.ion=false;st.anim=null;st.queue=[];st.n=n;ui();});
+  mkBtns('casBtns',2,NMAX,st.casN,n=>{st.casN=n;st.casFound.clear();ui();});
+  $('cEmit').hidden=st.mode!=='emit';$('cAbs').hidden=st.mode!=='absorb';$('cCas').hidden=st.mode!=='cascade';
+  const l=lFromS(+$('sL').value);const Eph=HC/l;$('vL').textContent=`${l<1000?l.toFixed(1):Math.round(l)} nm・${Eph.toFixed(2)} eV・${band(l)}`;
+  const tot=st.casN*(st.casN-1)/2;let f=0;st.casFound.forEach(k=>{const a=+k.split('→')[0];if(a<=st.casN)f++;});
+  $('found').textContent=`${f} / ${tot}`;$('foundTxt').textContent=`從 n = ${st.casN} 掉回基態，找到的不同光子頻率（理論上最多 n(n−1)/2 = ${tot} 種）`;
+  $('drop').disabled=$('drop20').disabled=st.busy;$('fire').disabled=st.ion;$('white').disabled=st.ion||!!whiteTimer;
+  explain();
+  $('atomNote').textContent=st.mode==='emit'?'點軌道讓電子躍遷':st.mode==='absorb'?'光子從左方射入':'看電子一階一階掉下來';
+  $('lvNote').textContent=st.mode==='emit'?'點能階讓電子躍遷':'';
+}
+function explain(){let s='';
+  if(st.ion){s='光子能量大於電子的束縛能（13.6/n² eV），電子直接脫離原子——這叫<b>游離</b>。按「復原電子」重新開始。';}
+  else if(st.mode==='emit'){const last=[...st.rec.values()].filter(r=>!r.abs).pop();
+    s=last?`剛才的躍遷 ${last.from}→${last.to}：ΔE = ${E(last.from).toFixed(2)} − (${E(last.to).toFixed(2)}) = <b>${last.dE.toFixed(2)} eV</b>，λ = 1240 / ΔE = <b>${last.l.toFixed(1)} nm</b>（${band(last.l)}）。`:'先點較高的能階把電子激發上去，再點較低的能階，看看放出什麼顏色的光。試著湊出氫的四條可見光譜線。';}
+  else if(st.mode==='absorb'){const n=st.n;const opts=[];for(let m=n+1;m<=NMAX;m++)opts.push(`${n}→${m}: ${lamOf(n,m).toFixed(1)} nm`);
+    s=`電子在 n = ${n}，只會吸收能量恰好等於能階差的光子：${opts.slice(0,4).join('；')}…。其他波長直接穿過。白光照射時，被吸收的波長在光譜上留下<b>暗線</b>（電子掉回時雖會再放出光子，但方向四散，原方向仍變暗）。`+(n===1?' 注意：n = 1 的電子吸收的都是紫外線，白光照射看不到可見光暗線。':'');}
+  else{s=`電子從 n = ${st.casN} 往下掉，每一步隨機選一個較低的能階。重複幾次，把所有可能的躍遷都找出來。`;}
+  $('explain').innerHTML=s;}
+
+// ---------- events ----------
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>{st.mode=b.dataset.m;document.querySelectorAll('.modebar button').forEach(z=>z.setAttribute('aria-pressed',z===b));
+  st.queue=[];st.anim=null;st.ion=false;st.busy=false;if(whiteTimer){clearInterval(whiteTimer);whiteTimer=null;}st.fast=false;st.pending=false;
+  if(st.mode==='absorb')st.n=st.startN;if(st.mode==='cascade')st.n=1;ui();drawStrip();});
+function pickAtom(e){if(st.mode!=='emit')return;const r=atom.getBoundingClientRect();const x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;const d=Math.hypot(x,y);
+  const maxR=Math.min(r.width,r.height)/2-18;let best=1,bd=1e9;for(let n=1;n<=NMAX;n++){const dd=Math.abs(radius(n,maxR)-d);if(dd<bd){bd=dd;best=n;}}jump(best,best>st.n?'excite':'emit');}
+function pickLv(e){if(st.mode!=='emit')return;const r=lv.getBoundingClientRect();const y=e.clientY-r.top;let best=1,bd=1e9;for(let n=1;n<=NMAX;n++){const dd=Math.abs(lvY(E(n),r.height)-y);if(dd<bd){bd=dd;best=n;}}jump(best,best>st.n?'excite':'emit');}
+atom.addEventListener('pointerdown',pickAtom);lv.addEventListener('pointerdown',pickLv);
+$('tReal').onchange=e=>st.real=e.target.checked;$('tZoom').onchange=e=>st.zoom=!e.target.checked;
+$('sL').oninput=ui;
+[['巴耳末 656',656.4],['486',486.2],['434',434.1],['410',410.3],['萊曼 121.6',121.6],['102.6',102.6],['帕申 1875',1875.6],['500（不吸收）',500]].forEach(([n,l])=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{$('sL').value=sFromL(l);ui();};$('lpre').appendChild(b);});
+$('fire').onclick=()=>{tryAbsorb(lFromS(+$('sL').value),false);};
+$('white').onclick=()=>{whiteLight();ui();};
+$('restore').onclick=()=>{if(whiteTimer){clearInterval(whiteTimer);whiteTimer=null;}st.fast=false;st.pending=false;st.ion=false;st.anim=null;st.queue=[];st.n=st.mode==='absorb'?st.startN:1;ui();};
+$('drop').onclick=()=>cascadeOnce(null);$('drop20').onclick=()=>cascadeOnce({left:19});
+$('clearLog').onclick=()=>{st.rec.clear();st.absLines.clear();st.casFound.clear();renderLog();ui();};
+
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;drawAtom(dt);drawLevels();requestAnimationFrame(frame);}
+addEventListener('resize',drawStrip);
+ui();renderLog();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

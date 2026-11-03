@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鋅板與驗電器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#43d6ff;--phos:#7dffc4;--amber:#ffcf6b;--red:#ff7a7a;--uv:#b794ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(183,148,255,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--uv);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:68ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:18px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:13px;color:var(--amber)}
+.box{margin:6px 14px 14px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%}
+#scene{height:400px}
+@media(max-width:560px){#scene{height:310px}}
+.group{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;background:var(--panel2)}
+.group h3{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:6px}
+.tg{display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer;padding:3px 0}
+.tg input{width:18px;height:18px;accent-color:var(--uv)}
+.tg small{color:var(--dim);font-family:"JetBrains Mono",monospace;font-size:12px}
+.ctl .row{display:flex;justify-content:space-between;margin-bottom:5px}
+.ctl label{font-size:13.5px;font-weight:500}.ctl .val{font-family:"JetBrains Mono",monospace;color:var(--uv)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;background:#26314a;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--uv);border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--uv);border:3px solid #0c1322;cursor:pointer}
+.btns{display:flex;gap:7px;flex-wrap:wrap}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:#1b2336;color:var(--txt);padding:7px 11px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--uv)}
+.ro{display:flex;gap:10px;align-items:baseline;justify-content:space-between;font-size:13.5px;color:var(--muted);padding:2px 0}
+.ro b{font-family:"JetBrains Mono",monospace;color:var(--txt);font-size:16px}
+.note{margin-top:4px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--amber);font-weight:500}
+.quiz{margin-top:16px}
+.quiz h3{font-size:15px;margin-bottom:6px}
+.quiz p{font-size:13.5px;color:var(--muted)}
+.quiz details{margin-top:8px;font-size:13.5px;color:var(--muted)}
+.quiz summary{cursor:pointer;color:var(--acc)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">6-2 · 範例 6-1</div>
+  <h1>鋅板與驗電器：哪一種光能打出電子？</h1>
+  <p class="lede">鋅板用導線接到驗電器，兩者底座絕緣。光源含紅外線、可見光、紫外線。鋅板放出光電子後會帶正電，驗電器的電子流向鋅板，金屬箔片帶正電而張開。試試在光源前放一片「只讓可見光通過」的玻璃。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">實驗裝置</span><span class="n" id="state"></span></div>
+      <div class="box"><canvas id="scene" aria-label="鋅板與驗電器動畫"></canvas></div>
+    </section>
+    <section class="card"><div class="pad">
+      <div class="group">
+        <h3>光源包含的成分</h3>
+        <label class="tg"><input type="checkbox" id="cIR" checked>紅外線 <small>約 1000 nm・1.2 eV</small></label>
+        <label class="tg"><input type="checkbox" id="cVIS" checked>可見光 <small>400–700 nm・1.8–3.1 eV</small></label>
+        <label class="tg"><input type="checkbox" id="cUV" checked>紫外線 <small>約 254 nm・4.9 eV</small></label>
+      </div>
+      <div class="group">
+        <label class="tg"><input type="checkbox" id="glass">放上特殊玻璃片（擋住紅外線與紫外線，只讓可見光通過）</label>
+      </div>
+      <div class="group ctl">
+        <div class="row"><label for="sI">光源強度</label><span class="val" id="vI"></span></div>
+        <input type="range" id="sI" min="0" max="100" value="60">
+        <div class="btns" style="margin-top:10px"><button id="lamp">💡 關燈</button></div>
+      </div>
+      <div class="group">
+        <h3>驗電器初始狀態（按下即重設）</h3>
+        <div class="btns"><button id="r0">中性</button><button id="rN">先帶負電</button><button id="rP">先帶正電</button></div>
+      </div>
+      <div class="group">
+        <div class="ro">鋅的功函數<b>4.3 eV</b></div>
+        <div class="ro">系統淨電荷<b id="q">0</b></div>
+        <div class="ro">已放出光電子<b id="ne">0</b></div>
+      </div>
+      <div class="note" id="explain"></div>
+    </div></section>
+  </div>
+
+  <section class="card quiz"><div class="pad">
+    <h3>想一想（課本範例 6-1、習題 4）</h3>
+    <p>(1) 放上玻璃片後箔片不張開，移開玻璃片後張開。讓鋅板產生光電效應的是哪一種電磁波？(2) 紅外線能不能讓鋅板產生光電效應？(3) 如果驗電器一開始帶負電，照紫外線後會發生什麼事？</p>
+    <details><summary>看參考答案</summary>
+      <p>(1) 紫外線。可見光能通過玻璃卻無法使箔片張開，表示可見光光子能量不足；能量更高的紫外線才行。(2) 不能，紅外線光子能量比可見光更低。(3) 鋅板上多餘的電子被打出，負電逐漸減少，箔片先合攏；繼續照射則轉為帶正電而再張開（但正電累積後會把光電子吸回去，張開程度有上限）。</p>
+    </details>
+  </div></section>
+
+  <footer>光子能量 E = 1240 / λ（eV，λ 以 nm 計）。鋅的功函數約 4.3 eV，對應底限波長約 288 nm，只有紫外線能打出電子。光源再強，若只有可見光和紅外線，也只是光子數目多，每顆光子仍然能量不足。</footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const W=4.3;
+const COMP=[{id:'cIR',name:'紅外線',E:1.24,col:'rgba(200,60,60,',lam:1000},{id:'cVIS',name:'可見光',E:2.4,col:'rgba(255,240,200,',lam:520},{id:'cUV',name:'紫外線',E:4.88,col:'rgba(183,148,255,',lam:254}];
+const st={Q:0,emitted:0,on:true,I:60,glass:false,ph:[],el:[],acc:0,t:0};
+const sc=$('scene');let G={};
+function layout(){const d=Math.min(2,devicePixelRatio||1);const w=sc.clientWidth,h=sc.clientHeight;sc.width=w*d;sc.height=h*d;
+  G={w,h,d,plateX:w*.5,plateTop:h*.22,plateH:h*.42,esX:w*.2,esTop:h*.3,lampX:w*.92,lampY:h*.42,glassX:w*.73};}
+function active(){return COMP.filter(c=>$(c.id).checked&&(!st.glass||c.id==='cVIS'));}
+function reach(c){return $(c.id).checked&&(!st.glass||c.id==='cVIS');}
+function step(dt){
+  st.t+=dt;
+  if(st.on&&st.I>0){const comps=COMP.filter(c=>$(c.id).checked);st.acc+=st.I*0.5*dt*comps.length;
+    while(st.acc>=1){st.acc-=1;const c=comps[Math.floor(Math.random()*comps.length)];if(!c)break;
+      st.ph.push({c,x:G.lampX-14,y:G.lampY+(Math.random()-.5)*30,ty:G.plateTop+10+Math.random()*(G.plateH-20),ph:Math.random()*6});}}
+  for(let i=st.ph.length-1;i>=0;i--){const p=st.ph[i];const dx=G.plateX+6-p.x,dy=p.ty-p.y;const L=Math.hypot(dx,dy);const sp=420*dt;
+    // glass absorbs IR & UV
+    if(st.glass&&p.c.id!=='cVIS'&&p.x>G.glassX&&p.x+dx/L*sp<=G.glassX){st.ph.splice(i,1);continue;}
+    if(L<sp){st.ph.splice(i,1);
+      if(p.c.E>W){ // emission probability reduced if plate positive (electrons pulled back)
+        const supp=st.Q>0?Math.max(0,1-st.Q/60):1;
+        if(Math.random()<0.6*supp){st.el.push({x:G.plateX+8,y:p.ty,vx:120+Math.random()*80,vy:(Math.random()-.5)*80,life:0,back:st.Q>0&&Math.random()<.25});st.Q+=1;st.emitted++;}
+        else if(st.Q>0&&Math.random()<.5){st.el.push({x:G.plateX+8,y:p.ty,vx:70,vy:(Math.random()-.5)*50,life:0,back:true});}
+      }
+      continue;}
+    p.x+=dx/L*sp;p.y+=dy/L*sp;}
+  for(let i=st.el.length-1;i>=0;i--){const e=st.el[i];e.life+=dt;
+    if(e.back){e.vx-=320*dt;}e.x+=e.vx*dt;e.y+=e.vy*dt;
+    if(e.back&&e.x<=G.plateX+8&&e.life>.1){st.el.splice(i,1);continue;}
+    if(e.x>G.w+10||e.life>3)st.el.splice(i,1);}
+  st.Q=Math.max(-80,Math.min(80,st.Q));
+}
+function draw(){
+  const x=sc.getContext('2d');x.setTransform(G.d,0,0,G.d,0,0);const {w,h}=G;x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  // table
+  x.fillStyle='#141b29';x.fillRect(0,h*.88,w,h*.12);
+  // plate stand
+  x.fillStyle='#6b4a3a';x.beginPath();x.ellipse(G.plateX,h*.88,28,7,0,0,7);x.fill();
+  x.fillStyle='#7d8a96';x.fillRect(G.plateX-2,G.plateTop+G.plateH,4,h*.88-G.plateTop-G.plateH);
+  // zinc plate (perspective)
+  x.fillStyle='#8e9aa6';x.beginPath();x.moveTo(G.plateX-8,G.plateTop+8);x.lineTo(G.plateX+8,G.plateTop);x.lineTo(G.plateX+8,G.plateTop+G.plateH-8);x.lineTo(G.plateX-8,G.plateTop+G.plateH);x.closePath();x.fill();
+  x.fillStyle='#c9d2dc';x.font='12px "Noto Sans TC"';x.textAlign='center';x.fillText('鋅板',G.plateX,G.plateTop-10);
+  // electroscope
+  const ex=G.esX,ballY=G.esTop,jarY=G.esTop+44,jarR=Math.min(w*.11,62);
+  x.fillStyle='#6b4a3a';x.beginPath();x.ellipse(ex,h*.88,30,7,0,0,7);x.fill();
+  x.fillStyle='#7d8a96';x.fillRect(ex-2,jarY+jarR,4,h*.88-jarY-jarR);
+  x.fillStyle='rgba(140,180,200,.12)';x.strokeStyle='rgba(160,200,220,.35)';x.beginPath();x.arc(ex,jarY+jarR*.55,jarR,0,7);x.fill();x.stroke();
+  x.strokeStyle='#c9d2dc';x.lineWidth=2;x.beginPath();x.moveTo(ex,ballY);x.lineTo(ex,jarY+jarR*.45);x.stroke();
+  // leaves
+  const ang=Math.min(.75,Math.sqrt(Math.abs(st.Q)/80)*.75);const ly=jarY+jarR*.45,ll=jarR*.75;
+  x.strokeStyle='#e8c15a';x.lineWidth=3;
+  [-1,1].forEach(s=>{x.beginPath();x.moveTo(ex,ly);x.lineTo(ex+s*Math.sin(ang)*ll,ly+Math.cos(ang)*ll);x.stroke();});
+  x.fillStyle='#b9c3cc';x.beginPath();x.arc(ex,ballY,9,0,7);x.fill();
+  x.fillStyle='#c9d2dc';x.font='12px "Noto Sans TC"';x.fillText('驗電器',ex,ballY-16);
+  x.fillStyle='#8492aa';x.font='11px "Noto Sans TC"';x.fillText('金屬箔片',ex,jarY+jarR*1.55+12>h*.88?h*.86:jarY+jarR*1.55+12);
+  // wire
+  x.strokeStyle='#c99a3d';x.lineWidth=2;x.beginPath();x.moveTo(ex+8,ballY-3);x.bezierCurveTo(ex+60,ballY-60,G.plateX-60,G.plateTop-40,G.plateX-6,G.plateTop+14);x.stroke();
+  // charge signs
+  const n=Math.min(10,Math.round(Math.abs(st.Q)/8));const sgn=st.Q>0?'+':'−',sc2=st.Q>0?'#ff8a8a':'#6fc3ff';
+  x.font='bold 13px "JetBrains Mono"';x.fillStyle=sc2;
+  for(let i=0;i<n;i++){x.fillText(sgn,G.plateX-16+(i%2)*32,G.plateTop+18+i*(G.plateH-30)/10);}
+  for(let i=0;i<Math.min(4,Math.ceil(n/2));i++){[-1,1].forEach(s=>{const t=(i+1)/5;x.fillText(sgn,ex+s*(Math.sin(ang)*ll*t+8),ly+Math.cos(ang)*ll*t+4);});}
+  // glass
+  if(st.glass){x.fillStyle='rgba(150,220,255,.18)';x.strokeStyle='rgba(150,220,255,.6)';x.fillRect(G.glassX-4,G.lampY-70,8,140);x.strokeRect(G.glassX-4,G.lampY-70,8,140);
+    x.fillStyle='#9fd8ff';x.font='11px "Noto Sans TC"';x.fillText('玻璃片',G.glassX,G.lampY+86);}
+  // lamp
+  x.fillStyle='#3d4a66';rr(x,G.lampX-10,G.lampY-22,26,44,6);x.fill();
+  x.fillStyle=st.on&&st.I>0?'#fff6dc':'#222';x.beginPath();x.ellipse(G.lampX-10,G.lampY,5,16,0,0,7);x.fill();
+  x.fillStyle='#c9d2dc';x.font='12px "Noto Sans TC"';x.fillText('光源',G.lampX,G.lampY+38);
+  // photons
+  st.ph.forEach(p=>{const k=2*Math.PI/(4+p.c.lam/80);x.strokeStyle=p.c.col+'.95)';x.lineWidth=1.8;x.beginPath();
+    for(let s=0;s<=16;s++){const X=p.x+s,Y=p.y+3*Math.sin(k*s+p.ph);s?x.lineTo(X,Y):x.moveTo(X,Y);}x.stroke();});
+  // electrons
+  st.el.forEach(e=>{x.fillStyle=e.back?'#9fd0ff':'#5ab8ff';x.beginPath();x.arc(e.x,e.y,4,0,7);x.fill();x.fillStyle='#fff';x.font='bold 7px sans-serif';x.fillText('−',e.x,e.y+2.5);});
+  // legend
+  x.font='11px "Noto Sans TC"';x.textAlign='left';let yy=16;COMP.forEach(c=>{if(!$(c.id).checked)return;x.fillStyle=c.col+'1)';x.fillText('〰 '+c.name+(reach(c)?'':'（被擋住）'),10,yy);yy+=15;});
+}
+function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
+function texts(){
+  $('q').textContent=(st.Q>0?'+':'')+st.Q+' e（示意）';$('ne').textContent=st.emitted;
+  const open=Math.abs(st.Q)>3;$('state').textContent=open?(st.Q>0?'箔片張開（帶正電）':'箔片張開（帶負電）'):'箔片閉合';
+  const uv=$('cUV').checked&&!st.glass&&st.on&&st.I>0;let s='';
+  if(!st.on||st.I===0)s='光源關閉。';
+  else if(uv){s=st.Q>40?'<b>紫外線</b>光子能量（4.9 eV）大於鋅的功函數，持續打出電子。鋅板正電越來越多，會把剛脫離的電子吸回去，所以箔片張開到一定程度後就不再增加。':st.Q<0?'紫外線把鋅板上多餘的電子打出去，<b>負電減少</b>，箔片逐漸合攏；繼續照下去會轉為帶正電。':'<b>紫外線</b>光子能量（4.9 eV）大於鋅的功函數（4.3 eV），打出光電子。鋅板失去電子帶正電，驗電器的電子流向鋅板，箔片帶正電而張開。';}
+  else{const has=active().map(c=>c.name);s=`現在照到鋅板的只有 ${has.length?has.join('、'):'（無）'}。這些光子能量都小於 4.3 eV，<b>光再強也打不出電子</b>，箔片不會改變。`;}
+  $('explain').innerHTML=s;$('vI').textContent=st.I+' %';$('lamp').textContent=st.on?'💡 關燈':'💡 開燈';
+}
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;step(dt);draw();texts();requestAnimationFrame(frame);}
+function reset(q){st.Q=q;st.emitted=0;st.ph=[];st.el=[];}
+$('sI').oninput=e=>st.I=+e.target.value;$('glass').onchange=e=>st.glass=e.target.checked;
+$('lamp').onclick=()=>st.on=!st.on;$('r0').onclick=()=>reset(0);$('rN').onclick=()=>reset(-50);$('rP').onclick=()=>reset(40);
+addEventListener('resize',layout);layout();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

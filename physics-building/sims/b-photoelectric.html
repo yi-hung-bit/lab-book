@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光電效應</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#43d6ff;--phos:#7dffc4;--amber:#ffcf6b;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(67,214,255,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:68ch;margin-top:6px;font-size:15px}
+.modebar{display:flex;gap:0;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#04121a;font-weight:700}
+.modebar button.cls[aria-pressed="true"]{background:var(--red);color:#1a0505}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;position:relative}
+canvas{display:block;width:100%}
+#scene{height:330px}
+#graph{height:250px}
+@media(max-width:560px){#scene{height:270px}#graph{height:220px}}
+.banner{margin:0 14px 10px;padding:8px 12px;border-radius:9px;font-size:13px;background:rgba(255,122,122,.12);border:1px solid rgba(255,122,122,.4);color:#ffc4c4}
+.ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.ro{background:var(--panel2);padding:10px 12px}
+.ro .k{font-size:11.5px;color:var(--muted)}
+.ro .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:18px;margin-top:2px;line-height:1.2}
+.ro .u{font-size:12px;color:var(--dim);font-weight:400}
+.ro.big{grid-column:1/-1;background:linear-gradient(120deg,rgba(125,255,196,.10),rgba(67,214,255,.04))}
+.ro.big .v{font-size:24px;color:var(--phos)}
+.ctl{margin-bottom:13px}
+.ctl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px}
+.ctl label{font-size:13.5px;font-weight:500}
+.ctl .val{font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--acc);text-align:right}
+select{width:100%;font:inherit;font-size:14px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:7px 10px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:#26314a;border-radius:4px;outline:none}
+#sL{background:linear-gradient(90deg,#3b2a5a 0%,#5a3b8a 30.7%,#7c3aed 34.6%,#3b82f6 44%,#10b981 55%,#facc15 66%,#f97316 74%,#ef4444 82%,#5a1414 92%,#2a0a0a 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;box-shadow:0 0 0 1px #fff;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+.chips button{padding:4px 9px;font-size:12.5px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px}
+button.primary{background:var(--phos);border-color:var(--phos);color:#05140d;font-weight:700}
+.toggles{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.tg{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--muted);cursor:pointer}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13px;color:var(--muted)}
+.note b{color:var(--amber);font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:12px;padding:0 16px 12px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+@media(max-width:760px){.three{grid-template-columns:1fr}}
+.law{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted)}
+.law h4{color:var(--txt);font-size:14px;margin-bottom:4px}
+.law .ok{color:var(--phos)} .law .ng{color:var(--red)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">6-2 · Photoelectric Effect</div>
+  <h1>光電效應：光是一顆一顆的光子</h1>
+  <p class="lede">讓光照在真空管裡的金屬板上。改變光的顏色（頻率）與強度，看看什麼時候打得出光電子、光電子跑多快。再切換到「古典電磁理論預測」，比較兩種理論的差別。</p>
+
+  <div class="modebar" role="group" aria-label="理論">
+    <button type="button" id="mQ" aria-pressed="true">光子理論（與實驗相符）</button>
+    <button type="button" id="mC" class="cls" aria-pressed="false">古典電磁理論預測</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">光電管</span><span class="n" id="status"></span></div>
+      <div class="banner" id="clsBanner" hidden>這是<b>古典理論的預測</b>，並不是真實實驗結果：光被當成連續的電磁波，能量平均灑在每個電子上，電子要「累積」夠能量才能跳出。</div>
+      <div class="box"><canvas id="scene" aria-label="光電管動畫"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t">光電子最大動能 − 入射光頻率</span><span class="n" id="gnote"></span></div>
+      <div class="box"><canvas id="graph" aria-label="最大動能對頻率圖"></canvas></div>
+      <div class="legend">
+        <span><i style="background:var(--phos)"></i>理論 K<sub>max</sub> = hf − W</span>
+        <span><i style="background:var(--amber)"></i>你記錄的數據點</span>
+        <span id="lgC" hidden><i style="background:var(--red)"></i>古典預測（與頻率無關）</span>
+      </div>
+    </section>
+
+    <section class="card"><div class="pad">
+      <div class="ro-grid">
+        <div class="ro big"><div class="k">光電子最大動能 K<sub>max</sub></div><div class="v" id="kmax">—</div></div>
+        <div class="ro"><div class="k">一顆光子的能量 hf</div><div class="v" id="ephot">—</div></div>
+        <div class="ro"><div class="k">金屬功函數 W</div><div class="v" id="wf">—</div></div>
+        <div class="ro"><div class="k">入射光頻率 f</div><div class="v" id="freq">—</div></div>
+        <div class="ro"><div class="k">底限頻率 f<sub>c</sub>（波長）</div><div class="v" id="fc">—</div></div>
+        <div class="ro"><div class="k">光電流（相對）</div><div class="v" id="cur">—</div></div>
+        <div class="ro"><div class="k">實測最快電子</div><div class="v" id="meas">—</div></div>
+      </div>
+
+      <div class="ctl">
+        <div class="row"><label for="metal">金屬板</label></div>
+        <select id="metal"></select>
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sL">入射光波長 λ</label><span class="val" id="vL"></span></div>
+        <input type="range" id="sL" min="150" max="900" step="1" value="500">
+        <div class="chips" id="lchips"></div>
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sI">光強度</label><span class="val" id="vI"></span></div>
+        <input type="range" id="sI" min="0" max="100" step="1" value="40">
+      </div>
+
+      <div class="btns">
+        <button class="primary" id="rec">＋ 記錄這個數據點</button>
+        <button id="clr">清除數據</button>
+        <button id="pause">⏸ 暫停</button>
+      </div>
+      <div class="toggles">
+        <label class="tg"><input type="checkbox" id="tAll">圖上顯示其他金屬的理論線</label>
+        <label class="tg"><input type="checkbox" id="tCurve" checked>圖上顯示目前金屬的理論線</label>
+      </div>
+      <div class="note" id="explain"></div>
+    </div></section>
+  </div>
+
+  <div class="three" id="laws">
+    <div class="law"><h4>① 要有底限頻率</h4><span id="l1"></span></div>
+    <div class="law"><h4>② 一照射幾乎立刻有光電流，大小與光強度成正比</h4><span id="l2"></span></div>
+    <div class="law"><h4>③ 最大動能與頻率有關、與光強度無關</h4><span id="l3"></span></div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>光子能量 E = hf = 1240 / λ（eV，λ 以 nm 計）。電子吸收一顆光子後，扣掉功函數 W 才是動能；有些電子在離開前還會碰撞損失能量，所以動能有大有小，最大值 K<sub>max</sub> = hf − W。把不同金屬的理論線都打開，會發現它們互相平行——斜率都是普朗克常數 h，只有截距（底限頻率）不同。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const HC=1239.84; // eV·nm
+const H_EV=4.135667696e-15; // eV·s
+const METALS=[["銫",2.1],["鉀",2.3],["鈉",2.8],["鋰",2.9],["鋅",4.3],["鋁",4.3],["鐵",4.7],["金",5.1]];
+const MCOL={"銫":"#f6d48a","鉀":"#cfd6dc","鈉":"#d9dde0","鋰":"#c7ccd1","鋅":"#a9b4bd","鋁":"#d0d6db","鐵":"#8d949a","金":"#e8c15a"};
+const $=id=>document.getElementById(id);
+const st={mode:'q',metal:0,lam:500,I:40,paused:false,photons:[],elec:[],arrivals:[],kmaxSeen:0,seenWin:[],data:[],showAll:false,showCurve:true,
+  buckets:[],waveT:0,firstEjectAt:null,lightOnAt:0,t:0,emitAcc:0};
+const sc=$('scene'),gr=$('graph');
+
+function wl2rgb(w){let r=0,g=0,b=0;
+  if(w>=380&&w<440){r=-(w-440)/60;b=1}else if(w>=440&&w<490){g=(w-440)/50;b=1}else if(w>=490&&w<510){g=1;b=-(w-510)/20}
+  else if(w>=510&&w<580){r=(w-510)/70;g=1}else if(w>=580&&w<645){r=1;g=-(w-645)/65}else if(w>=645&&w<=780){r=1}
+  let f=0;if(w>=380&&w<420)f=.3+.7*(w-380)/40;else if(w>=420&&w<=700)f=1;else if(w>700&&w<=780)f=.3+.7*(780-w)/80;
+  return [r,g,b].map(v=>Math.round(255*Math.pow(v*f,.8)));}
+function lightColor(l){if(l<380)return'rgb(200,170,255)';if(l>780)return'rgb(150,40,40)';const [r,g,b]=wl2rgb(l);return `rgb(${Math.max(r,30)},${Math.max(g,30)},${Math.max(b,30)})`;}
+function bandName(l){return l<380?'紫外線':l>750?'紅外線':'可見光';}
+const W=()=>METALS[st.metal][1];
+const Eph=()=>HC/st.lam;
+const Kmax=()=>Eph()-W();
+
+// ---- UI setup ----
+METALS.forEach(([n,w],i)=>{const o=document.createElement('option');o.value=i;o.textContent=`${n}（W = ${w} eV，底限波長 ${Math.round(HC/w)} nm）`;$('metal').appendChild(o);});
+const LCH=[["紅 700",700],["綠 551",551],["紫 400",400],["甲 400",400],["乙 500",500],["丙 600",600],["紫外 250",250],["紅外 850",850]];
+LCH.slice(0,3).concat(LCH.slice(6)).forEach(([n,l])=>{const b=document.createElement('button');b.textContent=n+' nm';b.onclick=()=>{$('sL').value=l;st.lam=l;onParam();};$('lchips').appendChild(b);});
+
+function resetClassical(){st.buckets=Array.from({length:9},()=>Math.random()*0.15);st.firstEjectAt=null;st.lightOnAt=st.t;}
+function onParam(){st.lam=+$('sL').value;st.I=+$('sI').value;st.metal=+$('metal').value;st.kmaxSeen=0;st.seenWin=[];
+  if(st.mode==='c')resetClassical();ui();}
+function ui(){
+  const l=st.lam,E=Eph(),w=W(),K=Kmax();
+  $('vL').textContent=`${l} nm・${bandName(l)}`;$('vI').textContent=st.I+' %';
+  $('ephot').innerHTML=E.toFixed(2)+'<span class="u"> eV</span>';
+  $('wf').innerHTML=w.toFixed(1)+'<span class="u"> eV</span>';
+  $('freq').innerHTML=(E/H_EV/1e14).toFixed(2)+'<span class="u"> ×10¹⁴ Hz</span>';
+  $('fc').innerHTML=(w/H_EV/1e14).toFixed(2)+'<span class="u">×10¹⁴ Hz（'+Math.round(HC/w)+' nm）</span>';
+  if(st.mode==='q'){
+    $('kmax').innerHTML=K>0?K.toFixed(2)+'<span class="u"> eV</span>':'<span style="color:var(--red);font-size:18px">沒有光電子（hf &lt; W）</span>';
+  }else{
+    const kc=classicalK();$('kmax').innerHTML=kc.toFixed(2)+'<span class="u"> eV（古典預測，只看強度）</span>';
+  }
+  $('lgC').hidden=st.mode!=='c';$('clsBanner').hidden=st.mode!=='c';
+  explain();laws();
+}
+function classicalK(){return st.I/100*2.5;} // KE grows with amplitude^2 ∝ intensity, independent of f
+function explain(){
+  const E=Eph(),w=W(),K=Kmax();let s='';
+  if(st.mode==='q'){
+    if(st.I===0)s='光強度為 0：沒有光子，自然沒有光電子。';
+    else if(K<=0)s=`每顆光子只有 <b>${E.toFixed(2)} eV</b>，小於功函數 ${w} eV。電子一次只吸收一顆光子，能量不夠就跳不出來——<b>光再強、照再久都沒用</b>，因為光強只代表光子「數量」多。`;
+    else s=`每顆光子 ${E.toFixed(2)} eV − 功函數 ${w} eV = 最大動能 <b>${K.toFixed(2)} eV</b>。把光調強，光電子變多（電流變大），但最快的電子速度不變；把波長調短（頻率變高），最大動能才會增加。`;
+  }else{
+    s=`古典理論認為光是連續的波，強度越大、電場越強。每個電子持續吸收能量，累積到 ${w} eV 就跳出。所以預測：<b>任何頻率</b>只要等夠久都會有光電子；光很弱時要<b>等一段時間</b>；動能由<b>強度</b>決定。這三點都和實驗不符。`;
+  }
+  $('explain').innerHTML=s;
+}
+function laws(){
+  const ok='<span class="ok">✔ 光子理論：</span>',ng='<span class="ng">✘ 古典預測：</span>';
+  if(st.mode==='q'){
+    $('l1').innerHTML=ok+'一顆光子的能量 hf 必須大於 W，才能讓電子脫離。試試把紅光調到最強。';
+    $('l2').innerHTML=ok+'光子一到就被吸收，不需累積時間；光強越大，每秒光子越多 → 光電子越多。';
+    $('l3').innerHTML=ok+'K<sub>max</sub> = hf − W，只和單顆光子能量有關。';
+  }else{
+    $('l1').innerHTML=ng+'只要照得夠久，任何頻率都能累積到足夠能量 → 沒有底限頻率。';
+    $('l2').innerHTML=ng+'光弱時能量累積慢，應該要等一段時間才出現光電子。';
+    $('l3').innerHTML=ng+'光越強、電場振幅越大，電子被推得越快 → 動能應隨強度增加。';
+  }
+}
+
+// ---- geometry ----
+let G={};
+function layout(){const d=Math.min(2,devicePixelRatio||1);const w=sc.clientWidth,h=sc.clientHeight;sc.width=Math.round(w*d);sc.height=Math.round(h*d);
+  G={w,h,d,tubeX:w*.2,tubeY:h*.2,tubeW:w*.72,tubeH:h*.48,cathX:w*.3,anodeX:w*.84,midY:h*.44,plateH:h*.34,lampX:w*.06,lampY:h*.07};
+  G.hitY0=G.midY-G.plateH/2+8;G.hitY1=G.midY+G.plateH/2-8;
+  const d2=Math.min(2,devicePixelRatio||1);gr.width=Math.round(gr.clientWidth*d2);gr.height=Math.round(gr.clientHeight*d2);}
+
+// ---- simulation ----
+function spawnPhoton(){const ty=G.hitY0+Math.random()*(G.hitY1-G.hitY0);const sx=G.lampX+18+Math.random()*10,sy=G.lampY+20+Math.random()*8;
+  const dx=G.cathX-sx,dy=ty-sy,L=Math.hypot(dx,dy);st.photons.push({x:sx,y:sy,ux:dx/L,uy:dy/L,ty,ph:Math.random()*6});}
+function eject(y,K){const v=60+260*Math.sqrt(Math.max(0,K)/4);const ang=(Math.random()-.5)*1.1;
+  st.elec.push({x:G.cathX+4,y,vx:v*Math.cos(ang),vy:v*Math.sin(ang),K,trail:[]});
+  st.seenWin.push({t:st.t,K});}
+function step(dt){
+  st.t+=dt;
+  if(st.mode==='q'){
+    const rate=st.I*0.9; // photons per second (visual)
+    st.emitAcc+=rate*dt;while(st.emitAcc>=1){st.emitAcc-=1;spawnPhoton();}
+    const sp=520;
+    for(let i=st.photons.length-1;i>=0;i--){const p=st.photons[i];p.x+=p.ux*sp*dt;p.y+=p.uy*sp*dt;
+      if(p.x>=G.cathX){st.photons.splice(i,1);
+        if(Kmax()>0&&Math.random()<0.55){ // quantum efficiency (visual)
+          const K=Kmax()*(1-Math.pow(Math.random(),1.8)*0.98); // some lose energy in collisions
+          eject(p.ty,K);}
+        else st.flash=(st.flash||[]).concat([{x:G.cathX,y:p.ty,a:1}]);
+      }}
+  }else{
+    st.waveT+=dt;
+    const rate=st.I/100*1.2; // eV per second per electron, independent of frequency
+    st.buckets.forEach((b,i)=>{st.buckets[i]+=rate*dt*(0.85+0.3*((i*37)%10)/10);
+      if(st.buckets[i]>=W()){st.buckets[i]=0;const y=G.hitY0+(i+.5)/st.buckets.length*(G.hitY1-G.hitY0);eject(y,classicalK()*(0.75+0.25*Math.random()));if(st.firstEjectAt==null)st.firstEjectAt=st.t;}});
+  }
+  // electrons: mild accelerating field toward anode
+  for(let i=st.elec.length-1;i>=0;i--){const e=st.elec[i];e.vx+=40*dt;e.vy*=1-1.6*dt;e.x+=e.vx*dt;e.y+=e.vy*dt;
+    e.trail.push([e.x,e.y]);if(e.trail.length>8)e.trail.shift();
+    if(e.y<G.tubeY+8||e.y>G.tubeY+G.tubeH-8)e.vy*=-.6,e.y=Math.max(G.tubeY+8,Math.min(G.tubeY+G.tubeH-8,e.y));
+    if(e.x>=G.anodeX){st.elec.splice(i,1);st.arrivals.push(st.t);}}
+  while(st.arrivals.length&&st.arrivals[0]<st.t-1.5)st.arrivals.shift();
+  while(st.seenWin.length&&st.seenWin[0].t<st.t-4)st.seenWin.shift();
+  if(st.flash){st.flash.forEach(f=>f.a-=dt*3);st.flash=st.flash.filter(f=>f.a>0);}
+}
+
+// ---- drawing ----
+function drawScene(){
+  const x=sc.getContext('2d');x.setTransform(G.d,0,0,G.d,0,0);const {w,h}=G;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  // tube
+  x.fillStyle='rgba(120,190,255,.06)';x.strokeStyle='rgba(150,200,255,.35)';x.lineWidth=1.5;
+  rr(x,G.tubeX,G.tubeY,G.tubeW,G.tubeH,G.tubeH/2);x.fill();x.stroke();
+  x.fillStyle='#5b6880';x.font='11px "Noto Sans TC"';x.textAlign='center';x.fillText('真空管',G.tubeX+G.tubeW/2,G.tubeY+G.tubeH-8);
+  // light
+  const col=lightColor(st.lam),a=st.I/100;
+  if(st.I>0){
+    const tx=G.cathX;const g=x.createLinearGradient(G.lampX,G.lampY,tx,G.midY);
+    if(st.mode==='c'){
+      g.addColorStop(0,col.replace('rgb','rgba').replace(')',`,${.25+.45*a})`));g.addColorStop(1,col.replace('rgb','rgba').replace(')',`,${.12+.3*a})`));
+    }else{g.addColorStop(0,col.replace('rgb','rgba').replace(')',`,${.06+.12*a})`));g.addColorStop(1,'rgba(0,0,0,0)');}
+    x.fillStyle=g;x.beginPath();x.moveTo(G.lampX+16,G.lampY+14);x.lineTo(G.lampX+34,G.lampY+26);x.lineTo(tx,G.hitY1);x.lineTo(tx,G.hitY0);x.closePath();x.fill();
+    if(st.mode==='c'){ // continuous wave fronts
+      const sx=G.lampX+25,sy=G.lampY+20,dx=tx-sx,dy=G.midY-sy,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+      const lamPx=8+st.lam/40;x.strokeStyle=col;x.lineWidth=1.3;x.globalAlpha=.3+.6*a;
+      for(let s=((st.waveT*90)%lamPx);s<L;s+=lamPx){const cx=sx+ux*s,cy=sy+uy*s,half=6+s/L*(G.plateH/2-6);
+        x.beginPath();x.moveTo(cx-uy*half,cy+ux*half);x.lineTo(cx+uy*half,cy-ux*half);x.stroke();}
+      x.globalAlpha=1;}
+  }
+  // lamp
+  x.save();x.translate(G.lampX+16,G.lampY+14);x.rotate(Math.atan2(G.midY-G.lampY,G.cathX-G.lampX));
+  x.fillStyle='#3d4a66';rr(x,-26,-9,30,18,4);x.fill();x.fillStyle=st.I>0?col:'#222';x.beginPath();x.ellipse(5,0,4,9,0,0,7);x.fill();x.restore();
+  x.fillStyle='#8492aa';x.font='11px "Noto Sans TC"';x.textAlign='left';x.fillText(`${st.lam} nm`,G.lampX,G.lampY+46);
+  // photons
+  if(st.mode==='q'){x.lineWidth=1.8;x.strokeStyle=col;
+    const amp=3.2,kk=2*Math.PI/(4+st.lam/60);
+    st.photons.forEach(p=>{x.beginPath();for(let s=-14;s<=0;s+=1){const px=p.x+p.ux*s,py=p.y+p.uy*s,o=amp*Math.sin(kk*s+p.ph);
+      const X=px-p.uy*o,Y=py+p.ux*o;s===-14?x.moveTo(X,Y):x.lineTo(X,Y);}x.stroke();
+      x.fillStyle=col;x.beginPath();x.arc(p.x,p.y,2,0,7);x.fill();});
+    (st.flash||[]).forEach(f=>{x.fillStyle=`rgba(255,255,255,${f.a*.35})`;x.beginPath();x.arc(f.x,f.y,6*(1.2-f.a),0,7);x.fill();});
+  }
+  // plates
+  const mn=METALS[st.metal][0];x.fillStyle=MCOL[mn];x.fillRect(G.cathX-5,G.midY-G.plateH/2,9,G.plateH);
+  x.fillStyle='#9aa3a8';x.fillRect(G.anodeX,G.midY-G.plateH/2+10,6,G.plateH-20);
+  x.fillStyle='#c9d2dc';x.font='12px "Noto Sans TC"';x.textAlign='center';x.fillText(mn+'板',G.cathX,G.midY-G.plateH/2-6);x.fillText('收集板',G.anodeX+3,G.midY-G.plateH/2+4);
+  // classical buckets
+  if(st.mode==='c'){st.buckets.forEach((b,i)=>{const y=G.hitY0+(i+.5)/st.buckets.length*(G.hitY1-G.hitY0);const fr=Math.min(1,b/W());
+    x.fillStyle='#1d2638';x.fillRect(G.cathX-30,y-3,20,6);x.fillStyle=fr>.9?'#ffcf6b':'#43d6ff';x.fillRect(G.cathX-30,y-3,20*fr,6);});
+    x.fillStyle='#ffb4b4';x.font='11px "Noto Sans TC"';x.textAlign='right';x.fillText('電子累積的能量',G.cathX-34,G.hitY1+14);}
+  // electrons
+  st.elec.forEach(e=>{x.strokeStyle='rgba(120,200,255,.35)';x.lineWidth=2;x.beginPath();e.trail.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke();
+    x.fillStyle='#5ab8ff';x.beginPath();x.arc(e.x,e.y,4,0,7);x.fill();x.fillStyle='#fff';x.font='bold 7px sans-serif';x.textAlign='center';x.fillText('−',e.x,e.y+2.5);});
+  // circuit
+  const cy=G.tubeY+G.tubeH+(h-G.tubeY-G.tubeH)*.55;
+  x.strokeStyle='#c99a3d';x.lineWidth=2.5;x.beginPath();x.moveTo(G.cathX,G.midY+G.plateH/2);x.lineTo(G.cathX,cy);x.lineTo(G.anodeX+3,cy);x.lineTo(G.anodeX+3,G.midY+G.plateH/2-10);x.stroke();
+  // battery
+  const bx=G.cathX+(G.anodeX-G.cathX)*.3;x.fillStyle='#04060b';x.fillRect(bx-14,cy-12,28,24);x.strokeStyle='#ddd';x.lineWidth=2;
+  x.beginPath();x.moveTo(bx-6,cy-12);x.lineTo(bx-6,cy+12);x.stroke();x.lineWidth=4;x.beginPath();x.moveTo(bx+6,cy-7);x.lineTo(bx+6,cy+7);x.stroke();
+  // ammeter
+  const ax=G.cathX+(G.anodeX-G.cathX)*.68,R=18;x.fillStyle='#0d1422';x.beginPath();x.arc(ax,cy,R,0,7);x.fill();x.strokeStyle='#ddd';x.lineWidth=1.5;x.stroke();
+  const cur=st.arrivals.length/1.5;const ang=-Math.PI*.85+Math.min(1,cur/50)*Math.PI*.7;
+  x.strokeStyle='#ff6b6b';x.lineWidth=2;x.beginPath();x.moveTo(ax,cy+5);x.lineTo(ax+Math.cos(ang)*(R-4),cy+5+Math.sin(ang)*(R-4));x.stroke();
+  x.fillStyle='#ddd';x.font='bold 10px "JetBrains Mono"';x.textAlign='center';x.fillText('A',ax,cy+15);
+  $('cur').innerHTML=Math.round(cur)+'<span class="u"> 顆電子/秒</span>';
+}
+function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
+
+function drawGraph(){
+  const d=Math.min(2,devicePixelRatio||1);const x=gr.getContext('2d');x.setTransform(d,0,0,d,0,0);const w=gr.clientWidth,h=gr.clientHeight;
+  x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const L=44,R=12,T=12,B=34,pw=w-L-R,ph=h-T-B;const FX=21,KY=6; // x: 0..21 ×10^14 Hz, y: -? 0..6 eV
+  const X=f=>L+f/FX*pw,Y=K=>T+ph-K/KY*ph;
+  x.strokeStyle='rgba(255,255,255,.07)';x.fillStyle='#6b7893';x.font='11px "JetBrains Mono"';x.textAlign='center';
+  for(let f=0;f<=FX;f+=3){x.beginPath();x.moveTo(X(f),T);x.lineTo(X(f),T+ph);x.stroke();x.fillText(f,X(f),h-B+15);}
+  x.textAlign='right';for(let K=0;K<=KY;K+=1){x.beginPath();x.moveTo(L,Y(K));x.lineTo(L+pw,Y(K));x.stroke();x.fillText(K,L-6,Y(K)+4);}
+  x.textAlign='center';x.fillText('入射光頻率 f（×10¹⁴ Hz）',L+pw/2,h-4);
+  x.save();x.translate(12,T+ph/2);x.rotate(-Math.PI/2);x.fillText('K_max（eV）',0,0);x.restore();
+  // visible band
+  for(let l=380;l<=750;l+=5){const f=HC/l/H_EV/1e14;const [r,g,b]=wl2rgb(l);x.fillStyle=`rgba(${r},${g},${b},.18)`;x.fillRect(X(f)-1.4,T+ph-6,2.8,6);}
+  x.strokeStyle='#3a4660';x.beginPath();x.moveTo(L,T);x.lineTo(L,T+ph);x.lineTo(L+pw,T+ph);x.stroke();
+  x.save();x.beginPath();x.rect(L,T,pw,ph);x.clip();
+  const line=(wv,col,lw,dash)=>{const fc=wv/H_EV/1e14;x.strokeStyle=col;x.lineWidth=lw;x.setLineDash(dash||[]);x.beginPath();x.moveTo(X(0),Y(0));x.lineTo(X(fc),Y(0));x.lineTo(X(FX),Y(H_EV*FX*1e14-wv));x.stroke();x.setLineDash([]);};
+  if(st.showAll)METALS.forEach(([n,wv],i)=>{if(i!==st.metal){line(wv,'rgba(160,175,200,.35)',1.2,[4,4]);const fc=wv/H_EV/1e14;x.fillStyle='rgba(160,175,200,.7)';x.font='10px "Noto Sans TC"';x.textAlign='center';x.fillText(n,X(fc),T+ph-10-(i%2)*10);}});
+  if(st.showCurve)line(W(),'#7dffc4',2);
+  if(st.mode==='c'){x.strokeStyle='#ff7a7a';x.lineWidth=2;x.setLineDash([7,5]);x.beginPath();x.moveTo(L,Y(classicalK()));x.lineTo(L+pw,Y(classicalK()));x.stroke();x.setLineDash([]);
+    x.fillStyle='#ff9a9a';x.font='11px "Noto Sans TC"';x.textAlign='right';x.fillText('古典預測：與頻率無關',L+pw-6,Y(classicalK())-6);}
+  st.data.forEach(p=>{x.fillStyle=p.cls?'#ff7a7a':'#ffcf6b';x.beginPath();x.arc(X(p.f),Y(Math.max(0,p.K)),4.5,0,7);x.fill();});
+  // current marker
+  const fnow=Eph()/H_EV/1e14;const kn=st.mode==='q'?Math.max(0,Kmax()):classicalK();
+  x.strokeStyle='#fff';x.lineWidth=1.5;x.beginPath();x.arc(X(fnow),Y(kn),6,0,7);x.stroke();
+  x.restore();
+  if(st.data.length>=2&&st.mode==='q'){const pts=st.data.filter(p=>p.K>0.02&&!p.cls);if(pts.length>=2){
+    const n=pts.length,sx=pts.reduce((a,p)=>a+p.f,0),sy=pts.reduce((a,p)=>a+p.K,0),sxx=pts.reduce((a,p)=>a+p.f*p.f,0),sxy=pts.reduce((a,p)=>a+p.f*p.K,0);
+    const m=(n*sxy-sx*sy)/(n*sxx-sx*sx);if(isFinite(m)){const hh=m/1e14*1.602176634e-19;$('gnote').innerHTML=`由你的數據算出斜率 h ≈ <b style="color:#ffcf6b">${(hh/1e-34).toFixed(2)}×10⁻³⁴ J·s</b>`;return;}}}
+  $('gnote').textContent=st.mode==='q'?'記錄 2 個以上有光電子的點，可算出普朗克常數':'';
+}
+
+// ---- loop ----
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!st.paused)step(dt);
+  drawScene();drawGraph();
+  const mx=st.seenWin.reduce((a,e)=>Math.max(a,e.K),0);
+  $('meas').innerHTML=st.seenWin.length?mx.toFixed(2)+'<span class="u"> eV</span>':'<span class="u">尚無光電子</span>';
+  let s='';if(st.mode==='q'){s=st.I===0?'沒有照光':Kmax()>0?'有光電子':'光子能量不足，沒有光電子';}
+  else{s=st.firstEjectAt==null?(st.I>0?`照光 ${(st.t-st.lightOnAt).toFixed(1)} 秒，電子仍在累積能量…`:'沒有照光'):`照光後 ${(st.firstEjectAt-st.lightOnAt).toFixed(1)} 秒才出現第一顆光電子`;}
+  $('status').textContent=s;
+  requestAnimationFrame(frame);}
+
+// ---- wiring ----
+['sL','sI'].forEach(id=>$(id).addEventListener('input',onParam));$('metal').addEventListener('change',onParam);
+$('mQ').onclick=()=>{st.mode='q';$('mQ').setAttribute('aria-pressed','true');$('mC').setAttribute('aria-pressed','false');st.elec=[];st.photons=[];ui();};
+$('mC').onclick=()=>{st.mode='c';$('mC').setAttribute('aria-pressed','true');$('mQ').setAttribute('aria-pressed','false');st.elec=[];st.photons=[];resetClassical();ui();};
+$('rec').onclick=()=>{const f=Eph()/H_EV/1e14;if(f>21)return;const K=st.mode==='q'?Kmax():classicalK();st.data.push({f,K,cls:st.mode==='c'});};
+$('clr').onclick=()=>{st.data=[];};
+$('pause').onclick=()=>{st.paused=!st.paused;$('pause').textContent=st.paused?'▶ 繼續':'⏸ 暫停';};
+$('tAll').onchange=e=>{st.showAll=e.target.checked;};$('tCurve').onchange=e=>{st.showCurve=e.target.checked;};
+addEventListener('resize',layout);
+layout();onParam();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
