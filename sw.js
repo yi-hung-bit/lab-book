@@ -1,5 +1,5 @@
 // 實驗培訓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v9";
+const VERSION="v10";
 const CACHE="lab-book-"+VERSION;
 const FILES=[
  "./",

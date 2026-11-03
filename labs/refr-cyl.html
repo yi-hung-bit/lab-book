@@ -50,6 +50,7 @@ canvas{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);bac
 details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
 .placeholder{color:var(--muted);padding:30px;text-align:center}
 </style>
+<style>/* 手機版面修正：避免窄螢幕橫向捲動（只調版面，不改內容） */.grid2>*{min-width:0} .grid2 canvas{max-width:100%;height:auto} .tblx{overflow-x:auto;max-width:100%}</style>
 </head>
 <body>
 <header>
@@ -143,9 +144,9 @@ details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
 
   <div class="card">
     <h3>直徑 D（mm）</h3>
-    <table class="data" id="tblD"></table>
+    <div class="tblx"><table class="data" id="tblD"></table></div>
     <h3>高 h（mm）</h3>
-    <table class="data" id="tblH"></table>
+    <div class="tblx"><table class="data" id="tblH"></table></div>
   </div>
 
   <div class="card">
@@ -195,7 +196,7 @@ details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
   <div class="card">
     <h3>數據紀錄</h3>
     <p class="res">使用的圓柱半徑 R = <b id="Rused"></b></p>
-    <table class="data" id="tblF"></table>
+    <div class="tblx"><table class="data" id="tblF"></table></div>
     <div id="focRes" class="res muted" style="margin-top:8px">填入數據後自動計算。</div>
   </div>
 </section>
@@ -215,8 +216,8 @@ details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
       <span id="dpLbl" class="muted"></span>
     </div>
     <div class="scroll" style="margin-top:6px"><div id="vern4a"><div class="placeholder">按上方按鈕，游標尺就會夾住白線圓柱。</div></div></div>
-    <table class="data" style="margin-top:8px"><tr><th></th><th>0°</th><th>60°</th><th>120°</th><th>D′ 平均</th></tr>
-      <tr><th>D′（mm）</th><td><input class="cell" id="Dp_0" inputmode="decimal"></td><td><input class="cell" id="Dp_1" inputmode="decimal"></td><td><input class="cell" id="Dp_2" inputmode="decimal"></td><td id="DpMean">—</td></tr></table>
+    <div class="tblx"><table class="data" style="margin-top:8px"><tr><th></th><th>0°</th><th>60°</th><th>120°</th><th>D′ 平均</th></tr>
+      <tr><th>D′（mm）</th><td><input class="cell" id="Dp_0" inputmode="decimal"></td><td><input class="cell" id="Dp_1" inputmode="decimal"></td><td><input class="cell" id="Dp_2" inputmode="decimal"></td><td id="DpMean">—</td></tr></table></div>
   </div>
 
   <div class="card">
@@ -232,7 +233,7 @@ details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
     <details><summary>為什麼還要讀「外緣」？</summary>
       <p>眼睛在有限距離 L 時，看到的圓柱外緣寬度 W 和核心寬度都被同樣的比例壓縮：<span class="f">W/2 ≈ R′√[(L−R′)/(L+R′)]</span>。L = 30 cm 時約縮 3%，直接用 B/b 會系統性偏低。這個壓縮對核心與外緣幾乎相同，所以用比值 <span class="f">B = (w<sub>B</sub>/w<sub>W</sub>)·D′/2</span> 就能把視差消去。第 ⑤ 頁會兩種算法並列。</p>
     </details>
-    <table class="data" id="tblS" style="margin-top:8px"></table>
+    <div class="tblx"><table class="data" id="tblS" style="margin-top:8px"></table></div>
   </div>
 
   <div class="card">
@@ -247,7 +248,7 @@ details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
       </div>
     </div>
     <div class="scroll"><div id="vern4b"></div></div>
-    <table class="data" id="tblE" style="margin-top:8px"></table>
+    <div class="tblx"><table class="data" id="tblE" style="margin-top:8px"></table></div>
     <details><summary>教師工具</summary>
       <div class="row" style="margin-top:6px"><button class="b warn" id="autoFill4">自動填入第 ④ 頁理想讀數（示範用，L = 300 mm）</button><button class="b warn" id="clear4">清空第 ④ 頁</button></div>
     </details>
@@ -259,7 +260,7 @@ details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
   <div class="card">
     <h2>⑤-1 視半徑法求 n</h2>
     <div id="anaN" class="res muted">請先完成第 ④ 頁的 D′、側面與端面數據。</div>
-    <table class="data" id="tblN" style="margin-top:8px"></table>
+    <div class="tblx"><table class="data" id="tblN" style="margin-top:8px"></table></div>
   </div>
   <div class="grid2">
     <div class="card">

@@ -73,6 +73,7 @@ svg{max-width:100%;height:auto;display:block}
 .todo-card{text-align:center;color:var(--mute);padding:40px}
 .kbd{font-family:"Times New Roman",serif;font-style:italic}
 </style>
+<style>/* 手機版面修正：避免窄螢幕橫向捲動（只調版面，不改內容） */.tblx,#t5res{overflow-x:auto;max-width:100%}</style>
 </head>
 <body>
 <header>
@@ -210,7 +211,7 @@ svg{max-width:100%;height:auto;display:block}
   </div>
   <div class="card">
     <h3>阻值總表（③ 組裝時依此估算）</h3>
-    <table id="t2sum"></table>
+    <div class="tblx"><table id="t2sum"></table></div>
     <p class="note">可按「採用」帶入迴歸斜率，也可直接在欄位輸入數值。同一編號量多顆不同的電阻，可以看出製造誤差。</p>
   </div>
 </section>

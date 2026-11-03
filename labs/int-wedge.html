@@ -111,6 +111,7 @@ td.del button:hover{color:var(--bad)}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<style>/* 手機版面修正：避免窄螢幕橫向捲動（只調版面，不改內容） */.p3grid>*{min-width:0} @media(max-width:640px){.p3grid{grid-template-columns:1fr!important}}</style>
 </head>
 <body>
 
@@ -270,7 +271,7 @@ td.del button:hover{color:var(--bad)}
     <div><button class="act" id="m-new">換一條新的金屬線</button></div>
   </div>
 
-  <div style="display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.25fr);gap:18px;align-items:start;margin-top:18px">
+  <div class="p3grid" style="display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.25fr);gap:18px;align-items:start;margin-top:18px">
     <div>
       <table id="tbl">
         <thead><tr><th>n</th><th>y<sub>n</sub> (mm)</th><th></th></tr></thead>

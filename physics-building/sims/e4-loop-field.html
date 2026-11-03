@@ -603,7 +603,7 @@
             const chartImg = html.querySelector('#fieldChart');
             if (chartCanvas && chartImg) {
                 const dataURL = chartCanvas.toDataURL('image/png');
-                const img = html.createElement('img');
+                const img = document.createElement('img');
                 img.src = dataURL;
                 img.style.width = '100%';
                 img.style.height = '100%';

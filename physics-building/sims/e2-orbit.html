@@ -1730,7 +1730,7 @@
           const shouldShow = currentMode === 'satellite' || celestialBodies.length > 0;
           if (window.sceneObjects.earth) window.sceneObjects.earth.visible = shouldShow;
           if (window.sceneObjects.grid) window.sceneObjects.grid.visible = shouldShow;
-          if (window.sceneObjects.planeGrid) window.sceneObjects.planeGrid.visible = shouldShow;
+          if (window.sceneObjects.planeGridHelper) window.sceneObjects.planeGridHelper.visible = shouldShow;
         } catch (e) {
           console.error('Error updating earth visibility:', e);
         }
@@ -1754,7 +1754,7 @@
           if (window.sceneObjects) {
             window.sceneObjects.earth.material.opacity = 0.6;
             window.sceneObjects.grid.material.opacity = 0.08;
-            window.sceneObjects.planeGrid.material.opacity = 0.25;
+            window.sceneObjects.planeGridHelper.material.opacity = 0.25;
           }
         } else {
           // 立體視圖 - 斜向視角
@@ -1770,7 +1770,7 @@
           if (window.sceneObjects) {
             window.sceneObjects.earth.material.opacity = 0.9;
             window.sceneObjects.grid.material.opacity = 0.15;
-            window.sceneObjects.planeGrid.material.opacity = 0.2;
+            window.sceneObjects.planeGridHelper.material.opacity = 0.2;
           }
         }
       }

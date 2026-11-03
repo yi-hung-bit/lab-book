@@ -1,5 +1,5 @@
 // 物理大樓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v2";
+const VERSION="v3";
 const CACHE="physics-building-"+VERSION;
 const FILES=[
  "./",
@@ -7,6 +7,7 @@ const FILES=[
  "manifest.webmanifest",
  "icons/icon-192.png",
  "icons/icon-512.png",
+ "icons/icon-maskable-512.png",
  "icons/apple-touch-icon.png",
  "vendor/three.min.js",
  "vendor/react.production.min.js",
