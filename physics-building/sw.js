@@ -25,6 +25,7 @@ const FILES=[
  "sims/b-bohr.html",
  "sims/b-franck-hertz.html",
  "sims/b-davisson.html",
+ "sims/b-pendulum.html",
  "sims/b-microphone.html",
  "sims/comp-double-spring.html",
  "sims/comp-wilberforce.html",

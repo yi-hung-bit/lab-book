@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單擺探究：控制變因</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.steps span{font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--dim)}
+.steps span.on{border-color:var(--acc);color:var(--acc)}
+.steps span.done{color:var(--phos);border-color:rgba(125,255,196,.35)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+#pend{height:400px;cursor:grab}
+#graph{height:400px}
+@media(max-width:560px){#pend{height:330px}#graph{height:300px}}
+.ctlwrap{display:grid;grid-template-columns:1fr 1.15fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctlwrap{grid-template-columns:1fr}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#2a3550,#ffd166)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]:disabled{opacity:.45}
+.ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:12px;overflow:hidden;margin:0 14px 14px}
+.ro{background:var(--panel2);padding:9px 12px;min-width:0}
+.ro .k{font-size:11.5px;color:var(--muted)}
+.ro .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:18px;margin-top:2px;line-height:1.2;overflow-wrap:anywhere}
+.ro .u{font-size:12px;color:var(--dim);font-weight:400}
+.ro.big{grid-column:1/-1;background:linear-gradient(120deg,rgba(125,255,196,.10),rgba(67,214,255,.04))}
+.ro.big .v{font-size:22px;color:var(--phos)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.note.warn{border-color:rgba(255,122,122,.45)}
+.note.warn b{color:var(--red)}
+.note.good{border-color:rgba(125,255,196,.4)}
+.note.good b{color:var(--phos)}
+.tg{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);cursor:pointer;margin-top:10px}
+.tg input{width:17px;height:17px;accent-color:var(--acc);flex:none}
+.tblbox{overflow-x:auto;max-height:330px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:right;padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:500;font-size:12px;position:sticky;top:0;background:var(--panel)}
+td{font-family:"JetBrains Mono",monospace}
+td.zh{font-family:"Noto Sans TC",sans-serif;text-align:left;white-space:normal;font-size:12px;color:var(--muted)}
+td.chg{color:var(--acc)}
+td.bad{color:var(--red)}
+td button{padding:2px 7px;font-size:12px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:86ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">1-2 · Scientific Method</div>
+  <h1>單擺探究：用控制變因找出週期的規律</h1>
+  <p class="lede">單擺來回擺動一次的時間叫做<b style="color:var(--acc);font-weight:500">週期 T</b>。週期會和擺長、擺錘質量、擺角有關嗎？先提出假說，每次<b style="color:var(--acc);font-weight:500">只改變一個變因</b>、其餘保持不變，測量 10 次全振動的時間求出週期，再用圖表分析資料。</p>
+
+  <div class="steps" id="steps"><span data-s="0">① 進行觀察</span><span data-s="1">② 提出假說</span><span data-s="2">③ 實驗驗證</span><span data-s="3">④ 分析資料</span><span data-s="4">⑤ 得到結論</span></div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">單擺</span><span class="n" id="pendNote">拖曳擺錘設定擺角，再按「放手」</span></div>
+      <div class="box"><canvas id="pend" aria-label="單擺動畫"></canvas></div>
+      <div class="ro-grid">
+        <div class="ro"><div class="k">碼表</div><div class="v" id="rClock">0.00 <span class="u">s</span></div></div>
+        <div class="ro"><div class="k">已完成全振動</div><div class="v" id="rCount">0 <span class="u">次</span></div></div>
+        <div class="ro"><div class="k">目前擺角 θ</div><div class="v" id="rTheta">0.0°</div></div>
+        <div class="ro"><div class="k">擺錘速率</div><div class="v" id="rSpeed">0.00 <span class="u">m/s</span></div></div>
+        <div class="ro big" id="rTheoBox" hidden><div class="k">理論值：小角度 T₀ = 2π√(ℓ/g)｜考慮擺角的真實週期</div><div class="v" id="rTheo">—</div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">分析資料</span><span class="n" id="graphNote"></span></div>
+      <div class="pad" style="padding-bottom:0">
+        <div class="lab">橫軸</div>
+        <div class="seg" id="xBtns">
+          <button type="button" data-x="L" aria-pressed="true">擺長 ℓ</button>
+          <button type="button" data-x="sqrtL" aria-pressed="false">√ℓ</button>
+          <button type="button" data-x="m" aria-pressed="false">質量 m</button>
+          <button type="button" data-x="a" aria-pressed="false">擺角 θ₀</button>
+        </div>
+      </div>
+      <div class="box"><canvas id="graph" aria-label="週期與變因的關係圖"></canvas></div>
+      <div class="pad" style="padding-top:0"><div class="note" id="fitNote" style="margin-top:0">至少記錄 3 筆資料後，這裡會分析圖形。</div></div>
+    </section>
+  </div>
+
+  <div class="ctlwrap">
+    <section class="card"><div class="pad">
+      <div class="lab">② 我的假說：單擺的週期和下面哪一個變因有關？</div>
+      <div class="seg" id="hypBtns">
+        <button type="button" data-h="L" aria-pressed="false">擺長</button>
+        <button type="button" data-h="m" aria-pressed="false">擺錘質量</button>
+        <button type="button" data-h="a" aria-pressed="false">擺角</button>
+      </div>
+
+      <div class="ctl"><div class="r"><label for="sL">擺長 ℓ</label><span id="vL"></span></div><input type="range" id="sL" min="20" max="150" step="1" value="64"></div>
+      <div class="ctl"><div class="r"><label for="sM">擺錘質量 m</label><span id="vM"></span></div><input type="range" id="sM" min="50" max="500" step="10" value="100"></div>
+      <div class="ctl"><div class="r"><label for="sA">擺角 θ₀</label><span id="vA"></span></div><input type="range" id="sA" min="2" max="60" step="1" value="8"></div>
+
+      <div class="lab" style="margin-top:12px">實驗地點</div>
+      <div class="seg" id="gBtns">
+        <button type="button" data-g="9.8" aria-pressed="true">地球 9.8</button>
+        <button type="button" data-g="3.71" aria-pressed="false">火星 3.71</button>
+        <button type="button" data-g="1.62" aria-pressed="false">月球 1.62</button>
+      </div>
+
+      <div class="seg" style="margin-top:14px">
+        <button type="button" class="primary" id="bMeasure">③ 放手並測 10 次全振動</button>
+        <button type="button" id="bFree">只放手看看</button>
+        <button type="button" id="bStop">停止</button>
+      </div>
+      <div class="lab" style="margin-top:12px">播放速度</div>
+      <div class="seg" id="spBtns">
+        <button type="button" data-sp="1" aria-pressed="true">1×（真實）</button>
+        <button type="button" data-sp="3" aria-pressed="false">3×</button>
+        <button type="button" data-sp="8" aria-pressed="false">8×</button>
+      </div>
+      <label class="tg"><input type="checkbox" id="tHuman" checked>手按碼表：開始和停止各有約 0.1 s 的反應誤差</label>
+      <label class="tg"><input type="checkbox" id="tTheo">顯示理論值（做完實驗再打開）</label>
+      <div class="note" id="explain"></div>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="lab" style="margin:0">實驗紀錄（黃色＝和上一筆相比改變的變因）</div>
+        <div class="seg"><button type="button" id="bBook">載入課本數據</button><button type="button" id="bClear">清除</button></div>
+      </div>
+      <div class="tblbox" style="margin-top:8px"><table>
+        <thead><tr><th>#</th><th>ℓ (cm)</th><th>m (g)</th><th>θ₀</th><th>g</th><th>10T (s)</th><th>T (s)</th><th style="text-align:left">控制變因檢查</th><th></th></tr></thead>
+        <tbody id="log"></tbody>
+      </table></div>
+      <div class="note" id="concl">⑤ 結論會在這裡出現：先選一個假說，再做幾組只改變那個變因的實驗。</div>
+    </div></section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>課本探究活動的數據 ℓ = 36.00、64.00、100.00 cm，T = 1.21、1.60、1.98 s：擺長變成 4 倍時週期約變成 2 倍，T 對 ℓ 的圖是彎曲的，T 對 √ℓ 的圖才是通過原點的直線，所以 T ∝ √ℓ。擺錘質量不影響週期；擺角在 10° 以下時週期幾乎不變（等時性），擺角很大時週期會略為變長，60° 約長 7%。測 10 次全振動再除以 10，可以把手按碼表的反應誤差也縮小為 1/10。由直線斜率 k（T = k√ℓ，ℓ 用公尺）還可以算出 g = 4π²/k²。本模擬忽略空氣阻力與擺線質量。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const TAU=Math.PI*2,D2R=Math.PI/180;
+const st={L:64,m:100,a:8,g:9.8,sp:1,hyp:null,theta:8*D2R,omega:0,running:false,measuring:false,
+  t:0,count:0,lastCross:null,crossTimes:[],startErr:0,drag:false,xAxis:'L',rows:[],trail:[],observed:false};
+
+// exact period with complete elliptic integral (AGM)
+function agm(a,b){for(let i=0;i<30;i++){const an=(a+b)/2,bn=Math.sqrt(a*b);a=an;b=bn;if(Math.abs(a-b)<1e-15)break;}return a;}
+function T0(L,g){return TAU*Math.sqrt(L/100/g);}
+function Texact(L,g,a){const k=Math.sin(a*D2R/2);return T0(L,g)/agm(1,Math.sqrt(1-k*k));}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(TAU*v);}
+
+// ---------- physics: θ'' = −(g/ℓ) sin θ ----------
+function acc(th){return -(st.g/(st.L/100))*Math.sin(th);}
+function step(dt){
+  const th=st.theta,w=st.omega;
+  const k1t=w,k1w=acc(th);
+  const k2t=w+k1w*dt/2,k2w=acc(th+k1t*dt/2);
+  const k3t=w+k2w*dt/2,k3w=acc(th+k2t*dt/2);
+  const k4t=w+k3w*dt,k4w=acc(th+k3t*dt);
+  const nt=th+dt*(k1t+2*k2t+2*k3t+k4t)/6,nw=w+dt*(k1w+2*k2w+2*k3w+k4w)/6;
+  // released at +θ0 moving toward negative: a full period ends when ω changes from + to −
+  if(w>0&&nw<=0){const f=w/(w-nw);const tc=st.t+f*dt;st.count++;st.crossTimes.push(tc);}
+  st.theta=nt;st.omega=nw;st.t+=dt;
+}
+
+// ---------- UI refs ----------
+const pend=$('pend'),graph=$('graph');
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+
+function geom(w,h){const px=w/2,py=34;const scale=(h-py-40)/150;return{px,py,scale,len:st.L*scale,r:5+Math.cbrt(st.m)*1.35};}
+function drawPend(){
+  const {x,w,h}=fit(pend);x.clearRect(0,0,w,h);
+  const G=geom(w,h);
+  // support
+  x.fillStyle='#8ea3bd';x.fillRect(G.px-70,G.py-10,140,8);
+  x.strokeStyle='rgba(255,255,255,.05)';x.lineWidth=1;
+  for(let i=-6;i<=6;i++){x.beginPath();x.moveTo(G.px+i*11,G.py-10);x.lineTo(G.px+i*11-7,G.py-18);x.stroke();}
+  // vertical reference
+  x.setLineDash([4,5]);x.strokeStyle='rgba(255,255,255,.18)';x.beginPath();x.moveTo(G.px,G.py);x.lineTo(G.px,G.py+G.len+30);x.stroke();x.setLineDash([]);
+  // protractor arc at release angle
+  const A=st.a*D2R;
+  x.strokeStyle='rgba(255,209,102,.35)';x.lineWidth=1.2;x.beginPath();x.arc(G.px,G.py,G.len,Math.PI/2-A,Math.PI/2+A);x.stroke();
+  // scale ticks every 10°
+  x.fillStyle='#5b6880';x.font='10px "JetBrains Mono"';x.textAlign='center';
+  for(let d=-60;d<=60;d+=10){const t=d*D2R;const r1=G.len+6,r2=G.len+(d%30===0?14:10);
+    x.strokeStyle='rgba(255,255,255,.15)';x.beginPath();x.moveTo(G.px+r1*Math.sin(t),G.py+r1*Math.cos(t));x.lineTo(G.px+r2*Math.sin(t),G.py+r2*Math.cos(t));x.stroke();
+    if(d%30===0&&d!==0&&G.len>80)x.fillText(Math.abs(d)+'°',G.px+(G.len+24)*Math.sin(t),G.py+(G.len+24)*Math.cos(t)+4);}
+  // trail
+  if(st.trail.length>1){x.lineWidth=2;for(let i=1;i<st.trail.length;i++){const p=st.trail[i-1],q=st.trail[i];x.strokeStyle=`rgba(67,214,255,${i/st.trail.length*.5})`;x.beginPath();x.moveTo(p[0],p[1]);x.lineTo(q[0],q[1]);x.stroke();}}
+  // string and bob
+  const bx=G.px+G.len*Math.sin(st.theta),by=G.py+G.len*Math.cos(st.theta);
+  x.strokeStyle='#c9d2dc';x.lineWidth=1.4;x.beginPath();x.moveTo(G.px,G.py);x.lineTo(bx,by);x.stroke();
+  // angle wedge
+  if(Math.abs(st.theta)>0.01){x.strokeStyle='rgba(255,209,102,.9)';x.lineWidth=1.5;x.beginPath();
+    const r=Math.min(40,G.len*.35);if(st.theta>0)x.arc(G.px,G.py,r,Math.PI/2-st.theta,Math.PI/2);else x.arc(G.px,G.py,r,Math.PI/2,Math.PI/2-st.theta);x.stroke();
+    x.fillStyle='#ffd166';x.font='12px "JetBrains Mono"';x.textAlign='center';const mid=st.theta/2;x.fillText('θ',G.px+(r+12)*Math.sin(mid),G.py+(r+12)*Math.cos(mid)+4);}
+  const grd=x.createRadialGradient(bx-G.r*.35,by-G.r*.35,1,bx,by,G.r);grd.addColorStop(0,'#bfefff');grd.addColorStop(1,'#1a8fc7');
+  x.fillStyle=grd;x.beginPath();x.arc(bx,by,G.r,0,TAU);x.fill();
+  x.fillStyle='#04121b';x.font='bold 10px "JetBrains Mono"';x.textAlign='center';x.fillText(st.m+'g',bx,by+3.5);
+  // length label
+  x.save();x.translate(G.px+(G.len/2)*Math.sin(st.theta)+(st.theta>=0?-10:10),G.py+(G.len/2)*Math.cos(st.theta));
+  x.fillStyle='#8492aa';x.font='12px "JetBrains Mono"';x.textAlign=st.theta>=0?'right':'left';x.fillText('ℓ='+st.L+' cm',0,0);x.restore();
+  if(st.g!==9.8){x.fillStyle='#8492aa';x.font='12px "Noto Sans TC"';x.textAlign='left';x.fillText(st.g===3.71?'火星表面':'月球表面',10,h-10);}
+}
+
+// ---------- graph ----------
+const XDEF={
+  L:{lab:'擺長 ℓ（cm）',v:r=>r.L},
+  sqrtL:{lab:'√ℓ（√m，ℓ 以公尺計）',v:r=>Math.sqrt(r.L/100)},
+  m:{lab:'擺錘質量 m（g）',v:r=>r.m},
+  a:{lab:'擺角 θ₀（°）',v:r=>r.a}
+};
+function niceMax(v){if(v<=0)return 1;const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p;}
+function drawGraph(){
+  const {x,w,h}=fit(graph);x.clearRect(0,0,w,h);
+  const rows=st.rows,D=XDEF[st.xAxis];
+  const L=50,R=16,T=18,B=40,pw=w-L-R,ph=h-T-B;
+  const xmax=niceMax(Math.max(st.xAxis==='sqrtL'?Math.sqrt(1.5):st.xAxis==='L'?150:st.xAxis==='m'?500:60,...rows.map(D.v))*1.0);
+  const ymax=Math.ceil(Math.max(2.5,...rows.map(r=>r.T))*1.1*2)/2;
+  const X=v=>L+v/xmax*pw,Y=v=>T+ph-v/ymax*ph;
+  x.strokeStyle='rgba(255,255,255,.07)';x.fillStyle='#6b7893';x.font='11px "JetBrains Mono"';x.lineWidth=1;
+  const nx=5,ny=5;
+  x.textAlign='center';for(let i=0;i<=nx;i++){const v=xmax*i/nx;x.beginPath();x.moveTo(X(v),T);x.lineTo(X(v),T+ph);x.stroke();x.fillText(+v.toFixed(2),X(v),h-B+15);}
+  x.textAlign='right';for(let i=0;i<=ny;i++){const v=ymax*i/ny;x.beginPath();x.moveTo(L,Y(v));x.lineTo(L+pw,Y(v));x.stroke();x.fillText(v.toFixed(1),L-6,Y(v)+4);}
+  x.strokeStyle='rgba(255,255,255,.3)';x.beginPath();x.moveTo(L,T);x.lineTo(L,T+ph);x.lineTo(L+pw,T+ph);x.stroke();
+  x.textAlign='center';x.fillStyle='#8492aa';x.font='12px "Noto Sans TC"';x.fillText(D.lab,L+pw/2,h-6);
+  x.save();x.translate(13,T+ph/2);x.rotate(-Math.PI/2);x.fillText('週期 T（s）',0,0);x.restore();
+  const fitR=analyse();
+  if(fitR&&fitR.kind==='sqrt'){
+    x.strokeStyle='rgba(125,255,196,.8)';x.lineWidth=1.6;x.setLineDash([6,5]);x.beginPath();
+    for(let i=0;i<=80;i++){const xv=xmax*i/80;const Lcm=st.xAxis==='L'?xv:xv*xv*100;const y=fitR.k*Math.sqrt(Lcm/100);i?x.lineTo(X(xv),Y(y)):x.moveTo(X(xv),Y(y));}
+    x.stroke();x.setLineDash([]);
+  }
+  if(fitR&&fitR.kind==='flat'){x.strokeStyle='rgba(125,255,196,.7)';x.setLineDash([6,5]);x.beginPath();x.moveTo(L,Y(fitR.mean));x.lineTo(L+pw,Y(fitR.mean));x.stroke();x.setLineDash([]);}
+  rows.forEach((r,i)=>{const cx=X(D.v(r)),cy=Y(r.T);x.fillStyle=r.book?'#ffd166':'#43d6ff';x.beginPath();x.arc(cx,cy,5,0,TAU);x.fill();x.strokeStyle='#04060b';x.lineWidth=1.5;x.stroke();
+    x.fillStyle='#8492aa';x.font='10px "JetBrains Mono"';x.textAlign='left';x.fillText(i+1,cx+7,cy-6);});
+}
+
+// Find rows that differ only in the chosen x variable (same other variables and same g)
+function groupFor(v){
+  const key=r=>[v!=='L'?r.L:'*',v!=='m'?r.m:'*',v!=='a'?r.a:'*',r.g].join('|');
+  const groups={};st.rows.forEach(r=>{(groups[key(r)]=groups[key(r)]||[]).push(r);});
+  let best=[];Object.values(groups).forEach(gp=>{const uniq=new Set(gp.map(r=>r[v]));if(uniq.size>best.length)best=gp;});
+  return best;
+}
+function analyse(){
+  const v=st.xAxis==='sqrtL'?'L':st.xAxis;
+  const gp=groupFor(v);const uniq=new Set(gp.map(r=>r[v]));
+  if(uniq.size<3)return null;
+  const Ts=gp.map(r=>r.T),mean=Ts.reduce((a,b)=>a+b,0)/Ts.length;
+  const spread=(Math.max(...Ts)-Math.min(...Ts))/mean;
+  if(v==='L'){ // least squares through origin: T = k√(ℓ/m)
+    let sxy=0,sxx=0;gp.forEach(r=>{const s=Math.sqrt(r.L/100);sxy+=s*r.T;sxx+=s*s;});const k=sxy/sxx;
+    // compare with straight line T = bℓ + c by R² of linear fit in ℓ
+    const xs=gp.map(r=>r.L),n=xs.length,mx=xs.reduce((a,b)=>a+b,0)/n;
+    let sxy2=0,sxx2=0;xs.forEach((xv,i)=>{sxy2+=(xv-mx)*(Ts[i]-mean);sxx2+=(xv-mx)*(xv-mx);});
+    const b=sxy2/sxx2,c=mean-b*mx;
+    return {kind:'sqrt',k,g:4*Math.PI*Math.PI/(k*k),gp,n:gp.length,b,c,gval:gp[0].g};
+  }
+  return {kind:spread<0.03?'flat':'vary',mean,spread,gp,v};
+}
+function fitText(){
+  const r=analyse(),el=$('fitNote');el.className='note';
+  if(!r){el.innerHTML=st.rows.length<3?'至少記錄 3 筆資料後，這裡會分析圖形。':`要分析「${XDEF[st.xAxis].lab.split('（')[0]}」，需要至少 3 筆<b>只有這個變因不同</b>、其他條件都相同的資料。`;return;}
+  if(r.kind==='sqrt'){
+    const bend=r.c>0.05?'（直線外插到 ℓ = 0 時 T ≠ 0，所以 T 和 ℓ 不是正比）':'';
+    el.className='note good';
+    el.innerHTML=st.xAxis==='L'
+      ?`T 對 ℓ 的圖是<b>彎曲</b>的${bend}。改用 √ℓ 當橫軸試試看！虛線是 T = k√ℓ 的最佳擬合。`
+      :`T 對 √ℓ 是一條<b>通過原點的直線</b>，所以 <b>T ∝ √ℓ</b>。斜率 k = ${r.k.toFixed(3)} s/√m，可推得 g = 4π²/k² ≈ <b>${r.g.toFixed(2)} m/s²</b>（設定值 ${r.gval}）。`;
+  }else if(r.kind==='flat'){el.className='note good';el.innerHTML=`改變${r.v==='m'?'擺錘質量':'擺角'}時，週期幾乎不變（差異 ${(r.spread*100).toFixed(1)}%，在測量誤差範圍內）。平均 T = <b>${r.mean.toFixed(2)} s</b>。`;}
+  else{el.innerHTML=`改變${r.v==='m'?'擺錘質量':'擺角'}時，週期的差異約 ${(r.spread*100).toFixed(1)}%。${r.v==='a'?'擺角很大時，週期會<b>略為變長</b>；擺角在 10° 以下時幾乎看不出差別。':'差異比預期大，檢查一下其他變因是否保持相同？'}`;}
+}
+
+// ---------- conclusion ----------
+function conclusion(){
+  const el=$('concl');el.className='note';
+  if(!st.hyp){el.innerHTML='⑤ 結論會在這裡出現：先選一個假說，再做幾組只改變那個變因的實驗。';return 0;}
+  const name={L:'擺長',m:'擺錘質量',a:'擺角'}[st.hyp];
+  const gp=groupFor(st.hyp),uniq=new Set(gp.map(r=>r[st.hyp]));
+  if(uniq.size<3){el.innerHTML=`假說：週期和<b>${name}</b>有關。請保持其他變因不變，只改變${name}，做至少 3 組不同的${name}（目前 ${uniq.size} 組）。`;return 1;}
+  const Ts=gp.map(r=>r.T),mean=Ts.reduce((a,b)=>a+b,0)/Ts.length,spread=(Math.max(...Ts)-Math.min(...Ts))/mean;
+  if(st.hyp==='L'){el.className='note good';el.innerHTML=`<b>假說成立</b>：擺長越長，週期越長。把橫軸改成 √ℓ 可以看出 T ∝ √ℓ。`;}
+  else if(st.hyp==='m'){el.className=spread<0.03?'note warn':'note';el.innerHTML=spread<0.03?`<b>假說不成立</b>：質量從 ${Math.min(...gp.map(r=>r.m))} g 改到 ${Math.max(...gp.map(r=>r.m))} g，週期差異只有 ${(spread*100).toFixed(1)}%，在測量誤差內。回到「提出假說」，換另一個變因試試。`:`週期差異 ${(spread*100).toFixed(1)}%，檢查是否不小心同時改了別的變因。`;}
+  else{const amax=Math.max(...gp.map(r=>r.a));
+    if(amax<=12){el.className='note warn';el.innerHTML=`在小擺角（≤ ${amax}°）範圍內，<b>週期幾乎不變</b>（差異 ${(spread*100).toFixed(1)}%），這就是單擺的<b>等時性</b>。可以再試試 30°、60° 這種大擺角。`;}
+    else{el.className='note';el.innerHTML=`擺角小時週期幾乎相同；擺角大到 ${amax}° 時週期<b>略為變長</b>（差異 ${(spread*100).toFixed(1)}%）。所以「週期和擺角有關」只在大擺角時才明顯，課本實驗要求 θ < 10°。`;}}
+  return 2;
+}
+function steps(){
+  const c=conclusion();
+  let s=0;if(st.observed)s=1;if(st.hyp)s=2;if(st.rows.length)s=3;if(c===2)s=4;
+  document.querySelectorAll('#steps span').forEach((e,i)=>{e.className=i<s?'done':i===s?'on':'';});
+}
+
+// ---------- table ----------
+function changed(r,p){if(!p)return [];const c=[];if(r.L!==p.L)c.push('L');if(r.m!==p.m)c.push('m');if(r.a!==p.a)c.push('a');if(r.g!==p.g)c.push('g');return c;}
+function renderLog(){
+  const tb=$('log');tb.innerHTML='';
+  st.rows.forEach((r,i)=>{const c=changed(r,st.rows[i-1]);const tr=document.createElement('tr');
+    const cls=k=>c.includes(k)?' class="chg"':'';
+    let chk;if(i===0)chk='第一筆';else if(c.length===0)chk='重複測量';else if(c.length===1)chk='只改變 '+({L:'擺長',m:'質量',a:'擺角',g:'地點'})[c[0]]+' ✓';else chk='同時改了 '+c.length+' 個變因 ✗';
+    tr.innerHTML=`<td>${i+1}</td><td${cls('L')}>${r.L.toFixed(2)}</td><td${cls('m')}>${r.m}</td><td${cls('a')}>${r.a}°</td><td${cls('g')}>${r.g}</td><td>${r.book?'—':r.t10.toFixed(2)}</td><td>${r.T.toFixed(2)}</td><td class="zh${c.length>1?' bad':''}">${r.book?'課本數據':chk}</td><td><button type="button" aria-label="刪除第 ${i+1} 筆">×</button></td>`;
+    tr.querySelector('button').onclick=()=>{st.rows.splice(i,1);refresh();};
+    tb.appendChild(tr);});
+  if(!st.rows.length)tb.innerHTML='<tr><td colspan="9" class="zh" style="text-align:center;padding:14px">還沒有資料</td></tr>';
+}
+
+// ---------- controls ----------
+function readouts(){
+  $('vL').textContent=st.L+' cm';$('vM').textContent=st.m+' g';$('vA').textContent=st.a+'°';
+  $('rClock').innerHTML=(st.measuring||st.lastMeasure!=null?(st.measuring?Math.max(0,st.t-st.startErr):st.lastMeasure).toFixed(2):'0.00')+' <span class="u">s</span>';
+  $('rCount').innerHTML=st.count+' <span class="u">次</span>';
+  $('rTheta').textContent=(st.theta/D2R).toFixed(1)+'°';
+  $('rSpeed').innerHTML=Math.abs(st.omega*st.L/100).toFixed(2)+' <span class="u">m/s</span>';
+  const show=$('tTheo').checked;$('rTheoBox').hidden=!show;
+  if(show){const a=T0(st.L,st.g),b=Texact(st.L,st.g,st.a);$('rTheo').innerHTML=`${a.toFixed(3)} s｜${b.toFixed(3)} s <span class="u">（長 ${((b/a-1)*100).toFixed(2)}%）</span>`;}
+  ['sL','sM','sA'].forEach(id=>$(id).disabled=st.running);
+  $('bMeasure').disabled=st.running;$('bFree').disabled=st.running;$('bStop').disabled=!st.running;
+  $('pendNote').textContent=st.running?(st.measuring?'測量中…數到第 10 次全振動就停錶':'自由擺動中'):'拖曳擺錘設定擺角，再按「放手」';
+}
+function explain(){
+  const el=$('explain');
+  if(st.measuring){el.innerHTML=`擺錘從右側最高點放手時按下碼表，每回到右側最高點一次算<b>一次全振動</b>。數到第 10 次再停錶。`;return;}
+  const last=st.rows[st.rows.length-1];
+  if(last&&!last.book){el.innerHTML=`第 ${st.rows.length} 筆：10T = ${last.t10.toFixed(2)} s → T = ${last.T.toFixed(3)} s。${$('tHuman').checked?'碼表的反應誤差約 ±0.1 s，除以 10 之後只剩 ±0.01 s 左右。':''}下一步：<b>只改變一個變因</b>再測一次。`;return;}
+  el.innerHTML='先按「只放手看看」觀察單擺，再選一個假說。測量時，擺角保持在 10° 以下比較準確。';
+}
+function refresh(){readouts();renderLog();drawGraph();fitText();explain();steps();}
+
+function release(measure){
+  st.theta=st.a*D2R;st.omega=0;st.t=0;st.count=0;st.crossTimes=[];st.trail=[];
+  st.running=true;st.measuring=measure;st.lastMeasure=null;st.observed=true;
+  st.startErr=$('tHuman').checked?gauss()*0.08:0;st.stopErr=$('tHuman').checked?gauss()*0.08:0;
+  refresh();
+}
+function stop(){st.running=false;st.measuring=false;st.theta=st.a*D2R;st.omega=0;st.trail=[];refresh();}
+function finishMeasure(){
+  const t10=st.crossTimes[9]-st.startErr+st.stopErr;
+  st.rows.push({L:st.L,m:st.m,a:st.a,g:st.g,t10,T:t10/10});
+  st.lastMeasure=t10;st.measuring=false;st.running=false;st.theta=st.a*D2R;st.omega=0;st.trail=[];
+  refresh();
+  const tb=document.querySelector('.tblbox');tb.scrollTop=tb.scrollHeight;
+}
+
+['L','M','A'].forEach(k=>{$('s'+k).oninput=e=>{const v=+e.target.value;if(k==='L')st.L=v;if(k==='M')st.m=v;if(k==='A'){st.a=v;}if(!st.running){st.theta=st.a*D2R;st.omega=0;}refresh();};});
+function segWire(id,attr,fn){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#'+id+' button').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));fn(b.dataset[attr]);});}
+segWire('gBtns','g',v=>{if(st.running)stop();st.g=+v;refresh();});
+segWire('spBtns','sp',v=>{st.sp=+v;});
+segWire('xBtns','x',v=>{st.xAxis=v;refresh();});
+segWire('hypBtns','h',v=>{st.hyp=v;refresh();});
+$('bMeasure').onclick=()=>release(true);
+$('bFree').onclick=()=>release(false);
+$('bStop').onclick=stop;
+$('tTheo').onchange=refresh;
+$('bClear').onclick=()=>{st.rows=[];st.lastMeasure=null;refresh();};
+$('bBook').onclick=()=>{[[36,1.21],[64,1.60],[100,1.98]].forEach(([L,T])=>st.rows.push({L,m:100,a:8,g:9.8,t10:T*10,T,book:true}));
+  st.xAxis='L';document.querySelectorAll('#xBtns button').forEach(o=>o.setAttribute('aria-pressed',String(o.dataset.x==='L')));refresh();};
+
+// drag bob to set angle
+function angleFromEvent(e){const r=pend.getBoundingClientRect();const G=geom(r.width,r.height);const dx=e.clientX-r.left-G.px,dy=e.clientY-r.top-G.py;let a=Math.atan2(dx,dy)/D2R;return a;}
+pend.addEventListener('pointerdown',e=>{if(st.running)return;const r=pend.getBoundingClientRect();const G=geom(r.width,r.height);
+  const bx=G.px+G.len*Math.sin(st.theta),by=G.py+G.len*Math.cos(st.theta);
+  if(Math.hypot(e.clientX-r.left-bx,e.clientY-r.top-by)<G.r+18){st.drag=true;pend.setPointerCapture(e.pointerId);pend.style.cursor='grabbing';}});
+pend.addEventListener('pointermove',e=>{if(!st.drag)return;let a=Math.round(Math.abs(angleFromEvent(e)));a=Math.max(2,Math.min(60,a));st.a=a;$('sA').value=a;st.theta=a*D2R;refresh();});
+const endDrag=()=>{if(st.drag){st.drag=false;pend.style.cursor='grab';}};
+pend.addEventListener('pointerup',endDrag);pend.addEventListener('pointercancel',endDrag);
+
+// ---------- loop ----------
+let last=performance.now();
+function loop(now){
+  let dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(st.running){
+    let sim=dt*st.sp;const h=0.0005;
+    while(sim>1e-9){const s=Math.min(h,sim);step(s);sim-=s;
+      if(st.measuring&&st.count>=10){finishMeasure();break;}}
+    if(st.running){const r=pend.getBoundingClientRect();const G=geom(r.width,r.height);st.trail.push([G.px+G.len*Math.sin(st.theta),G.py+G.len*Math.cos(st.theta)]);if(st.trail.length>40)st.trail.shift();}
+    readouts();
+  }
+  drawPend();
+  requestAnimationFrame(loop);
+}
+addEventListener('resize',()=>{drawGraph();});
+refresh();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
