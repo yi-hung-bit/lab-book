@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>直尺讀數：準確值與估計值</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--teal:#4fd1c5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:pan-y}
+#cv{height:360px}
+@media(max-width:560px){#cv{height:330px}}
+.ctlwrap{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctlwrap{grid-template-columns:1fr}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.tg{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);cursor:pointer;margin-top:10px}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+.ans{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ans label{font-size:14px}
+.ans input[type=text]{font-family:"JetBrains Mono",monospace;font-size:18px;width:130px;max-width:44vw;padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:#05080f;color:var(--txt)}
+.ans input:focus{outline:2px solid var(--acc);outline-offset:1px}
+.fb{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid var(--line);background:#0a0f1a;color:var(--muted);min-height:48px}
+.fb.ok{border-color:#1f6f55;background:#071a14;color:#bff5dc}
+.fb.mid{border-color:#7a6320;background:#1a1505;color:#ffe7a3}
+.fb.bad{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.rd{font-family:"JetBrains Mono",monospace;font-size:24px;font-weight:700;letter-spacing:.02em}
+.rd .a{color:var(--teal)}.rd .e{color:var(--red)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.stat{display:flex;gap:18px;flex-wrap:wrap;margin-top:6px}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:18px;color:var(--phos);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500;font-size:12px}
+td{font-family:"JetBrains Mono",monospace}
+td.zh{font-family:"Noto Sans TC",sans-serif}
+tr.off td{color:var(--dim);text-decoration:line-through}
+tr.off td.zh,tr.off td:last-child{text-decoration:none}
+tr.warn td:nth-child(2){color:var(--red)}
+td input{width:17px;height:17px;accent-color:var(--acc);vertical-align:middle}
+.calc{margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:13.5px;line-height:1.9;color:var(--txt);overflow-wrap:anywhere}
+.calc .res{color:var(--phos);font-size:18px;font-weight:700}
+.add{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.add input{font-family:"JetBrains Mono",monospace;font-size:15px;width:110px;padding:5px 9px;border-radius:9px;border:1px solid var(--line);background:#05080f;color:var(--txt)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 1-1 · 長度的測量</div>
+  <h1>直尺讀數：準確值與估計值</h1>
+  <p class="lede">測量結果要寫出<b style="color:var(--acc);font-weight:500">數值和單位</b>。數值由一組<span style="color:var(--teal)">準確值</span>和一位<span style="color:var(--red)">估計值</span>組成：準確值記錄到尺的最小刻度，估計值是最小刻度的下一位。換一把最小刻度更小的尺，讀數就能多一位。</p>
+
+  <div class="modebar" role="group" aria-label="模式">
+    <button type="button" data-m="read" aria-pressed="true">① 讀直尺</button>
+    <button type="button" data-m="avg" aria-pressed="false">② 多次測量求平均（例 2）</button>
+  </div>
+
+  <!-- ===== mode 1 ===== -->
+  <div id="mRead">
+    <section class="card" style="margin-top:14px">
+      <div class="head"><span class="t">直尺與放大圖</span><span class="n" id="cvNote">放大圖是框起來的那一段</span></div>
+      <div class="box"><canvas id="cv" aria-label="直尺與待測物，下方為末端放大圖"></canvas></div>
+    </section>
+
+    <div class="ctlwrap">
+      <section class="card"><div class="pad">
+        <div class="lab">直尺的最小刻度</div>
+        <div class="seg" id="scaleBtns">
+          <button type="button" data-d="1" aria-pressed="true">1 cm（只有公分刻度）</button>
+          <button type="button" data-d="0.1" aria-pressed="false">0.1 cm（有毫米刻度）</button>
+        </div>
+        <div class="lab" style="margin-top:12px">待測物</div>
+        <div class="seg" id="objBtns">
+          <button type="button" data-o="pencil" aria-pressed="true">鉛筆</button>
+          <button type="button" data-o="eraser" aria-pressed="false">橡皮擦</button>
+          <button type="button" data-o="clip" aria-pressed="false">迴紋針</button>
+        </div>
+        <label class="tg"><input type="checkbox" id="tShift">起點不對齊 0（左端對齊其他整數刻度）</label>
+        <div class="ans">
+          <label for="inp">這個物體的長度 =</label>
+          <input type="text" id="inp" inputmode="decimal" autocomplete="off" placeholder="例 14.7">
+          <span>cm</span>
+        </div>
+        <div class="seg" style="margin-top:10px">
+          <button class="primary" id="check">檢查讀數</button>
+          <button id="reveal">看標準讀法</button>
+          <button id="next">換一個長度</button>
+        </div>
+        <div class="fb" id="fb" aria-live="polite">先看放大圖，從尺上讀出物體的長度，輸入後按「檢查讀數」。</div>
+      </div></section>
+
+      <section class="card"><div class="pad">
+        <div class="lab">這把尺應該讀到哪一位？</div>
+        <div class="stat">
+          <div>最小刻度<b id="sD">1 cm</b></div>
+          <div>準確值記到<b id="sA">個位</b></div>
+          <div>估計值在<b id="sE">0.1 位</b></div>
+        </div>
+        <div class="note" id="explain"></div>
+        <div class="stat" style="margin-top:12px">
+          <div>本回合答對<b id="score">0 / 0</b></div>
+        </div>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== mode 2 ===== -->
+  <div id="mAvg" hidden>
+    <div class="ctlwrap" style="margin-top:14px">
+      <section class="card"><div class="pad">
+        <div class="lab" id="avgTitle">五位同學用最小刻度 0.1 cm 的直尺測量同一本課本的寬度</div>
+        <table><thead><tr><th>測量者</th><th>讀數（cm）</th><th>採用</th></tr></thead><tbody id="tb"></tbody></table>
+        <div class="add">
+          <input type="text" id="addInp" inputmode="decimal" placeholder="19.12" aria-label="新增一筆讀數">
+          <button id="addBtn">新增一筆</button>
+        </div>
+        <div class="seg" style="margin-top:10px">
+          <button id="useEx">課本例 2 的數據</button>
+          <button id="genNew">產生新的一組</button>
+          <button id="clrAll">清空</button>
+        </div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="lab">平均值 = 合理測量結果值的總和 ÷ 測量次數</div>
+        <div class="calc" id="calc"></div>
+        <div class="note" id="avgNote"></div>
+      </div></section>
+    </div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>課本圖 1-2 用最小刻度 1 cm 的尺量鉛筆得 14.7 cm（14 為準確值、0.7 為估計值），換成最小刻度 0.1 cm 的尺得 14.74 cm。末端剛好對齊刻度時，估計值要寫 0，例如 14.70 cm，不能寫成 14.7 cm——少寫的 0 會讓人以為用的是最小刻度 1 cm 的尺。估計值因人而異，所以同學之間最後一位差 1、2 是正常的；差很多的數據（例如例 2 的 29.00 cm）是操作或記錄錯誤，要先刪除再求平均。在「② 多次測量求平均」可以按「產生新的一組」反覆練習找出異常值，也可以輸入全班實際量到的數據。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const cv=$('cv');
+const RMAX=20; // ruler 0–20 cm
+const OBJ={pencil:{name:'鉛筆',min:8,max:17.5},eraser:{name:'橡皮擦',min:3,max:6.5},clip:{name:'迴紋針',min:2.6,max:5}};
+const st={mode:'read',d:1,obj:'pencil',shift:false,start:0,L:14.736,tries:0,right:0,answered:false,log:[]};
+
+// ---------- number helpers ----------
+const dp=d=>d===1?1:2;                 // digits after the point for a correct reading
+const fmt=(v,n)=>v.toFixed(n);
+function decOf(s){const m=/\.(\d*)$/.exec(s);return m?m[1].length:0;}
+function stdReading(L,d){ // what a careful reader writes: accurate part + 1 estimated digit
+  return Math.round(L/(d/10))*(d/10);}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+function newLength(){
+  const o=OBJ[st.obj];
+  let L;
+  // 1 in 6 chance: end sits (almost) exactly on a mark, to practise writing the trailing 0
+  if(Math.random()<1/6){L=Math.round(rnd(o.min,o.max)*(st.d===1?1:10))/(st.d===1?1:10);L+=rnd(-.004,.004);}
+  else L=rnd(o.min,o.max);
+  st.L=Math.round(L*1000)/1000;
+  st.start=st.shift?Math.floor(rnd(1,Math.max(1.01,RMAX-st.L-0.5))):0;
+  st.answered=false;$('inp').value='';
+  setFb('先看放大圖，從尺上讀出物體的長度，輸入後按「檢查讀數」。','');
+  draw();ui();
+}
+
+// ---------- canvas ----------
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+
+function drawObject(x,kind,x0,x1,yc,hh){ // draws object from x0 (left) to x1 (right)
+  const len=x1-x0;
+  x.save();
+  if(kind==='pencil'){
+    const tip=Math.min(len*.16,hh*2.6),ferr=Math.min(len*.07,hh*1.2);
+    // eraser + ferrule on left
+    x.fillStyle='#f29bb0';x.fillRect(x0,yc-hh/2,ferr*.7,hh);
+    x.fillStyle='#b8bcc6';x.fillRect(x0+ferr*.7,yc-hh/2,ferr*.5,hh);
+    // body
+    const bx=x0+ferr*1.2,bw=len-ferr*1.2-tip;
+    const g=x.createLinearGradient(0,yc-hh/2,0,yc+hh/2);g.addColorStop(0,'#3b4252');g.addColorStop(.5,'#2a303c');g.addColorStop(1,'#1b1f27');
+    x.fillStyle=g;x.fillRect(bx,yc-hh/2,bw,hh);
+    // wood cone
+    x.fillStyle='#e6b98a';x.beginPath();x.moveTo(bx+bw,yc-hh/2);x.lineTo(x1,yc);x.lineTo(bx+bw,yc+hh/2);x.closePath();x.fill();
+    // lead
+    x.fillStyle='#222';x.beginPath();const lt=tip*.3;x.moveTo(x1-lt,yc-hh*.5*lt/tip);x.lineTo(x1,yc);x.lineTo(x1-lt,yc+hh*.5*lt/tip);x.closePath();x.fill();
+  }else if(kind==='eraser'){
+    x.fillStyle='#f4f1ea';x.fillRect(x0,yc-hh/2,len,hh);
+    x.fillStyle='#3d7be0';x.fillRect(x0+len*.12,yc-hh/2,len*.62,hh);
+    x.fillStyle='#fff';x.font=`700 ${Math.max(8,hh*.42)}px "Noto Sans TC",sans-serif`;x.textAlign='center';x.textBaseline='middle';
+    if(len>40)x.fillText('ERASER',x0+len*.43,yc+1);
+  }else{ // paper clip
+    x.strokeStyle='#c9d1dc';x.lineWidth=Math.max(1.6,hh*.13);x.lineJoin='round';
+    x.beginPath();
+    rr(x,x0,yc-hh*.42,len,hh*.84,hh*.42);x.stroke();
+    x.beginPath();rr(x,x0+len*.12,yc-hh*.24,len*.78,hh*.48,hh*.24);x.stroke();
+  }
+  x.restore();
+}
+function rr(x,a,b,w,h,r){r=Math.min(r,w/2,h/2);x.moveTo(a+r,b);x.lineTo(a+w-r,b);x.arc(a+w-r,b+r,r,-Math.PI/2,0);x.lineTo(a+w,b+h-r);x.arc(a+w-r,b+h-r,r,0,Math.PI/2);x.lineTo(a+r,b+h);x.arc(a+r,b+h-r,r,Math.PI/2,Math.PI);x.lineTo(a,b+r);x.arc(a+r,b+r,r,Math.PI,1.5*Math.PI);}
+
+function drawRuler(x,X,y,h,c0,c1,d,big){ // X(cm)->px ; ruler body from y to y+h ; ticks hang from top edge
+  const xa=X(c0),xb=X(c1);
+  const g=x.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'#f7f3e3');g.addColorStop(1,'#e6dfc4');
+  x.fillStyle=g;x.fillRect(xa,y,xb-xa,h);
+  x.strokeStyle='#1d1d1d';x.lineWidth=big?1.4:1;
+  const step=d===1?1:0.1;
+  const n0=Math.ceil(c0/step-1e-9),n1=Math.floor(c1/step+1e-9);
+  x.fillStyle='#1d1d1d';x.textAlign='center';x.textBaseline='top';
+  x.font=`600 ${big?15:10}px "JetBrains Mono",monospace`;
+  const pxPerCm=X(1)-X(0);
+  const every=pxPerCm<14?5:pxPerCm<22?2:1;
+  for(let k=n0;k<=n1;k++){
+    const cm=k*step,px=X(cm);
+    const isCm=Math.abs(cm-Math.round(cm))<1e-6,isHalf=d!==1&&Math.abs(cm*2-Math.round(cm*2))<1e-6;
+    const L=isCm?h*.42:isHalf?h*.3:h*.2;
+    x.beginPath();x.moveTo(px,y);x.lineTo(px,y+L);x.stroke();
+    if(isCm&&(Math.round(cm)%every===0)&&(!big||(px>xa+12&&px<xb-12)))x.fillText(String(Math.round(cm)),px,y+L+2);
+  }
+  if(!big){x.font='600 9px "JetBrains Mono",monospace';x.textAlign='right';x.fillText('cm',xb-3,y+h-12);}
+}
+
+function draw(){
+  const {x,w,h}=fit(cv);
+  if(w<120||h<120)return;
+  x.clearRect(0,0,w,h);
+  const d=st.d,S=st.start,E=S+st.L;
+  // ---------- top: whole ruler ----------
+  const m=14,top=26,rH=h*.13,objH=Math.max(14,h*.065);
+  const X=cm=>m+(w-2*m)*(cm+0.4)/(RMAX+0.8);
+  x.fillStyle='#8492aa';x.font='12px "Noto Sans TC",sans-serif';x.textAlign='left';x.textBaseline='alphabetic';
+  x.fillText(`整把尺（0–${RMAX} cm，最小刻度 ${d===1?'1 cm':'0.1 cm'}）`,m,16);
+  const objY=top+objH/2+2;
+  const rulerY=top+objH+6;
+  drawRuler(x,X,rulerY,rH,-0.4,RMAX+0.4,d,false);
+  drawObject(x,st.obj,X(S),X(E),objY,objH);
+  // alignment line at start
+  x.strokeStyle='rgba(67,214,255,.7)';x.setLineDash([3,3]);x.beginPath();x.moveTo(X(S),objY-objH/2-4);x.lineTo(X(S),rulerY+rH*.45);x.stroke();x.setLineDash([]);
+  // zoom window region
+  const win=3;let z0=Math.floor(E)-1;z0=Math.max(-0.4,Math.min(RMAX+0.4-win,z0));
+  if(E-z0<0.6)z0=E-1.5;if(z0+win-E<0.6)z0=E-win+1.5;
+  const z1=z0+win;
+  x.strokeStyle='#ffd166';x.lineWidth=1.5;x.strokeRect(X(z0),objY-objH/2-5,X(z1)-X(z0),rulerY+rH-(objY-objH/2-5)+3);
+  // ---------- bottom: magnified ----------
+  const bTop=rulerY+rH+30,bH=h-bTop-10;
+  const zx=m+4,zw=w-2*m-8;
+  const Z=cm=>zx+zw*(cm-z0)/win;
+  // connector
+  x.strokeStyle='rgba(255,209,102,.45)';x.lineWidth=1;
+  x.beginPath();x.moveTo(X(z0),rulerY+rH+3);x.lineTo(zx,bTop);x.moveTo(X(z1),rulerY+rH+3);x.lineTo(zx+zw,bTop);x.stroke();
+  x.save();x.beginPath();rr(x,zx,bTop,zw,bH,12);x.clip();
+  x.fillStyle='#0b1220';x.fillRect(zx,bTop,zw,bH);
+  const bObjH=Math.min(bH*.32,64),bObjY=bTop+bObjH/2+16,bRulY=bObjY+bObjH/2+8,bRH=bH-(bRulY-bTop)-6;
+  drawRuler(x,Z,bRulY,bRH,z0-0.05,z1+0.05,d,true);
+  // object in zoom: draw full object with same scale (clipped)
+  drawObject(x,st.obj,Z(S),Z(E),bObjY,bObjH);
+  // end guide line
+  x.strokeStyle='rgba(255,122,122,.9)';x.setLineDash([5,4]);x.lineWidth=1.3;
+  x.beginPath();x.moveTo(Z(E),bTop+6);x.lineTo(Z(E),bRulY+bRH*.62);x.stroke();x.setLineDash([]);
+  x.restore();
+  x.strokeStyle='#ffd166';x.lineWidth=1.5;x.beginPath();rr(x,zx,bTop,zw,bH,12);x.stroke();
+  x.fillStyle='#ffd166';x.font='12px "Noto Sans TC",sans-serif';x.textAlign='left';x.textBaseline='alphabetic';
+  x.fillText('放大圖（末端）',zx+2,bTop-8);
+  if(st.answered){ // show answer marker in zoom
+    const R=stdReading(st.L,d)+S;
+    x.fillStyle='#ff7a7a';x.textAlign='right';x.fillText(`末端在 ${fmt(R,dp(d))} cm 處`,zx+zw-2,bTop-8);
+  }
+}
+
+// ---------- check ----------
+function setFb(html,cls){const f=$('fb');f.className='fb'+(cls?' '+cls:'');f.innerHTML=html;}
+function readingHTML(v,d){const s=fmt(v,dp(d));return `<span class="rd"><span class="a">${s.slice(0,-1)}</span><span class="e">${s.slice(-1)}</span> cm</span>`;}
+function check(){
+  const raw=$('inp').value.trim().replace(/[，,]/g,'.').replace(/\s*cm$/i,'');
+  if(!/^\d+(\.\d*)?$/.test(raw)){setFb('請輸入一個數字，例如 14.7（單位已經是 cm）。','bad');return;}
+  const v=parseFloat(raw),d=st.d,need=dp(d),got=decOf(raw);
+  const L=st.L,std=stdReading(L,d);
+  const acc=Math.floor(L/d+1e-9)*d;
+  const nearMark=Math.abs(L/d-Math.round(L/d))<0.06; // end very close to a mark
+  const accOK=Math.abs(Math.floor(v/d+1e-9)*d-acc)<1e-9||(nearMark&&Math.abs(Math.round(v/d)*d-Math.round(L/d)*d)<1e-9);
+  const err=Math.abs(v-L)/d; // in units of smallest division
+  st.tries++;
+  let cls,msg;
+  const shiftHint=st.shift?`<br>起點對齊 ${st.start} cm，所以長度 = 末端讀數 − ${st.start} cm。`:'';
+  if(got<need){
+    cls='bad';
+    if(Math.abs(v-std)<1e-9||(got===need-1&&Math.abs(v-std)<d/10*0.6)){
+      msg=`數值大致對，但<b>少寫了估計值</b>。最小刻度 ${d===1?'1 cm':'0.1 cm'} 的尺要讀到小數第 ${need} 位，即使剛好對齊刻度也要補 0，例如 ${readingHTML(std,d)}`;
+    }else msg=`位數不夠：這把尺最小刻度是 ${d===1?'1 cm':'0.1 cm'}，讀數要寫到小數第 ${need} 位（準確值 + 一位估計值）。`+shiftHint;
+  }else if(got>need){
+    cls='bad';msg=`估計值只能有一位。最小刻度 ${d===1?'1 cm':'0.1 cm'} 的尺讀到小數第 ${need} 位就好，再多寫的數字都是猜的，沒有意義。`;
+  }else if(!accOK){
+    cls='bad';msg=`<b>準確值</b>讀錯了：末端落在 ${fmt(acc+st.start,d===1?0:1)} 和 ${fmt(acc+d+st.start,d===1?0:1)} cm 刻度之間，所以準確值是 ${fmt(acc,d===1?0:1)} cm。`+shiftHint;
+  }else if(err<=0.25){
+    cls='ok';st.right++;msg=`正確！${readingHTML(v,d)}　準確值 <span style="color:var(--teal)">${fmt(Math.floor(v/d+1e-9)*d,d===1?0:1)}</span>，估計值 <span style="color:var(--red)">${fmt(v-Math.floor(v/d+1e-9)*d,need)}</span>。估計值因人而異，和標準讀法差一點點都算合理。`;
+  }else if(err<=0.45){
+    cls='mid';st.right++;msg=`可以接受。準確值正確，估計值稍有差距（標準讀法約 ${readingHTML(std,d)}）。再看一次放大圖，末端在兩條刻度間的幾成位置？`;
+  }else{
+    cls='bad';msg=`準確值對了，但估計值差太多。把兩條刻度之間想成 10 等分，末端大約在第幾格？`+shiftHint;
+  }
+  setFb(msg,cls);ui();
+}
+function reveal(){
+  st.answered=true;const d=st.d,std=stdReading(st.L,d),S=st.start;
+  const accLen=Math.floor(std/d+1e-9)*d;
+  let h=`標準讀法：${readingHTML(std,d)}<br>準確值 <span style="color:var(--teal)">${fmt(accLen,d===1?0:1)} cm</span>（記到最小刻度），估計值 <span style="color:var(--red)">${fmt(std-accLen,dp(d))} cm</span>（最小刻度的下一位）。`;
+  if(S)h+=`<br>末端讀數 ${fmt(std+S,dp(d))} cm − 起點 ${S} cm = ${fmt(std,dp(d))} cm。`;
+  h+=`<br><span style="font-size:12.5px;color:var(--dim)">模擬裡設定的長度是 ${st.L.toFixed(3)} cm；真實測量中，誰也不知道這個「真值」。</span>`;
+  setFb(h,'');draw();
+}
+
+function ui(){
+  const d=st.d;
+  $('sD').textContent=d===1?'1 cm':'0.1 cm';
+  $('sA').textContent=d===1?'個位（cm）':'小數第 1 位';
+  $('sE').textContent=d===1?'小數第 1 位':'小數第 2 位';
+  $('score').textContent=`${st.right} / ${st.tries}`;
+  $('explain').innerHTML=d===1
+    ?`這把尺只有公分刻度。末端在兩條公分刻度之間時，<b>準確值</b>就是左邊那條刻度的數字；再用眼睛把兩條刻度之間分成 10 等分，估計末端在第幾等分，就是<b>估計值</b>（小數第 1 位）。`
+    :`這把尺有毫米刻度（0.1 cm）。<b>準確值</b>讀到 0.1 cm（小數第 1 位），再估計末端在兩條毫米刻度之間的幾成位置，寫成小數第 2 位的<b>估計值</b>。和 1 cm 的尺相比，多了一位可信的數字，測量更準確。`;
+  document.querySelectorAll('#scaleBtns button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.d===d)));
+  document.querySelectorAll('#objBtns button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.o===st.obj)));
+  $('inp').placeholder=d===1?'例 14.7':'例 14.74';
+}
+
+// ---------- mode 2: average ----------
+const WHO=['甲','乙','丙','丁','戊','己','庚','辛'];
+const avg={rows:[],title:''};
+function exampleData(){
+  avg.title='例 2：五位同學用最小刻度 0.1 cm 的直尺測量同一本課本的寬度';
+  avg.rows=[19.13,19.15,19.17,29.00,19.10].map((v,i)=>({who:WHO[i],v,s:v.toFixed(2),on:true}));
+}
+function genData(){
+  const T=rnd(12,26),kinds=['課本的寬度','鉛筆盒的長度','手機的長度','桌子抽屜的深度'];
+  const what=kinds[Math.floor(Math.random()*kinds.length)];
+  avg.title=`五位同學用最小刻度 0.1 cm 的直尺測量同一個${what}`;
+  const bad=Math.floor(Math.random()*5),type=Math.floor(Math.random()*3);
+  avg.rows=[];
+  for(let i=0;i<5;i++){
+    let v=Math.round((T+(Math.random()+Math.random()+Math.random()-1.5)*0.05)*100)/100;
+    if(i===bad){
+      if(type===0)v=Math.round((v+10)*100)/100;         // 十位寫錯
+      else if(type===1)v=Math.round((v-1)*100)/100;     // 起點對到 1 cm 卻忘了扣
+      else v=Math.round((v+0.9)*100)/100;               // 讀錯一格公分
+    }
+    avg.rows.push({who:WHO[i],v,s:v.toFixed(2),on:true});
+  }
+}
+function median(a){const b=[...a].sort((p,q)=>p-q);const n=b.length;return n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2;}
+function renderAvg(){
+  $('avgTitle').textContent=avg.title||'測量紀錄';
+  const vals=avg.rows.map(r=>r.v);const med=vals.length?median(vals):0;
+  const tb=$('tb');tb.innerHTML='';
+  avg.rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    const odd=vals.length>=3&&Math.abs(r.v-med)>Math.max(0.3,med*0.02);
+    tr.className=(r.on?'':'off')+(odd?' warn':'');
+    tr.innerHTML=`<td class="zh">${r.who}</td><td>${r.s}</td><td><input type="checkbox" ${r.on?'checked':''} aria-label="採用 ${r.who} 的讀數"></td>`;
+    tr.querySelector('input').onchange=e=>{r.on=e.target.checked;renderAvg();};
+    tb.appendChild(tr);
+  });
+  const used=avg.rows.filter(r=>r.on);
+  const c=$('calc'),note=$('avgNote');
+  if(!used.length){c.innerHTML='<span style="color:var(--muted)">沒有採用任何數據。</span>';note.innerHTML='勾選要採用的讀數。';return;}
+  const n=Math.max(...used.map(r=>decOf(r.s)));
+  const sum=used.reduce((s,r)=>s+r.v,0),mean=sum/used.length;
+  c.innerHTML=`平均值 = (${used.map(r=>r.s).join(' + ')}) ÷ ${used.length}<br>　　　 = ${sum.toFixed(n)} ÷ ${used.length}<br>　　　 = ${mean.toFixed(Math.min(6,n+3)).replace(/0+$/,'').replace(/\.$/,'')}<br>　　　 ≈ <span class="res">${(Math.round(mean*10**n+1e-7)/10**n).toFixed(n)} cm</span>`;
+  const keptOdd=used.filter(r=>vals.length>=3&&Math.abs(r.v-med)>Math.max(0.3,med*0.02));
+  const dropped=avg.rows.filter(r=>!r.on);
+  let h='';
+  if(keptOdd.length){
+    h=`<b>注意：</b>${keptOdd.map(r=>r.who+'的 '+r.s+' cm').join('、')}和其他人差很多（紅字），很可能是操作或記錄錯誤。把它算進去，平均值會被拉偏。試著取消勾選它。`;
+  }else{
+    h=`平均值四捨五入到和讀數相同的位數（小數第 ${n} 位），因為最後一位已經是估計值，再多的位數沒有意義。`;
+    if(dropped.length)h+=`<br>已刪除：${dropped.map(r=>r.who+' '+r.s+' cm').join('、')}，剩下 ${used.length} 筆，所以除以 ${used.length}。`;
+    if(used.length>=2){const mx=Math.max(...used.map(r=>r.v)),mn=Math.min(...used.map(r=>r.v));h+=`<br>採用的讀數最大與最小只差 ${(mx-mn).toFixed(n)} cm，差在估計值那一位，這就是<b>誤差</b>：每個人的估計不同，多量幾次取平均可以減少誤差。`;}
+  }
+  note.innerHTML=h;
+}
+
+// ---------- events ----------
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>{
+  st.mode=b.dataset.m;document.querySelectorAll('.modebar button').forEach(q=>q.setAttribute('aria-pressed',String(q===b)));
+  $('mRead').hidden=st.mode!=='read';$('mAvg').hidden=st.mode!=='avg';
+  if(st.mode==='read')draw();else renderAvg();
+});
+document.querySelectorAll('#scaleBtns button').forEach(b=>b.onclick=()=>{
+  st.d=+b.dataset.d;st.answered=false;$('inp').value='';
+  setFb(`換成最小刻度 ${st.d===1?'1 cm':'0.1 cm'} 的尺量同一個物體。讀數要寫到小數第 ${dp(st.d)} 位。`,'');draw();ui();});
+document.querySelectorAll('#objBtns button').forEach(b=>b.onclick=()=>{st.obj=b.dataset.o;newLength();});
+$('tShift').onchange=e=>{st.shift=e.target.checked;newLength();};
+$('check').onclick=check;
+$('inp').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+$('reveal').onclick=reveal;
+$('next').onclick=newLength;
+$('useEx').onclick=()=>{exampleData();renderAvg();};
+$('genNew').onclick=()=>{genData();renderAvg();};
+$('clrAll').onclick=()=>{avg.rows=[];avg.title='測量紀錄';renderAvg();};
+$('addBtn').onclick=()=>{const raw=$('addInp').value.trim();const v=parseFloat(raw);if(!/^\d+(\.\d*)?$/.test(raw))return;
+  avg.rows.push({who:WHO[avg.rows.length]||('第 '+(avg.rows.length+1)+' 筆'),v,s:raw,on:true});$('addInp').value='';renderAvg();};
+$('addInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('addBtn').click();});
+addEventListener('resize',()=>{if(st.mode==='read')draw();});
+
+exampleData();
+st.L=14.736;ui();draw();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>
