@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>量筒讀數與排水法測體積</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--teal:#4fd1c5;--pink:#ff8fb1}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(67,214,255,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:74ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:pan-y}
+#cv1{height:380px}#cv2{height:440px}#cv3{height:320px}
+@media(max-width:560px){#cv1{height:340px}#cv2{height:400px}#cv3{height:270px}}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:14px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.row label{font-size:13.5px;color:var(--muted);min-width:5.5em}
+.row input[type=range]{flex:1;min-width:0;accent-color:var(--acc)}
+.row output{font-family:"JetBrains Mono",monospace;font-size:14px;min-width:5.2em;text-align:right;color:var(--txt)}
+.tg{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);cursor:pointer;margin-top:10px}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+.ans{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ans label{font-size:14px}
+.ans input[type=text]{font-family:"JetBrains Mono",monospace;font-size:18px;width:130px;max-width:44vw;padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:#05080f;color:var(--txt)}
+.ans input:focus{outline:2px solid var(--acc);outline-offset:1px}
+.fb{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid var(--line);background:#0a0f1a;color:var(--muted);min-height:48px}
+.fb.ok{border-color:#1f6f55;background:#071a14;color:#bff5dc}
+.fb.mid{border-color:#7a6320;background:#1a1505;color:#ffe7a3}
+.fb.bad{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.note.warn{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.note.warn b{color:#ffb0b0}
+.stat{display:flex;gap:18px;flex-wrap:wrap;margin-top:6px}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:18px;color:var(--phos);font-weight:700}
+.ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:12px;overflow:hidden}
+.ro{background:var(--panel2);padding:10px 12px;min-width:0}
+.ro .k{font-size:11.5px;color:var(--muted)}
+.ro .v{font-family:"JetBrains Mono",monospace;font-size:19px;font-weight:700;overflow-wrap:anywhere}
+.ro.wide{grid-column:1/-1}
+.calc{margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:13.5px;line-height:1.9;color:var(--txt);overflow-wrap:anywhere}
+.calc .res{color:var(--phos);font-size:18px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500;font-size:12px}
+td{font-family:"JetBrains Mono",monospace;overflow-wrap:anywhere}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 1-1 · 體積的測量</div>
+  <h1>量筒讀數與排水法測體積</h1>
+  <p class="lede">液體用<b>量筒</b>量體積：視線要<b>平視液面凹處的底部</b>，俯視、仰視都會讀錯。形狀不規則、不溶於水的固體，可以完全沒入水中時，會排開和自己體積相同的水，水位由 V₁ 升到 V₂，<b>固體體積 = V₂ − V₁</b>，這就是排水法。1 mL = 1 cm³。</p>
+
+  <div class="modebar" role="group" aria-label="模式">
+    <button type="button" data-m="1" aria-pressed="true">① 量筒讀數與視線</button>
+    <button type="button" data-m="2" aria-pressed="false">② 排水法</button>
+    <button type="button" data-m="3" aria-pressed="false">③ 規則固體：長×寬×高</button>
+  </div>
+
+  <!-- ===== mode 1 ===== -->
+  <div id="m1">
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">眼睛看到的刻度 ｜ 側面示意</span><span class="n" id="eyeNote">平視</span></div>
+        <div class="box"><canvas id="cv1" aria-label="左邊是眼睛看到的量筒刻度放大圖，右邊是眼睛、刻度與液面的側面示意圖"></canvas></div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="lab">量筒</div>
+        <div class="seg" id="c1Btns"></div>
+        <div class="lab" style="margin-top:12px">眼睛的高度</div>
+        <div class="seg" id="eyeBtns">
+          <button type="button" data-e="1">俯視（由上往下看）</button>
+          <button type="button" data-e="0" aria-pressed="true">平視</button>
+          <button type="button" data-e="-1">仰視（由下往上看）</button>
+        </div>
+        <div class="row"><label for="eye">微調</label><input type="range" id="eye" min="-100" max="100" step="1" value="0"><output id="eyeO">0</output></div>
+        <div class="ans">
+          <label for="inp">液體體積 =</label>
+          <input type="text" id="inp" inputmode="decimal" autocomplete="off" placeholder="例 30.0">
+          <span>mL</span>
+        </div>
+        <div class="seg" style="margin-top:10px">
+          <button class="primary" id="check">檢查讀數</button>
+          <button id="reveal">看標準讀法</button>
+          <button id="next">換一個水量</button>
+        </div>
+        <div class="fb" id="fb" aria-live="polite">看左邊的刻度放大圖，讀出液面凹處底部對到的刻度，輸入後按「檢查讀數」。</div>
+        <div class="stat" style="margin-top:10px">
+          <div>最小刻度<b id="sD">1 mL</b></div>
+          <div>讀到<b id="sP">小數第 1 位</b></div>
+          <div>本回合答對<b id="score">0 / 0</b></div>
+        </div>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== mode 2 ===== -->
+  <div id="m2" hidden>
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">放入前 ｜ 放入後</span><span class="n" id="c2Note"></span></div>
+        <div class="box"><canvas id="cv2" aria-label="兩個量筒：左邊是放入固體前的水位 V1，右邊是放入固體後的水位 V2"></canvas></div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="lab">量筒</div>
+        <div class="seg" id="c2Btns"></div>
+        <div class="lab" style="margin-top:12px">待測固體</div>
+        <div class="seg" id="objBtns"></div>
+        <div class="row"><label for="v1">先裝水</label><input type="range" id="v1" min="0" max="50" step="0.1" value="30"><output id="v1O">30.0 mL</output></div>
+        <label class="tg" id="pushWrap" hidden><input type="checkbox" id="push">用細針把木塊壓入水中</label>
+        <div class="seg" style="margin-top:12px">
+          <button class="primary" id="drop">放入固體</button>
+          <button id="lift">取出</button>
+        </div>
+        <div class="ro-grid" style="margin-top:14px">
+          <div class="ro"><div class="k">放入前 V₁</div><div class="v" id="rV1" style="color:var(--cyan)">—</div></div>
+          <div class="ro"><div class="k">放入後 V₂</div><div class="v" id="rV2" style="color:var(--pink)">—</div></div>
+          <div class="ro wide"><div class="k">水位變化 V₂ − V₁（＝ 排開的水）</div><div class="v" id="rDV" style="color:var(--phos)">—</div></div>
+        </div>
+        <div class="note" id="n2"></div>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== mode 3 ===== -->
+  <div id="m3" hidden>
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">長方體</span><span class="n">圖 1-3A：用直尺量邊長，再用公式計算</span></div>
+        <div class="box"><canvas id="cv3" aria-label="長方體與長、寬、高"></canvas></div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="row"><label for="bL">長</label><input type="range" id="bL" min="0.5" max="12" step="0.1" value="5"><output id="bLO"></output></div>
+        <div class="row"><label for="bW">寬</label><input type="range" id="bW" min="0.5" max="12" step="0.1" value="3"><output id="bWO"></output></div>
+        <div class="row"><label for="bH">高</label><input type="range" id="bH" min="0.5" max="12" step="0.1" value="10"><output id="bHO"></output></div>
+        <div class="calc" id="calc3"></div>
+        <table><thead><tr><th>單位</th><th>這個長方體</th></tr></thead><tbody id="units"></tbody></table>
+        <div class="seg" style="margin-top:12px">
+          <button id="ex3">課本圖 1-3A（5×3×10）</button>
+          <button class="primary" id="toDisp">放進量筒驗證</button>
+        </div>
+        <div class="note" id="n3"></div>
+      </div></section>
+    </div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>課本圖 1-3B 三個眼睛只有平視的讀數正確：俯視時視線斜斜往下穿過刻度，對到的刻度比液面高，讀數<b>偏大</b>；仰視讀數<b>偏小</b>。量筒讀數和直尺一樣要讀到最小刻度的下一位，例如最小刻度 1 mL 要寫成 30.0 mL。圖 1-3C 的螺帽讓水位由 30.0 mL 升到 35.0 mL，體積 = 35.0 − 30.0 = 5.0 mL = 5.0 cm³，在「② 排水法」選 50 mL 量筒與螺帽就能重現。可以讓學生試：水太少、物體放不進量筒、木塊浮起來、水溢出來時，量到的還是物體的體積嗎？最後用「③」算長方體體積，再「放進量筒驗證」兩種方法結果相同。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const PI=Math.PI;
+// 量筒：容量 cap(mL)、最小刻度 div(mL)、內徑 d(cm)
+const CYL=[
+  {id:'c10',name:'10 mL 量筒',cap:10,div:0.1,d:1.4},
+  {id:'c50',name:'50 mL 量筒',cap:50,div:1,d:2.7},
+  {id:'c100',name:'100 mL 量筒',cap:100,div:1,d:3.4}
+];
+CYL.forEach(c=>{c.A=PI*(c.d/2)**2;c.H=c.cap/c.A;});
+const dp=div=>div>=1?1:2;                    // 讀到最小刻度的下一位
+const rd=(v,div)=>Math.round(v/(div/10))*(div/10);
+const fmt=(v,n)=>(Math.abs(v)<1e-9?0:v).toFixed(n);
+const fmtDiv=div=>div>=1?'1 mL':'0.1 mL';
+function decOf(s){const m=/\.(\d*)$/.exec(s);return m?m[1].length:0;}
+function rnd(a,b){return a+Math.random()*(b-a);}
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+function rr(x,a,b,w,h,r){r=Math.min(r,w/2,h/2);x.moveTo(a+r,b);x.lineTo(a+w-r,b);x.arc(a+w-r,b+r,r,-PI/2,0);x.lineTo(a+w,b+h-r);x.arc(a+w-r,b+h-r,r,0,PI/2);x.lineTo(a+r,b+h);x.arc(a+r,b+h-r,r,PI/2,PI);x.lineTo(a,b+r);x.arc(a+r,b+r,r,PI,1.5*PI);}
+const FONT='"Noto Sans TC",sans-serif',MONO='"JetBrains Mono",monospace';
+const WATER='rgba(67,214,255,.22)',WATER_EDGE='rgba(120,225,255,.95)';
+const st={mode:'1'};
+
+/* ================= mode 1：讀數與視線 ================= */
+const m1={c:1,V:30.0,e:0,tries:0,right:0,shown:false};
+const PAR=1.8;                 // 眼睛在最高/最低時，看起來偏移幾個最小刻度
+const SHIFT=()=>m1.e*PAR;      // 正：俯視（讀數偏大）
+function cyl1(){return CYL[m1.c];}
+function newVol(){
+  const c=cyl1();
+  let V=rnd(c.cap*0.15,c.cap*0.88);
+  if(Math.random()<1/6)V=Math.round(V/c.div)*c.div+rnd(-.02,.02)*c.div; // 剛好對齊刻度：練習補 0
+  m1.V=Math.round(V/(c.div/100))*(c.div/100);
+  m1.shown=false;$('inp').value='';
+  setFb('看左邊的刻度放大圖，讀出液面凹處底部對到的刻度，輸入後按「檢查讀數」。','');
+  draw1();ui1();
+}
+function apparent(){return m1.V+SHIFT()*cyl1().div;}
+
+function drawScaleStrip(x,X0,X1,Y,v0,v1,div,big){ // Y(value)->px, ticks hang from left edge X0
+  const n0=Math.ceil(v0/div-1e-9),n1=Math.floor(v1/div+1e-9);
+  const major=div>=1?10:1, mid=div>=1?5:0.5;
+  x.strokeStyle='rgba(255,170,90,.95)';x.fillStyle='rgba(255,170,90,.98)';
+  x.textBaseline='middle';x.textAlign='left';
+  for(let k=n0;k<=n1;k++){
+    const v=k*div,py=Y(v);
+    const isMaj=Math.abs(v/major-Math.round(v/major))<1e-6, isMid=Math.abs(v/mid-Math.round(v/mid))<1e-6;
+    const L=(X1-X0)*(isMaj?.62:isMid?.45:.28);
+    x.lineWidth=isMaj?(big?2.2:1.6):(big?1.4:1);
+    x.beginPath();x.moveTo(X0,py);x.lineTo(X0+L,py);x.stroke();
+    if(big&&isMid){x.font=`700 ${isMaj?17:13}px ${MONO}`;x.fillText(fmt(v,div>=1?0:1),X0+L+5,py);}
+    else if(!big&&isMaj){x.font=`600 10px ${MONO}`;x.fillText(fmt(v,0),X0+L+3,py);}
+  }
+}
+
+function draw1(){
+  const {x,w,h}=fit($('cv1'));if(w<120)return;
+  x.clearRect(0,0,w,h);
+  const c=cyl1(),div=c.div;
+  const split=Math.round(w*0.6);
+  // ---------- 左：眼睛看到的畫面 ----------
+  const fx=10,fw=split-20,top=26,bot=h-12,fh=bot-top;
+  const win=12*div,app=apparent();
+  const center=Math.round(m1.V/div)*div;          // 視窗中心固定在真實水位附近
+  const v0=center-win/2,v1=center+win/2;
+  const Y=v=>bot-(v-v0)/(v1-v0)*fh;
+  x.fillStyle='#8492aa';x.font=`12px ${FONT}`;x.textAlign='left';x.textBaseline='alphabetic';
+  x.fillText('眼睛看到的刻度（放大）',fx,16);
+  x.save();x.beginPath();rr(x,fx,top,fw,fh,10);x.clip();
+  // glass background
+  const gg=x.createLinearGradient(fx,0,fx+fw,0);gg.addColorStop(0,'#0e1626');gg.addColorStop(.5,'#101b2e');gg.addColorStop(1,'#0b1220');
+  x.fillStyle=gg;x.fillRect(fx,top,fw,fh);
+  // liquid (drawn at apparent position)
+  const ly=Y(app),dv=fh/12;                       // px per division
+  const rise=dv*0.45;                              // 凹面在管壁處升高
+  const ell=Math.max(1.5,Math.abs(m1.e)*dv*0.55);  // 斜看時看到液面的橢圓
+  x.fillStyle=WATER;
+  x.beginPath();x.moveTo(fx,ly-rise);
+  x.quadraticCurveTo(fx+fw/2,ly+rise*1.0,fx+fw,ly-rise);
+  x.lineTo(fx+fw,bot+2);x.lineTo(fx,bot+2);x.closePath();x.fill();
+  // meniscus surface
+  x.strokeStyle=WATER_EDGE;x.lineWidth=2;
+  x.beginPath();x.moveTo(fx,ly-rise);x.quadraticCurveTo(fx+fw/2,ly+rise*1.0,fx+fw,ly-rise);x.stroke();
+  if(Math.abs(m1.e)>0.04){
+    x.strokeStyle='rgba(120,225,255,.45)';x.lineWidth=1.2;
+    x.beginPath();x.ellipse(fx+fw/2,ly-rise*0.5+(m1.e>0?-ell*0.2:ell*0.2),fw/2,ell,0,0,2*PI);x.stroke();
+  }
+  // scale on the front surface
+  drawScaleStrip(x,fx+8,fx+fw*0.55,Y,v0-div,v1+div,div,true);
+  // highlights
+  x.fillStyle='rgba(255,255,255,.05)';x.fillRect(fx+fw*0.78,top,fw*0.06,fh);
+  // eye-level guide line
+  const eyeLineY=ly; // 眼睛視線對到的是凹面底部 → 在畫面上就是液面底部高度
+  x.strokeStyle='rgba(255,209,102,.8)';x.setLineDash([6,5]);x.lineWidth=1.2;
+  x.beginPath();x.moveTo(fx,eyeLineY);x.lineTo(fx+fw,eyeLineY);x.stroke();x.setLineDash([]);
+  if(m1.shown){
+    const ty=Y(m1.V);
+    x.strokeStyle='rgba(125,255,196,.95)';x.lineWidth=1.6;x.beginPath();x.moveTo(fx,ty);x.lineTo(fx+fw,ty);x.stroke();
+    x.fillStyle='#7dffc4';x.font=`700 12px ${MONO}`;x.textAlign='right';x.textBaseline='bottom';
+    x.fillText(`${fmt(rd(m1.V,div),dp(div))} mL`,fx+fw-6,ty-3);
+  }
+  x.restore();
+  x.strokeStyle='#2a3550';x.lineWidth=1;x.beginPath();rr(x,fx,top,fw,fh,10);x.stroke();
+
+  // ---------- 右：側面示意 ----------
+  const sx=split+6,sw=w-sx-8;
+  x.fillStyle='#8492aa';x.font=`12px ${FONT}`;x.textAlign='left';x.textBaseline='alphabetic';
+  x.fillText('側面示意',sx,16);
+  const eyeX=sx+14, wallX=sx+sw*0.42, farX=sx+sw-4, R=(farX-wallX)/2, axisX=wallX+R;
+  const D=wallX-eyeX;
+  const midY=top+fh*0.55, k=Math.min(14,fh/18);   // px per division in schematic
+  // sight hits scale at shift*k above meniscus ; eye height = shift*k*(D+R)/R
+  const mY=midY, hitY=mY-SHIFT()*k, eyeY=mY-SHIFT()*k*(D+R)/R;
+  // cylinder walls
+  x.fillStyle='rgba(67,214,255,.16)';x.fillRect(wallX,mY-2,farX-wallX,bot-mY+2);
+  x.strokeStyle='#9fb3d1';x.lineWidth=2;x.beginPath();x.moveTo(wallX,top+8);x.lineTo(wallX,bot);x.moveTo(farX,top+8);x.lineTo(farX,bot);x.stroke();
+  // meniscus (side): concave
+  x.strokeStyle=WATER_EDGE;x.lineWidth=2;x.beginPath();x.moveTo(wallX,mY-k*0.45);x.quadraticCurveTo(axisX,mY+k*0.45,farX,mY-k*0.45);x.stroke();
+  // ticks on near wall
+  x.strokeStyle='rgba(255,170,90,.9)';x.lineWidth=1;
+  for(let i=-8;i<=8;i++){const yy=mY-i*k;if(yy<top+8||yy>bot)continue;x.beginPath();x.moveTo(wallX-(i%5===0?8:4),yy);x.lineTo(wallX,yy);x.stroke();}
+  // sight line: eye -> scale -> meniscus bottom
+  const level=Math.abs(m1.e)<0.06;
+  x.strokeStyle=level?'#7dffc4':'#ff7a7a';x.lineWidth=1.6;x.setLineDash([5,4]);
+  x.beginPath();x.moveTo(eyeX+8,eyeY);x.lineTo(axisX,mY);x.stroke();x.setLineDash([]);
+  x.fillStyle=level?'#7dffc4':'#ff7a7a';x.beginPath();x.arc(wallX,hitY,3.2,0,2*PI);x.fill();
+  x.beginPath();x.arc(axisX,mY,2.6,0,2*PI);x.fill();
+  // eye
+  drawEye(x,eyeX,eyeY);
+  x.font=`12px ${FONT}`;x.textAlign='left';x.textBaseline='top';x.fillStyle=level?'#7dffc4':'#ff9d9d';
+  const lbl=level?'平視 ✓':(m1.e>0?'俯視：對到較高的刻度':'仰視：對到較低的刻度');
+  wrapText(x,lbl,sx,bot-34,sw,15);
+  x.fillStyle='#5b6880';x.font=`11px ${FONT}`;x.textBaseline='alphabetic';
+  x.fillText('刻度',wallX-30,top+22);x.fillText('液面凹處底部',Math.max(sx,axisX-40),mY+k*1.6);
+}
+function drawEye(x,cx,cy){
+  x.save();x.translate(cx,cy);
+  x.fillStyle='#f2f5fb';x.beginPath();x.ellipse(0,0,9,6,0,0,2*PI);x.fill();
+  x.fillStyle='#2b3a55';x.beginPath();x.arc(3,0,3.4,0,2*PI);x.fill();
+  x.strokeStyle='#ffd166';x.lineWidth=1.3;x.beginPath();x.ellipse(0,0,9,6,0,0,2*PI);x.stroke();
+  x.restore();
+}
+function wrapText(x,s,X,Yy,W,lh){let line='',yy=Yy;for(const ch of s){if(x.measureText(line+ch).width>W&&line){x.fillText(line,X,yy);line=ch;yy+=lh;}else line+=ch;}if(line)x.fillText(line,X,yy);}
+
+function setFb(html,cls){const f=$('fb');f.className='fb'+(cls?' '+cls:'');f.innerHTML=html;}
+function check1(){
+  const raw=$('inp').value.trim().replace(/[，,]/g,'.').replace(/\s*m[lL]$/,'');
+  if(!/^\d+(\.\d*)?$/.test(raw)){setFb('請輸入一個數字，例如 30.0（單位已經是 mL）。','bad');return;}
+  const c=cyl1(),div=c.div,need=dp(div),got=decOf(raw),v=parseFloat(raw);
+  const std=rd(m1.V,div),app=apparent();
+  const err=Math.abs(v-m1.V)/div, errApp=Math.abs(v-app)/div;
+  const level=Math.abs(m1.e)<0.06;
+  m1.tries++;
+  let cls,msg;
+  if(got<need){
+    cls='bad';msg=`位數不夠：最小刻度 ${fmtDiv(div)} 的量筒要讀到小數第 ${need} 位（準確值 + 一位估計值）。剛好對齊刻度也要補 0，例如 <b>${fmt(std,need)} mL</b> 的寫法。`;
+  }else if(got>need){
+    cls='bad';msg=`估計值只能有一位。最小刻度 ${fmtDiv(div)} 讀到小數第 ${need} 位就好。`;
+  }else if(!level&&errApp<=0.4&&err>0.4){
+    cls='bad';msg=`你讀的是眼睛看到的刻度沒錯，但<b>視線沒有平視</b>：${m1.e>0?'俯視讀數偏大':'仰視讀數偏小'}。按「平視」再讀一次。`;
+  }else if(err<=0.3){
+    cls=level?'ok':'mid';m1.right++;
+    msg=level?`正確！${fmt(v,need)} mL。準確值 ${fmt(Math.floor(v/div+1e-9)*div,div>=1?0:1)} mL，最後一位是估計值，和標準讀法差一點點都算合理。`
+             :`數值對了，但眼睛不是平視，這樣讀很容易出錯。正式測量時要蹲低，讓視線和液面凹處底部同高。`;
+  }else if(err<=0.5){
+    cls='mid';m1.right++;msg=`可以接受，估計值稍有差距（標準讀法約 ${fmt(std,need)} mL）。看清楚凹面最低點在兩條刻度間的幾成位置。`;
+  }else{
+    cls='bad';msg=`差太多了。要讀的是液面<b>凹處的底部</b>（中間最低點），不是靠管壁翹起來的邊緣。`+(level?'':' 另外，視線也沒有平視。');
+  }
+  setFb(msg,cls);ui1();
+}
+function reveal1(){
+  m1.shown=true;const c=cyl1(),div=c.div,need=dp(div),std=rd(m1.V,div);
+  const app=rd(apparent(),div),level=Math.abs(m1.e)<0.06;
+  let s=`標準讀法（平視凹處底部）：<b>${fmt(std,need)} mL</b>，記到最小刻度 ${fmtDiv(div)}，再估計一位。`;
+  if(!level)s+=`<br>現在的視線會讀成 ${fmt(app,need)} mL（${m1.e>0?'俯視偏大':'仰視偏小'} ${fmt(Math.abs(app-std),need)} mL）。`;
+  s+=`<br><span style="font-size:12.5px;color:var(--dim)">模擬設定的真實體積 ${m1.V.toFixed(need+1)} mL。綠線是真實液面位置。</span>`;
+  setFb(s,'');draw1();
+}
+function ui1(){
+  const c=cyl1();
+  $('sD').textContent=fmtDiv(c.div);$('sP').textContent=`小數第 ${dp(c.div)} 位`;
+  $('score').textContent=`${m1.right} / ${m1.tries}`;
+  $('inp').placeholder=c.div>=1?'例 30.0':'例 6.00';
+  $('eyeO').textContent=m1.e>0.055?'俯視':m1.e<-0.055?'仰視':'平視';
+  $('eyeNote').textContent=Math.abs(m1.e)<0.06?'視線平視液面凹處底部':(m1.e>0?'俯視：讀數偏大':'仰視：讀數偏小');
+  document.querySelectorAll('#c1Btns button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===m1.c)));
+  document.querySelectorAll('#eyeBtns button').forEach(b=>{const e=+b.dataset.e;b.setAttribute('aria-pressed',String(e===0?Math.abs(m1.e)<0.06:(e>0?m1.e>0.06:m1.e<-0.06)));});
+}
+
+/* ================= mode 2：排水法 ================= */
+// 物體：V 體積(cm³)、fit 放入時需要的寬度(cm)、h 高度(cm)、rho 密度(g/cm³)
+const OBJ=[
+  {id:'nut',name:'螺帽',V:5.0,fit:2.4,w:2.4,h:1.3,rho:7.9,shape:'nut'},
+  {id:'ball',name:'鋼珠',V:4/3*PI*0.6**3,fit:1.2,w:1.2,h:1.2,rho:7.9,shape:'ball'},
+  {id:'marble',name:'玻璃彈珠',V:4/3*PI*0.8**3,fit:1.6,w:1.6,h:1.6,rho:2.5,shape:'marble'},
+  {id:'stone',name:'小石塊',V:9.0,fit:3.0,w:3.0,h:2.2,rho:2.6,shape:'stone'},
+  {id:'wood',name:'木塊',V:1.8**3,fit:1.8*Math.SQRT2,w:1.8,h:1.8,rho:0.6,shape:'wood'}
+];
+const m2={c:1,o:0,V1:30,placed:false,anim:1,push:false,box:null};
+function cyl2(){return CYL[m2.c];}
+function obj2(){return m2.o===-1?m2.box:OBJ[m2.o];}
+function physics(){ // 回傳放入後的水位等
+  const c=cyl2(),o=obj2(),A=c.A,V1=m2.V1;
+  const r={fits:o.fit<c.d-0.04,level:V1/A,sub:0,float:false,full:false,bottomY:0};
+  if(!m2.placed||!r.fits)return r;
+  const a=Math.min(o.V/o.h,A*0.98);            // 平均截面積
+  const floats=o.rho<1&&!m2.push;
+  if(floats){
+    const yF=(V1+o.rho*o.V)/A;                 // 浮起時的水位
+    if(yF>=o.rho*o.h){r.level=yF;r.sub=o.rho*o.V;r.float=true;r.bottomY=yF-o.rho*o.h;return r;}
+    const y=V1/(A-a);r.level=y;r.sub=a*y;return r;   // 水太少，木塊擱在底部
+  }
+  const yFull=(V1+o.V)/A;
+  if(yFull>=o.h){r.level=yFull;r.sub=o.V;r.full=true;}
+  else{const y=V1/(A-a);r.level=y;r.sub=a*y;}
+  return r;
+}
+function geom2(w,h){
+  const c=cyl2();
+  const totH=c.H*1.16;                         // 刻度上方還有一段
+  let pxcm=(h-86)/totH;
+  pxcm=Math.min(pxcm,(w*0.22)/c.d);
+  return pxcm;
+}
+function drawCylinder(x,cx,baseY,pxcm,c,levelH,o,objBottom,showObj,label,col,objAlpha){
+  const iw=c.d*pxcm, H=c.H*1.16*pxcm, x0=cx-iw/2, x1=cx+iw/2, topY=baseY-H;
+  // base foot
+  x.fillStyle='rgba(180,200,230,.18)';x.beginPath();x.ellipse(cx,baseY+10,iw*1.05,9,0,0,2*PI);x.fill();
+  x.strokeStyle='rgba(180,200,230,.5)';x.lineWidth=1.2;x.beginPath();x.ellipse(cx,baseY+10,iw*1.05,9,0,0,2*PI);x.stroke();
+  // water
+  const ly=baseY-Math.min(levelH,c.H*1.16)*pxcm;
+  const rise=Math.min(6,iw*0.08);
+  x.fillStyle=WATER;x.beginPath();x.moveTo(x0,ly-rise);x.quadraticCurveTo(cx,ly+rise,x1,ly-rise);x.lineTo(x1,baseY);x.lineTo(x0,baseY);x.closePath();x.fill();
+  // object
+  if(showObj&&o){x.save();x.globalAlpha=objAlpha;drawObj(x,o,cx,baseY-objBottom*pxcm,pxcm);x.restore();}
+  x.strokeStyle=WATER_EDGE;x.lineWidth=1.8;x.beginPath();x.moveTo(x0,ly-rise);x.quadraticCurveTo(cx,ly+rise,x1,ly-rise);x.stroke();
+  // glass
+  x.strokeStyle='rgba(200,215,240,.75)';x.lineWidth=2;
+  x.beginPath();x.moveTo(x0,topY);x.lineTo(x0,baseY);x.lineTo(x1,baseY);x.lineTo(x1,topY);x.stroke();
+  x.beginPath();x.moveTo(x0-3,topY);x.lineTo(x0+2,topY);x.moveTo(x1+3,topY);x.lineTo(x1-2,topY);x.stroke();
+  x.fillStyle='rgba(255,255,255,.05)';x.fillRect(x1-iw*0.22,topY,iw*0.08,H);
+  // scale
+  const Y=v=>baseY-(v/c.A)*pxcm;
+  drawScaleStrip(x,x0+2,x0+Math.min(iw*0.62,34),Y,c.div,c.cap,c.div,false);
+  x.fillStyle='rgba(255,170,90,.9)';x.font=`600 9px ${MONO}`;x.textAlign='center';x.textBaseline='bottom';
+  x.fillText('mL',cx,topY-2);
+  x.fillStyle=col;x.font=`600 12px ${FONT}`;x.textBaseline='top';x.fillText(label,cx,baseY+22);
+  return {ly,x0,x1};
+}
+function drawObj(x,o,cx,bottomPx,pxcm){
+  const w=o.w*pxcm,h=o.h*pxcm,top=bottomPx-h;
+  if(o.shape==='ball'||o.shape==='marble'){
+    const r=w/2,g=x.createRadialGradient(cx-r*.35,top+r*.65,r*.1,cx,top+r,r);
+    if(o.shape==='ball'){g.addColorStop(0,'#f3f6fb');g.addColorStop(1,'#6b7586');}else{g.addColorStop(0,'#d7fff4');g.addColorStop(.6,'#3fb7a4');g.addColorStop(1,'#1d6c62');}
+    x.fillStyle=g;x.beginPath();x.arc(cx,top+r,r,0,2*PI);x.fill();
+  }else if(o.shape==='nut'){
+    const g=x.createLinearGradient(0,top,0,bottomPx);g.addColorStop(0,'#d9dee7');g.addColorStop(.5,'#9aa3b2');g.addColorStop(1,'#6a7383');
+    x.fillStyle=g;x.fillRect(cx-w/2,top,w,h);
+    x.strokeStyle='rgba(40,48,62,.8)';x.lineWidth=1;
+    x.beginPath();x.moveTo(cx-w/4,top);x.lineTo(cx-w/4,bottomPx);x.moveTo(cx+w/4,top);x.lineTo(cx+w/4,bottomPx);x.stroke();
+    x.strokeStyle='rgba(40,48,62,.45)';x.setLineDash([2,2]);x.beginPath();x.moveTo(cx-w*0.2,top+1);x.lineTo(cx-w*0.2,bottomPx-1);x.moveTo(cx+w*0.2,top+1);x.lineTo(cx+w*0.2,bottomPx-1);x.stroke();x.setLineDash([]);
+  }else if(o.shape==='stone'){
+    x.fillStyle='#8a7f72';x.beginPath();
+    const pts=[[-.5,.15],[-.38,-.42],[-.05,-.5],[.3,-.38],[.5,-.05],[.42,.38],[.05,.5],[-.35,.45]];
+    pts.forEach((p,i)=>{const X=cx+p[0]*w,Yy=top+h/2+p[1]*h;i?x.lineTo(X,Yy):x.moveTo(X,Yy);});x.closePath();x.fill();
+    x.fillStyle='rgba(255,255,255,.12)';x.beginPath();x.ellipse(cx-w*.12,top+h*.32,w*.16,h*.1,-.4,0,2*PI);x.fill();
+  }else if(o.shape==='wood'){
+    x.fillStyle='#c99a5b';x.fillRect(cx-w/2,top,w,h);
+    x.strokeStyle='rgba(110,70,30,.55)';x.lineWidth=1;
+    for(let i=1;i<4;i++){x.beginPath();x.moveTo(cx-w/2,top+h*i/4);x.bezierCurveTo(cx-w/6,top+h*i/4-3,cx+w/6,top+h*i/4+3,cx+w/2,top+h*i/4);x.stroke();}
+  }else{ // box (aluminum)
+    const g=x.createLinearGradient(cx-w/2,0,cx+w/2,0);g.addColorStop(0,'#8e99aa');g.addColorStop(.5,'#cfd6e0');g.addColorStop(1,'#7d8798');
+    x.fillStyle=g;x.fillRect(cx-w/2,top,w,h);x.strokeStyle='rgba(30,36,48,.6)';x.lineWidth=1;x.strokeRect(cx-w/2,top,w,h);
+  }
+}
+let raf=0;
+function draw2(){
+  const {x,w,h}=fit($('cv2'));if(w<120)return;
+  x.clearRect(0,0,w,h);
+  const c=cyl2(),o=obj2(),pxcm=geom2(w,h),baseY=h-48;
+  const r=physics(),t=m2.anim;
+  const cxL=w*0.27,cxR=w*0.73;
+  const lvl0=m2.V1/c.A;
+  // 動畫：先落下（t<.55），再水位上升
+  const fall=Math.min(1,t/0.55),grow=Math.max(0,(t-0.55)/0.45);
+  const lvlR=m2.placed?lvl0+(r.level-lvl0)*grow:lvl0;
+  const L=drawCylinder(x,cxL,baseY,pxcm,c,lvl0,null,0,false,'放入前','#43d6ff',1);
+  let objB=0,showObj=true;
+  const topCm=c.H*1.16;
+  if(m2.placed&&r.fits){const endB=r.float?r.bottomY:0;objB=(topCm+0.6)+(endB-(topCm+0.6))*(fall*fall);}
+  else objB=topCm+0.5;
+  const R=drawCylinder(x,cxR,baseY,pxcm,c,lvlR,o,objB,showObj,m2.placed?'放入後':'準備放入','#ff8fb1',1);
+  if(!r.fits&&o){
+    x.fillStyle='#ff9d9d';x.font=`600 12px ${FONT}`;x.textAlign='center';x.textBaseline='top';
+    x.fillText('放不進去！',cxR,baseY-(topCm+0.5+o.h)*pxcm-20);
+  }
+  // V1 / V2 dashed lines（像課本圖 1-3C）
+  const yV1=L.ly;
+  x.setLineDash([6,5]);x.lineWidth=1.2;
+  x.strokeStyle='rgba(67,214,255,.8)';x.beginPath();x.moveTo(L.x0-4,yV1);x.lineTo(R.x1+4,yV1);x.stroke();
+  if(m2.placed&&r.fits&&t>=1){
+    x.strokeStyle='rgba(255,143,177,.9)';x.beginPath();x.moveTo(L.x1,R.ly);x.lineTo(R.x1+4,R.ly);x.stroke();
+    x.setLineDash([]);
+    const bx=R.x0-7;
+    if(R.ly<yV1-3){
+      x.strokeStyle='#7dffc4';x.lineWidth=1.5;x.beginPath();x.moveTo(bx,yV1);x.lineTo(bx,R.ly);x.moveTo(bx-4,yV1);x.lineTo(bx+4,yV1);x.moveTo(bx-4,R.ly);x.lineTo(bx+4,R.ly);x.stroke();
+    }
+  }
+  x.setLineDash([]);
+  // labels
+  const n=dp(c.div);
+  x.font=`700 12px ${MONO}`;x.textBaseline='bottom';x.textAlign='center';
+  const midX=(L.x1+R.x0)/2;
+  x.fillStyle='#43d6ff';x.fillText(`V₁=${fmt(rd(m2.V1,c.div),n)}`,midX,yV1-3);
+  if(m2.placed&&r.fits&&t>=1){x.fillStyle='#ff8fb1';x.textBaseline='bottom';x.fillText(`V₂=${fmt(rd(r.level*c.A,c.div),n)}`,midX,Math.min(R.ly-3,yV1-18));}
+  // overflow
+  if(m2.placed&&r.fits&&r.level>c.H*1.16){
+    x.fillStyle='rgba(67,214,255,.45)';x.fillRect(R.x1,baseY-c.H*1.16*pxcm,3,c.H*1.16*pxcm);
+    x.fillStyle='#ff9d9d';x.font=`600 12px ${FONT}`;x.textAlign='center';x.textBaseline='bottom';x.fillText('水溢出來了！',cxR,baseY-c.H*1.16*pxcm-14);
+  }
+}
+function animate(){
+  cancelAnimationFrame(raf);m2.anim=0;const t0=performance.now();
+  const step=now=>{m2.anim=Math.min(1,(now-t0)/1100);draw2();if(m2.anim<1)raf=requestAnimationFrame(step);else ui2();};
+  raf=requestAnimationFrame(step);
+}
+function ui2(){
+  const c=cyl2(),o=obj2(),n=dp(c.div),r=physics();
+  document.querySelectorAll('#c2Btns button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===m2.c)));
+  document.querySelectorAll('#objBtns button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.o===m2.o)));
+  const sl=$('v1');sl.max=c.cap;sl.step=c.div/10;
+  if(m2.V1>c.cap)m2.V1=c.cap;sl.value=m2.V1;
+  $('v1O').textContent=`${fmt(rd(m2.V1,c.div),n)} mL`;
+  $('pushWrap').hidden=!(o&&o.rho<1);
+  $('c2Note').textContent=`${c.name}・最小刻度 ${fmtDiv(c.div)}・內徑 ${c.d} cm`;
+  $('drop').disabled=m2.placed;$('lift').disabled=!m2.placed;
+  const V1r=rd(m2.V1,c.div);
+  $('rV1').textContent=`${fmt(V1r,n)} mL`;
+  const done=m2.placed&&m2.anim>=1;
+  const note=$('n2');note.className='note';
+  if(!m2.placed){
+    $('rV2').textContent='—';$('rDV').textContent='—';
+    note.innerHTML=r.fits?`先讀 V₁，再按「放入固體」。<b>${o.name}</b>要能<b>完全沒入水中</b>，而且放入後水不能超過刻度。`
+      :`<b>${o.name}</b>比量筒口還寬（約 ${o.fit.toFixed(1)} cm ＞ 內徑 ${c.d} cm），放不進去。換一個較大的量筒。`;
+    if(!r.fits)note.className='note warn';
+    return;
+  }
+  if(!r.fits){$('rV2').textContent='—';$('rDV').textContent='—';note.className='note warn';note.innerHTML=`<b>${o.name}</b>放不進這個量筒。換大一點的量筒。`;return;}
+  if(!done){$('rV2').textContent='…';$('rDV').textContent='…';note.innerHTML='水位上升中…';return;}
+  const V2=r.level*c.A,over=V2>c.cap+1e-9,spill=r.level>c.H*1.16;
+  const V2r=rd(V2,c.div),dV=V2r-V1r;
+  $('rV2').textContent=over?`超過 ${c.cap} mL`:`${fmt(V2r,n)} mL`;
+  $('rDV').innerHTML=over?'讀不到':`${fmt(V2r,n)} − ${fmt(V1r,n)} = ${fmt(dV,n)} mL = ${fmt(dV,n)} cm³`;
+  const trueV=o.V;
+  let s='',warn=false;
+  if(spill){warn=true;s=`<b>水溢出來了。</b>水位超過量筒頂端，溢出去的水沒算到，量不出體積。先倒掉一些水（V₁ 小一點）再做。`;}
+  else if(over){warn=true;s=`<b>水位超過最大刻度 ${c.cap} mL</b>，讀不到 V₂。先少裝一點水，或換大一點的量筒。`;}
+  else if(r.float){warn=true;s=`<b>木塊浮在水面上</b>，只有一部分沉入水中，排開的水只有 ${fmt(r.sub,2)} cm³，比木塊體積 ${fmt(trueV,2)} cm³ 小。勾選「用細針把木塊壓入水中」讓它完全沒入再量。`;}
+  else if(!r.full){warn=true;s=`<b>水太少了</b>：${o.name}沒有完全沒入水中，水位上升量只有沒入部分的體積，比真正的體積小。把 V₁ 調大一點再放一次。`;}
+  else{
+    s=`${o.name}完全沒入水中，排開的水 = 自己的體積。量到 <b>${fmt(dV,n)} cm³</b>（模擬設定的體積 ${trueV.toFixed(3)} cm³）。`;
+    if(dV<c.div*3)s+=`<br>水位只上升 ${(dV/c.div).toFixed(1)} 格，太少了，估計值的誤差占比很大。小物體用最小刻度較小的量筒（例如 10 mL 量筒）比較準確。`;
+    if(m2.push&&o.rho<1)s+=`<br>細針很細，它本身排開的水可以忽略。`;
+    if(m2.o===-1)s+=`<br>和「③」用長×寬×高算出的 ${fmt(trueV,3).replace(/\.?0+$/,'')} cm³ 比較，兩種方法結果相同（只差在估計值那一位）。`;
+  }
+  note.className='note'+(warn?' warn':'');note.innerHTML=s;
+}
+
+/* ================= mode 3：長×寬×高 ================= */
+const m3={L:5,W:3,H:10};
+function trim(v,n){return v.toFixed(n).replace(/\.?0+$/,'');}
+function draw3(){
+  const {x,w,h}=fit($('cv3'));if(w<120)return;
+  x.clearRect(0,0,w,h);
+  const {L,W,H}=m3;
+  const k=0.5,ang=-PI/6;                         // 斜投影：深度方向縮成 0.5
+  const dx=Math.cos(ang)*W*k,dy=Math.sin(ang)*W*k;
+  const spanX=L+Math.abs(dx),spanY=H+Math.abs(dy);
+  const s=Math.min((w-110)/spanX,(h-70)/spanY);
+  const ox=(w-spanX*s)/2+10,oy=h-34;
+  const P=(a,b,c)=>[ox+(a+c*Math.cos(ang)*k)*s,oy-(b-c*Math.sin(ang)*k)*s];
+  const v=[P(0,0,0),P(L,0,0),P(L,H,0),P(0,H,0),P(0,0,W),P(L,0,W),P(L,H,W),P(0,H,W)];
+  const poly=(ids,fill)=>{x.beginPath();ids.forEach((i,j)=>j?x.lineTo(...v[i]):x.moveTo(...v[i]));x.closePath();x.fillStyle=fill;x.fill();x.stroke();};
+  x.strokeStyle='rgba(190,230,255,.9)';x.lineWidth=1.5;
+  poly([3,2,6,7],'rgba(67,214,255,.32)');   // top
+  poly([1,5,6,2],'rgba(67,214,255,.20)');   // right
+  poly([0,1,2,3],'rgba(67,214,255,.26)');   // front
+  // dimension labels
+  x.fillStyle='#ff8fb1';x.strokeStyle='#ff8fb1';x.lineWidth=1.2;x.font=`700 13px ${MONO}`;
+  const dim=(a,b,off,txt,al)=>{const [x1,y1]=a,[x2,y2]=b;x.beginPath();x.moveTo(x1+off[0],y1+off[1]);x.lineTo(x2+off[0],y2+off[1]);x.stroke();
+    x.textAlign=al;x.textBaseline='middle';x.fillText(txt,(x1+x2)/2+off[0]*2.2,(y1+y2)/2+off[1]*2.2);};
+  dim(v[0],v[1],[0,12],`長 ${L.toFixed(1)} cm`,'center');
+  dim(v[0],v[3],[-10,0],`高 ${H.toFixed(1)} cm`,'right');
+  dim(v[1],v[5],[10,6],`寬 ${W.toFixed(1)} cm`,'left');
+}
+function ui3(){
+  const {L,W,H}=m3,V=L*W*H;
+  $('bLO').textContent=`${L.toFixed(1)} cm`;$('bWO').textContent=`${W.toFixed(1)} cm`;$('bHO').textContent=`${H.toFixed(1)} cm`;
+  $('calc3').innerHTML=`體積 = 長 × 寬 × 高<br>　　 = ${L.toFixed(1)} cm × ${W.toFixed(1)} cm × ${H.toFixed(1)} cm<br>　　 = <span class="res">${trim(V,3)} cm³</span>`;
+  const m3v=V*1e-6;
+  const e=Math.floor(Math.log10(m3v)),man=m3v/10**e;
+  $('units').innerHTML=`<tr><td>cm³ ＝ mL（cc）</td><td>${trim(V,3)}</td></tr><tr><td>dm³ ＝ L</td><td>${trim(V/1000,6)}</td></tr><tr><td>m³</td><td>${trim(man,3)} × 10<sup>${e}</sup></td></tr>`;
+  // 放進哪個量筒
+  const dims=[L,W,H].sort((a,b)=>a-b);
+  const fitW=Math.hypot(dims[0],dims[1]);
+  const ok=CYL.filter(c=>fitW<c.d-0.04&&V<c.cap*0.9);
+  const n=$('n3');
+  if(ok.length){n.className='note';n.innerHTML=`豎起來放（最長邊 ${dims[2].toFixed(1)} cm 朝上），底面對角線 ${fitW.toFixed(2)} cm，可以放進 <b>${ok.map(c=>c.name).join('、')}</b>。按「放進量筒驗證」用排水法量量看。`;}
+  else{n.className='note warn';n.innerHTML=`這個長方體太大（底面對角線 ${fitW.toFixed(2)} cm，或體積 ${trim(V,1)} cm³ 超過量筒容量），模擬裡的量筒都放不進去，只能用長×寬×高計算。課本圖 1-3A 的 150 cm³ 就是這種情況。`;}
+  $('toDisp').disabled=!ok.length;
+  draw3();
+}
+
+/* ================= events ================= */
+CYL.forEach((c,i)=>{
+  const b1=document.createElement('button');b1.type='button';b1.textContent=`${c.name}（最小刻度 ${fmtDiv(c.div)}）`;
+  b1.onclick=()=>{m1.c=i;newVol();};$('c1Btns').appendChild(b1);
+  const b2=document.createElement('button');b2.type='button';b2.textContent=c.name;
+  b2.onclick=()=>{const old=CYL[m2.c];m2.c=i;m2.V1=Math.round(Math.min(c.cap,m2.V1/old.cap*c.cap)/c.div)*c.div;m2.placed=false;m2.anim=1;ui2();draw2();};
+  $('c2Btns').appendChild(b2);
+});
+function objButtons(){
+  const box=$('objBtns');box.innerHTML='';
+  OBJ.forEach((o,i)=>{const b=document.createElement('button');b.type='button';b.dataset.o=i;b.textContent=o.name;
+    b.onclick=()=>{m2.o=i;m2.placed=false;m2.anim=1;m2.push=false;$('push').checked=false;ui2();draw2();};box.appendChild(b);});
+  if(m2.box){const b=document.createElement('button');b.type='button';b.dataset.o=-1;b.textContent='③ 的長方體';
+    b.onclick=()=>{m2.o=-1;m2.placed=false;m2.anim=1;ui2();draw2();};box.appendChild(b);}
+}
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+function setMode(m){
+  st.mode=m;document.querySelectorAll('.modebar button').forEach(q=>q.setAttribute('aria-pressed',String(q.dataset.m===m)));
+  $('m1').hidden=m!=='1';$('m2').hidden=m!=='2';$('m3').hidden=m!=='3';
+  if(m==='1'){draw1();ui1();}else if(m==='2'){ui2();draw2();}else ui3();
+}
+document.querySelectorAll('#eyeBtns button').forEach(b=>b.onclick=()=>{m1.e=+b.dataset.e*0.85;$('eye').value=Math.round(m1.e*100);draw1();ui1();});
+$('eye').oninput=e=>{m1.e=+e.target.value/100;draw1();ui1();};
+$('check').onclick=check1;
+$('inp').addEventListener('keydown',e=>{if(e.key==='Enter')check1();});
+$('reveal').onclick=reveal1;
+$('next').onclick=newVol;
+$('v1').oninput=e=>{m2.V1=+e.target.value;if(m2.placed){m2.anim=1;}ui2();draw2();};
+$('push').onchange=e=>{m2.push=e.target.checked;if(m2.placed)animate();else{ui2();draw2();}};
+$('drop').onclick=()=>{m2.placed=true;ui2();animate();};
+$('lift').onclick=()=>{m2.placed=false;m2.anim=1;cancelAnimationFrame(raf);ui2();draw2();};
+['L','W','H'].forEach(k=>$('b'+k).oninput=e=>{m3[k]=+e.target.value;ui3();});
+$('ex3').onclick=()=>{m3.L=5;m3.W=3;m3.H=10;$('bL').value=5;$('bW').value=3;$('bH').value=10;ui3();};
+$('toDisp').onclick=()=>{
+  const {L,W,H}=m3,V=L*W*H,dims=[L,W,H].sort((a,b)=>a-b);
+  m2.box={id:'box',name:'鋁製長方體',V,fit:Math.hypot(dims[0],dims[1]),w:dims[1],h:dims[2],rho:2.7,shape:'box'};
+  const i=CYL.findIndex(c=>m2.box.fit<c.d-0.04&&V<c.cap*0.9);
+  m2.c=i<0?2:i;const c=CYL[m2.c];
+  // 水要能淹過物體，又不能溢出
+  const need=Math.max(c.cap*0.3,(dims[2]+0.3)*c.A-V);
+  m2.V1=Math.round(Math.min(need,c.cap-V-c.div)/c.div)*c.div;
+  if(m2.V1<0)m2.V1=0;
+  m2.o=-1;m2.placed=false;m2.anim=1;objButtons();setMode('2');
+};
+addEventListener('resize',()=>{if(st.mode==='1')draw1();else if(st.mode==='2')draw2();else draw3();});
+
+objButtons();
+m1.V=30.36;ui1();draw1();ui3();ui2();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(st.mode==='1')draw1();else if(st.mode==='2')draw2();else draw3();});
+})();
+</script>
+</body>
+</html>
