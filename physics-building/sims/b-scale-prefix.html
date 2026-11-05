@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>尺度之旅與 SI 前綴詞</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none;cursor:grab}
+#zoom{height:420px}
+@media(max-width:560px){#zoom{height:330px}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select,input[type=text],input[type=number]{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#7c3aed,#3b82f6 30%,#10b981 50%,#facc15 70%,#ef4444)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.ladder{display:flex;flex-direction:column;gap:3px;padding:6px 14px 14px}
+.rung{display:grid;grid-template-columns:42px 34px 1fr 66px;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;border:1px solid transparent;cursor:pointer;font-size:13px;color:var(--muted)}
+.rung:hover{border-color:var(--line)}
+.rung .sym{font-family:"JetBrains Mono",monospace;font-size:16px;font-weight:700;color:var(--txt);text-align:center}
+.rung .pw{font-family:"JetBrains Mono",monospace;font-size:12.5px;text-align:right}
+.rung .nm{font-size:13px}
+.rung .ex{font-size:11.5px;color:var(--dim);grid-column:3/5}
+.rung.on{background:rgba(255,209,102,.1);border-color:var(--acc);color:var(--txt)}
+.rung.on .sym{color:var(--acc)}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+@media(max-width:560px){.read{grid-template-columns:1fr 1fr}}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:16px;color:var(--phos);font-weight:700;word-break:break-all}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.q{font-size:16px;margin:6px 0 10px;line-height:1.7}
+.q .u{font-family:"JetBrains Mono",monospace;color:var(--acc)}
+.ans{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:"JetBrains Mono",monospace}
+.ans input{width:92px}
+.ans input.e{width:60px}
+.fb{margin-top:10px;font-size:14px;min-height:1.6em}
+.fb.ok{color:var(--phos)} .fb.no{color:var(--red)}
+.sol{margin-top:8px;font-size:13.5px;color:var(--muted);background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:"JetBrains Mono","Noto Sans TC",monospace;line-height:1.8}
+.conv{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.conv input{width:110px}
+.out{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:18px;color:var(--phos);word-break:break-all}
+.score{font-family:"JetBrains Mono",monospace;color:var(--acc);font-size:13px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">1-3 · Powers of Ten</div>
+  <h1>尺度之旅與 SI 前綴詞</h1>
+  <p class="lede">從比原子核還小的 10<sup>−18</sup> m，一路放大到比鄰星距離的 10<sup>18</sup> m。每放大 1000 倍，就換一個前綴詞：n、μ、m、k、M、G……前綴詞只是「10 的幾次方」的代號，配上任何單位都通用。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">縮放視窗</span><span class="n" id="zNote">拖曳畫面或用滾輪縮放</span></div>
+      <div class="box"><canvas id="zoom" aria-label="尺度縮放畫面"></canvas></div>
+      <div class="pad" style="padding-top:0">
+        <div class="ctl">
+          <div class="r"><label for="sZ">畫面寬度（10 的幾次方公尺）</label><span id="vZ"></span></div>
+          <input type="range" id="sZ" min="-18" max="18.6" step="0.01" value="0.4">
+        </div>
+        <div class="seg" style="margin-top:10px">
+          <button id="dn">÷ 1000（縮小一級）</button>
+          <button id="up">× 1000（放大一級）</button>
+          <button class="primary" id="play">▶ 自動旅行</button>
+        </div>
+        <div class="read" style="margin-top:12px">
+          <div><small>畫面寬度</small><b id="rW"></b></div>
+          <div><small>用科學記號</small><b id="rS"></b></div>
+          <div><small>約是人身高的</small><b id="rH"></b></div>
+        </div>
+        <div class="note" id="see"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">SI 前綴詞（表 1-4）</span><span class="n">點一列跳到那個尺度</span></div>
+      <div class="ladder" id="ladder"></div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">單位換算練習</span><span class="score" id="score">0 / 0</span></div>
+      <div class="pad" style="padding-top:4px">
+        <div class="seg" id="qType"></div>
+        <div class="q" id="qText"></div>
+        <div class="ans"><input type="text" inputmode="decimal" id="aM" aria-label="係數"> × 10^ <input type="text" inputmode="numeric" class="e" id="aE" aria-label="指數"> <span id="aU"></span></div>
+        <div class="seg" style="margin-top:10px">
+          <button class="primary" id="chk">對答案</button>
+          <button id="show">看解法</button>
+          <button id="next">下一題</button>
+        </div>
+        <div class="fb" id="fb"></div>
+        <div class="sol" id="sol" hidden></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">前綴詞換算器</span><span class="n">任何單位都適用</span></div>
+      <div class="pad" style="padding-top:4px">
+        <div class="conv">
+          <input type="number" id="cV" value="2.4" aria-label="數值">
+          <select id="cF" aria-label="原前綴"></select>
+          <select id="cU" aria-label="單位"><option>m</option><option>Hz</option><option>B</option><option>Pa</option><option>A</option><option>s</option><option>W</option><option>g</option></select>
+          <span>→</span>
+          <select id="cT" aria-label="新前綴"></select><span id="cU2">m</span>
+        </div>
+        <div class="out" id="cO"></div>
+        <div class="note" id="cN"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>相鄰兩個前綴詞（c、d 除外）都差 1000 倍，所以「換一個前綴詞 = 小數點移 3 位」。換大的前綴詞（m→k）數字變小，換小的前綴詞（m→μ）數字變大，物理量本身不變。注意 k 是小寫、M 是大寫：1 mm 和 1 Mm 差了 10<sup>9</sup> 倍。電腦記憶體有時用 1 KiB = 2<sup>10</sup> = 1024 B，但 SI 前綴詞一律是 10 的次方，1 TB = 1000 GB。<br>
+    <b>課本對照：</b>基礎物理 Ch01 1-3 物理量的單位（p.8–9 表 1-4 前綴詞、p.12 範例 1-2 單位換算）。物體大小取常見的代表值，只求數量級正確。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const SUP={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
+const sup=n=>String(n).replace(/[-0-9]/g,c=>SUP[c]);
+const P=[
+  {s:"E",n:"艾（exa）",p:18,ex:"比鄰星距離約 40 Pm ≈ 0.04 Em"},
+  {s:"P",n:"拍（peta）",p:15,ex:"1 光年 ≈ 9.46 Pm"},
+  {s:"T",n:"兆（tera）",p:12,ex:"硬碟容量 2 TB"},
+  {s:"G",n:"吉（giga）",p:9,ex:"Wi-Fi 頻率 2.4 GHz、記憶體 8 GB"},
+  {s:"M",n:"百萬（mega）",p:6,ex:"地球半徑 ≈ 6.4 Mm"},
+  {s:"k",n:"千（kilo）",p:3,ex:"公里 km、公斤 kg"},
+  {s:"",n:"（基本單位）",p:0,ex:"1 m、1 s、1 Hz"},
+  {s:"d",n:"分（deci）",p:-1,ex:"分公尺 dm、分貝 dB"},
+  {s:"c",n:"厘（centi）",p:-2,ex:"公分 cm"},
+  {s:"m",n:"毫（milli）",p:-3,ex:"毫米 mm、電池容量 mAh"},
+  {s:"μ",n:"微（micro）",p:-6,ex:"紅血球直徑約 7.5 μm"},
+  {s:"n",n:"奈（nano）",p:-9,ex:"DNA 雙股寬約 2 nm"},
+  {s:"p",n:"皮（pico）",p:-12,ex:"氫原子半徑約 53 pm"},
+  {s:"f",n:"飛（femto）",p:-15,ex:"質子直徑約 1.7 fm"},
+  {s:"a",n:"阿（atto）",p:-18,ex:"電子、夸克大小的上限"}
+];
+// 物體：D = 直徑或大小（m），k = 'o' 實心物體、'r' 軌道或距離（以中心為圓心）
+const OBJ=[
+  {D:2e-18,t:"夸克、電子（目前量不到大小，上限約 10⁻¹⁸ m）",c:"#c084fc",k:"o"},
+  {D:1.7e-15,t:"質子",c:"#ff7a7a",k:"o"},
+  {D:1.4e-14,t:"金原子核",c:"#fb923c",k:"o"},
+  {D:1.06e-10,t:"氫原子（電子雲）",c:"#43d6ff",k:"o"},
+  {D:2.0e-9,t:"DNA 雙股寬",c:"#7dffc4",k:"o"},
+  {D:1.0e-7,t:"流感病毒",c:"#a3e635",k:"o"},
+  {D:2.0e-6,t:"大腸桿菌",c:"#facc15",k:"o"},
+  {D:7.5e-6,t:"紅血球",c:"#ef4444",k:"o"},
+  {D:7.0e-5,t:"頭髮直徑",c:"#d6b38a",k:"o"},
+  {D:3.0e-3,t:"螞蟻",c:"#f59e0b",k:"o"},
+  {D:1.7,t:"人",c:"#ffd166",k:"o"},
+  {D:508,t:"台北 101 高度",c:"#93c5fd",k:"o"},
+  {D:3.94e5,t:"台灣南北長",c:"#4ade80",k:"o"},
+  {D:1.27e7,t:"地球直徑",c:"#38bdf8",k:"o"},
+  {D:7.69e8,t:"月球軌道（地月距離 3.84×10⁸ m）",c:"#cbd5e1",k:"r"},
+  {D:1.39e9,t:"太陽直徑",c:"#fbbf24",k:"o"},
+  {D:3.0e11,t:"地球軌道（1 AU ≈ 1.5×10¹¹ m）",c:"#38bdf8",k:"r"},
+  {D:9.0e12,t:"海王星軌道（太陽系行星區）",c:"#818cf8",k:"r"},
+  {D:1.89e16,t:"半徑 1 光年（9.46×10¹⁵ m）",c:"#e879f9",k:"r"},
+  {D:8.0e16,t:"比鄰星距離 4.24 光年（4.0×10¹⁶ m）",c:"#f472b6",k:"r"}
+];
+const prefixFor=e=>{let best=P[P.length-1];for(const q of P){if(q.p<=e+1e-9&&(q.p%3===0||q.p===0)){best=q;break;}}return best;};
+function fmtLen(m){ // 以適合的前綴詞表示
+  const e=Math.floor(Math.log10(m)+1e-9);
+  let q=P.find(x=>x.p%3===0&&x.p<=e)||P[P.length-1];
+  const v=m/Math.pow(10,q.p);
+  const s=v>=100?v.toFixed(0):v>=10?v.toFixed(1):v.toFixed(2);
+  return s+" "+q.s+"m";
+}
+function sci(x,d=2){if(x===0)return"0";const e=Math.floor(Math.log10(Math.abs(x))+1e-12);const m=x/Math.pow(10,e);let ms=(+m.toFixed(d)).toString();if(ms==="10"){return sci(x*1.0000001,d);}return(e===0?ms:(ms==="1"?"":ms+" × ")+"10"+sup(e));}
+
+const cv=$("#zoom"),sZ=$("#sZ");
+let z=+sZ.value,target=null,playing=false;
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+
+function draw(){
+  const {x,w,h}=fit(cv);
+  const V=Math.pow(10,z); // 畫面寬度（m）
+  const px=w/V; // 每公尺幾像素
+  x.clearRect(0,0,w,h);
+  // 背景格線：10 的整數次方的格子
+  const n=Math.floor(Math.log10(V/4));
+  for(const [k,a] of [[n,.10],[n+1,.22]]){
+    const g=Math.pow(10,k)*px; if(g<6) continue;
+    x.strokeStyle=`rgba(120,140,180,${a})`;x.lineWidth=1;x.beginPath();
+    for(let gx=w/2%g;gx<w;gx+=g){x.moveTo(gx,0);x.lineTo(gx,h);}
+    for(let gy=h/2%g;gy<h;gy+=g){x.moveTo(0,gy);x.lineTo(w,gy);}
+    x.stroke();
+  }
+  const cx=w/2,cy=h*0.5;
+  const shown=[];
+  // 由大到小畫，大的在下
+  const list=OBJ.slice().sort((a,b)=>b.D-a.D);
+  for(const o of list){
+    const r=o.D*px/2;
+    const rel=o.D/V;
+    if(rel<0.004||r>Math.hypot(w,h)) continue;
+    let al=1;
+    if(rel<0.03) al=(rel-0.004)/0.026;
+    if(rel>1.6) al=Math.max(0,1-(rel-1.6)/2.4);
+    al=Math.max(0,Math.min(1,al));
+    if(al<=0.01) continue;
+    x.globalAlpha=al;
+    x.beginPath();x.arc(cx,cy,Math.max(r,1.5),0,Math.PI*2);
+    if(o.k==="o"){x.fillStyle=o.c+"22";x.fill();x.strokeStyle=o.c;x.lineWidth=1.6;x.setLineDash([]);x.stroke();}
+    else{x.strokeStyle=o.c;x.lineWidth=1.4;x.setLineDash([6,5]);x.stroke();x.setLineDash([]);
+      x.fillStyle=o.c;x.beginPath();x.arc(cx+r,cy,3,0,7);x.fill();}
+    shown.push({o,r,al});
+    x.globalAlpha=1;
+  }
+  // 標籤：放在圓的上緣（若超出畫面則放在左上角清單）
+  x.font="500 12.5px 'Noto Sans TC',sans-serif";x.textBaseline="bottom";
+  let ly=18;
+  for(const s of shown.slice().reverse()){
+    const {o,r,al}=s;
+    x.globalAlpha=al;
+    const label=o.t+"　"+fmtLen(o.D);
+    const tw=x.measureText(label).width;
+    if(r<h*0.46&&r>8){
+      const yy=cy-r-3;
+      x.fillStyle="rgba(4,6,11,.75)";x.fillRect(cx-tw/2-4,yy-16,tw+8,17);
+      x.fillStyle=o.c;x.textAlign="center";x.fillText(label,cx,yy);
+    }else if(r<=8){
+      x.fillStyle=o.c;x.textAlign="left";x.fillText("• "+label,cx+r+8,cy+5);
+    }else{
+      x.fillStyle="rgba(4,6,11,.75)";x.fillRect(8,ly-15,tw+14,17);
+      x.fillStyle=o.c;x.textAlign="left";x.fillText("◯ "+label,10,ly);ly+=19;
+    }
+  }
+  x.globalAlpha=1;
+  // 比例尺
+  const e=Math.floor(Math.log10(V*0.4));
+  const L=Math.pow(10,e)*px;
+  const bx=16,by=h-20;
+  x.strokeStyle="#ffd166";x.lineWidth=3;x.beginPath();x.moveTo(bx,by);x.lineTo(bx+L,by);
+  x.moveTo(bx,by-6);x.lineTo(bx,by+6);x.moveTo(bx+L,by-6);x.lineTo(bx+L,by+6);x.stroke();
+  const q=P.find(t=>t.p%3===0&&t.p<=e)||P[P.length-1];
+  const mult=Math.pow(10,e-q.p);
+  x.fillStyle="#ffd166";x.font="700 14px 'JetBrains Mono',monospace";x.textAlign="left";x.textBaseline="bottom";
+  x.fillText(`${mult} ${q.s}m = 10${sup(e)} m`,bx,by-8);
+  ui(V,shown);
+}
+function ui(V,shown){
+  $("#vZ").textContent="log₁₀(寬/m) = "+(Math.abs(z)<0.05?"0.0":z.toFixed(1).replace("-","−"));
+  $("#rW").textContent=fmtLen(V);
+  $("#rS").textContent=sci(V,2)+" m";
+  const r=V/1.7;
+  $("#rH").textContent=r>=0.01&&r<1000?(+r.toPrecision(2))+" 倍":sci(r,1)+" 倍";
+  const e=Math.floor(Math.log10(V)+1e-9);
+  const q=P.find(t=>t.p%3===0&&t.p<=e)||P[P.length-1];
+  document.querySelectorAll(".rung").forEach(el=>el.classList.toggle("on",+el.dataset.p===q.p));
+  const names=shown.filter(s=>s.o.D/V>0.03&&s.o.D/V<1.6).map(s=>s.o.t.replace(/（.*/,""));
+  $("#see").innerHTML=names.length?`<b>這個尺度看得到：</b>${names.join("、")}。`:"<b>這個尺度沒有代表物體</b>——繼續縮放看看。注意原子（10⁻¹⁰ m）和原子核（10⁻¹⁴ m）之間差了一萬倍，原子內部幾乎是空的。";
+  $("#zNote").textContent="前綴詞："+(q.s?q.s+"（10"+sup(q.p)+"）":"無（10⁰）");
+}
+sZ.addEventListener("input",()=>{z=+sZ.value;target=null;stop();draw();});
+function go(t){target=Math.max(-18,Math.min(18.6,t));stop();loop();}
+$("#dn").onclick=()=>go(z-3);
+$("#up").onclick=()=>go(z+3);
+let raf=0;
+function loop(){cancelAnimationFrame(raf);raf=requestAnimationFrame(step);}
+function step(){
+  if(playing){z+=0.018;if(z>=18.6){z=18.6;stop();}}
+  else if(target!==null){const d=target-z;if(Math.abs(d)<0.005){z=target;target=null;}else z+=d*0.12;}
+  sZ.value=z;draw();
+  if(playing||target!==null) raf=requestAnimationFrame(step);
+}
+function stop(){playing=false;$("#play").textContent="▶ 自動旅行";}
+$("#play").onclick=()=>{if(playing){stop();return;}if(z>=18.5) z=-18;playing=true;target=null;$("#play").textContent="❚❚ 暫停";loop();};
+// 滾輪與拖曳縮放
+cv.addEventListener("wheel",ev=>{ev.preventDefault();target=null;stop();z=Math.max(-18,Math.min(18.6,z+ev.deltaY*0.002));sZ.value=z;draw();},{passive:false});
+let drag=null;
+cv.addEventListener("pointerdown",ev=>{drag={y:ev.clientY,x:ev.clientX,z};cv.setPointerCapture(ev.pointerId);stop();target=null;});
+cv.addEventListener("pointermove",ev=>{if(!drag)return;const d=(drag.y-ev.clientY)+(ev.clientX-drag.x);z=Math.max(-18,Math.min(18.6,drag.z+d*0.012));sZ.value=z;draw();});
+cv.addEventListener("pointerup",()=>drag=null);
+cv.addEventListener("pointercancel",()=>drag=null);
+// 前綴詞階梯
+const lad=$("#ladder");
+for(const q of P){
+  const d=document.createElement("div");d.className="rung";d.dataset.p=q.p;
+  d.innerHTML=`<span class="sym">${q.s||"—"}</span><span class="pw">10${sup(q.p)}</span><span class="nm">${q.n}</span><span></span><span class="ex">${q.ex}</span>`;
+  d.onclick=()=>go(q.p+0.45);
+  lad.appendChild(d);
+}
+addEventListener("resize",draw);
+
+// ===== 單位換算練習 =====
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const QT=[
+  {k:"ghz",n:"GHz → Hz",make(){const v=pick([2.4,5,3.6,1.8,2.45]);return{q:`手機處理器時脈 <span class="u">${v} GHz</span> = ？ Hz`,u:"Hz",ans:v*1e9,sol:`G = 10⁹，所以 ${v} GHz = ${v} × 10⁹ Hz`+(v>=10?"":"")};}},
+  {k:"gb",n:"GB → B",make(){const v=pick([8,16,64,128,256]);return{q:`隨身碟容量 <span class="u">${v} GB</span> = ？ B（位元組，依 SI 前綴詞）`,u:"B",ans:v*1e9,sol:`G = 10⁹，${v} GB = ${v} × 10⁹ B = ${sci(v*1e9,3)} B`};}},
+  {k:"tb",n:"TB → GB",make(){const v=pick([1,2,4,0.5]);return{q:`外接硬碟 <span class="u">${v} TB</span> = ？ GB`,u:"GB",ans:v*1e3,sol:`T = 10¹²、G = 10⁹，相差 10³ 倍，${v} TB = ${v} × 10³ GB = ${v*1000} GB`};}},
+  {k:"mah",n:"mAh → C",make(){const v=pick([5000,4000,3000,10000]);return{q:`行動電源標示 <span class="u">${v} mAh</span>，可提供的電量 Q = It 是多少庫侖（C）？`,u:"C",ans:v*1e-3*3600,sol:`m = 10⁻³，${v} mAh = ${v} × 10⁻³ A × 3600 s = ${v/1000} A × 3600 s = ${sci(v*3.6,3)} C`};}},
+  {k:"hpa",n:"hPa → Pa",make(){const v=pick([1013,1000,980,1020]);return{q:`氣象報告的氣壓 <span class="u">${v} hPa</span> = ？ Pa`,u:"Pa",ans:v*100,sol:`h（百，hecto）= 10²，${v} hPa = ${v} × 10² Pa = ${sci(v*100,3)} Pa`};}},
+  {k:"len",n:"長度",make(){const c=pick([["紅血球直徑",7.5,"μm",-6],["DNA 雙股寬",2,"nm",-9],["質子直徑",1.7,"fm",-15],["地球半徑",6.4,"Mm",6],["氫原子半徑",53,"pm",-12]]);return{q:`${c[0]}約 <span class="u">${c[1]} ${c[2]}</span> = ？ m`,u:"m",ans:c[1]*Math.pow(10,c[3]),sol:`${c[2][0]} = 10${sup(c[3])}，${c[1]} ${c[2]} = ${c[1]} × 10${sup(c[3])} m = ${sci(c[1]*Math.pow(10,c[3]),3)} m`};}}
+];
+let cur=null,qk="ghz",right=0,tot=0,answered=false;
+const qBox=$("#qType");
+for(const t of QT){const b=document.createElement("button");b.textContent=t.n;b.dataset.k=t.k;b.setAttribute("aria-pressed",t.k===qk);b.onclick=()=>{qk=t.k;qBox.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.k===qk));newQ();};qBox.appendChild(b);}
+function newQ(){cur=QT.find(t=>t.k===qk).make();$("#qText").innerHTML=cur.q;$("#aU").textContent=cur.u;$("#aM").value="";$("#aE").value="";$("#fb").textContent="";$("#fb").className="fb";$("#sol").hidden=true;answered=false;}
+function check(){
+  const m=parseFloat($("#aM").value),e=$("#aE").value.trim()===""?0:parseInt($("#aE").value.replace("−","-"),10);
+  const fb=$("#fb");
+  if(!isFinite(m)||!isFinite(e)){fb.className="fb no";fb.textContent="請填入係數與指數（例如 2.4 和 9）。";return;}
+  const v=m*Math.pow(10,e);
+  const ok=Math.abs(v-cur.ans)<=Math.abs(cur.ans)*1e-6;
+  if(!answered){tot++;if(ok)right++;answered=true;}
+  $("#score").textContent=right+" / "+tot;
+  fb.className="fb "+(ok?"ok":"no");
+  if(ok){fb.textContent="✔ 正確！"+(m>=10||m<1?"（科學記號習慣把係數寫成 1 到 10 之間："+sci(cur.ans,3)+"）":"");}
+  else{const r=v/cur.ans;const off=Math.log10(r);fb.textContent=Math.abs(off-Math.round(off))<1e-6&&Math.round(off)!==0?`✘ 差了 10${sup(Math.round(off))} 倍，檢查前綴詞代表的次方。`:"✘ 再算一次，可以按「看解法」。";}
+}
+$("#chk").onclick=check;
+$("#aE").addEventListener("keydown",e=>{if(e.key==="Enter")check();});
+$("#aM").addEventListener("keydown",e=>{if(e.key==="Enter")check();});
+$("#show").onclick=()=>{const s=$("#sol");s.hidden=false;s.innerHTML=cur.sol+"<br>答案："+sci(cur.ans,4)+" "+cur.u;};
+$("#next").onclick=newQ;
+newQ();
+
+// ===== 換算器 =====
+const CP=P.concat([{s:"h",n:"百（hecto）",p:2}]).sort((a,b)=>b.p-a.p);
+for(const id of ["cF","cT"]){const s=$("#"+id);for(const q of CP){const o=document.createElement("option");o.value=q.p;o.textContent=(q.s||"（無）")+"  10"+sup(q.p);s.appendChild(o);}}
+$("#cF").value=9;$("#cT").value=0;
+function conv(){
+  const v=parseFloat($("#cV").value),f=+$("#cF").value,t=+$("#cT").value,u=$("#cU").value;
+  $("#cU2").textContent=u;
+  const fs=CP.find(q=>q.p===f).s,ts=CP.find(q=>q.p===t).s;
+  if(!isFinite(v)){$("#cO").textContent="—";return;}
+  const r=v*Math.pow(10,f-t);
+  const plain=Math.abs(r)>=1e-4&&Math.abs(r)<1e7?(+r.toPrecision(6)).toString():"";
+  const sc=sci(r,4);
+  $("#cO").textContent=`${v} ${fs}${u} = ${plain&&plain!==sc?plain+" "+ts+u+" = ":""}${sc} ${ts}${u}`;
+  const d=f-t;
+  $("#cN").innerHTML=d===0?"前綴詞相同，數值不變。":`${fs||"（無）"} = 10${sup(f)}，${ts||"（無）"} = 10${sup(t)}，相差 10${sup(Math.abs(d))} 倍。換成${d>0?"<b>較小</b>的前綴詞，數字要乘上 10"+sup(d):"<b>較大</b>的前綴詞，數字要除以 10"+sup(-d)}。`+(u==="g"&&t===0?"（提醒：質量的 SI 基本單位是 kg，不是 g。）":"");
+}
+["cV","cF","cT","cU"].forEach(id=>$("#"+id).addEventListener("input",conv));
+conv();
+draw();
+})();
+</script>
+</body>
+</html>
