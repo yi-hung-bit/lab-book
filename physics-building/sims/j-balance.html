@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上皿天平與電子天平</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--teal:#4fd1c5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:pan-y}
+#cv{height:400px}#ev{height:360px}
+@media(max-width:560px){#cv{height:340px}#ev{height:320px}}
+.ctlwrap{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctlwrap{grid-template-columns:1fr}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.35;cursor:default;border-color:var(--line)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.wt{font-family:"JetBrains Mono",monospace;min-width:62px}
+.wt.mg{border-style:dashed}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.steps span{font-size:12.5px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
+.steps span.on{border-color:var(--acc);color:var(--acc)}
+.steps span.done{border-color:#1f6f55;color:var(--phos)}
+.sl{display:flex;align-items:center;gap:10px;margin-top:4px}
+.sl input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
+.sl b{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);min-width:56px;text-align:right}
+.ans{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ans label{font-size:14px}
+.ans input[type=text]{font-family:"JetBrains Mono",monospace;font-size:18px;width:130px;max-width:44vw;padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:#05080f;color:var(--txt)}
+.ans input:focus{outline:2px solid var(--acc);outline-offset:1px}
+.fb{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid var(--line);background:#0a0f1a;color:var(--muted);min-height:48px}
+.fb.ok{border-color:#1f6f55;background:#071a14;color:#bff5dc}
+.fb.mid{border-color:#7a6320;background:#1a1505;color:#ffe7a3}
+.fb.bad{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.rd{font-family:"JetBrains Mono",monospace;font-size:22px;font-weight:700}
+.rd .a{color:var(--teal)}.rd .e{color:var(--red)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.stat{display:flex;gap:18px;flex-wrap:wrap;margin-top:6px}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:18px;color:var(--phos);font-weight:700}
+.calc{margin-top:8px;font-family:"JetBrains Mono",monospace;font-size:14px;line-height:1.8;overflow-wrap:anywhere}
+.calc .res{color:var(--phos);font-weight:700}
+.onpan{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin-top:4px}
+.onpan button{font-family:"JetBrains Mono",monospace;background:#1d2538;border-color:#33405e}
+.onpan .empty{font-size:13px;color:var(--dim);padding:6px 0}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 1-2 · 質量的測量</div>
+  <h1>上皿天平與電子天平</h1>
+  <p class="lede">上皿天平利用<b style="color:var(--acc);font-weight:500">加總砝碼的質量</b>得到物體的質量：先調平衡，再把待測物放左盤、砝碼放右盤，由大到小加砝碼，最後由指針讀出<span style="color:var(--red)">估計值</span>。電子天平則要先調水平、放上稱量紙後<b style="color:var(--acc);font-weight:500">歸零</b>，顯示的就是藥品的質量。</p>
+
+  <div class="modebar" role="group" aria-label="模式">
+    <button type="button" data-m="pan" aria-pressed="true">① 上皿天平</button>
+    <button type="button" data-m="elec" aria-pressed="false">② 電子天平</button>
+  </div>
+
+  <!-- ===== mode 1 ===== -->
+  <div id="mPan">
+    <section class="card" style="margin-top:14px">
+      <div class="head"><span class="t">上皿天平</span><span class="n" id="swing">指針靜止</span></div>
+      <div class="box"><canvas id="cv" aria-label="上皿天平，上方為指針刻度放大圖"></canvas></div>
+    </section>
+
+    <div class="ctlwrap">
+      <section class="card"><div class="pad">
+        <div class="steps"><span id="s1">1 調平衡</span><span id="s2">2 放待測物、加砝碼</span><span id="s3">3 讀數</span></div>
+        <div class="lab">步驟 1：空盤時轉動平衡螺絲，讓指針停在中央</div>
+        <div class="sl"><input type="range" id="screw" min="-80" max="80" step="1" value="0" aria-label="平衡螺絲"><b id="screwV">0</b></div>
+        <div class="lab" style="margin-top:12px">待測物（放左盤）</div>
+        <div class="seg" id="objBtns">
+          <button type="button" data-o="ex" aria-pressed="false">課本：模型 70.20 g</button>
+          <button type="button" data-o="nut" aria-pressed="false">螺帽</button>
+          <button type="button" data-o="stone" aria-pressed="false">石塊</button>
+          <button type="button" data-o="box" aria-pressed="false">鉛筆盒</button>
+          <button type="button" id="objOff">拿下待測物</button>
+        </div>
+        <div class="lab" style="margin-top:12px">砝碼盒（用鑷子夾到右盤，由大到小）</div>
+        <div class="seg" id="wbox"></div>
+        <div class="lab" style="margin-top:12px">右盤上的砝碼（點一下夾回盒子）</div>
+        <div class="onpan" id="onpan"></div>
+        <div class="seg" style="margin-top:8px"><button id="clrW">砝碼全部放回</button></div>
+      </div></section>
+
+      <section class="card"><div class="pad">
+        <div class="stat">
+          <div>砝碼總質量<b id="wSum">0 g</b></div>
+          <div>指針位置<b id="ptr">0 格</b></div>
+        </div>
+        <div class="calc" id="sumCalc"></div>
+        <div class="ans">
+          <label for="inp">待測物質量 =</label>
+          <input type="text" id="inp" inputmode="decimal" autocomplete="off" placeholder="例 70.20">
+          <span>g</span>
+        </div>
+        <div class="seg" style="margin-top:10px">
+          <button class="primary" id="check">檢查讀數</button>
+          <button id="reveal">看標準讀法</button>
+        </div>
+        <div class="fb" id="fb" aria-live="polite">先在空盤時用平衡螺絲把指針調到中央，再選一個待測物。</div>
+        <div class="note">指針往<b>較重的一側</b>偏。最小的砝碼是 100 mg = 0.1 g，所以準確值記到 0.1 g；砝碼加不下去時，看指針偏離中央幾格，估計 0.01 g 那一位。本模擬的天平：指針每偏 1 小格約差 0.02 g。</div>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== mode 2 ===== -->
+  <div id="mElec" hidden>
+    <section class="card" style="margin-top:14px">
+      <div class="head"><span class="t">電子天平</span><span class="n" id="eNote">最小顯示 0.01 g</span></div>
+      <div class="box"><canvas id="ev" aria-label="電子天平與水平儀"></canvas></div>
+    </section>
+    <div class="ctlwrap">
+      <section class="card"><div class="pad">
+        <div class="steps"><span id="e1">1 調整水平</span><span id="e2">2 歸零</span><span id="e3">3 進行測量</span></div>
+        <div class="lab">步驟 1：轉動腳座，讓水平儀的氣泡在圓圈中央</div>
+        <div class="sl"><input type="range" id="foot" min="-30" max="30" step="1" value="0" aria-label="腳座"><b id="footV">0</b></div>
+        <div class="lab" style="margin-top:12px">步驟 2、3</div>
+        <div class="seg">
+          <button id="paper">放上稱量紙</button>
+          <button id="tare" class="primary">歸零</button>
+          <button id="salt">用藥匙加一些食鹽</button>
+          <button id="eReset">清空秤盤</button>
+        </div>
+        <div class="ans">
+          <label for="eInp">食鹽的質量 =</label>
+          <input type="text" id="eInp" inputmode="decimal" autocomplete="off" placeholder="例 3.28">
+          <span>g</span>
+        </div>
+        <div class="seg" style="margin-top:10px"><button class="primary" id="eCheck">檢查</button><button id="eNew">重新開始</button></div>
+        <div class="fb" id="efb" aria-live="polite">先調整水平，再放上稱量紙、按「歸零」，然後加食鹽。</div>
+      </div></section>
+      <section class="card"><div class="pad">
+        <div class="stat">
+          <div>秤盤上的總質量<b id="eLoad">0.00 g</b></div>
+          <div>歸零時扣掉<b id="eTare">0.00 g</b></div>
+          <div>螢幕顯示<b id="eDisp">0.00 g</b></div>
+        </div>
+        <div class="note" id="eExplain"></div>
+      </div></section>
+    </div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>課本 p.25 的例子：待測物放左盤，右盤放 50 g、10 g、10 g、200 mg 砝碼後指針停在中央，所以待測物質量 = 50 g + 10 g + 10 g + 0.2 g = 70.20 g——準確值 70.2 g，指針在中央所以估計值是 0，仍要寫出來。砝碼要用鑷子夾取、由大到小試：放上去指針偏向右盤（砝碼太重）就拿下換小一號。忘了先調平衡，每一次讀數都會多（或少）同樣的量。電子天平（課本 p.26）的流程是調整水平 → 放稱量紙後歸零 → 進行測量；沒有歸零，讀數就包含了稱量紙的質量。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const G=0.02;            // grams per pointer division
+const STOP=7;            // pointer stop (divisions)
+// weight set: grams
+const SET=[100,50,20,10,10,5,2,2,1,0.5,0.2,0.2,0.1];
+const OBJ={ex:{name:'模型',m:70.200},nut:{name:'螺帽',min:8,max:30},stone:{name:'石塊',min:30,max:150},box:{name:'鉛筆盒',min:90,max:190}};
+const st={mode:'pan',offset0:0,screw:0,obj:null,m:0,used:[],p:0,v:0,last:0,answered:false,orderWarn:false,tries:0,right:0};
+
+const fmtW=g=>g>=1?`${g} g`:`${Math.round(g*1000)} mg`;
+const sumW=()=>Math.round(st.used.reduce((s,i)=>s+SET[i],0)*1000)/1000;
+const netOffset=()=>(st.offset0+st.screw/10);   // divisions with empty pans
+function target(){ // pointer target in divisions (positive = toward left/object pan)
+  const d=((st.obj?st.m:0)-sumW())/G+netOffset();
+  return Math.max(-STOP,Math.min(STOP,d));
+}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+// ---------- weight UI ----------
+function buildBox(){
+  const wb=$('wbox');wb.innerHTML='';
+  SET.forEach((g,i)=>{const b=document.createElement('button');b.type='button';b.className='wt'+(g<1?' mg':'');b.textContent=fmtW(g);b.dataset.i=i;
+    b.onclick=()=>addW(i);wb.appendChild(b);});
+}
+function addW(i){
+  if(st.used.includes(i))return;
+  // order check: adding a bigger weight than the smallest already on the pan
+  const minOn=st.used.length?Math.min(...st.used.map(k=>SET[k])):Infinity;
+  st.orderWarn=SET[i]>minOn;
+  st.used.push(i);st.answered=false;kick();ui();
+  if(st.orderWarn)setFb('提醒：砝碼要<b>由大到小</b>試。先放大的，太重就拿下換小一號，可以少走很多冤枉路。','mid');
+  else if(!st.obj)setFb('右盤有砝碼但左盤沒有待測物，先選一個待測物放左盤。','mid');
+}
+function remW(i){st.used=st.used.filter(k=>k!==i);st.answered=false;kick();ui();}
+function kick(){st.v+=0.0001;}
+
+function ui(){
+  document.querySelectorAll('#wbox button').forEach(b=>b.disabled=st.used.includes(+b.dataset.i));
+  const op=$('onpan');op.innerHTML='';
+  const sorted=[...st.used].sort((a,b)=>SET[b]-SET[a]||a-b);
+  if(!sorted.length)op.innerHTML='<span class="empty">（右盤是空的）</span>';
+  sorted.forEach(i=>{const b=document.createElement('button');b.type='button';b.textContent=fmtW(SET[i])+' ✕';b.onclick=()=>remW(i);op.appendChild(b);});
+  const W=sumW();
+  $('wSum').textContent=`${+W.toFixed(1)} g`;
+  $('sumCalc').innerHTML=sorted.length?`砝碼總質量 = ${sorted.map(i=>SET[i]>=1?SET[i]+' g':SET[i]+' g').join(' + ')}<br>　　　　　 = <span class="res">${W.toFixed(1)} g</span>`:'<span style="color:var(--dim)">砝碼總質量 = 0 g</span>';
+  $('screwV').textContent=(st.screw>0?'+':'')+st.screw;
+  document.querySelectorAll('#objBtns button[data-o]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.o===st.obj)));
+  // steps
+  const cal=Math.abs(netOffset())<0.25;
+  $('s1').className=cal?'done':'on';
+  $('s2').className=st.obj?(Math.abs(target())<STOP&&st.used.length?'done':'on'):'';
+  $('s3').className=st.obj&&Math.abs(target())<STOP&&st.used.length?'on':'';
+  if(st.answered)$('s3').className='done';
+}
+
+// ---------- canvas ----------
+const cv=$('cv');
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+function rr(x,a,b,w,h,r){r=Math.min(r,w/2,h/2);x.beginPath();x.moveTo(a+r,b);x.lineTo(a+w-r,b);x.arc(a+w-r,b+r,r,-Math.PI/2,0);x.lineTo(a+w,b+h-r);x.arc(a+w-r,b+h-r,r,0,Math.PI/2);x.lineTo(a+r,b+h);x.arc(a+r,b+h-r,r,Math.PI/2,Math.PI);x.lineTo(a,b+r);x.arc(a+r,b+r,r,Math.PI,1.5*Math.PI);x.closePath();}
+
+function drawWeight(x,g,cx,by,s){ // bottom-centre at (cx,by)
+  if(g>=1){
+    const k=Math.cbrt(g/100);const w=s*(16+26*k),h=s*(12+30*k);
+    const gr=x.createLinearGradient(cx-w/2,0,cx+w/2,0);gr.addColorStop(0,'#8c96a6');gr.addColorStop(.4,'#e9eef5');gr.addColorStop(1,'#7b8494');
+    x.fillStyle=gr;rr(x,cx-w/2,by-h,w,h,2*s);x.fill();
+    const kw=w*.38,kh=h*.42;x.fillStyle=gr;x.fillRect(cx-kw*.35,by-h-kh*.35,kw*.7,kh*.35);
+    rr(x,cx-kw/2,by-h-kh,kw,kh*.66,kw/2);x.fill();
+    x.fillStyle='#1c2230';x.font=`700 ${Math.max(8,9*s)}px "JetBrains Mono",monospace`;x.textAlign='center';x.textBaseline='middle';
+    if(w>22)x.fillText(String(g),cx,by-h/2);
+    return w;
+  }else{
+    const w=s*(14+g*14),h=s*3;
+    x.fillStyle='#c8ced8';x.fillRect(cx-w/2,by-h,w,h);
+    x.fillStyle='#e6eaf0';x.beginPath();x.moveTo(cx+w/2-4*s,by-h);x.lineTo(cx+w/2-1*s,by-h-7*s);x.lineTo(cx+w/2+1*s,by-h-6*s);x.lineTo(cx+w/2-1*s,by-h);x.fill();
+    x.fillStyle='#3a4256';x.font=`600 ${Math.max(7,7.5*s)}px "JetBrains Mono",monospace`;x.textAlign='center';x.textBaseline='bottom';
+    x.fillText(Math.round(g*1000)+'',cx-1*s,by-h-0.5);
+    return w;
+  }
+}
+function drawObj(x,kind,cx,by,s){
+  x.save();
+  if(kind==='ex'){ // toy figure (generic bear-like block)
+    x.fillStyle='#f3f3f0';rr(x,cx-16*s,by-30*s,32*s,30*s,10*s);x.fill();
+    x.fillStyle='#1c1c1c';x.beginPath();x.arc(cx,by-40*s,13*s,0,7);x.fill();
+    x.fillStyle='#f3f3f0';x.beginPath();x.arc(cx,by-40*s,10*s,0,7);x.fill();
+    x.fillStyle='#1c1c1c';x.beginPath();x.arc(cx-9*s,by-51*s,4.5*s,0,7);x.arc(cx+9*s,by-51*s,4.5*s,0,7);x.fill();
+    x.beginPath();x.ellipse(cx-4*s,by-41*s,2.6*s,3.4*s,0,0,7);x.ellipse(cx+4*s,by-41*s,2.6*s,3.4*s,0,0,7);x.fill();
+    x.fillRect(cx-16*s,by-24*s,8*s,14*s);x.fillRect(cx+8*s,by-24*s,8*s,14*s);
+  }else if(kind==='nut'){
+    x.fillStyle='#aab3c0';x.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;x.lineTo(cx+15*s*Math.cos(a),by-9*s+5*s*Math.sin(a));}x.fill();
+    x.fillStyle='#7d8696';x.fillRect(cx-15*s,by-9*s,30*s,9*s);
+    x.fillStyle='#5a6272';x.beginPath();x.ellipse(cx,by-9*s,6*s,2.4*s,0,0,7);x.fill();
+  }else if(kind==='stone'){
+    x.fillStyle='#8a7f72';x.beginPath();x.moveTo(cx-22*s,by);x.quadraticCurveTo(cx-26*s,by-22*s,cx-4*s,by-27*s);x.quadraticCurveTo(cx+20*s,by-30*s,cx+23*s,by-8*s);x.lineTo(cx+20*s,by);x.closePath();x.fill();
+    x.fillStyle='rgba(255,255,255,.12)';x.beginPath();x.ellipse(cx-6*s,by-18*s,8*s,4*s,-.3,0,7);x.fill();
+  }else{
+    x.fillStyle='#3d7be0';rr(x,cx-30*s,by-16*s,60*s,16*s,4*s);x.fill();
+    x.fillStyle='#2b5fb4';x.fillRect(cx-30*s,by-9*s,60*s,2*s);
+  }
+  x.restore();
+}
+
+function draw(){
+  const {x,w,h}=fit(cv);if(w<100||h<100)return;
+  x.clearRect(0,0,w,h);
+  const s=Math.min(1.25,Math.max(.7,w/640));
+  const cx=w/2;
+  // ----- magnified pointer scale (top) -----
+  const zH=Math.min(92,h*.24),zW=Math.min(w-28,420),zx=cx-zW/2,zy=10;
+  x.fillStyle='#0b1220';rr(x,zx,zy,zW,zH,10);x.fill();x.strokeStyle='#ffd166';x.lineWidth=1.3;rr(x,zx,zy,zW,zH,10);x.stroke();
+  const sc=(zW-40)/(2*STOP),tickY=zy+28;
+  x.strokeStyle='#e8edf6';x.fillStyle='#8492aa';x.textAlign='center';x.textBaseline='bottom';x.font='11px "JetBrains Mono",monospace';
+  for(let k=-STOP;k<=STOP;k++){const tx=cx+k*sc;const L=k===0?18:k%5===0?14:9;x.lineWidth=k===0?2:1;x.strokeStyle=k===0?'#ffd166':'#c9d1dc';x.beginPath();x.moveTo(tx,tickY);x.lineTo(tx,tickY+L);x.stroke();
+    if(k===0||Math.abs(k)===5)x.fillText(String(Math.abs(k)),tx,tickY-2);}
+  x.fillStyle='#ffd166';x.font='12px "Noto Sans TC",sans-serif';x.textAlign='left';x.textBaseline='alphabetic';
+  x.fillText('指針放大',zx+8,zy+zH-8);
+  x.textAlign='right';x.fillStyle='#8492aa';x.fillText('每小格 ≈ 0.02 g',zx+zW-8,zy+zH-8);
+  // pointer tip in zoom (tilts toward heavier side: positive p => left)
+  const px=cx-st.p*sc;
+  x.strokeStyle='#ff7a7a';x.lineWidth=2.4;x.beginPath();x.moveTo(px,tickY+4);x.lineTo(px,zy+zH-4);x.stroke();
+  x.fillStyle='#ff7a7a';x.beginPath();x.moveTo(px,tickY+1);x.lineTo(px-5,tickY+10);x.lineTo(px+5,tickY+10);x.fill();
+  // ----- balance -----
+  const baseY=h-14, baseH=40*s, baseW=Math.min(w*.8,360*s);
+  const pivotY=baseY-baseH-48*s;
+  const half=Math.min(w*.36,170*s);
+  const ang=st.p*0.022; // radians per division (visual)
+  // connector lines
+  x.strokeStyle='rgba(255,209,102,.35)';x.lineWidth=1;x.beginPath();x.moveTo(zx+8,zy+zH);x.lineTo(cx-10,pivotY-70*s);x.moveTo(zx+zW-8,zy+zH);x.lineTo(cx+10,pivotY-70*s);x.stroke();
+  // base
+  const bg=x.createLinearGradient(0,baseY-baseH,0,baseY);bg.addColorStop(0,'#f2b33d');bg.addColorStop(1,'#c98a1c');
+  x.fillStyle=bg;x.beginPath();x.moveTo(cx-baseW/2,baseY);x.lineTo(cx-baseW/2+18*s,baseY-baseH);x.lineTo(cx+baseW/2-18*s,baseY-baseH);x.lineTo(cx+baseW/2,baseY);x.closePath();x.fill();
+  x.fillStyle='#a8741a';x.fillRect(cx-baseW/2-4,baseY-5*s,baseW+8,5*s);
+  // column
+  x.fillStyle='#b8bfcb';x.fillRect(cx-7*s,pivotY,14*s,baseY-baseH-pivotY);
+  // scale plate on column (actual)
+  x.fillStyle='#e8e4d6';rr(x,cx-26*s,pivotY-74*s,52*s,14*s,3*s);x.fill();
+  x.strokeStyle='#333';x.lineWidth=1;for(let k=-STOP;k<=STOP;k+=1){const tx=cx+k*3.4*s;x.beginPath();x.moveTo(tx,pivotY-74*s);x.lineTo(tx,pivotY-74*s+(k===0?8:4)*s);x.stroke();}
+  // beam (rotates: positive p => left down => CCW in screen = left side moves down)
+  const dxL=-half*Math.cos(ang),dyL=half*Math.sin(ang); // left end offset (screen y down)
+  const Lx=cx+dxL,Ly=pivotY+dyL,Rx=cx-dxL,Ry=pivotY-dyL;
+  x.strokeStyle='#c43d3d';x.lineWidth=7*s;x.lineCap='round';x.beginPath();x.moveTo(Lx,Ly);x.lineTo(Rx,Ry);x.stroke();x.lineCap='butt';
+  // balance screws (nuts at both ends)
+  x.fillStyle='#d8b55a';x.fillRect(Lx-14*s,Ly-4*s,8*s,8*s);x.fillRect(Rx+6*s,Ry-4*s,8*s,8*s);
+  // pointer (from pivot upward, tilts with beam: tip moves toward the heavier side)
+  const pl=70*s;x.strokeStyle='#e8edf6';x.lineWidth=2;x.beginPath();x.moveTo(cx,pivotY);x.lineTo(cx-pl*Math.sin(ang),pivotY-pl*Math.cos(ang));x.stroke();
+  x.fillStyle='#e8edf6';x.beginPath();x.arc(cx,pivotY,6*s,0,7);x.fill();
+  // pans (stay level, move vertically with beam ends)
+  const panW=Math.min(116*s,half*1.05),panTopL=Ly-34*s,panTopR=Ry-34*s;
+  [[Lx,panTopL,Ly],[Rx,panTopR,Ry]].forEach(([X,Y,E])=>{
+    x.fillStyle='#9aa3b2';x.fillRect(X-3*s,Y,6*s,E-Y);
+    x.fillStyle='#f4f4f2';x.beginPath();x.ellipse(X,Y,panW/2,9*s,0,0,7);x.fill();
+    x.fillStyle='#d6d6d2';x.beginPath();x.ellipse(X,Y+2*s,panW/2-6*s,5*s,0,0,Math.PI);x.fill();
+  });
+  // objects on pans
+  if(st.obj)drawObj(x,st.obj,Lx,panTopL-2*s,s);
+  // weights on right pan: big ones on the pan, mg ones in a row in front
+  const sorted=[...st.used].sort((a,b)=>SET[b]-SET[a]);
+  const big=sorted.filter(i=>SET[i]>=1),small=sorted.filter(i=>SET[i]<1);
+  const ws=s*.82;
+  let widths=big.map(i=>Math.cbrt(SET[i]/100)*26*ws+16*ws+3);
+  let total=widths.reduce((a,b)=>a+b,0);
+  const sc2=total>panW-8?(panW-8)/total:1;
+  let wx=Rx-total*sc2/2;
+  big.forEach((i,k)=>{const ww=widths[k]*sc2;drawWeight(x,SET[i],wx+ww/2,panTopR-2*s,ws*sc2);wx+=ww;});
+  if(small.length){let mx=Rx-small.length*11*s;small.forEach(i=>{drawWeight(x,SET[i],mx+10*s,panTopR+5*s,s*.8);mx+=22*s;});}
+  // labels
+  x.fillStyle='#8492aa';x.font=`${Math.max(11,12*s)}px "Noto Sans TC",sans-serif`;x.textAlign='center';x.textBaseline='top';
+  x.fillText('左盤：待測物',cx-half*.62,pivotY+14*s);
+  x.fillText('右盤：砝碼',cx+half*.62,pivotY+14*s);
+}
+
+// ---------- dynamics ----------
+let raf=0;
+function step(t){
+  const dt=Math.min(0.04,(t-(st.last||t))/1000);st.last=t;
+  const T=target();
+  const w0=3.4,gam=2.4;
+  st.v+=(-w0*w0*(st.p-T)-gam*st.v)*dt;st.p+=st.v*dt;
+  if(st.p>STOP){st.p=STOP;st.v=-st.v*0.2;}if(st.p<-STOP){st.p=-STOP;st.v=-st.v*0.2;}
+  const moving=Math.abs(st.v)>0.05||Math.abs(st.p-T)>0.05;
+  $('swing').textContent=moving?'指針擺動中……等它停下再讀':(Math.abs(T)>=STOP-1e-6?'指針偏到底了':'指針靜止');
+  const pd=moving?st.p:T;
+  $('ptr').textContent=(Math.abs(pd)<0.05?'0':(pd>0?'偏左 ':'偏右 ')+Math.abs(pd).toFixed(1))+' 格';
+  if(st.mode==='pan')draw();
+  raf=requestAnimationFrame(step);
+}
+
+// ---------- check ----------
+function setFb(h,c){const f=$('fb');f.className='fb'+(c?' '+c:'');f.innerHTML=h;}
+function decOf(s){const m=/\.(\d*)$/.exec(s);return m?m[1].length:0;}
+function rdHTML(v){const s=v.toFixed(2);return `<span class="rd"><span class="a">${s.slice(0,-1)}</span><span class="e">${s.slice(-1)}</span> g</span>`;}
+function check(){
+  if(!st.obj){setFb('左盤還沒有待測物。','bad');return;}
+  const raw=$('inp').value.trim().replace(/[，,]/g,'.').replace(/\s*g$/i,'');
+  if(!/^\d+(\.\d*)?$/.test(raw)){setFb('請輸入一個數字，例如 70.20（單位已經是 g）。','bad');return;}
+  const T=target();
+  if(Math.abs(T)>=STOP-1e-6){setFb(T>0?'指針偏到左邊底，表示待測物比砝碼重很多，還要再加砝碼。':'指針偏到右邊底，表示砝碼太重了，把最後放的砝碼換小一號。','bad');return;}
+  const v=parseFloat(raw),got=decOf(raw);st.tries++;
+  const truth=st.m, shown=sumW()+T*G; // what an ideal reader of the pointer gets (includes offset error)
+  const off=netOffset()*G;
+  if(got<2){setFb(`要讀到 <b>0.01 g</b>：最小砝碼 0.1 g 是準確值的最後一位，指針再給一位估計值。即使指針停在中央，也要寫成 ${rdHTML(Math.round(shown*100)/100)}。`,'bad');ui();return;}
+  if(got>2){setFb('估計值只能有一位，寫到小數第 2 位（0.01 g）就好。','bad');ui();return;}
+  const err=Math.abs(v-truth);
+  if(Math.abs(off)>=0.25*G&&Math.abs(v-shown)<=0.012&&err>0.012){
+    setFb(`你的讀法沒錯，但天平<b>沒有先調平衡</b>：空盤時指針就偏了 ${Math.abs(netOffset()).toFixed(1)} 格，所以每次讀數都差了約 ${Math.abs(off).toFixed(2)} g。回到步驟 1，拿下所有東西後用平衡螺絲把指針調到中央。`,'mid');
+  }else if(err<=0.012){
+    st.right++;st.answered=true;const W=sumW();
+    setFb(`正確！${rdHTML(v)}　= 砝碼 ${W.toFixed(1)} g + 指針估計 ${(v-W).toFixed(2)} g。<span style="color:var(--teal)">${v.toFixed(2).slice(0,-1)}</span> 是準確值，最後一位 <span style="color:var(--red)">${v.toFixed(2).slice(-1)}</span> 是估計值。`,'ok');
+  }else if(err<=0.03){
+    setFb(`很接近了，估計值差了一點（差 ${err.toFixed(2)} g）。指針偏 1 小格約 0.02 g：指針偏向左盤表示待測物比砝碼重，要加；偏向右盤表示砝碼較重，要減。`,'mid');
+  }else{
+    setFb(`差了 ${err.toFixed(2)} g。先確認「砝碼總質量」算對了，再看指針：偏向左盤（待測物較重）→ 待測物 = 砝碼 + 估計值；偏向右盤 → 待測物 = 砝碼 − 估計值。`,'bad');
+  }
+  ui();
+}
+function reveal(){
+  if(!st.obj){setFb('左盤還沒有待測物。','');return;}
+  const W=sumW(),T=target();
+  if(Math.abs(T)>=STOP-1e-6){setFb(`先把指針調回刻度範圍內。提示：待測物大約是 ${Math.round(st.m)} g，從 ${fmtW(SET.find(g=>g<=st.m)||0.1)} 開始由大到小試。`,'');return;}
+  const r=Math.round(st.m*100)/100;
+  setFb(`標準讀法：${rdHTML(r)}<br>砝碼總質量 ${W.toFixed(1)} g，指針${Math.abs(T)<0.05?'停在中央，估計值為 0':(T>0?'偏左':'偏右')+` 約 ${Math.abs(T).toFixed(1)} 格 → ${T>0?'+':'−'} ${Math.abs(T*G).toFixed(2)} g`}。<br><span style="font-size:12.5px;color:var(--dim)">模擬設定的質量是 ${st.m.toFixed(3)} g；真實測量時沒有人知道「真值」。</span>`,'');
+  st.answered=true;ui();
+}
+
+function pickObj(o){
+  st.obj=o;const d=OBJ[o];
+  st.m=d.m!==undefined?d.m:Math.round(rnd(d.min,d.max)*1000)/1000;
+  st.answered=false;$('inp').value='';kick();
+  const cal=Math.abs(netOffset())<0.25;
+  setFb(cal?`把${d.name}放在左盤。用鑷子從砝碼盒夾砝碼放右盤，<b>由大到小</b>試：指針偏右（砝碼太重）就拿下換小一號。`:`注意：你還沒調平衡（空盤時指針不在中央）就放上${d.name}了。可以先拿下待測物，調好再放。`,cal?'':'mid');
+  ui();
+}
+
+// ---------- mode 2: electronic ----------
+const ev=$('ev');
+const es={tilt:0,paper:false,salt:0,tare:0,PAPER:0.37,checked:false};
+function eLoad(){return (es.paper?es.PAPER:0)+es.salt;}
+function eLevel(){return Math.abs(es.tilt)<=2;}
+function eDisp(){const err=eLevel()?0:es.tilt*0.004*eLoad();return Math.round((eLoad()+err-es.tare)*100)/100;}
+function eDraw(){
+  const {x,w,h}=fit(ev);if(w<100||h<100)return;x.clearRect(0,0,w,h);
+  const s=Math.min(1.25,Math.max(.7,w/600)),cx=w*0.5;
+  const bw=Math.min(w-30,330*s),bh=110*s,by=h-18;
+  // body
+  const g=x.createLinearGradient(0,by-bh,0,by);g.addColorStop(0,'#ece4d4');g.addColorStop(1,'#cfc4ae');
+  x.fillStyle=g;rr(x,cx-bw/2,by-bh,bw,bh,12*s);x.fill();
+  // display
+  const dw=bw*.42,dh=34*s,dx=cx-bw*.36,dy=by-bh+36*s;
+  x.fillStyle='#283326';rr(x,dx-4,dy-4,dw+8,dh+8,6);x.fill();
+  x.fillStyle='#9fd18a';rr(x,dx,dy,dw,dh,4);x.fill();
+  x.fillStyle='#1d2a17';x.font=`700 ${24*s}px "JetBrains Mono",monospace`;x.textAlign='right';x.textBaseline='middle';
+  x.fillText(eDisp().toFixed(2),dx+dw-22*s,dy+dh/2+1);x.font=`700 ${12*s}px "JetBrains Mono",monospace`;x.fillText('g',dx+dw-6*s,dy+dh/2+4);
+  // buttons
+  x.fillStyle='#2b2b2b';[[0,'ON'],[1,'歸零']].forEach(([k,t])=>{const bx=cx+bw*.14+k*44*s;x.beginPath();x.arc(bx,dy+dh/2,13*s,0,7);x.fill();x.fillStyle='#ddd';x.font=`${9*s}px "Noto Sans TC",sans-serif`;x.textAlign='center';x.fillText(t,bx,dy+dh/2);x.fillStyle='#2b2b2b';});
+  // level bubble (on body, left)
+  const lx=cx-bw/2+30*s,ly=by-24*s,lr=13*s;
+  x.fillStyle='#bfe36a';x.beginPath();x.arc(lx,ly,lr,0,7);x.fill();x.strokeStyle='#4b5a20';x.lineWidth=1;x.beginPath();x.arc(lx,ly,lr*.38,0,7);x.stroke();
+  const bxp=lx+Math.max(-1,Math.min(1,es.tilt/30))*lr*.7;
+  x.fillStyle='rgba(255,255,255,.85)';x.beginPath();x.arc(bxp,ly,lr*.26,0,7);x.fill();
+  x.fillStyle='#6b6050';x.font=`${10*s}px "Noto Sans TC",sans-serif`;x.textAlign='left';x.fillText('水平儀',lx+lr+4,ly);
+  // big magnified bubble at top-left
+  const Lr=Math.min(52*s,h*.16),LX=16+Lr,LY=14+Lr;
+  x.fillStyle='#0b1220';x.beginPath();x.arc(LX,LY,Lr+4,0,7);x.fill();x.strokeStyle='#ffd166';x.lineWidth=1.3;x.stroke();
+  x.fillStyle='#a9d14d';x.beginPath();x.arc(LX,LY,Lr,0,7);x.fill();
+  x.strokeStyle='#36421a';x.lineWidth=1.5;x.beginPath();x.arc(LX,LY,Lr*.38,0,7);x.stroke();
+  const BX=LX+Math.max(-1,Math.min(1,es.tilt/30))*Lr*.72;
+  x.fillStyle='rgba(255,255,255,.9)';x.beginPath();x.arc(BX,LY,Lr*.24,0,7);x.fill();
+  x.fillStyle=eLevel()?'#7dffc4':'#ff7a7a';x.font='12px "Noto Sans TC",sans-serif';x.textAlign='left';x.textBaseline='top';
+  x.fillText(eLevel()?'氣泡在中央：水平':'氣泡偏了：不水平',LX+Lr+10,LY-8);
+  // pan
+  const panY=by-bh-8*s,pw=bw*.56,pcx=cx+bw*.05;
+  x.fillStyle='#8a8f98';x.fillRect(pcx-6*s,panY,12*s,10*s);
+  x.fillStyle='#3a3f48';x.beginPath();x.ellipse(pcx,panY,pw/2,12*s,0,0,7);x.fill();
+  x.fillStyle='#565c66';x.beginPath();x.ellipse(pcx,panY-2*s,pw/2-8*s,8*s,0,0,7);x.fill();
+  if(es.paper){x.fillStyle='#f6f6f2';x.beginPath();x.moveTo(pcx-44*s,panY-2*s);x.lineTo(pcx+6*s,panY-14*s);x.lineTo(pcx+46*s,panY-3*s);x.lineTo(pcx-4*s,panY+8*s);x.closePath();x.fill();}
+  if(es.salt>0){const r=Math.min(30,10+es.salt*5)*s;x.fillStyle='#ffffff';x.beginPath();x.ellipse(pcx,panY-4*s,r,r*.42,0,Math.PI,0);x.fill();
+    x.fillStyle='#e3e7ee';for(let k=0;k<14;k++){x.fillRect(pcx-r*.8+((k*37)%100)/100*r*1.6,panY-4*s-((k*53)%100)/100*r*.35,1.6,1.6);}}
+  // feet
+  x.fillStyle='#555';x.fillRect(cx-bw/2+12*s,by,14*s,6+(es.tilt>0?2:0));x.fillRect(cx+bw/2-26*s,by,14*s,6+(es.tilt<0?2:0));
+}
+function eUI(){
+  $('footV').textContent=(es.tilt>0?'+':'')+es.tilt;
+  $('eLoad').textContent=eLoad().toFixed(2)+' g';
+  $('eTare').textContent=es.tare.toFixed(2)+' g';
+  $('eDisp').textContent=eDisp().toFixed(2)+' g';
+  $('paper').textContent=es.paper?'拿走稱量紙':'放上稱量紙';
+  $('e1').className=eLevel()?'done':'on';
+  const tared=es.paper&&Math.abs(es.tare-es.PAPER)<1e-9;
+  $('e2').className=tared?'done':(eLevel()?'on':'');
+  $('e3').className=es.checked?'done':(tared?'on':'');
+  let h='';
+  if(!eLevel())h='<b>先調整水平：</b>天平不水平時秤盤受力方向歪了，讀數會不準。轉動腳座讓氣泡回到圓圈中央。';
+  else if(!es.paper)h='水平調好了。藥品（例如食鹽）不能直接放在秤盤上，要先<b>放上稱量紙</b>。';
+  else if(!tared)h=`稱量紙本身有質量（螢幕顯示 ${es.PAPER.toFixed(2)} g 左右）。按<b>「歸零」</b>，天平會把目前的質量當成 0，之後只顯示加上去的藥品質量。`;
+  else h=`已扣除稱量紙。現在加上食鹽，螢幕顯示的就是<b>食鹽的質量</b>。電子天平直接顯示到 0.01 g，不必自己估計。`;
+  $('eExplain').innerHTML=h;
+  eDraw();
+}
+function setEfb(h,c){const f=$('efb');f.className='fb'+(c?' '+c:'');f.innerHTML=h;}
+function eCheck(){
+  const raw=$('eInp').value.trim().replace(/[，,]/g,'.').replace(/\s*g$/i,'');
+  if(es.salt<=0){setEfb('秤盤上還沒有食鹽，先用藥匙加一些。','bad');return;}
+  if(!/^\d+(\.\d*)?$/.test(raw)){setEfb('請輸入一個數字，例如 3.28。','bad');return;}
+  const v=parseFloat(raw),truth=Math.round(es.salt*100)/100;
+  if(Math.abs(v-truth)<0.005){es.checked=true;setEfb(`正確！食鹽的質量是 <b>${truth.toFixed(2)} g</b>。${Math.abs(eDisp()-truth)<0.005?'因為放稱量紙後有歸零，螢幕顯示的就是食鹽質量。':'你自己把稱量紙的質量扣掉了，也可以；用「歸零」更方便、不容易算錯。'}`,'ok');}
+  else if(Math.abs(v-(truth+es.PAPER))<0.005){setEfb(`你讀到的是<b>食鹽＋稱量紙</b>的質量。放上稱量紙後要先按「歸零」，或把讀數減掉稱量紙的 ${es.PAPER.toFixed(2)} g。`,'bad');}
+  else if(!eLevel()){setEfb('天平沒有調水平，讀數已經不準。先轉動腳座讓氣泡回到中央，再重新稱量。','bad');}
+  else setEfb(`不對喔。秤盤上總共 ${eLoad().toFixed(2)} g，歸零時扣掉了 ${es.tare.toFixed(2)} g。想想看哪些是食鹽？`,'bad');
+  eUI();
+}
+function eNew(){es.tilt=[-1,1][Math.random()<.5?0:1]*Math.round(rnd(9,24));es.paper=false;es.salt=0;es.tare=0;es.checked=false;$('foot').value=es.tilt;$('eInp').value='';setEfb('先調整水平，再放上稱量紙、按「歸零」，然後加食鹽。','');eUI();}
+
+// ---------- events ----------
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>{
+  st.mode=b.dataset.m;document.querySelectorAll('.modebar button').forEach(q=>q.setAttribute('aria-pressed',String(q===b)));
+  $('mPan').hidden=st.mode!=='pan';$('mElec').hidden=st.mode!=='elec';
+  if(st.mode==='elec')eUI();else draw();
+});
+$('screw').oninput=e=>{st.screw=+e.target.value;kick();ui();
+  if(!st.obj&&!st.used.length&&Math.abs(netOffset())<0.25)setFb('平衡調好了：空盤時指針停在中央。接著選一個待測物放到左盤。','ok');};
+document.querySelectorAll('#objBtns button[data-o]').forEach(b=>b.onclick=()=>pickObj(b.dataset.o));
+$('objOff').onclick=()=>{st.obj=null;st.answered=false;kick();ui();setFb('左盤已清空。','');};
+$('clrW').onclick=()=>{st.used=[];st.answered=false;kick();ui();};
+$('check').onclick=check;$('inp').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+$('reveal').onclick=reveal;
+$('foot').oninput=e=>{es.tilt=+e.target.value;eUI();};
+$('paper').onclick=()=>{es.paper=!es.paper;es.checked=false;
+  setEfb(es.paper?'稱量紙放上去了，螢幕的數字變大了一點——那是稱量紙的質量。':'稱量紙拿走了。如果剛剛歸零過，現在會顯示負數。','');eUI();};
+$('tare').onclick=()=>{es.tare=eLoad();es.checked=false;
+  setEfb(!eLevel()?'歸零了，但天平還沒調水平，之後的讀數可能不準。':es.salt>0?'在已經放食鹽之後才歸零，螢幕會變成 0，就讀不到食鹽的質量了。要先歸零再加藥品。':es.paper?'歸零完成：稱量紙的質量被扣掉了，螢幕顯示 0.00 g。':'空秤盤歸零完成。記得藥品要放在稱量紙上。',es.salt>0?'bad':'');eUI();};
+$('salt').onclick=()=>{if(!es.paper){setEfb('藥品不能直接倒在秤盤上，先放上稱量紙。','bad');return;}
+  es.salt=Math.round((es.salt+rnd(0.6,1.6))*1000)/1000;es.checked=false;$('eInp').value='';
+  setEfb('加了一匙食鹽。讀出螢幕上的數字，填入食鹽的質量。','');eUI();};
+$('eReset').onclick=()=>{es.paper=false;es.salt=0;es.checked=false;setEfb('秤盤清空了。','');eUI();};
+$('eCheck').onclick=eCheck;$('eInp').addEventListener('keydown',e=>{if(e.key==='Enter')eCheck();});
+$('eNew').onclick=eNew;
+addEventListener('resize',()=>{if(st.mode==='pan')draw();else eDraw();});
+
+// init
+st.offset0=(Math.random()<.5?-1:1)*rnd(2.5,5.5);
+st.p=netOffset();
+buildBox();ui();eNew();
+raf=requestAnimationFrame(step);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{draw();eDraw();});
+// test hook
+window.__bal={st,es,target,sumW,SET,netOffset};
+})();
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 // 物理大樓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v9";
+const VERSION="v10";
 const CACHE="physics-building-"+VERSION;
 const FILES=[
  "./",
@@ -43,7 +43,8 @@ const FILES=[
  "sims/e5-neutron.html",
  "sims/j-power-phase.html",
  "sims/j-ruler-reading.html",
- "sims/j-displacement-volume.html"
+ "sims/j-displacement-volume.html",
+ "sims/j-balance.html"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE&&k.startsWith("physics-building-")).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
