@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基本單位拼出導出單位</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1.15fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);background:rgba(255,209,102,.08)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.mono{font-family:"JetBrains Mono",monospace}
+/* 基本單位積木 */
+.bases{display:flex;flex-direction:column;gap:6px}
+.brow{display:grid;grid-template-columns:52px 1fr 34px 36px 34px;align-items:center;gap:8px;padding:5px 8px;border-radius:10px;border:1px solid var(--line);background:#0a0f1a}
+.chip{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:30px;padding:0 8px;border-radius:15px;font-family:"JetBrains Mono",monospace;font-weight:700;font-size:15px;color:#05131a}
+.brow .nm{font-size:12.5px;color:var(--muted);line-height:1.35;min-width:0}
+.brow .nm b{color:var(--txt);font-weight:500;font-size:13.5px}
+.brow button{padding:4px 0;font-size:17px;line-height:1;font-family:"JetBrains Mono",monospace}
+.brow .ex{font-family:"JetBrains Mono",monospace;font-size:17px;text-align:center;color:var(--dim)}
+.brow .ex.pos{color:var(--phos)} .brow .ex.neg{color:var(--red)}
+/* 拼出的單位 */
+.build{margin:4px 0 0;padding:14px 12px;border-radius:12px;border:1px dashed #33405c;background:#04060b;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.frac{display:flex;flex-direction:column;align-items:center;gap:4px;max-width:100%}
+.frac .row{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;min-height:30px}
+.frac .bar{height:2px;width:100%;min-width:90px;background:#8492aa;border-radius:2px}
+.frac .chip{height:26px;min-width:34px;font-size:13.5px}
+.empty{color:var(--dim);font-size:13.5px}
+.utext{font-family:"JetBrains Mono",monospace;font-size:19px;color:var(--acc);margin-top:6px;text-align:center;word-break:break-all}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+@media(max-width:560px){.read{grid-template-columns:1fr 1fr}}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;color:var(--phos);font-weight:700;word-break:break-all}
+/* 目標 */
+.target{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.target button{text-align:left;padding:7px 9px;line-height:1.35}
+.target button small{display:block;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+.target button.done{border-color:#2f6d57}
+.target button.done::after{content:" ✔";color:var(--phos)}
+.task{font-size:16px;margin:10px 0 2px;line-height:1.7}
+.task .f{font-family:"JetBrains Mono",monospace;color:var(--acc)}
+.fb{margin-top:10px;font-size:14px;min-height:1.6em}
+.fb.ok{color:var(--phos)} .fb.no{color:var(--red)}
+.sol{margin-top:8px;font-size:13.5px;color:var(--muted);background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:"JetBrains Mono","Noto Sans TC",monospace;line-height:1.85}
+.sol b{color:var(--acc);font-weight:500}
+.score{font-family:"JetBrains Mono",monospace;color:var(--acc);font-size:13px}
+/* 範例 1-1 表 */
+.tblwrap{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+th{background:#161d2e;color:var(--muted);font-weight:500;font-size:12.5px}
+td.u{font-family:"JetBrains Mono",monospace;color:var(--phos)}
+td.q{color:var(--dim)}
+/* 因次檢查 */
+.two{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.opt{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;cursor:pointer;text-align:left;font-size:14px}
+.opt:hover{border-color:var(--acc)}
+.opt .ex{font-family:"JetBrains Mono",monospace;font-size:16px;color:var(--txt)}
+.opt .ud{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);text-align:right}
+.opt.ok{border-color:var(--phos);background:rgba(125,255,196,.06)}
+.opt.bad{border-color:var(--red);background:rgba(255,122,122,.06)}
+.opt .why{grid-column:1/3;font-size:12.5px;color:var(--muted);font-family:"JetBrains Mono","Noto Sans TC",monospace}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin-top:4px}
+.legend span b{font-family:"JetBrains Mono",monospace;color:var(--txt);font-weight:500}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">1-3 · Base &amp; Derived Units</div>
+  <h1>基本單位拼出導出單位</h1>
+  <p class="lede">國際單位制（SI）只有 7 個基本單位，其他所有物理量的單位都能由它們相乘、相除拼出來，稱為導出單位。用下面的積木拼拼看，再用單位（因次）檢查公式有沒有寫錯。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">7 個基本單位（圖 1-3）</span><span class="n">按 ＋ 放到分子、按 − 放到分母</span></div>
+      <div class="pad" style="padding-top:6px">
+        <div class="bases" id="bases"></div>
+        <div class="seg" style="margin-top:10px"><button id="clr">清空重拼</button></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">拼出的單位</span><span class="score" id="score">完成 0 / 0</span></div>
+      <div class="pad" style="padding-top:6px">
+        <div class="lab">選一個物理量當目標</div>
+        <div class="target" id="targets"></div>
+        <div class="task" id="task"></div>
+        <div class="build" id="build"></div>
+        <div class="read">
+          <div><small>基本單位組合</small><b id="rU">—</b></div>
+          <div><small>常用單位名稱</small><b id="rN">—</b></div>
+          <div><small>和目標相比</small><b id="rD">—</b></div>
+        </div>
+        <div class="seg" style="margin-top:10px">
+          <button class="primary" id="chk">檢查</button>
+          <button id="hint">提示一步</button>
+          <button id="show">看推導</button>
+        </div>
+        <div class="fb" id="fb"></div>
+        <div class="sol" id="sol" hidden></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">範例 1-1 對照表</span><span class="n">拼對的物理量會自動填入</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="tblwrap"><table>
+          <thead><tr><th>物理量</th><th>公式</th><th>基本單位組合</th><th>常用單位</th></tr></thead>
+          <tbody id="tbl"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">因次檢查：哪個公式可能是對的？</span><span class="score" id="dScore">0 / 0</span></div>
+      <div class="pad" style="padding-top:4px">
+        <div class="seg" id="dType"></div>
+        <div class="task" id="dQ"></div>
+        <div class="legend" id="dLeg"></div>
+        <div class="opts" id="dOpts"></div>
+        <div class="note" id="dNote"><b>規則：</b>等號兩邊的單位必須相同；相加或相減的每一項，單位也必須相同。點一個選項，看看它的單位算出來是什麼。</div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>寫導出單位時，先把公式中每個量換成基本單位，再像代數一樣相乘、相除、約分，例如 K = ½mv² ⇒ kg·(m/s)² = kg·m²/s² = J。純數字（½、2π）沒有單位。單位檢查只能抓出「一定錯」的公式：單位對了，係數仍可能錯（例如 T = π√(ℓ/g) 的單位也是 s）。三角函數、指數裡面的量必須沒有單位。<br>
+    <b>課本對照：</b>基礎物理 Ch01 1-3 物理量的單位（p.8 圖 1-3 國際單位制的 7 個基本單位、p.9 導出單位、p.12 範例 1-1、章末習題）。2019 年 5 月 20 日起 SI 的 7 個基本單位全部改由物理常數定義。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const SUP={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
+const sup=n=>n===1?"":Number.isInteger(n)?String(n).replace(/[-0-9]/g,c=>SUP[c]):(Math.abs(n)===0.5?"^("+(n<0?"−":"")+"½)":"^("+n+")");
+// 基本單位：順序即向量的分量
+const B=[
+  {s:"kg",q:"質量",n:"公斤",c:"#ffd166"},
+  {s:"m",q:"長度",n:"公尺",c:"#7dffc4"},
+  {s:"s",q:"時間",n:"秒",c:"#43d6ff"},
+  {s:"A",q:"電流",n:"安培",c:"#ff9f6e"},
+  {s:"K",q:"熱力學溫度",n:"克耳文",c:"#ff7a9c"},
+  {s:"mol",q:"物量",n:"莫耳",c:"#b79bff"},
+  {s:"cd",q:"光強度",n:"燭光",c:"#e6f27a"}
+];
+const N=B.length;
+const V=o=>B.map(b=>o[b.s]||0);           // {kg:1,m:1,s:-2} → 向量
+const eq=(a,b)=>a.every((x,i)=>x===b[i]);
+const add=(a,b,k=1)=>a.map((x,i)=>x+k*b[i]);
+const zero=()=>Array(N).fill(0);
+// 向量 → 文字（分子 kg·m²，分母 s²）
+function utext(v){
+  const num=[],den=[];
+  B.forEach((b,i)=>{if(v[i]>0)num.push(b.s+sup(v[i]));if(v[i]<0)den.push(b.s+sup(-v[i]));});
+  if(!num.length&&!den.length)return"（沒有單位）";
+  const n=num.length?num.join("·"):"1";
+  if(!den.length)return n;
+  const d=den.length>1?"("+den.join("·")+")":den[0];
+  return n+"/"+d;
+}
+// 常用（具名）單位
+const NAMED=[
+  {v:V({kg:1,m:1,s:-2}),n:"N（牛頓）"},
+  {v:V({kg:1,m:2,s:-2}),n:"J（焦耳）＝N·m"},
+  {v:V({kg:1,m:2,s:-3}),n:"W（瓦特）＝J/s"},
+  {v:V({kg:1,m:-1,s:-2}),n:"Pa（帕）＝N/m²"},
+  {v:V({A:1,s:1}),n:"C（庫侖）"},
+  {v:V({s:-1}),n:"Hz（赫茲）"},
+  {v:V({kg:1,m:2,s:-3,A:-1}),n:"V（伏特）＝W/A"},
+  {v:V({kg:1,m:2,s:-3,A:-2}),n:"Ω（歐姆）＝V/A"},
+  {v:V({kg:1,m:1,s:-1}),n:"N·s"},
+  {v:V({m:1,s:-1}),n:"m/s"},
+  {v:V({m:1,s:-2}),n:"m/s²"},
+  {v:V({kg:1,m:-3}),n:"kg/m³（1 g/cm³ = 1000 kg/m³）"},
+  {v:V({s:1}),n:"s（秒）"},
+  {v:V({m:1}),n:"m（公尺）"},
+  {v:V({kg:1}),n:"kg（公斤）"}
+];
+const named=v=>{const f=NAMED.find(x=>eq(x.v,v));return f?f.n:"—";};
+
+// 目標物理量（steps 為推導，hint 為提示）
+const T=[
+  {k:"F",q:"力",f:"F = ma",v:V({kg:1,m:1,s:-2}),ex:true,
+    steps:["m 的單位：kg","a = Δv/Δt 的單位：(m/s)/s = m/s²","F = ma ⇒ kg × m/s² = <b>kg·m/s²</b>","記作 N（牛頓）：1 N = 1 kg·m/s²"],
+    hint:["質量 m → kg 放分子一個","加速度 a 是 m/s²：m 放分子、s 放分母兩個"]},
+  {k:"K",q:"動能",f:"K = ½mv²",v:V({kg:1,m:2,s:-2}),ex:true,
+    steps:["½ 是純數字，沒有單位","v 的單位 m/s，v² 的單位 (m/s)² = m²/s²","K = ½mv² ⇒ kg·(m/s)² = <b>kg·m²/s²</b>","記作 J（焦耳）：1 J = 1 N·m"],
+    hint:["½ 沒有單位，只看 m 和 v²","v² 讓 m 和 s 的次方都變 2 倍"]},
+  {k:"Q",q:"電荷",f:"Q = It",v:V({A:1,s:1}),ex:true,
+    steps:["I 的單位：A（基本單位）","t 的單位：s","Q = It ⇒ <b>A·s</b>","記作 C（庫侖）：1 C = 1 A·s"],
+    hint:["電流 A 本身就是基本單位","時間 s 放在分子"]},
+  {k:"v",q:"速度",f:"v = Δx / Δt",v:V({m:1,s:-1}),
+    steps:["Δx 的單位 m，Δt 的單位 s","v = Δx/Δt ⇒ <b>m/s</b>"],hint:["位移在分子、時間在分母"]},
+  {k:"a",q:"加速度",f:"a = Δv / Δt",v:V({m:1,s:-2}),
+    steps:["Δv 的單位 m/s","a = Δv/Δt ⇒ (m/s)/s = <b>m/s²</b>"],hint:["速度再除以一次時間"]},
+  {k:"rho",q:"密度",f:"ρ = m / V",v:V({kg:1,m:-3}),
+    steps:["m 的單位 kg","體積 V = 長×寬×高，單位 m³","ρ = m/V ⇒ <b>kg/m³</b>","例：空氣在 0 °C、1 atm 約 1.293 kg/m³；水 1000 kg/m³"],
+    hint:["體積是三個長度相乘","m 的次方是 −3"]},
+  {k:"p",q:"動量",f:"p = mv",v:V({kg:1,m:1,s:-1}),
+    steps:["p = mv ⇒ kg × m/s = <b>kg·m/s</b>","也可寫成 N·s（因為 N = kg·m/s²）"],hint:["和力很像，只差一個 s"]},
+  {k:"P",q:"壓力",f:"P = F / A",v:V({kg:1,m:-1,s:-2}),
+    steps:["F 的單位 N = kg·m/s²","面積 A 的單位 m²","P = F/A ⇒ (kg·m/s²)/m² = <b>kg/(m·s²)</b>","記作 Pa（帕）：1 Pa = 1 N/m²；氣象常用 hPa"],
+    hint:["先拼出力，再除以 m²","m 的次方：1 − 2 = −1"]},
+  {k:"Pw",q:"功率",f:"P = W / t",v:V({kg:1,m:2,s:-3}),
+    steps:["W 的單位 J = kg·m²/s²","P = W/t ⇒ (kg·m²/s²)/s = <b>kg·m²/s³</b>","記作 W（瓦特）：1 W = 1 J/s"],
+    hint:["先拼出能量 J，再除以 s","s 的次方：−2 − 1 = −3"]},
+  {k:"U",q:"重力位能",f:"U = mgh",v:V({kg:1,m:2,s:-2}),
+    steps:["g 的單位 m/s²，h 的單位 m","U = mgh ⇒ kg·(m/s²)·m = <b>kg·m²/s²</b>","和動能一樣都是 J：不同形式的能量單位必須相同"],
+    hint:["g 是加速度","答案應該和動能相同"]},
+  {k:"T",q:"單擺週期",f:"T = 2π√(ℓ/g)",v:V({s:1}),
+    steps:["2π 是純數字，沒有單位","ℓ/g ⇒ m ÷ (m/s²) = s²","√(s²) = <b>s</b>","週期的單位是秒，公式的單位對得上"],
+    hint:["先算根號裡面 ℓ/g 的單位","m 約掉，剩下 s²，再開根號"]},
+  {k:"f",q:"頻率",f:"f = 1 / T",v:V({s:-1}),
+    steps:["T 的單位 s","f = 1/T ⇒ <b>1/s</b>","記作 Hz（赫茲）：1 Hz = 1/s；Wi-Fi 2.4 GHz = 2.4×10⁹ /s"],
+    hint:["s 放分母一個"]}
+];
+
+let cur=zero();
+let tgt=T[0];
+const done=new Set();let tries=0;let hintStep=0;
+
+// --- 建立基本單位列 ---
+const bx=$("#bases");
+B.forEach((b,i)=>{
+  const r=document.createElement("div");r.className="brow";
+  r.innerHTML=`<span class="chip" style="background:${b.c}">${b.s}</span><span class="nm"><b>${b.q}</b><br>${b.n}</span>
+  <button aria-label="${b.s} 次方減一">−</button><span class="ex" id="ex${i}">0</span><button aria-label="${b.s} 次方加一">＋</button>`;
+  const [mi,pl]=r.querySelectorAll("button");
+  mi.onclick=()=>{cur[i]=Math.max(-4,cur[i]-1);render();};
+  pl.onclick=()=>{cur[i]=Math.min(4,cur[i]+1);render();};
+  bx.appendChild(r);
+});
+$("#clr").onclick=()=>{cur=zero();render();clearFb();};
+
+// --- 目標按鈕 ---
+const tb=$("#targets");
+function drawTargets(){
+  tb.innerHTML="";
+  T.forEach(t=>{const b=document.createElement("button");b.innerHTML=`${t.q}<small>${t.f}</small>`;b.setAttribute("aria-pressed",t===tgt);if(done.has(t.k))b.classList.add("done");b.onclick=()=>{tgt=t;hintStep=0;cur=zero();clearFb();drawTargets();render();};tb.appendChild(b);});
+}
+function clearFb(){$("#fb").textContent="";$("#fb").className="fb";$("#sol").hidden=true;}
+
+function render(){
+  B.forEach((b,i)=>{const e=$("#ex"+i);e.textContent=cur[i]>0?"+"+cur[i]:cur[i];e.className="ex"+(cur[i]>0?" pos":cur[i]<0?" neg":"");});
+  $("#task").innerHTML=`目標：<b>${tgt.q}</b>　<span class="f">${tgt.f}</span>　的單位`;
+  // 積木分數
+  const num=[],den=[];
+  B.forEach((b,i)=>{for(let k=0;k<Math.abs(cur[i]);k++)(cur[i]>0?num:den).push(`<span class="chip" style="background:${b.c}">${b.s}</span>`);});
+  const bd=$("#build");
+  if(!num.length&&!den.length) bd.innerHTML=`<div class="empty">還沒有積木（純數字，沒有單位）</div>`;
+  else bd.innerHTML=`<div class="frac"><div class="row">${num.length?num.join(""):'<span class="mono" style="font-size:20px">1</span>'}</div>${den.length?`<div class="bar"></div><div class="row">${den.join("")}</div>`:""}</div><div class="utext">${utext(cur)}</div>`;
+  $("#rU").textContent=utext(cur);
+  $("#rN").textContent=named(cur);
+  const diff=add(cur,tgt.v,-1);
+  $("#rD").textContent=eq(diff,zero())?"完全相同 ✔":"還差 "+utext(add(tgt.v,cur,-1));
+  $("#score").textContent=`完成 ${done.size} / ${T.length}`;
+  drawTable();
+}
+$("#chk").onclick=()=>{
+  tries++;
+  const fb=$("#fb");
+  if(eq(cur,tgt.v)){
+    done.add(tgt.k);fb.className="fb ok";
+    fb.textContent=`✔ 正確！${tgt.q}的單位是 ${utext(tgt.v)}`+(/^(N|J|W|Pa|C|Hz)（/.test(named(tgt.v))?`，也就是 ${named(tgt.v).split("＝")[0]}。`:"。");
+    drawTargets();render();
+  }else{
+    fb.className="fb no";
+    const d=add(cur,tgt.v,-1);const wrong=B.filter((b,i)=>d[i]!==0).map(b=>{const i=B.indexOf(b);return `${b.s} 的次方應為 ${tgt.v[i]}（現在 ${cur[i]}）`;});
+    fb.textContent="✘ 還不對："+wrong.join("；")+"。";
+  }
+};
+$("#hint").onclick=()=>{const h=tgt.hint;$("#fb").className="fb";$("#fb").textContent="提示："+h[Math.min(hintStep,h.length-1)];hintStep++;};
+$("#show").onclick=()=>{const s=$("#sol");s.hidden=false;s.innerHTML=tgt.steps.map((x,i)=>`${i+1}. ${x}`).join("<br>");};
+
+// --- 範例 1-1 表 ---
+function drawTable(){
+  const rows=T.filter(t=>t.ex).concat(T.filter(t=>!t.ex&&done.has(t.k)));
+  $("#tbl").innerHTML=rows.map(t=>{const ok=done.has(t.k);const nm=named(t.v).split("＝")[0].split("（1")[0];
+    return `<tr><td>${t.q}</td><td class="mono">${t.f}</td>${ok?`<td class="u">${utext(t.v)}</td><td class="u">${nm}</td>`:`<td class="q">？</td><td class="q">？</td>`}</tr>`;}).join("");
+}
+
+// ===== 因次檢查 =====
+// 變數的單位
+const VAR={
+  "ℓ":{v:V({m:1}),d:"擺長 m"}, "h":{v:V({m:1}),d:"高度 m"}, "x":{v:V({m:1}),d:"位移 m"},
+  "g":{v:V({m:1,s:-2}),d:"重力加速度 m/s²"}, "a":{v:V({m:1,s:-2}),d:"加速度 m/s²"},
+  "m":{v:V({kg:1}),d:"質量 kg"}, "v":{v:V({m:1,s:-1}),d:"速度 m/s"}, "v₀":{v:V({m:1,s:-1}),d:"初速 m/s"},
+  "t":{v:V({s:1}),d:"時間 s"}, "k":{v:V({kg:1,s:-2}),d:"彈力常數 N/m"}
+};
+// 每一項 = [[變數, 次方], ...]（純數字省略）
+const D=[
+  {k:"pend",n:"單擺週期",q:"單擺的週期 T（單位 s）應該是下列哪一個？",want:V({s:1}),vars:["ℓ","g","m"],
+    o:[{e:"T = 2π√(ℓ/g)",t:[[["ℓ",.5],["g",-.5]]]},{e:"T = 2π√(g/ℓ)",t:[[["g",.5],["ℓ",-.5]]]},{e:"T = 2π√(mℓ/g)",t:[[["m",.5],["ℓ",.5],["g",-.5]]]},{e:"T = 2πℓ/g",t:[[["ℓ",1],["g",-1]]]}]},
+  {k:"fall",n:"落地時間",q:"從高 h 處靜止落下，落地所需時間 t（單位 s）是？",want:V({s:1}),vars:["h","g"],
+    o:[{e:"t = √(2gh)",t:[[["g",.5],["h",.5]]]},{e:"t = 2h/g",t:[[["h",1],["g",-1]]]},{e:"t = √(2h/g)",t:[[["h",.5],["g",-.5]]]},{e:"t = √(2g/h)",t:[[["g",.5],["h",-.5]]]}]},
+  {k:"vel",n:"落地速率",q:"從高 h 處靜止落下，落地速率 v（單位 m/s）是？",want:V({m:1,s:-1}),vars:["h","g"],
+    o:[{e:"v = 2gh",t:[[["g",1],["h",1]]]},{e:"v = √(2gh)",t:[[["g",.5],["h",.5]]]},{e:"v = √(2h/g)",t:[[["h",.5],["g",-.5]]]},{e:"v = gh²",t:[[["g",1],["h",2]]]}]},
+  {k:"disp",n:"等加速位移",q:"等加速度運動的位移 x（單位 m）是？注意：每一項都要檢查！",want:V({m:1}),vars:["v₀","a","t"],
+    o:[{e:"x = v₀t + ½at²",t:[[["v₀",1],["t",1]],[["a",1],["t",2]]]},{e:"x = v₀t + ½at",t:[[["v₀",1],["t",1]],[["a",1],["t",1]]]},{e:"x = v₀ + ½at²",t:[[["v₀",1]],[["a",1],["t",2]]]},{e:"x = v₀t² + ½at",t:[[["v₀",1],["t",2]],[["a",1],["t",1]]]}]},
+  {k:"ke",n:"動能",q:"質量 m、速率 v 的物體，動能 K（單位 J = kg·m²/s²）是？",want:V({kg:1,m:2,s:-2}),vars:["m","v"],
+    o:[{e:"K = mv",t:[[["m",1],["v",1]]]},{e:"K = ½mv²",t:[[["m",1],["v",2]]]},{e:"K = ½m²v",t:[[["m",2],["v",1]]]},{e:"K = mv²/2g",t:[[["m",1],["v",2],["g",-1]]]}],extra:["g"]},
+  {k:"spring",n:"彈簧週期",q:"質量 m 掛在彈力常數 k（N/m）的彈簧上，振動週期 T（單位 s）是？",want:V({s:1}),vars:["m","k"],
+    o:[{e:"T = 2π√(k/m)",t:[[["k",.5],["m",-.5]]]},{e:"T = 2π√(m/k)",t:[[["m",.5],["k",-.5]]]},{e:"T = 2πmk",t:[[["m",1],["k",1]]]},{e:"T = 2πm/k",t:[[["m",1],["k",-1]]]}]}
+];
+let dk="pend",dRight=0,dTot=0,dAns=false;
+const dBox=$("#dType");
+D.forEach(d=>{const b=document.createElement("button");b.textContent=d.n;b.dataset.k=d.k;b.onclick=()=>{dk=d.k;drawD();};dBox.appendChild(b);});
+const termUnit=t=>t.reduce((acc,[s,p])=>add(acc,VAR[s].v,p),zero());
+function drawD(){
+  const d=D.find(x=>x.k===dk);dAns=false;
+  dBox.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===dk));
+  $("#dQ").innerHTML=d.q;
+  $("#dLeg").innerHTML=d.vars.concat(d.extra||[]).map(s=>`<span><b>${s}</b>：${VAR[s].d}</span>`).join("");
+  const box=$("#dOpts");box.innerHTML="";
+  d.o.forEach(o=>{
+    const units=o.t.map(termUnit);
+    const ok=units.every(u=>eq(u,d.want));
+    const el=document.createElement("button");el.className="opt";
+    el.innerHTML=`<span class="ex">${o.e}</span><span class="ud"></span><span class="why" hidden></span>`;
+    el.onclick=()=>{
+      if(!dAns){dTot++;if(ok)dRight++;dAns=true;$("#dScore").textContent=dRight+" / "+dTot;}
+      el.classList.add(ok?"ok":"bad");
+      el.querySelector(".ud").textContent=ok?"✔ 單位對":"✘ 單位不對";
+      const w=el.querySelector(".why");w.hidden=false;
+      w.textContent=units.map((u,i)=>(units.length>1?`第 ${i+1} 項：`:"右邊：")+utext(u)+(eq(u,d.want)?" ✔":" ✘")).join("　")+`　（需要 ${utext(d.want)}）`;
+      const n=$("#dNote");
+      n.innerHTML=ok?`<b>這個公式單位正確。</b>不過單位檢查只能排除錯誤：係數 2π、½ 這類純數字沒有單位，必須靠理論或實驗決定。`:
+        (units.length>1&&units.some(u=>eq(u,d.want))?`<b>有一項單位對、一項不對</b>——單位不同的量不能相加，就像 3 m + 2 s 沒有意義。`:`<b>右邊的單位和左邊不同</b>，所以這個公式一定錯。`);
+    };
+    box.appendChild(el);
+  });
+  $("#dNote").innerHTML=`<b>規則：</b>等號兩邊的單位必須相同；相加或相減的每一項，單位也必須相同。點一個選項，看看它的單位算出來是什麼。`;
+}
+drawTargets();render();drawD();
+})();
+</script>
+</body>
+</html>

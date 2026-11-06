@@ -27,6 +27,7 @@ const FILES=[
  "sims/b-davisson.html",
  "sims/b-pendulum.html",
  "sims/b-scale-prefix.html",
+ "sims/b-si-units.html",
  "sims/b-microphone.html",
  "sims/comp-double-spring.html",
  "sims/comp-wilberforce.html",
