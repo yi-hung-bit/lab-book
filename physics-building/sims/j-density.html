@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>質量與體積的關係・密度</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--teal:#4fd1c5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:pan-y}
+.scene{height:330px}.gr{height:330px}
+@media(max-width:560px){.scene{height:270px}.gr{height:280px}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.35;cursor:default;border-color:var(--line)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.sl{display:flex;align-items:center;gap:10px;margin-top:4px}
+.sl input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
+.sl b{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);min-width:76px;text-align:right}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:10px;cursor:pointer}
+.chk input{accent-color:var(--acc);width:17px;height:17px}
+.fb{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid var(--line);background:#0a0f1a;color:var(--muted);min-height:48px}
+.fb.ok{border-color:#1f6f55;background:#071a14;color:#bff5dc}
+.fb.mid{border-color:#7a6320;background:#1a1505;color:#ffe7a3}
+.fb.bad{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.fb b{color:var(--acc);font-weight:500}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.stat{display:flex;gap:18px;flex-wrap:wrap;margin-top:6px}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:18px;color:var(--phos);font-weight:700}
+.tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+.tbl th,.tbl td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+.tbl th{color:var(--muted);font-weight:500;background:#0b1120}
+.tbl td{font-family:"JetBrains Mono",monospace}
+.tbl td.nm{font-family:"Noto Sans TC",sans-serif}
+.tblwrap{overflow-x:auto;max-width:100%}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctl{grid-template-columns:1fr}}
+.qrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:14px}
+.qrow input{font-family:"JetBrains Mono",monospace;font-size:16px;width:96px;padding:5px 8px;border-radius:9px;border:1px solid var(--line);background:#05080f;color:var(--txt)}
+.qrow input:focus{outline:2px solid var(--acc);outline-offset:1px}
+.qrow .mk{min-width:20px;font-weight:700}
+.mats{display:flex;flex-wrap:wrap;gap:6px}
+.mats button{display:flex;align-items:center;gap:6px}
+.mats i{display:inline-block;width:10px;height:10px;border-radius:3px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 1-3 · 密度</div>
+  <h1>質量與體積的關係・密度</h1>
+  <p class="lede">同一種物質，體積愈大質量愈大，而且<b>質量和體積成正比</b>：M–V 圖是一條通過原點的斜直線。單位體積內所含物質的質量稱為<b>密度</b>，D = M / V，常用單位 g/cm³。不同物質的密度通常不同，所以密度可以視為物質的一種特性。</p>
+
+  <div class="modebar" role="group" aria-label="模式">
+    <button type="button" data-m="exp" aria-pressed="true">① 實驗 1-1</button>
+    <button type="button" data-m="mat" aria-pressed="false">② 比較物質（表 1-4）</button>
+    <button type="button" data-m="ex3" aria-pressed="false">③ 例 3 由圖求密度</button>
+  </div>
+
+  <!-- ===== mode 1 ===== -->
+  <div id="mExp">
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">實驗桌</span><span class="n" id="expNote"></span></div>
+        <div class="box"><canvas id="cvS" class="scene" aria-label="量筒與電子天平"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="head"><span class="t">M–V 圖</span><span class="n" id="grNote"></span></div>
+        <div class="box"><canvas id="cvG" class="gr" aria-label="質量與體積關係圖"></canvas></div>
+      </section>
+    </div>
+    <div class="ctl">
+      <section class="card"><div class="pad">
+        <div class="seg" role="group" aria-label="實驗部分">
+          <button type="button" data-p="al" aria-pressed="true">測量不同體積的鋁塊</button>
+          <button type="button" data-p="wa" aria-pressed="false">測量不同體積的水</button>
+        </div>
+        <div id="pAl">
+          <div class="lab" style="margin-top:12px">選一塊鋁塊：先用排水法測體積（V₂ − V₁），再放上電子天平測質量</div>
+          <div class="seg" id="alBtns"></div>
+          <div class="seg" style="margin-top:10px"><button class="primary" id="alRec">記錄這一塊</button><button id="alClr">清除數據</button></div>
+        </div>
+        <div id="pWa" hidden>
+          <div class="lab" style="margin-top:12px">步驟 4：先把乾燥的空量筒放上電子天平</div>
+          <div class="seg"><button id="waM0" class="primary">測量空量筒質量 M₀</button></div>
+          <div class="lab" style="margin-top:12px">步驟 5：量筒內的水加到 10.0、20.0 … 50.0 mL，分別測總質量 M₁～M₅</div>
+          <div class="seg" id="waBtns"></div>
+          <label class="chk"><input type="checkbox" id="waSub">扣除量筒質量（畫「水的質量」M − M₀）</label>
+          <div class="seg" style="margin-top:10px"><button id="waClr">重新做一次</button></div>
+        </div>
+        <div class="fb" id="fbE" aria-live="polite"></div>
+      </div></section>
+      <section class="card"><div class="pad">
+        <div class="stat">
+          <div>直線斜率（M ÷ V）<b id="slope">—</b></div>
+          <div id="icptBox">直線與縱軸交點<b id="icpt">—</b></div>
+        </div>
+        <div class="tblwrap"><table class="tbl" id="tbl"></table></div>
+        <div class="note" id="expExplain"></div>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== mode 2 ===== -->
+  <div id="mMat" hidden>
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t" id="cmpT">等體積比質量</span><span class="n" id="cmpN"></span></div>
+        <div class="box"><canvas id="cvC" class="scene" aria-label="不同物質的方塊比較"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="head"><span class="t">M–V 圖</span><span class="n">斜率愈大，密度愈大</span></div>
+        <div class="box"><canvas id="cvM" class="gr" aria-label="不同物質的質量體積關係圖"></canvas></div>
+      </section>
+    </div>
+    <div class="ctl">
+      <section class="card"><div class="pad">
+        <div class="lab">選擇物質（常溫常壓下，課本表 1-4）</div>
+        <div class="mats" id="matBtns"></div>
+        <div class="seg" style="margin-top:12px" role="group" aria-label="比較方式">
+          <button type="button" data-c="v" aria-pressed="true">等體積：比質量</button>
+          <button type="button" data-c="m" aria-pressed="false">等質量：比體積</button>
+        </div>
+        <div id="cV"><div class="lab" style="margin-top:10px">每一塊的體積 V</div><div class="sl"><input type="range" id="vSl" min="1" max="50" step="1" value="10" aria-label="體積"><b id="vV">10 cm³</b></div></div>
+        <div id="cM" hidden><div class="lab" style="margin-top:10px">每一塊的質量 M</div><div class="sl"><input type="range" id="mSl" min="10" max="500" step="10" value="100" aria-label="質量"><b id="mV">100 g</b></div></div>
+        <div class="tblwrap"><table class="tbl" id="matTbl"></table></div>
+      </div></section>
+      <section class="card"><div class="pad">
+        <div class="lab">猜猜看：這個神秘物體是什麼物質？</div>
+        <div class="stat"><div>質量 M<b id="qM">—</b></div><div>體積 V<b id="qV">—</b></div></div>
+        <div class="qrow"><label for="qD">先算密度 D = M / V ≈</label><input type="text" id="qD" inputmode="decimal" autocomplete="off"><span>g/cm³</span></div>
+        <div class="lab" style="margin-top:10px">再選出它是哪一種物質</div>
+        <div class="seg" id="qBtns"></div>
+        <div class="seg" style="margin-top:10px"><button id="qNew">換一個物體</button></div>
+        <div class="fb" id="fbQ" aria-live="polite">用天平和排水法量到的數據在上面。先算出密度，再對照表 1-4。</div>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== mode 3 ===== -->
+  <div id="mEx3" hidden>
+    <div class="grid">
+      <section class="card"><div class="pad">
+        <div class="lab" id="ex3Q"></div>
+        <div class="tblwrap"><table class="tbl" id="ex3Tbl"></table></div>
+        <div class="seg" style="margin-top:12px"><button class="primary" id="ex3Plot">1. 描點並畫出直線</button></div>
+        <div class="qrow"><span>2. 量筒的質量 =</span><input type="text" id="a2" inputmode="decimal" autocomplete="off"><span>g</span><span class="mk" id="k2"></span></div>
+        <div class="qrow"><span>3. 液體的密度 =</span><input type="text" id="a3" inputmode="decimal" autocomplete="off"><span>g/cm³</span><span class="mk" id="k3"></span></div>
+        <div class="qrow"><span id="q4t">4. 液體 15 cm³ 時，量筒＋液體的總質量 =</span><input type="text" id="a4" inputmode="decimal" autocomplete="off"><span>g</span><span class="mk" id="k4"></span></div>
+        <div class="seg" style="margin-top:12px"><button class="primary" id="ex3Chk">檢查答案</button><button id="ex3Sol">看解法</button><button id="ex3New">換一題</button><button id="ex3Book">回到課本例 3</button></div>
+        <div class="fb" id="fbX" aria-live="polite">先按「描點並畫出直線」，把直線往左延長到縱軸。</div>
+      </div></section>
+      <section class="card">
+        <div class="head"><span class="t">量筒＋液體的總質量 – 液體體積</span><span class="n" id="ex3N"></span></div>
+        <div class="box"><canvas id="cvX" class="gr" aria-label="例 3 的關係圖"></canvas></div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>實驗 1-1 中，若沒有把空量筒的質量扣掉，畫出的直線不會通過原點；把直線往左延長到縱軸，交點的數值就是空量筒的質量（課本圖 1-6）。扣掉之後，水的 M–V 圖是通過原點的斜直線（圖 1-8），斜率約 1 g/cm³；鋁塊的直線較陡（圖 1-7），斜率約 2.7 g/cm³。在定溫定壓下，同一種物質的密度固定，但溫度改變時密度也會改變，所以表 1-4 註明了溫度：冰是 0 ℃、水是 4 ℃、水蒸氣是 100 ℃。例 3 的圖形不過原點，斜率 = (54 − 30) ÷ (40 − 10) = 0.8 g/cm³ 才是液體的密度，縱軸交點 22 g 是量筒的質量；直接用 30 ÷ 10 = 3 是常見的錯誤。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const r1=v=>Math.round(v*10)/10, r2=v=>Math.round(v*100)/100;
+const fmt=(v,d)=>(+v).toFixed(d);
+// ---------- material table (課本表 1-4, g/cm3) ----------
+const MAT=[
+  {k:'au',n:'金',d:19.30,ph:'s',c:'#f3c64a'},
+  {k:'cu',n:'銅',d:8.96,ph:'s',c:'#e08a52'},
+  {k:'fe',n:'鐵',d:7.87,ph:'s',c:'#9aa3b2'},
+  {k:'al',n:'鋁',d:2.70,ph:'s',c:'#d7dde6'},
+  {k:'ice',n:'冰（0 ℃）',d:0.92,ph:'s',c:'#bfe8ff'},
+  {k:'hg',n:'水銀',d:13.53,ph:'l',c:'#c7cdd6'},
+  {k:'w',n:'水（4 ℃）',d:1.00,ph:'l',c:'#43d6ff'},
+  {k:'eth',n:'酒精',d:0.79,ph:'l',c:'#b48cff'},
+  {k:'co2',n:'二氧化碳',d:0.00198,ph:'g',c:'#7dffc4'},
+  {k:'air',n:'空氣',d:0.0012,ph:'g',c:'#a0f0d0'},
+  {k:'vap',n:'水蒸氣（100 ℃）',d:0.0006,ph:'g',c:'#ffffff'}
+];
+const PH={s:'固體',l:'液體',g:'氣體'};
+const dStr=d=>d>=0.1?d.toFixed(2):String(d);
+
+// ---------- canvas helpers ----------
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+function rr(x,a,b,w,h,r){r=Math.min(r,w/2,h/2);x.beginPath();x.moveTo(a+r,b);x.lineTo(a+w-r,b);x.arc(a+w-r,b+r,r,-Math.PI/2,0);x.lineTo(a+w,b+h-r);x.arc(a+w-r,b+h-r,r,0,Math.PI/2);x.lineTo(a+r,b+h);x.arc(a+r,b+h-r,r,Math.PI/2,Math.PI);x.lineTo(a,b+r);x.arc(a+r,b+r,r,Math.PI,1.5*Math.PI);x.closePath();}
+function niceStep(max,n){const raw=max/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p;}
+function tickLabel(v,st){const dec=st<1?Math.min(4,Math.ceil(-Math.log10(st))):0;return v.toFixed(dec);}
+/* generic M–V graph
+   o:{xmax,ymax,xlab,ylab,series:[{pts:[[x,y]],c,lines:[{m,b,x0,x1,dash}],lab,labAt}],marks:[{x,y,t,c}]} */
+function graph(cv,o){
+  const {x,w,h}=fit(cv);if(w<60||h<60)return;
+  x.clearRect(0,0,w,h);
+  const L=48,R=14,T=24,B=40,pw=w-L-R,ph=h-T-B;
+  const sx=v=>L+v/o.xmax*pw, sy=v=>T+ph-v/o.ymax*ph;
+  const xs=niceStep(o.xmax,w<420?5:8),ys=niceStep(o.ymax,6);
+  x.font='11px "JetBrains Mono",monospace';
+  x.strokeStyle='#1a2236';x.lineWidth=1;x.fillStyle='#8492aa';
+  x.textAlign='center';x.textBaseline='top';
+  for(let v=0;v<=o.xmax+1e-9;v+=xs){const X=sx(v);x.beginPath();x.moveTo(X,T);x.lineTo(X,T+ph);x.stroke();x.fillText(tickLabel(v,xs),X,T+ph+5);}
+  x.textAlign='right';x.textBaseline='middle';
+  for(let v=0;v<=o.ymax+1e-9;v+=ys){const Y=sy(v);x.beginPath();x.moveTo(L,Y);x.lineTo(L+pw,Y);x.stroke();x.fillText(tickLabel(v,ys),L-5,Y);}
+  x.strokeStyle='#8492aa';x.lineWidth=1.4;x.beginPath();x.moveTo(L,T-6);x.lineTo(L,T+ph);x.lineTo(L+pw+6,T+ph);x.stroke();
+  x.fillStyle='#c9d1dc';x.font='12px "Noto Sans TC",sans-serif';
+  x.textAlign='right';x.textBaseline='bottom';x.fillText(o.xlab,L+pw,h-4);
+  x.textAlign='left';x.textBaseline='top';x.fillText(o.ylab,L+4,3);
+  x.save();x.beginPath();x.rect(L,T-4,pw+2,ph+5);x.clip();
+  (o.series||[]).forEach(s=>{
+    (s.lines||[]).forEach(l=>{
+      x.strokeStyle=s.c;x.lineWidth=l.w||2.2;x.setLineDash(l.dash?[6,5]:[]);
+      // clip line by y range
+      let x0=l.x0,x1=l.x1;
+      if(l.m>0){const xt=(o.ymax*1.02-l.b)/l.m;if(xt<x1)x1=xt;}
+      x.beginPath();x.moveTo(sx(x0),sy(l.m*x0+l.b));x.lineTo(sx(x1),sy(l.m*x1+l.b));x.stroke();x.setLineDash([]);
+    });
+    (s.pts||[]).forEach(p=>{x.fillStyle=s.c;x.beginPath();x.arc(sx(p[0]),sy(p[1]),4.5,0,7);x.fill();x.strokeStyle='#04060b';x.lineWidth=1.2;x.stroke();});
+  });
+  x.restore();
+  (o.series||[]).forEach(s=>{
+    if(!s.lab||!s.labAt)return;
+    let [lx,ly]=s.labAt;const X=Math.min(L+pw-4,sx(lx)),Y=Math.max(T+8,Math.min(T+ph-8,sy(ly)));
+    x.font='12px "Noto Sans TC",sans-serif';x.fillStyle=s.c;x.textAlign=X>L+pw*0.7?'right':'left';x.textBaseline='bottom';
+    x.fillText(s.lab,X+(x.textAlign==='left'?6:-6),Y-4);
+  });
+  (o.marks||[]).forEach(m=>{x.fillStyle=m.c;x.font='12px "JetBrains Mono",monospace';x.textAlign='left';x.textBaseline='middle';
+    x.beginPath();x.arc(sx(m.x),sy(m.y),5,0,7);x.fill();x.fillText(m.t,sx(m.x)+8,sy(m.y));});
+}
+// least squares
+function fitLine(p){const n=p.length;if(n<2)return null;let sx=0,sy=0,sxx=0,sxy=0;p.forEach(([a,b])=>{sx+=a;sy+=b;sxx+=a*a;sxy+=a*b;});const m=(n*sxy-sx*sy)/(n*sxx-sx*sx);return{m,b:(sy-m*sx)/n};}
+function fitOrigin(p){if(!p.length)return null;let a=0,b=0;p.forEach(([v,m])=>{a+=v*m;b+=v*v;});return{m:a/b,b:0};}
+
+// ---------- drawing pieces ----------
+function drawBalance(x,cx,by,bw,reading,s){
+  const bh=46*s;
+  const g=x.createLinearGradient(0,by-bh,0,by);g.addColorStop(0,'#ece4d4');g.addColorStop(1,'#cfc4ae');
+  x.fillStyle=g;x.beginPath();x.moveTo(cx-bw/2,by);x.lineTo(cx-bw/2+10*s,by-bh);x.lineTo(cx+bw/2-10*s,by-bh);x.lineTo(cx+bw/2,by);x.closePath();x.fill();
+  const dw=bw*.5,dh=20*s,dx=cx-bw*.36,dy=by-bh*.62;
+  x.fillStyle='#283326';rr(x,dx-3,dy-3,dw+6,dh+6,4);x.fill();x.fillStyle='#9fd18a';rr(x,dx,dy,dw,dh,3);x.fill();
+  x.fillStyle='#1d2a17';x.font=`700 ${15*s}px "JetBrains Mono",monospace`;x.textAlign='right';x.textBaseline='middle';
+  x.fillText(reading,dx+dw-14*s,dy+dh/2+1);x.font=`700 ${9*s}px "JetBrains Mono",monospace`;x.fillText('g',dx+dw-4*s,dy+dh/2+3);
+  x.fillStyle='#2b2b2b';x.beginPath();x.arc(cx+bw*.3,dy+dh/2,7*s,0,7);x.fill();
+  const panY=by-bh;x.fillStyle='#3a3f48';x.beginPath();x.ellipse(cx,panY,bw*.36,7*s,0,0,7);x.fill();
+  x.fillStyle='#565c66';x.beginPath();x.ellipse(cx,panY-1.5*s,bw*.36-5*s,4*s,0,0,7);x.fill();
+  return panY-2*s;
+}
+/* graduated cylinder 0–100 mL. returns geometry */
+function drawCyl(x,cx,by,H,W,level,s,opt){
+  opt=opt||{};
+  const top=by-H, inH=H-14*s, base=by-6*s; // inner bottom at base, 100 mL at base-inH*0.92
+  const y=v=>base-v/100*inH*0.92;
+  // foot
+  x.fillStyle='rgba(200,230,255,.35)';x.beginPath();x.ellipse(cx,by-2*s,W*0.95,4*s,0,0,7);x.fill();
+  // water
+  if(level>0){x.fillStyle='rgba(67,214,255,.38)';x.fillRect(cx-W/2+2,y(level),W-4,base-y(level));
+    x.strokeStyle='rgba(140,230,255,.95)';x.lineWidth=1.5;x.beginPath();x.moveTo(cx-W/2+2,y(level)-2*s);x.quadraticCurveTo(cx,y(level)+3*s,cx+W/2-2,y(level)-2*s);x.stroke();}
+  if(opt.block){const b=opt.block;const bs=Math.max(6,Math.min(W-8,b.px));x.fillStyle='#d7dde6';x.fillRect(cx-bs/2,base-b.ph,bs,b.ph);x.strokeStyle='#8992a2';x.lineWidth=1;x.strokeRect(cx-bs/2,base-b.ph,bs,b.ph);}
+  // glass
+  x.strokeStyle='rgba(220,236,255,.8)';x.lineWidth=1.6;x.beginPath();x.moveTo(cx-W/2,top);x.lineTo(cx-W/2,base);x.lineTo(cx+W/2,base);x.lineTo(cx+W/2,top);x.stroke();
+  // ticks
+  x.font=`${Math.max(8,8.5*s)}px "JetBrains Mono",monospace`;x.textAlign='left';x.textBaseline='middle';
+  for(let v=0;v<=100;v+=5){const Y=y(v);x.strokeStyle='rgba(230,240,255,.6)';x.lineWidth=1;x.beginPath();x.moveTo(cx-W/2,Y);x.lineTo(cx-W/2+(v%10===0?W*0.42:W*0.25),Y);x.stroke();
+    if(v%20===0&&v>0){x.fillStyle='rgba(230,240,255,.75)';x.fillText(String(v),cx-W/2+W*0.46,Y);}}
+  return {y,base};
+}
+
+// =================== MODE 1 ===================
+const BLOCKS=[
+  {n:'鋁片',V:6.0,shape:[3,2,1]},
+  {n:'小鋁塊',V:10.0,shape:[2.2,2.2,2.07]},
+  {n:'鋁圓柱',V:16.0,shape:[2,2,4]},
+  {n:'中鋁塊',V:22.0,shape:[2.8,2.8,2.8]},
+  {n:'大鋁塊',V:30.0,shape:[3.1,3.1,3.1]}
+];
+const E={part:'al',sel:-1,alData:[],cur:null,
+  M0:0,M0done:false,lvl:0,waData:[],sub:false};
+function newAlMeas(i){
+  const b=BLOCKS[i];const V1=50.0;const Vtrue=b.V*rnd(0.985,1.015);
+  const V2=r1(V1+Vtrue+rnd(-0.12,0.12));
+  const M=r2(2.70*Vtrue+rnd(-0.03,0.03));
+  E.cur={i,V1,V2,V:r1(V2-V1),M};
+}
+function buildAl(){
+  const g=$('alBtns');g.innerHTML='';
+  BLOCKS.forEach((b,i)=>{const t=document.createElement('button');t.type='button';t.textContent=b.n;t.setAttribute('aria-pressed','false');
+    t.onclick=()=>{E.sel=i;newAlMeas(i);setFbE(`把${b.n}用細線綁好，慢慢放進裝有 50.0 mL 水的量筒：水面升到 ${fmt(E.cur.V2,1)} mL，體積 = ${fmt(E.cur.V2,1)} − ${fmt(E.cur.V1,1)} = <b>${fmt(E.cur.V,1)} cm³</b>。擦乾後放上電子天平：<b>${fmt(E.cur.M,2)} g</b>。按「記錄這一塊」把數據畫到圖上。`,'');uiE();};
+    g.appendChild(t);});
+}
+function buildWa(){
+  const g=$('waBtns');g.innerHTML='';
+  [10,20,30,40,50].forEach((v,k)=>{const t=document.createElement('button');t.type='button';t.textContent=`加水到 ${v}.0 mL（M${'₁₂₃₄₅'[k]}）`;t.dataset.v=v;
+    t.onclick=()=>{
+      if(!E.M0done){setFbE('先測空量筒的質量 M₀（步驟 4），之後才能把它扣掉。','mid');return;}
+      E.lvl=v;const Mt=r2(E.M0+v*rnd(0.994,1.004)+rnd(-0.03,0.03));
+      if(!E.waData.find(d=>d.V===v))E.waData.push({V:v,M:Mt});
+      E.waData.sort((a,b)=>a.V-b.V);
+      const d=E.waData.find(q=>q.V===v);
+      setFbE(`水面對齊 ${v}.0 mL（平視凹面最低處）。天平讀數 = 量筒＋水 = <b>${fmt(d.M,2)} g</b>，水的質量 = ${fmt(d.M,2)} − ${fmt(E.M0,2)} = <b>${fmt(d.M-E.M0,2)} g</b>。`,'');uiE();};
+    g.appendChild(t);});
+}
+function setFbE(h,c){const f=$('fbE');f.className='fb'+(c?' '+c:'');f.innerHTML=h;}
+
+function drawExpScene(){
+  const {x,w,h}=fit($('cvS'));if(w<60)return;x.clearRect(0,0,w,h);
+  const s=Math.min(1.25,Math.max(.72,w/520));
+  // table
+  x.fillStyle='#1a1410';x.fillRect(0,h-16,w,16);x.fillStyle='#3a2b1d';x.fillRect(0,h-18,w,3);
+  const by=h-18;
+  if(E.part==='al'){
+    const c=E.cur;
+    // cylinder left
+    const cx1=w*0.27,H=Math.min(h-40,250*s),W=Math.min(54*s,w*0.13);
+        const geo=drawCyl(x,cx1,by,H,W,c?c.V2:50,s,c?{block:{px:W*0.62,ph:c.V/100*(H-14*s)*0.92/0.3844}}:null);
+    x.fillStyle='#8492aa';x.font=`${12*s}px "Noto Sans TC",sans-serif`;x.textAlign='center';x.textBaseline='top';
+    x.fillText('量筒（排水法）',cx1,6);
+    // reading callout
+    const lv=c?c.V2:50;const Y=geo.y(lv);
+    x.strokeStyle='#ffd166';x.setLineDash([4,4]);x.lineWidth=1;x.beginPath();x.moveTo(cx1+W/2+2,Y);x.lineTo(cx1+W/2+30*s,Y);x.stroke();x.setLineDash([]);
+    x.fillStyle='#ffd166';x.font=`700 ${13*s}px "JetBrains Mono",monospace`;x.textAlign='left';x.textBaseline='middle';
+    x.fillText((c?'V₂ = ':'V₁ = ')+fmt(lv,1)+' mL',cx1+W/2+32*s,Y);
+    if(c){const Y1=geo.y(50);x.fillStyle='#8492aa';x.font=`${11*s}px "JetBrains Mono",monospace`;x.fillText('V₁ = 50.0 mL',cx1+W/2+32*s,Y1+14*s);
+      x.strokeStyle='rgba(132,146,170,.6)';x.setLineDash([3,4]);x.beginPath();x.moveTo(cx1-W/2,Y1);x.lineTo(cx1+W/2+28*s,Y1);x.stroke();x.setLineDash([]);}
+    // balance right
+    const cx2=w*0.74,bw=Math.min(w*0.42,210*s);
+    const panTop=drawBalance(x,cx2,by,bw,c?fmt(c.M,2):'0.00',s);
+    if(c){const b=BLOCKS[c.i],k=13*s;const bwid=b.shape[0]*k,bht=b.shape[2]*k;
+      x.fillStyle='#d7dde6';x.fillRect(cx2-bwid/2,panTop-bht,bwid,bht);x.fillStyle='#b3bbc8';x.beginPath();x.moveTo(cx2-bwid/2,panTop-bht);x.lineTo(cx2-bwid/2+6*s,panTop-bht-5*s);x.lineTo(cx2+bwid/2+6*s,panTop-bht-5*s);x.lineTo(cx2+bwid/2,panTop-bht);x.fill();
+      x.fillStyle='#9aa3b2';x.beginPath();x.moveTo(cx2+bwid/2,panTop-bht);x.lineTo(cx2+bwid/2+6*s,panTop-bht-5*s);x.lineTo(cx2+bwid/2+6*s,panTop-5*s);x.lineTo(cx2+bwid/2,panTop);x.fill();}
+    x.fillStyle='#8492aa';x.font=`${12*s}px "Noto Sans TC",sans-serif`;x.textAlign='center';x.textBaseline='top';x.fillText('電子天平',cx2,6);
+    $('expNote').textContent=c?`${BLOCKS[c.i].n}：V = ${fmt(c.V,1)} cm³，M = ${fmt(c.M,2)} g`:'先選一塊鋁塊';
+  }else{
+    const cx=w*0.5,bw=Math.min(w*0.62,260*s);
+    const reading=E.M0done?fmt(E.lvl?(E.waData.find(d=>d.V===E.lvl)||{M:E.M0}).M:E.M0,2):'0.00';
+    const panTop=drawBalance(x,cx,by,bw,reading,s);
+    if(E.M0done){const H=Math.min(panTop-26,230*s),W=Math.min(46*s,w*0.12);
+      drawCyl(x,cx,panTop,H,W,E.lvl,s);}
+    x.fillStyle='#8492aa';x.font=`${12*s}px "Noto Sans TC",sans-serif`;x.textAlign='left';x.textBaseline='top';
+    x.fillText(E.M0done?`空量筒 M₀ = ${fmt(E.M0,2)} g`:'電子天平（已歸零）',10,8);
+    $('expNote').textContent=E.M0done?(E.lvl?`水 ${E.lvl}.0 mL`:'空量筒'):'步驟 4';
+  }
+}
+function drawExpGraph(){
+  const cv=$('cvG');
+  if(E.part==='al'){
+    const pts=E.alData.map(d=>[d.V,d.M]);const f=fitOrigin(pts);
+    graph(cv,{xmax:40,ymax:100,xlab:'體積 (cm³)',ylab:'鋁塊的質量 (g)',series:[{pts,c:'#ffd166',lines:f&&pts.length>=2?[{m:f.m,b:0,x0:0,x1:40}]:[],lab:f&&pts.length>=2?`斜率 ${f.m.toFixed(2)} g/cm³`:'',labAt:[24,f?f.m*24:0]}]});
+    $('grNote').textContent='圖 1-7';
+  }else{
+    const raw=E.waData.map(d=>[d.V,d.M]);const net=E.waData.map(d=>[d.V,d.M-E.M0]);
+    const series=[];
+    const fr=fitLine(raw);
+    const s1={pts:raw,c:'#ff7a7a',lines:[],lab:'未扣除量筒質量',labAt:[24,fr?fr.m*38+fr.b:0]};
+    if(fr&&raw.length>=2){s1.lines.push({m:fr.m,b:fr.b,x0:Math.min(...raw.map(p=>p[0])),x1:60});s1.lines.push({m:fr.m,b:fr.b,x0:0,x1:Math.min(...raw.map(p=>p[0])),dash:true,w:1.6});}
+    series.push(s1);
+    const marks=[];
+    if(E.sub){const fn=fitOrigin(net);const s2={pts:net,c:'#43d6ff',lines:fn&&net.length>=2?[{m:fn.m,b:0,x0:0,x1:60}]:[],lab:'已扣除量筒質量',labAt:[34,fn?fn.m*44:0]};series.push(s2);}
+    if(fr&&raw.length>=2)marks.push({x:0,y:fr.b,t:`${fr.b.toFixed(1)} g`,c:'#ffd166'});
+    graph(cv,{xmax:60,ymax:100,xlab:'體積 (cm³)',ylab:E.sub?'質量 (g)':'量筒＋水的質量 (g)',series,marks});
+    $('grNote').textContent='圖 1-6、1-8';
+  }
+}
+function uiE(){
+  document.querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.p===E.part)));
+  $('pAl').hidden=E.part!=='al';$('pWa').hidden=E.part!=='wa';
+  document.querySelectorAll('#alBtns button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===E.sel)));
+  $('alRec').disabled=!E.cur;
+  $('waM0').disabled=E.M0done;
+  document.querySelectorAll('#waBtns button').forEach(b=>{b.disabled=!E.M0done;b.setAttribute('aria-pressed',String(+b.dataset.v===E.lvl));});
+  const tb=$('tbl');
+  if(E.part==='al'){
+    const pts=E.alData.map(d=>[d.V,d.M]);const f=fitOrigin(pts);
+    $('slope').textContent=f&&pts.length>=2?f.m.toFixed(2)+' g/cm³':'—';
+    $('icptBox').hidden=true;
+    tb.innerHTML='<tr><th>鋁塊</th><th>V (cm³)</th><th>M (g)</th><th>M ÷ V (g/cm³)</th></tr>'+(E.alData.length?E.alData.map(d=>`<tr><td class="nm">${d.n}</td><td>${fmt(d.V,1)}</td><td>${fmt(d.M,2)}</td><td>${(d.M/d.V).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="4" class="nm" style="color:var(--dim)">還沒有數據</td></tr>');
+    $('expExplain').innerHTML=E.alData.length<2?'至少測兩塊不同大小的鋁塊。<b>體積愈大，質量愈大</b>嗎？M ÷ V 有什麼規律？':
+      E.alData.length<3?'再多測一塊，看三個點是不是落在同一條通過原點的直線上。':
+      `所有點幾乎落在一條<b>通過原點的斜直線</b>上，M ÷ V 都約為 ${f.m.toFixed(1)}：鋁塊的質量和體積成正比。這個比值就是鋁的密度（表 1-4：2.70 g/cm³）。不論鋁塊的形狀、大小，比值都差不多。`;
+  }else{
+    const raw=E.waData.map(d=>[d.V,d.M]);const fr=fitLine(raw);const fn=fitOrigin(E.waData.map(d=>[d.V,d.M-E.M0]));
+    $('icptBox').hidden=false;
+    $('slope').textContent=raw.length>=2?fr.m.toFixed(2)+' g/cm³':'—';
+    $('icpt').textContent=raw.length>=2?fr.b.toFixed(1)+' g':'—';
+    tb.innerHTML='<tr><th>V (cm³)</th><th>量筒＋水 (g)</th><th>水 M − M₀ (g)</th><th>(M − M₀) ÷ V</th></tr>'+(E.waData.length?E.waData.map(d=>`<tr><td>${d.V}.0</td><td>${fmt(d.M,2)}</td><td>${fmt(d.M-E.M0,2)}</td><td>${((d.M-E.M0)/d.V).toFixed(2)}</td></tr>`).join(''):`<tr><td colspan="4" class="nm" style="color:var(--dim)">${E.M0done?'M₀ = '+fmt(E.M0,2)+' g，開始加水':'還沒有數據'}</td></tr>`);
+    $('expExplain').innerHTML=raw.length<2?'先測 M₀，再依序加水到 10.0、20.0 … 50.0 mL，記錄每次的總質量。':
+      !E.sub?`紅色直線<b>沒有通過原點</b>：把它往左延長（虛線）到縱軸，交點約 ${fr.b.toFixed(1)} g——這正是空量筒的質量 M₀ = ${fmt(E.M0,2)} g。勾選「扣除量筒質量」看看。`:
+      `扣除量筒質量後，藍色直線<b>通過原點</b>，表示水的質量和體積成正比；斜率約 ${fn.m.toFixed(2)} g/cm³，就是水的密度（約 1 g/cm³）。兩條線互相平行：扣掉的只是固定的 M₀，斜率不變。`;
+  }
+  drawExpScene();drawExpGraph();
+}
+$('alRec').onclick=()=>{if(!E.cur)return;const c=E.cur,b=BLOCKS[c.i];
+  const ex=E.alData.findIndex(d=>d.n===b.n);const rec={n:b.n,V:c.V,M:c.M};
+  if(ex>=0)E.alData[ex]=rec;else E.alData.push(rec);E.alData.sort((a,b)=>a.V-b.V);
+  setFbE(`已記錄：${b.n} V = ${fmt(c.V,1)} cm³、M = ${fmt(c.M,2)} g，M ÷ V = ${(c.M/c.V).toFixed(2)} g/cm³。${E.alData.length<3?'再選一塊不同大小的鋁塊。':''}`,'ok');uiE();};
+$('alClr').onclick=()=>{E.alData=[];E.cur=null;E.sel=-1;setFbE('數據已清除。','');uiE();};
+$('waM0').onclick=()=>{E.M0=r2(rnd(24.2,27.8));E.M0done=true;E.lvl=0;setFbE(`空量筒放上天平：M₀ = <b>${fmt(E.M0,2)} g</b>。接著加水到 10.0 mL。`,'');uiE();};
+$('waSub').onchange=e=>{E.sub=e.target.checked;uiE();};
+$('waClr').onclick=()=>{E.M0done=false;E.waData=[];E.lvl=0;E.sub=false;$('waSub').checked=false;setFbE('重新開始：先測空量筒質量 M₀。','');uiE();};
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{E.part=b.dataset.p;
+  setFbE(E.part==='al'?'選一塊鋁塊開始測量。':(E.M0done?'繼續加水測量。':'先把空量筒放上電子天平，測 M₀。'),'');uiE();});
+
+// =================== MODE 2 ===================
+const C={sel:new Set(['au','fe','al','w','eth']),cmp:'v',V:10,M:100,q:null};
+function buildMat(){
+  const g=$('matBtns');g.innerHTML='';
+  MAT.forEach(m=>{const b=document.createElement('button');b.type='button';b.dataset.k=m.k;b.innerHTML=`<i style="background:${m.c}"></i>${m.n}`;
+    b.onclick=()=>{if(C.sel.has(m.k)){if(C.sel.size>1)C.sel.delete(m.k);}else C.sel.add(m.k);uiC();};g.appendChild(b);});
+  const q=$('qBtns');q.innerHTML='';
+  MAT.filter(m=>m.ph!=='g').forEach(m=>{const b=document.createElement('button');b.type='button';b.textContent=m.n;b.onclick=()=>guess(m);q.appendChild(b);});
+}
+function selMats(){return MAT.filter(m=>C.sel.has(m.k));}
+function drawCmp(){
+  const {x,w,h}=fit($('cvC'));if(w<60)return;x.clearRect(0,0,w,h);
+  const ms=selMats();const n=ms.length;const slot=w/n;
+  const s=Math.min(1.2,Math.max(.7,w/520));
+  const baseY=h-58;
+  x.fillStyle='#1a1410';x.fillRect(0,baseY,w,4);
+  // sizes
+  let vols=ms.map(m=>C.cmp==='v'?C.V:C.M/m.d);
+  const solidVols=ms.map((m,i)=>m.ph==='g'?0:vols[i]);
+  const vmax=Math.max(...solidVols,1e-9);
+  const maxSide=Math.min(slot*0.78,h-110,150*s);
+  ms.forEach((m,i)=>{
+    const cx=slot*(i+.5);const V=vols[i],M=C.cmp==='v'?m.d*C.V:C.M;
+    let side=C.cmp==='v'?Math.min(maxSide,Math.max(14,Math.cbrt(C.V/50)*maxSide)):Math.max(5,Math.cbrt(V/vmax)*maxSide);
+    const tooBig=m.ph==='g'&&C.cmp==='m';
+    if(tooBig){side=maxSide;}
+    const top=baseY-side;
+    if(m.ph==='g'){x.setLineDash([4,4]);x.strokeStyle=m.c;x.lineWidth=1.4;x.strokeRect(cx-side/2,top,side,side);x.setLineDash([]);
+      x.fillStyle='rgba(160,240,208,.08)';x.fillRect(cx-side/2,top,side,side);
+      x.fillStyle=m.c;for(let k=0;k<10;k++){x.globalAlpha=.6;x.beginPath();x.arc(cx-side/2+((k*37)%97)/97*side,top+((k*61)%89)/89*side,1.5,0,7);x.fill();}x.globalAlpha=1;
+      if(tooBig){x.fillStyle='#ffd166';x.font=`${11*s}px "Noto Sans TC",sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText('畫不下！',cx,top+side/2);}
+    }else{
+      const sh=Math.min(side*0.22,8);
+      if(m.ph==='l'){x.strokeStyle='rgba(220,236,255,.6)';x.lineWidth=1.2;x.strokeRect(cx-side/2-2,top-sh-4,side+4,side+sh+4);}
+      x.fillStyle=m.c;x.globalAlpha=m.ph==='l'?.75:1;x.fillRect(cx-side/2,top,side,side);
+      x.globalAlpha=.55;x.fillStyle='#fff';x.beginPath();x.moveTo(cx-side/2,top);x.lineTo(cx-side/2+sh,top-sh);x.lineTo(cx+side/2+sh,top-sh);x.lineTo(cx+side/2,top);x.fill();
+      x.globalAlpha=.25;x.fillStyle='#000';x.beginPath();x.moveTo(cx+side/2,top);x.lineTo(cx+side/2+sh,top-sh);x.lineTo(cx+side/2+sh,baseY-sh);x.lineTo(cx+side/2,baseY);x.fill();x.globalAlpha=1;
+    }
+    x.textAlign='center';x.textBaseline='top';
+    x.fillStyle='#e8edf6';x.font=`${12*s}px "Noto Sans TC",sans-serif`;x.fillText(m.n.replace(/（.*）/,''),cx,baseY+8);
+    x.fillStyle=C.cmp==='v'?'#7dffc4':'#ffd166';x.font=`700 ${11.5*s}px "JetBrains Mono",monospace`;
+    const val=C.cmp==='v'?(M>=0.1?M.toFixed(M<10?2:1)+' g':M.toPrecision(2)+' g'):(V>=1000?Math.round(V).toLocaleString()+' cm³':V.toFixed(V<10?2:1)+' cm³');
+    x.fillText(val,cx,baseY+26*s);
+  });
+  $('cmpT').textContent=C.cmp==='v'?'等體積比質量':'等質量比體積';
+  $('cmpN').textContent=C.cmp==='v'?`每塊 ${C.V} cm³`:`每塊 ${C.M} g`;
+}
+function drawMatGraph(){
+  const ms=selMats();const xmax=C.cmp==='v'?Math.max(10,Math.ceil(C.V/10)*10):50;
+  let ymax=Math.max(...ms.map(m=>m.d*xmax));
+  ymax=Math.max(ymax,0.01);const st=niceStep(ymax*1.05,6);ymax=Math.ceil(ymax*1.05/st)*st;
+  const series=ms.map(m=>({c:m.c,lines:[{m:m.d,b:0,x0:0,x1:xmax}],lab:`${m.n.replace(/（.*）/,'')} ${dStr(m.d)}`,labAt:[Math.min(xmax*0.98,ymax/m.d*0.95),Math.min(m.d*xmax,ymax*0.95)]}));
+  if(C.cmp==='v')series.forEach((s,i)=>s.pts=[[C.V,ms[i].d*C.V]]);
+  else series.forEach((s,i)=>{const V=C.M/ms[i].d;if(V<=xmax&&C.M<=ymax)s.pts=[[V,C.M]];});
+  graph($('cvM'),{xmax,ymax,xlab:'體積 V (cm³)',ylab:'質量 M (g)',series});
+}
+function uiC(){
+  document.querySelectorAll('#matBtns button').forEach(b=>b.setAttribute('aria-pressed',String(C.sel.has(b.dataset.k))));
+  document.querySelectorAll('[data-c]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===C.cmp)));
+  $('cV').hidden=C.cmp!=='v';$('cM').hidden=C.cmp!=='m';
+  $('vV').textContent=C.V+' cm³';$('mV').textContent=C.M+' g';
+  const ms=selMats();
+  $('matTbl').innerHTML=`<tr><th>物質</th><th>狀態</th><th>密度 (g/cm³)</th><th>${C.cmp==='v'?'質量 M = D × V':'體積 V = M ÷ D'}</th></tr>`+
+    ms.map(m=>{const v=C.cmp==='v'?m.d*C.V:C.M/m.d;const u=C.cmp==='v'?' g':' cm³';
+      const s=v>=10000?Math.round(v).toLocaleString():v>=0.1?v.toFixed(2):v.toPrecision(2);return `<tr><td class="nm">${m.n}</td><td class="nm">${PH[m.ph]}</td><td>${dStr(m.d)}</td><td>${s}${u}</td></tr>`;}).join('');
+  drawCmp();drawMatGraph();
+}
+document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{C.cmp=b.dataset.c;uiC();});
+$('vSl').oninput=e=>{C.V=+e.target.value;uiC();};
+$('mSl').oninput=e=>{C.M=+e.target.value;uiC();};
+function newQ(){
+  const pool=MAT.filter(m=>m.ph!=='g');let m;do{m=pool[Math.floor(Math.random()*pool.length)];}while(C.q&&m.k===C.q.m.k);
+  const V=r1(rnd(5,40));const M=r2(m.d*V*rnd(0.99,1.01));
+  C.q={m,V,M,done:false};$('qM').textContent=fmt(M,2)+' g';$('qV').textContent=fmt(V,1)+' cm³';$('qD').value='';
+  setFbQ('用天平和排水法量到的數據在上面。先算出密度，再對照表 1-4。','');
+}
+function setFbQ(h,c){const f=$('fbQ');f.className='fb'+(c?' '+c:'');f.innerHTML=h;}
+function guess(m){
+  const q=C.q;const D=q.M/q.V;const raw=$('qD').value.trim().replace(/[，,]/g,'.');
+  const dv=parseFloat(raw);
+  const dOk=raw!==''&&isFinite(dv)&&Math.abs(dv-D)/D<0.03;
+  if(m.k===q.m.k){setFbQ(`答對了，是<b>${m.n}</b>！D = ${fmt(q.M,2)} ÷ ${fmt(q.V,1)} ≈ ${D.toFixed(2)} g/cm³，表 1-4 中${m.n}是 ${dStr(m.d)} g/cm³。${raw===''?'下次先把密度算出來填進去喔。':dOk?'':'（你填的密度和計算值差較多，再算一次。）'}`,'ok');q.done=true;}
+  else if(raw!==''&&!dOk){setFbQ(`先檢查密度：D = M ÷ V = ${fmt(q.M,2)} ÷ ${fmt(q.V,1)}，你算的 ${raw} 不太對喔。`,'bad');}
+  else setFbQ(`不是${m.n}（${dStr(m.d)} g/cm³）。${raw===''?'先算密度 D = M ÷ V，再找表中最接近的物質。':'找表中密度和你算出的值最接近的物質。'}`,'bad');
+}
+$('qNew').onclick=newQ;
+
+// =================== MODE 3 (例 3) ===================
+const BOOK={cyl:22,d:0.8,Vs:[10,20,30,40],q:15};
+const X={p:{...BOOK},plotted:false,book:true};
+function ex3Data(){return X.p.Vs.map(v=>[v,r1(X.p.cyl+X.p.d*v)]);}
+function uiX(){
+  const pts=ex3Data();
+  $('ex3Q').innerHTML=`${X.book?'課本例 3：':''}小華用量筒裝某液體，測量液體體積 V 與「量筒＋液體」的總質量 M，結果如下表。`;
+  $('ex3Tbl').innerHTML='<tr><th>次數</th><th>液體體積 V (cm³)</th><th>量筒＋液體 M (g)</th></tr>'+pts.map((p,i)=>`<tr><td>${i+1}</td><td>${p[0]}</td><td>${fmt(p[1],p[1]%1?1:0)}</td></tr>`).join('');
+  $('q4t').textContent=`4. 液體 ${X.p.q} cm³ 時，量筒＋液體的總質量 =`;
+  $('ex3N').textContent=X.book?'課本例 3':'練習題';
+  drawX();
+}
+function drawX(){
+  const pts=ex3Data();const ymax=Math.ceil((X.p.cyl+X.p.d*60)/10)*10;
+  const series=[{pts,c:'#ffd166',lines:[]}];
+  if(X.plotted){series[0].lines.push({m:X.p.d,b:X.p.cyl,x0:pts[0][0],x1:60});series[0].lines.push({m:X.p.d,b:X.p.cyl,x0:0,x1:pts[0][0],dash:true,w:1.6});}
+  const marks=X.plotted?[{x:0,y:X.p.cyl,t:`${X.p.cyl} g`,c:'#ff7a7a'}]:[];
+  if(X.show4)marks.push({x:X.p.q,y:X.p.cyl+X.p.d*X.p.q,t:`(${X.p.q}, ${r1(X.p.cyl+X.p.d*X.p.q)})`,c:'#7dffc4'});
+  graph($('cvX'),{xmax:60,ymax,xlab:'體積 (cm³)',ylab:'量筒＋液體的總質量 (g)',series,marks});
+}
+function setFbX(h,c){const f=$('fbX');f.className='fb'+(c?' '+c:'');f.innerHTML=h;}
+function num(id){const v=$(id).value.trim().replace(/[，,]/g,'.');return v===''?NaN:parseFloat(v);}
+$('ex3Plot').onclick=()=>{X.plotted=true;drawX();setFbX(`四個點連成一條直線，但<b>不通過原點</b>。把直線往左延長（虛線）到縱軸，交點是 V = 0 時的質量——也就是還沒裝液體時量筒的質量。`,'');};
+$('ex3Chk').onclick=()=>{
+  const ans=[X.p.cyl,X.p.d,r1(X.p.cyl+X.p.d*X.p.q)];const ids=['a2','a3','a4'];let ok=0;const msgs=[];
+  ids.forEach((id,i)=>{const v=num(id);const good=isFinite(v)&&Math.abs(v-ans[i])<=(i===1?0.005:0.05);$('k'+(i+2)).textContent=isNaN(v)?'':good?'✓':'✗';$('k'+(i+2)).style.color=good?'var(--phos)':'var(--red)';if(good)ok++;});
+  const d3=num('a3');const p=ex3Data();
+  if(isFinite(d3)&&Math.abs(d3-p[0][1]/p[0][0])<0.01)msgs.push(`第 3 題：${p[0][1]} ÷ ${p[0][0]} 算到的是「量筒＋液體」除以體積，量筒的質量也被算進去了。密度要用<b>斜率</b>（質量的變化 ÷ 體積的變化），或先扣掉量筒質量。`);
+  const a4=num('a4');if(isFinite(a4)&&Math.abs(a4-X.p.d*X.p.q)<0.05)msgs.push(`第 4 題：${a4} g 只是液體的質量，題目問的是量筒＋液體，還要加上量筒的質量。`);
+  if(ok===3){setFbX('全部正確！不通過原點的直線：縱軸交點 = 容器質量，斜率 = 液體密度。','ok');X.show4=true;drawX();}
+  else setFbX((msgs.length?msgs.join('<br>'):'還有題目不對，可以先畫出直線，再看縱軸交點和斜率。')+`（答對 ${ok} / 3）`,msgs.length?'mid':'bad');
+};
+$('ex3Sol').onclick=()=>{
+  const p=ex3Data(),a=p[0],b=p[p.length-1];X.plotted=true;X.show4=true;drawX();
+  const tot=r1(X.p.cyl+X.p.d*X.p.q);
+  setFbX(`2. 直線往左延長和縱軸交於 <b>${X.p.cyl} g</b>，這時液體體積為 0，所以量筒質量 = ${X.p.cyl} g。<br>3. 液體密度 = 斜率 = (${b[1]} − ${a[1]}) ÷ (${b[0]} − ${a[0]}) = <b>${X.p.d} g/cm³</b>；也可以先扣掉量筒：(${a[1]} − ${X.p.cyl}) ÷ ${a[0]} = ${X.p.d}。<br>4. 液體質量 = ${X.p.d} × ${X.p.q} = ${r1(X.p.d*X.p.q)} g，總質量 = ${X.p.cyl} + ${r1(X.p.d*X.p.q)} = <b>${tot} g</b>。`,'');
+};
+function clrAns(){['a2','a3','a4'].forEach(id=>$(id).value='');['k2','k3','k4'].forEach(id=>$(id).textContent='');X.plotted=false;X.show4=false;}
+$('ex3New').onclick=()=>{
+  const ds=[0.8,0.9,1.2,1.5];const d=ds[Math.floor(Math.random()*ds.length)];const cyl=Math.round(rnd(15,40));
+  const v0=[5,10][Math.floor(Math.random()*2)];const Vs=[v0,v0*2,v0*3,v0*4];const q=[15,25,35,45][Math.floor(Math.random()*4)];
+  X.p={cyl,d,Vs,q};X.book=false;clrAns();uiX();setFbX('新題目。先描點畫直線，再回答。','');};
+$('ex3Book').onclick=()=>{X.p={...BOOK};X.book=true;clrAns();uiX();setFbX('先按「描點並畫出直線」，把直線往左延長到縱軸。','');};
+
+// =================== modes ===================
+let mode='exp';
+function show(m){mode=m;document.querySelectorAll('.modebar button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===m)));
+  $('mExp').hidden=m!=='exp';$('mMat').hidden=m!=='mat';$('mEx3').hidden=m!=='ex3';redraw();}
+function redraw(){if(mode==='exp')uiE();else if(mode==='mat')uiC();else uiX();}
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>show(b.dataset.m));
+addEventListener('resize',redraw);
+
+buildAl();buildWa();buildMat();newQ();
+setFbE('選一塊鋁塊開始測量。','');
+show('exp');
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(redraw);
+window.__den={E,C,X,MAT,fitLine,fitOrigin,show};
+})();
+</script>
+</body>
+</html>
