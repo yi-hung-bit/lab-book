@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>運動圖形互推</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--cx:#ff5c8a;--cv:#ff9f43;--ca:#2dd4bf}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 8px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none;cursor:ew-resize}
+#track{height:96px}
+.gx,.gv,.ga{height:170px}
+@media(max-width:560px){.gx,.gv,.ga{height:150px}#track{height:86px}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select,input[type=number]{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);background:rgba(255,209,102,.08)}
+.ctl{margin-top:10px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+#sT{background:linear-gradient(90deg,var(--acc),#f59e0b)}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;word-break:break-all}
+.read .x b{color:var(--cx)} .read .v b{color:var(--cv)} .read .a b{color:var(--ca)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.rel{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:13.5px}
+.rel div{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 10px;border-radius:9px;background:#0a0f1a;border:1px solid var(--line)}
+.rel span{color:var(--muted)}
+.rel b{font-family:"JetBrains Mono",monospace;font-weight:700;text-align:right}
+.custom[hidden]{display:none}
+.two{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.qs{display:flex;flex-direction:column;gap:8px}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);font-family:"JetBrains Mono","Noto Sans TC",monospace;line-height:1.8}
+.qq .ans b{color:var(--phos);font-weight:700}
+.calc .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.calc input{width:92px}
+.calc .out{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:14px;line-height:1.9;color:var(--muted);background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:10px 12px;word-break:break-word}
+.calc .out b{color:var(--phos)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2-1 · x–t · v–t · a–t</div>
+  <h1>運動圖形互推</h1>
+  <p class="lede">同一個直線運動，用三張圖來看：x–t 圖的<b style="color:var(--acc);font-weight:500">切線斜率</b>是速度，v–t 圖下的<b style="color:var(--acc);font-weight:500">面積</b>是位移，a–t 圖下的面積是速度變化。拖曳任一張圖上的時間游標，三張圖會同步。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">運動軌道（每 1 秒留一個記號）</span><span class="n" id="trkNote"></span></div>
+      <div class="box"><canvas id="track" aria-label="物體在直線上的位置"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t" style="color:var(--cx)">x–t 圖・切線斜率 = 速度</span></div>
+      <div class="box"><canvas class="gx" id="gx" aria-label="位置與時間關係圖"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t" style="color:var(--cv)">v–t 圖・面積 = 位移</span></div>
+      <div class="box"><canvas class="gv" id="gv" aria-label="速度與時間關係圖"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t" style="color:var(--ca)">a–t 圖・面積 = 速度變化</span></div>
+      <div class="box" style="margin-bottom:14px"><canvas class="ga" id="ga" aria-label="加速度與時間關係圖"></canvas></div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">選擇運動</span><span class="n">範例 2-2 的甲乙丙</span></div>
+      <div class="pad" style="padding-top:4px">
+        <div class="seg" id="presets"></div>
+        <div class="lab" id="pDesc" style="margin-top:8px"></div>
+        <div class="custom" id="custom" hidden>
+          <div class="ctl"><div class="r"><label for="cV0">初速 v₀</label><span id="oV0"></span></div><input type="range" id="cV0" min="-2" max="3" step="0.1" value="0"></div>
+          <div class="ctl"><div class="r"><label for="cA1">第一段加速度 a₁</label><span id="oA1"></span></div><input type="range" id="cA1" min="-1" max="1" step="0.05" value="0.5"></div>
+          <div class="ctl"><div class="r"><label for="cT1">第一段結束時刻 t₁</label><span id="oT1"></span></div><input type="range" id="cT1" min="0" max="6" step="0.5" value="3"></div>
+          <div class="ctl"><div class="r"><label for="cA2">第二段加速度 a₂</label><span id="oA2"></span></div><input type="range" id="cA2" min="-1" max="1" step="0.05" value="-0.5"></div>
+        </div>
+        <div class="ctl"><div class="r"><label for="sT">時間游標 t</label><span id="oT"></span></div><input type="range" id="sT" min="0" max="6" step="0.01" value="3"></div>
+        <div class="seg" style="margin-top:10px">
+          <button class="primary" id="play">▶ 播放</button>
+          <button id="snap">游標取整數秒</button>
+        </div>
+        <div class="read">
+          <div class="x"><small>位置 x</small><b id="rX"></b></div>
+          <div class="v"><small>速度 v</small><b id="rV"></b></div>
+          <div class="a"><small>加速度 a</small><b id="rA"></b></div>
+        </div>
+        <div class="rel">
+          <div><span>x–t 切線斜率</span><b id="sX" style="color:var(--cx)"></b></div>
+          <div><span>v–t 下面積（0 → t）＝ 位移 Δx</span><b id="aV" style="color:var(--cv)"></b></div>
+          <div><span>v–t 切線斜率</span><b id="sV" style="color:var(--cv)"></b></div>
+          <div><span>a–t 下面積（0 → t）＝ 速度變化 Δv</span><b id="aA" style="color:var(--ca)"></b></div>
+          <div><span>0 → t 的平均速度 Δx / Δt</span><b id="vav" style="color:var(--muted)"></b></div>
+        </div>
+        <div class="note" id="see"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">範例 2-2 運動的函數圖形</span><span class="n">按「到這一題」設定圖形與游標</span></div>
+      <div class="pad" style="padding-top:4px"><div class="qs" id="qs"></div></div>
+    </section>
+    <section class="card calc">
+      <div class="head"><span class="t">範例 2-1 高鐵的平均加速度</span></div>
+      <div class="pad" style="padding-top:4px">
+        <div class="row">由靜止加速到 <input type="number" id="hV" value="315" min="1" step="1" aria-label="末速 km/h"> km/h</div>
+        <div class="row">所需時間 <input type="number" id="hT" value="175" min="1" step="1" aria-label="時間 s"> s</div>
+        <div class="out" id="hO"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>看到圖先問「縱軸是什麼」：同樣是一條斜直線，在 x–t 圖是等速，在 v–t 圖是等加速度。x–t 圖越陡速度越大；曲線向上彎表示速度在增加。v–t 圖在時間軸下方的面積代表往負方向的位移，要算成負的。每 1 秒的記號間距相等是等速運動，間距越來越大（1 : 3 : 5…）就是由靜止的等加速度運動。<br>
+    <b>課本對照：</b>基礎物理 Ch02 2-1 運動學（p.28 圖 2-3 等速運動、p.29 圖 2-4 等加速運動、p.30 範例 2-1 高鐵、知識延長線 v–t 圖面積、p.31 範例 2-2 甲乙丙）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const TMAX=6;
+// 運動 = 起始 x0, v0 與分段加速度 [{t0,t1,a}]
+const PRE={
+  jia:{n:"甲：等速",d:"甲的 x–t 圖是過原點的斜直線（5 s 時 x = 5 m），速度固定 1 m/s。",x0:0,v0:1,seg:[{t0:0,t1:6,a:0}]},
+  yi:{n:"乙：先加速後等速",d:"乙由靜止出發，0～4 s 等加速度到 2.0 m/s，4～6 s 等速。",x0:0,v0:0,seg:[{t0:0,t1:4,a:0.5},{t0:4,t1:6,a:0}]},
+  bing:{n:"丙：等加速",d:"丙由靜止出發，加速度固定 0.2 m/s²。",x0:0,v0:0,seg:[{t0:0,t1:6,a:0.2}]},
+  back:{n:"折返",d:"初速 2 m/s、加速度 −0.8 m/s²：2.5 s 時停下再往回走，v–t 圖穿過時間軸，面積有正有負。",x0:0,v0:2,seg:[{t0:0,t1:6,a:-0.8}]},
+  cus:{n:"自訂",d:"自己設定初速與兩段加速度。",x0:0,v0:0,seg:[]}
+};
+let key="yi",M=PRE.yi,t=3,playing=false;
+function custom(){
+  const v0=+$("#cV0").value,a1=+$("#cA1").value,t1=+$("#cT1").value,a2=+$("#cA2").value;
+  $("#oV0").textContent=v0.toFixed(1)+" m/s";$("#oA1").textContent=a1.toFixed(2)+" m/s²";$("#oT1").textContent=t1.toFixed(1)+" s";$("#oA2").textContent=a2.toFixed(2)+" m/s²";
+  const seg=[];if(t1>0)seg.push({t0:0,t1:t1,a:a1});if(t1<TMAX)seg.push({t0:t1,t1:TMAX,a:a2});
+  PRE.cus.v0=v0;PRE.cus.seg=seg;
+}
+// 狀態
+function st(tt){
+  let x=M.x0,v=M.v0,a=0;
+  for(const s of M.seg){
+    if(tt<=s.t0)break;
+    const d=Math.min(tt,s.t1)-s.t0;
+    x+=v*d+0.5*s.a*d*d;v+=s.a*d;a=s.a;
+    if(tt<=s.t1)break;
+  }
+  if(tt<=0&&M.seg.length)a=M.seg[0].a;
+  return{x,v,a};
+}
+const fmt=(n,d=2)=>{const r=+n.toFixed(d);return(Object.is(r,-0)?0:r).toFixed(d).replace("-","−");};
+// 樣本與範圍
+function range(f){let lo=Infinity,hi=-Infinity;for(let i=0;i<=600;i++){const y=f(i/100);lo=Math.min(lo,y);hi=Math.max(hi,y);}lo=Math.min(lo,0);hi=Math.max(hi,0);if(hi-lo<1e-6){hi+=1;}const step=nice((hi-lo)/4);return{lo:Math.floor((lo+1e-9)/step)*step,hi:Math.ceil((hi-1e-9)/step)*step,step};}
+function nice(r){const e=Math.pow(10,Math.floor(Math.log10(r)));const m=r/e;return(m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*e;}
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+const PADL=46,PADR=14,PADT=22,PADB=24;
+function graph(cv,f,col,unit,mode){
+  const {x:g,w,h}=fit(cv);g.clearRect(0,0,w,h);
+  const R=range(f);
+  const X=tt=>PADL+(w-PADL-PADR)*tt/TMAX, Y=y=>PADT+(h-PADT-PADB)*(R.hi-y)/(R.hi-R.lo);
+  // 格線
+  g.font="11px 'JetBrains Mono',monospace";g.lineWidth=1;
+  for(let y=R.lo;y<=R.hi+1e-9;y+=R.step){g.strokeStyle=Math.abs(y)<1e-9?"#5b6880":"rgba(120,140,180,.14)";g.beginPath();g.moveTo(PADL,Y(y));g.lineTo(w-PADR,Y(y));g.stroke();g.fillStyle="#5b6880";g.textAlign="right";g.textBaseline="middle";g.fillText(fmt(y,R.step<0.5?2:R.step<1?1:0),PADL-6,Y(y));}
+  for(let s=0;s<=TMAX;s++){g.strokeStyle="rgba(120,140,180,.14)";g.beginPath();g.moveTo(X(s),PADT);g.lineTo(X(s),h-PADB);g.stroke();g.fillStyle="#5b6880";g.textAlign="center";g.textBaseline="top";g.fillText(s,X(s),h-PADB+5);}
+  g.fillStyle="#8492aa";g.textAlign="left";g.textBaseline="top";g.fillText(unit,6,3);g.textAlign="right";g.textBaseline="bottom";g.fillText("t (s)",w-PADR,h-PADB-2);
+  // 面積
+  if(mode==="area"){
+    g.beginPath();g.moveTo(X(0),Y(0));for(let i=0;i<=200;i++){const tt=t*i/200;g.lineTo(X(tt),Y(f(tt)));}g.lineTo(X(t),Y(0));g.closePath();
+    g.save();g.clip();
+    g.fillStyle=col+"40";g.fillRect(X(0),PADT,X(t)-X(0),Y(0)-PADT);
+    g.fillStyle="rgba(255,122,122,.30)";g.fillRect(X(0),Y(0),X(t)-X(0),h-PADB-Y(0));
+    g.restore();
+  }
+  // 曲線
+  g.strokeStyle=col;g.lineWidth=2.6;g.beginPath();for(let i=0;i<=600;i++){const tt=i/100;const px=X(tt),py=Y(f(tt));i?g.lineTo(px,py):g.moveTo(px,py);}g.stroke();
+  // 切線
+  const s=st(t);
+  if(mode==="tan"||mode==="area"&&unit.startsWith("v")){
+    const slope=mode==="tan"?s.v:s.a;const y0=f(t);const dt=1.2;
+    g.save();g.beginPath();g.rect(PADL,PADT,w-PADL-PADR,h-PADT-PADB);g.clip();
+    g.strokeStyle="#ffd166";g.setLineDash([6,4]);g.lineWidth=1.6;g.beginPath();g.moveTo(X(t-dt),Y(y0-slope*dt));g.lineTo(X(t+dt),Y(y0+slope*dt));g.stroke();g.setLineDash([]);
+    // 斜率三角形
+    if(mode==="tan"){const d=Math.min(1,TMAX-t)||-1;g.strokeStyle="rgba(255,209,102,.7)";g.lineWidth=1;g.beginPath();g.moveTo(X(t),Y(y0));g.lineTo(X(t+d),Y(y0));g.lineTo(X(t+d),Y(y0+slope*d));g.stroke();
+      g.fillStyle="#ffd166";g.font="11px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="top";g.fillText("Δt="+Math.abs(d)+"s",X(t+d/2),Y(y0)+3);}
+    g.restore();
+  }
+  // 游標
+  g.strokeStyle="rgba(255,209,102,.8)";g.lineWidth=1.2;g.beginPath();g.moveTo(X(t),PADT);g.lineTo(X(t),h-PADB);g.stroke();
+  g.fillStyle=col;g.beginPath();g.arc(X(t),Y(f(t)),5,0,7);g.fill();g.strokeStyle="#04060b";g.lineWidth=2;g.stroke();
+  cv._X=X;cv._w=w;
+}
+function track(){
+  const cv=$("#track");const {x:g,w,h}=fit(cv);g.clearRect(0,0,w,h);
+  const R=range(tt=>st(tt).x);const lo=R.lo,hi=R.hi;
+  const X=x=>24+(w-48)*(x-lo)/(hi-lo);const y0=h*0.56;
+  g.strokeStyle="#5b6880";g.lineWidth=2;g.beginPath();g.moveTo(16,y0);g.lineTo(w-16,y0);g.stroke();
+  g.font="11px 'JetBrains Mono',monospace";g.fillStyle="#5b6880";g.textAlign="center";g.textBaseline="top";
+  for(let x=lo;x<=hi+1e-9;x+=R.step){g.beginPath();g.moveTo(X(x),y0-4);g.lineTo(X(x),y0+4);g.stroke();g.fillText(fmt(x,R.step<1?1:0),X(x),y0+8);}
+  g.textAlign="right";g.fillText("x (m)",w-8,h-14);
+  // 每秒記號
+  let lastL=-1e9;for(let s=0;s<=TMAX;s++){if(s>t+1e-9)break;const xs=st(s).x;g.fillStyle="rgba(255,92,138,.55)";g.beginPath();g.arc(X(xs),y0-16,3.5,0,7);g.fill();g.fillStyle="#8492aa";g.textBaseline="bottom";g.textAlign="center";const lv=s%2?14:0;if(Math.abs(X(xs)-lastL)>20||s===0){g.fillText(s+"s",X(xs),y0-22-(Math.abs(X(xs)-lastL)<20?0:0));lastL=X(xs);}}
+  const s=st(t);
+  // 球
+  g.fillStyle="#ff5c8a";g.beginPath();g.arc(X(s.x),y0-10,9,0,7);g.fill();
+  // 速度箭頭
+  const L=s.v*(w-48)/(hi-lo)*0.6;
+  if(Math.abs(L)>3){g.strokeStyle="#ff9f43";g.fillStyle="#ff9f43";g.lineWidth=3;const yy=y0-10;g.beginPath();g.moveTo(X(s.x),yy);g.lineTo(X(s.x)+L,yy);g.stroke();const dir=Math.sign(L);g.beginPath();g.moveTo(X(s.x)+L+dir*8,yy);g.lineTo(X(s.x)+L,yy-5);g.lineTo(X(s.x)+L,yy+5);g.closePath();g.fill();}
+  $("#trkNote").textContent=`t = ${fmt(t)} s`;
+}
+function draw(){
+  track();
+  graph($("#gx"),tt=>st(tt).x,"#ff5c8a","x (m)","tan");
+  graph($("#gv"),tt=>st(tt).v,"#ff9f43","v (m/s)","area");
+  graph($("#ga"),tt=>st(tt).a,"#2dd4bf","a (m/s²)","area");
+  const s=st(t),s0=st(0);
+  $("#oT").textContent=fmt(t)+" s";
+  $("#rX").textContent=fmt(s.x)+" m";$("#rV").textContent=fmt(s.v)+" m/s";$("#rA").textContent=fmt(s.a)+" m/s²";
+  $("#sX").textContent=fmt(s.v)+" m/s";
+  $("#aV").textContent=fmt(s.x-s0.x)+" m";
+  $("#sV").textContent=fmt(s.a)+" m/s²";
+  $("#aA").textContent=fmt(s.v-s0.v)+" m/s";
+  $("#vav").textContent=t>0.005?fmt((s.x-s0.x)/t)+" m/s":"—";
+  let msg;
+  if(Math.abs(s.a)<1e-9) msg=Math.abs(s.v)<1e-9?"<b>靜止：</b>x 不變，v = 0，a = 0。":"<b>等速運動：</b>x–t 圖是斜直線（斜率固定），v–t 圖是水平線，a = 0；每秒記號間距相等。";
+  else if(s.v*s.a>0) msg="<b>加速中：</b>速度和加速度同方向，速率越來越大，x–t 曲線越來越陡；每秒記號間距越來越大。";
+  else if(Math.abs(s.v)<0.02) msg="<b>瞬間靜止：</b>v = 0，但加速度不為零，下一刻就會往反方向運動。x–t 圖在這裡的切線是水平的。";
+  else msg="<b>減速中：</b>速度和加速度反方向，速率越來越小，x–t 曲線越來越平。";
+  if(M.seg.length>1&&Math.abs(t-M.seg[0].t1)<0.06) msg+=" 這裡是兩段運動的交界：a–t 圖跳一階，v–t 圖轉折，但 x–t 圖仍然平滑相接。";
+  $("#see").innerHTML=msg;
+}
+// 預設按鈕
+const pb=$("#presets");
+Object.entries(PRE).forEach(([k,p])=>{const b=document.createElement("button");b.textContent=p.n;b.dataset.k=k;b.onclick=()=>setPre(k);pb.appendChild(b);});
+function setPre(k){key=k;if(k==="cus")custom();M=PRE[k];pb.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===k));$("#custom").hidden=k!=="cus";$("#pDesc").textContent=M.d;draw();}
+["cV0","cA1","cT1","cA2"].forEach(id=>$("#"+id).addEventListener("input",()=>{custom();draw();}));
+// 時間
+const sT=$("#sT");
+sT.addEventListener("input",()=>{t=+sT.value;stop();draw();});
+$("#snap").onclick=()=>{t=Math.round(t);sT.value=t;draw();};
+let raf=0,last=0;
+function stop(){playing=false;cancelAnimationFrame(raf);$("#play").textContent="▶ 播放";}
+$("#play").onclick=()=>{if(playing){stop();return;}if(t>=TMAX-0.01)t=0;playing=true;$("#play").textContent="❚❚ 暫停";last=performance.now();raf=requestAnimationFrame(step);};
+function step(now){const dt=Math.min(.05,(now-last)/1000);last=now;t=Math.min(TMAX,t+dt);sT.value=t;draw();if(t>=TMAX){stop();return;}if(playing)raf=requestAnimationFrame(step);}
+// 在圖上拖曳
+["gx","gv","ga","track"].forEach(id=>{const cv=$("#"+id);let on=false;
+  const set=e=>{const r=cv.getBoundingClientRect();const w=r.width;const px=e.clientX-r.left;let tt;
+    if(id==="track"){tt=t;return;}
+    tt=(px-PADL)/(w-PADL-PADR)*TMAX;t=Math.max(0,Math.min(TMAX,tt));sT.value=t;stop();draw();};
+  cv.addEventListener("pointerdown",e=>{if(id==="track")return;on=true;cv.setPointerCapture(e.pointerId);set(e);});
+  cv.addEventListener("pointermove",e=>{if(on)set(e);});
+  cv.addEventListener("pointerup",()=>on=false);cv.addEventListener("pointercancel",()=>on=false);
+});
+$("#track").style.cursor="default";
+addEventListener("resize",draw);
+
+// 範例 2-2
+const Q=[
+  {q:"(1) 在時間為 3 秒時，甲的速度為何？",go:()=>{setPre("jia");t=3;},a:"甲的 x–t 圖是斜直線 → 等速。斜率 v = (5 m − 0 m)/(5 s − 0 s) = <b>1 m/s</b>（看右邊「x–t 切線斜率」）。"},
+  {q:"(2) 在 4 秒內（0～4 秒），乙的位移為何？",go:()=>{setPre("yi");t=4;},a:"v–t 圖下的面積 = 位移：三角形 ½ × 4 s × 2.0 m/s = <b>4 m</b>（看「v–t 下面積」）。"},
+  {q:"(3) 在 4 秒內（0～4 秒），丙的速度變化量為何？",go:()=>{setPre("bing");t=4;},a:"a–t 圖下的面積 = 速度變化：4 s × 0.2 m/s² = <b>0.8 m/s</b>（看「a–t 下面積」）。"},
+  {q:"(4) 在時間為 2 秒時，甲、乙、丙三者的加速度量值關係為何？",go:null,a:"甲等速 a = 0；乙 a = 2.0 m/s ÷ 4 s = 0.5 m/s²；丙 a = 0.2 m/s²。所以 <b>甲 &lt; 丙 &lt; 乙</b>。可以按三個按鈕逐一比對 t = 2 s 的加速度。",multi:true}
+];
+const qs=$("#qs");
+Q.forEach((o,i)=>{const d=document.createElement("div");d.className="qq";
+  d.innerHTML=`<p>${o.q}</p><div class="seg"></div><div class="ans" hidden>${o.a}</div>`;
+  const sg=d.querySelector(".seg");
+  const mk=(txt,fn)=>{const b=document.createElement("button");b.textContent=txt;b.onclick=fn;sg.appendChild(b);};
+  if(o.multi){[["jia","看甲"],["yi","看乙"],["bing","看丙"]].forEach(([k,n])=>mk(n,()=>{setPre(k);t=2;sT.value=t;stop();draw();}));}
+  else mk("到這一題",()=>{o.go();sT.value=t;stop();draw();});
+  mk("看答案",()=>{d.querySelector(".ans").hidden=false;});
+  qs.appendChild(d);
+});
+
+// 範例 2-1
+function hsr(){
+  const kmh=parseFloat($("#hV").value),T=parseFloat($("#hT").value);
+  if(!(kmh>0)||!(T>0)){$("#hO").textContent="請輸入正數。";return;}
+  const ms=kmh*1000/3600,a=ms/T;
+  $("#hO").innerHTML=`(1) ${kmh} km/h = ${kmh} × 1000 m ÷ 3600 s = <b>${fmt(ms,1)} m/s</b><br>(2) a<sub>av</sub> = Δv/Δt = (${fmt(ms,1)} − 0) m/s ÷ ${T} s = <b>${fmt(a,a<0.1?3:2)} m/s²</b><br>約是重力加速度的 ${fmt(a/9.8,3)} 倍；若一直等加速，這段期間跑了 ½ × ${fmt(a,2)} × ${T}² ≈ <b>${fmt(0.5*a*T*T/1000,1)} km</b>`;
+}
+["hV","hT"].forEach(id=>$("#"+id).addEventListener("input",hsr));
+hsr();
+setPre("yi");
+})();
+</script>
+</body>
+</html>
