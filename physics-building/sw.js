@@ -24,6 +24,7 @@ const FILES=[
  "sims/b-spectra.html",
  "sims/b-bohr.html",
  "sims/b-franck-hertz.html",
+ "sims/b-galileo-incline.html",
  "sims/b-davisson.html",
  "sims/b-pendulum.html",
  "sims/b-scale-prefix.html",

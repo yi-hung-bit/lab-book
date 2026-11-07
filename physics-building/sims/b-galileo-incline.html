@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伽利略斜面與假想實驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--ball:#4ade80;--ramp:#a78bfa}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:74ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tabs button{font-size:14px;padding:8px 14px}
+.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%}
+#cvA{height:300px}#cvG{height:220px}#cvB{height:320px}
+@media(max-width:560px){#cvA{height:230px}#cvG{height:190px}#cvB{height:250px}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);background:rgba(255,209,102,.08)}
+.ctl{margin-top:10px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;word-break:break-all;color:var(--phos)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.tbl{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.tbl th,.tbl td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th{color:var(--dim);font-weight:500;font-size:12px}
+.tbl td{font-family:"JetBrains Mono",monospace}
+.tbl td.k{color:var(--acc)}
+.tblw{overflow-x:auto}
+.ebar{display:flex;height:16px;border-radius:6px;overflow:hidden;margin-top:6px;border:1px solid var(--line);background:#0a0f1a}
+.ebar i{display:block;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:5px}
+.leg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--c)}
+.recs{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:13px;font-family:"JetBrains Mono","Noto Sans TC",monospace;color:var(--muted)}
+.recs div{display:flex;justify-content:space-between;gap:8px;padding:5px 9px;border-radius:8px;background:#0a0f1a;border:1px solid var(--line)}
+.recs b{color:var(--phos);font-weight:700}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2-2 · Galileo · Inclined Plane</div>
+  <h1>伽利略斜面與假想實驗</h1>
+  <p class="lede">自由落體太快、不好計時，伽利略把它「放慢」：讓小球沿斜面滾下，發現<b>落下距離與時間的平方成正比</b>。他再讓小球在兩個斜面間來回，發現球總會回到<b>相同的高度</b>；如果把右邊斜面放平呢？</p>
+
+  <div class="tabs seg" id="tabs">
+    <button data-m="A" aria-pressed="true">① 斜面滾落：1 : 4 : 9</button>
+    <button data-m="B" aria-pressed="false">② 雙斜面假想實驗：慣性</button>
+  </div>
+
+  <!-- 模式 A -->
+  <div id="modeA">
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">斜面（每隔 Δt 留一個記號）</span><span class="n" id="aNote"></span></div>
+        <div class="box"><canvas id="cvA" aria-label="小球沿斜面滾落，每隔相同時間標記位置"></canvas></div>
+        <div class="head" style="padding-top:0"><span class="t" id="gTitle">落下距離 d – 時間 t</span>
+          <span class="seg"><button id="gxT" aria-pressed="true">橫軸 t</button><button id="gxT2" aria-pressed="false">橫軸 t²</button></span></div>
+        <div class="box"><canvas id="cvG" aria-label="落下距離與時間關係圖"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="head"><span class="t">實驗設定</span></div>
+        <div class="pad" style="padding-top:4px">
+          <div class="ctl"><div class="r"><label for="aTh">斜面傾角 θ</label><span id="oATh"></span></div><input type="range" id="aTh" min="3" max="45" step="1" value="8"></div>
+          <div class="ctl"><div class="r"><label for="aL">斜面長度 L</label><span id="oAL"></span></div><input type="range" id="aL" min="2" max="8" step="0.5" value="5"></div>
+          <div class="ctl"><div class="r"><span style="color:var(--txt);font-family:inherit">標記間隔 Δt</span></div>
+            <div class="seg" id="aDt"><button data-v="0.25" aria-pressed="false">0.25 s</button><button data-v="0.5" aria-pressed="true">0.5 s</button><button data-v="1" aria-pressed="false">1 s</button></div></div>
+          <div class="ctl"><div class="r"><span style="color:var(--txt);font-family:inherit">小球</span></div>
+            <div class="seg" id="aBall"><button data-v="slide" aria-pressed="true">光滑滑下 a = g sinθ</button><button data-v="roll" aria-pressed="false">實心球滾動 a = 5/7 g sinθ</button></div></div>
+          <div class="seg" style="margin-top:12px">
+            <button class="primary" id="aPlay">▶ 放開小球</button>
+            <button id="aReset">重來</button>
+          </div>
+          <div class="read">
+            <div><small>時間 t</small><b id="rAt"></b></div>
+            <div><small>落下距離 d</small><b id="rAd"></b></div>
+            <div><small>加速度 a</small><b id="rAa"></b></div>
+          </div>
+          <div class="tblw"><table class="tbl" id="aTbl"><thead><tr><th>記號</th><th>t (s)</th><th>d (m)</th><th>d : d₁</th><th>這段走 (m)</th><th>段比</th><th>d / t²</th></tr></thead><tbody></tbody></table></div>
+          <div class="note" id="aSee"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 模式 B -->
+  <div id="modeB" hidden>
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">兩個斜面（虛線＝開始高度）</span><span class="n" id="bNote"></span></div>
+        <div class="box"><canvas id="cvB" aria-label="小球在兩斜面間運動"></canvas></div>
+        <div class="pad" style="padding-top:0">
+          <div class="lab">能量去向（以開始時的位能為 100%）</div>
+          <div class="ebar"><i id="eK" style="background:#43d6ff"></i><i id="eU" style="background:#a78bfa"></i><i id="eF" style="background:#ff7a7a"></i></div>
+          <div class="leg"><span style="--c:#43d6ff" id="lK">動能</span><span style="--c:#a78bfa" id="lU">位能</span><span style="--c:#ff7a7a" id="lF">摩擦生熱</span></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="head"><span class="t">實驗設定</span></div>
+        <div class="pad" style="padding-top:4px">
+          <div class="ctl"><div class="r"><label for="bH">開始高度 h</label><span id="oBH"></span></div><input type="range" id="bH" min="0.4" max="1.5" step="0.1" value="1"></div>
+          <div class="ctl"><div class="r"><label for="bT1">左斜面傾角 θ₁</label><span id="oBT1"></span></div><input type="range" id="bT1" min="15" max="60" step="1" value="40"></div>
+          <div class="ctl"><div class="r"><label for="bT2">右斜面傾角 θ₂</label><span id="oBT2"></span></div><input type="range" id="bT2" min="0" max="60" step="1" value="40"></div>
+          <div class="ctl"><div class="r"><label for="bMu">摩擦係數 μ</label><span id="oBMu"></span></div><input type="range" id="bMu" min="0" max="0.3" step="0.01" value="0"></div>
+          <div class="ctl"><div class="r"><label for="bSp">播放速度</label><span id="oBSp"></span></div><input type="range" id="bSp" min="0.25" max="1" step="0.25" value="1"></div>
+          <div class="seg" style="margin-top:12px">
+            <button class="primary" id="bPlay">▶ 放開小球</button>
+            <button id="bReset">重來</button>
+            <button id="bSeq">依序把右斜面放平</button>
+          </div>
+          <div class="read">
+            <div><small>速率 v</small><b id="rBv"></b></div>
+            <div><small>高度 y</small><b id="rBy"></b></div>
+            <div><small>運動情形</small><b id="rBs"></b></div>
+            <div><small>右斜面最高點</small><b id="rBm"></b></div>
+            <div><small>右側沿斜面走了</small><b id="rBd"></b></div>
+            <div><small>時間 t</small><b id="rBt"></b></div>
+          </div>
+          <div class="lab" style="margin-top:12px">每次到達右側最高點的紀錄 <button id="bClr" style="padding:3px 8px;font-size:12px;margin-left:6px">清除</button></div>
+          <div class="recs" id="recs"></div>
+          <div class="note" id="bSee"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>①先讓學生預測：時間變成 2 倍、3 倍，距離變成幾倍？看表格的 d : d₁ 是 1 : 4 : 9 : 16，每一段走的距離是 1 : 3 : 5 : 7（奇數比），d / t² 固定，所以 d ∝ t²，這是等加速度運動的特徵。改變傾角只改變加速度（比例常數），比例關係不變；傾角拉到 90° 就是自由落體——伽利略用斜面「稀釋」重力，才能用水鐘量到時間。滾動的球加速度較小（部分能量變成轉動），但 d ∝ t² 仍然成立。
+    ②雙斜面：沒有摩擦時，不論右斜面多陡多緩，球都回到開始高度；斜面越緩，要走得越遠才能爬回那個高度。放到水平時，再也爬不回去，也沒有東西讓它減速，只好一直以 v = √(2gh) 走下去——物體不受外力時保持原來的運動狀態，就是<b>慣性</b>。把 μ 調大，看球為什麼在真實世界會停下：不是「運動本來就會停」，而是摩擦力把動能變成熱。
+    <br><b>課本對照：</b>基礎物理 Ch02 2-2（p.33 圖 2-6 斜面運動：落下距離與時間的平方成正比；p.34 圖 2-7 伽利略的假想實驗：小球在兩斜面間運動、開始高度＝最後高度、右邊斜面放平；慣性）、習題 6。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const g=9.8, D=Math.PI/180;
+const fmt=(n,d=2)=>{const r=+n.toFixed(d);return(Object.is(r,-0)?0:r).toFixed(d).replace("-","−");};
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+function segPick(id,cb){const box=$(id);box.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;box.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));cb(b.dataset.v);});}
+function ball(c,x,y,r,col){const gr=c.createRadialGradient(x-r*.35,y-r*.35,r*.15,x,y,r);gr.addColorStop(0,"#d9ffe7");gr.addColorStop(1,col);c.fillStyle=gr;c.beginPath();c.arc(x,y,r,0,7);c.fill();}
+
+/* ---------- 模式切換 ---------- */
+let mode="A";
+$("#tabs").addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;$$("#tabs button").forEach(x=>x.setAttribute('aria-pressed',x===b));$("#modeA").hidden=mode!=="A";$("#modeB").hidden=mode!=="B";drawA();drawB();});
+
+/* ================= 模式 A：斜面滾落 ================= */
+const A={th:8,L:5,dt:0.5,kind:"slide",t:0,run:false,gx:"t"};
+const aAcc=()=>(A.kind==="roll"?5/7:1)*g*Math.sin(A.th*D);
+const aTend=()=>Math.sqrt(2*A.L/aAcc());
+const aD=t=>0.5*aAcc()*t*t;
+function aMarks(upto){const out=[];const T=aTend();for(let n=1;n*A.dt<=Math.min(upto,T)+1e-9;n++)out.push({n,t:n*A.dt,d:aD(n*A.dt)});return out;}
+function aSync(){
+  A.th=+$("#aTh").value;A.L=+$("#aL").value;
+  $("#oATh").textContent=A.th+"°";$("#oAL").textContent=fmt(A.L,1)+" m";
+}
+function aReset(){A.t=0;A.run=false;$("#aPlay").textContent="▶ 放開小球";drawA();}
+["#aTh","#aL"].forEach(s=>$(s).addEventListener('input',()=>{aSync();aReset();}));
+segPick("#aDt",v=>{A.dt=+v;drawA();});
+segPick("#aBall",v=>{A.kind=v;aReset();});
+$("#aPlay").onclick=()=>{if(A.t>=aTend()-1e-9)A.t=0;A.run=!A.run;$("#aPlay").textContent=A.run?"❚❚ 暫停":"▶ 繼續";if(A.t===0&&A.run)$("#aPlay").textContent="❚❚ 暫停";};
+$("#aReset").onclick=aReset;
+$("#gxT").onclick=()=>{A.gx="t";$("#gxT").setAttribute('aria-pressed',true);$("#gxT2").setAttribute('aria-pressed',false);drawA();};
+$("#gxT2").onclick=()=>{A.gx="t2";$("#gxT2").setAttribute('aria-pressed',true);$("#gxT").setAttribute('aria-pressed',false);drawA();};
+
+function drawA(){
+  if(mode!=="A")return;
+  const {x:c,w,h}=fit($("#cvA"));c.clearRect(0,0,w,h);
+  const th=A.th*D, L=A.L, T=aTend();
+  const mL=30,mR=24,mT=28,mB=36;
+  const sc=Math.min((w-mL-mR)/(L*Math.cos(th)),(h-mT-mB)/(L*Math.sin(th)));
+  const W=L*Math.cos(th)*sc,H=L*Math.sin(th)*sc;
+  const ox=mL+((w-mL-mR)-W)/2, oy=mT+((h-mT-mB)-H)/2;   // 頂端
+  const P=d=>({x:ox+d*Math.cos(th)*sc,y:oy+d*Math.sin(th)*sc});
+  // 斜面本體
+  c.fillStyle="rgba(167,139,250,.22)";c.strokeStyle="#a78bfa";c.lineWidth=2;
+  c.beginPath();c.moveTo(ox,oy);c.lineTo(ox+W,oy+H);c.lineTo(ox,oy+H);c.closePath();c.fill();
+  c.beginPath();c.moveTo(ox,oy);c.lineTo(ox+W,oy+H);c.stroke();
+  // 角度
+  c.strokeStyle="#5b6880";c.lineWidth=1;c.beginPath();c.arc(ox+W,oy+H,26,Math.PI,Math.PI+th,false);c.stroke();
+  c.fillStyle="#8492aa";c.font="12px 'JetBrains Mono',monospace";c.textAlign="right";c.textBaseline="top";c.fillText("θ = "+A.th+"°",ox+W-30,oy+H+6);
+  // 每公尺刻度
+  c.font="10px 'JetBrains Mono',monospace";c.textAlign="center";c.textBaseline="middle";
+  const nx=-Math.sin(th),ny=Math.cos(th);
+  for(let d=0;d<=L+1e-9;d+=0.5){const p=P(d);const big=Math.abs(d-Math.round(d))<1e-9;c.strokeStyle=big?"#8492aa":"#3b4660";c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x+nx*(big?9:5),p.y+ny*(big?9:5));c.stroke();if(big&&d>0){c.fillStyle="#5b6880";c.fillText(d+"",p.x+nx*18,p.y+ny*18);}}
+  // 記號
+  const ms=aMarks(A.t);
+  const r=Math.max(6,Math.min(11,w/70));
+  const ux=Math.sin(th),uy=-Math.cos(th); // 斜面法線向上
+  ms.forEach(m=>{const p=P(m.d);c.fillStyle="rgba(255,209,102,.9)";c.beginPath();c.arc(p.x+ux*r,p.y+uy*r,3.5,0,7);c.fill();
+    c.strokeStyle="rgba(255,209,102,.45)";c.setLineDash([3,3]);c.beginPath();c.moveTo(p.x+ux*r,p.y+uy*r);c.lineTo(p.x+ux*(r+22),p.y+uy*(r+22));c.stroke();c.setLineDash([]);
+    if(ms.length<=12||m.n%2===0){c.fillStyle="#ffd166";c.font="11px 'JetBrains Mono',monospace";c.fillText(fmt(m.t,A.dt<1?2:0).replace(/\.?0+$/,"")+"s",p.x+ux*(r+31),p.y+uy*(r+31));}});
+  // 起點記號 t=0
+  {const p=P(0);c.fillStyle="#ffd166";c.font="11px 'JetBrains Mono',monospace";c.fillText("0",p.x+ux*(r+16)-4,p.y+uy*(r+16));}
+  // 球
+  const d=aD(Math.min(A.t,T));const p=P(d);ball(c,p.x+ux*r,p.y+uy*r,r,"#22c55e");
+  // 讀數
+  const a=aAcc();
+  $("#rAt").textContent=fmt(Math.min(A.t,T),2)+" s";$("#rAd").textContent=fmt(d,2)+" m";$("#rAa").textContent=fmt(a,2)+" m/s²";
+  $("#aNote").textContent="滾到底要 "+fmt(T,2)+" s";
+  // 表格
+  const all=aMarks(A.t);const d1=aD(A.dt);
+  $("#aTbl tbody").innerHTML=all.map((m,i)=>{const prev=i?all[i-1].d:0;const seg=m.d-prev;return`<tr><td class="k">${m.n}</td><td>${fmt(m.t,2)}</td><td>${fmt(m.d,3)}</td><td>${fmt(m.d/d1,1)}</td><td>${fmt(seg,3)}</td><td>${fmt(seg/d1,1)}</td><td>${fmt(m.d/(m.t*m.t),3)}</td></tr>`;}).join("")||`<tr><td colspan="7" style="text-align:center;color:var(--dim);font-family:inherit">按「放開小球」開始記錄</td></tr>`;
+  // 說明
+  const done=A.t>=T-1e-9;
+  $("#aSee").innerHTML=all.length>=3
+    ?`距離比 d : d₁ = <b>${all.slice(0,5).map(m=>fmt(m.d/d1,0)).join(" : ")}</b>${all.length>5?" …":""}，正好是 1² : 2² : 3² …；每段距離比 <b>${all.slice(0,5).map((m,i)=>fmt((m.d-(i?all[i-1].d:0))/d1,0)).join(" : ")}</b> 是連續奇數。d / t² 都等於 <b>${fmt(a/2,3)} m/s²</b> = a / 2，所以 d = ½ a t²。${done?" 換個傾角再試：比例常數變了，1 : 4 : 9 不變。":""}`
+    :`小球從靜止放開。猜猜看：時間變成 2 倍時，落下的距離會是幾倍？傾角越小加速度越小，記號越密、越容易量時間。`;
+  drawG(all,done);
+}
+function drawG(all,done){
+  const {x:c,w,h}=fit($("#cvG"));c.clearRect(0,0,w,h);
+  const T=aTend(),a=aAcc(),t2=A.gx==="t2";
+  $("#gTitle").textContent=t2?"落下距離 d – 時間平方 t²":"落下距離 d – 時間 t";
+  const XM=t2?T*T:T,YM=A.L;
+  const PL=44,PR=14,PT=18,PB=28;
+  const X=v=>PL+(w-PL-PR)*v/XM,Y=v=>h-PB-(h-PB-PT)*v/YM;
+  c.font="11px 'JetBrains Mono',monospace";c.lineWidth=1;
+  const ys=YM<=3?0.5:1;
+  for(let y=0;y<=YM+1e-9;y+=ys){c.strokeStyle=y?"rgba(120,140,180,.14)":"#5b6880";c.beginPath();c.moveTo(PL,Y(y));c.lineTo(w-PR,Y(y));c.stroke();c.fillStyle="#5b6880";c.textAlign="right";c.textBaseline="middle";c.fillText(fmt(y,ys<1?1:0),PL-6,Y(y));}
+  const xs=XM<=1.5?0.25:XM<=4?0.5:XM<=10?1:XM<=25?5:10;
+  for(let x=0;x<=XM+1e-9;x+=xs){c.strokeStyle=x?"rgba(120,140,180,.14)":"#5b6880";c.beginPath();c.moveTo(X(x),PT);c.lineTo(X(x),h-PB);c.stroke();c.fillStyle="#5b6880";c.textAlign="center";c.textBaseline="top";c.fillText(fmt(x,xs<1?2:0).replace(/\.?0+$/,"")||"0",X(x),h-PB+5);}
+  c.fillStyle="#8492aa";c.textAlign="left";c.textBaseline="top";c.fillText("d (m)",4,2);c.textAlign="right";c.textBaseline="bottom";c.fillText(t2?"t² (s²)":"t (s)",w-PR,h-PB-2);
+  // 理論曲線（虛線）
+  c.strokeStyle="rgba(125,255,196,.35)";c.setLineDash([5,4]);c.lineWidth=1.5;c.beginPath();
+  for(let i=0;i<=120;i++){const t=T*i/120;const xv=t2?t*t:t;const y=aD(t);i?c.lineTo(X(xv),Y(y)):c.moveTo(X(xv),Y(y));}c.stroke();c.setLineDash([]);
+  // 已走過
+  const tn=Math.min(A.t,T);c.strokeStyle="#7dffc4";c.lineWidth=2.2;c.beginPath();
+  for(let i=0;i<=120;i++){const t=tn*i/120;const xv=t2?t*t:t;i?c.lineTo(X(xv),Y(aD(t))):c.moveTo(X(xv),Y(aD(t)));}c.stroke();
+  all.forEach(m=>{c.fillStyle="#ffd166";c.beginPath();c.arc(X(t2?m.t*m.t:m.t),Y(m.d),4,0,7);c.fill();});
+  if(t2&&all.length>=2){c.fillStyle="#7dffc4";c.textAlign="left";c.textBaseline="top";c.font="12px 'Noto Sans TC',sans-serif";c.fillText("過原點的直線，斜率 = a/2 = "+fmt(a/2,3)+" m/s²",PL+8,PT+2);}
+}
+
+/* ================= 模式 B：雙斜面 ================= */
+const Lf=0.3; // 底部平滑連接段
+const B={h:1,t1:40,t2:40,mu:0,sp:1,s:0,v:0,t:0,run:false,fric:0,maxY:0,apexDone:false,dist:0,recs:[],seq:null,stopped:false};
+const L1=()=>B.h/Math.sin(B.t1*D);
+function geo(s){ // 回傳 {x,y,gt,cos}
+  if(s<0){const th=B.t1*D;return{x:s*Math.cos(th),y:-s*Math.sin(th),gt:g*Math.sin(th),cos:Math.cos(th),side:-1};}
+  if(s<=Lf)return{x:s,y:0,gt:0,cos:1,side:0};
+  const th=B.t2*D,q=s-Lf;return{x:Lf+q*Math.cos(th),y:q*Math.sin(th),gt:-g*Math.sin(th),cos:Math.cos(th),side:1};
+}
+function bReach(){ // 預測右側沿斜面可走的距離（第一次）
+  const th1=B.t1*D,th2=B.t2*D;
+  const E=g*B.h-B.mu*g*Math.cos(th1)*L1()-B.mu*g*Lf;
+  if(E<=0)return 0;
+  const den=g*Math.sin(th2)+B.mu*g*Math.cos(th2);
+  return den<1e-9?Infinity:E/den;
+}
+function bSync(){
+  B.h=+$("#bH").value;B.t1=+$("#bT1").value;B.t2=+$("#bT2").value;B.mu=+$("#bMu").value;B.sp=+$("#bSp").value;
+  $("#oBH").textContent=fmt(B.h,1)+" m";$("#oBT1").textContent=B.t1+"°";$("#oBT2").textContent=B.t2+"°"+(B.t2===0?"（水平）":"");$("#oBMu").textContent=B.mu===0?"0（光滑）":fmt(B.mu,2);$("#oBSp").textContent=B.sp+"×";
+}
+function bReset(){B.s=-L1();B.v=0;B.t=0;B.run=false;B.fric=0;B.maxY=0;B.apexDone=false;B.dist=0;B.stopped=false;B.cam=0;$("#bPlay").textContent="▶ 放開小球";drawB();}
+["#bH","#bT1","#bT2","#bMu"].forEach(s=>$(s).addEventListener('input',()=>{bSync();B.seq=null;bReset();}));
+$("#bSp").addEventListener('input',bSync);
+$("#bPlay").onclick=()=>{if(B.stopped)bReset();B.run=!B.run;$("#bPlay").textContent=B.run?"❚❚ 暫停":"▶ 繼續";};
+$("#bReset").onclick=()=>{B.seq=null;bReset();};
+$("#bClr").onclick=()=>{B.recs=[];drawRecs();drawB();};
+$("#bSeq").onclick=()=>{B.seq=[45,30,15,5,0];B.recs=[];$("#bMu").value=0;nextSeq();};
+function nextSeq(){
+  if(!B.seq||!B.seq.length){B.seq=null;return;}
+  const a=B.seq.shift();$("#bT2").value=a;bSync();bReset();B.run=true;$("#bPlay").textContent="❚❚ 暫停";
+}
+function record(){
+  const gm=geo(B.s);
+  B.recs.push({t2:B.t2,y:gm.y,x:gm.x,d:B.s-Lf,mu:B.mu,h:B.h});
+  if(B.recs.length>8)B.recs.shift();drawRecs();
+}
+function drawRecs(){
+  $("#recs").innerHTML=B.recs.length?B.recs.map(r=>`<div><span>θ₂ = ${r.t2}°${r.mu?`，μ = ${fmt(r.mu,2)}`:""}</span><span>高度 <b>${r.y==null?"—":fmt(r.y,2)+" m"}</b>・走 ${r.d==null?"一直走":fmt(r.d,2)+" m"}</span></div>`).join(""):`<div style="justify-content:center;color:var(--dim)">還沒有紀錄</div>`;
+}
+function bStep(dt){
+  const L=L1();
+  const gm=geo(B.s), f=B.mu*g*gm.cos;
+  let v=B.v;
+  if(v===0){
+    if(Math.abs(gm.gt)<=f+1e-12){ // 靜止
+      B.stopped=true;B.run=false;return;}
+    v+=(gm.gt-Math.sign(gm.gt)*f)*dt;
+  }else{
+    const nv=v+(gm.gt-Math.sign(v)*f)*dt;
+    if(Math.sign(nv)!==Math.sign(v))v=0;else v=nv;
+  }
+  const prevV=B.v;
+  // 摩擦生熱（每單位質量）
+  const ds=v*dt;B.fric+=f*Math.abs(ds);
+  B.s+=ds;B.v=v;B.t+=dt;
+  if(B.s<-L){B.s=-L;B.v=0;}
+  const g2=geo(B.s);
+  if(g2.side===1)B.dist=Math.max(B.dist,B.s-Lf);
+  if(g2.side===1&&g2.y>B.maxY)B.maxY=g2.y;
+  // 右側第一次到達最高點
+  if(!B.apexDone&&g2.side===1&&prevV>0&&B.v<=0){B.apexDone=true;record();
+    if(B.seq){B.run=false;setTimeout(nextSeq,700);}}
+}
+function bPredicted(){const r=bReach();return r;}
+
+function drawB(){
+  if(mode!=="B")return;
+  const {x:c,w,h}=fit($("#cvB"));c.clearRect(0,0,w,h);
+  const th1=B.t1*D,th2=B.t2*D,L=L1();
+  const reach=bReach();
+  const capD=6*B.h; // 視窗右側最多顯示的水平距離
+  const rx=isFinite(reach)?Math.min(reach*Math.cos(th2),capD):capD;
+  const xmin=-L*Math.cos(th1)-0.25*B.h, xmax=Lf+Math.max(rx,B.h*0.8)+0.3*B.h;
+  const mT=26,mB=30;
+  const sc=Math.min(w/(xmax-xmin),(h-mT-mB)/(B.h*1.25));
+  const gm=geo(B.s);
+  // 相機：球超出右側時跟著走
+  const viewW=w/sc;
+  let cam=Math.max(0,gm.x-(xmin+viewW*0.72));
+  const SX=x=>(x-xmin-cam)*sc, SY=y=>h-mB-y*sc;
+  // 開始高度線
+  c.strokeStyle="rgba(255,209,102,.6)";c.setLineDash([6,5]);c.lineWidth=1.3;c.beginPath();c.moveTo(0,SY(B.h));c.lineTo(w,SY(B.h));c.stroke();c.setLineDash([]);
+  c.fillStyle="#ffd166";c.font="12px 'Noto Sans TC',sans-serif";c.textAlign="right";c.textBaseline="bottom";c.fillText("開始高度 h = "+fmt(B.h,1)+" m",w-8,SY(B.h)-3);
+  // 軌道
+  const farX=xmin+cam+viewW+1;
+  const rightLen=th2>0?Math.max(0,Math.min((farX-Lf)/Math.cos(th2),(B.h*1.4)/Math.sin(th2))):Math.max(0,farX-Lf);
+  const topR={x:Lf+rightLen*Math.cos(th2),y:rightLen*Math.sin(th2)};
+  c.fillStyle="rgba(167,139,250,.28)";c.strokeStyle="#a78bfa";c.lineWidth=2;
+  c.beginPath();c.moveTo(SX(-L*Math.cos(th1)-0.25*B.h),SY(B.h));c.lineTo(SX(-L*Math.cos(th1)),SY(B.h));c.lineTo(SX(0),SY(0));c.lineTo(SX(Lf),SY(0));c.lineTo(SX(topR.x),SY(topR.y));
+  c.lineTo(SX(topR.x),SY(-0.3));c.lineTo(SX(-L*Math.cos(th1)-0.25*B.h),SY(-0.3));c.closePath();c.fill();
+  c.beginPath();c.moveTo(SX(-L*Math.cos(th1)-0.25*B.h),SY(B.h));c.lineTo(SX(-L*Math.cos(th1)),SY(B.h));c.lineTo(SX(0),SY(0));c.lineTo(SX(Lf),SY(0));c.lineTo(SX(topR.x),SY(topR.y));c.stroke();
+  // 水平時的距離刻度
+  if(B.t2<3){
+    c.font="10px 'JetBrains Mono',monospace";c.textAlign="center";c.textBaseline="top";
+    const step=B.h<=0.6?0.5:1;
+    for(let d=0;Lf+d<farX;d+=step){const X=SX(Lf+d*Math.cos(th2));if(X<-20)continue;c.strokeStyle="#5b6880";c.beginPath();c.moveTo(X,SY(d*Math.sin(th2)));c.lineTo(X,SY(d*Math.sin(th2))+6);c.stroke();if(Math.abs(d-Math.round(d))<1e-9){c.fillStyle="#5b6880";c.fillText(d+" m",X,SY(0)+8);}}
+  }
+  // 角度標示
+  c.fillStyle="#8492aa";c.font="12px 'JetBrains Mono',monospace";c.textBaseline="bottom";
+  if(cam<1e-6){c.textAlign="left";c.fillText("θ₁="+B.t1+"°",SX(0)-58,SY(0)-4);}
+  c.textAlign="left";if(SX(Lf)>-10)c.fillText("θ₂="+B.t2+"°",SX(Lf)+10,SY(0)-4);
+  // 紀錄的最高點
+  B.recs.forEach(r=>{if(r.y==null)return;const g3=r.h===B.h;if(!g3)return;
+    // 依該次的角度畫出點的位置
+    const th=r.t2*D;const X=SX(Lf+r.d*Math.cos(th)),Y=SY(r.y);
+    c.strokeStyle="rgba(167,139,250,.35)";c.lineWidth=1;c.setLineDash([3,3]);c.beginPath();c.moveTo(SX(Lf),SY(0));c.lineTo(X,Y);c.stroke();c.setLineDash([]);
+    c.fillStyle="rgba(125,255,196,.7)";c.beginPath();c.arc(X,Y-7,4,0,7);c.fill();
+    c.fillStyle="#7dffc4";c.font="10px 'JetBrains Mono',monospace";c.textAlign="center";c.textBaseline="bottom";c.fillText(r.t2+"°",X,Y-12);});
+  // 球
+  const r=Math.max(7,Math.min(11,w/70));
+  const nrm=gm.side<0?{x:Math.sin(th1),y:Math.cos(th1)}:gm.side>0?{x:-Math.sin(th2),y:Math.cos(th2)}:{x:0,y:1};
+  const bx=SX(gm.x)+nrm.x*r,by=SY(gm.y)-nrm.y*r;
+  ball(c,bx,by,r,"#22c55e");
+  // 速度箭頭
+  if(Math.abs(B.v)>0.02){const dir=gm.side<0?{x:Math.cos(th1),y:Math.sin(th1)}:gm.side>0?{x:Math.cos(th2),y:-Math.sin(th2)}:{x:1,y:0};
+    const len=Math.min(70,Math.abs(B.v)*14)*Math.sign(B.v);c.strokeStyle="#ff9f43";c.fillStyle="#ff9f43";c.lineWidth=2.5;
+    const ex=bx+dir.x*len,ey=by+dir.y*len;c.beginPath();c.moveTo(bx,by);c.lineTo(ex,ey);c.stroke();
+    const an=Math.atan2(ey-by,ex-bx);c.beginPath();c.moveTo(ex,ey);c.lineTo(ex-8*Math.cos(an-0.4),ey-8*Math.sin(an-0.4));c.lineTo(ex-8*Math.cos(an+0.4),ey-8*Math.sin(an+0.4));c.closePath();c.fill();}
+  if(cam>0){c.fillStyle="#8492aa";c.font="12px 'Noto Sans TC',sans-serif";c.textAlign="left";c.textBaseline="top";c.fillText("◀ 畫面跟著小球移動",8,6);}
+  // 讀數
+  const sp=Math.abs(B.v);
+  $("#rBv").textContent=fmt(sp,2)+" m/s";$("#rBy").textContent=fmt(gm.y,2)+" m";$("#rBt").textContent=fmt(B.t,2)+" s";
+  const at=gm.gt-(B.v!==0?Math.sign(B.v)*B.mu*g*gm.cos:0);
+  let st;if(B.stopped)st="停住";else if(B.t===0)st="靜止";else if(Math.abs(at)<1e-9)st="等速";else st=(at*B.v>0)?"加速":"減速";
+  $("#rBs").textContent=st;
+  $("#rBm").textContent=B.apexDone?fmt(B.recs.length?B.recs[B.recs.length-1].y:B.maxY,2)+" m":(gm.side===1&&B.t2>0?fmt(B.maxY,2)+" m…":"—");
+  $("#rBd").textContent=fmt(B.dist,2)+" m";
+  // 能量條
+  const E0=g*B.h,K=0.5*B.v*B.v,U=g*gm.y,F=B.fric;
+  const pk=Math.max(0,K/E0*100),pu=Math.max(0,U/E0*100),pf=Math.max(0,100-pk-pu);
+  $("#eK").style.width=pk+"%";$("#eU").style.width=pu+"%";$("#eF").style.width=pf+"%";
+  $("#lK").textContent="動能 "+fmt(pk,0)+"%";$("#lU").textContent="位能 "+fmt(pu,0)+"%";$("#lF").textContent="摩擦生熱 "+fmt(pf,0)+"%";
+  // 預測與說明
+  const pr=reach;
+  const pv=Math.sqrt(Math.max(0,2*(g*B.h-B.mu*g*Math.cos(th1)*L-B.mu*g*Lf)));
+  $("#bNote").textContent=B.mu===0?(B.t2===0?"右邊放平":"預測爬回 "+fmt(B.h,2)+" m"):"";
+  let s;
+  if(B.mu>0&&B.mu>=Math.tan(th1))s=`摩擦太大（μ ≥ tan θ₁），小球放開後根本滑不下來。`;
+  else if(B.mu===0&&B.t2===0)s=`右邊放平了：小球到底部時速率 v = √(2gh) = <b>${fmt(pv,2)} m/s</b>，之後<b>沒有斜面讓它減速、也沒有摩擦</b>，速度保持不變，<b>一直走下去</b>。物體不受外力時保持原來的運動狀態，這就是<b>慣性</b>。`;
+  else if(B.mu===0)s=`沒有摩擦：不論右斜面幾度，小球都爬回<b>開始高度 ${fmt(B.h,1)} m</b>（虛線）。右斜面 ${B.t2}° 時要沿斜面走 h / sin θ₂ = <b>${fmt(pr,2)} m</b>；斜面越平緩，走得越遠。試試「依序把右斜面放平」。`;
+  else if(B.t2===0)s=`有摩擦 μ = ${fmt(B.mu,2)}：水平面上摩擦力讓小球減速，大約走 <b>${fmt(pr,2)} m</b> 就停下。真實世界的物體會停下，是因為受到摩擦力，不是運動「自然」會停止。把 μ 調回 0 看看。`;
+  else s=`有摩擦 μ = ${fmt(B.mu,2)}：每走一段，就有一部分能量變成熱，小球爬不回開始高度（預測最高約 <b>${fmt(Math.max(0,pr)*Math.sin(th2),2)} m</b>），來回幾次後停下。摩擦越小，越接近開始高度——伽利略由此推想「完全沒有摩擦」的理想情形。`;
+  $("#bSee").innerHTML=s;
+}
+
+/* ---------- 迴圈 ---------- */
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(mode==="A"&&A.run){A.t+=dt;const T=aTend();if(A.t>=T){A.t=T;A.run=false;$("#aPlay").textContent="▶ 再放一次";}drawA();}
+  if(mode==="B"&&B.run){
+    const n=Math.ceil(dt*B.sp/0.0005);const h=dt*B.sp/n;
+    for(let i=0;i<n&&B.run;i++)bStep(h);
+    // 水平無摩擦：走了很遠就自動暫停，避免無限
+    if(B.t2===0&&B.mu===0&&B.dist>40){B.run=false;B.recs.push({t2:0,y:null,d:null,mu:0,h:B.h});if(B.recs.length>8)B.recs.shift();drawRecs();$("#bPlay").textContent="▶ 繼續";if(B.seq)B.seq=null;}
+    if(!B.run&&!B.seq)$("#bPlay").textContent=B.stopped?"▶ 再放一次":"▶ 繼續";
+    drawB();
+  }
+  requestAnimationFrame(loop);
+}
+addEventListener('resize',()=>{drawA();drawB();});
+aSync();bSync();bReset();drawRecs();aReset();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
