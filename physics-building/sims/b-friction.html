@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摩擦力：從靜摩擦到動摩擦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--cF:#8b8cff;--cs:#84cc16;--ck:#ff5c8a;--cN:#43d6ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%}
+#scene{height:250px}
+#plot{height:260px}
+@media(max-width:560px){#scene{height:210px}#plot{height:230px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+#sF{background:linear-gradient(90deg,#3b3f8f,var(--cF))}
+.chk{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted);margin-top:10px}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.state{margin-top:12px;padding:10px 14px;border-radius:11px;font-weight:700;font-size:15px;text-align:center;border:1px solid var(--line)}
+.state.s{background:rgba(132,204,22,.1);color:var(--cs);border-color:rgba(132,204,22,.4)}
+.state.k{background:rgba(255,92,138,.1);color:var(--ck);border-color:rgba(255,92,138,.4)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);font-family:"JetBrains Mono","Noto Sans TC",monospace;line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2-3 · Static &amp; Kinetic Friction</div>
+  <h1>摩擦力：從靜摩擦到動摩擦</h1>
+  <p class="lede">用水平力 F 拉桌上的木塊，F 從零慢慢增加。木塊不動時，靜摩擦力剛好等於 F；F 超過最大靜摩擦力，木塊開始滑動，摩擦力掉到比較小的動摩擦力，多出來的力讓木塊加速：F − f<sub>k</sub> = ma。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">木塊受力圖</span><span class="n" id="sNote"></span></div>
+      <div class="box"><canvas id="scene" aria-label="木塊受力情形"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t">f–F 圖（圖 2-13）</span><span class="n">每個點是一個時刻的 (F, f)</span></div>
+      <div class="box"><canvas id="plot" aria-label="摩擦力與拉力關係圖"></canvas></div>
+      <div class="legend"><span><i style="background:var(--cs)"></i>靜摩擦 f<sub>s</sub> = F</span><span><i style="background:var(--ck)"></i>動摩擦 f<sub>k</sub></span><span><i style="background:var(--acc)"></i>目前</span></div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">拉力與條件</span><span class="n">g = 10 m/s²（同範例 2-5）</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="ctl"><div class="r"><label for="sF">水平拉力 F</label><span id="oF"></span></div><input type="range" id="sF" min="0" max="240" step="1" value="0"></div>
+        <div class="seg" style="margin-top:10px">
+          <button class="primary" id="ramp">▶ F 從零慢慢增加</button>
+          <button id="reset">重來（木塊靜止、清除圖）</button>
+        </div>
+        <div class="state s" id="state"></div>
+        <div class="read">
+          <div><small>摩擦力 f</small><b id="rf"></b></div>
+          <div><small>加速度 a</small><b id="ra"></b></div>
+          <div><small>速度 v</small><b id="rv"></b></div>
+          <div><small>正向力 N = mg</small><b id="rN"></b></div>
+          <div><small>最大靜摩擦 f<sub>s,max</sub></small><b id="rS"></b></div>
+          <div><small>動摩擦 f<sub>k</sub></small><b id="rK"></b></div>
+        </div>
+        <div class="ctl"><div class="r"><label for="sM">木塊質量 m</label><span id="oM"></span></div><input type="range" id="sM" min="1" max="20" step="1" value="10"></div>
+        <div class="ctl"><div class="r"><label for="sS">最大靜摩擦力 f<sub>s,max</sub></label><span id="oS"></span></div><input type="range" id="sS" min="0.5" max="16" step="0.5" value="8"></div>
+        <div class="ctl"><div class="r"><label for="sK">動摩擦力 f<sub>k</sub></label><span id="oK"></span></div><input type="range" id="sK" min="0.5" max="16" step="0.5" value="7"></div>
+        <label class="chk"><input type="checkbox" id="prop" checked> 改質量時，摩擦力跟著正向力等比例改變（小百科）</label>
+        <div class="note" id="see"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">範例 2-5 摩擦力</span><span class="n">10 kg、f<sub>s,max</sub> = 8 kgw、f<sub>k</sub> = 7 kgw</span></div>
+      <div class="pad" style="padding-top:2px" id="ex"></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">想一想</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="qq"><p>木塊已經在滑動後，把 F 調回 75 N（比 80 N 小、比 70 N 大），木塊會停下來嗎？</p><div class="seg"><button id="t1">試試看</button><button data-a="a1">看說明</button></div><div class="ans" id="a1" hidden>不會。滑動時摩擦力是 f<sub>k</sub> = 70 N，F = 75 N 仍大於 70 N，木塊<b>繼續加速</b>（a = 0.5 m/s²）。f<sub>s,max</sub> 只決定「能不能開始動」。</div></div>
+        <div class="qq"><p>滑動中把 F 調成 60 N 會怎樣？調成 0 呢？</p><div class="seg"><button id="t2">F = 60 N</button><button id="t3">F = 0</button><button data-a="a2">看說明</button></div><div class="ans" id="a2" hidden>F &lt; f<sub>k</sub>，合力向後，木塊<b>減速</b>：F = 60 N 時 a = (60 − 70)/10 = −1 m/s²；F = 0 時 a = −7 m/s²。停下來以後摩擦力又變回靜摩擦，等於 F。</div></div>
+        <div class="qq"><p>同樣的桌面，木塊質量加倍為 20 kg，最少要多大的 F 才拉得動？</p><div class="seg"><button id="t4">設成 20 kg</button><button data-a="a3">看說明</button></div><div class="ans" id="a3" hidden>正向力加倍，最大靜摩擦力也加倍：16 kgw = <b>160 N</b>。這就是越重的東西越難拉動。</div></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>「靜摩擦力」不是固定值，而是「需要多少就出多少」，最多到 f<sub>s,max</sub>；所以靜止時 f = F，拉力是多少摩擦力就是多少。一旦滑動，摩擦力大致固定為 f<sub>k</sub>，通常 f<sub>k</sub> &lt; f<sub>s,max</sub>，所以「拉動的瞬間最吃力，動了以後比較輕鬆」。1 kgw 是 1 kg 物體受的重力，本頁取 g = 10 m/s²，1 kgw = 10 N。<br>
+    <b>課本對照：</b>基礎物理 Ch02 2-3 生活中常見的力（p.40 圖 2-11 正向力、圖 2-12 靜摩擦力、圖 2-13 摩擦力隨施力變化、小百科；p.41 範例 2-5）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const G=10;
+let m=10,fs=80,fk=70; // N
+let F=0,v=0,x=0,moving=false,ramping=false;
+let pts=[];let lastPt=0;
+const fmt=(n,d=1)=>{const r=+n.toFixed(d);return(Object.is(r,-0)?0:r).toFixed(d).replace("-","−");};
+function friction(){ // 回傳 {f, a, kind}
+  if(!moving){
+    if(F<=fs+1e-9) return{f:F,a:0,kind:"s"};
+    return{f:fk,a:(F-fk)/m,kind:"k"};
+  }
+  return{f:fk,a:(F-fk)/m,kind:"k"};
+}
+function step(dt){
+  if(ramping){F=Math.min(+$("#sF").max,F+dt*12);$("#sF").value=F;if(F>=+$("#sF").max)stopRamp();}
+  let r=friction();
+  if(!moving&&r.kind==="k") moving=true;
+  if(moving){
+    v+=r.a*dt;
+    if(v<=0){v=0;moving=false;r=friction();}
+    x+=v*dt;
+  }
+  const now=performance.now();
+  if(now-lastPt>60&&(ramping||moving||pts.length===0||Math.abs(pts[pts.length-1].F-F)>0.5)){pts.push({F,f:r.f,k:r.kind});lastPt=now;if(pts.length>1500)pts.shift();}
+  return r;
+}
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w,h};}
+function arrow(g,x1,y1,x2,y2,col,lab,lx,ly){
+  const L=Math.hypot(x2-x1,y2-y1);if(L<2)return;
+  g.strokeStyle=col;g.fillStyle=col;g.lineWidth=4;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
+  const ux=(x2-x1)/L,uy=(y2-y1)/L;g.beginPath();g.moveTo(x2+ux*10,y2+uy*10);g.lineTo(x2-uy*7,y2+ux*7);g.lineTo(x2+uy*7,y2-ux*7);g.closePath();g.fill();
+  if(lab){g.font="700 14px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="middle";g.fillText(lab,lx,ly);}
+}
+function drawScene(r){
+  const {g,w,h}=fit($("#scene"));g.clearRect(0,0,w,h);
+  const gy=h*0.66, bw=Math.min(130,w*0.26), bh=bw*0.7, cx=w*0.5;
+  // 桌面（滑動時往後捲）
+  g.fillStyle="#2a3448";g.fillRect(0,gy,w,10);
+  g.strokeStyle="#3b4862";g.lineWidth=2;const off=(x*60)%40;
+  for(let k=-1;k<w/40+2;k++){const xx=k*40-off;g.beginPath();g.moveTo(xx,gy+10);g.lineTo(xx-10,gy+22);g.stroke();}
+  // 木塊
+  const bx=cx-bw/2,by=gy-bh;
+  g.fillStyle="#9a6b3f";g.fillRect(bx,by,bw,bh);g.strokeStyle="#6b4523";g.lineWidth=3;g.strokeRect(bx,by,bw,bh);
+  g.beginPath();g.moveTo(bx,by);g.lineTo(bx+bw,by+bh);g.moveTo(bx+bw,by);g.lineTo(bx,by+bh);g.stroke();
+  // 力的比例
+  const sc=Math.min((w*0.42)/Math.max(160,fs,F),(h*0.24)/Math.max(100,m*G));
+  // N 與 mg
+  arrow(g,cx-10,by+bh*0.5,cx-10,by+bh*0.5-m*G*sc*0.9,"#43d6ff","N",cx-30,by+bh*0.5-m*G*sc*0.9);
+  arrow(g,cx+10,by+bh*0.5,cx+10,by+bh*0.5+m*G*sc*0.9,"#93a3bf","mg",cx+34,Math.min(h-10,by+bh*0.5+m*G*sc*0.9));
+  g.font="700 13px 'JetBrains Mono',monospace";const lw=g.measureText(m+" kg").width+10;
+  g.fillStyle="rgba(40,24,10,.85)";g.fillRect(bx+6,by+6,lw,20);g.fillStyle="#fff";g.textAlign="left";g.textBaseline="middle";g.fillText(m+" kg",bx+11,by+16);
+  // F 與 f
+  const fy=by+bh*0.72;
+  if(F>0.01) arrow(g,bx+bw,by+bh*0.3,bx+bw+F*sc,by+bh*0.3,"#8b8cff","F",bx+bw+F*sc/2,by+bh*0.3-16);
+  if(r.f>0.01){const col=r.kind==="s"?"#84cc16":"#ff5c8a";arrow(g,bx,gy-6,bx-r.f*sc,gy-6,col,r.kind==="s"?"fs":"fk",bx-r.f*sc/2,gy-22);}
+  // 速度
+  g.fillStyle="#8492aa";g.font="12px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="top";
+  g.fillText(`v = ${fmt(v,2)} m/s`,10,8);g.fillText(`位移 ${fmt(x,2)} m`,10,26);
+}
+function drawPlot(){
+  const {g,w,h}=fit($("#plot"));g.clearRect(0,0,w,h);
+  const L=46,R=14,T=24,B=30;
+  const Fmax=+$("#sF").max,fmax=Math.max(fs,fk)*1.25;
+  const X=v=>L+(w-L-R)*v/Fmax,Y=v=>T+(h-T-B)*(1-v/fmax);
+  g.font="11px 'JetBrains Mono',monospace";
+  const st=Fmax>120?40:20;
+  for(let a=0;a<=Fmax+1e-9;a+=st){g.strokeStyle="rgba(120,140,180,.14)";g.lineWidth=1;g.beginPath();g.moveTo(X(a),T);g.lineTo(X(a),h-B);g.stroke();g.fillStyle="#5b6880";g.textAlign="center";g.textBaseline="top";g.fillText(a,X(a),h-B+5);}
+  const sy=fmax>150?40:20;
+  for(let a=0;a<=fmax;a+=sy){g.strokeStyle="rgba(120,140,180,.14)";g.beginPath();g.moveTo(L,Y(a));g.lineTo(w-R,Y(a));g.stroke();g.fillStyle="#5b6880";g.textAlign="right";g.textBaseline="middle";g.fillText(a,L-6,Y(a));}
+  g.fillStyle="#8492aa";g.textAlign="left";g.textBaseline="top";g.fillText("f (N)",6,2);g.textAlign="right";g.textBaseline="bottom";g.fillText("F (N)",w-R,h-B-3);
+  g.strokeStyle="#5b6880";g.lineWidth=1.5;g.beginPath();g.moveTo(L,T);g.lineTo(L,h-B);g.lineTo(w-R,h-B);g.stroke();
+  // 參考線
+  g.setLineDash([5,4]);g.lineWidth=1;
+  g.strokeStyle="rgba(255,92,138,.6)";g.beginPath();g.moveTo(L,Y(fs));g.lineTo(X(fs),Y(fs));g.lineTo(X(fs),h-B);g.stroke();
+  g.strokeStyle="rgba(255,92,138,.35)";g.beginPath();g.moveTo(L,Y(fk));g.lineTo(w-R,Y(fk));g.stroke();
+  g.strokeStyle="rgba(132,204,22,.35)";g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(Math.min(fs,Fmax)),Y(Math.min(fs,Fmax)));g.stroke();
+  g.setLineDash([]);
+  g.fillStyle="#ff9fb8";g.textAlign="left";g.textBaseline="bottom";g.fillText("fs,max = "+fmt(fs,0)+" N",L+4,Y(fs)-2);
+  g.textBaseline="top";g.fillText("fk = "+fmt(fk,0)+" N",Math.min(w-R-90,X(fs)+8),Y(fk)+3);
+  // 點
+  for(const p of pts){g.fillStyle=p.k==="s"?"#84cc16":"#ff5c8a";g.beginPath();g.arc(X(p.F),Y(p.f),2.6,0,7);g.fill();}
+  const r=friction();
+  g.fillStyle="#ffd166";g.beginPath();g.arc(X(F),Y(moving?fk:r.f),6,0,7);g.fill();g.strokeStyle="#04060b";g.lineWidth=2;g.stroke();
+}
+function ui(r){
+  $("#oF").textContent=`${fmt(F,0)} N（${fmt(F/G,1)} kgw）`;
+  $("#oM").textContent=m+" kg";$("#oS").textContent=`${fmt(fs/G,1)} kgw = ${fmt(fs,0)} N`;$("#oK").textContent=`${fmt(fk/G,1)} kgw = ${fmt(fk,0)} N`;
+  $("#rf").textContent=fmt(r.f,0)+" N";$("#ra").textContent=fmt(moving?r.a:0,2)+" m/s²";$("#rv").textContent=fmt(v,2)+" m/s";
+  $("#rN").textContent=fmt(m*G,0)+" N";$("#rS").textContent=fmt(fs,0)+" N";$("#rK").textContent=fmt(fk,0)+" N";
+  const s=$("#state");
+  if(!moving){s.className="state s";s.textContent=F<=0.01?"靜止：沒有拉力，也沒有摩擦力":`靜止：靜摩擦力 f = F = ${fmt(F,0)} N`;}
+  else{s.className="state k";s.textContent=r.a>0.001?`滑動加速：f = fk = ${fmt(fk,0)} N，a = (F − fk)/m = ${fmt(r.a,2)} m/s²`:r.a<-0.001?`滑動減速：F < fk，a = ${fmt(r.a,2)} m/s²`:`等速滑動：F = fk，合力為零`;}
+  let msg;
+  if(!moving&&F<fs-0.5) msg=`<b>還拉不動。</b>還差 ${fmt(fs-F,0)} N 才達到最大靜摩擦力。靜摩擦力會隨 F 一起增加，兩力抵消，合力為零。`;
+  else if(!moving) msg="<b>剛好到最大靜摩擦力。</b>再多拉一點點，木塊就會開始滑動。";
+  else if(r.a>0) msg=`<b>滑動了！</b>摩擦力從 ${fmt(fs,0)} N 掉到 ${fmt(fk,0)} N（f–F 圖上的那一階），合力 F − f<sub>k</sub> = ${fmt(F-fk,0)} N 使木塊加速。`;
+  else msg="<b>拉力小於動摩擦力</b>，合力向後，木塊會慢下來，停下後又變成靜摩擦。";
+  $("#see").innerHTML=msg;
+  $("#sNote").textContent=moving?"滑動中":"靜止";
+}
+let raf=0,last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;const r=step(dt);drawScene(r);drawPlot();ui(r);raf=requestAnimationFrame(loop);}
+function stopRamp(){ramping=false;$("#ramp").textContent="▶ F 從零慢慢增加";}
+$("#ramp").onclick=()=>{if(ramping){stopRamp();return;}reset(false);ramping=true;$("#ramp").textContent="❚❚ 暫停增加";};
+function reset(keepF){v=0;x=0;moving=false;pts=[];if(!keepF){F=0;$("#sF").value=0;}}
+$("#reset").onclick=()=>{stopRamp();reset(false);};
+$("#sF").addEventListener("input",()=>{stopRamp();F=+$("#sF").value;});
+function setFric(){fs=+$("#sS").value*G;fk=Math.min(+$("#sK").value,+$("#sS").value)*G;$("#sK").value=fk/G;}
+$("#sS").addEventListener("input",()=>{setFric();});
+$("#sK").addEventListener("input",()=>{if(+$("#sK").value>+$("#sS").value)$("#sK").value=$("#sS").value;setFric();});
+function setMass(nm){
+  if($("#prop").checked){const k=nm/m;$("#sS").value=Math.min(16,Math.max(0.5,Math.round(+$("#sS").value*k*2)/2));$("#sK").value=Math.min(+$("#sS").value,Math.max(0.5,Math.round(+$("#sK").value*k*2)/2));}
+  m=nm;$("#sM").value=m;setFric();
+}
+$("#sM").addEventListener("input",()=>{setMass(+$("#sM").value);});
+function exSetup(){stopRamp();$("#prop").checked=true;m=10;$("#sM").value=10;$("#sS").value=8;$("#sK").value=7;setFric();reset(false);}
+// 範例 2-5
+const EX=[
+  {q:"(1) 當 F = 50 牛頓時，摩擦力為多少牛頓？",F:50,a:"f<sub>s,max</sub> = 8 kgw = 80 N。50 N &lt; 80 N，木塊不動，摩擦力為靜摩擦力 = 拉力 = <b>50 N</b>。"},
+  {q:"(2) 當 F = 90 牛頓時，摩擦力為多少牛頓？",F:90,a:"90 N &gt; 80 N，木塊開始滑動，摩擦力為動摩擦力 7 kgw = <b>70 N</b>。"},
+  {q:"(3) 承 (2)，此時木塊的加速度為多少 m/s²？",F:90,a:"F − f<sub>k</sub> = ma ⇒ a = (90 − 70) N ÷ 10 kg = <b>2 m/s²</b>。"}
+];
+const ex=$("#ex");
+EX.forEach((o,i)=>{const d=document.createElement("div");d.className="qq";d.innerHTML=`<p>${o.q}</p><div class="seg"><button>設定並施力</button><button>看答案</button></div><div class="ans" hidden>${o.a}</div>`;
+  const [b1,b2]=d.querySelectorAll("button");
+  b1.onclick=()=>{exSetup();F=o.F;$("#sF").value=F;};
+  b2.onclick=()=>{d.querySelector(".ans").hidden=false;};
+  ex.appendChild(d);});
+// 想一想
+$("#t1").onclick=()=>{exSetup();F=90;$("#sF").value=90;setTimeout(()=>{F=75;$("#sF").value=75;},700);};
+$("#t2").onclick=()=>{if(!moving){exSetup();F=90;$("#sF").value=90;setTimeout(()=>{F=60;$("#sF").value=60;},900);}else{F=60;$("#sF").value=60;}};
+$("#t3").onclick=()=>{if(!moving){exSetup();F=90;$("#sF").value=90;setTimeout(()=>{F=0;$("#sF").value=0;},900);}else{F=0;$("#sF").value=0;}};
+$("#t4").onclick=()=>{exSetup();setMass(20);reset(false);ramping=true;$("#ramp").textContent="❚❚ 暫停增加";};
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("#"+b.dataset.a).hidden=false;});
+setFric();
+requestAnimationFrame(loop);
+// 測試用
+window.__fr=()=>({F,m,fs,fk,v,moving,...friction()});
+})();
+</script>
+</body>
+</html>
