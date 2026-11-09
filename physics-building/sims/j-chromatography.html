@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>濾紙色層分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--teal:#4fd1c5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:74ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:pan-y}
+.scene{height:440px}
+.zoom{height:440px}
+@media(max-width:560px){.scene{height:340px}.zoom{height:260px}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.35;cursor:default;border-color:var(--line)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.sl{display:flex;align-items:center;gap:10px;margin-top:4px}
+.sl span{font-size:13.5px;min-width:96px}
+.sl input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
+.sl b{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);min-width:58px;text-align:right}
+.fb{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid var(--line);background:#0a0f1a;color:var(--muted);min-height:48px}
+.fb.ok{border-color:#1f6f55;background:#071a14;color:#bff5dc}
+.fb.mid{border-color:#7a6320;background:#1a1505;color:#ffe7a3}
+.fb.bad{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.fb b{color:var(--acc);font-weight:500}
+.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;margin-top:6px}
+@media(max-width:420px){.stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:17px;color:var(--phos);font-weight:700}
+.stat b.w{color:#fff}.stat b.c{color:var(--cyan)}
+.tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+.tbl th,.tbl td{border:1px solid var(--line);padding:5px 6px;text-align:center}
+.tbl th{color:var(--muted);font-weight:500;background:#0b1120}
+.tbl td.m{font-family:"JetBrains Mono",monospace}
+.tblwrap{overflow-x:auto;max-width:100%}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:1px solid rgba(255,255,255,.25)}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctl{grid-template-columns:1fr}}
+details{margin-top:8px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;padding:8px 12px;font-size:13.5px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--txt)}
+details p{margin-top:6px}
+details b{color:var(--acc);font-weight:500}
+ol.steps{margin:6px 0 0 20px;font-size:13.5px;color:var(--muted)}
+ol.steps b{color:var(--txt);font-weight:500}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 2-1 · 濾紙色層分析</div>
+  <h1>濾紙色層分析：黑色墨水的分離</h1>
+  <p class="lede">濾紙由棉質纖維交錯成疏鬆多孔的構造，水會藉<b>毛細作用</b>從底端慢慢往上爬。水經過墨水小點時把色素一起帶上去，但不同色素被濾紙<b>吸附</b>的能力不同：吸附力弱的跑得遠、吸附力強的跑得近，一段時間後，一個黑點就分成好幾種顏色。</p>
+
+  <div class="modebar" role="group" aria-label="模式">
+    <button type="button" data-m="one" aria-pressed="true">① 探索活動：一種墨水</button>
+    <button type="button" data-m="cmp" aria-pressed="false">② 四種墨水並排比較</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">燒杯與濾紙條</span><span class="n" id="sceneN"></span></div>
+      <div class="box"><canvas id="cv" class="scene" aria-label="濾紙條掛在燒杯中，下端浸在水裡"></canvas></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">粒子模型（放大濾紙纖維）</span><span class="n" id="zoomN"></span></div>
+      <div class="box"><canvas id="cz" class="zoom" aria-label="水與色素粒子在濾紙纖維間移動的放大圖"></canvas></div>
+    </section>
+  </div>
+
+  <div class="ctl">
+    <section class="card"><div class="pad">
+      <div id="inkBox">
+        <div class="lab">墨水（改變後會換一條新濾紙）</div>
+        <div class="seg" id="inkSeg" role="group" aria-label="墨水種類"></div>
+      </div>
+      <div class="lab" style="margin-top:10px">濾紙條 10 cm × 2 cm（改變後會換一條新濾紙）</div>
+      <div class="sl"><span>小點距底端</span><input type="range" id="slDot" min="0.5" max="3" step="0.1" value="1.5" aria-label="墨水小點距濾紙底端的高度"><b id="vDot"></b></div>
+      <div class="sl"><span>底端浸入水中</span><input type="range" id="slW" min="0" max="2.5" step="0.1" value="0.3" aria-label="濾紙底端浸入水中的深度"><b id="vW"></b></div>
+      <div class="lab" style="margin-top:10px">時間快轉</div>
+      <div class="seg" id="spdSeg" role="group" aria-label="時間快轉倍數">
+        <button type="button" data-s="10" aria-pressed="false">×10</button>
+        <button type="button" data-s="30" aria-pressed="true">×30</button>
+        <button type="button" data-s="90" aria-pressed="false">×90</button>
+      </div>
+      <div class="seg" style="margin-top:12px">
+        <button type="button" class="primary" id="bRun">▶ 開始（放入燒杯）</button>
+        <button type="button" id="bOut">取出濾紙</button>
+        <button type="button" id="bReset">換新濾紙</button>
+        <button type="button" id="bBook">課本建議設定</button>
+      </div>
+      <div class="fb" id="fb" aria-live="polite"></div>
+      <details>
+        <summary>探索活動步驟（課本 p.50）</summary>
+        <ol class="steps">
+          <li>剪一條長 <b>10 cm</b>、寬 <b>2 cm</b> 的濾紙條。</li>
+          <li>在距底端 <b>1.5 cm</b> 處用水性黑筆點一個直徑約 <b>0.2 cm</b> 的小黑點。</li>
+          <li>用鉛筆和膠帶把濾紙條掛在燒杯口，燒杯裡加水。</li>
+          <li>讓濾紙底端浸入水中約 <b>0.3 cm</b>，黑點一定要<b>高於水面</b>。</li>
+          <li>觀察水沿濾紙上升、黑點分出的顏色；水上升到距頂端約 <b>1 cm</b> 時取出濾紙晾乾。</li>
+        </ol>
+      </details>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <div class="stat">
+        <div>經過時間<b class="w" id="rT">0:00</b></div>
+        <div>水上升到（距底端）<b class="c" id="rFront">—</b></div>
+        <div>水從起點走了<b class="c" id="rDw">—</b></div>
+      </div>
+      <div class="lab" style="margin-top:12px" id="tblCap">由起點（墨水小點）量起的移動距離</div>
+      <div class="tblwrap"><table class="tbl" id="tbl"></table></div>
+      <details>
+        <summary>想一想 1：為什麼小黑點要高於水面？</summary>
+        <p>把「底端浸入水中」調得比小點高試試。小點泡在水裡時，色素會直接<b>溶到燒杯的水裡</b>擴散開，水變色、濾紙上幾乎留不下色帶，就分不出顏色了。</p>
+      </details>
+      <details>
+        <summary>想一想 2：綠色、紫色墨水會分出哪些顏色？</summary>
+        <p>先看黑色墨水分出哪些顏色、各跑多遠，再到模式 ② 並排比較。<b>同一種色素在同一條件下跑的位置相同</b>，所以可以比對色帶的位置，判斷不同墨水裡含有哪些相同的色素。只分出一種顏色的墨水，色素可能只有一種。</p>
+      </details>
+      <details>
+        <summary>想一想 3：油性筆的黑點為什麼不動？</summary>
+        <p>色層分析要讓色素<b>溶在水中</b>才會被水帶著走。油性筆的色素不溶於水，水經過時帶不走它，小點留在原地；要分離它得改用能溶解它的液體（例如酒精）。也因為如此，起點線要用<b>鉛筆</b>畫，鉛筆筆跡不溶於水、不會跟著跑。</p>
+      </details>
+      <details>
+        <summary>想一想 4：讓水一直爬到頂端會怎樣？</summary>
+        <p>水到頂端後不再往上走，跑得最快的色素會被擠到頂端邊緣、和其他顏色疊在一起。所以課本要在水距頂端約 1 cm 時取出濾紙，色帶最清楚。</p>
+      </details>
+    </div></section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>這個方法同時用到濾紙的兩個性質：<b>多孔</b>（水藉毛細作用上升）與<b>吸附</b>（不同色素被纖維吸住的程度不同）。水上升得越來越慢，前緣高度大約和時間的平方根成正比；不論跑了多久，每種色素走的距離和水走的距離，比例大致固定，可比較表格最後一欄。粒子模型中，色素粒子有時被纖維吸住停下、有時被水帶走，被吸住越久的平均走得越慢。模擬中色素的種類與分離位置是示意，不同品牌的墨水成分不同，實際分出的顏色也會不一樣；可請學生用家裡的彩色筆實測比較。<br>
+    <b>來源：</b>國中自然 2 上 第 2 章 2-1 物質的分離 ⑤ 濾紙色層分析，探索活動「黑色墨水的分離」（p.50，圖 2-5、圖 2-6）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const f1=v=>(Math.round(v*10)/10).toFixed(1), f2=v=>(Math.round(v*100)/100).toFixed(2);
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return {x,w,h};}
+function txt(x,s,X,Y,o={}){x.font=o.f||'12px "Noto Sans TC",sans-serif';x.fillStyle=o.c||'#c9d1dc';x.textAlign=o.a||'center';x.textBaseline=o.b||'middle';x.fillText(s,X,Y);}
+
+// ---------- 色素與墨水（示意值）----------
+// R：色素移動距離 ÷ 水移動距離（被濾紙吸附越弱越大）
+const DYE={
+  Y:{n:'黃',c:'#f5c400',rgb:[245,196,0],R:0.88},
+  B:{n:'藍',c:'#2f6fe4',rgb:[47,111,228],R:0.68},
+  M:{n:'紅紫',c:'#c4318f',rgb:[196,49,143],R:0.40},
+  r:{n:'紅',c:'#e0402f',rgb:[224,64,47],R:0.55},
+  K:{n:'黑（油性）',c:'#1e1e22',rgb:[30,30,34],R:0},
+};
+const INK={
+  black:{n:'黑色水性筆',d:[['Y',.75],['B',1],['M',.95]]},
+  green:{n:'綠色水性筆',d:[['Y',1],['B',.8]]},
+  purple:{n:'紫色水性筆',d:[['B',.85],['M',1]]},
+  red:{n:'紅色水性筆',d:[['r',1]]},
+  oil:{n:'黑色油性筆',d:[['K',1]],oil:true},
+};
+const CMP=['black','green','purple','red'];
+const K=0.085;        // 毛細上升：前緣高出水面 h，h² = K t（cm²/s）
+const L=10, WID=2;    // 濾紙 10 cm × 2 cm
+const S={ink:'black',mode:'one',dot:1.5,w:0.3,spd:30,t:0,run:false,out:false};
+
+// 狀態計算（純函數，方便驗算）
+function front(t){ if(S.w<=0) return 0; return S.w+Math.sqrt(K*t); }   // 未截頂的前緣（距底端 cm）
+function stateOf(inkKey,t){
+  const ink=INK[inkKey], fr=front(t), frC=Math.min(L,fr);
+  const sub=S.dot<=S.w;                      // 小點泡在水裡
+  const start=sub?S.w:S.dot;
+  const dw=Math.max(0,fr-start);             // 水越過起點的距離（未截頂）
+  const tw=sub?t:(S.w>0&&fr>S.dot?Math.pow((S.dot-S.w),2)/K:0); // 小點開始濕的時間
+  const wetT=S.w>0&&fr>=S.dot?Math.max(0,t-(sub?0:tw)):0;
+  const left=sub?Math.exp(-wetT/90):1;       // 泡在水中時，色素溶入燒杯水的比例
+  const bands=ink.d.map(([k,a])=>{const D=DYE[k];
+    const mv=ink.oil?0:D.R*dw;
+    let pos=S.dot+mv; pos=Math.min(pos,L-0.15-(1-D.R)*0.12);
+    const moved=pos-S.dot;
+    return {k,D,a:a*left,pos,moved,sig:0.1+0.075*Math.sqrt(Math.max(0,moved)),wx:Math.min(1.75,0.22+0.32*Math.sqrt(Math.max(0,moved)))};
+  });
+  return {fr,frC,dw,sub,left,bands,top:fr>=L};
+}
+
+// ---------- 繪圖：燒杯 ----------
+const cv=$('cv');
+function drawScene(){
+  const {x,w,h}=fit(cv);
+  x.clearRect(0,0,w,h);
+  const inks=S.mode==='one'?[S.ink]:CMP;
+  const n=inks.length, gap=0.7;
+  const innerW=n*WID+(n-1)*gap+2.4;          // 燒杯內寬（cm）
+  const sc=Math.min((h-58)/(L+1.3),(w-70)/innerW);
+  const bw=innerW*sc, bl=(w-bw)/2+14;
+  const yTop=34, yStripTop=yTop+6, yStripBot=yStripTop+L*sc, yBot=yStripBot+1.2*sc;
+  const yW=S.w>0?yStripBot-S.w*sc:yStripBot+0.35*sc;
+  // 水
+  let tint=[0,0,0],ta=0;
+  if(S.run||S.t>0){inks.forEach(k=>{const st=stateOf(k,S.t);if(st.sub){INK[k].d.forEach(([dk,a])=>{const f=(1-st.left)*a;const c=DYE[dk].rgb;tint[0]+=c[0]*f;tint[1]+=c[1]*f;tint[2]+=c[2]*f;ta+=f;});}});}
+  let wc='rgba(90,160,255,.22)';
+  if(ta>0){const r=tint.map(v=>Math.round(v/ta));wc=`rgba(${Math.round(r[0]*.85+90*.15)},${Math.round(r[1]*.85+160*.15)},${Math.round(r[2]*.85+255*.15)},${(.3+Math.min(.5,ta*.25)).toFixed(2)})`;}
+  if(!S.out){x.fillStyle=wc;x.fillRect(bl,yW,bw,yBot-yW);x.strokeStyle='rgba(150,200,255,.6)';x.lineWidth=1.2;x.beginPath();x.moveTo(bl,yW);x.lineTo(bl+bw,yW);x.stroke();}
+  else{x.fillStyle=wc;x.fillRect(bl,yW,bw,yBot-yW);}
+  // 燒杯外框
+  x.strokeStyle='rgba(200,225,255,.75)';x.lineWidth=2;
+  x.beginPath();x.moveTo(bl-6,yTop-2);x.lineTo(bl,yTop+4);x.lineTo(bl,yBot-6);x.quadraticCurveTo(bl,yBot,bl+6,yBot);x.lineTo(bl+bw-6,yBot);x.quadraticCurveTo(bl+bw,yBot,bl+bw,yBot-6);x.lineTo(bl+bw,yTop);x.stroke();
+  // 尺（cm，距濾紙底端）
+  const rx=bl-26;
+  x.strokeStyle='rgba(255,209,102,.55)';x.lineWidth=1;x.beginPath();x.moveTo(rx+10,yStripTop);x.lineTo(rx+10,yStripBot);x.stroke();
+  for(let i=0;i<=L*2;i++){const y=yStripBot-i*0.5*sc;x.beginPath();x.moveTo(rx+(i%2?5:2),y);x.lineTo(rx+10,y);x.stroke();if(i%4===0)txt(x,String(i/2),rx-4,y,{f:'10px "JetBrains Mono",monospace',c:'#a08a4a',a:'right'});}
+  txt(x,'cm',rx+2,yStripTop-10,{f:'10px "JetBrains Mono",monospace',c:'#a08a4a'});
+  // 濾紙條
+  const totW=n*WID+(n-1)*gap, sx0=bl+(bw-totW*sc)/2;
+  const dropBy=S.out?0:0;
+  inks.forEach((k,i)=>{
+    const sx=sx0+i*(WID+gap)*sc, sw=WID*sc;
+    const st=stateOf(k,S.t);
+    const yTopS=yStripTop-dropBy;
+    // 紙
+    x.save();
+    x.beginPath();x.rect(sx,yTopS,sw,L*sc);x.clip();
+    x.fillStyle='#f4f1ea';x.fillRect(sx,yTopS,sw,L*sc);
+    // 濕的部分
+    if(S.w>0&&(S.t>0)){const yf=yStripBot-st.frC*sc;const g=x.createLinearGradient(0,yf-3,0,yStripBot);g.addColorStop(0,'rgba(180,205,230,.0)');g.addColorStop(.03,'rgba(165,195,228,.55)');g.addColorStop(1,'rgba(150,185,225,.6)');x.fillStyle=g;x.fillRect(sx,yf-3,sw,yStripBot-yf+3);
+      if(!S.out){x.strokeStyle='rgba(90,140,210,.55)';x.lineWidth=1;x.beginPath();x.moveTo(sx,yf);for(let q=0;q<=8;q++)x.lineTo(sx+q*sw/8,yf+Math.sin(q*1.7+i)*1.2);x.stroke();}}
+    // 起點鉛筆線
+    const yd=yStripBot-S.dot*sc;
+    x.strokeStyle='rgba(90,90,100,.55)';x.lineWidth=0.8;x.setLineDash([3,3]);x.beginPath();x.moveTo(sx+3,yd);x.lineTo(sx+sw-3,yd);x.stroke();x.setLineDash([]);
+    // 色帶（相乘混色）
+    x.globalCompositeOperation='multiply';
+    st.bands.forEach(b=>{
+      const cy=yStripBot-b.pos*sc, sy=Math.max(1.6,b.sig*sc), sxw=Math.min(sw*0.48,Math.max(2.5,b.wx*sc/2));
+      const al=clamp(b.a*0.19/b.sig,0,0.97);
+      if(al<0.01)return;
+      x.save();x.translate(sx+sw/2,cy);x.scale(sxw/sy,1);
+      const g=x.createRadialGradient(0,0,0,0,0,sy*2.2);
+      const [r,gg,bb]=b.D.rgb;
+      g.addColorStop(0,`rgba(${r},${gg},${bb},${al})`);g.addColorStop(.45,`rgba(${r},${gg},${bb},${al*.7})`);g.addColorStop(1,`rgba(${r},${gg},${bb},0)`);
+      x.fillStyle=g;x.beginPath();x.arc(0,0,sy*2.2,0,Math.PI*2);x.fill();x.restore();
+      // 拖尾
+      if(b.moved>0.3&&!INK[k].oil){const tg=x.createLinearGradient(0,cy,0,yd);tg.addColorStop(0,`rgba(${r},${gg},${bb},${al*.22})`);tg.addColorStop(1,`rgba(${r},${gg},${bb},0)`);x.fillStyle=tg;x.fillRect(sx+sw/2-sxw*.55,cy,sxw*1.1,yd-cy);}
+    });
+    x.globalCompositeOperation='source-over';
+    x.restore();
+    x.strokeStyle='rgba(210,205,190,.9)';x.lineWidth=1;x.strokeRect(sx,yTopS,sw,L*sc);
+    // 膠帶
+    x.fillStyle='rgba(230,225,200,.55)';x.fillRect(sx+sw*.15,yTopS-8,sw*.7,14);
+    // 標籤
+    if(n>1)txt(x,INK[k].n.replace('水性筆',''),sx+sw/2,12,{f:'12px "Noto Sans TC",sans-serif',c:'#e8edf6'});
+  });
+  // 鉛筆
+  const py=yTop-4;
+  x.fillStyle='#e0a940';x.fillRect(bl-30,py-4,bw+44,8);
+  x.fillStyle='#f3d3a0';x.beginPath();x.moveTo(bl+bw+14,py-4);x.lineTo(bl+bw+26,py);x.lineTo(bl+bw+14,py+4);x.fill();
+  x.fillStyle='#333';x.beginPath();x.moveTo(bl+bw+22,py-1.4);x.lineTo(bl+bw+26,py);x.lineTo(bl+bw+22,py+1.4);x.fill();
+  x.fillStyle='#d9837a';x.fillRect(bl-36,py-4,7,8);
+  // 標示
+  if(S.w>0&&!S.out)txt(x,'水面',bl+bw+6,yW,{a:'left',c:'#9cc8ff',f:'11px "Noto Sans TC",sans-serif'});
+  if(S.w<=0)txt(x,'濾紙沒碰到水',bl+bw/2,yBot-0.25*sc-10,{c:'#ffc9c9',f:'12px "Noto Sans TC",sans-serif'});
+  if(S.out)txt(x,'已取出晾乾',bl+bw/2,yBot-10,{c:'#bff5dc',f:'12px "Noto Sans TC",sans-serif'});
+  const stOne=stateOf(inks[0],S.t);
+  if(S.w>0&&!S.out&&stOne.frC<L-0.05&&S.t>0){const yf=yStripBot-stOne.frC*sc;txt(x,'水的前緣',sx0+totW*sc+6,yf,{a:'left',c:'#9cc8ff',f:'11px "Noto Sans TC",sans-serif'});}
+  // 頂端 1 cm 參考
+  const y9=yStripBot-(L-1)*sc;x.strokeStyle='rgba(255,209,102,.35)';x.setLineDash([2,4]);x.beginPath();x.moveTo(sx0-4,y9);x.lineTo(sx0+totW*sc+4,y9);x.stroke();x.setLineDash([]);
+  const yfr=yStripBot-stOne.frC*sc;
+  if(!(S.w>0&&!S.out&&S.t>0&&Math.abs(yfr-y9)<13&&stOne.frC<L-0.05))txt(x,'距頂端 1 cm',sx0+totW*sc+6,y9,{a:'left',c:'#a08a4a',f:'10px "Noto Sans TC",sans-serif'});
+}
+
+// ---------- 粒子模型 ----------
+const cz=$('cz');
+let fibers=[],parts=[],waters=[],zW=0,zH=0;
+function seedZoom(w,h){zW=w;zH=h;fibers=[];
+  for(let i=0;i<34;i++){const y=Math.random()*h,x0=-20+Math.random()*w*0.5,len=w*(0.45+Math.random()*0.7),ang=(Math.random()-.5)*0.9;fibers.push({x0,y,x1:x0+Math.cos(ang)*len,y1:y+Math.sin(ang)*len,wd:3+Math.random()*4});}
+  waters=Array.from({length:70},()=>({x:Math.random()*w,y:Math.random()*h}));
+  resetParts();
+}
+function resetParts(){parts=[];const ink=INK[S.mode==='one'?S.ink:'black'];
+  ink.d.forEach(([k,a])=>{const nn=Math.round(16*a);for(let i=0;i<nn;i++)parts.push({k,x:zW*(0.2+Math.random()*0.6),y:zH*(0.72+Math.random()*0.18),stuck:Math.random()<.5,sp:0});});}
+function zoomActive(){const st=stateOf(S.mode==='one'?S.ink:'black',S.t);return S.run&&!S.out&&S.w>0&&st.fr>S.dot&&!st.sub&&!INK[S.mode==='one'?S.ink:'black'].oil;}
+function stepZoom(dt){
+  const inkK=S.mode==='one'?S.ink:'black';
+  const active=S.run&&!S.out&&S.w>0&&front(S.t)>S.dot;
+  const st=stateOf(inkK,S.t);
+  // 水流速度：依前緣上升速率（越來越慢），截頂後仍有少量流動
+  const h=Math.max(0.3,front(S.t)-S.w); const v=active?clamp(55*(0.9/h),10,70)*(st.top?0.6:1):0;
+  waters.forEach(p=>{p.y-=v*dt*(0.8+Math.random()*0.4);p.x+=(Math.random()-.5)*14*dt;if(p.y<-4){p.y=zH+4;p.x=Math.random()*zW;}});
+  const oil=INK[inkK].oil, sub=st.sub;
+  parts.forEach(p=>{const R=DYE[p.k].R;
+    if(!active||oil){if(sub&&active){p.y+=(Math.random()-.5)*30*dt;p.x+=(Math.random()-.5)*30*dt;}return;}
+    const c=2.2;
+    if(p.stuck){if(Math.random()<R*c*dt)p.stuck=false;}
+    else{if(Math.random()<(1-R)*c*dt)p.stuck=true;}
+    if(!p.stuck){p.y-=v*dt;p.x+=(Math.random()-.5)*20*dt;}
+    if(p.y<-6){p.y=zH+6;}
+    p.x=clamp(p.x,4,zW-4);
+  });
+}
+function drawZoom(){
+  const {x,w,h}=fit(cz);
+  if(Math.abs(w-zW)>2||Math.abs(h-zH)>2)seedZoom(w,h);
+  x.fillStyle='#0b0f18';x.fillRect(0,0,w,h);
+  const inkK=S.mode==='one'?S.ink:'black';
+  const wet=S.w>0&&front(S.t)>S.dot&&S.t>0;
+  if(wet){x.fillStyle='rgba(60,120,210,.13)';x.fillRect(0,0,w,h);}
+  x.lineCap='round';
+  fibers.forEach(f=>{x.strokeStyle='rgba(210,205,190,.28)';x.lineWidth=f.wd;x.beginPath();x.moveTo(f.x0,f.y);x.lineTo(f.x1,f.y1);x.stroke();x.strokeStyle='rgba(240,235,220,.12)';x.lineWidth=f.wd*.35;x.stroke();});
+  if(wet)waters.forEach(p=>{x.fillStyle='rgba(120,180,255,.55)';x.beginPath();x.arc(p.x,p.y,2,0,Math.PI*2);x.fill();});
+  parts.forEach(p=>{const D=DYE[p.k];x.fillStyle=D.c;x.beginPath();x.arc(p.x,p.y,4.2,0,Math.PI*2);x.fill();
+    if(p.stuck&&wet&&!INK[inkK].oil){x.strokeStyle='rgba(255,255,255,.65)';x.lineWidth=1.2;x.beginPath();x.arc(p.x,p.y,6.5,0,Math.PI*2);x.stroke();}});
+  // 圖例
+  let lx=10;const ly=h-14;
+  INK[inkK].d.forEach(([k])=>{const D=DYE[k];x.fillStyle=D.c;x.beginPath();x.arc(lx+5,ly,5,0,Math.PI*2);x.fill();txt(x,D.n,lx+14,ly,{a:'left',f:'12px "Noto Sans TC",sans-serif'});lx+=26+D.n.length*13;});
+  x.strokeStyle='rgba(255,255,255,.65)';x.lineWidth=1.2;x.beginPath();x.arc(lx+5,ly,6,0,Math.PI*2);x.stroke();txt(x,'＝被纖維吸住',lx+14,ly,{a:'left',f:'12px "Noto Sans TC",sans-serif'});
+  txt(x,'↑ 水往上流',w-10,16,{a:'right',c:'#9cc8ff',f:'12px "Noto Sans TC",sans-serif'});
+  let msg='';
+  if(S.w<=0)msg='濾紙沒碰到水，纖維是乾的';
+  else if(!wet)msg='水還沒到達墨水小點';
+  else if(INK[inkK].oil)msg='色素不溶於水，留在原地';
+  else if(stateOf(inkK,S.t).sub)msg='小點泡在水中：色素溶入燒杯的水裡散開';
+  else if(S.out)msg='已取出：色素停在各自的位置';
+  if(msg){x.fillStyle='rgba(7,10,18,.75)';x.fillRect(0,h/2-16,w,32);txt(x,msg,w/2,h/2,{f:'13px "Noto Sans TC",sans-serif',c:'#ffe7a3'});}
+  $('zoomN').textContent=S.mode==='one'?INK[S.ink].n:'黑色水性筆';
+}
+
+// ---------- 讀數與回饋 ----------
+function mmss(t){t=Math.round(t);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');}
+function setFb(s,c){const e=$('fb');e.innerHTML=s;e.className='fb'+(c?' '+c:'');}
+function readout(){
+  const inks=S.mode==='one'?[S.ink]:CMP;
+  const st0=stateOf(inks[0],S.t);
+  $('rT').textContent=mmss(S.t);
+  $('rFront').textContent=S.w>0?f1(st0.frC)+' cm':'—';
+  const dwC=Math.max(0,st0.frC-(st0.sub?S.w:S.dot));
+  $('rDw').textContent=S.w>0?f1(dwC)+' cm':'—';
+  let rows='<tr><th>墨水</th><th>色素</th><th>移動距離</th><th>色素距離 ÷ 水距離</th></tr>';
+  inks.forEach(k=>{const st=stateOf(k,S.t);const dwk=Math.max(0,st.frC-(st.sub?S.w:S.dot));
+    st.bands.forEach((b,j)=>{const ratio=dwk>0.3&&!st.sub?(b.moved/dwk):null;
+      rows+=`<tr>${j===0?`<td rowspan="${st.bands.length}">${INK[k].n}</td>`:''}<td><span class="sw" style="background:${b.D.c}"></span>${b.D.n}</td><td class="m">${st.sub?'溶入水中':f1(b.moved)+' cm'}</td><td class="m">${ratio===null?'—':f2(ratio)}</td></tr>`;});});
+  $('tbl').innerHTML=rows;
+  $('sceneN').textContent=`小點距底端 ${f1(S.dot)} cm・浸入水中 ${f1(S.w)} cm`;
+  // 回饋
+  const ink=INK[inks[0]];
+  if(S.w<=0){setFb('濾紙底端<b>沒碰到水</b>，水無法藉毛細作用上升，什麼也不會發生。把「底端浸入水中」調大一點（課本約 0.3 cm）。','bad');return;}
+  if(st0.sub){setFb(S.t>0?`小點在水面<b>以下</b>：色素直接溶進燒杯的水裡擴散，水染上顏色，濾紙上留下的色素越來越少（剩約 ${Math.round(st0.left*100)}%），分不出色帶。小點一定要高於水面。`:'注意：小點在水面<b>以下</b>（或剛好在水面），放進燒杯後會發生什麼事？按「開始」看看。','bad');return;}
+  if(S.t===0){setFb('按「開始」把濾紙條放進燒杯，觀察水沿著濾紙往上爬，經過墨水小點後會發生什麼事。','');return;}
+  if(st0.fr<=S.dot){setFb('水藉<b>毛細作用</b>沿著濾紙的孔隙往上爬，還沒到達墨水小點。','');return;}
+  if(S.mode==='one'&&ink.oil){setFb('水已經越過小點，但<b>油性筆</b>的色素不溶於水，小點留在原地不動。色層分析要讓色素溶在流動的液體裡才能被帶走。','mid');return;}
+  if(S.out){const sep=S.mode==='one'?ink.d.length:0;
+    setFb(S.mode==='one'?(sep>1?`取出了！${ink.n}的小點分出 <b>${sep} 種顏色</b>（${ink.d.map(d=>DYE[d[0]].n).join('、')}），表示它是由多種色素混合而成的<b>混合物</b>。比較表格：每種色素移動距離 ÷ 水移動距離大致固定。`:`取出了！${ink.n}只有<b>一種顏色</b>往上跑，沒有再分開，所用的色素可能只有一種。`):'取出了！比較四條濾紙：位置相同、顏色相同的色帶是同一種色素。黑色墨水的色帶在綠色、紫色墨水裡各出現了哪些？','ok');return;}
+  if(st0.top){setFb('水已經爬到<b>濾紙頂端</b>，跑得快的色素擠在頂端邊緣、顏色疊在一起。下次在水距頂端約 1 cm 時就取出濾紙。','mid');return;}
+  if(st0.frC>=L-1){setFb('水的前緣到達<b>距頂端約 1 cm</b>，色帶已經分得很清楚，可以按「取出濾紙」晾乾了。','ok');return;}
+  setFb('水經過小點，把色素一起帶上去。不同色素被濾紙<b>吸附</b>的能力不同，吸附弱的跑得快、吸附強的跑得慢，顏色漸漸分開。水上升得越來越<b>慢</b>。','');
+}
+
+// ---------- 控制 ----------
+function resetStrip(){S.t=0;S.run=false;S.out=false;resetParts();syncBtns();readout();}
+function syncBtns(){$('bRun').textContent=S.run?'⏸ 暫停':(S.t>0?'▶ 繼續':'▶ 開始（放入燒杯）');$('bRun').disabled=S.out;$('bOut').disabled=S.out||S.t===0;}
+const segI=$('inkSeg');
+Object.keys(INK).forEach(k=>{const b=document.createElement('button');b.type='button';b.dataset.i=k;b.textContent=INK[k].n;b.setAttribute('aria-pressed',String(k===S.ink));b.onclick=()=>{S.ink=k;segI.querySelectorAll('button').forEach(q=>q.setAttribute('aria-pressed',String(q===b)));resetStrip();};segI.appendChild(b);});
+function readSl(){S.dot=+$('slDot').value;S.w=+$('slW').value;$('vDot').textContent=f1(S.dot)+' cm';$('vW').textContent=S.w>0?f1(S.w)+' cm':'沒碰到';}
+['slDot','slW'].forEach(id=>$(id).addEventListener('input',()=>{readSl();resetStrip();}));
+document.querySelectorAll('#spdSeg button').forEach(b=>b.onclick=()=>{S.spd=+b.dataset.s;document.querySelectorAll('#spdSeg button').forEach(q=>q.setAttribute('aria-pressed',String(q===b)));});
+$('bRun').onclick=()=>{if(S.out)return;S.run=!S.run;syncBtns();readout();};
+$('bOut').onclick=()=>{S.out=true;S.run=false;syncBtns();readout();};
+$('bReset').onclick=resetStrip;
+$('bBook').onclick=()=>{$('slDot').value=1.5;$('slW').value=0.3;readSl();resetStrip();};
+let mode='one';
+function show(m){S.mode=m;document.querySelectorAll('.modebar button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===m)));$('inkBox').hidden=m!=='one';resetStrip();}
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>show(b.dataset.m));
+
+let last=0,acc=0;
+function loop(t){const dt=Math.min(0.05,(t-last)/1000);last=t;
+  if(S.run&&!S.out){S.t+=dt*S.spd; if(S.t>3600){S.t=3600;S.run=false;syncBtns();}}
+  stepZoom(dt);
+  drawScene();drawZoom();
+  acc+=dt;if(acc>0.12){acc=0;if(S.run){readout();syncBtns();}}
+  requestAnimationFrame(loop);}
+readSl();resetStrip();
+requestAnimationFrame(t=>{last=t;loop(t);});
+window.__chrom={S,stateOf,front,show};
+})();
+</script>
+</body>
+</html>
