@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>克卜勒三定律</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--sun:#ff9d3c;--pl:#6ee7a0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:74ch;margin-top:6px;font-size:15px}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%}
+#orbit{height:420px}
+#plot{height:330px}
+@media(max-width:560px){#orbit{height:300px}#plot{height:280px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.lab{font-size:13px;color:var(--muted);margin:12px 0 6px}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.chk{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted);margin-top:8px;cursor:pointer}
+.chk input{width:17px;height:17px;accent-color:var(--acc)}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 14px 14px}
+@media(max-width:560px){.read{grid-template-columns:repeat(2,1fr)}}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:14.5px;font-weight:700;color:var(--phos);word-break:break-all}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.tbl{overflow-x:auto;margin:0 14px 14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:right;padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:500;font-size:12px}
+td{font-family:"JetBrains Mono",monospace}
+td:first-child,th:first-child{text-align:left;font-family:"Noto Sans TC",sans-serif}
+tr.me td{color:var(--acc)}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2-4 · Kepler's Three Laws</div>
+  <h1>克卜勒三定律</h1>
+  <p class="lede">克卜勒整理第谷多年的觀測資料，歸納出行星運動的三個規律：軌道是<b>橢圓</b>、太陽在一個焦點上；相同時間掃過<b>相同面積</b>；平均軌道半徑的立方與週期的平方成正比，<b>R³/T² = 常數</b>。調整近日距與遠日距，親自驗證看看。</p>
+
+  <div class="modebar" role="group" aria-label="中心天體">
+    <button type="button" id="mSun" aria-pressed="true">☀ 行星繞太陽</button>
+    <button type="button" id="mEarth" aria-pressed="false">🌍 衛星繞地球</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">軌道（第一、第二定律）</span><span class="n" id="oNote"></span></div>
+      <div class="box"><canvas id="orbit" aria-label="橢圓軌道與等時間掃過的扇形"></canvas></div>
+      <div class="read">
+        <div><small>平均軌道半徑 R = (r<sub>min</sub>+r<sub>max</sub>)/2</small><b id="rR"></b></div>
+        <div><small>週期 T</small><b id="rT"></b></div>
+        <div><small>R³/T²</small><b id="rK"></b></div>
+        <div><small>目前與<span class="cn">太陽</span>距離 r</small><b id="rr"></b></div>
+        <div><small>目前速率 v</small><b id="rv"></b></div>
+        <div><small>經過時間 t</small><b id="rt"></b></div>
+        <div><small>v<sub>近</sub> ÷ v<sub>遠</sub> = r<sub>max</sub> ÷ r<sub>min</sub></small><b id="rvv"></b></div>
+        <div><small>每一格掃過面積（理論 πab/N）</small><b id="rA"></b></div>
+        <div><small>數值計算：第 1 格 / 中間那格</small><b id="rA2"></b></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">軌道設定</span><span class="n" id="unitNote"></span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="lab">快速選擇</div>
+        <div class="seg" id="presets"></div>
+        <div class="ctl"><div class="r"><label for="sMin">近<span class="cn2">日</span>距 r<sub>min</sub></label><span id="oMin"></span></div><input type="range" id="sMin" min="0" max="1000" step="1"></div>
+        <div class="ctl"><div class="r"><label for="sMax">遠<span class="cn2">日</span>距 r<sub>max</sub></label><span id="oMax"></span></div><input type="range" id="sMax" min="0" max="1000" step="1"></div>
+        <div class="ctl"><div class="r"><label for="sN">等時間分成 N 格</label><span id="oN"></span></div><input type="range" id="sN" min="4" max="24" step="1" value="12"></div>
+        <div class="ctl"><div class="r"><label for="sSp">動畫速度（繞一圈約幾秒）</label><span id="oSp"></span></div><input type="range" id="sSp" min="4" max="30" step="1" value="12"></div>
+        <div class="seg" style="margin-top:12px">
+          <button class="primary" id="play">❚❚ 暫停</button>
+          <button id="restart">從近<span class="cn2">日</span>點重新開始</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="cSec" checked> 畫出等時間掃過的扇形（第二定律）</label>
+        <label class="chk"><input type="checkbox" id="cFoci"> 顯示兩個焦點與繩長 r + r′ = 2R（第一定律）</label>
+        <label class="chk"><input type="checkbox" id="cVel" checked> 顯示速度箭頭</label>
+        <div class="note" id="see"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">第三定律：R³–T² 圖（對數座標）</span><span class="n">課本圖 2-15(3) 與表</span></div>
+      <div class="box"><canvas id="plot" aria-label="行星的 R 立方對 T 平方圖"></canvas></div>
+      <div class="tbl"><table>
+        <thead><tr><th id="thName">行星</th><th>T</th><th>R</th><th>R³/T²</th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">範例與想一想</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="qq"><p><b style="color:var(--acc)">範例 2-6</b> 月球的近地距 356 500 km、遠地距 406 700 km（2016/11/14 超級月亮），月球繞地球的平均軌道半徑是多少？</p><div class="seg"><button id="e1">畫出月球軌道</button><button data-a="a1">看答案</button></div><div class="ans" id="a1" hidden>R = (356 500 + 406 700) ÷ 2 = <b>381 600 km</b>。偏心率只有約 0.066，看起來幾乎是圓；但近地點的滿月看起來比遠地點大約 14%，就是「超級月亮」。</div></div>
+        <div class="qq"><p><b style="color:var(--acc)">範例 2-7</b>（105 學測）地球的軌道平均半徑約 150 百萬公里、週期 1 地球年；某行星約 4500 百萬公里，週期 T 最接近 (A)1 (B)30 (C)50 (D)100 (E)160？</p><div class="seg"><button id="e2">設成 R = 30 AU</button><button data-a="a2">看答案</button></div><div class="ans" id="a2" hidden>R 是地球的 4500 ÷ 150 = 30 倍，T² ∝ R³ ⇒ T = √(30³) 年 = <b>164.3 年 ≈ 160 年</b>，選 (E)。這顆就是海王星（表中 164.774 年）。</div></div>
+        <div class="qq"><p>行星在近日點和遠日點，哪裡跑得比較快？快幾倍？</p><div class="seg"><button id="e3">試試哈雷彗星</button><button data-a="a3">看說明</button></div><div class="ans" id="a3" hidden>近日點比較快。相同時間掃過相同面積，在近日點時連線較短，必須走較長的弧才能掃出同樣的面積：v<sub>近</sub> r<sub>min</sub> = v<sub>遠</sub> r<sub>max</sub>，所以 v<sub>近</sub>/v<sub>遠</sub> = r<sub>max</sub>/r<sub>min</sub>。哈雷彗星約 <b>60 倍</b>，大部分時間都在遠方慢慢走。</div></div>
+        <div class="qq"><p>把近日距和遠日距同時改變、但讓 R 不變（例如 1 和 1 AU，改成 0.5 和 1.5 AU），週期會改變嗎？</p><div class="seg"><button id="e4">0.5 / 1.5 AU</button><button data-a="a4">看說明</button></div><div class="ans" id="a4" hidden>不會。第三定律只和平均軌道半徑 R 有關，R 都是 1 AU，週期都是 <b>1 年</b>，只有軌道形狀和速率變化不同。</div></div>
+        <div class="qq"><p>衛星繞地球時，R³/T² 也會等於 1 AU³/y² 嗎？</p><div class="seg"><button id="e5">切到衛星繞地球</button><button data-a="a5">看說明</button></div><div class="ans" id="a5" hidden>不會。繞同一個中心天體的物體 R³/T² 才相同；這個常數和中心天體的質量有關（之後學到萬有引力會知道 R³/T² = GM/4π²）。月球、同步衛星、太空站的 R³/T² 彼此相同，但和行星繞太陽的不同。</div></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>本頁的運動是解克卜勒方程式 E − e sin E = 2πt/T 算出的真實橢圓運動，不是等速轉圈；扇形的邊界就是每隔 T/N 的位置，所以每一格面積都相同（右下讀數用多邊形面積數值驗算）。課本圖 2-15(3) 第二定律的 12 個月就是 N = 12；地球偏心率只有 0.017，所以要把近日距、遠日距拉開，才看得出「近日點快、遠日點慢」。第三定律圖用對數座標，所有行星落在斜率 1 的直線上，也就是 R³ ∝ T²。1 AU = 1.496 × 10¹¹ m，是地球的平均軌道半徑。<br>
+    <b>課本對照：</b>基礎物理 Ch02 2-4 克卜勒行星運動定律（p.43 三定律表；p.44–45 圖 2-15 來自行星的故事、行星數據表；p.46 知識延長線 畫橢圓；p.48 範例 2-6、範例 2-7）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+// 課本 p.45 表
+const PLANETS=[["水星",0.241,0.387],["金星",0.615,0.723],["地球",1.000,1.000],["火星",1.881,1.524],["木星",11.862,5.203],["土星",29.458,9.555],["天王星",84.022,19.218],["海王星",164.774,30.110]];
+const MODES={
+  sun:{name:"太陽",cn2:"日",unit:"AU",lo:0.1,hi:40,GM:4*Math.PI*Math.PI, // AU³/y²
+    v:(r,a)=>29.785*Math.sqrt(2/r-1/a), tU:"年",
+    presets:[["地球",0.983,1.017],["水星",0.307,0.467],["火星",1.381,1.666],["木星",4.95,5.46],["哈雷彗星",0.586,35.08],["誇張橢圓",0.5,1.5]]},
+  earth:{name:"地球",cn2:"地",unit:"km",lo:6600,hi:500000,GM:398600.4418*86400*86400, // km³/day²
+    v:(r,a)=>Math.sqrt(398600.4418*(2/r-1/a)), tU:"天",
+    presets:[["月球（範例 2-6）",356500,406700],["地球同步衛星",42164,42164],["國際太空站",6778,6778],["誇張橢圓",20000,200000]]}
+};
+let mode="sun",M=MODES.sun;
+let rmin=0.983,rmax=1.017,N=12,phase=0,playing=true,spd=12;
+const fmt=(x,d)=>{if(!isFinite(x))return"—";return x.toFixed(d);};
+function sig(x,n=4){if(x===0)return"0";const a=Math.abs(x);if(a>=1e5||a<1e-3){const e=Math.floor(Math.log10(a));const m=x/10**e;return m.toFixed(n-1)+"×10"+sup(e);}const d=Math.max(0,n-1-Math.floor(Math.log10(a)));return x.toFixed(Math.min(d,6));}
+function sup(e){const S="⁰¹²³⁴⁵⁶⁷⁸⁹";return(e<0?"⁻":"")+String(Math.abs(e)).split("").map(c=>S[c]).join("");}
+function num(x){ // 千分位
+  if(M.unit==="km")return Math.round(x).toLocaleString("en-US").replace(/,/g," ");
+  return x<1?x.toFixed(3):x<10?x.toFixed(3):x.toFixed(2);}
+const toS=r=>Math.round(1000*Math.log(r/M.lo)/Math.log(M.hi/M.lo));
+const fromS=s=>M.lo*Math.pow(M.hi/M.lo,s/1000);
+function geo(){const a=(rmin+rmax)/2,c=(rmax-rmin)/2,e=c/a,b=Math.sqrt(rmin*rmax);const T=2*Math.PI*Math.sqrt(a*a*a/M.GM);return{a,c,e,b,T};}
+function solveE(Mn,e){let E=e<0.8?Mn:Math.PI;for(let i=0;i<50;i++){const d=(E-e*Math.sin(E)-Mn)/(1-e*Math.cos(E));E-=d;if(Math.abs(d)<1e-12)break;}return E;}
+// 以橢圓中心為原點，近日點在左；太陽在左焦點 (-c,0)
+function posE(E,g){return{x:-g.a*Math.cos(E),y:g.b*Math.sin(E)};}
+function posT(frac,g){return posE(solveE(2*Math.PI*frac,g.e),g);}
+function polyArea(pts){let s=0;for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[(i+1)%pts.length];s+=p.x*q.y-q.x*p.y;}return Math.abs(s)/2;}
+function sectorPts(k,g,n=60){const E1=solveE(2*Math.PI*k/N,g.e),E2=k+1>=N?2*Math.PI:solveE(2*Math.PI*(k+1)/N,g.e);const pts=[{x:-g.c,y:0}];for(let i=0;i<=n;i++)pts.push(posE(E1+(E2-E1)*i/n,g));return pts;}
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w,h};}
+function arrow(g,x1,y1,x2,y2,col){const L=Math.hypot(x2-x1,y2-y1);if(L<3)return;g.strokeStyle=col;g.fillStyle=col;g.lineWidth=3;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();const ux=(x2-x1)/L,uy=(y2-y1)/L;g.beginPath();g.moveTo(x2+ux*8,y2+uy*8);g.lineTo(x2-uy*5,y2+ux*5);g.lineTo(x2+uy*5,y2-ux*5);g.closePath();g.fill();}
+function drawOrbit(){
+  const {g,w,h}=fit($("#orbit"));g.clearRect(0,0,w,h);if(w<80||h<80)return;
+  const G=geo();const pad=34;
+  const s=Math.min((w-2*pad)/(2*G.a),(h-2*pad-10)/(2*G.b));
+  const cx=w/2,cy=h/2+4;const X=x=>cx+x*s,Y=y=>cy-y*s;
+  // 星點
+  g.fillStyle="rgba(180,200,255,.25)";for(let i=0;i<50;i++){const px=(i*137.5)%w,py=(i*71.3+i*i*3.1)%h;g.fillRect(px,py,1.3,1.3);}
+  const cur=Math.floor(phase*N)%N;
+  if($("#cSec").checked){
+    for(let k=0;k<N;k++){const pts=sectorPts(k,G,40);g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p.x),Y(p.y)):g.moveTo(X(p.x),Y(p.y)));g.closePath();
+      g.fillStyle=k===cur?"rgba(255,209,102,.38)":(k%2?"rgba(67,214,255,.10)":"rgba(67,214,255,.20)");g.fill();
+      g.strokeStyle="rgba(67,214,255,.35)";g.lineWidth=1;g.stroke();}
+    // 等時間點
+    for(let k=0;k<N;k++){const p=posT(k/N,G);g.fillStyle="#6ee7a0";g.beginPath();g.arc(X(p.x),Y(p.y),3.5,0,7);g.fill();}
+  }
+  // 橢圓
+  g.strokeStyle="#c9d4ea";g.lineWidth=1.6;g.beginPath();g.ellipse(cx,cy,G.a*s,G.b*s,0,0,Math.PI*2);g.stroke();
+  // 長軸與 rmin rmax
+  g.setLineDash([4,4]);g.strokeStyle="rgba(140,160,200,.5)";g.lineWidth=1;g.beginPath();g.moveTo(X(-G.a),cy);g.lineTo(X(G.a),cy);g.stroke();g.setLineDash([]);
+  g.font="12px 'Noto Sans TC',sans-serif";g.fillStyle="#8492aa";g.textBaseline="bottom";
+  g.textAlign="left";g.fillText("近"+M.cn2+"點",Math.max(2,X(-G.a)-4),cy-6);g.textAlign="right";g.fillText("遠"+M.cn2+"點",Math.min(w-2,X(G.a)+4),cy-6);
+  g.font="11px 'JetBrains Mono',monospace";g.textBaseline="top";g.fillStyle="#ff9fb8";
+  const mx1=(X(-G.a)+X(-G.c))/2,mx2=(X(-G.c)+X(G.a))/2;
+  if(X(-G.c)-X(-G.a)>34){g.textAlign="center";g.fillText("rmin",mx1,cy+4);}
+  g.textAlign="center";g.fillText("rmax",mx2,cy+4);
+  // 焦點與繩長
+  const p=posT(phase,G);
+  if($("#cFoci").checked){
+    g.strokeStyle="#43d6ff";g.lineWidth=2;g.beginPath();g.moveTo(X(-G.c),Y(0));g.lineTo(X(p.x),Y(p.y));g.lineTo(X(G.c),Y(0));g.stroke();
+    g.fillStyle="#ff5c8a";g.beginPath();g.arc(X(G.c),cy,4,0,7);g.fill();
+    g.fillStyle="#9fdcff";g.font="12px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="top";g.fillText("空焦點",X(G.c),cy+16);
+    const r1=Math.hypot(p.x+G.c,p.y),r2=Math.hypot(p.x-G.c,p.y);
+    g.textAlign="left";g.textBaseline="top";g.fillStyle="#9fdcff";g.fillText(`r + r′ = ${num(r1)} + ${num(r2)} = ${num(r1+r2)} ${M.unit}`,8,8);
+  }
+  // 太陽／地球
+  const sx=X(-G.c);const R0=M===MODES.sun?9:8;
+  const grd=g.createRadialGradient(sx,cy,1,sx,cy,R0*2.2);grd.addColorStop(0,M===MODES.sun?"#fff2b0":"#9fdcff");grd.addColorStop(.45,M===MODES.sun?"#ff9d3c":"#2f7de1");grd.addColorStop(1,"rgba(0,0,0,0)");
+  g.fillStyle=grd;g.beginPath();g.arc(sx,cy,R0*2.2,0,7);g.fill();
+  // 連線
+  g.strokeStyle="rgba(255,209,102,.8)";g.lineWidth=1.5;g.beginPath();g.moveTo(sx,cy);g.lineTo(X(p.x),Y(p.y));g.stroke();
+  // 速度
+  if($("#cVel").checked){const E=solveE(2*Math.PI*phase,G.e);let vx=G.a*Math.sin(E),vy=G.b*Math.cos(E);const L=Math.hypot(vx,vy);const r=Math.hypot(p.x+G.c,p.y);
+    const v=M.v(r,G.a),vmax=M.v(rmin,G.a);const len=14+52*v/vmax;arrow(g,X(p.x),Y(p.y),X(p.x)+vx/L*len,Y(p.y)-vy/L*len,"#ff7a7a");}
+  g.fillStyle=M===MODES.sun?"#6ee7a0":"#d7dde8";g.beginPath();g.arc(X(p.x),Y(p.y),6,0,7);g.fill();g.strokeStyle="#04060b";g.lineWidth=2;g.stroke();
+  g.font="11px 'JetBrains Mono',monospace";g.fillStyle="#5b6880";g.textAlign="right";g.textBaseline="bottom";g.fillText(`e = ${G.e.toFixed(3)}`,w-8,h-6);
+}
+// 第三定律圖
+function drawPlot(){
+  const {g,w,h}=fit($("#plot"));g.clearRect(0,0,w,h);if(w<80||h<80)return;
+  const L=52,R=26,T=16,B=34;const lo=-2,hi=5;
+  const X=v=>L+(w-L-R)*(Math.log10(v)-lo)/(hi-lo),Y=v=>T+(h-T-B)*(1-(Math.log10(v)-lo)/(hi-lo));
+  g.font="10.5px 'JetBrains Mono',monospace";
+  for(let k=lo;k<=hi;k++){const v=10**k;g.strokeStyle="rgba(120,140,180,.14)";g.lineWidth=1;g.beginPath();g.moveTo(X(v),T);g.lineTo(X(v),h-B);g.stroke();g.beginPath();g.moveTo(L,Y(v));g.lineTo(w-R,Y(v));g.stroke();
+    const lab=k<0?"10"+sup(k):String(v);g.fillStyle="#5b6880";g.textAlign="center";g.textBaseline="top";if(w>420||k%2===0)g.fillText(lab,X(v),h-B+5);g.textAlign="right";g.textBaseline="middle";g.fillText(lab,L-5,Y(v));}
+  g.strokeStyle="#5b6880";g.lineWidth=1.5;g.beginPath();g.moveTo(L,T);g.lineTo(L,h-B);g.lineTo(w-R,h-B);g.stroke();
+  g.fillStyle="#8492aa";g.textAlign="left";g.textBaseline="top";g.fillText(M===MODES.sun?"R³ (AU³)":"R³",L+4,T);g.textAlign="right";g.textBaseline="bottom";g.fillText(M===MODES.sun?"T² (y²)":"T²",w-R,h-B-3);
+  if(M!==MODES.sun){g.fillStyle="#8492aa";g.font="13px 'Noto Sans TC',sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText("這張圖是太陽系行星（R 用 AU、T 用年）",w/2,h/2-12);g.fillText("繞地球的衛星請看下表：R³/T² 彼此相同",w/2,h/2+12);return;}
+  // 直線 R³ = T²
+  g.strokeStyle="rgba(255,157,60,.8)";g.lineWidth=2.5;g.beginPath();g.moveTo(X(10**lo),Y(10**lo));g.lineTo(X(10**hi),Y(10**hi));g.stroke();
+  g.font="11px 'Noto Sans TC',sans-serif";
+  PLANETS.forEach(([n,T0,R0],i)=>{const x=X(T0*T0),y=Y(R0**3);g.fillStyle=n==="地球"?"#6ee7a0":"#ff9d3c";g.beginPath();g.arc(x,y,5,0,7);g.fill();g.strokeStyle="#04060b";g.lineWidth=1.5;g.stroke();
+    g.fillStyle="#c9d4ea";g.textAlign="right";g.textBaseline="middle";g.fillText(n,x-8,y-(i%2?8:-8));});
+  const G=geo();const x=X(G.T*G.T),y=Y(G.a**3);
+  if(G.T*G.T>=10**lo&&G.T*G.T<=10**hi){g.strokeStyle="#ffd166";g.lineWidth=2.5;g.beginPath();g.arc(x,y,8,0,7);g.stroke();g.fillStyle="#ffd166";g.textAlign="left";g.textBaseline="middle";g.fillText("目前軌道",x+11,y+10);}
+}
+function tableHTML(){
+  const G=geo();let rows="";
+  if(M===MODES.sun){
+    $("#thName").textContent="行星";
+    PLANETS.forEach(([n,T0,R0])=>rows+=`<tr><td>${n}</td><td>${T0.toFixed(3)} y</td><td>${R0.toFixed(3)} AU</td><td>${(R0**3/T0**2).toFixed(3)}</td></tr>`);
+    rows+=`<tr class="me"><td>目前軌道</td><td>${sig(G.T,4)} y</td><td>${sig(G.a,4)} AU</td><td>${(G.a**3/G.T**2).toFixed(3)}</td></tr>`;
+  }else{
+    $("#thName").textContent="衛星";
+    const list=[["國際太空站",6778],["地球同步衛星",42164],["月球",381600]];
+    list.forEach(([n,a])=>{const T=2*Math.PI*Math.sqrt(a**3/M.GM);rows+=`<tr><td>${n}</td><td>${tfmt(T)}</td><td>${num(a)} km</td><td>${sig(a**3/T**2,4)}</td></tr>`;});
+    rows+=`<tr class="me"><td>目前軌道</td><td>${tfmt(G.T)}</td><td>${num(G.a)} km</td><td>${sig(G.a**3/G.T**2,4)}</td></tr>`;
+  }
+  $("#tb").innerHTML=rows;
+}
+function tfmt(T){ // T 單位：sun 年，earth 天
+  if(M===MODES.sun)return T<2?`${sig(T,3)} 年（${Math.round(T*365.25)} 天）`:`${sig(T,4)} 年`;
+  return T<1?`${sig(T*24,3)} 小時（${Math.round(T*1440)} 分）`:`${sig(T,4)} 天`;}
+function ui(){
+  const G=geo();
+  $("#oMin").textContent=`${num(rmin)} ${M.unit}`;$("#oMax").textContent=`${num(rmax)} ${M.unit}`;$("#oN").textContent=`${N} 格（每格 T/${N}）`;$("#oSp").textContent=`${spd} 秒`;
+  $("#rR").textContent=`${num(G.a)} ${M.unit}`;$("#rT").textContent=tfmt(G.T);
+  $("#rK").textContent=M===MODES.sun?`${(G.a**3/G.T**2).toFixed(3)} AU³/y²`:`${sig(G.a**3/G.T**2,4)} km³/天²`;
+  const p=posT(phase,G);const r=Math.hypot(p.x+G.c,p.y);
+  $("#rr").textContent=`${num(r)} ${M.unit}`;$("#rv").textContent=`${M.v(r,G.a).toFixed(2)} km/s`;
+  $("#rt").textContent=tfmt(phase*G.T).replace(/（.*）/,"");
+  $("#rvv").textContent=`${(M.v(rmin,G.a)/M.v(rmax,G.a)).toFixed(2)} = ${(rmax/rmin).toFixed(2)}`;
+  const Ath=Math.PI*G.a*G.b/N;const u=M===MODES.sun?" AU²":" km²";
+  $("#rA").textContent=sig(Ath,4)+u;
+  $("#rA2").textContent=`${sig(polyArea(sectorPts(0,G,400)),4)} / ${sig(polyArea(sectorPts(Math.floor(N/2),G,400)),4)}`;
+  $("#oNote").textContent=`偏心率 e = ${G.e.toFixed(3)}`;
+  let msg;
+  if(G.e<0.02) msg=`<b>幾乎是圓。</b>偏心率 ${G.e.toFixed(3)}，${M.name}幾乎在中心，每一格扇形看起來都一樣；把 r<sub>min</sub> 和 r<sub>max</sub> 拉開看看。`;
+  else if(G.e<0.4) msg=`<b>橢圓軌道，${M.name}在左焦點。</b>近${M.cn2}點附近的扇形又短又胖、遠${M.cn2}點附近又細又長，但面積都一樣：每格 ${sig(Ath,3)}${u}。`;
+  else msg=`<b>很扁的橢圓。</b>近${M.cn2}點速率是遠${M.cn2}點的 ${(rmax/rmin).toFixed(1)} 倍；一圈裡大部分時間都在遠${M.cn2}點附近慢慢走（看等時間的綠點分布）。`;
+  $("#see").innerHTML=msg;
+  tableHTML();
+}
+function setMode(m){mode=m;M=MODES[m];$("#mSun").setAttribute("aria-pressed",m==="sun");$("#mEarth").setAttribute("aria-pressed",m==="earth");
+  document.querySelectorAll(".cn").forEach(e=>e.textContent=M.name);document.querySelectorAll(".cn2").forEach(e=>e.textContent=M.cn2);
+  $("#unitNote").textContent=M===MODES.sun?"1 AU = 1.496×10¹¹ m":"距離從地心算起（地球半徑 6371 km）";
+  const box=$("#presets");box.innerHTML="";M.presets.forEach(([n,a,b])=>{const bt=document.createElement("button");bt.textContent=n;bt.onclick=()=>setOrbit(a,b);box.appendChild(bt);});
+  setOrbit(M.presets[0][1],M.presets[0][2]);}
+function setOrbit(a,b){rmin=Math.min(a,b);rmax=Math.max(a,b);$("#sMin").value=toS(rmin);$("#sMax").value=toS(rmax);phase=0;ui();}
+$("#sMin").addEventListener("input",()=>{rmin=fromS(+$("#sMin").value);if(rmin>rmax){rmax=rmin;$("#sMax").value=toS(rmax);}ui();});
+$("#sMax").addEventListener("input",()=>{rmax=fromS(+$("#sMax").value);if(rmax<rmin){rmin=rmax;$("#sMin").value=toS(rmin);}ui();});
+$("#sN").addEventListener("input",()=>{N=+$("#sN").value;ui();});
+$("#sSp").addEventListener("input",()=>{spd=+$("#sSp").value;ui();});
+$("#play").onclick=()=>{playing=!playing;$("#play").textContent=playing?"❚❚ 暫停":"▶ 播放";};
+$("#restart").onclick=()=>{phase=0;ui();};
+["#cSec","#cFoci","#cVel"].forEach(s=>$(s).addEventListener("change",ui));
+$("#mSun").onclick=()=>setMode("sun");$("#mEarth").onclick=()=>setMode("earth");
+$("#e1").onclick=()=>{if(mode!=="earth")setMode("earth");setOrbit(356500,406700);};
+$("#e2").onclick=()=>{if(mode!=="sun")setMode("sun");setOrbit(30,30);};
+$("#e3").onclick=()=>{if(mode!=="sun")setMode("sun");setOrbit(0.586,35.08);};
+$("#e4").onclick=()=>{if(mode!=="sun")setMode("sun");setOrbit(0.5,1.5);};
+$("#e5").onclick=()=>{setMode("earth");};
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("#"+b.dataset.a).hidden=false;});
+let last=performance.now(),acc=0;
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(playing){phase=(phase+dt/spd)%1;}
+  drawOrbit();acc+=dt;if(acc>0.1){acc=0;ui();drawPlot();}requestAnimationFrame(loop);}
+setMode("sun");drawPlot();requestAnimationFrame(loop);
+window.addEventListener("resize",drawPlot);
+window.__kp=()=>{const G=geo();return{mode,rmin,rmax,...G,A0:polyArea(sectorPts(0,G,400)),Amid:polyArea(sectorPts(Math.floor(N/2),G,400)),Ath:Math.PI*G.a*G.b/N};};
+})();
+</script>
+</body>
+</html>
