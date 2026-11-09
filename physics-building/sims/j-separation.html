@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>簡易物質分離</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--teal:#4fd1c5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:72ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:pan-y}
+.scene{height:340px}
+#cvMag{touch-action:none}
+@media(max-width:560px){.scene{height:280px}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.35;cursor:default;border-color:var(--line)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button.done{border-color:#1f6f55;color:#bff5dc}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.sl{display:flex;align-items:center;gap:10px;margin-top:2px}
+.sl span{font-size:13.5px;min-width:44px}
+.sl input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
+.sl b{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);min-width:64px;text-align:right}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:10px;cursor:pointer}
+.chk input{accent-color:var(--acc);width:17px;height:17px}
+.fb{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid var(--line);background:#0a0f1a;color:var(--muted);min-height:48px}
+.fb.ok{border-color:#1f6f55;background:#071a14;color:#bff5dc}
+.fb.mid{border-color:#7a6320;background:#1a1505;color:#ffe7a3}
+.fb.bad{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.fb b{color:var(--acc);font-weight:500}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;margin-top:6px}
+@media(max-width:420px){.stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:17px;color:var(--phos);font-weight:700}
+.stat b.w{color:#fff}.stat b.k{color:#c9d1dc}.stat b.c{color:var(--cyan)}
+.tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+.tbl th,.tbl td{border:1px solid var(--line);padding:5px 6px;text-align:center}
+.tbl th{color:var(--muted);font-weight:500;background:#0b1120}
+.tblwrap{overflow-x:auto;max-width:100%}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctl{grid-template-columns:1fr}}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.steps button{padding:8px 6px;font-size:13px}
+.flow{display:flex;flex-direction:column;align-items:stretch;gap:4px;margin-top:8px}
+.fbox{border:1px solid var(--line);background:#0a0f1a;border-radius:9px;padding:6px 10px;font-size:13.5px;text-align:center}
+.fbox.mix{border-color:#5a4a1a;color:#ffe7a3}
+.farrow{text-align:center;color:var(--muted);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.farrow select{padding:4px 8px;font-size:13px}
+.fsplit{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fsplit .col{display:flex;flex-direction:column;gap:4px}
+.mk{font-weight:700;min-width:14px;display:inline-block}
+.mk.y{color:var(--phos)}.mk.n{color:var(--red)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 2-1 · 物質的分離</div>
+  <h1>簡易物質分離</h1>
+  <p class="lede">混合物裡的各種物質仍保有原來的性質，利用它們<b>性質的差異</b>就能把它們分開：食鹽溶於水、碳粉不溶於水，所以先<b>溶解</b>再<b>過濾</b>；水容易蒸發、食鹽不易蒸發，所以再<b>蒸發</b>濾液就能取回食鹽。鐵粉會被磁鐵吸引、細砂不會，就能用<b>磁鐵</b>分開。</p>
+
+  <div class="modebar" role="group" aria-label="模式">
+    <button type="button" data-m="salt" aria-pressed="true">① 實驗 2-1 食鹽與碳粉</button>
+    <button type="button" data-m="mag" aria-pressed="false">② 磁鐵分離鐵粉與細砂</button>
+  </div>
+
+  <!-- ===== mode 1 ===== -->
+  <div id="mSalt">
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">實驗桌</span><span class="n" id="sceneN"></span></div>
+        <div class="box"><canvas id="cvS" class="scene" aria-label="溶解、過濾、蒸發的實驗裝置"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="head"><span class="t">粒子模型（放大）</span><span class="n" id="partN"></span></div>
+        <div class="box"><canvas id="cvP" class="scene" aria-label="粒子模型"></canvas></div>
+      </section>
+    </div>
+    <div class="ctl">
+      <section class="card"><div class="pad">
+        <div class="lab">混合物與水的量（改變後會重新開始）</div>
+        <div class="sl"><span>食鹽</span><input type="range" id="slSalt" min="1" max="15" step="0.5" value="5" aria-label="食鹽質量"><b id="vSalt"></b></div>
+        <div class="sl"><span>碳粉</span><input type="range" id="slCarb" min="0.5" max="5" step="0.5" value="2" aria-label="碳粉質量"><b id="vCarb"></b></div>
+        <div class="sl"><span>水</span><input type="range" id="slWater" min="5" max="60" step="5" value="30" aria-label="水的體積"><b id="vWater"></b></div>
+        <div class="steps">
+          <button type="button" id="st1" class="primary">1 加水攪拌</button>
+          <button type="button" id="st2" disabled>2 過濾</button>
+          <button type="button" id="st3" disabled>3 加熱蒸發</button>
+        </div>
+        <div class="seg" style="margin-top:8px"><button type="button" id="stR">重新開始</button><button type="button" id="stBook">課本建議量</button><button type="button" id="stLow">水太少會怎樣？</button></div>
+        <div class="fb" id="fbS" aria-live="polite"></div>
+      </div></section>
+      <section class="card"><div class="pad">
+        <div class="stat">
+          <div>已溶解的食鹽<b class="w" id="rDis">—</b></div>
+          <div>未溶解的食鹽<b class="w" id="rUnd">—</b></div>
+          <div>最多能溶解<b class="c" id="rMax">—</b></div>
+          <div>濾紙上（濾渣）<b class="k" id="rRes">—</b></div>
+          <div>蒸發皿剩下的水<b class="c" id="rLeft">—</b></div>
+          <div>蒸發皿裡的食鹽<b id="rRec">—</b></div>
+        </div>
+        <div class="lab" style="margin-top:12px">完成分離流程圖（選對每一步的操作與得到的物質）</div>
+        <div class="flow">
+          <div class="fbox mix">食鹽＋碳粉（混合物）</div>
+          <div class="farrow">↓ <select id="q1" aria-label="第一步操作"></select> <span class="mk" id="k1"></span></div>
+          <div class="fbox">食鹽水＋碳粉</div>
+          <div class="farrow">↓ <select id="q2" aria-label="第二步操作"></select> <span class="mk" id="k2"></span></div>
+          <div class="fsplit">
+            <div class="col"><div class="fbox">濾紙上：<select id="q3" aria-label="濾紙上的物質"></select> <span class="mk" id="k3"></span></div></div>
+            <div class="col"><div class="fbox">濾液：食鹽水</div>
+              <div class="farrow">↓ <select id="q4" aria-label="第三步操作"></select> <span class="mk" id="k4"></span></div>
+              <div class="fbox">蒸發皿：<select id="q5" aria-label="蒸發皿裡留下的物質"></select> <span class="mk" id="k5"></span></div></div>
+          </div>
+        </div>
+        <div class="seg" style="margin-top:10px"><button type="button" class="primary" id="qChk">檢查流程圖</button><button type="button" id="qAns">看答案</button></div>
+        <div class="fb" id="fbQ" aria-live="polite">每個空格選一個答案，再按「檢查流程圖」。</div>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== mode 2 ===== -->
+  <div id="mMag" hidden>
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">培養皿</span><span class="n">在盤子上拖曳磁鐵</span></div>
+        <div class="box"><canvas id="cvMag" class="scene" aria-label="用磁鐵分離混合物，可拖曳磁鐵"></canvas></div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="lab">混合物</div>
+        <div class="seg" role="group" aria-label="混合物種類">
+          <button type="button" data-x="fe" aria-pressed="true">鐵粉＋細砂</button>
+          <button type="button" data-x="nacl" aria-pressed="false">食鹽＋碳粉</button>
+        </div>
+        <div class="sl" style="margin-top:10px"><span id="lA">鐵粉</span><input type="range" id="slA" min="1" max="10" step="1" value="4" aria-label="第一種物質質量"><b id="vA"></b></div>
+        <div class="sl"><span id="lB">細砂</span><input type="range" id="slB" min="1" max="10" step="1" value="6" aria-label="第二種物質質量"><b id="vB"></b></div>
+        <label class="chk"><input type="checkbox" id="wrap" checked>磁鐵先套上塑膠袋</label>
+        <div class="seg" style="margin-top:10px"><button type="button" class="primary" id="mSweep">磁鐵自動掃過一次</button><button type="button" id="mTake">取下吸住的粉末</button><button type="button" id="mReset">重新混合</button></div>
+        <div class="stat" style="margin-top:12px">
+          <div>磁鐵上吸住<b id="mOn">—</b></div>
+          <div>收集皿<b id="mCol">—</b></div>
+          <div>盤中剩下<b class="k" id="mLeft">—</b></div>
+        </div>
+        <div class="fb" id="fbM" aria-live="polite"></div>
+        <div class="tblwrap"><table class="tbl">
+          <tr><th>混合物</th><th>利用的性質差異</th><th>分離方法</th></tr>
+          <tr><td>食鹽＋碳粉</td><td>食鹽溶於水，碳粉不溶於水</td><td>溶解、過濾</td></tr>
+          <tr><td>食鹽水</td><td>水容易蒸發，食鹽不易蒸發</td><td>蒸發</td></tr>
+          <tr><td>鐵粉＋細砂</td><td>鐵會被磁鐵吸引，細砂不會</td><td>用磁鐵吸引</td></tr>
+        </table></div>
+      </div></section>
+    </div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>過濾時，溶在水中的食鹽變成極微小的粒子，和水粒子一起穿過濾紙的孔隙成為濾液；碳粉顆粒比孔隙大，留在濾紙上成為濾渣。所以過濾能分開「溶於水」和「不溶於水」的物質，卻不能把食鹽和水分開，要再用蒸發。水量要足夠：20 ℃ 時 100 g 水最多約溶解 35.9 g 食鹽，水太少時沒溶解的食鹽會和碳粉一起留在濾紙上，回收的食鹽就變少。蒸發時，水少到溶不下食鹽就開始析出晶體；快乾時可停止加熱、用餘熱蒸乾，避免晶體噴濺。本模擬為理想情況，實際上濾紙與器材上會沾附少量溶液，回收的食鹽略少於加入的量。<br>
+    <b>來源：</b>國中自然 2 上 第 2 章 2-1 實驗 2-1 簡易的物質分離（p.46–49，圖 2-3、2-4、2-8）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const f1=v=>(Math.round(v*10)/10).toFixed(1), f2=v=>(Math.round(v*100)/100).toFixed(2);
+const SOL20=35.9, SOLHOT=39.2;   // 食鹽溶解度 g / 100 g 水（20 ℃、約 100 ℃）
+
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return {x,w,h};}
+function rr(x,a,b,w,h,r){r=Math.min(r,w/2,h/2);x.beginPath();x.moveTo(a+r,b);x.lineTo(a+w-r,b);x.arc(a+w-r,b+r,r,-Math.PI/2,0);x.lineTo(a+w,b+h-r);x.arc(a+w-r,b+h-r,r,0,Math.PI/2);x.lineTo(a+r,b+h);x.arc(a+r,b+h-r,r,Math.PI/2,Math.PI);x.lineTo(a,b+r);x.arc(a+r,b+r,r,Math.PI,1.5*Math.PI);x.closePath();}
+function txt(x,s,X,Y,o={}){x.font=o.f||'12px "Noto Sans TC",sans-serif';x.fillStyle=o.c||'#c9d1dc';x.textAlign=o.a||'center';x.textBaseline=o.b||'middle';x.fillText(s,X,Y);}
+
+// =================== mode 1: 食鹽＋碳粉 ===================
+const S={salt:5,carb:2,water:30,stage:0,prog:0,anim:false,t0:0};
+const DUR={1:2600,2:3200,3:6000};
+function calc(){
+  const maxDis=S.water*SOL20/100;              // 水 1 g/mL
+  const dis=Math.min(S.salt,maxDis), und=S.salt-dis;
+  const p1=S.stage>1?1:(S.stage===1?S.prog:0);
+  const disNow=dis*p1, undNow=S.salt-disNow;
+  const p2=S.stage>2?1:(S.stage===2?S.prog:0);
+  const p3=S.stage===3?S.prog:0;
+  const wLeft=S.water*(1-p3);
+  const precip=S.stage===3?Math.max(0,dis-wLeft*SOLHOT/100):0;
+  return {maxDis,dis,und,disNow,undNow,p1,p2,p3,wLeft,precip};
+}
+// 碳粉、晶體的固定亂數位置
+let seeds=[];function reseed(){seeds=Array.from({length:400},()=>[Math.random(),Math.random(),Math.random()]);}
+reseed();
+
+function glass(x,l,t,w,h){ // beaker outline
+  x.strokeStyle='rgba(200,225,255,.7)';x.lineWidth=2;
+  x.beginPath();x.moveTo(l-5,t);x.lineTo(l,t+4);x.lineTo(l,t+h-6);x.quadraticCurveTo(l,t+h,l+6,t+h);x.lineTo(l+w-6,t+h);x.quadraticCurveTo(l+w,t+h,l+w,t+h-6);x.lineTo(l+w,t);x.stroke();
+  x.strokeStyle='rgba(200,225,255,.35)';x.lineWidth=1;
+  for(let i=1;i<=4;i++){const y=t+h-h*0.18*i;x.beginPath();x.moveTo(l+4,y);x.lineTo(l+14,y);x.stroke();}
+}
+function liquid(x,l,t,w,h,lev,col){ if(lev<=0)return; x.fillStyle=col;x.beginPath();x.moveTo(l+1,t+h-lev);x.lineTo(l+w-1,t+h-lev);x.lineTo(l+w-1,t+h-6);x.quadraticCurveTo(l+w-1,t+h-1,l+w-6,t+h-1);x.lineTo(l+6,t+h-1);x.quadraticCurveTo(l+1,t+h-1,l+1,t+h-6);x.closePath();x.fill();
+  x.strokeStyle='rgba(160,220,255,.6)';x.lineWidth=1.2;x.beginPath();x.moveTo(l+1,t+h-lev);x.lineTo(l+w-1,t+h-lev);x.stroke();}
+function pile(x,cx,by,wd,hgt,col,n,o=0){ // heap of grains
+  x.fillStyle=col;
+  for(let i=0;i<n;i++){const s=seeds[(i+o)%seeds.length];const u=s[0]*2-1,v=s[1];const hh=hgt*(1-u*u);x.fillRect(cx+u*wd/2-1.2,by-v*hh-2.4,2.4,2.4);}
+}
+function drawScene(){
+  const cv=$('cvS');const {x,w,h}=fit(cv);if(w<60)return;
+  x.clearRect(0,0,w,h);
+  const c=calc(), tnow=performance.now()/1000;
+  // table
+  x.fillStyle='#0d1220';x.fillRect(0,h-22,w,22);x.strokeStyle='#26304a';x.beginPath();x.moveTo(0,h-22);x.lineTo(w,h-22);x.stroke();
+  const by=h-22;
+  const nSalt=Math.round(S.salt*14), nCarb=Math.round(S.carb*30);
+  if(S.stage<=1){
+    const bw=Math.min(160,w*0.42),bh=Math.min(190,h*0.62),l=w/2-bw/2,t=by-bh;
+    const lev=S.stage===1?(S.water/60)*bh*0.8*Math.min(1,S.prog*4):0;
+    if(lev>0){
+      const murk=S.stage===1?Math.min(1,S.prog*1.5):0;
+      liquid(x,l,t,bw,bh,lev,`rgba(${Math.round(70-40*murk)},${Math.round(150-110*murk)},${Math.round(230-180*murk)},${0.35+0.35*murk})`);
+      // suspended carbon specks
+      x.fillStyle='rgba(20,20,24,.95)';
+      const ns=Math.round(nCarb*0.6*murk);
+      for(let i=0;i<ns;i++){const s=seeds[i];const yy=by-4-s[1]*(lev-8);const xx=l+6+((s[0]+0.05*Math.sin(tnow*2+i))%1+1)%1*(bw-12);x.fillRect(xx,yy,2.2,2.2);}
+    }
+    // remaining solids at bottom
+    const undFrac=S.salt>0?c.undNow/S.salt:0;
+    pile(x,w/2,by-2,bw*0.7,Math.min(30,6+(S.salt+S.carb)*1.6)*(S.stage===1?0.5+0.5*(1-c.p1):1),'#f4f6fa',Math.round(nSalt*undFrac),0);
+    pile(x,w/2,by-2,bw*0.7,Math.min(30,6+(S.salt+S.carb)*1.6)*(S.stage===1?0.6:1),'#1a1a1f',S.stage===1?Math.round(nCarb*0.4):nCarb,200);
+    glass(x,l,t,bw,bh);
+    if(S.stage===1&&S.anim){ // stirring rod
+      const a=Math.sin(tnow*9)*bw*0.28;x.strokeStyle='rgba(220,235,255,.85)';x.lineWidth=3;x.beginPath();x.moveTo(w/2+a*0.4,t-30);x.lineTo(w/2+a,by-10);x.stroke();
+    }
+    txt(x,S.stage===0?'食鹽＋碳粉（未加水）':(S.anim?'玻璃棒攪拌中…':'加水攪拌後'),w/2,t-14,{c:'#ffe7a3'});
+    txt(x,`${S.salt} g 食鹽 ＋ ${S.carb} g 碳粉`+(S.stage>=1?` ＋ ${S.water} mL 水`:''),w/2,by+11,{c:'#8492aa'});
+  }
+  if(S.stage===2){
+    const fx=w*0.62, ft=26, fw=Math.min(120,w*0.3), fh=fw*0.72;
+    // stand
+    x.strokeStyle='#4a5470';x.lineWidth=3;x.beginPath();x.moveTo(w*0.93,by);x.lineTo(w*0.93,ft-10);x.stroke();
+    x.beginPath();x.moveTo(w*0.93,ft+fh*0.55);x.lineTo(fx+fw*0.3,ft+fh*0.55);x.stroke();
+    // receiving beaker
+    const bw=Math.min(120,w*0.3),bh=Math.min(130,h*0.4),l=fx-bw/2,t=by-bh;
+    const filtLev=(S.water/60)*bh*0.8*c.p2*0.9;
+    liquid(x,l,t,bw,bh,filtLev,'rgba(90,170,240,.38)');
+    glass(x,l,t,bw,bh);
+    // funnel
+    x.strokeStyle='rgba(200,225,255,.75)';x.lineWidth=2;
+    x.beginPath();x.moveTo(fx-fw/2,ft);x.lineTo(fx-5,ft+fh);x.lineTo(fx-5,t+30);x.moveTo(fx+fw/2,ft);x.lineTo(fx+5,ft+fh);x.lineTo(fx+5,t+30);x.stroke();
+    // filter paper cone
+    x.fillStyle='rgba(245,240,225,.18)';x.strokeStyle='rgba(245,240,225,.75)';x.lineWidth=1.4;
+    x.beginPath();x.moveTo(fx-fw/2+7,ft+4);x.lineTo(fx,ft+fh-4);x.lineTo(fx+fw/2-7,ft+4);x.closePath();x.fill();x.stroke();
+    // liquid in funnel while flowing
+    const inF=c.p2<1?Math.sin(Math.PI*Math.min(1,c.p2*1.15))*0.55:0;
+    const coneY=(fr)=>ft+fh-4-(fh-8)*fr;
+    const halfW=(y)=>(fw/2-7)*(ft+fh-4-y)/(fh-8);
+    if(inF>0){const y=coneY(inF);x.fillStyle='rgba(45,45,55,.75)';x.beginPath();x.moveTo(fx-halfW(y),y);x.lineTo(fx+halfW(y),y);x.lineTo(fx,ft+fh-4);x.closePath();x.fill();}
+    // residue (carbon + undissolved salt)
+    const resFr=Math.min(0.42,0.1+0.035*(S.carb+c.und))*Math.min(1,c.p2*1.3);
+    if(resFr>0){const y=coneY(resFr);x.fillStyle='#1b1b20';x.beginPath();x.moveTo(fx-halfW(y),y);x.lineTo(fx+halfW(y),y);x.lineTo(fx,ft+fh-4);x.closePath();x.fill();
+      if(c.und>0.01){const y2=coneY(resFr*(1+Math.min(0.6,c.und/(S.carb+0.01)*0.5)));x.fillStyle='#e9edf3';x.beginPath();x.moveTo(fx-halfW(y2),y2);x.lineTo(fx+halfW(y2),y2);x.lineTo(fx+halfW(y),y);x.lineTo(fx-halfW(y),y);x.closePath();x.fill();}}
+    // drip
+    if(c.p2>0.05&&c.p2<1){const dy=((tnow*120)%40);x.fillStyle='rgba(120,190,255,.9)';x.beginPath();x.arc(fx,t+30+dy,2.4,0,7);x.fill();}
+    // source beaker pouring
+    const sw=Math.min(90,w*0.22),sh=Math.min(100,h*0.3),sl=w*0.06,st=by-sh-70;
+    x.save();x.translate(sl+sw,st);x.rotate(c.p2<1?-0.6:0);
+    const sLev=(S.water/60)*sh*0.8*(1-c.p2);
+    liquid(x,-sw,0,sw,sh,sLev,'rgba(45,45,55,.7)');glass(x,-sw,0,sw,sh);x.restore();
+    if(c.p2<1){x.strokeStyle='rgba(60,60,72,.9)';x.lineWidth=3;x.beginPath();x.moveTo(sl+sw+2,st+4);x.quadraticCurveTo(fx-fw*0.2,ft-18,fx-fw*0.15,ft+12);x.stroke();
+      x.strokeStyle='rgba(220,235,255,.8)';x.lineWidth=2.5;x.beginPath();x.moveTo(sl+sw-6,st-8);x.lineTo(fx-fw*0.1,ft+20);x.stroke();}
+    txt(x,'濾渣',fx+fw/2+4,ft+fh*0.75,{a:'left',c:'#c9d1dc'});
+    txt(x,'濾液',l-6,by-filtLev/2-8,{a:'right',c:'#9fd8ff'});
+    txt(x,c.p2<1?'沿玻璃棒倒入漏斗…':'過濾完成',w*0.3,by+11,{c:'#8492aa'});
+  }
+  if(S.stage===3){
+    const cx=w*0.6, dw=Math.min(220,w*0.5), dy=by-110;
+    // lamp
+    x.fillStyle='rgba(180,200,230,.18)';x.strokeStyle='rgba(200,225,255,.6)';x.lineWidth=1.5;
+    x.beginPath();x.ellipse(cx,by-22,26,20,0,0,7);x.fill();x.stroke();
+    x.fillStyle='#8492aa';x.fillRect(cx-5,by-50,10,10);
+    if(S.anim||c.p3<1){const fl=1+0.12*Math.sin(tnow*20);x.fillStyle='rgba(90,160,255,.75)';x.beginPath();x.ellipse(cx,by-62,7,14*fl,0,0,7);x.fill();x.fillStyle='rgba(255,200,90,.7)';x.beginPath();x.ellipse(cx,by-66,4,8*fl,0,0,7);x.fill();}
+    // tripod + gauze
+    x.strokeStyle='#5d6886';x.lineWidth=3;x.beginPath();x.moveTo(cx-dw*0.42,by);x.lineTo(cx-dw*0.36,dy+28);x.moveTo(cx+dw*0.42,by);x.lineTo(cx+dw*0.36,dy+28);x.stroke();
+    x.lineWidth=4;x.beginPath();x.moveTo(cx-dw*0.48,dy+28);x.lineTo(cx+dw*0.48,dy+28);x.stroke();
+    // dish
+    const R=dw*0.42, dd=R*0.5;
+    x.save();x.beginPath();x.ellipse(cx,dy,R,dd,0,0,Math.PI);x.closePath();x.clip();
+    const fr=S.water>0?c.wLeft/S.water:0, ly=dy+dd*(1-Math.sqrt(Math.max(0,fr)))*0.95;
+    if(fr>0.002){x.fillStyle='rgba(90,170,240,.42)';x.fillRect(cx-R,ly,2*R,dd+2);}
+    // crystals
+    const nCr=Math.round(clamp(c.precip/Math.max(c.dis,0.01),0,1)*Math.min(160,c.dis*14));
+    x.fillStyle='#f4f6fa';
+    for(let i=0;i<nCr;i++){const s=seeds[i];const u=s[0]*1.6-0.8;const yy=dy+dd*Math.sqrt(1-u*u)-2-s[1]*6;x.fillRect(cx+u*R-1.5,yy-1.5,3,3);}
+    x.restore();
+    x.strokeStyle='rgba(235,235,245,.85)';x.lineWidth=2;x.beginPath();x.ellipse(cx,dy,R,dd,0,0,Math.PI);x.stroke();
+    x.beginPath();x.moveTo(cx-R-4,dy);x.lineTo(cx+R+4,dy);x.stroke();
+    // steam
+    if(c.p3<1&&c.p3>0){x.strokeStyle='rgba(220,230,245,.35)';x.lineWidth=2;for(let k=0;k<3;k++){const ph=(tnow*0.8+k/3)%1;const sx=cx+(k-1)*R*0.45;x.beginPath();for(let j=0;j<=10;j++){const yy=dy-6-ph*60-j*3;const xx=sx+Math.sin(j*0.8+tnow*3+k)*4;j?x.lineTo(xx,yy):x.moveTo(xx,yy);}x.stroke();}
+      txt(x,'水蒸氣',cx+R*0.75,dy-56,{c:'#c9d1dc'});}
+    txt(x,'蒸發皿',cx-R-8,dy+6,{a:'right',c:'#8492aa'});
+    // residue funnel aside
+    const fx=w*0.13, fw=Math.min(70,w*0.17), ft=40, fh=fw*0.7;
+    x.strokeStyle='rgba(245,240,225,.6)';x.lineWidth=1.3;x.fillStyle='#1b1b20';
+    x.beginPath();x.moveTo(fx-fw/2,ft);x.lineTo(fx,ft+fh);x.lineTo(fx+fw/2,ft);x.closePath();x.stroke();
+    x.beginPath();x.moveTo(fx-fw*0.22,ft+fh*0.55);x.lineTo(fx,ft+fh);x.lineTo(fx+fw*0.22,ft+fh*0.55);x.closePath();x.fill();
+    txt(x,'濾渣',fx,ft+fh+14,{c:'#8492aa'});
+    txt(x,c.p3<1?(c.precip>0?'開始析出食鹽晶體':'加熱中，水逐漸蒸發'):'水蒸乾，留下食鹽',cx,22,{c:'#ffe7a3'});
+  }
+  $('sceneN').textContent=['步驟 0　混合物','步驟 1　溶解','步驟 2　過濾','步驟 3　蒸發'][S.stage];
+}
+
+// ---------- particle model ----------
+let P=[];   // {x,y,vx,vy,k,st}
+let lattice=[]; // salt crystal cells {x,y,on}
+function initPart(){
+  P=[];lattice=[];
+  const c=calc();
+  const nW=S.stage>=1?46:0;
+  for(let i=0;i<5;i++)for(let j=0;j<5;j++)lattice.push({x:0.18+i*0.045,y:0.5+j*0.045,on:true,released:false});
+  if(S.stage===2){
+    for(let i=0;i<nW;i++)P.push({x:rnd(.05,.95),y:rnd(.04,.46),vx:0,vy:0,k:'w'});
+    const ns=Math.round(25*(S.salt>0?c.dis/S.salt:0));
+    for(let i=0;i<ns;i++)P.push({x:rnd(.05,.95),y:rnd(.04,.46),vx:0,vy:0,k:'s'});
+    lattice.forEach((L,i)=>{L.on=i>=ns;L.x=0.3+(i%5)*0.04;L.y=0.4+Math.floor(i/5)*0.04;});
+  }else if(S.stage===3){
+    for(let i=0;i<nW;i++)P.push({x:rnd(.05,.95),y:rnd(.3,.95),vx:0,vy:0,k:'w'});
+    const ns=Math.round(25*(S.salt>0?c.dis/S.salt:0));
+    for(let i=0;i<ns;i++)P.push({x:rnd(.05,.95),y:rnd(.3,.95),vx:0,vy:0,k:'s',lat:i});
+    lattice.forEach(L=>L.on=false);
+  }else{
+    for(let i=0;i<nW;i++)P.push({x:rnd(.05,.95),y:rnd(.08,.95),vx:0,vy:0,k:'w'});
+  }
+}
+const PAPER0=0.55,PAPER1=0.63,PORE=0.12,PW=0.03;
+const poreC=x=>Math.round((x-0.06)/PORE)*PORE+0.06;
+function stepPart(dt){
+  const c=calc();
+  if(S.stage===1){ // release lattice cells progressively
+    const target=Math.round(25*(S.salt>0?c.disNow/S.salt:0));
+    let rel=lattice.filter(L=>L.released).length;
+    for(const L of lattice){if(rel>=target)break;if(!L.released){L.released=true;L.on=false;rel++;P.push({x:L.x,y:L.y,vx:rnd(-.1,.1),vy:rnd(-.1,.1),k:'s'});}}
+  }
+  for(const p of P){
+    if(p.fixed)continue;
+    p.vx+=rnd(-1,1)*dt*1.4;p.vy+=rnd(-1,1)*dt*1.4;p.vx*=0.96;p.vy*=0.96;
+    if(S.stage===2)p.vy+=dt*0.5;
+    if(S.stage===3&&p.leave){p.vy-=dt*1.5;}
+    let nx=p.x+p.vx*dt, ny=p.y+p.vy*dt;
+    if(S.stage===2){
+      const inPaper=ny>PAPER0&&ny<PAPER1, wasAbove=p.y<=PAPER0;
+      if(inPaper||(wasAbove&&ny>=PAPER1)){
+        const pc=poreC(nx);
+        if(Math.abs(nx-pc)>PW/2-0.006){ if(wasAbove){ny=PAPER0-0.002;p.vy=-Math.abs(p.vy)*0.3;p.vx+=(pc-nx)*3;} else nx=pc+Math.sign(nx-pc)*(PW/2-0.007);}
+      }
+    }
+    if(nx<0.03||nx>0.97){p.vx*=-1;nx=clamp(nx,0.03,0.97);}
+    const top=S.stage===3&&!p.leave?surfY(c):0.03;
+    if(!p.leave&&(ny<top||ny>0.97)){p.vy=Math.abs(p.vy)*(ny<top?1:-1);ny=ny<top?top+rnd(0.005,0.04):0.97;}
+    p.x=nx;p.y=ny;
+  }
+  if(S.stage===3){
+    const nW=P.filter(p=>p.k==='w').length;
+    const keep=Math.round(46*(S.water>0?c.wLeft/S.water:0));
+    let stay=P.filter(p=>p.k==='w'&&!p.leave).length;
+    for(const p of P){if(stay<=keep)break;if(p.k==='w'&&!p.leave){p.leave=true;stay--;}}
+    P=P.filter(p=>!(p.leave&&p.y<-0.05));
+    const ns=P.filter(p=>p.k==='s').length;
+    const nLat=Math.round(ns*(c.dis>0?clamp(c.precip/c.dis,0,1):0));
+    let i=0;for(const p of P){if(p.k!=='s')continue;if(i<nLat){p.fixed=true;p.x+= (0.32+(i%7)*0.05-p.x)*0.2;p.y+=(0.93-Math.floor(i/7)*0.05-p.y)*0.2;p.vx=p.vy=0;}i++;}
+    void nW;
+  }
+}
+function surfY(c){return 0.08+0.82*(1-(S.water>0?c.wLeft/S.water:0));}
+function drawPart(){
+  const cv=$('cvP');const {x,w,h}=fit(cv);if(w<60)return;
+  x.clearRect(0,0,w,h);
+  const c=calc();const s=Math.min(w,h);
+  const X=v=>v*w, Y=v=>v*h;
+  const rW=Math.max(3,s*0.011), rS=Math.max(3.4,s*0.012);
+  if(S.stage===3){const sy=Y(surfY(c));x.fillStyle='rgba(67,214,255,.06)';x.fillRect(0,sy,w,h-sy);x.strokeStyle='rgba(67,214,255,.4)';x.setLineDash([4,4]);x.beginPath();x.moveTo(0,sy);x.lineTo(w,sy);x.stroke();x.setLineDash([]);}
+  if(S.stage===1||S.stage===0){if(S.stage===1){x.fillStyle='rgba(67,214,255,.05)';x.fillRect(0,0,w,h);}}
+  if(S.stage===2){ // filter paper with pores
+    x.fillStyle='rgba(67,214,255,.05)';x.fillRect(0,0,w,h);
+    x.fillStyle='#d9d2bd';
+    for(let px=0.06-PORE;px<1.1;px+=PORE){const a=px+PW/2,b=px+PORE-PW/2;x.fillRect(X(a),Y(PAPER0),X(b)-X(a),Y(PAPER1)-Y(PAPER0));}
+    txt(x,'濾紙（放大，纖維間有小孔隙）',w-8,Y(PAPER1)+12,{a:'right',c:'#d9d2bd'});
+  }
+  // carbon chunks
+  const nC=S.stage===3?0:3;
+  for(let i=0;i<nC;i++){
+    let cx,cy,r=s*(0.055+0.01*i);
+    if(S.stage===2){cx=X(0.2+i*0.3);cy=Y(PAPER0)-r*0.85;}
+    else{cx=X(0.6+i*0.13);cy=Y(S.stage===0?0.9-i*0.02:0.55+0.25*Math.sin(i*2.1))+(S.stage===1?Math.sin(performance.now()/700+i)*4:0);if(S.stage===0)cy=Y(0.9)-r;}
+    x.fillStyle='#202026';x.strokeStyle='#4a4a55';x.lineWidth=1;x.beginPath();
+    for(let k=0;k<9;k++){const a=k/9*Math.PI*2,rr2=r*(0.8+0.25*Math.sin(k*2.7+i));k?x.lineTo(cx+Math.cos(a)*rr2,cy+Math.sin(a)*rr2):x.moveTo(cx+Math.cos(a)*rr2,cy+Math.sin(a)*rr2);}
+    x.closePath();x.fill();x.stroke();
+  }
+  // undissolved salt lattice
+  const cell=s*0.04;
+  for(const L of lattice){if(!L.on)continue;let lx=X(L.x),ly=Y(L.y);
+    if(S.stage===0){lx=X(0.12)+(lattice.indexOf(L)%5)*cell;ly=Y(0.9)-cell*5+Math.floor(lattice.indexOf(L)/5)*cell;}
+    if(S.stage===2){const i=lattice.indexOf(L);lx=X(0.48)+(i%5)*cell;ly=Y(PAPER0)-cell*(5-Math.floor(i/5))-1;}
+    x.fillStyle='#f4f6fa';x.fillRect(lx,ly,cell-1.5,cell-1.5);}
+  for(const p of P){
+    if(p.k==='w'){x.fillStyle=p.leave?'rgba(67,214,255,.45)':'#43d6ff';x.beginPath();x.arc(X(p.x),Y(p.y),rW,0,7);x.fill();}
+    else{x.fillStyle='#ffffff';x.beginPath();x.arc(X(p.x),Y(p.y),rS*(p.fixed?1.05:1),0,7);x.fill();}
+  }
+  // legend
+  x.font='12px "Noto Sans TC",sans-serif';x.textBaseline='middle';x.textAlign='left';
+  const lg=[['#43d6ff','水粒子'],['#ffffff','食鹽粒子'],['#202026','碳粉顆粒']];
+  let lx=8;for(const [col,t] of lg){x.fillStyle=col;x.strokeStyle='#4a4a55';x.beginPath();x.arc(lx+5,12,5,0,7);x.fill();x.stroke();x.fillStyle='#c9d1dc';x.fillText(t,lx+14,12);lx+=x.measureText(t).width+30;}
+  $('partN').textContent=['食鹽晶體與碳粉','食鹽分散成極小的粒子','小粒子穿過孔隙、碳粉留下','水粒子離開、食鹽粒子聚成晶體'][S.stage];
+}
+
+function setFb(id,h,cls){const e=$(id);e.innerHTML=h;e.className='fb'+(cls?' '+cls:'');}
+function readings(){
+  const c=calc();
+  $('rMax').textContent=f2(c.maxDis)+' g';
+  $('rDis').textContent=S.stage>=1?f2(c.disNow)+' g':'—';
+  $('rUnd').textContent=S.stage>=1?f2(S.stage>=2?c.und*(1-c.p2):c.undNow)+' g':'—';
+  $('rRes').textContent=S.stage>=2?`碳 ${f1(S.carb*Math.min(1,c.p2*1.3))}`+(c.und>0.005?`＋鹽 ${f2(c.und*Math.min(1,c.p2*1.3))}`:'')+' g':'—';
+  $('rLeft').textContent=S.stage===3?f1(c.wLeft)+' mL':'—';
+  $('rRec').textContent=S.stage===3?f2(Math.min(c.precip,c.dis))+' g':'—';
+}
+function stepUI(){
+  const done=s=>S.stage>s||(S.stage===s&&!S.anim&&S.prog>=1);
+  $('st1').disabled=S.anim||S.stage>=1; $('st2').disabled=S.anim||!done(1)||S.stage>=2; $('st3').disabled=S.anim||!done(2)||S.stage>=3;
+  ['st1','st2','st3'].forEach((id,i)=>{const b=$(id);const s=i+1;b.classList.toggle('done',done(s));b.classList.toggle('primary',!b.disabled&&!done(s));});
+  $('slSalt').disabled=$('slCarb').disabled=$('slWater').disabled=S.anim;
+}
+function stageMsg(){
+  const c=calc();
+  if(S.stage===0){setFb('fbS',`20 ℃ 時食鹽的溶解度約 <b>${SOL20} g／100 g 水</b>，${S.water} mL 水最多能溶解 ${f2(c.maxDis)} g 食鹽。按「1 加水攪拌」開始。`,'');return;}
+  if(S.anim){setFb('fbS',['','用玻璃棒攪拌，食鹽逐漸溶解，碳粉不溶、使水變得混濁。','沿玻璃棒把混合液倒入摺好的濾紙，液面不要高過濾紙。','加熱蒸發皿，水逐漸變成水蒸氣離開。'][S.stage],'');return;}
+  if(S.stage===1){
+    if(c.und>0.005)setFb('fbS',`水太少！${S.water} mL 水最多只能溶解 ${f2(c.maxDis)} g 食鹽，還有 <b>${f2(c.und)} g 食鹽沒溶解</b>，過濾時會和碳粉一起留在濾紙上。可以重新開始、多加一點水。`,'bad');
+    else setFb('fbS',`${S.salt} g 食鹽全部溶解成食鹽水，碳粉不溶於水，懸浮使液體混濁。接著按「2 過濾」。`,'ok');return;}
+  if(S.stage===2){setFb('fbS',`碳粉顆粒比濾紙孔隙大，留在濾紙上成為<b>濾渣</b>${c.und>0.005?`（還混著 ${f2(c.und)} g 沒溶解的食鹽）`:''}；食鹽粒子很小，隨水穿過濾紙成為澄清的<b>濾液</b>（食鹽水）。過濾不能把食鹽和水分開，接著按「3 加熱蒸發」。`,'ok');return;}
+  if(S.stage===3){const pct=S.salt>0?c.dis/S.salt*100:0;
+    setFb('fbS',`水蒸發掉，蒸發皿留下 <b>${f2(c.dis)} g 食鹽</b>，回收 ${pct.toFixed(0)}% 的食鹽。`+(c.und>0.005?`少掉的 ${f2(c.und)} g 因為水太少沒溶解，留在濾渣裡了。`:'食鹽和碳粉完全分開了！')+` 晶體在剩下約 ${f1(c.dis/SOLHOT*100)} mL 水時就開始析出（熱水約溶 ${SOLHOT} g／100 g）。`,c.und>0.005?'mid':'ok');}
+}
+let raf=0,last=0;
+function loop(t){
+  const dt=Math.min(0.05,(t-last)/1000||0);last=t;
+  if(S.anim){S.prog=Math.min(1,(t-S.t0)/DUR[S.stage]);if(S.prog>=1){S.anim=false;stepUI();stageMsg();}}
+  if(mode==='salt'){stepPart(dt);drawPart();drawScene();readings();}
+  else drawMag(dt);
+  raf=requestAnimationFrame(loop);
+}
+function go(s){S.stage=s;S.prog=0;S.anim=true;S.t0=performance.now();if(s>=2)initPart();stepUI();stageMsg();}
+function resetS(){S.stage=0;S.prog=0;S.anim=false;reseed();initPart();stepUI();stageMsg();}
+$('st1').onclick=()=>{go(1);initPart();};
+$('st2').onclick=()=>go(2);
+$('st3').onclick=()=>go(3);
+$('stR').onclick=resetS;
+function setSl(sa,ca,wa){$('slSalt').value=sa;$('slCarb').value=ca;$('slWater').value=wa;readSl();}
+$('stBook').onclick=()=>setSl(5,2,30);
+$('stLow').onclick=()=>setSl(8,2,10);
+function readSl(){S.salt=+$('slSalt').value;S.carb=+$('slCarb').value;S.water=+$('slWater').value;
+  $('vSalt').textContent=S.salt.toFixed(1)+' g';$('vCarb').textContent=S.carb.toFixed(1)+' g';$('vWater').textContent=S.water+' mL';resetS();}
+['slSalt','slCarb','slWater'].forEach(id=>$(id).addEventListener('input',readSl));
+
+// flow chart quiz
+const OPS=['（選擇）','加水攪拌溶解','過濾','加熱蒸發','用磁鐵吸引'];
+const MATS=['（選擇）','碳粉','食鹽','食鹽水','鐵粉'];
+const ANS={q1:'加水攪拌溶解',q2:'過濾',q3:'碳粉',q4:'加熱蒸發',q5:'食鹽'};
+['q1','q2','q4'].forEach(id=>$(id).innerHTML=OPS.map(o=>`<option>${o}</option>`).join(''));
+['q3','q5'].forEach(id=>$(id).innerHTML=MATS.map(o=>`<option>${o}</option>`).join(''));
+$('qChk').onclick=()=>{let ok=0,blank=0;
+  Object.keys(ANS).forEach((q,i)=>{const v=$(q).value,k=$('k'+(i+1));if(v.startsWith('（')){blank++;k.textContent='';k.className='mk';return;}const y=v===ANS[q];ok+=y;k.textContent=y?'✓':'✗';k.className='mk '+(y?'y':'n');});
+  if(ok===5)setFb('fbQ','全對！先<b>溶解</b>（利用溶解性不同）、再<b>過濾</b>（利用粒子大小不同）、最後<b>蒸發</b>（利用是否容易蒸發）。','ok');
+  else if(blank)setFb('fbQ',`還有 ${blank} 格沒選。`,'mid');
+  else setFb('fbQ',`對了 ${ok} 格。想一想：哪一種物質溶於水？過濾後什麼留在濾紙上？用磁鐵能吸起食鹽或碳粉嗎？`,'bad');};
+$('qAns').onclick=()=>{Object.entries(ANS).forEach(([q,a])=>$(q).value=a);$('qChk').onclick();};
+
+// =================== mode 2: 磁鐵 ===================
+const M={kind:'fe',a:4,b:6,parts:[],mx:-1,my:-1,show:false,col:0,stuck:0,sweep:null,cw:0,ch:0};
+const PER=30; // 每 g 畫幾顆
+function mixM(){
+  M.parts=[];M.col=0;M.stuck=0;
+  const n1=M.a*PER,n2=M.b*PER;
+  const mk=k=>{const r=Math.sqrt(Math.random())*0.92,a=Math.random()*Math.PI*2;return {k,r,a,st:0,ox:0,oy:0};};
+  for(let i=0;i<n1;i++)M.parts.push(mk(M.kind==='fe'?'fe':'salt'));
+  for(let i=0;i<n2;i++)M.parts.push(mk(M.kind==='fe'?'sand':'carb'));
+  M.parts.sort(()=>Math.random()-0.5);
+  magMsg();
+}
+function geo(w,h){const R=Math.min(w*0.36,h*0.4);return {cx:w*0.4,cy:h*0.54,R,colX:w*0.86,colY:h*0.78};}
+function drawMag(dt){
+  const cv=$('cvMag');const {x,w,h}=fit(cv);if(w<60)return;M.cw=w;M.ch=h;
+  x.clearRect(0,0,w,h);
+  const g=geo(w,h);
+  // sweep animation
+  if(M.sweep){M.sweep.t+=dt;const u=M.sweep.t/3.2;if(u>=1){M.sweep=null;M.show=false;magMsg();}else{const a=u*Math.PI*6;const rr3=g.R*0.8*u+g.R*0.1;M.mx=g.cx+Math.cos(a)*rr3;M.my=g.cy+Math.sin(a)*rr3;M.show=true;}}
+  // dish
+  x.fillStyle='rgba(180,200,230,.06)';x.strokeStyle='rgba(200,225,255,.55)';x.lineWidth=2;x.beginPath();x.arc(g.cx,g.cy,g.R,0,7);x.fill();x.stroke();
+  // collection dish
+  x.beginPath();x.arc(g.colX,g.colY,Math.min(42,w*0.1),0,7);x.stroke();
+  txt(x,'收集皿',g.colX,g.colY+Math.min(42,w*0.1)+12,{c:'#8492aa'});
+  const tip={x:M.mx,y:M.my}, RAD=Math.max(34,g.R*0.28);
+  const col={fe:'#6b7180',sand:'#c9a66b',salt:'#f4f6fa',carb:'#202026'};
+  // update attraction
+  if(M.show&&M.kind==='fe'){
+    for(const p of M.parts){if(p.st!==0||p.k!=='fe')continue;const px=g.cx+Math.cos(p.a)*p.r*g.R,py=g.cy+Math.sin(p.a)*p.r*g.R;
+      if(Math.hypot(px-tip.x,py-tip.y)<RAD){p.st=1;const aa=Math.random()*Math.PI*2,rr4=Math.sqrt(Math.random())*14;p.ox=Math.cos(aa)*rr4;p.oy=Math.sin(aa)*rr4*0.6+6;}}
+  }
+  // particles in dish
+  for(const p of M.parts){if(p.st!==0)continue;const px=g.cx+Math.cos(p.a)*p.r*g.R,py=g.cy+Math.sin(p.a)*p.r*g.R;x.fillStyle=col[p.k];x.fillRect(px-1.4,py-1.4,2.8,2.8);}
+  // collected
+  const cr=Math.min(42,w*0.1);
+  for(let i=0;i<Math.min(M.col,400);i++){const s=seeds[i%seeds.length];const r=Math.sqrt(s[0])*cr*0.85,a=s[1]*7;x.fillStyle=col.fe;x.fillRect(g.colX+Math.cos(a)*r-1.4,g.colY+Math.sin(a)*r-1.4,2.8,2.8);}
+  // magnet
+  const on=M.parts.filter(p=>p.st===1);
+  const mx=M.show?tip.x:w*0.86, my=M.show?tip.y:h*0.28;
+  const mw=26,mh=Math.min(90,h*0.3);
+  x.fillStyle='#d64545';x.fillRect(mx-mw/2,my-mh,mw,mh/2);x.fillStyle='#3a6fd6';x.fillRect(mx-mw/2,my-mh/2,mw,mh/2);
+  txt(x,'N',mx,my-mh*0.75,{f:'bold 13px "JetBrains Mono"',c:'#fff'});txt(x,'S',mx,my-mh*0.25,{f:'bold 13px "JetBrains Mono"',c:'#fff'});
+  if($('wrap').checked){x.fillStyle='rgba(230,240,255,.14)';x.strokeStyle='rgba(230,240,255,.5)';x.lineWidth=1;rr(x,mx-mw/2-5,my-mh-6,mw+10,mh+12,6);x.fill();x.stroke();}
+  for(const p of on){x.fillStyle=col.fe;x.fillRect(mx+p.ox-1.4,my+p.oy-1.4,2.8,2.8);}
+  // stuck (unwrapped leftovers)
+  for(let i=0;i<M.stuck;i++){const s=seeds[(i+50)%seeds.length];x.fillStyle=col.fe;x.fillRect(mx+(s[0]-0.5)*mw-1.4,my-s[1]*10+2,2.8,2.8);}
+  if(M.show&&M.kind==='fe'){x.strokeStyle='rgba(255,209,102,.25)';x.setLineDash([3,4]);x.beginPath();x.arc(mx,my,RAD,0,7);x.stroke();x.setLineDash([]);}
+  if(!M.show&&!M.sweep)txt(x,'拖曳磁鐵到盤子上',w*0.4,18,{c:'#ffe7a3'});
+  // readings
+  const g1=n=>(n/PER).toFixed(1)+' g';
+  const left1=M.parts.filter(p=>p.st===0&&(p.k==='fe'||p.k==='salt')).length, left2=M.parts.filter(p=>p.st===0&&(p.k==='sand'||p.k==='carb')).length;
+  $('mOn').textContent=g1(on.length+M.stuck);$('mCol').textContent=g1(M.col);
+  $('mLeft').textContent=M.kind==='fe'?`鐵 ${(left1/PER).toFixed(1)}＋砂 ${g1(left2)}`:`鹽 ${(left1/PER).toFixed(1)}＋碳 ${g1(left2)}`;
+}
+function magMsg(){
+  if(M.kind==='nacl'){setFb('fbM','食鹽和碳粉都<b>不會</b>被磁鐵吸引，磁鐵掃過去什麼也吸不起來。這種混合物要利用「食鹽溶於水、碳粉不溶」，改用溶解、過濾、蒸發（模式 ①）。','mid');return;}
+  const left=M.parts.filter(p=>p.st===0&&p.k==='fe').length,on=M.parts.filter(p=>p.st===1).length;
+  if(M.col>0&&left===0&&on===0&&M.stuck===0)setFb('fbM',`鐵粉全部收集完成（${(M.col/PER).toFixed(1)} g），盤中只剩細砂。鐵會被磁鐵吸引、細砂不會，利用這個<b>性質差異</b>把它們分開。`,'ok');
+  else if(on>0)setFb('fbM',`磁鐵吸住了 ${(on/PER).toFixed(1)} g 鐵粉，細砂留在盤中。按「取下吸住的粉末」放進收集皿。`,'');
+  else if(M.stuck>0)setFb('fbM','沒套塑膠袋的磁鐵上還黏著一些鐵粉，很難刮乾淨。套上塑膠袋，取下時把磁鐵從袋子裡抽出來，鐵粉就會自然落下。','mid');
+  else setFb('fbM','把磁鐵在盤子上方來回移動，看看哪一種粉末會被吸起來。','');
+}
+$('mTake').onclick=()=>{const on=M.parts.filter(p=>p.st===1);if(!on.length&&!M.stuck){magMsg();return;}
+  if($('wrap').checked){M.col+=on.length+M.stuck;M.stuck=0;}
+  else{const k=Math.round(on.length*0.25);M.col+=on.length-k;M.stuck+=k;}
+  on.forEach(p=>p.st=2);M.show=false;magMsg();};
+$('wrap').onchange=()=>{if($('wrap').checked&&M.stuck){/* 下次取下時一起清 */}magMsg();};
+$('mSweep').onclick=()=>{M.sweep={t:0};};
+$('mReset').onclick=()=>{mixM();M.stuck=0;};
+document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{M.kind=b.dataset.x;document.querySelectorAll('[data-x]').forEach(q=>q.setAttribute('aria-pressed',String(q===b)));
+  $('lA').textContent=M.kind==='fe'?'鐵粉':'食鹽';$('lB').textContent=M.kind==='fe'?'細砂':'碳粉';readM();});
+function readM(){M.a=+$('slA').value;M.b=+$('slB').value;$('vA').textContent=M.a+' g';$('vB').textContent=M.b+' g';mixM();}
+['slA','slB'].forEach(id=>$(id).addEventListener('input',readM));
+const cvM=$('cvMag');
+function ptr(e){const r=cvM.getBoundingClientRect();M.mx=e.clientX-r.left;M.my=e.clientY-r.top+20;}
+cvM.addEventListener('pointerdown',e=>{M.sweep=null;M.show=true;ptr(e);cvM.setPointerCapture(e.pointerId);});
+cvM.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||M.show){M.show=true;ptr(e);}});
+cvM.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse'){M.show=false;}magMsg();});
+cvM.addEventListener('pointerleave',()=>{if(!M.sweep){M.show=false;magMsg();}});
+
+// =================== modes ===================
+let mode='salt';
+function show(m){mode=m;document.querySelectorAll('.modebar button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===m)));
+  $('mSalt').hidden=m!=='salt';$('mMag').hidden=m!=='mag';}
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>show(b.dataset.m));
+
+readSl();readM();show('salt');
+requestAnimationFrame(t=>{last=t;loop(t);});
+window.__sep={S,M,calc,show,go};
+})();
+</script>
+</body>
+</html>
