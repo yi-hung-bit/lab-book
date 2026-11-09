@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>反應時間尺與自由落體</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--ball:#4ade80}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:74ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tabs button{font-size:14px;padding:8px 14px}
+.grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%}
+#cvA,#cvB{height:430px;touch-action:manipulation}
+#gHt,#gHt2{height:250px}
+@media(max-width:560px){#cvA,#cvB{height:360px}#gHt,#gHt2{height:220px}}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0}
+@media(max-width:700px){.g2{grid-template-columns:1fr}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button.grab{background:#ef4444;border-color:#ef4444;color:#fff;font-weight:700;font-size:18px;padding:12px 18px;flex:1;min-width:140px}
+button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);background:rgba(255,209,102,.08)}
+.ctl{margin-top:10px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;word-break:break-all;color:var(--phos)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.tg{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);cursor:pointer;margin-top:8px}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+.tblw{overflow-x:auto;max-height:240px;overflow-y:auto}
+.tbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+.tbl th,.tbl td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th{color:var(--dim);font-weight:500;font-size:12px}
+.tbl td{font-family:"JetBrains Mono",monospace}
+.tbl td.k{color:var(--acc)}
+.tbl td.zh{font-family:"Noto Sans TC",sans-serif;color:var(--muted)}
+.tbl button{padding:1px 7px;font-size:12px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2-1 · Free Fall · Reaction Time</div>
+  <h1>反應時間尺與自由落體</h1>
+  <p class="lede">忽略空氣阻力時，物體由靜止落下做等加速度運動，加速度 g = 9.8 m/s²，落下距離 <b>d = ½gt²</b>。反過來，只要量出落下距離，就能算出經過的時間 <b>t = √(2d/g)</b>——用一把直尺就能測你的反應時間；從不同高度放球計時，畫 H–t² 圖還能求出 g。</p>
+
+  <div class="tabs seg" id="tabs">
+    <button data-m="A" aria-pressed="true">① 反應時間尺</button>
+    <button data-m="B" aria-pressed="false">② 落球計時探究：H ∝ t²</button>
+  </div>
+
+  <!-- ========== A ========== -->
+  <div id="paneA">
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">直尺（0 刻度對準手指）</span><span class="n" id="aNote">按「準備」，尺會在 1～3 秒內隨機放開</span></div>
+        <div class="box"><canvas id="cvA" aria-label="反應時間尺"></canvas></div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="lab">誰來接尺？</div>
+        <div class="seg" id="who">
+          <button data-w="me" aria-pressed="true">我自己（點「抓！」或按空白鍵）</button>
+          <button data-w="sim" aria-pressed="false">模擬同學</button>
+        </div>
+        <div class="ctl" id="simCtl" hidden>
+          <div class="r"><label for="sRT">同學的反應時間</label><span id="vRT"></span></div>
+          <input type="range" id="sRT" min="0.08" max="0.32" step="0.01" value="0.18">
+          <label class="tg"><input type="checkbox" id="tSlow" checked>慢動作（×¼）</label>
+        </div>
+        <div class="ctl">
+          <div class="lab">在哪裡做實驗？</div>
+          <div class="seg" id="gSel">
+            <button data-g="9.8" aria-pressed="true">地球 g = 9.8</button>
+            <button data-g="1.6" aria-pressed="false">月球 g = 1.6</button>
+          </div>
+        </div>
+        <label class="tg"><input type="checkbox" id="tScale">在尺上標出反應時間刻度（反應時間尺）</label>
+        <div class="seg" style="margin-top:12px">
+          <button class="primary" id="ready">準備</button>
+          <button class="grab" id="grab">抓！</button>
+        </div>
+        <div class="read">
+          <div><small>接住位置 H</small><b id="rH">—</b></div>
+          <div><small>反應時間 t = √(2H/g)</small><b id="rT">—</b></div>
+          <div><small>平均（<span id="rN">0</span> 次）</small><b id="rAvg">—</b></div>
+        </div>
+        <div class="note" id="aExplain"></div>
+      </div></section>
+    </div>
+    <section class="card" style="margin-top:16px"><div class="pad">
+      <div class="seg" style="justify-content:space-between;align-items:center"><div class="lab" style="margin:0">測量紀錄</div><button id="aClear">清除紀錄</button></div>
+      <div class="tblw"><table class="tbl"><thead><tr><th>次</th><th>接尺者</th><th>g (m/s²)</th><th>H (cm)</th><th>t (s)</th></tr></thead><tbody id="aLog"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <!-- ========== B ========== -->
+  <div id="paneB" hidden>
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">從高度 H 放手讓球落下</span><span class="n" id="bNote"></span></div>
+        <div class="box"><canvas id="cvB" aria-label="落球計時"></canvas></div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="ctl" style="margin-top:0">
+          <div class="r"><label for="sH">放手高度 H</label><span id="vH"></span></div>
+          <input type="range" id="sH" min="20" max="200" step="5" value="100">
+          <div class="seg" style="margin-top:8px" id="hPre"></div>
+        </div>
+        <div class="ctl">
+          <div class="lab">計時方式</div>
+          <div class="seg" id="tmSel">
+            <button data-t="gate" aria-pressed="true">光電計時器（準確到 0.001 s）</button>
+            <button data-t="hand" aria-pressed="false">手按碼錶</button>
+          </div>
+        </div>
+        <label class="tg"><input type="checkbox" id="tSlowB">慢動作（×¼）</label>
+        <div class="seg" style="margin-top:12px">
+          <button class="primary" id="drop">放手！</button>
+          <button id="drop5">每個高度各測一次（50、100、150、200 cm）</button>
+        </div>
+        <div class="read">
+          <div><small>計時器讀數 t</small><b id="bT">—</b></div>
+          <div><small>理論值 √(2H/g)</small><b id="bTh">—</b></div>
+          <div><small>t²</small><b id="bT2">—</b></div>
+        </div>
+        <div class="note" id="bExplain"></div>
+      </div></section>
+    </div>
+
+    <section class="card" style="margin-top:16px">
+      <div class="g2">
+        <div><div class="head"><span class="t">H–t 圖</span><span class="n">曲線，不是直線</span></div><div class="box"><canvas id="gHt" aria-label="H-t 圖"></canvas></div></div>
+        <div><div class="head"><span class="t">H–t² 圖</span><span class="n" id="fitNote">直線，斜率 = ½g</span></div><div class="box"><canvas id="gHt2" aria-label="H-t平方圖"></canvas></div></div>
+      </div>
+      <div class="pad" style="padding-top:0">
+        <div class="seg" style="justify-content:space-between;align-items:center">
+          <div class="seg"><button id="book">載入課本探究活動數據</button><button id="bClear">清除數據</button></div>
+          <label class="tg" style="margin:0"><input type="checkbox" id="tFree">也畫不過原點的最適直線</label>
+        </div>
+        <div class="read" id="fitRead">
+          <div><small>過原點最適直線斜率 k</small><b id="fK">—</b></div>
+          <div><small>g = 2k</small><b id="fG">—</b></div>
+          <div><small>與 9.8 m/s² 相差</small><b id="fE">—</b></div>
+        </div>
+        <div class="tblw"><table class="tbl"><thead><tr><th>#</th><th>H (cm)</th><th>t (s)</th><th>t² (s²)</th><th>2H/t² (m/s²)</th><th>來源</th><th></th></tr></thead><tbody id="bLog"></tbody></table></div>
+        <div class="note" id="fitExplain"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>反應時間尺：同學捏住尺的上端，你把手指張開放在 0 刻度旁（不要碰到尺），看到尺開始掉就立刻夾住。尺落下的距離 H 與反應時間 t 滿足 H = ½gt²，所以 t = √(2H/g)；一般人約 0.15～0.25 s，30 cm 的尺最多只能量到約 0.25 s。反應時間刻度不是等間距：0.05 s 只對應 1.2 cm，0.10 s 對應 4.9 cm，0.20 s 對應 19.6 cm——時間加倍，距離變 4 倍。
+    落球探究（課本章末探究活動）：H 與 t 的關係圖是曲線，改畫 H 與 t² 就變成過原點的直線，表示 H ∝ t²；直線斜率等於 ½g。用手按碼錶時，按下與放開都有反應時間，數據會偏離理論值，這也是為什麼精密實驗要改用光電計時器。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h};}
+const f2=v=>v.toFixed(2),f3=v=>v.toFixed(3);
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+const st={mode:'A',
+  // A
+  who:'me',g:9.8,phase:'idle',t0:0,tc:0,waitUntil:0,rt:0.18,slow:true,scale:false,logA:[],earlyMsg:false,
+  // B
+  H:100,timer:'gate',slowB:false,ball:null,data:[],free:false,queue:[],lastB:null};
+
+// ===================== A: reaction ruler =====================
+const RL=30; // cm
+const LIM=RL/100; // m
+function simSpeed(){return st.who==='sim'&&st.slow?0.25:1;}
+function curT(now){ // physical time since release
+  if(st.phase==='fall')return (now-st.t0)/1000*simSpeed();
+  if(st.phase==='caught')return st.tc;
+  if(st.phase==='missed')return (now-st.t0)/1000*simSpeed();
+  return 0;}
+function ready(){
+  if(st.phase==='wait'||st.phase==='fall')return;
+  st.phase='wait';st.earlyMsg=false;st.waitUntil=performance.now()+1000+Math.random()*2000;
+  if(st.who==='sim'){st.simRT=Math.max(0.06,st.rt+0.015*gauss());}
+  uiA();}
+function grab(ts){
+  const now=ts||performance.now();
+  if(st.phase==='wait'&&st.who==='me'){st.phase='idle';st.earlyMsg=true;uiA();return;}
+  if(st.phase!=='fall'||st.who!=='me')return;
+  const t=(now-st.t0)/1000;catchAt(t);}
+function catchAt(t){
+  const H=0.5*st.g*t*t;
+  if(H>LIM){st.phase='missed';uiA();return;}
+  st.phase='caught';st.tc=t;
+  st.logA.push({who:st.who==='me'?'我':'模擬同學',g:st.g,H:H*100,t});
+  uiA();renderLogA();}
+function stepA(now){
+  if(st.phase==='wait'&&now>=st.waitUntil){st.phase='fall';st.t0=now;uiA();}
+  if(st.phase==='fall'){const t=curT(now);
+    if(st.who==='sim'&&t>=st.simRT){catchAt(st.simRT);}
+    else if(0.5*st.g*t*t>LIM){st.phase='missed';st.t0m=now;uiA();}}
+}
+function drawA(now){
+  const {x,w,h}=fit($('cvA'));x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const top=46,sc=(h-top-70)/RL; // px per cm
+  const yF=top+RL*sc; // finger line
+  const t=curT(now);let d=0.5*st.g*t*t*100; // cm fallen
+  if(st.phase==='missed'){d=0.5*st.g*t*t*100;}
+  if(st.phase==='idle'||st.phase==='wait')d=0;
+  const rw=Math.min(64,w*.16),rx=w*0.42-rw/2;
+  const yTop=top+d*sc,yBot=yTop+RL*sc;
+  // dropper hand (top)
+  const handY=top-6;
+  x.fillStyle=st.phase==='wait'||st.phase==='idle'?'#e8b48a':'#b98a6a';
+  x.beginPath();x.ellipse(rx+rw/2,handY-12,rw*0.62,16,0,0,7);x.fill();
+  if(!(st.phase==='wait'||st.phase==='idle')){x.fillStyle='#8492aa';x.font='12px "Noto Sans TC"';x.textAlign='center';x.fillText('放開！',rx+rw/2+rw*0.9,handY-8);}
+  // ruler
+  x.save();x.beginPath();x.rect(0,0,w,h);x.clip();
+  const grd=x.createLinearGradient(rx,0,rx+rw,0);grd.addColorStop(0,'#f5e6b8');grd.addColorStop(1,'#e8d29a');
+  x.fillStyle=grd;x.fillRect(rx,yTop,rw,RL*sc);x.strokeStyle='#8a7440';x.lineWidth=1;x.strokeRect(rx+.5,yTop+.5,rw-1,RL*sc-1);
+  // cm marks: 0 at bottom
+  x.strokeStyle='#3b3020';x.fillStyle='#3b3020';x.textAlign='left';
+  for(let c=0;c<=RL*10;c++){const y=yBot-c/10*sc;const L=c%10===0?rw*0.38:c%5===0?rw*0.26:rw*0.14;if(sc<9&&c%10&&c%5)continue;
+    x.lineWidth=c%10===0?1.4:.8;x.beginPath();x.moveTo(rx,y);x.lineTo(rx+L,y);x.stroke();
+    if(c%10===0&&c%(sc<9?20:10)===0){x.font='bold 11px "JetBrains Mono"';x.fillText(c/10,rx+rw*0.42,y+4);}}
+  if(st.scale){ // reaction-time scale on right side of ruler
+    x.fillStyle='#b4232a';x.strokeStyle='#b4232a';x.textAlign='right';x.font='bold 10px "JetBrains Mono"';
+    for(let k=1;k<=10;k++){const tt=0.025*k*(st.g<5?2:1);const c=0.5*st.g*tt*tt*100;if(c>RL)break;const y=yBot-c*sc;
+      x.lineWidth=1.4;x.beginPath();x.moveTo(rx+rw,y);x.lineTo(rx+rw-rw*0.3,y);x.stroke();
+      if(k%2===0)x.fillText(tt.toFixed(2)+'s',rx+rw-2,y-3);}
+  }
+  x.restore();
+  // catcher hand: fingers at yF
+  const caught=st.phase==='caught';
+  const gap=caught?0:14;
+  x.fillStyle='#e8b48a';
+  x.beginPath();x.roundRect?x.roundRect(rx-34-gap,yF-8,32,16,7):x.rect(rx-34-gap,yF-8,32,16);x.fill(); // thumb side
+  x.beginPath();x.roundRect?x.roundRect(rx+rw+2+gap,yF-8,40,16,7):x.rect(rx+rw+2+gap,yF-8,40,16);x.fill(); // fingers
+  x.fillStyle='#c8946c';x.beginPath();x.ellipse(rx+rw+46+gap,yF+18,30,24,0,0,7);x.fill();
+  // finger line marker
+  x.strokeStyle='rgba(67,214,255,.6)';x.setLineDash([5,4]);x.beginPath();x.moveTo(8,yF);x.lineTo(rx-40-gap,yF);x.stroke();x.setLineDash([]);
+  x.fillStyle='#43d6ff';x.font='11px "Noto Sans TC"';x.textAlign='left';x.fillText('手指位置',8,yF-6);
+  // readouts on canvas
+  const showD=Math.min(d,RL);
+  x.textAlign='left';x.font='bold 13px "JetBrains Mono"';x.fillStyle='#ffd166';
+  const tx=Math.min(w-118,rx+rw+90);
+  x.fillText(`t = ${f3(Math.min(t,9.99))} s`,tx,top+14);
+  x.fillText(`d = ${showD.toFixed(1)} cm`,tx,top+34);
+  if(st.phase==='caught'){x.fillStyle='#7dffc4';x.font='bold 14px "Noto Sans TC"';x.fillText('接住了！',tx,top+60);}
+  if(st.phase==='missed'){x.fillStyle='#ff7a7a';x.font='bold 14px "Noto Sans TC"';x.fillText('沒接到…',tx,top+60);}
+  if(st.phase==='wait'){x.fillStyle='#8492aa';x.font='13px "Noto Sans TC"';x.fillText('盯著尺……',tx,top+60);}
+  if(st.earlyMsg){x.fillStyle='#ff7a7a';x.font='bold 14px "Noto Sans TC"';x.fillText('太早了！偷跑',tx,top+60);}
+  if(st.who==='sim'&&st.slow&&st.phase==='fall'){x.fillStyle='#5b6880';x.font='11px "Noto Sans TC"';x.fillText('慢動作 ×¼',tx,top+80);}
+}
+function uiA(){
+  $('simCtl').hidden=st.who!=='sim';
+  $('vRT').textContent=f2(st.rt)+' s（約 '+(0.5*st.g*st.rt*st.rt*100).toFixed(1)+' cm）';
+  $('grab').disabled=st.who!=='me';
+  $('ready').disabled=st.phase==='wait'||st.phase==='fall';
+  const last=st.logA[st.logA.length-1];
+  if(st.phase==='caught'&&last){$('rH').textContent=last.H.toFixed(1)+' cm';$('rT').textContent=f3(last.t)+' s';}
+  else if(st.phase==='missed'){$('rH').textContent='> 30 cm';$('rT').textContent='> '+f3(Math.sqrt(2*LIM/st.g))+' s';}
+  const sameG=st.logA.filter(r=>r.g===st.g);
+  $('rN').textContent=sameG.length;$('rAvg').textContent=sameG.length?f3(sameG.reduce((s,r)=>s+r.t,0)/sameG.length)+' s':'—';
+  const tmax=Math.sqrt(2*LIM/st.g);
+  let s='';
+  if(st.phase==='caught'&&last){s=`尺落下 H = <b>${last.H.toFixed(1)} cm</b> = ${(last.H/100).toFixed(3)} m，t = √(2H/g) = √(2 × ${(last.H/100).toFixed(3)} / ${st.g}) = <b>${f3(last.t)} s</b>。`+(st.g<5?' 在月球上 g 只有地球的約 1/6，同樣的反應時間，尺只掉下約 1/6 的距離。':'');}
+  else if(st.phase==='missed'){s=`尺掉超過 30 cm 了：反應時間大於 √(2 × 0.30 / ${st.g}) ≈ <b>${f3(tmax)} s</b>，這把尺量不到。`;}
+  else if(st.earlyMsg){s='尺還沒放開你就抓了——要「看到尺開始掉」才能抓，不能猜時間。';}
+  else if(st.phase==='wait'){s='尺會在 1～3 秒內隨機放開，看到尺動就立刻抓！';}
+  else s=`按「準備」後，尺會隨機放開。30 cm 的尺在 g = ${st.g} m/s² 下，最多只能量到 ${f3(tmax)} s 的反應時間。打開「反應時間刻度」，看看刻度為什麼越往上越疏。`;
+  $('aExplain').innerHTML=s;
+  $('aNote').textContent=st.who==='me'?'按「準備」，尺會在 1～3 秒內隨機放開':'模擬同學會在反應時間後接住';
+}
+function renderLogA(){
+  $('aLog').innerHTML=st.logA.map((r,i)=>`<tr><td>${i+1}</td><td class="zh">${r.who}</td><td>${r.g}</td><td class="k">${r.H.toFixed(1)}</td><td>${f3(r.t)}</td></tr>`).reverse().join('')||'<tr><td colspan="5" class="zh" style="text-align:center">尚無紀錄</td></tr>';
+  uiA();}
+
+// ===================== B: drop-ball timing =====================
+const G=9.8;
+function measure(H){ // H in m
+  const tt=Math.sqrt(2*H/G);
+  if(st.timer==='gate')return Math.round(tt*1000)/1000;
+  // hand stopwatch: start/stop both delayed by reaction; stop delay usually a bit longer
+  const m=tt+0.02+0.025*gauss();return Math.max(0.05,Math.round(m*100)/100);}
+function drop(H){
+  if(st.ball)return;H=H??st.H;
+  st.H=H;$('sH').value=H;renderB();st.ball={H:H/100,t0:performance.now(),done:false,meas:null};$('drop').disabled=$('drop5').disabled=true;}
+function stepB(now){
+  const b=st.ball;if(!b||b.done)return;
+  const sp=st.slowB?0.25:1;const t=(now-b.t0)/1000*sp;const tt=Math.sqrt(2*b.H/G);
+  if(t>=tt){b.done=true;b.meas=measure(b.H);b.tEnd=now;
+    st.data.push({H:b.H*100,t:b.meas,src:st.timer==='gate'?'光電計時':'手按碼錶'});st.lastB={H:b.H,t:b.meas,gate:st.timer==='gate'};
+    renderB();
+    setTimeout(()=>{st.ball=null;if(st.queue.length){drop(st.queue.shift());}else{$('drop').disabled=$('drop5').disabled=false;}},st.queue.length?350:700);}
+}
+function drawB(now){
+  const {x,w,h}=fit($('cvB'));x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const ground=h-30,top=24,sc=(ground-top)/215; // px per cm
+  // ground
+  x.fillStyle='#1b2336';x.fillRect(0,ground,w,h-ground);x.strokeStyle='#334155';x.beginPath();x.moveTo(0,ground);x.lineTo(w,ground);x.stroke();
+  // vertical ruler
+  const rx=Math.min(w*0.62,w-70),rw=12;
+  x.fillStyle='#7dd3fc';x.globalAlpha=.75;x.fillRect(rx,ground-200*sc,rw,200*sc);x.globalAlpha=1;
+  x.fillStyle='#c9d2dc';x.font='11px "JetBrains Mono"';x.textAlign='left';x.strokeStyle='#e8edf6';
+  for(let c=0;c<=200;c+=10){const y=ground-c*sc;x.lineWidth=c%50===0?1.6:.8;x.beginPath();x.moveTo(rx+rw,y);x.lineTo(rx+rw+(c%50===0?10:5),y);x.stroke();if(c%50===0)x.fillText(c===0?'地面':c+' cm',rx+rw+13,y+4);}
+  // person (simple)
+  const px=rx-Math.min(110,w*0.25),feet=ground,hp=170*sc;
+  const H=st.ball?st.ball.H*100:st.H;
+  const hy=ground-H*sc;
+  x.strokeStyle='#64748b';x.lineWidth=5;x.lineCap='round';
+  x.beginPath();x.moveTo(px-8,feet);x.lineTo(px,feet-hp*0.48);x.lineTo(px+8,feet);x.stroke();
+  x.beginPath();x.moveTo(px,feet-hp*0.48);x.lineTo(px,feet-hp*0.84);x.stroke();
+  x.fillStyle='#e8b48a';x.beginPath();x.arc(px,feet-hp*0.92,hp*0.075,0,7);x.fill();
+  const sh={x:px,y:feet-hp*0.8};const hand={x:rx-14,y:hy};
+  x.strokeStyle='#e8b48a';x.lineWidth=4;x.beginPath();x.moveTo(sh.x,sh.y);x.lineTo(hand.x,hand.y);x.stroke();
+  // ball
+  let by=hy;let t=0;const b=st.ball;
+  if(b){const sp=st.slowB?0.25:1;t=b.done?Math.sqrt(2*b.H/G):(now-b.t0)/1000*sp;by=ground-(b.H*100-0.5*G*t*t*100)*sc;}
+  const br=Math.max(5,4*sc);by=Math.min(by,ground-br);
+  // height marker
+  x.strokeStyle='rgba(255,209,102,.5)';x.setLineDash([4,4]);x.lineWidth=1;x.beginPath();x.moveTo(rx-50,hy);x.lineTo(rx,hy);x.stroke();x.setLineDash([]);
+  x.font='bold 12px "JetBrains Mono"';x.textAlign='right';{const lt='H = '+H+' cm',lw=x.measureText(lt).width;x.fillStyle='rgba(4,6,11,.85)';x.fillRect(rx-58-lw,hy-9,lw+8,18);}x.fillStyle='#ffd166';x.fillText('H = '+H+' cm',rx-54,hy+4);
+  // flashes: strobe marks every 0.05 s while falling
+  if(b){x.fillStyle='rgba(74,222,128,.28)';for(let k=1;k*0.05<t;k++){const tk=k*0.05;const yy=ground-(b.H*100-0.5*G*tk*tk*100)*sc;if(yy<ground-br)x.beginPath(),x.arc(rx-14,yy,br*0.7,0,7),x.fill();}}
+  x.fillStyle='#4ade80';x.shadowColor='#4ade80';x.shadowBlur=8;x.beginPath();x.arc(rx-14,by,br,0,7);x.fill();x.shadowBlur=0;
+  // timer
+  x.fillStyle='#0a0f1a';x.strokeStyle='#334155';x.lineWidth=1;const tw=118;x.fillRect(10,10,tw,48);x.strokeRect(10.5,10.5,tw,48);
+  x.fillStyle='#8492aa';x.font='11px "Noto Sans TC"';x.textAlign='left';x.fillText(st.timer==='gate'?'光電計時器':'碼錶',18,26);
+  x.fillStyle='#7dffc4';x.font='bold 18px "JetBrains Mono"';
+  const shown=b?(b.done?b.meas:t):(st.lastB?st.lastB.t:0);const dg=b?(st.timer==='gate'?3:2):(st.lastB&&!st.lastB.gate?2:3);x.fillText(shown.toFixed(dg)+' s',18,50);
+  if(b&&!b.done&&st.slowB){x.fillStyle='#5b6880';x.font='11px "Noto Sans TC"';x.fillText('慢動作 ×¼（計時為真實時間）',10,76);}
+}
+function fitData(){
+  const d=st.data;if(!d.length)return null;
+  const X=d.map(p=>p.t*p.t),Y=d.map(p=>p.H/100);
+  const k=X.reduce((s,v,i)=>s+v*Y[i],0)/X.reduce((s,v)=>s+v*v,0);
+  let free=null;
+  if(d.length>=2){const n=d.length,mx=X.reduce((a,b)=>a+b)/n,my=Y.reduce((a,b)=>a+b)/n;let sxx=0,sxy=0;X.forEach((v,i)=>{sxx+=(v-mx)*(v-mx);sxy+=(v-mx)*(Y[i]-my);});if(sxx>1e-9){const m=sxy/sxx;free={m,b:my-m*mx};}}
+  return{k,free};}
+function axes(x,w,h,xmax,ymax,xl,yl,xt,yt){
+  const L=46,R=12,T=12,B=34;const W=w-L-R,H=h-T-B;
+  const X=v=>L+v/xmax*W,Y=v=>T+H-v/ymax*H;
+  x.strokeStyle='#222c42';x.lineWidth=1;x.fillStyle='#6b7893';x.font='10.5px "JetBrains Mono"';
+  for(let v=0;v<=xmax+1e-9;v+=xt){x.beginPath();x.moveTo(X(v),T);x.lineTo(X(v),T+H);x.stroke();x.textAlign='center';x.fillText(+v.toFixed(2),X(v),T+H+14);}
+  for(let v=0;v<=ymax+1e-9;v+=yt){x.beginPath();x.moveTo(L,Y(v));x.lineTo(L+W,Y(v));x.stroke();x.textAlign='right';x.fillText(+v.toFixed(2),L-5,Y(v)+4);}
+  x.strokeStyle='#5b6880';x.beginPath();x.moveTo(L,T);x.lineTo(L,T+H);x.lineTo(L+W,T+H);x.stroke();
+  x.fillStyle='#8492aa';x.font='11px "Noto Sans TC"';x.textAlign='center';x.fillText(xl,L+W/2,h-4);
+  x.save();x.translate(11,T+H/2);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore();
+  return{X,Y,L,T,W,H};}
+function drawGraphs(){
+  const F=fitData();
+  // H-t
+  {const {x,w,h}=fit($('gHt'));x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+    const a=axes(x,w,h,0.8,2.2,'t (s)','H (m)',0.1,0.5);
+    x.strokeStyle='rgba(255,209,102,.55)';x.setLineDash([5,4]);x.lineWidth=1.5;x.beginPath();for(let i=0;i<=80;i++){const t=i/100;const Hh=0.5*G*t*t;if(Hh>2.2)break;i?x.lineTo(a.X(t),a.Y(Hh)):x.moveTo(a.X(t),a.Y(Hh));}x.stroke();x.setLineDash([]);
+    x.fillStyle='#ffd166';x.font='11px "JetBrains Mono"';x.textAlign='left';x.fillText('H = ½(9.8)t²',a.L+8,a.T+14);
+    st.data.forEach(p=>{x.fillStyle=p.src==='課本'?'#43d6ff':'#4ade80';x.beginPath();x.arc(a.X(p.t),a.Y(p.H/100),4.5,0,7);x.fill();});}
+  // H-t2
+  {const {x,w,h}=fit($('gHt2'));x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+    const a=axes(x,w,h,0.5,2.2,'t² (s²)','H (m)',0.1,0.5);
+    if(F){x.strokeStyle='#ffd166';x.lineWidth=2;x.beginPath();x.moveTo(a.X(0),a.Y(0));const xe=Math.min(0.5,2.2/F.k);x.lineTo(a.X(xe),a.Y(F.k*xe));x.stroke();
+      if(st.free&&F.free){x.strokeStyle='#c084fc';x.setLineDash([6,4]);x.beginPath();const x0=Math.max(0,-F.free.b/F.free.m);x.moveTo(a.X(x0),a.Y(F.free.m*x0+F.free.b));const xe2=Math.min(0.5,(2.2-F.free.b)/F.free.m);x.lineTo(a.X(xe2),a.Y(F.free.m*xe2+F.free.b));x.stroke();x.setLineDash([]);}}
+    st.data.forEach(p=>{x.fillStyle=p.src==='課本'?'#43d6ff':'#4ade80';x.beginPath();x.arc(a.X(p.t*p.t),a.Y(p.H/100),4.5,0,7);x.fill();});
+    x.font='11px "Noto Sans TC"';x.textAlign='left';x.fillStyle='#43d6ff';x.fillText('● 課本數據',a.L+8,a.T+14);x.fillStyle='#4ade80';x.fillText('● 模擬測量',a.L+82,a.T+14);}
+}
+function renderB(){
+  const Hm=st.H/100,th=Math.sqrt(2*Hm/G);
+  $('vH').textContent=st.H+' cm';
+  $('bTh').textContent=f3(th)+' s';
+  if(st.lastB){$('bT').textContent=(st.lastB.t.toFixed(st.lastB.gate?3:2))+' s'+(Math.round(st.lastB.H*100)!==st.H?'（'+Math.round(st.lastB.H*100)+' cm）':'');$('bT2').textContent=f3(st.lastB.t*st.lastB.t)+' s²';}
+  $('bLog').innerHTML=st.data.map((p,i)=>`<tr><td>${i+1}</td><td class="k">${p.H}</td><td>${p.t.toFixed(p.src==='光電計時'?3:2)}</td><td>${f3(p.t*p.t)}</td><td>${f2(2*p.H/100/(p.t*p.t))}</td><td class="zh">${p.src}</td><td><button data-del="${i}" aria-label="刪除">✕</button></td></tr>`).join('')||'<tr><td colspan="7" class="zh" style="text-align:center">尚無數據：按「放手！」或載入課本數據</td></tr>';
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{st.data.splice(+b.dataset.del,1);renderB();});
+  const F=fitData();
+  if(F){$('fK').textContent=f2(F.k)+' m/s²';const g=2*F.k;$('fG').textContent=f2(g)+' m/s²';$('fE').textContent=((g-9.8)/9.8*100).toFixed(1)+' %';}
+  else{$('fK').textContent=$('fG').textContent=$('fE').textContent='—';}
+  let s='';
+  if(!F)s='至少量一個高度，H–t² 圖上就會出現過原點的最適直線。改變 H 多測幾次，看看點是不是都落在同一條直線上。';
+  else{s=`過原點的最適直線 H = k t²，k = <b>${f2(F.k)} m/s²</b>，因為 H = ½gt²，所以 g = 2k = <b>${f2(2*F.k)} m/s²</b>。`;
+    if(st.free&&F.free)s+=` 不強迫過原點的最適直線（紫色虛線）：斜率 ${f2(F.free.m)} m/s²（g ≈ ${f2(2*F.free.m)}），截距 ${(F.free.b*100).toFixed(1)} cm。`+(Math.abs(F.free.b)>0.02?'截距明顯不為零，代表每次計時都有差不多大小的偏差（系統誤差）；隨機誤差大時，斜率也會跟著亂跳。':'截距接近零，數據符合 H ∝ t²。');
+    const hasBook=st.data.some(p=>p.src==='課本'),hasHand=st.data.some(p=>p.src==='手按碼錶');
+    if(hasBook||hasHand)s+=' 課本與手按碼錶的數據多半比理論值<b>偏長</b>（按停比按下更慢），所以算出的 g 偏小。';}
+  $('fitExplain').innerHTML=s;
+  $('bExplain').innerHTML=`從 H = ${st.H} cm 放手，理論上 t = √(2H/g) = √(2 × ${f2(Hm)} / 9.8) = <b>${f3(th)} s</b>。`+(st.timer==='hand'?' 手按碼錶：看到放手才按下、看到落地才按停，兩次都有反應時間，讀數會上下跳動（約 ±0.03 s），還常常偏長一點。':' 光電計時器由球擋光自動開始與停止，幾乎沒有人為誤差。')+' 高度加倍，時間不是加倍，而是變成 √2 ≈ 1.41 倍。';
+  $('fitNote').textContent=F?`斜率 k = ${f2(F.k)}，g = 2k = ${f2(2*F.k)}`:'直線，斜率 = ½g';
+  $('bNote').textContent='綠色殘影：每 0.05 s 的位置，間隔越來越大';
+  drawGraphs();
+}
+
+// ===================== events =====================
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{st.mode=b.dataset.m;document.querySelectorAll('#tabs button').forEach(z=>z.setAttribute('aria-pressed',z===b));$('paneA').hidden=st.mode!=='A';$('paneB').hidden=st.mode!=='B';if(st.mode==='B')renderB();});
+document.querySelectorAll('#who button').forEach(b=>b.onclick=()=>{st.who=b.dataset.w;document.querySelectorAll('#who button').forEach(z=>z.setAttribute('aria-pressed',z===b));st.phase='idle';st.earlyMsg=false;uiA();});
+document.querySelectorAll('#gSel button').forEach(b=>b.onclick=()=>{st.g=+b.dataset.g;document.querySelectorAll('#gSel button').forEach(z=>z.setAttribute('aria-pressed',z===b));st.phase='idle';st.earlyMsg=false;uiA();});
+$('sRT').oninput=e=>{st.rt=+e.target.value;uiA();};
+$('tSlow').onchange=e=>st.slow=e.target.checked;
+$('tScale').onchange=e=>st.scale=e.target.checked;
+$('ready').onclick=ready;
+$('grab').addEventListener('pointerdown',e=>{e.preventDefault();grab(performance.now());});
+$('cvA').addEventListener('pointerdown',()=>{if(st.phase==='fall'||st.phase==='wait')grab(performance.now());else if(st.phase!=='wait')ready();});
+addEventListener('keydown',e=>{if(st.mode!=='A')return;if(e.code==='Space'||e.code==='Enter'){if(e.target.tagName==='INPUT')return;e.preventDefault();if(e.repeat)return;if(st.phase==='fall'||st.phase==='wait')grab(performance.now());else ready();}});
+$('aClear').onclick=()=>{st.logA=[];renderLogA();};
+
+$('sH').oninput=e=>{st.H=+e.target.value;renderB();};
+[50,100,150,200].forEach(v=>{const b=document.createElement('button');b.textContent=v+' cm';b.onclick=()=>{st.H=v;$('sH').value=v;renderB();};$('hPre').appendChild(b);});
+document.querySelectorAll('#tmSel button').forEach(b=>b.onclick=()=>{st.timer=b.dataset.t;document.querySelectorAll('#tmSel button').forEach(z=>z.setAttribute('aria-pressed',z===b));renderB();});
+$('tSlowB').onchange=e=>st.slowB=e.target.checked;
+$('drop').onclick=()=>drop(st.H);
+$('drop5').onclick=()=>{if(st.ball)return;st.queue=[100,150,200];drop(50);};
+$('book').onclick=()=>{st.data=st.data.filter(p=>p.src!=='課本');[[50,.34],[100,.48],[150,.57],[200,.65]].forEach(([H,t])=>st.data.push({H,t,src:'課本'}));renderB();};
+$('bClear').onclick=()=>{st.data=[];st.lastB=null;renderB();};
+$('tFree').onchange=e=>{st.free=e.target.checked;renderB();};
+
+function frame(now){
+  if(st.mode==='A'){stepA(now);drawA(now);}
+  else{stepB(now);drawB(now);}
+  requestAnimationFrame(frame);}
+addEventListener('resize',()=>{if(st.mode==='B')drawGraphs();});
+uiA();renderLogA();renderB();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
