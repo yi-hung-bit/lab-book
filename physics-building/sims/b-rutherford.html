@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拉塞福 α 粒子散射</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--pink:#ff5fa2}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%}
+#cvA,#cvB{height:420px}
+#cvH{height:230px}
+@media(max-width:560px){#cvA,#cvB{height:330px}#cvH{height:210px}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 11px;border-radius:9px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);background:rgba(255,209,102,.08)}
+.modebar button[aria-pressed="true"]{color:#231a02;background:var(--acc)}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+@media(max-width:420px){.read{grid-template-columns:repeat(2,1fr)}}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:14.5px;font-weight:700;word-break:break-all;color:var(--phos)}
+.read b.warn{color:var(--red)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.note.alert{border-color:#5a2a2a;color:#ffb4b4}
+.tg{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);cursor:pointer;margin-top:8px}
+.tg input{width:17px;height:17px;accent-color:var(--acc)}
+.tbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+.tbl th,.tbl td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th{color:var(--dim);font-weight:500;font-size:12px}
+.tbl td{font-family:"JetBrains Mono",monospace}
+.tbl td.zh{font-family:"Noto Sans TC",sans-serif;color:var(--muted);text-align:left}
+.tblw{overflow-x:auto}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">3-2 · Rutherford Scattering</div>
+  <h1>拉塞福 α 粒子散射</h1>
+  <p class="lede">拉塞福用 α 粒子（氦原子核 ⁴₂He²⁺）撞擊薄金箔：<b>絕大部分直接穿過、少數大角度偏折、極少數幾乎反彈</b>。湯姆森的葡萄乾布丁模型無法解釋反彈，於是拉塞福提出：原子的正電荷與大部分質量集中在一個極小的<b>原子核</b>裡（圖 3-7）。</p>
+
+  <div class="modebar" id="modes">
+    <button data-m="A" aria-pressed="true">① 單一原子放大：瞄準距離</button>
+    <button data-m="B" aria-pressed="false">② 金箔實驗：偵測屏計數</button>
+  </div>
+
+  <!-- ===== 共用模型選擇 ===== -->
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t" id="vTitle">原子放大圖</span><span class="n" id="vNote"></span></div>
+      <div class="box" id="boxA"><canvas id="cvA" aria-label="α 粒子經過原子的軌跡"></canvas></div>
+      <div class="box" id="boxB" hidden><canvas id="cvB" aria-label="金箔與環形偵測屏"></canvas></div>
+      <div id="histWrap" hidden>
+        <div class="head" style="padding-top:0"><span class="t">各角度計數（對數刻度）</span><span class="n" id="hNote"></span></div>
+        <div class="box"><canvas id="cvH" aria-label="散射角計數長條圖"></canvas></div>
+      </div>
+    </section>
+
+    <section class="card"><div class="pad">
+      <div class="lab">原子模型</div>
+      <div class="seg" id="model">
+        <button data-v="R" aria-pressed="true">拉塞福：原子核模型</button>
+        <button data-v="T" aria-pressed="false">湯姆森：葡萄乾布丁模型</button>
+      </div>
+
+      <div class="ctl">
+        <div class="r"><label for="sK">α 粒子動能 K</label><span id="vK"></span></div>
+        <input type="range" id="sK" min="1" max="10" step="0.1" value="5">
+      </div>
+      <div class="ctl">
+        <div class="lab">靶（金屬箔）</div>
+        <div class="seg" id="tgt"></div>
+      </div>
+
+      <!-- A -->
+      <div id="ctlA">
+        <div class="ctl">
+          <div class="r"><label for="sB">瞄準距離（撞擊參數）b</label><span id="vB"></span></div>
+          <input type="range" id="sB" min="0" max="1000" step="1" value="250">
+        </div>
+        <label class="tg"><input type="checkbox" id="tFan" checked>同時畫一排不同 b 的軌跡</label>
+        <div class="read">
+          <div><small>散射角 θ</small><b id="rTh"></b></div>
+          <div><small>最接近距離 r<sub>min</sub></small><b id="rRmin"></b></div>
+          <div><small>正面撞擊最近距離 d</small><b id="rD"></b></div>
+          <div><small>原子核半徑（約）</small><b id="rRN"></b></div>
+          <div><small>原子半徑（約）</small><b id="rRA"></b></div>
+          <div><small>原子 ÷ 原子核</small><b id="rRatio"></b></div>
+        </div>
+        <div class="note" id="noteA"></div>
+      </div>
+
+      <!-- B -->
+      <div id="ctlB" hidden>
+        <div class="ctl">
+          <div class="r"><label for="sT">箔的厚度</label><span id="vT"></span></div>
+          <input type="range" id="sT" min="0.1" max="2" step="0.05" value="0.4">
+        </div>
+        <div class="ctl">
+          <div class="lab">發射速率</div>
+          <div class="seg" id="rate">
+            <button data-v="30" aria-pressed="false">慢（30 個/秒）</button>
+            <button data-v="400" aria-pressed="true">中（400 個/秒）</button>
+            <button data-v="20000" aria-pressed="false">快（2 萬個/秒）</button>
+          </div>
+        </div>
+        <div class="ctl" id="boostWrap">
+          <div class="lab">大角度事件的機率（教學用放大）</div>
+          <div class="seg" id="boost">
+            <button data-v="1" aria-pressed="true">真實比例</button>
+            <button data-v="10" aria-pressed="false">放大 10 倍</button>
+            <button data-v="100" aria-pressed="false">放大 100 倍</button>
+          </div>
+        </div>
+        <div class="seg" style="margin-top:12px">
+          <button class="primary" id="run">暫停</button>
+          <button id="clr">清除計數</button>
+        </div>
+        <div class="read">
+          <div><small>已發射</small><b id="rN"></b></div>
+          <div><small>A 直穿／小角度 &lt;10°</small><b id="rA"></b></div>
+          <div><small>B 大角度 10°～90°</small><b id="rBc"></b></div>
+          <div><small>C 反彈 &gt;90°</small><b id="rC"></b></div>
+          <div><small>反彈比例（實測）</small><b id="rCf"></b></div>
+          <div><small>反彈比例（理論）</small><b id="rCt"></b></div>
+        </div>
+        <div class="tblw"><table class="tbl" id="tbl"></table></div>
+        <div class="note" id="noteB"></div>
+      </div>
+    </div></section>
+  </div>
+
+  <footer>
+    <b>計算方式</b>：α 粒子電量 +2e、靶原子核 +Ze，庫侖斥力 F = k(2e)(Ze)/r²，k e² = 1.44 MeV·fm（1 fm = 10⁻¹⁵ m）。正面撞擊時動能全部變成電位能，最接近距離 d = 2Zke²/K；瞄準距離 b 時散射角滿足 tan(θ/2) = d/(2b)，最接近距離 r<sub>min</sub> = (d/2)[1 + 1/sin(θ/2)]。①的軌跡用 RK4 數值積分畫出。原子核半徑以 1.2 A<sup>1/3</sup> fm 估計。
+    湯姆森模型把原子當成半徑約 1.4×10⁻¹⁰ m、正電荷均勻分布的球（電子太輕，幾乎不影響 α 粒子），每經過一個原子最多偏折約 d/(2R)，穿過上千層原子後偏折像隨機漫步累加，仍只有約 1° 以下。
+    ②中拉塞福模型大於某角度的機率 = (每單位面積的原子數) × π(d/2)²cot²(θ/2)；真實比例下反彈大約數萬個才出現 1 個，可用「放大」按鈕加快教學觀察（讀數與理論值會一起放大）。
+    <br><b>教學提示</b>：先讓學生在湯姆森模型下按「快」，看是否有任何 C 事件；再切到拉塞福模型，問「為什麼大部分直穿？為什麼少數會反彈？」連結「原子大部分是空的」與「正電荷、質量集中在極小的核」。①中把 b 調到 0 看 θ = 180°，調大 b 看偏折迅速變小；把 K 調小或換成金，d 變大、偏折變明顯。（基礎物理 Ch03 3-2 圖 3-5～3-7、小百科 α 粒子）
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const KE2=1.44; // MeV·fm
+const TGT=[
+  {k:'Al',name:'鋁',Z:13,A:27,n:6.03e28,Ra:1.43e5},
+  {k:'Cu',name:'銅',Z:29,A:64,n:8.49e28,Ra:1.28e5},
+  {k:'Ag',name:'銀',Z:47,A:108,n:5.86e28,Ra:1.44e5},
+  {k:'Au',name:'金',Z:79,A:197,n:5.90e28,Ra:1.44e5}
+];
+const st={mode:'A',model:'R',K:5,tgt:3,bFrac:.25,fan:true,
+  t:0.4,rate:400,boost:1,run:true,N:0,bins:new Array(18).fill(0),A:0,B:0,C:0,acc:0,live:[],hits:[]};
+
+/* ---------- helpers ---------- */
+const T=()=>TGT[st.tgt];
+const dHead=()=>2*T().Z*KE2/st.K;        // fm
+const RN=()=>1.2*Math.cbrt(T().A);        // fm
+const deg=r=>r*180/Math.PI;
+function fmtLen(fm){ // fm -> 科學記號 m
+  const m=fm*1e-15;const e=Math.floor(Math.log10(m));const c=m/Math.pow(10,e);
+  return c.toFixed(c<9.95?1:0)+'×10'+sup(e)+' m';}
+function sup(e){const map={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};return String(e).split('').map(c=>map[c]).join('');}
+function fmtDeg(x){if(x>=10)return x.toFixed(1)+'°';if(x>=0.1)return x.toFixed(2)+'°';if(x===0)return '0°';const e=Math.floor(Math.log10(x));return (x/Math.pow(10,e)).toFixed(1)+'×10'+sup(e)+'°';}
+function setupCanvas(cv){const dpr=window.devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return {c,w,h};}
+
+/* ---------- 物理：散射角 ---------- */
+function thetaR(b){const d=dHead();return 2*Math.atan(d/(2*Math.max(b,1e-9)));}
+function thetaT(b){const R=T().Ra,d=dHead();if(b>=R)return 0;return d*b*Math.sqrt(R*R-b*b)/(R*R*R);}
+// 數值積分（拉塞福）：單位 fm，初速 1，加速度 (d/2) r̂ / r²
+function trajR(b,W){
+  const d=dHead();const x0=-Math.max(60*d,3*W);
+  let x=x0,y=b,vx=1,vy=0;const pts=[];const R0=Math.hypot(x,y);
+  const acc=(x,y)=>{const r=Math.hypot(x,y);const f=d/2/(r*r*r);return [f*x,f*y];};
+  for(let i=0;i<60000;i++){
+    const r=Math.hypot(x,y);const dt=0.006*r/Math.hypot(vx,vy);
+    const a1=acc(x,y);
+    const a2=acc(x+vx*dt/2,y+vy*dt/2);const v2x=vx+a1[0]*dt/2,v2y=vy+a1[1]*dt/2;
+    const a3=acc(x+v2x*dt/2,y+v2y*dt/2);const v3x=vx+a2[0]*dt/2,v3y=vy+a2[1]*dt/2;
+    const a4=acc(x+v3x*dt,y+v3y*dt);const v4x=vx+a3[0]*dt,v4y=vy+a3[1]*dt;
+    x+=dt/6*(vx+2*v2x+2*v3x+v4x);y+=dt/6*(vy+2*v2y+2*v3y+v4y);
+    vx+=dt/6*(a1[0]+2*a2[0]+2*a3[0]+a4[0]);vy+=dt/6*(a1[1]+2*a2[1]+2*a3[1]+a4[1]);
+    if(Math.abs(x)<2*W&&Math.abs(y)<2*W)pts.push(x,y);
+    if(Math.hypot(x,y)>Math.min(R0,4*W)&&x*vx+y*vy>0&&x>-2*W)break;
+  }
+  return pts;}
+
+/* ---------- ① 放大圖 ---------- */
+function viewW(){return st.model==='R'?Math.min(900,Math.max(40,4*dHead())):1.7*T().Ra;}
+function bVal(){return st.bFrac*(st.model==='R'?viewW():T().Ra);}
+function drawA(){
+  const {c,w,h}=setupCanvas($('cvA'));
+  c.fillStyle='#04060b';c.fillRect(0,0,w,h);
+  const W=viewW();const s=Math.min(w,h)/2/W;const cx=w*0.55,cy=h*0.62;
+  const X=x=>cx+x*s,Y=y=>cy-y*s;
+  // 格線
+  c.strokeStyle='#121a2a';c.lineWidth=1;
+  const step=niceStep(W/3);
+  for(let g=-Math.ceil(2*W/step)*step;g<=2*W;g+=step){c.beginPath();c.moveTo(X(g),0);c.lineTo(X(g),h);c.stroke();c.beginPath();c.moveTo(0,Y(g));c.lineTo(w,Y(g));c.stroke();}
+  // 比例尺
+  c.strokeStyle='#8492aa';c.fillStyle='#8492aa';c.font='12px "JetBrains Mono",monospace';
+  const sx=14,sy=h-14;c.beginPath();c.moveTo(sx,sy);c.lineTo(sx+step*s,sy);c.moveTo(sx,sy-4);c.lineTo(sx,sy+2);c.moveTo(sx+step*s,sy-4);c.lineTo(sx+step*s,sy+2);c.stroke();
+  c.fillText(fmtLen(step),sx,sy-7);
+  if(st.model==='R'){
+    // 原子核
+    const rn=Math.max(RN()*s,2.5);
+    const g=c.createRadialGradient(cx,cy,0,cx,cy,rn*2.2);g.addColorStop(0,'rgba(255,95,162,.55)');g.addColorStop(1,'rgba(255,95,162,0)');
+    c.fillStyle=g;c.beginPath();c.arc(cx,cy,rn*2.2,0,7);c.fill();
+    c.fillStyle='#ff5fa2';c.beginPath();c.arc(cx,cy,rn,0,7);c.fill();
+    c.fillStyle='#ffd1e6';c.font='12px "Noto Sans TC",sans-serif';c.fillText('原子核 +'+T().Z+'e',cx+rn+6,cy+16);
+    // d 圓
+    c.setLineDash([4,4]);c.strokeStyle='rgba(255,209,102,.45)';c.beginPath();c.arc(cx,cy,dHead()*s,0,7);c.stroke();c.setLineDash([]);
+    c.fillStyle='rgba(255,209,102,.8)';c.fillText('正面撞擊最近距離 d',cx+dHead()*s*0.72+4,cy-dHead()*s*0.72-4);
+    // 扇形軌跡
+    if(st.fan){
+      c.strokeStyle='rgba(67,214,255,.28)';c.lineWidth=1.2;
+      for(let i=-6;i<=6;i++){if(i===0)continue;const b=i/6*W*0.9;drawPts(c,trajR(Math.abs(b),W),X,Y,b<0);}
+      c.strokeStyle='rgba(67,214,255,.28)';drawPts(c,trajR(0.0001,W),X,Y,false);
+    }
+    // 目前軌跡
+    const b=bVal();c.strokeStyle='#ffd166';c.lineWidth=2.4;const pts=trajR(b,W);drawPts(c,pts,X,Y,false);
+    arrowAtEnd(c,pts,X,Y);
+    // b 標示
+    c.strokeStyle='rgba(255,209,102,.7)';c.lineWidth=1;c.setLineDash([3,3]);
+    c.beginPath();c.moveTo(X(-W*1.05),Y(0));c.lineTo(X(0),Y(0));c.stroke();c.setLineDash([]);
+    const bx=X(-W*0.85);c.beginPath();c.moveTo(bx,Y(0));c.lineTo(bx,Y(b));c.stroke();
+    c.fillStyle='#ffd166';c.font='13px "JetBrains Mono",monospace';c.fillText('b',bx+5,(Y(0)+Y(b))/2+4);
+  }else{
+    // 葡萄乾布丁
+    const R=T().Ra;
+    c.fillStyle='rgba(255,140,170,.18)';c.strokeStyle='rgba(255,140,170,.6)';c.lineWidth=1.5;
+    c.beginPath();c.arc(cx,cy,R*s,0,7);c.fill();c.stroke();
+    c.fillStyle='#43d6ff';
+    const nE=Math.min(T().Z,40);for(let i=0;i<nE;i++){const a=i*2.399963,r=Math.sqrt((i+.5)/nE)*R*s*0.92;c.beginPath();c.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),2.6,0,7);c.fill();}
+    c.fillStyle='#ffd1e6';c.font='12px "Noto Sans TC",sans-serif';c.fillText('均勻分布正電荷的球＋電子',cx-R*s*0.9,cy+R*s+16);
+    const b=bVal();const th=thetaT(b);
+    if(st.fan){c.strokeStyle='rgba(67,214,255,.28)';c.lineWidth=1.2;
+      for(let i=-6;i<=6;i++){const bb=i/6*R*1.1;c.beginPath();c.moveTo(X(-W*1.2),Y(bb));c.lineTo(X(W*1.2),Y(bb+Math.sign(bb)*thetaT(Math.abs(bb))*W*1.2));c.stroke();}}
+    c.strokeStyle='#ffd166';c.lineWidth=2.4;c.beginPath();c.moveTo(X(-W*1.2),Y(b));c.lineTo(X(0),Y(b));c.lineTo(X(W*1.2),Y(b+th*W*1.2));c.stroke();
+    c.fillStyle='#ffd166';c.beginPath();c.moveTo(w-4,Y(b));c.lineTo(w-14,Y(b)-5);c.lineTo(w-14,Y(b)+5);c.fill();
+    c.strokeStyle='rgba(255,209,102,.7)';c.lineWidth=1;const bx=X(-W*0.92);c.beginPath();c.moveTo(bx,Y(0));c.lineTo(bx,Y(b));c.stroke();
+    c.setLineDash([3,3]);c.beginPath();c.moveTo(X(-W*1.2),Y(0));c.lineTo(X(0),Y(0));c.stroke();c.setLineDash([]);
+    c.fillStyle='#ffd166';c.font='13px "JetBrains Mono",monospace';c.fillText('b',bx+5,(Y(0)+Y(b))/2+4);
+  }
+  // α 來源標示
+  c.fillStyle='#8492aa';c.font='12px "Noto Sans TC",sans-serif';c.fillText('α 粒子由左方射入 →',10,18);
+}
+function drawPts(c,p,X,Y,flip){if(p.length<4)return;c.beginPath();for(let i=0;i<p.length;i+=2){const x=X(p[i]),y=Y(flip?-p[i+1]:p[i+1]);i?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();}
+function arrowAtEnd(c,p,X,Y){const n=p.length;if(n<8)return;const x1=X(p[n-6]),y1=Y(p[n-5]),x2=X(p[n-2]),y2=Y(p[n-1]);const a=Math.atan2(y2-y1,x2-x1);
+  c.fillStyle='#ffd166';c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-11*Math.cos(a-.4),y2-11*Math.sin(a-.4));c.lineTo(x2-11*Math.cos(a+.4),y2-11*Math.sin(a+.4));c.fill();}
+function niceStep(x){const e=Math.pow(10,Math.floor(Math.log10(x)));const f=x/e;return (f<2?1:f<5?2:5)*e;}
+
+function readA(){
+  const d=dHead(),b=bVal();
+  $('vB').textContent=fmtLen(b);
+  $('rD').textContent=fmtLen(d);$('rRN').textContent=fmtLen(RN());$('rRA').textContent=fmtLen(T().Ra);
+  $('rRatio').textContent='約 '+Math.round(T().Ra/RN()).toLocaleString()+' 倍';
+  let msg='';
+  if(st.model==='R'){
+    const th=thetaR(b);const rmin=d/2*(1+1/Math.sin(th/2));
+    $('rTh').textContent=fmtDeg(deg(th));$('rRmin').textContent=fmtLen(rmin);
+    const touch=rmin<RN()+1.7;
+    $('rRmin').className=touch?'warn':'';
+    msg=touch?'⚠ 最接近距離已小於原子核半徑＋α 粒子半徑：α 粒子碰到原子核，<b>核力</b>開始作用，拉塞福的庫侖散射公式不再適用（換成鋁、把動能調高就看得到）。'
+      :(deg(th)>90?'<b>反彈！</b>α 粒子幾乎正對原子核，被很強的庫侖斥力推回來——只有「正電荷集中在極小區域」才能產生這麼大的力。'
+      :(deg(th)>10?'瞄準距離和 d 差不多時，會有<b>大角度偏折</b>（圖 3-7 的 B）。':'瞄準距離比 d 大很多時，α 粒子幾乎<b>直接穿過</b>（圖 3-7 的 A）——原子內部大部分是空的。'));
+    msg+='<br>b 越小偏折越大：tan(θ/2) = d/(2b) = '+(d/(2*Math.max(b,1e-9))).toPrecision(3)+'。';
+    $('vNote').textContent='比例尺依 d 自動縮放';
+  }else{
+    const th=thetaT(b);$('rTh').textContent=fmtDeg(deg(th));$('rRmin').textContent='—';$('rRmin').className='';
+    msg='正電荷平均散布在整個原子裡，α 粒子在任何位置受到的淨力都很小：最大偏折只有 d/(2R) ≈ <b>'+fmtDeg(deg(d/(2*T().Ra)))+'</b>，畫面上看起來是直線。就算穿過上千層原子，累積起來也不到 1°，<b>不可能反彈</b>。';
+    $('vNote').textContent='整個原子的尺度（約 10⁻¹⁰ m）';
+  }
+  $('noteA').innerHTML=msg;
+}
+
+/* ---------- ② 金箔實驗 ---------- */
+function foil(){const t=T();const tm=st.t*1e-6;const areal=t.n*tm;const a=Math.cbrt(1/t.n);const layers=tm/a;
+  const d=dHead()*1e-15;const Rm=t.Ra*1e-15;
+  const sigT=dHead()/(t.Ra*Math.sqrt(6))*Math.sqrt(layers); // rad rms（2D 總偏折）
+  return {areal,layers,d,sigT,frac:th=>areal*Math.PI*(d/2)**2/Math.tan(th/2)**2};}
+const TH_MIN=3*Math.PI/180;
+// 單次散射取樣的最小角度：放大倍率太大時往上提高，讓機率不超過 0.6
+function thMin(F){const f=F.frac(TH_MIN)*st.boost;if(f<=0.6)return TH_MIN;return 2*Math.atan(Math.sqrt(F.areal*Math.PI*(F.d/2)**2*st.boost/0.6));}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function sample(F){
+  // 多次小角度散射（兩個模型都有）
+  let gx=gauss()*F.sigT/Math.SQRT2,gy=gauss()*F.sigT/Math.SQRT2;
+  let th=Math.hypot(gx,gy);
+  if(st.model==='R'){
+    const tm=thMin(F);const pc=F.frac(tm)*st.boost;
+    if(Math.random()<pc){ // 一次靠近原子核的單次散射
+      const d=dHead();const bc=d/2/Math.tan(tm/2);const b=bc*Math.sqrt(Math.random());
+      th=2*Math.atan(d/(2*b));}
+  }
+  return Math.min(th,Math.PI);}
+function fire(n){const F=foil();
+  for(let i=0;i<n;i++){const th=sample(F);const dg=deg(th);st.N++;
+    st.bins[Math.min(17,Math.floor(dg/10))]++;
+    if(dg<10)st.A++;else if(dg<90)st.B++;else st.C++;
+    const side=Math.random()<.5?1:-1;
+    if(st.live.length<70&&(st.rate<=400||dg>=10||Math.random()<.02))st.live.push({th:th*side,t:0});
+    else st.hits.push({a:th*side,life:1,big:dg>=10});
+  }
+  if(st.hits.length>600)st.hits.splice(0,st.hits.length-600);
+}
+function drawB(dt){
+  const {c,w,h}=setupCanvas($('cvB'));
+  c.fillStyle='#04060b';c.fillRect(0,0,w,h);
+  const cx=w*0.56,cy=h*0.5,R=Math.min(w*0.4,h*0.44);
+  // 偵測屏環
+  c.lineWidth=10;c.strokeStyle='#1d2640';c.beginPath();c.arc(cx,cy,R,Math.PI+0.12,Math.PI-0.12+2*Math.PI);c.stroke();
+  // 區域標示
+  const zone=(a0,a1,col,lab)=>{c.strokeStyle=col;c.lineWidth=3;c.beginPath();c.arc(cx,cy,R+9,-a1,-a0);c.stroke();c.beginPath();c.arc(cx,cy,R+9,a0,a1);c.stroke();
+    c.fillStyle=col;c.font='bold 14px "JetBrains Mono",monospace';const am=(a0+a1)/2;c.fillText(lab,cx+(R+24)*Math.cos(-am)-5,cy+(R+24)*Math.sin(-am)+5);};
+  zone(0,10*Math.PI/180,'#7dffc4','A');zone(10*Math.PI/180,Math.PI/2,'#43d6ff','B');zone(Math.PI/2,Math.PI-0.12,'#ff7a7a','C');
+  // 射源與光束
+  const sx=Math.max(14,cx-R-60);
+  c.fillStyle='#3b2a52';c.fillRect(sx-12,cy-16,24,32);c.fillStyle='#ff5fa2';c.beginPath();c.arc(sx,cy,5,0,7);c.fill();
+  c.strokeStyle='rgba(255,95,162,.35)';c.lineWidth=4;c.beginPath();c.moveTo(sx+12,cy);c.lineTo(cx,cy);c.stroke();
+  c.fillStyle='#8492aa';c.font='12px "Noto Sans TC",sans-serif';c.fillText('α 射源',sx-16,cy+32);
+  // 金箔
+  c.fillStyle='#ffd166';c.fillRect(cx-2.5,cy-R*0.28,5,R*0.56);
+  c.fillStyle='#ffd166';c.fillText(T().name+'箔',cx+8,cy-R*0.28+2);
+  // 命中閃光
+  for(const p of st.hits){p.life-=dt*0.9;}
+  st.hits=st.hits.filter(p=>p.life>0);
+  for(const p of st.hits){const x=cx+R*Math.cos(p.a),y=cy-R*Math.sin(p.a);c.fillStyle=p.big?`rgba(255,240,180,${p.life})`:`rgba(125,255,196,${p.life*0.5})`;c.beginPath();c.arc(x,y,p.big?4:2,0,7);c.fill();}
+  // 飛行中的粒子
+  const sp=1.6;
+  for(const p of st.live){p.t+=dt*sp;}
+  const done=[];
+  for(const p of st.live){
+    let x,y;const L1=cx-(sx+12);
+    if(p.t<0.5){const f=p.t/0.5;x=sx+12+L1*f;y=cy;}
+    else{const f=Math.min(1,(p.t-0.5)/0.5);x=cx+R*f*Math.cos(p.th);y=cy-R*f*Math.sin(p.th);
+      c.strokeStyle='rgba(255,95,162,.5)';c.lineWidth=1;c.beginPath();c.moveTo(cx,cy);c.lineTo(x,y);c.stroke();
+      if(f>=1){done.push(p);}}
+    c.fillStyle='#ff9ccc';c.beginPath();c.arc(x,y,2.6,0,7);c.fill();
+  }
+  for(const p of done)st.hits.push({a:p.th,life:1.4,big:Math.abs(deg(p.th))>=10});
+  st.live=st.live.filter(p=>p.t<1);
+  c.fillStyle='#8492aa';c.font='12px "Noto Sans TC",sans-serif';c.fillText('環形偵測屏（俯視）',10,18);
+}
+function drawH(){
+  const {c,w,h}=setupCanvas($('cvH'));
+  c.fillStyle='#04060b';c.fillRect(0,0,w,h);
+  const L=44,Rr=10,Tp=12,B=30;const pw=w-L-Rr,ph=h-Tp-B;
+  const F=foil();
+  // 理論（拉塞福）期望：只對 ≥10° 的格子
+  const tm=thMin(F);const exp=st.bins.map((_,i)=>{if(st.model!=='R'||i*10*Math.PI/180<tm-1e-9)return 0;const a=i*10*Math.PI/180,b=(i+1)*10*Math.PI/180;return st.N*st.boost*(F.frac(a)-F.frac(b));});
+  const mx=Math.max(10,...st.bins,...exp);const top=Math.ceil(Math.log10(mx));
+  const Yv=v=>Tp+ph-(v<=0?0:Math.max(0,Math.log10(v)+0.3)/(top+0.3))*ph;
+  c.strokeStyle='#1a2236';c.fillStyle='#5b6880';c.font='11px "JetBrains Mono",monospace';c.lineWidth=1;
+  for(let e=0;e<=top;e++){const y=Yv(Math.pow(10,e));c.beginPath();c.moveTo(L,y);c.lineTo(w-Rr,y);c.stroke();c.fillText(e===0?'1':'10'+sup(e),6,y+4);}
+  const bw=pw/18;
+  for(let i=0;i<18;i++){const v=st.bins[i];const col=i===0?'#7dffc4':i<9?'#43d6ff':'#ff7a7a';
+    if(v>0){const y=Yv(v);c.fillStyle=col;c.globalAlpha=.85;c.fillRect(L+i*bw+1.5,y,bw-3,Tp+ph-y);c.globalAlpha=1;}
+  }
+  if(st.model==='R'&&st.N>0){c.strokeStyle='#ffd166';c.lineWidth=1.6;c.setLineDash([4,3]);c.beginPath();let first=true;
+    for(let i=1;i<18;i++){const v=exp[i];if(v<0.05)continue;const y=Yv(v);const x=L+(i+.5)*bw;first?c.moveTo(x,y):c.lineTo(x,y);first=false;}c.stroke();c.setLineDash([]);}
+  c.fillStyle='#5b6880';for(let i=0;i<=18;i+=3){c.fillText(i*10+'°',L+i*bw-8,h-10);}
+  $('hNote').textContent=st.model==='R'?'虛線：拉塞福公式預測':'湯姆森模型';
+}
+const ZN=['0–10°','10–20°','20–30°','30–60°','60–90°','90–120°','120–150°','150–180°'];
+function readB(){
+  $('vT').textContent=st.t.toFixed(2)+' μm';
+  $('rN').textContent=st.N.toLocaleString();
+  const p=v=>st.N?v.toLocaleString()+'（'+(100*v/st.N).toPrecision(3)+'%）':'0';
+  $('rA').textContent=p(st.A);$('rBc').textContent=p(st.B);$('rC').textContent=st.C.toLocaleString();
+  $('rCf').textContent=st.C?'1 / '+Math.round(st.N/st.C).toLocaleString():'—';
+  const F=foil();
+  if(st.model==='R'){const f=F.frac(Math.PI/2)*st.boost;$('rCt').textContent='1 / '+Math.round(1/f).toLocaleString();}
+  else $('rCt').textContent='≈ 0';
+  // 表
+  const grp=[[0,1],[1,2],[2,3],[3,6],[6,9],[9,12],[12,15],[15,18]];
+  let html='<tr><th style="text-align:left">散射角</th><th>計數</th>'+(st.model==='R'?'<th>拉塞福預測</th>':'')+'</tr>';
+  grp.forEach(([a,b],k)=>{let s=0,e=0;for(let i=a;i<b;i++){s+=st.bins[i];}
+    if(st.model==='R'){const ta=a*10*Math.PI/180,tb=b*10*Math.PI/180;e=(ta<thMin(F)-1e-9)?null:st.N*st.boost*(F.frac(ta)-F.frac(tb));}
+    html+='<tr><td class="zh">'+ZN[k]+'</td><td>'+s.toLocaleString()+'</td>'+(st.model==='R'?'<td>'+(e===null?'—':e<10?e.toFixed(2):Math.round(e).toLocaleString())+'</td>':'')+'</tr>';});
+  $('tbl').innerHTML=html;
+  $('noteB').innerHTML=st.model==='R'
+    ?'箔約有 <b>'+Math.round(F.layers).toLocaleString()+' 層</b>原子，α 粒子仍幾乎都直穿（A）：原子核只佔原子極小的截面。偶爾正好擦過某個原子核，就會大角度偏折（B）甚至反彈（C）。大於 90° 的機率 = 單位面積原子數 × π(d/2)² ≈ <b>'+(F.frac(Math.PI/2)).toExponential(1)+'</b>'+(st.boost>1?'（目前放大 '+st.boost+' 倍顯示）':'')+'。'+(thMin(F)>10.01*Math.PI/180?'<br>⚠ 目前動能低、放大倍率高，「擦過原子核」的機率已大到不合理，'+fmtDeg(deg(thMin(F)))+' 以下的預測不列出；請降低放大倍率或提高動能。':'')
+    :'湯姆森模型：每層原子最多偏折約 '+fmtDeg(deg(F.d/(2*T().Ra*1e-15)))+'，穿過約 '+Math.round(F.layers).toLocaleString()+' 層原子後，偏折的方均根值約 <b>'+fmtDeg(deg(F.sigT))+'</b>。按「快」發射幾十萬個也<b>看不到任何反彈</b>——和蓋革、馬斯登觀察到的反彈事件矛盾。';
+}
+
+/* ---------- UI ---------- */
+function tgtUI(){const el=$('tgt');el.innerHTML='';TGT.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t.name+'（Z='+t.Z+'）';b.setAttribute('aria-pressed',i===st.tgt);b.onclick=()=>{st.tgt=i;tgtUI();changed(true);};el.appendChild(b);});}
+function segUI(id,key,num,after){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{st[key]=num?+b.dataset.v:b.dataset.v;document.querySelectorAll('#'+id+' button').forEach(z=>z.setAttribute('aria-pressed',z===b));after&&after();});}
+function clearB(){st.N=0;st.A=st.B=st.C=0;st.bins.fill(0);st.live=[];st.hits=[];}
+function changed(reset){ $('vK').textContent=st.K.toFixed(1)+' MeV'; if(reset)clearB(); render(); }
+function render(){
+  if(st.mode==='A'){readA();drawA();}
+  else{readB();drawH();}
+}
+segUI('model','model',false,()=>{$('boostWrap').hidden=st.model!=='R';changed(true);});
+segUI('rate','rate',true);
+segUI('boost','boost',true,()=>changed(true));
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{st.mode=b.dataset.m;document.querySelectorAll('#modes button').forEach(z=>z.setAttribute('aria-pressed',z===b));
+  const A=st.mode==='A';$('boxA').hidden=!A;$('ctlA').hidden=!A;$('boxB').hidden=A;$('ctlB').hidden=A;$('histWrap').hidden=A;
+  $('vTitle').textContent=A?'原子放大圖':'金箔實驗（圖 3-7）';$('vNote').textContent=A?'':'A 直穿　B 大角度　C 反彈';render();});
+$('sK').oninput=e=>{st.K=+e.target.value;changed(true);};
+$('sB').oninput=e=>{st.bFrac=e.target.value/1000;render();};
+$('tFan').onchange=e=>{st.fan=e.target.checked;render();};
+$('sT').oninput=e=>{st.t=+e.target.value;changed(true);};
+$('run').onclick=()=>{st.run=!st.run;$('run').textContent=st.run?'暫停':'開始發射';};
+$('clr').onclick=()=>{clearB();render();};
+addEventListener('resize',render);
+
+let last=performance.now(),tick=0;
+function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(st.mode==='B'){
+    if(st.run){st.acc+=st.rate*dt;const n=Math.floor(st.acc);if(n>0){st.acc-=n;fire(n);}}
+    drawB(dt);tick+=dt;if(tick>0.15){tick=0;readB();drawH();}
+  }
+  requestAnimationFrame(frame);}
+tgtUI();changed(false);requestAnimationFrame(frame);
+window.__sim={st,thetaR,dHead,foil};
+})();
+</script>
+</body>
+</html>
