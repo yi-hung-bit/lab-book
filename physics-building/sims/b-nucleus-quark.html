@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原子核積木與夸克</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--pink:#ff5fa2;--pro:#f2457a;--neu:#f3e38a;--ele:#4ea3ff;--nu:#b77cff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:78ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;height:420px;touch-action:manipulation}
+#cvP{height:200px}
+@media(max-width:560px){canvas{height:330px}#cvP{height:180px}}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select,input[type=number]{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 11px;border-radius:9px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);background:rgba(255,209,102,.08)}
+.modebar button[aria-pressed="true"]{color:#231a02;background:var(--acc)}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+@media(max-width:420px){.read{grid-template-columns:repeat(2,1fr)}}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:14.5px;font-weight:700;word-break:break-all;color:var(--phos)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.note.alert{border-color:#5a2a2a;color:#ffb4b4}
+.note.ok{border-color:#1f5a44;color:#b8ffe0}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+/* 原子核標示 */
+.nucard{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px}
+.nuc{display:inline-flex;align-items:center;font-family:"JetBrains Mono",monospace;font-weight:700;line-height:1}
+.nuc .ss{display:inline-flex;flex-direction:column;align-items:flex-end;margin-right:3px}
+.nuc .ss span{font-size:.42em;color:var(--acc)}
+.nuc .ss span+span{margin-top:.12em;color:var(--pro)}
+.big{font-size:52px;color:#fff}
+.mid{font-size:30px;color:#fff}
+.ename{font-size:15px;color:var(--muted)}
+.ename b{color:var(--txt);font-size:20px;display:block}
+.pm{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px 8px;align-items:center;margin-top:12px}
+.pm .nm{font-size:14px}
+.pm .nm i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.pm .num{font-family:"JetBrains Mono",monospace;font-size:20px;color:var(--phos);text-align:right;min-width:3ch}
+.pm button{min-width:42px;font-size:16px;padding:4px 10px}
+.eq{font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--txt);margin-top:10px;background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:8px 10px;overflow-x:auto}
+.quiz{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;font-size:13.5px}
+.quiz input{width:74px}
+.qt{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+.qt th,.qt td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:center}
+.qt th{color:var(--dim);font-weight:500;font-size:12px}
+.qt td{font-family:"JetBrains Mono",monospace}
+.qt td.zh{font-family:"Noto Sans TC",sans-serif;color:var(--muted)}
+.ladder{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:4px}
+.ladder span{background:#0a0f1a;border:1px solid var(--line);border-radius:8px;padding:3px 8px}
+.ladder span.on{border-color:var(--acc);color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">3-2 · Nucleus &amp; Quarks</div>
+  <h1>原子核積木與夸克</h1>
+  <p class="lede">原子核由<b>質子</b>與<b>中子</b>（合稱核子）組成：<b>原子序 Z = 質子數</b>、<b>質量數 A = 質子數 + 中子數</b>，標示成 <span class="nuc" style="font-size:22px"><span class="ss"><span>A</span><span>Z</span></span>X</span>（圖 3-8）。再放大，質子與中子又由<b>夸克</b>組成；而<b>弱核力</b>能讓中子裡的一個夸克改變身分，造成 β 衰變（圖 3-16）。</p>
+
+  <div class="modebar" id="modes">
+    <button data-m="A" aria-pressed="true">① 拼原子核</button>
+    <button data-m="B" aria-pressed="false">② 放大到夸克</button>
+    <button data-m="C" aria-pressed="false">③ β 衰變</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t" id="vTitle">原子核</span><span class="n" id="vNote"></span></div>
+      <div class="box"><canvas id="cv" aria-label="模擬畫面"></canvas></div>
+      <div id="plotWrap" hidden>
+        <div class="head" style="padding-top:0"><span class="t">剩下的中子數 N(t)</span><span class="n">虛線：理論 N₀e<sup>−t/τ</sup></span></div>
+        <div class="box"><canvas id="cvP" aria-label="剩下中子數隨時間變化圖"></canvas></div>
+      </div>
+    </section>
+
+    <section class="card"><div class="pad">
+      <!-- ===== A ===== -->
+      <div id="ctlA">
+        <div class="nucard">
+          <div class="nuc big" id="nucBig"></div>
+          <div class="ename" id="ename"></div>
+        </div>
+        <div class="pm">
+          <span class="nm"><i style="background:var(--pro)"></i>質子 p</span><span></span>
+          <span class="num" id="nZ"></span>
+          <span style="display:flex;gap:6px"><button id="pDn" aria-label="減少一個質子">−</button><button id="pUp" aria-label="增加一個質子">＋</button></span>
+          <span class="nm"><i style="background:var(--neu)"></i>中子 n</span><span></span>
+          <span class="num" id="nN"></span>
+          <span style="display:flex;gap:6px"><button id="nDn" aria-label="減少一個中子">−</button><button id="nUp" aria-label="增加一個中子">＋</button></span>
+        </div>
+        <div class="ctl">
+          <div class="lab">常見原子核</div>
+          <select id="preset" style="width:100%"></select>
+        </div>
+        <div class="eq" id="eqA"></div>
+        <div class="read">
+          <div><small>原子序 Z</small><b id="rZ"></b></div>
+          <div><small>質量數 A</small><b id="rA"></b></div>
+          <div><small>中性原子的電子數</small><b id="rE"></b></div>
+          <div><small>原子核電量</small><b id="rQ"></b></div>
+          <div><small>核子質量總和</small><b id="rM"></b></div>
+          <div><small>中子數 ÷ 質子數</small><b id="rR"></b></div>
+        </div>
+        <div class="note" id="noteA"></div>
+        <div class="ctl">
+          <div class="lab">練習：看標示說出質子數與中子數（像範例 3-1）</div>
+          <div class="quiz">
+            <span class="nuc mid" id="qNuc"></span>
+            <label>質子 <input type="number" id="qP" min="0" inputmode="numeric"></label>
+            <label>中子 <input type="number" id="qN" min="0" inputmode="numeric"></label>
+            <button id="qChk" class="primary">檢查</button>
+            <button id="qNew">換一題</button>
+          </div>
+          <div class="note" id="qMsg" hidden></div>
+        </div>
+      </div>
+
+      <!-- ===== B ===== -->
+      <div id="ctlB" hidden>
+        <div class="lab">尺度：從原子一路放大（圖 3-9）</div>
+        <div class="ladder"><span>原子 約 10⁻¹⁰ m</span>→<span>原子核 約 10⁻¹⁵～10⁻¹⁴ m</span>→<span class="on">質子／中子 約 10⁻¹⁵ m</span>→<span class="on">夸克：尚未發現內部結構</span></div>
+        <div class="ctl">
+          <div class="lab">要放大哪一個核子？</div>
+          <div class="seg" id="hadron">
+            <button data-v="uud" aria-pressed="true">質子 p</button>
+            <button data-v="udd" aria-pressed="false">中子 n</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="lab">自己換夸克（也可以直接點畫面上的夸克，u ⇄ d）</div>
+          <div class="seg" id="qslots"></div>
+        </div>
+        <div class="eq" id="eqB"></div>
+        <div class="note" id="noteB"></div>
+        <div class="ctl">
+          <div class="lab">知識延長線：目前已知的 6 種夸克</div>
+          <table class="qt">
+            <tr><th>夸克</th><th>符號</th><th>電量</th><th>夸克</th><th>符號</th><th>電量</th></tr>
+            <tr><td class="zh">上夸克</td><td>u</td><td>+⅔ e</td><td class="zh">下夸克</td><td>d</td><td>−⅓ e</td></tr>
+            <tr><td class="zh">魅夸克</td><td>c</td><td>+⅔ e</td><td class="zh">奇夸克</td><td>s</td><td>−⅓ e</td></tr>
+            <tr><td class="zh">頂夸克</td><td>t</td><td>+⅔ e</td><td class="zh">底夸克</td><td>b</td><td>−⅓ e</td></tr>
+          </table>
+          <div class="lab" style="margin-top:6px">組成質子與中子的只有 u 和 d。</div>
+        </div>
+      </div>
+
+      <!-- ===== C ===== -->
+      <div id="ctlC" hidden>
+        <div class="lab">誰要衰變？</div>
+        <div class="seg" id="bcase">
+          <button data-v="c14" aria-pressed="true">碳-14</button>
+          <button data-v="free" aria-pressed="false">自由中子</button>
+          <button data-v="mine" aria-pressed="false">我拼的原子核</button>
+          <button data-v="pop" aria-pressed="false">一群自由中子：平均壽命</button>
+        </div>
+        <div id="oneWrap">
+          <div class="seg" style="margin-top:12px">
+            <button id="bGo" class="primary">β 衰變！</button>
+            <button id="bReset">重來</button>
+          </div>
+          <div class="eq" id="eqC"></div>
+          <table class="qt" id="consv"></table>
+        </div>
+        <div id="popWrap" hidden>
+          <div class="ctl">
+            <div class="r"><label for="sSp">時間快轉</label><span id="vSp"></span></div>
+            <input type="range" id="sSp" min="10" max="300" step="10" value="100">
+          </div>
+          <div class="seg" style="margin-top:12px">
+            <button id="pRun" class="primary">開始</button>
+            <button id="pReset">重來</button>
+          </div>
+          <div class="read">
+            <div><small>經過時間 t</small><b id="pT"></b></div>
+            <div><small>剩下的中子</small><b id="pN"></b></div>
+            <div><small>理論 N₀e<sup>−t/τ</sup></small><b id="pTh"></b></div>
+          </div>
+        </div>
+        <div class="note" id="noteC"></div>
+      </div>
+    </div></section>
+  </div>
+
+  <footer>
+    <b>數值來源</b>：質子質量 1.673×10⁻²⁷ kg、中子質量 1.675×10⁻²⁷ kg、基本電荷 e ≈ 1.6×10⁻¹⁹ C（課本 p.65 對照表）。「核子質量總和」只是把 Z 個質子與 N 個中子的質量相加；真實原子核略輕一點（差額是結合能，選修物理會學）。
+    「接近穩定帶／中子偏多／質子偏多」是用經驗式 Z ≈ A ÷ (1.98 + 0.0155 A<sup>2/3</sup>) 粗略估計，只供參考；選單中的原子核則標出真實的穩定或放射性。自由中子平均壽命 τ = 887 秒（圖 3-16），剩下一半約需 τ ln 2 ≈ 615 秒；③的一群中子每一步以機率 Δt/τ 隨機衰變。
+    <br><b>教學提示</b>：①先做範例 3-1：把質子調到 95、中子 146，看是不是鋂 Am-241；再問「只加一個中子，元素會變嗎？只加一個質子呢？」（決定元素的是質子數）。②比較質子 uud 與中子 udd 的電荷加總，並試試 uuu、ddd 這種組合電量是多少（它們不是質子或中子，是其他粒子）。③觀察碳-14 衰變時：核子總數不變、電荷不變，只是 1 個 d 變成 u，所以 1 個中子變成質子，原子序加 1 變成氮-14；再問課本的問題「弱核力是四種基本作用力中最弱的嗎？」（基礎物理 Ch03 3-2 p.65–67 圖 3-8、圖 3-9、知識延長線、範例 3-1；3-3 p.78–79 圖 3-16）
+  </footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const EL=["","氫H","氦He","鋰Li","鈹Be","硼B","碳C","氮N","氧O","氟F","氖Ne","鈉Na","鎂Mg","鋁Al","矽Si","磷P","硫S","氯Cl","氬Ar","鉀K","鈣Ca","鈧Sc","鈦Ti","釩V","鉻Cr","錳Mn","鐵Fe","鈷Co","鎳Ni","銅Cu","鋅Zn","鎵Ga","鍺Ge","砷As","硒Se","溴Br","氪Kr","銣Rb","鍶Sr","釔Y","鋯Zr","鈮Nb","鉬Mo","鎝Tc","釕Ru","銠Rh","鈀Pd","銀Ag","鎘Cd","銦In","錫Sn","銻Sb","碲Te","碘I","氙Xe","銫Cs","鋇Ba","鑭La","鈰Ce","鐠Pr","釹Nd","鉕Pm","釤Sm","銪Eu","釓Gd","鋱Tb","鏑Dy","鈥Ho","鉺Er","銩Tm","鐿Yb","鎦Lu","鉿Hf","鉭Ta","鎢W","錸Re","鋨Os","銥Ir","鉑Pt","金Au","汞Hg","鉈Tl","鉛Pb","鉍Bi","釙Po","砈At","氡Rn","鍅Fr","鐳Ra","錒Ac","釷Th","鏷Pa","鈾U","錼Np","鈽Pu","鋂Am","鋦Cm","鉳Bk","鉲Cf","鑀Es","鐨Fm"];
+const ZMAX=EL.length-1, NMAX=160;
+const elName=z=>z>=1?EL[z].replace(/[A-Za-z]+$/,""):"（無）";
+const elSym=z=>z>=1?EL[z].match(/[A-Za-z]+$/)[0]:"?";
+const PRESETS=[
+  [1,0,"氫-1：最常見的氫，原子核只有 1 個質子","穩定"],
+  [1,1,"氘（氫-2）：重水裡的氫","穩定"],
+  [1,2,"氚（氫-3）","放射性：β 衰變，半衰期約 12.3 年"],
+  [2,2,"氦-4：就是 α 粒子","穩定"],
+  [6,6,"碳-12","穩定"],
+  [6,8,"碳-14：考古定年用","放射性：β 衰變成氮-14，半衰期約 5730 年"],
+  [7,7,"氮-14","穩定"],
+  [8,8,"氧-16","穩定"],
+  [26,30,"鐵-56","穩定"],
+  [79,118,"金-197：拉塞福實驗的金箔","穩定"],
+  [92,143,"鈾-235：核電廠燃料","放射性：α 衰變，半衰期約 7 億年"],
+  [92,146,"鈾-238","放射性：α 衰變，半衰期約 45 億年"],
+  [95,146,"鋂-241：煙霧偵測器（範例 3-1）","放射性：α 衰變，半衰期約 432 年"]
+];
+const MP=1.673e-27, MN=1.675e-27, E0=1.6e-19;
+const S={mode:"A",Z:6,N:6,sel:null,quarks:["u","u","d"],bcase:"c14"};
+
+/* ---------- 工具 ---------- */
+function setup(cv){const d=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}
+  const x=cv.getContext("2d");x.setTransform(d,0,0,d,0,0);return {x,w,h};}
+function sci(v,dig=3){if(v===0)return"0";const e=Math.floor(Math.log10(Math.abs(v)));const m=v/10**e;
+  const sup=String(e).replace(/-/g,"⁻").replace(/\d/g,c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[c]);return m.toFixed(dig-1)+"×10"+sup;}
+function nucHTML(A,Z,sym){return `<span class="ss"><span>${A}</span><span>${Z}</span></span>${sym}`;}
+function ball(x,X,Y,r,col,label,glow){
+  const g=x.createRadialGradient(X-r*.35,Y-r*.4,r*.1,X,Y,r);
+  g.addColorStop(0,"#ffffff");g.addColorStop(.25,col);g.addColorStop(1,shade(col,-.45));
+  if(glow){x.save();x.shadowColor=glow;x.shadowBlur=18;}
+  x.fillStyle=g;x.beginPath();x.arc(X,Y,r,0,7);x.fill();
+  if(glow)x.restore();
+  x.strokeStyle="rgba(0,0,0,.35)";x.lineWidth=1;x.stroke();
+  if(label&&r>=8){x.fillStyle="#1a1020";x.font=`700 ${Math.max(9,r*.9)}px "JetBrains Mono",monospace`;x.textAlign="center";x.textBaseline="middle";x.fillText(label,X,Y+1);}
+}
+function shade(hex,k){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;
+  const f=v=>Math.max(0,Math.min(255,Math.round(k<0?v*(1+k):v+(255-v)*k)));return `rgb(${f(r)},${f(g)},${f(b)})`;}
+const COL={p:"#f2457a",n:"#f3e38a",q:"#9aa3b4",u:"#c7cfdc",d:"#7d8798",e:"#4ea3ff",nu:"#b77cff"};
+
+/* 把 Z 個質子與 N 個中子排成一團（向日葵排列，外圈先畫） */
+function layout(Z,N,cx,cy,R){
+  const A=Z+N, out=[]; if(!A) return {pts:out,r:0};
+  const r=Math.min(26,R/Math.sqrt(A)*0.98);
+  const golden=Math.PI*(3-Math.sqrt(5));
+  for(let i=0;i<A;i++){
+    const rad=A===1?0:r*1.05*Math.sqrt(i+.5)*1.02, th=i*golden;
+    const isP=Math.floor((i+1)*Z/A)>Math.floor(i*Z/A);
+    out.push({x:cx+rad*Math.cos(th),y:cy+rad*Math.sin(th)*.92,t:isP?"p":"n",i});
+  }
+  return {pts:out,r};
+}
+function drawNucleus(x,Z,N,cx,cy,R,opt={}){
+  const L=layout(Z,N,cx,cy,R);
+  L.pts.slice().reverse().forEach(p=>{
+    let t=p.t, glow=null;
+    if(opt.flip!=null&&p.i===opt.flip){t=opt.flipTo;glow=opt.glow;}
+    if(S.sel&&opt.hi&&S.sel.i===p.i) glow="#ffd166";
+    ball(x,p.x,p.y,L.r,COL[t],L.r>=11?(t==="p"?"p":"n"):"",glow);
+  });
+  return L;
+}
+
+/* ---------- 模式 ---------- */
+document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+function setMode(m){S.mode=m;
+  document.querySelectorAll("#modes button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===m));
+  $("#ctlA").hidden=m!=="A";$("#ctlB").hidden=m!=="B";$("#ctlC").hidden=m!=="C";
+  $("#plotWrap").hidden=!(m==="C"&&S.bcase==="pop");
+  $("#vTitle").textContent={A:"原子核（點一個核子可放大到夸克）",B:"核子內部：三個夸克",C:"弱核力：β 衰變"}[m];
+  if(m==="C") resetBeta();
+  render();
+}
+
+/* ===== ① 拼原子核 ===== */
+const pre=$("#preset");
+pre.innerHTML=`<option value="">— 選一個 —</option>`+PRESETS.map((p,i)=>`<option value="${i}">${elSym(p[0])}-${p[0]+p[1]}　${p[2]}</option>`).join("");
+pre.onchange=()=>{if(pre.value==="")return;const p=PRESETS[+pre.value];S.Z=p[0];S.N=p[1];S.sel=null;updA();};
+$("#pUp").onclick=()=>{if(S.Z<ZMAX){S.Z++;S.sel=null;updA();}};
+$("#pDn").onclick=()=>{if(S.Z>0){S.Z--;S.sel=null;updA();}};
+$("#nUp").onclick=()=>{if(S.N<NMAX){S.N++;S.sel=null;updA();}};
+$("#nDn").onclick=()=>{if(S.N>0){S.N--;S.sel=null;updA();}};
+function stability(Z,N){
+  const A=Z+N, k=PRESETS.find(p=>p[0]===Z&&p[1]===N);
+  if(k) return {txt:k[3],cls:k[3].startsWith("穩定")?"ok":"",known:true};
+  if(Z===0) return {txt:"沒有質子：這不是任何元素的原子核（只有中子的團不會穩定存在）",cls:"alert"};
+  if(Z>83) return {txt:"原子序大於 83 的原子核都不穩定（多半會 α 衰變）",cls:"alert"};
+  const zo=A/(1.98+0.0155*A**(2/3)), d=Z-zo;
+  if(d<-0.75) return {txt:"粗估：中子偏多 → 傾向 β 衰變（中子變成質子），像碳-14",cls:"alert"};
+  if(d>0.9) return {txt:"粗估：質子偏多 → 不穩定（質子間的電斥力太大）",cls:"alert"};
+  return {txt:"粗估：接近穩定帶（質子與中子的比例合適）",cls:"ok"};
+}
+function updA(){
+  const {Z,N}=S, A=Z+N;
+  $("#nZ").textContent=Z;$("#nN").textContent=N;
+  $("#pUp").disabled=Z>=ZMAX;$("#pDn").disabled=Z<=0;$("#nUp").disabled=N>=NMAX;$("#nDn").disabled=N<=0;
+  $("#nucBig").innerHTML=nucHTML(A,Z,Z?elSym(Z):"?");
+  $("#ename").innerHTML=Z?`<b>${elName(Z)}-${A}</b>原子序 ${Z} → ${elName(Z)}（${elSym(Z)}）`:`<b>還不是元素</b>至少要 1 個質子`;
+  $("#eqA").innerHTML=`質量數 A = 質子數 + 中子數 = ${Z} + ${N} = <b style="color:var(--acc)">${A}</b><br>原子序 Z = 質子數 = <b style="color:var(--pro)">${Z}</b>`;
+  $("#rZ").textContent=Z;$("#rA").textContent=A;$("#rE").textContent=Z;
+  $("#rQ").textContent=Z?`+${Z}e = ${sci(Z*E0,2)} C`:"0";
+  $("#rM").textContent=A?sci(Z*MP+N*MN,4)+" kg":"0";
+  $("#rR").textContent=Z?(N/Z).toFixed(2):"—";
+  const st=stability(Z,N), n=$("#noteA");
+  n.className="note "+(st.cls||"");
+  n.innerHTML=(A?`<b>${st.known?"真實資料":"穩定性"}</b>：${st.txt}<br>`:"")+(Z?`決定是哪一種元素的是<b>質子數</b>：只改中子數會得到同一元素的「同位素」（例如碳-12 與碳-14）。`:`按「＋」加入質子與中子開始拼原子核。`);
+  const k=PRESETS.findIndex(p=>p[0]===Z&&p[1]===N); pre.value=k>=0?String(k):"";
+  render();
+}
+/* 練習 */
+let Q=null;
+function newQ(){const pool=[[95,146],[6,8],[92,143],[26,30],[79,118],[8,10],[17,18],[17,20],[11,12],[13,14],[47,61],[82,126],[1,2],[3,4],[20,20],[29,34],[53,78],[55,82],[38,52],[88,138]];
+  let p;do{p=pool[Math.floor(Math.random()*pool.length)];}while(Q&&p[0]===Q[0]&&p[1]===Q[1]);Q=p;
+  $("#qNuc").innerHTML=nucHTML(p[0]+p[1],p[0],elSym(p[0]));$("#qP").value="";$("#qN").value="";$("#qMsg").hidden=true;}
+$("#qNew").onclick=newQ;
+$("#qChk").onclick=()=>{const p=+$("#qP").value,n=+$("#qN").value,m=$("#qMsg");m.hidden=false;
+  const okP=p===Q[0],okN=n===Q[1];
+  if(okP&&okN){m.className="note ok";m.innerHTML=`答對了！${elName(Q[0])}-${Q[0]+Q[1]}：質子 ${Q[0]} 個、中子 ${Q[0]+Q[1]} − ${Q[0]} = ${Q[1]} 個。`;}
+  else{m.className="note alert";m.innerHTML=`${okP?"質子數對了。":"質子數 = 原子序（左下角的數字）。"}${okN?"中子數對了。":"中子數 = 質量數 − 質子數（左上減左下）。"}再試一次！`;}};
+
+/* ===== ② 夸克 ===== */
+document.querySelectorAll("#hadron button").forEach(b=>b.onclick=()=>{S.quarks=b.dataset.v.split("");updB();});
+function qCharge(q){return q==="u"?2:-1;} // 單位 e/3
+function frac(n){if(n%3===0)return (n>0?"+":n<0?"−":"")+Math.abs(n/3)+" e";return (n>0?"+":"−")+Math.abs(n)+"/3 e";}
+function updB(){
+  const qs=S.quarks, key=qs.slice().sort((a,b)=>a===b?0:a==="u"?-1:1).join(""), tot=qs.reduce((a,q)=>a+qCharge(q),0);
+  document.querySelectorAll("#hadron button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===key));
+  $("#qslots").innerHTML=qs.map((q,i)=>`<button data-i="${i}" aria-label="第 ${i+1} 個夸克，目前是 ${q}，按一下換">${i+1}：${q==="u"?"上夸克 u":"下夸克 d"}</button>`).join("");
+  $("#qslots").querySelectorAll("button").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;S.quarks[i]=S.quarks[i]==="u"?"d":"u";updB();});
+  $("#eqB").innerHTML=qs.map(q=>q==="u"?"(+2/3 e)":"(−1/3 e)").join(" + ")+` = <b style="color:var(--acc)">${frac(tot)}</b>`;
+  const name={uud:"質子 p：電量 +1 e",udd:"中子 n：電量 0",uuu:"不是質子也不是中子（uuu 是一種叫 Δ⁺⁺ 的粒子，電量 +2 e，很快就衰變）",ddd:"不是質子也不是中子（ddd 是一種叫 Δ⁻ 的粒子，電量 −1 e，很快就衰變）"}[key];
+  $("#noteB").innerHTML=`<b>${name}</b><br>質子和中子的電量，都是由組成它的夸克電量加總而來。夸克電量是 e 的分數，但三個夸克加起來一定是 e 的整數倍。中子雖然整體不帶電，裡面的夸克卻都帶電。`;
+  render();
+}
+
+/* ===== ③ β 衰變 ===== */
+document.querySelectorAll("#bcase button").forEach(b=>b.onclick=()=>{S.bcase=b.dataset.v;
+  document.querySelectorAll("#bcase button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  $("#oneWrap").hidden=S.bcase==="pop";$("#popWrap").hidden=S.bcase!=="pop";$("#plotWrap").hidden=S.bcase!=="pop";resetBeta();render();});
+let B={t:-1,run:false,flip:0};
+function caseZN(){return S.bcase==="c14"?[6,8]:S.bcase==="free"?[0,1]:[S.Z,S.N];}
+function resetBeta(){
+  B={t:-1,run:false,flip:0};
+  const [Z,N]=caseZN();
+  if(S.bcase!=="free"&&N>0){const L=layout(Z,N,0,0,100);const ns=L.pts.filter(p=>p.t==="n");B.flip=ns[Math.floor(ns.length*0.35)].i;}
+  $("#bGo").disabled=!(N>=1&&Z+1<=ZMAX);
+  updC(); popReset();
+}
+function updC(){
+  if(S.bcase==="pop"){ $("#noteC").innerHTML=`自由中子（不在原子核裡）不穩定，<b>平均壽命 887 秒</b>，會衰變成質子、電子與反微中子。每個中子什麼時候衰變是隨機的，但一大群中子剩下的數目會照 N₀e<sup>−t/τ</sup> 規律減少：約 615 秒剩一半、887 秒剩約 37%。`;$("#noteC").className="note";return;}
+  const [Z,N]=caseZN(), A=Z+N, done=B.t>=1;
+  const sb=Z?elSym(Z):"n", sa=elSym(Z+1);
+  const before=S.bcase==="free"?`n`:`<span class="nuc" style="font-size:20px">${nucHTML(A,Z,sb)}</span>`;
+  const after=S.bcase==="free"?`p`:`<span class="nuc" style="font-size:20px">${nucHTML(A,Z+1,sa)}</span>`;
+  $("#eqC").innerHTML=N<1?"沒有中子，無法 β 衰變。":`${before} → ${after} + e⁻ + ν̄<br><span style="color:var(--muted)">核子內部：udd（中子）→ uud（質子），一個 <b style="color:#9aa3b4">d</b> 變成 <b style="color:#fff">u</b></span>`;
+  const row=(k,a,b,c)=>`<tr><td class="zh">${k}</td><td>${a}</td><td>${b}</td><td class="zh">${c}</td></tr>`;
+  $("#consv").innerHTML=N<1?"":`<tr><th></th><th>衰變前</th><th>衰變後</th><th></th></tr>`+
+    row("質子數",Z,Z+1,"多 1 個")+row("中子數",N,N-1,"少 1 個")+row("核子總數",A,A,"✓ 不變")+
+    row("總電量",Z?`+${Z}e`:"0",`(+${Z+1}e)+(−1e)+0`,"✓ 守恆");
+  let msg;
+  if(S.bcase==="c14") msg=`碳-14（6 個質子、8 個中子）中子偏多，其中一個中子經<b>弱交互作用</b>變成質子，放出電子與反微中子，變成<b>氮-14（7 個質子、7 個中子）</b>。質子數變了，所以元素也變了。考古用的碳-14 定年就是靠這個衰變，半衰期約 5730 年。`;
+  else if(S.bcase==="free") msg=`自由中子的平均壽命只有 <b>887 秒</b>，會衰變成質子、電子與反微中子：n → p + e⁻ + ν̄。β 射線的本質是電子，但它是從原子核（中子）裡產生的，能量比核外電子高得多。反微中子質量趨近於零、不帶電。`;
+  else{const st=stability(S.Z,S.N);msg=N<1?`你拼的原子核沒有中子。回到①加入中子再來。`:`你拼的 ${elName(Z)}-${A} 做 β 衰變後會變成 <b>${elName(Z+1)}-${A}</b>。<br>它真的會這樣衰變嗎？①的判斷：${st.txt}。中子偏多的原子核才傾向這種 β 衰變。`;}
+  $("#noteC").className="note";$("#noteC").innerHTML=(done?"<b>衰變完成。</b>":"按「β 衰變！」看看發生什麼事。")+"<br>"+msg;
+}
+$("#bGo").onclick=()=>{if(B.run)return;if(B.t>=1)resetBeta();B.t=0;B.run=true;B.last=performance.now();loop();};
+$("#bReset").onclick=()=>{resetBeta();render();};
+
+/* 一群中子 */
+const NPOP=400,TAU=887;
+let P={t:0,alive:[],run:false,hist:[]};
+function popReset(){P={t:0,alive:new Array(NPOP).fill(1),dec:new Array(NPOP).fill(0),run:false,hist:[[0,NPOP]]};$("#pRun").textContent="開始";updPop();}
+function updPop(){const n=P.alive.reduce((a,b)=>a+b,0);$("#pT").textContent=P.t.toFixed(0)+" s";$("#pN").textContent=n+" / "+NPOP;
+  $("#pTh").textContent=(NPOP*Math.exp(-P.t/TAU)).toFixed(0);$("#vSp").textContent="×"+$("#sSp").value+"（1 秒 = "+$("#sSp").value+" 秒）";}
+$("#sSp").oninput=updPop;
+$("#pRun").onclick=()=>{P.run=!P.run;$("#pRun").textContent=P.run?"暫停":"繼續";if(P.run){P.last=performance.now();loop();}};
+$("#pReset").onclick=()=>{popReset();render();};
+
+/* ---------- 動畫迴圈 ---------- */
+let looping=false;
+function loop(){if(looping)return;looping=true;requestAnimationFrame(step);}
+function step(now){
+  looping=false;let more=false;
+  if(S.mode==="C"&&B.run){const dt=Math.min(.05,(now-B.last)/1000);B.last=now;B.t+=dt/2.6;if(B.t>=1){B.t=1;B.run=false;updC();}else more=true;}
+  if(S.mode==="C"&&S.bcase==="pop"&&P.run){
+    const dt=Math.min(.05,(now-P.last)/1000)*(+$("#sSp").value);P.last=now;
+    const sub=Math.max(1,Math.ceil(dt/5)),h=dt/sub;
+    for(let s=0;s<sub;s++){P.t+=h;const pr=h/TAU;for(let i=0;i<NPOP;i++)if(P.alive[i]&&Math.random()<pr){P.alive[i]=0;P.dec[i]=now;}}
+    const n=P.alive.reduce((a,b)=>a+b,0);P.hist.push([P.t,n]);
+    if(P.t>=3*TAU||n===0){P.run=false;$("#pRun").textContent="開始";}
+    updPop();more=P.run;
+  }
+  if(S.mode==="C"&&S.bcase==="pop") more=more||P.dec.some(d=>d&&now-d<600);
+  render(now);
+  if(more) loop();
+}
+
+/* ---------- 繪圖 ---------- */
+const cv=$("#cv");
+function render(now=performance.now()){
+  const {x,w,h}=setup(cv);
+  x.clearRect(0,0,w,h);
+  const bg=x.createRadialGradient(w/2,h/2,10,w/2,h/2,Math.max(w,h)*.7);bg.addColorStop(0,"#0d1424");bg.addColorStop(1,"#04060b");x.fillStyle=bg;x.fillRect(0,0,w,h);
+  if(S.mode==="A") drawA(x,w,h);
+  else if(S.mode==="B") drawB(x,w,h);
+  else if(S.bcase==="pop") drawPop(x,w,h,now);
+  else drawC(x,w,h);
+}
+let LA=null;
+function drawA(x,w,h){
+  const R=Math.min(w,h)*.40;
+  // 電子雲示意
+  x.strokeStyle="rgba(78,163,255,.12)";x.lineWidth=1;
+  for(let k=1;k<=3;k++){x.beginPath();x.ellipse(w/2,h/2,R*1.05+k*14,(R*1.05+k*14)*.9,0,0,7);x.stroke();}
+  LA=drawNucleus(x,S.Z,S.N,w/2,h/2,R,{hi:true});
+  x.fillStyle="#8492aa";x.font='12.5px "Noto Sans TC",sans-serif';x.textAlign="left";x.textBaseline="top";
+  x.fillText(`${S.Z} 個質子（紅）＋ ${S.N} 個中子（黃）`,10,10);
+  x.textAlign="right";x.fillText("示意圖，不按比例：原子核比原子小約 10 萬倍",w-10,h-22);
+  if(!S.Z&&!S.N){x.textAlign="center";x.fillStyle="#5b6880";x.font='15px "Noto Sans TC",sans-serif';x.fillText("按右邊的「＋」加入質子或中子",w/2,h/2-8);}
+}
+cv.addEventListener("click",e=>{
+  const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  if(S.mode==="A"&&LA){let best=null,bd=1e9;LA.pts.forEach(p=>{const d=Math.hypot(p.x-mx,p.y-my);if(d<bd){bd=d;best=p;}});
+    if(best&&bd<=Math.max(LA.r*1.6,10)){S.sel=best;S.quarks=best.t==="p"?["u","u","d"]:["u","d","d"];setMode("B");updB();}}
+  else if(S.mode==="B"&&QB){QB.forEach((q,i)=>{if(Math.hypot(q.x-mx,q.y-my)<=q.r){S.quarks[i]=S.quarks[i]==="u"?"d":"u";updB();}});}
+});
+let QB=null;
+function drawB(x,w,h){
+  const qs=S.quarks,key=qs.slice().sort().reverse().join(""),tot=qs.reduce((a,q)=>a+qCharge(q),0);
+  const isP=tot===3&&qs.filter(q=>q==="u").length===2, isN=tot===0&&qs.filter(q=>q==="d").length===2;
+  const bowl=isP?COL.p:isN?COL.n:"#5b6880";
+  const cx=w/2, cy=h*.47, R=Math.min(w*.36,h*.34);
+  // 核子外殼
+  x.save();x.globalAlpha=.18;x.fillStyle=bowl;x.beginPath();x.arc(cx,cy,R,0,7);x.fill();x.restore();
+  x.strokeStyle=bowl;x.lineWidth=2;x.setLineDash([6,6]);x.beginPath();x.arc(cx,cy,R,0,7);x.stroke();x.setLineDash([]);
+  // 膠子示意的彈簧線
+  const r=R*.3, pos=[[cx,cy-R*.42],[cx-R*.42,cy+R*.28],[cx+R*.42,cy+R*.28]];
+  x.strokeStyle="rgba(255,209,102,.45)";x.lineWidth=2;
+  for(let i=0;i<3;i++){const a=pos[i],b=pos[(i+1)%3];x.beginPath();
+    for(let k=0;k<=40;k++){const t=k/40,px=a[0]+(b[0]-a[0])*t,py=a[1]+(b[1]-a[1])*t,nx=-(b[1]-a[1]),ny=b[0]-a[0],L=Math.hypot(nx,ny),s=Math.sin(t*Math.PI*10)*5;
+      k?x.lineTo(px+nx/L*s,py+ny/L*s):x.moveTo(px,py);}x.stroke();}
+  QB=pos.map((p,i)=>({x:p[0],y:p[1],r}));
+  pos.forEach((p,i)=>{ball(x,p[0],p[1],r,qs[i]==="u"?COL.u:COL.d,qs[i]);
+    x.fillStyle=qs[i]==="u"?"#ffd166":"#43d6ff";x.font=`600 ${Math.max(11,r*.36)}px "JetBrains Mono",monospace`;x.textAlign="center";x.textBaseline="top";
+    x.fillText(qs[i]==="u"?"+2/3 e":"−1/3 e",p[0],p[1]+r+4);});
+  x.fillStyle=bowl==="#5b6880"?"#8492aa":bowl;x.font='700 17px "Noto Sans TC",sans-serif';x.textAlign="center";x.textBaseline="alphabetic";
+  x.fillText(isP?"質子 p（uud）":isN?"中子 n（udd）":key+"：不是質子也不是中子",cx,h-34);
+  x.fillStyle="#e8edf6";x.font='600 15px "JetBrains Mono",monospace';x.fillText("總電量 "+frac(tot),cx,h-12);
+  x.fillStyle="#8492aa";x.font='12px "Noto Sans TC",sans-serif';x.textAlign="left";x.textBaseline="top";
+  x.fillText(S.sel?`從①的原子核點進來的${S.sel.t==="p"?"質子":"中子"}`:"點夸克可切換 u ⇄ d",10,10);
+  x.textAlign="right";x.fillText("黃色彈簧線：示意夸克被強力綁在一起",w-10,10);
+}
+function ease(t){return t<0?0:t>1?1:t*t*(3-2*t);}
+function drawC(x,w,h){
+  const [Z,N]=caseZN(), t=Math.max(0,B.t), free=S.bcase==="free";
+  const flipT=ease((t-.35)/.15), fly=ease((t-.45)/.55);
+  const cx=w*.36, cy=h*.52, R=Math.min(w*.22,h*.3);
+  if(N<1){x.fillStyle="#8492aa";x.font='15px "Noto Sans TC",sans-serif';x.textAlign="center";x.fillText("沒有中子，無法 β 衰變",w/2,h/2);return;}
+  let src;
+  if(free){const r=Math.min(R*.55,60);const col=flipT>=.5?COL.p:COL.n;
+    ball(x,cx,cy,r,col,flipT>=.5?"p":"n",t>.2&&t<.5?"#ffd166":null);src={x:cx,y:cy};
+  }else{
+    const L=drawNucleus(x,Z,N,cx,cy,R,{flip:B.flip,flipTo:flipT>=.5?"p":"n",glow:t>.05?"#ffd166":null});
+    const p=L.pts.find(q=>q.i===B.flip);src={x:p.x,y:p.y};
+  }
+  // 放大鏡：核子內部的夸克
+  if(t>.05){
+    const zx=w*.80, zy=h*.24, zr=Math.min(w*.15,h*.19);
+    x.strokeStyle="rgba(255,209,102,.5)";x.lineWidth=1.2;x.beginPath();x.moveTo(src.x,src.y);x.lineTo(zx-zr*.9,zy+zr*.4);x.stroke();
+    x.fillStyle="rgba(10,15,26,.92)";x.beginPath();x.arc(zx,zy,zr,0,7);x.fill();x.strokeStyle="#ffd166";x.stroke();
+    const qr=zr*.3, qp=[[zx,zy-zr*.38],[zx-zr*.4,zy+zr*.28],[zx+zr*.4,zy+zr*.28]];
+    const qs=["u","d","d"]; if(flipT>=.5) qs[2]="u";
+    qp.forEach((p,i)=>ball(x,p[0],p[1],qr,qs[i]==="u"?COL.u:COL.d,qs[i],i===2&&t>.3&&t<.6?"#ffd166":null));
+    x.fillStyle="#e8edf6";x.font=`600 ${Math.max(11,zr*.17)}px "Noto Sans TC",sans-serif`;x.textAlign="center";x.textBaseline="top";
+    x.fillText(flipT>=.5?"uud → 質子":"udd → 中子",zx,zy+zr+4);
+  }
+  // 放出的電子與反微中子
+  if(t>.45){
+    const ex=src.x+(w*.93-src.x)*fly, ey=src.y+(h*.70-src.y)*fly, vx=src.x+(w*.88-src.x)*fly, vy=src.y+(h*.93-src.y)*fly;
+    x.strokeStyle="rgba(78,163,255,.4)";x.setLineDash([4,4]);x.beginPath();x.moveTo(src.x,src.y);x.lineTo(ex,ey);x.stroke();
+    x.strokeStyle="rgba(183,124,255,.4)";x.beginPath();x.moveTo(src.x,src.y);x.lineTo(vx,vy);x.stroke();x.setLineDash([]);
+    ball(x,ex,ey,8,COL.e,"",COL.e);ball(x,vx,vy,6,COL.nu,"",COL.nu);
+    if(fly>.6){x.font='600 13px "Noto Sans TC",sans-serif';x.textAlign="right";x.textBaseline="bottom";
+    x.fillStyle=COL.e;x.fillText("電子 e⁻（β 射線）",ex+6,ey-10);
+    x.fillStyle=COL.nu;x.fillText("反微中子 ν̄",vx+4,vy-8);}
+  }
+  // 標題
+  const A=Z+N;
+  x.fillStyle="#e8edf6";x.font='700 16px "Noto Sans TC",sans-serif';x.textAlign="left";x.textBaseline="top";
+  const nm=free?(flipT>=.5?"質子":"自由中子"):(flipT>=.5?`${elName(Z+1)}-${A}`:`${elName(Z)}-${A}`);
+  const zn=free?"":(flipT>=.5?`（${Z+1} 個質子、${N-1} 個中子）`:`（${Z} 個質子、${N} 個中子）`);
+  x.fillText(nm,10,10);x.fillStyle="#8492aa";x.font='12.5px "Noto Sans TC",sans-serif';x.fillText(zn,10,32);
+  if(free){x.fillText("平均壽命 887 秒",10,50);}
+}
+function drawPop(x,w,h,now){
+  const cols=25,rows=16,gx=(w-20)/cols,gy=(h-50)/rows,r=Math.max(2.5,Math.min(gx,gy)*.36);
+  for(let i=0;i<NPOP;i++){const c=i%cols,rw=Math.floor(i/cols),X=10+gx*(c+.5),Y=40+gy*(rw+.5);
+    x.fillStyle=P.alive[i]?COL.n:COL.p;x.beginPath();x.arc(X,Y,r,0,7);x.fill();
+    const d=P.dec[i];if(d&&now-d<600){const k=(now-d)/600;x.strokeStyle=`rgba(78,163,255,${1-k})`;x.lineWidth=1.5;x.beginPath();x.arc(X,Y,r+k*12,0,7);x.stroke();}}
+  const n=P.alive.reduce((a,b)=>a+b,0);
+  x.fillStyle="#e8edf6";x.font='600 14px "Noto Sans TC",sans-serif';x.textAlign="left";x.textBaseline="top";
+  x.fillText(`黃：還沒衰變的中子 ${n}　紅：已變成質子 ${NPOP-n}`,10,10);
+  drawPlot();
+}
+function drawPlot(){
+  const c=$("#cvP"); if($("#plotWrap").hidden) return;
+  const {x,w,h}=setup(c);x.clearRect(0,0,w,h);x.fillStyle="#04060b";x.fillRect(0,0,w,h);
+  const L=44,Rr=12,T=12,Bm=30,tmax=3*TAU,X=t=>L+(w-L-Rr)*t/tmax,Y=n=>T+(h-T-Bm)*(1-n/NPOP);
+  x.strokeStyle="#222c42";x.lineWidth=1;x.fillStyle="#5b6880";x.font='11px "JetBrains Mono",monospace';
+  for(let k=0;k<=4;k++){const n=NPOP*k/4;x.beginPath();x.moveTo(L,Y(n));x.lineTo(w-Rr,Y(n));x.stroke();x.textAlign="right";x.textBaseline="middle";x.fillText(n,L-4,Y(n));}
+  [0,887,1774,2661].forEach(t=>{x.beginPath();x.moveTo(X(t),T);x.lineTo(X(t),h-Bm);x.stroke();x.textAlign="center";x.textBaseline="top";x.fillText(t+" s",X(t),h-Bm+4);});
+  x.fillStyle="#8492aa";x.textAlign="left";x.fillText("τ",X(887)+3,T);
+  x.strokeStyle="#ffd166";x.setLineDash([5,4]);x.beginPath();for(let k=0;k<=120;k++){const t=tmax*k/120;k?x.lineTo(X(t),Y(NPOP*Math.exp(-t/TAU))):x.moveTo(X(t),Y(NPOP));}x.stroke();x.setLineDash([]);
+  x.strokeStyle="#7dffc4";x.lineWidth=2;x.beginPath();P.hist.forEach(([t,n],i)=>i?x.lineTo(X(t),Y(n)):x.moveTo(X(t),Y(n)));x.stroke();
+  x.strokeStyle="rgba(255,122,122,.5)";x.lineWidth=1;x.setLineDash([2,3]);x.beginPath();x.moveTo(L,Y(NPOP*Math.exp(-1)));x.lineTo(X(887),Y(NPOP*Math.exp(-1)));x.lineTo(X(887),h-Bm);x.stroke();x.setLineDash([]);
+}
+
+addEventListener("resize",()=>render());
+updA();updB();newQ();setMode("A");
+</script>
+</body>
+</html>

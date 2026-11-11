@@ -1,6 +1,6 @@
-# 物理大樓
+# 物理研究院（原物理大樓）
 
-一層樓一冊，每間教室一個物理模擬。可安裝、可離線使用（PWA）。
+模擬大樓（一層樓一冊，每間教室一個物理模擬）與競賽大樓。內容和 claude.ai 的物理研究院同步：每次物理研究院更新後，用 `tools/sync_from_artifact.py` 同步到這裡再推送。可安裝、可離線使用（PWA）。
 
 網址：https://yi-hung-bit.github.io/lab-book/physics-building/
 

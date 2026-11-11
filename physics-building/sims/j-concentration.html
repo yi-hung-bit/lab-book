@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>濃度與溶解度</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--teal:#4fd1c5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 14px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+.cv{height:420px}
+@media(max-width:560px){.cv{height:340px}}
+.cv2{height:300px}
+.lab{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select,input[type=number]{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+input[type=number]{cursor:text;width:110px;font-family:"JetBrains Mono",monospace}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.35;cursor:default;border-color:var(--line)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.sl{display:flex;align-items:center;gap:10px;margin-top:4px}
+.sl span{font-size:13.5px;min-width:84px}
+.sl input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
+.sl b{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);min-width:70px;text-align:right}
+.fb{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid var(--line);background:#0a0f1a;color:var(--muted);min-height:48px}
+.fb.ok{border-color:#1f6f55;background:#071a14;color:#bff5dc}
+.fb.mid{border-color:#7a6320;background:#1a1505;color:#ffe7a3}
+.fb.bad{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.fb b{color:var(--acc);font-weight:500}
+.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;margin-top:6px}
+@media(max-width:420px){.stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:17px;color:var(--phos);font-weight:700}
+.stat b.w{color:#fff}.stat b.c{color:var(--cyan)}.stat b.y{color:var(--acc)}
+.formula{margin-top:12px;padding:10px 12px;border-radius:10px;background:#0b1120;border:1px solid var(--line);font-size:14px;overflow-x:auto}
+.formula .fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;font-family:"JetBrains Mono",monospace}
+.formula .fr span:first-child{border-bottom:1px solid var(--txt);padding:0 4px}
+.formula .fr span{padding:0 4px}
+.formula em{font-style:normal;color:var(--acc);font-family:"JetBrains Mono",monospace}
+.tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+.tbl th,.tbl td{border:1px solid var(--line);padding:5px 6px;text-align:center}
+.tbl th{color:var(--muted);font-weight:500;background:#0b1120}
+.tbl td.m{font-family:"JetBrains Mono",monospace}
+.tbl tr.on td{background:#1a1505;color:#ffe7a3}
+.tblwrap{overflow-x:auto;max-width:100%}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctl{grid-template-columns:1fr}}
+details{margin-top:8px;border:1px solid var(--line);border-radius:10px;background:#0a0f1a;padding:8px 12px;font-size:13.5px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--txt)}
+details p{margin-top:6px}
+details b{color:var(--acc);font-weight:500}
+.q{border:1px solid var(--line);border-radius:12px;background:#0a0f1a;padding:12px 14px;margin-top:12px}
+.q h3{font-size:15px;color:var(--acc);font-weight:700;margin-bottom:4px}
+.q p{font-size:14.5px}
+.q .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.q .unit{font-size:13.5px;color:var(--muted)}
+.q .ans{margin-top:8px;font-size:13.5px;color:var(--muted)}
+.q .ans.ok{color:#bff5dc}.q .ans.bad{color:#ffc9c9}
+.q .ans b{color:var(--acc);font-weight:500}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.opts button{font-family:"JetBrains Mono",monospace}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 2-2 ③ ④ · 常見濃度表示法・溶液的飽和</div>
+  <h1>濃度與溶解度</h1>
+  <p class="lede"><b>溶質</b>＋<b>溶劑</b>＝<b>溶液</b>。<b>濃度</b>是一定量溶液中所含溶質的量；常見的有重量百分率濃度、體積百分率濃度與百萬分點濃度（ppm）。定溫下，一定量的水能溶解的溶質有限，溶不完的會沉在杯底，這時就是<b>飽和溶液</b>；水中最多能溶解的量就是<b>溶解度</b>。</p>
+
+  <div class="modebar" role="group" aria-label="模式">
+    <button type="button" data-m="mix" aria-pressed="true">① 調配溶液・飽和</button>
+    <button type="button" data-m="dil" aria-pressed="false">② 加水稀釋（圖 2-12）</button>
+    <button type="button" data-m="vp" aria-pressed="false">③ 體積百分率與 ppm</button>
+    <button type="button" data-m="quiz" aria-pressed="false">④ 例題練習</button>
+  </div>
+
+  <!-- ===== 模式 ① ===== -->
+  <div id="mMix">
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">燒杯（攪拌到不再溶解）</span><span class="n" id="mixN"></span></div>
+        <div class="box"><canvas id="cMix" class="cv" aria-label="燒杯中的水溶液，可以把罐子裡的溶質拖進燒杯"></canvas></div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="stat">
+          <div>溶液質量<b class="w" id="rSol">—</b></div>
+          <div>已溶解的溶質<b class="c" id="rDis">—</b></div>
+          <div>沉在杯底<b class="y" id="rUnd">—</b></div>
+          <div>重量百分率濃度<b id="rPct">—</b></div>
+          <div>百萬分點濃度<b class="w" id="rPpm">—</b></div>
+          <div>還能再溶解<b class="c" id="rMore">—</b></div>
+        </div>
+        <div class="formula" id="fMix"></div>
+        <div class="lab" style="margin-top:12px">現在的水最多能溶解多少？（虛線 = 溶解度）</div>
+        <canvas id="cBar" style="height:70px" aria-label="已溶解的溶質和最多能溶解的量比較"></canvas>
+        <div class="fb" id="fbMix" aria-live="polite"></div>
+      </div></section>
+    </div>
+    <div class="ctl">
+      <section class="card"><div class="pad">
+        <div class="lab">溶質</div>
+        <div class="seg" id="soluteSeg" role="group" aria-label="溶質">
+          <button type="button" data-s="salt" aria-pressed="true">食鹽</button>
+          <button type="button" data-s="sugar" aria-pressed="false">蔗糖</button>
+        </div>
+        <div class="lab" style="margin-top:10px">加入溶質（也可以把畫面左上的罐子拖進燒杯，一匙 5 g）</div>
+        <div class="seg">
+          <button type="button" data-add="1">＋1 g</button>
+          <button type="button" data-add="5">＋1 匙（5 g）</button>
+          <button type="button" data-add="20">＋20 g</button>
+          <button type="button" data-add="-5">−5 g</button>
+        </div>
+        <div class="sl"><span>溶質質量</span><input type="range" id="slS" min="0" max="300" step="0.5" value="20" aria-label="溶質質量"><b id="vS"></b></div>
+        <div class="lab" style="margin-top:10px">水（溶劑）</div>
+        <div class="sl"><span>水的質量</span><input type="range" id="slW" min="10" max="300" step="1" value="100" aria-label="水的質量"><b id="vW"></b></div>
+        <div class="seg" style="margin-top:6px">
+          <button type="button" data-water="10">加水 10 g</button>
+          <button type="button" data-water="50">加水 50 g</button>
+          <button type="button" id="halfBtn">倒掉一半溶液</button>
+        </div>
+        <div class="lab" style="margin-top:10px">水溫（溶解度會隨溫度改變）</div>
+        <div class="sl"><span>水溫</span><input type="range" id="slT" min="0" max="100" step="5" value="20" aria-label="水溫"><b id="vT"></b></div>
+        <div class="seg" style="margin-top:12px">
+          <button type="button" class="primary" id="bookSat">課本：20 ℃ 飽和食鹽水</button>
+          <button type="button" id="ex5">例 5：4 g 食鹽 + 10 g 水（25 ℃）</button>
+          <button type="button" id="mixReset">清空燒杯</button>
+        </div>
+      </div></section>
+      <section class="card"><div class="pad">
+        <div class="lab">表 2-1　20 ℃ 時常見物質在水中的溶解度</div>
+        <div class="tblwrap"><table class="tbl">
+          <tr><th>物質</th><th>蔗糖</th><th>食鹽</th><th>氧氣</th><th>二氧化碳</th></tr>
+          <tr><th>溶解度</th><td class="m">203.9 g<br>／100 g 水</td><td class="m">35.9 g<br>／100 g 水</td><td class="m">0.031 mL<br>／1 mL 水</td><td class="m">0.878 mL<br>／1 mL 水</td></tr>
+        </table></div>
+        <div class="lab" style="margin-top:12px" id="solTitle">食鹽在不同水溫的溶解度（g／100 g 水）</div>
+        <div class="tblwrap"><table class="tbl" id="tblT"></table></div>
+        <details>
+          <summary>想一想 1：水加倍，能溶解的食鹽也加倍嗎？</summary>
+          <p>溶解度是「每 100 g 水」最多能溶解的量。20 ℃ 時 100 g 水最多溶 35.9 g 食鹽，200 g 水就最多溶 <b>71.8 g</b>。所以加水可以讓杯底的食鹽繼續溶解，但飽和溶液的濃度不變，都是 35.9 ÷（100 + 35.9）× 100% ≈ <b>26.4%</b>。</p>
+        </details>
+        <details>
+          <summary>想一想 2：杯底還有食鹽，再多加食鹽，濃度會變嗎？</summary>
+          <p>不會。已經飽和了，多加的食鹽只會沉在杯底，溶解的量不變，所以濃度不變。計算濃度時要用「<b>有溶解的</b>」溶質，沉在杯底的不算（例 5）。</p>
+        </details>
+        <details>
+          <summary>想一想 3：倒掉一半溶液，濃度會變一半嗎？</summary>
+          <p>不會。溶液是均勻混合的，倒掉一半時溶質和水都少一半，比例不變，濃度不變。要讓濃度變小，要加水（加溶劑）稀釋，見模式 ②。</p>
+        </details>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== 模式 ② ===== -->
+  <div id="mDil" hidden>
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">把一杯糖水平分成三杯</span><span class="n" id="dilN"></span></div>
+        <div class="box"><canvas id="cDil" class="cv" aria-label="三杯糖水分別加入不同量的水，顏色深淺不同"></canvas></div>
+      </section>
+      <section class="card"><div class="pad">
+        <div class="tblwrap"><table class="tbl" id="tblDil"></table></div>
+        <div class="fb" id="fbDil" aria-live="polite"></div>
+        <details>
+          <summary>想一想 1：三杯的糖一樣多，為什麼甜度不同？</summary>
+          <p>三杯是從同一杯平分出來的，<b>溶質（糖）的質量相同</b>。加的水越多，溶液的質量越大，每 100 g 溶液中的糖就越少，濃度越小，顏色越淡、越不甜。</p>
+        </details>
+        <details>
+          <summary>想一想 2：要把濃度變成原來的一半，要加多少水？</summary>
+          <p>濃度 = 溶質 ÷ 溶液。溶質不變時，溶液質量變 2 倍，濃度就變 1/2。所以 30 g 糖水要加 <b>30 g</b> 水（乙杯）；加 60 g 水（丙杯），溶液變 3 倍，濃度變 1/3。</p>
+        </details>
+      </div></section>
+    </div>
+    <div class="ctl">
+      <section class="card"><div class="pad">
+        <div class="lab">原來那一杯糖水（共 90 g，平分成三杯，每杯 30 g）</div>
+        <div class="sl"><span>原來濃度</span><input type="range" id="slC0" min="5" max="60" step="1" value="30" aria-label="原來濃度"><b id="vC0"></b></div>
+        <div class="lab" style="margin-top:10px">各杯加入的水（為了方便，1 mL 水當作 1 g）</div>
+        <div class="sl"><span>甲杯加水</span><input type="range" id="slA" min="0" max="90" step="5" value="0" aria-label="甲杯加水"><b id="vA"></b></div>
+        <div class="sl"><span>乙杯加水</span><input type="range" id="slB" min="0" max="90" step="5" value="30" aria-label="乙杯加水"><b id="vB"></b></div>
+        <div class="sl"><span>丙杯加水</span><input type="range" id="slC" min="0" max="90" step="5" value="60" aria-label="丙杯加水"><b id="vC"></b></div>
+        <div class="seg" style="margin-top:12px">
+          <button type="button" class="primary" id="dilBook">課本圖 2-12 設定</button>
+          <button type="button" id="dilZero">三杯都不加水</button>
+        </div>
+      </div></section>
+      <section class="card"><div class="pad">
+        <div class="lab">稀釋前後，溶質質量不變</div>
+        <div class="formula" id="fDil"></div>
+        <p class="lab" style="margin-top:10px">把「加水的量」由 0 拉到 90 g，看濃度怎麼變：溶液質量變 2 倍、3 倍、4 倍，濃度就變 1/2、1/3、1/4，濃度和溶液質量成反比。</p>
+      </div></section>
+    </div>
+  </div>
+
+  <!-- ===== 模式 ③ ===== -->
+  <div id="mVp" hidden>
+    <div class="grid">
+      <section class="card">
+        <div class="head"><span class="t">體積百分率濃度：料理米酒</span><span class="n">每 100 mL 溶液含多少 mL 溶質</span></div>
+        <div class="box"><canvas id="cWine" class="cv2" aria-label="酒瓶中的酒精體積示意"></canvas></div>
+        <div class="pad" style="padding-top:0">
+          <div class="sl"><span>酒精度</span><input type="range" id="slDeg" min="1" max="60" step="0.5" value="19.5" aria-label="酒精度"><b id="vDeg"></b></div>
+          <div class="sl"><span>容量</span><input type="range" id="slVol" min="0.1" max="1.5" step="0.05" value="0.6" aria-label="容量"><b id="vVol"></b></div>
+          <div class="seg" style="margin-top:8px">
+            <button type="button" data-w="19.5,0.6">料理米酒 19.5 度 0.6 L</button>
+            <button type="button" data-w="22,0.6">例 2：22 度 0.6 L</button>
+            <button type="button" data-w="75,0.5">消毒酒精 75%（0.5 L）</button>
+          </div>
+          <div class="formula" id="fWine"></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="head"><span class="t">百萬分點濃度 ppm</span><span class="n" id="ppmN"></span></div>
+        <div class="box"><canvas id="cPpm" class="cv2" aria-label="一萬個小格代表一百萬份，亮起的格子代表溶質所佔的份數"></canvas></div>
+        <div class="pad" style="padding-top:0">
+          <div class="sl"><span>濃度</span><input type="range" id="slPpm" min="0" max="5000" step="10" value="1450" aria-label="ppm 濃度"><b id="vPpm"></b></div>
+          <div class="sl"><span>牙膏質量</span><input type="range" id="slTp" min="0.5" max="200" step="0.5" value="1" aria-label="牙膏質量"><b id="vTp"></b></div>
+          <div class="seg" style="margin-top:8px">
+            <button type="button" data-p="1450,1">含氟牙膏 1450 ppm</button>
+            <button type="button" data-p="1000,100">例 3：1000 ppm</button>
+            <button type="button" data-p="500,1">兒童牙膏 500 ppm</button>
+          </div>
+          <div class="formula" id="fPpm"></div>
+        </div>
+      </section>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="pad">
+      <details open>
+        <summary>三種濃度怎麼選？</summary>
+        <p><b>重量百分率</b>：每 100 g 溶液含幾 g 溶質，最常用（糖漿標示糖分 75%）。<b>體積百分率</b>：每 100 mL 溶液含幾 mL 溶質，常用在酒類，「19.5 度」就是 19.5%。<b>百萬分點（ppm）</b>：每 10⁶ 份溶液含幾份溶質，用在含量非常少的微量濃度；1 ppm 就是 1 kg（10⁶ mg）中含 1 mg。</p>
+      </details>
+      <details>
+        <summary>為什麼酒精 19.5 mL 加水 80.5 mL 不一定剛好 100 mL？</summary>
+        <p>酒精和水混合時，粒子會互相擠進彼此的空隙，混合後的總體積會比兩者相加略小。所以體積百分率是用「<b>溶液的體積</b>」當分母，標示「每 100 mL 溶液含 19.5 mL 酒精」，而不是把兩種液體的體積直接相加。</p>
+      </details>
+    </div></div>
+  </div>
+
+  <!-- ===== 模式 ④ ===== -->
+  <div id="mQuiz" hidden>
+    <div class="card" style="margin-top:14px"><div class="pad">
+      <div class="seg"><button type="button" class="primary" id="qNew">🔀 換一組數字</button><button type="button" id="qBook">回到課本數字</button></div>
+      <div id="qList"></div>
+    </div></div>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>模式 ① 先讓學生預測「100 g 水能溶多少食鹽」，再一匙一匙加入，看濃度上升到 26.4% 後就不再改變、多的食鹽沉在杯底；接著加水讓杯底食鹽溶解，體會溶解度是「每 100 g 水」的量。換成蔗糖可以看到 20 ℃ 時 100 g 水能溶 203.9 g 糖，溶液濃度可以超過 50%。水溫的溶解度依常見化學手冊數據內插，國中課本只要求 20 ℃ 與例 5 的 25 ℃（36 g）。模式 ② 為了方便把 1 mL 水當作 1 g。模式 ④ 的題目依課本例 1～5 的題型改寫，可換數字反覆練習。<br>
+    <b>來源：</b>國中自然 2 上 第 2 章 2-2 水溶液 ③ 常見濃度表示法、④ 溶液的飽和（p.52–57，圖 2-9、2-12、2-13，表 2-1，例 1～5）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const r1=v=>(Math.round(v*10)/10).toFixed(1), r2=v=>(Math.round(v*100)/100).toFixed(2);
+const fmt=(v,d=1)=>{const s=Number(v).toFixed(d);return s.replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1');};
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return {x,w,h};}
+function txt(x,s,X,Y,o={}){x.font=o.f||'12px "Noto Sans TC",sans-serif';x.fillStyle=o.c||'#c9d1dc';x.textAlign=o.a||'center';x.textBaseline=o.b||'middle';x.fillText(s,X,Y);}
+function setFb(id,s,c){const e=$(id);e.innerHTML=s;e.className='fb'+(c?' '+c:'');}
+function rr(x,X,Y,W,H,R){x.beginPath();if(x.roundRect)x.roundRect(X,Y,W,H,R);else x.rect(X,Y,W,H);}
+function frac(a,b){return `<span class="fr"><span>${a}</span><span>${b}</span></span>`;}
+
+/* ===== 溶解度資料（g／100 g 水；0～100 ℃，化學手冊常見值；20 ℃ 依課本表 2-1） ===== */
+const TT=[0,10,20,30,40,50,60,70,80,90,100];
+const SOL={
+  salt:{name:'食鹽',unit:'g',data:[35.7,35.8,35.9,36.1,36.4,36.7,37.1,37.5,38.0,38.5,39.2],col:'#f4f6fb',max:300},
+  sugar:{name:'蔗糖',unit:'g',data:[179.2,190.5,203.9,219.5,238.1,260.4,287.3,320.5,362.1,415.7,487.2],col:'#e9c88f',max:300}
+};
+function solub(k,T){const d=SOL[k].data;if(T<=0)return d[0];if(T>=100)return d[10];const i=Math.floor(T/10),f=(T-10*i)/10;return d[i]+(d[i+1]-d[i])*f;}
+function solubAt(k,T){ if(k==='salt'&&T===25) return 36; return solub(k,T);} // 例 5 用 36 g
+
+/* =============== 模式 ① =============== */
+const M={k:'salt',S:20,W:100,T:20,disShow:0,crystals:[],drag:null,parts:[]};
+function eq(){const s=solubAt(M.k,M.T);const maxDis=s*M.W/100;const dis=Math.min(M.S,maxDis);return {s,maxDis,dis,und:M.S-dis,sat:M.S>=maxDis-1e-9};}
+function syncSliders(){$('slS').value=M.S;$('slW').value=M.W;$('slT').value=M.T;
+  $('vS').textContent=fmt(M.S,1)+' g';$('vW').textContent=M.W+' g';$('vT').textContent=M.T+' ℃';}
+function setS(v){M.S=clamp(Math.round(v*10)/10,0,SOL[M.k].max);syncSliders();readMix();}
+function readMix(){
+  const e=eq(), sol=e.dis+M.W, pct=e.dis/sol*100;
+  $('rSol').textContent=fmt(sol,1)+' g';
+  $('rDis').textContent=fmt(e.dis,1)+' g';
+  $('rUnd').textContent=e.und>0.05?fmt(e.und,1)+' g':'0 g';
+  $('rPct').textContent=(M.S>0?r1(pct):'0.0')+'%';
+  $('rPpm').textContent=M.S>0?Math.round(pct*1e4).toLocaleString()+' ppm':'0 ppm';
+  $('rMore').textContent=e.sat?'0 g（飽和）':fmt(e.maxDis-e.dis,1)+' g';
+  $('mixN').textContent=`${SOL[M.k].name}・水 ${M.W} g・${M.T} ℃`;
+  $('fMix').innerHTML=`重量百分率濃度 = ${frac('溶質的質量','溶質＋溶劑的質量')} × 100% = ${frac(fmt(e.dis,1)+' g',fmt(e.dis,1)+' + '+M.W+' g')} × 100% = <em>${M.S>0?r1(pct):'0.0'}%</em>`+
+    (e.und>0.05?`<div class="lab" style="margin:6px 0 0">沉在杯底的 ${fmt(e.und,1)} g 沒有溶解，不算進溶質。</div>`:'');
+  // 回饋
+  const satPct=e.s/(100+e.s)*100;
+  if(M.S===0) setFb('fbMix','燒杯裡只有水。把左上的罐子拖進燒杯，或按「＋1 匙」，一匙一匙加入溶質。','');
+  else if(e.sat&&e.und>0.05) setFb('fbMix',`<b>飽和溶液</b>：${M.W} g 水在 ${M.T} ℃ 最多只能溶解 ${fmt(e.maxDis,1)} g ${SOL[M.k].name}，多的 ${fmt(e.und,1)} g 沉在杯底。飽和濃度 = ${fmt(e.s,1)} ÷（100 + ${fmt(e.s,1)}）× 100% ≈ <b>${r1(satPct)}%</b>，再加${SOL[M.k].name}濃度也不會變；試試加水或改變水溫。`,'mid');
+  else if(e.sat) setFb('fbMix',`剛好達到飽和：${M.W} g 水溶解了 ${fmt(e.dis,1)} g ${SOL[M.k].name}，再加就溶不下了。`,'mid');
+  else setFb('fbMix',`<b>未飽和溶液</b>：${SOL[M.k].name}全部溶解，還可以再溶解 ${fmt(e.maxDis-e.dis,1)} g。溶質越多，濃度越大。`,'ok');
+  drawBar();
+}
+function drawBar(){
+  const c=$('cBar');const {x,w,h}=fit(c);x.clearRect(0,0,w,h);
+  const e=eq();const L=8,R=8,top=10,bh=22;const sc=Math.max(e.maxDis,M.S,1)*1.15;
+  const X=v=>L+v/sc*(w-L-R);
+  rr(x,L,top,w-L-R,bh,6);x.fillStyle='#0b1120';x.fill();x.strokeStyle='#2a3550';x.stroke();
+  x.fillStyle='#43d6ff';rr(x,L,top,Math.max(0,X(e.dis)-L),bh,6);x.fill();
+  if(e.und>0.05){x.fillStyle='rgba(255,209,102,.55)';x.fillRect(X(e.dis),top,X(M.S)-X(e.dis),bh);}
+  x.strokeStyle='#ffd166';x.setLineDash([4,3]);x.lineWidth=2;x.beginPath();x.moveTo(X(e.maxDis),top-6);x.lineTo(X(e.maxDis),top+bh+6);x.stroke();x.setLineDash([]);
+  txt(x,'最多 '+fmt(e.maxDis,1)+' g',clamp(X(e.maxDis),50,w-50),top+bh+16,{c:'#ffd166',f:'11.5px "Noto Sans TC",sans-serif'});
+  const lbl='溶解 '+fmt(e.dis,1)+' g';if(X(e.dis)-L>80)txt(x,lbl,L+6,top+bh/2,{a:'left',c:'#04121a',f:'bold 11.5px "Noto Sans TC",sans-serif'});else txt(x,lbl,X(Math.max(e.dis,M.S))+6,top+bh/2,{a:'left',c:'#43d6ff',f:'bold 11.5px "Noto Sans TC",sans-serif'});
+}
+// 燒杯畫面
+const cMix=$('cMix');
+let geo={};
+function beakerGeo(w,h){const bw=Math.min(w*0.5,250),bh=Math.min(h*0.62,280);const bl=w*0.56-bw/2,by=h-28-bh;return {bw,bh,bl,by,jar:{x:16,y:16,w:Math.min(86,w*0.2),h:72}};}
+function drawMix(){
+  const {x,w,h}=fit(cMix);x.clearRect(0,0,w,h);geo=beakerGeo(w,h);const g=geo;
+  const e=eq();
+  // 刻度桌面
+  x.fillStyle='#141b2b';x.fillRect(0,h-28,w,28);
+  // 液面高度：以 300 g 溶液約滿 0.85 杯
+  const solMass=M.W+e.dis;const lv=clamp(solMass/(320)*0.85,0.05,0.9);
+  const wy=g.by+g.bh-g.bh*lv;
+  M.disShow+=(e.dis-M.disShow)*0.12;
+  const p=M.disShow/(M.disShow+M.W);
+  const base=M.k==='salt'?[110,170,255]:[220,160,80];
+  const a=M.k==='salt'?0.22+0.25*p:0.22+0.75*clamp(p/0.7,0,1);
+  x.fillStyle=`rgba(${base[0]},${base[1]},${base[2]},${a.toFixed(3)})`;x.fillRect(g.bl+2,wy,g.bw-4,g.by+g.bh-wy-2);
+  x.strokeStyle='rgba(150,200,255,.7)';x.lineWidth=1;x.beginPath();x.moveTo(g.bl+2,wy);x.lineTo(g.bl+g.bw-2,wy);x.stroke();
+  // 杯底沒溶解的晶體
+  const und=Math.max(0,M.S-M.disShow);
+  if(und>0.05){const pileH=Math.min(g.bh*0.3,3+Math.sqrt(und)*3.4);const cx0=g.bl+g.bw/2,half=(g.bw-12)/2;
+    x.fillStyle=SOL[M.k].col;x.globalAlpha=0.9;x.beginPath();x.moveTo(cx0-half,g.by+g.bh-2);
+    for(let k=0;k<=40;k++){const u=k/40*2-1;x.lineTo(cx0+u*half,g.by+g.bh-2-pileH*(1-u*u*0.75));}
+    x.lineTo(cx0+half,g.by+g.bh-2);x.closePath();x.fill();x.globalAlpha=1;
+    x.fillStyle='rgba(120,130,150,.6)';const n=Math.min(260,Math.round(und*10));
+    for(let i=0;i<n;i++){const u=((i*0.6180339)%1)*2-1;const v=((i*0.7548776)%1);x.fillRect(cx0+u*half-1,g.by+g.bh-3-v*pileH*(1-u*u*0.75),2,2);}
+  }
+  // 落下中的晶體
+  M.crystals=M.crystals.filter(c=>{c.vy+=0.35;c.y+=c.vy;c.x+=c.vx;const floor=g.by+g.bh-6;if(c.y>=floor)return false;x.fillStyle=SOL[M.k].col;x.fillRect(c.x-1.5,c.y-1.5,3,3);return true;});
+  // 杯身與刻度
+  x.strokeStyle='rgba(200,225,255,.85)';x.lineWidth=2;x.beginPath();x.moveTo(g.bl-6,g.by-2);x.lineTo(g.bl,g.by+3);x.lineTo(g.bl,g.by+g.bh-6);x.quadraticCurveTo(g.bl,g.by+g.bh,g.bl+6,g.by+g.bh);x.lineTo(g.bl+g.bw-6,g.by+g.bh);x.quadraticCurveTo(g.bl+g.bw,g.by+g.bh,g.bl+g.bw,g.by+g.bh-6);x.lineTo(g.bl+g.bw,g.by);x.stroke();
+  // 罐子
+  const j=g.jar;const hold=M.drag;
+  rr(x,j.x,j.y,j.w,j.h,10);x.fillStyle='#1b2438';x.fill();x.strokeStyle='#ffd166';x.lineWidth=1.5;x.stroke();
+  x.fillStyle=SOL[M.k].col;for(let i=0;i<30;i++){const u=((i*0.618)%1),v=((i*0.7548)%1);x.fillRect(j.x+8+u*(j.w-16),j.y+j.h-10-v*16,3,3);}
+  txt(x,SOL[M.k].name,j.x+j.w/2,j.y+18,{c:'#fff',f:'bold 14px "Noto Sans TC",sans-serif'});
+  txt(x,'拖進燒杯',j.x+j.w/2,j.y+36,{c:'#ffd166',f:'11px "Noto Sans TC",sans-serif'});
+  if(hold){ // 湯匙
+    x.strokeStyle='#c9d1dc';x.lineWidth=4;x.beginPath();x.moveTo(hold.x+10,hold.y-8);x.lineTo(hold.x+34,hold.y-30);x.stroke();
+    x.fillStyle='#c9d1dc';x.beginPath();x.ellipse(hold.x,hold.y,12,8,-0.6,0,Math.PI*2);x.fill();
+    x.fillStyle=SOL[M.k].col;x.beginPath();x.ellipse(hold.x,hold.y-3,8,4,-0.6,0,Math.PI*2);x.fill();
+    const over=hold.x>g.bl&&hold.x<g.bl+g.bw&&hold.y<g.by+g.bh&&hold.y>g.by-80;
+    txt(x,over?'放開：加入 5 g':'一匙 5 g',hold.x,hold.y+22,{c:over?'#7dffc4':'#c9d1dc',f:'12px "Noto Sans TC",sans-serif'});
+  }
+  // 粒子模型放大圈
+  const zr=Math.min(62,w*0.13),zx=g.bl+g.bw+Math.min(46,(w-g.bl-g.bw)/2)+4,zy=g.by+40;
+  if(zx+zr<w+6){
+    x.save();x.beginPath();x.arc(Math.min(zx,w-zr-4),zy,zr,0,Math.PI*2);x.fillStyle='#0b0f18';x.fill();x.clip();
+    const cx=Math.min(zx,w-zr-4);
+    const nW=40,nS=Math.round(clamp(M.disShow/M.W,0,2.2)*40*(M.k==='salt'?1.6:0.5));
+    if(M.parts.length!==nW+nS){M.parts=[];for(let i=0;i<nW+nS;i++)M.parts.push({x:Math.random()*2-1,y:Math.random()*2-1,s:i>=nW});}
+    M.parts.forEach(q=>{q.x+=(Math.random()-.5)*0.05;q.y+=(Math.random()-.5)*0.05;if(q.x*q.x+q.y*q.y>0.9){q.x*=0.9;q.y*=0.9;}
+      x.fillStyle=q.s?(M.k==='salt'?'#ffffff':'#ffb35c'):'rgba(110,175,255,.7)';x.beginPath();x.arc(cx+q.x*zr,zy+q.y*zr,q.s?3:3.4,0,Math.PI*2);x.fill();});
+    x.restore();x.strokeStyle='rgba(200,225,255,.6)';x.lineWidth=1.5;x.beginPath();x.arc(cx,zy,zr,0,Math.PI*2);x.stroke();
+    txt(x,'粒子模型',cx,zy+zr+12,{c:'#8492aa',f:'11px "Noto Sans TC",sans-serif'});
+    x.strokeStyle='rgba(200,225,255,.25)';x.setLineDash([3,4]);x.beginPath();x.moveTo(cx-zr*0.7,zy+zr*0.7);x.lineTo(g.bl+g.bw-20,wy+16);x.stroke();x.setLineDash([]);
+  }
+  // 標示
+  txt(x,'溶液 '+fmt(M.W+e.dis,1)+' g',g.bl+g.bw/2,g.by-12,{c:'#c9d1dc',f:'12.5px "Noto Sans TC",sans-serif'});
+  if(e.sat&&e.und>0.05) txt(x,'飽和',g.bl+g.bw/2,wy+18,{c:'#ffd166',f:'bold 14px "Noto Sans TC",sans-serif'});
+}
+function addSolute(dg,px){ if(dg>0){const g=geo;for(let i=0;i<Math.min(60,dg*6);i++)M.crystals.push({x:(px??g.bl+g.bw/2)+(Math.random()-.5)*20,y:g.by-30+Math.random()*10,vx:(Math.random()-.5)*0.6,vy:Math.random()*2});} setS(M.S+dg);}
+document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addSolute(+b.dataset.add));
+document.querySelectorAll('[data-water]').forEach(b=>b.onclick=()=>{M.W=clamp(M.W+ +b.dataset.water,10,300);syncSliders();readMix();});
+$('halfBtn').onclick=()=>{M.S=Math.round(M.S/2*10)/10;M.W=Math.max(10,Math.round(M.W/2));M.disShow=Math.min(M.disShow,M.S);syncSliders();readMix();};
+$('slS').oninput=()=>{M.S=+$('slS').value;syncSliders();readMix();};
+$('slW').oninput=()=>{M.W=+$('slW').value;syncSliders();readMix();};
+$('slT').oninput=()=>{M.T=+$('slT').value;syncSliders();readMix();drawTblT();};
+document.querySelectorAll('#soluteSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#soluteSeg button').forEach(q=>q.setAttribute('aria-pressed',String(q===b)));M.k=b.dataset.s;M.disShow=0;M.parts=[];readMix();drawTblT();});
+function pickSolute(k){M.k=k;document.querySelectorAll('#soluteSeg button').forEach(q=>q.setAttribute('aria-pressed',String(q.dataset.s===k)));drawTblT();}
+$('bookSat').onclick=()=>{pickSolute('salt');M.T=20;M.W=100;M.S=40;M.disShow=0;syncSliders();readMix();};
+$('ex5').onclick=()=>{pickSolute('salt');M.T=25;M.W=10;M.S=4;M.disShow=0;syncSliders();readMix();};
+$('mixReset').onclick=()=>{M.S=0;M.W=100;M.disShow=0;syncSliders();readMix();};
+function drawTblT(){
+  $('solTitle').textContent=SOL[M.k].name+'在不同水溫的溶解度（g／100 g 水）';
+  const ts=[0,20,40,60,80,100];
+  let s='<tr><th>水溫</th>'+ts.map(t=>`<th>${t} ℃</th>`).join('')+'</tr><tr><th>溶解度</th>'+ts.map(t=>`<td class="m">${fmt(solub(M.k,t),1)}</td>`).join('')+'</tr>';
+  $('tblT').innerHTML=s;
+}
+// 拖曳
+function pt(e){const r=cMix.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+cMix.addEventListener('pointerdown',e=>{const p=pt(e),j=geo.jar;if(j&&p.x>=j.x&&p.x<=j.x+j.w&&p.y>=j.y&&p.y<=j.y+j.h){M.drag=p;cMix.setPointerCapture(e.pointerId);e.preventDefault();}});
+cMix.addEventListener('pointermove',e=>{if(M.drag){M.drag=pt(e);}});
+cMix.addEventListener('pointerup',e=>{if(!M.drag)return;const p=pt(e),g=geo;M.drag=null;if(p.x>g.bl&&p.x<g.bl+g.bw&&p.y<g.by+g.bh&&p.y>g.by-80)addSolute(5,p.x);});
+cMix.addEventListener('pointercancel',()=>{M.drag=null;});
+
+/* =============== 模式 ② 稀釋 =============== */
+const DL={c0:30,add:[0,30,60]};
+const NAMES=['甲','乙','丙'];
+function readDil(){
+  DL.c0=+$('slC0').value;DL.add=[+$('slA').value,+$('slB').value,+$('slC').value];
+  $('vC0').textContent=DL.c0+'%';$('vA').textContent=DL.add[0]+' g';$('vB').textContent=DL.add[1]+' g';$('vC').textContent=DL.add[2]+' g';
+  const sug=30*DL.c0/100;
+  let s='<tr><th>杯</th><th>糖</th><th>加水</th><th>溶液</th><th>濃度</th><th>變成原來的</th></tr>';
+  DL.add.forEach((a,i)=>{const sol=30+a;const c=sug/sol*100;s+=`<tr><td>${NAMES[i]}</td><td class="m">${fmt(sug,1)} g</td><td class="m">${a} g</td><td class="m">${sol} g</td><td class="m">${r1(c)}%</td><td class="m">${a===0?'1':(sol%30===0?'1/'+sol/30:'30/'+sol)}</td></tr>`;});
+  $('tblDil').innerHTML=s;
+  $('dilN').textContent=`原來 90 g・濃度 ${DL.c0}%`;
+  const a=DL.add[2],sol=30+a;
+  $('fDil').innerHTML=`丙杯：${frac(fmt(sug,1)+' g','30 + '+a+' g')} × 100% = <em>${r1(sug/sol*100)}%</em><div class="lab" style="margin:6px 0 0">溶質不變：${fmt(sug,1)} g 糖 ＝ 30 g × ${DL.c0}%</div>`;
+  const same=DL.add.every(v=>v===DL.add[0]);
+  if(same) setFb('fbDil','三杯加的水一樣多，濃度相同、顏色相同。試著讓乙杯、丙杯多加一些水。','');
+  else setFb('fbDil',`三杯的糖都是 <b>${fmt(sug,1)} g</b>，加的水越多，溶液越重、濃度越小，顏色越淡。`,'ok');
+}
+['slC0','slA','slB','slC'].forEach(id=>$(id).oninput=readDil);
+$('dilBook').onclick=()=>{$('slA').value=0;$('slB').value=30;$('slC').value=60;readDil();};
+$('dilZero').onclick=()=>{$('slA').value=0;$('slB').value=0;$('slC').value=0;readDil();};
+function drawDil(){
+  const c=$('cDil');const {x,w,h}=fit(c);x.clearRect(0,0,w,h);
+  const sug=30*DL.c0/100;const cw=w/3;
+  // 上方原杯
+  const ob=Math.min(70,cw*0.6),oh=70,ox=w/2-ob/2,oy=14;
+  const colA=p=>{const a=clamp(p/50,0,1);return `rgba(${Math.round(150+40*(1-a))},${Math.round(110-70*a)},${Math.round(60-40*a)},${(0.15+0.8*a).toFixed(3)})`;};
+  x.fillStyle=colA(DL.c0);x.fillRect(ox+2,oy+oh*0.2,ob-4,oh*0.8-2);
+  x.strokeStyle='rgba(200,225,255,.8)';x.lineWidth=1.6;x.strokeRect(ox,oy,ob,oh);
+  txt(x,'90 g・'+DL.c0+'%',w/2,oy+oh+12,{c:'#c9d1dc',f:'12px "Noto Sans TC",sans-serif'});
+  x.strokeStyle='#3a4560';x.lineWidth=1.2;x.beginPath();x.moveTo(w/2,oy+oh+22);x.lineTo(w/2,oy+oh+34);x.moveTo(cw/2,oy+oh+34);x.lineTo(cw*2.5,oy+oh+34);for(let i=0;i<3;i++){x.moveTo(cw*(i+.5),oy+oh+34);x.lineTo(cw*(i+.5),oy+oh+46);}x.stroke();
+  DL.add.forEach((a,i)=>{
+    const cx=cw*(i+.5),bw=Math.min(cw*0.7,110),bh=Math.min(h-oy-oh-110,200),bl=cx-bw/2,by=h-40-bh;
+    const sol=30+a,c=sug/sol*100;
+    const lv=sol/130;const wy=by+bh-bh*0.9*lv;
+    x.fillStyle=colA(c);x.fillRect(bl+2,wy,bw-4,by+bh-wy-2);
+    const wy0=by+bh-bh*0.9*30/130;
+    x.strokeStyle='rgba(255,209,102,.6)';x.setLineDash([3,3]);x.beginPath();x.moveTo(bl+2,wy0);x.lineTo(bl+bw-2,wy0);x.stroke();x.setLineDash([]);
+    x.strokeStyle='rgba(200,225,255,.85)';x.lineWidth=2;x.beginPath();x.moveTo(bl-5,by-2);x.lineTo(bl,by+3);x.lineTo(bl,by+bh);x.lineTo(bl+bw,by+bh);x.lineTo(bl+bw,by);x.stroke();
+    for(let k=1;k<=4;k++){const yy=by+bh-bh*0.9*(k*30)/130;x.strokeStyle='rgba(200,225,255,.35)';x.lineWidth=1;x.beginPath();x.moveTo(bl,yy);x.lineTo(bl+10,yy);x.stroke();txt(x,String(k*30),bl+14,yy,{a:'left',c:'#5b6880',f:'10px "JetBrains Mono",monospace'});}
+    txt(x,NAMES[i]+'　加水 '+a+' g',cx,by-14,{c:'#ffd166',f:'12.5px "Noto Sans TC",sans-serif'});
+    txt(x,r1(c)+'%',cx,h-24,{c:'#7dffc4',f:'bold 15px "JetBrains Mono",monospace'});
+    txt(x,'溶液 '+sol+' g',cx,h-8,{c:'#8492aa',f:'11px "Noto Sans TC",sans-serif'});
+  });
+}
+
+/* =============== 模式 ③ =============== */
+const VP={deg:19.5,vol:0.6,ppm:1450,tp:1};
+function readVp(){
+  VP.deg=+$('slDeg').value;VP.vol=+$('slVol').value;VP.ppm=+$('slPpm').value;VP.tp=+$('slTp').value;
+  $('vDeg').textContent=fmt(VP.deg,1)+' 度';$('vVol').textContent=fmt(VP.vol,2)+' L';$('vPpm').textContent=VP.ppm+' ppm';$('vTp').textContent=fmt(VP.tp,1)+' g';
+  const mL=VP.vol*1000, al=mL*VP.deg/100;
+  $('fWine').innerHTML=`酒精體積 = 溶液體積 × 體積百分率 = ${fmt(mL,0)} mL × ${fmt(VP.deg,1)}% = <em>${fmt(al,1)} mL</em><div class="lab" style="margin:6px 0 0">${fmt(VP.deg,1)} 度：每 100 mL ${VP.deg>=70?'溶液':'酒'}中含 ${fmt(VP.deg,1)} mL 酒精。</div>`;
+  const mg=VP.tp*1000*VP.ppm/1e6;
+  $('fPpm').innerHTML=`溶質質量 = 溶液質量 × ${frac(VP.ppm,'10⁶')} = ${fmt(VP.tp*1000,0)} mg × ${frac(VP.ppm,'1000000')} = <em>${fmt(mg,3)} mg</em><div class="lab" style="margin:6px 0 0">${VP.ppm} ppm：每 10⁶ mg（1 kg）中含 ${VP.ppm} mg；也等於 ${r2(VP.ppm/1e4)}%。</div>`;
+  $('ppmN').textContent=`10 000 格 = 10⁶ 份，每格 100 份`;
+}
+['slDeg','slVol','slPpm','slTp'].forEach(id=>$(id).oninput=readVp);
+document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const [d,v]=b.dataset.w.split(',');$('slDeg').max=Math.max(60,+d);$('slDeg').value=d;$('slVol').value=v;readVp();});
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const [p,t]=b.dataset.p.split(',');$('slPpm').value=p;$('slTp').value=t;readVp();});
+function drawWine(){
+  const c=$('cWine');const {x,w,h}=fit(c);x.clearRect(0,0,w,h);
+  // 瓶子
+  const bx=Math.max(18,w*0.08),bw=Math.min(84,w*0.22),bh=h-56,by=26;
+  x.fillStyle='rgba(140,60,30,.25)';x.strokeStyle='rgba(220,180,150,.7)';x.lineWidth=1.6;
+  x.beginPath();x.moveTo(bx+bw*0.38,by);x.lineTo(bx+bw*0.62,by);x.lineTo(bx+bw*0.62,by+bh*0.18);x.quadraticCurveTo(bx+bw,by+bh*0.26,bx+bw,by+bh*0.38);x.lineTo(bx+bw,by+bh);x.lineTo(bx,by+bh);x.lineTo(bx,by+bh*0.38);x.quadraticCurveTo(bx,by+bh*0.26,bx+bw*0.38,by+bh*0.18);x.closePath();x.fill();x.stroke();
+  txt(x,fmt(VP.deg,1)+' 度',bx+bw/2,by+bh*0.62,{c:'#ffd166',f:'bold 14px "Noto Sans TC",sans-serif'});
+  txt(x,fmt(VP.vol,2)+' L',bx+bw/2,by+bh*0.62+18,{c:'#e8edf6',f:'12px "JetBrains Mono",monospace'});
+  // 量筒：把酒精與「其他」分開
+  const gx=bx+bw+Math.max(24,w*0.1),gw=Math.min(70,w*0.18),gh=bh,gy=by;const cap=1500;
+  const mL=VP.vol*1000,al=mL*VP.deg/100;
+  const Y=v=>gy+gh-v/cap*gh;
+  x.fillStyle='rgba(110,170,255,.25)';x.fillRect(gx+2,Y(mL),gw-4,gy+gh-Y(mL));
+  x.fillStyle='rgba(255,209,102,.6)';x.fillRect(gx+2,Y(al),gw-4,gy+gh-Y(al));
+  x.strokeStyle='rgba(200,225,255,.85)';x.lineWidth=1.6;x.strokeRect(gx,gy,gw,gh);
+  for(let v=0;v<=cap;v+=250){x.strokeStyle='rgba(200,225,255,.35)';x.beginPath();x.moveTo(gx,Y(v));x.lineTo(gx+8,Y(v));x.stroke();txt(x,String(v),gx-4,Y(v),{a:'right',c:'#5b6880',f:'10px "JetBrains Mono",monospace'});}
+  const lx=gx+gw+10;
+  if(lx<w-60){
+    x.fillStyle='#ffd166';x.fillRect(lx,gy+10,12,12);txt(x,'酒精 '+fmt(al,1)+' mL',lx+18,gy+16,{a:'left',c:'#ffe7a3',f:'12.5px "Noto Sans TC",sans-serif'});
+    x.fillStyle='rgba(110,170,255,.6)';x.fillRect(lx,gy+32,12,12);txt(x,'其他（主要是水）',lx+18,gy+38,{a:'left',c:'#c9d1dc',f:'12.5px "Noto Sans TC",sans-serif'});
+    txt(x,'溶液共 '+fmt(mL,0)+' mL',lx,gy+64,{a:'left',c:'#8492aa',f:'12px "Noto Sans TC",sans-serif'});
+    txt(x,'每 100 mL 有 '+fmt(VP.deg,1)+' mL',lx,gy+84,{a:'left',c:'#8492aa',f:'12px "Noto Sans TC",sans-serif'});
+  }
+  txt(x,'（示意：把酒精和其他成分分開畫）',w/2,h-12,{c:'#5b6880',f:'11px "Noto Sans TC",sans-serif'});
+}
+function drawPpm(){
+  const c=$('cPpm');const {x,w,h}=fit(c);x.fillStyle='#04060b';x.fillRect(0,0,w,h);
+  const N=100;const side=Math.min((w-36)/2,h-56);const s=side/N;const gx=(w-2*side-16)/2,gy=24;
+  const cells=VP.ppm/100;const full=Math.floor(cells),part=cells-full;
+  x.fillStyle='#101828';x.fillRect(gx,gy,side,side);x.fillStyle='#ffd166';
+  for(let i=0;i<full;i++){const r=Math.floor(i/N),q=i%N;x.fillRect(gx+q*s,gy+r*s,Math.max(1,s),Math.max(1,s));}
+  if(part>0){const r=Math.floor(full/N),q=full%N;x.fillRect(gx+q*s,gy+r*s,Math.max(1,s*part),Math.max(1,s));}
+  x.strokeStyle='#2a3550';x.strokeRect(gx,gy,side,side);
+  txt(x,'全部：10 000 格 = 10⁶ 份',gx+side/2,gy-12,{c:'#8492aa',f:'11.5px "Noto Sans TC",sans-serif'});
+  // 放大前 100 格（10×10）
+  const zx=gx+side+16,zs=side/10;
+  x.strokeStyle='#ffd166';x.lineWidth=1;x.strokeRect(gx,gy,Math.max(3,10*s),Math.max(3,10*s));
+  x.setLineDash([3,3]);x.beginPath();x.moveTo(gx+10*s,gy);x.lineTo(zx,gy);x.moveTo(gx+10*s,gy+10*s);x.lineTo(zx,gy+side);x.stroke();x.setLineDash([]);
+  for(let i=0;i<100;i++){const r=Math.floor(i/10),q=i%10;const v=clamp(cells-i,0,1);
+    x.fillStyle='#101828';x.fillRect(zx+q*zs+1,gy+r*zs+1,zs-2,zs-2);
+    if(v>0){x.fillStyle='#ffd166';x.fillRect(zx+q*zs+1,gy+r*zs+1,(zs-2)*v,zs-2);}}
+  x.strokeStyle='#2a3550';x.strokeRect(zx,gy,side,side);
+  txt(x,'放大左上角 100 格（每格 100 份）',zx+side/2,gy-12,{c:'#ffe7a3',f:'11.5px "Noto Sans TC",sans-serif'});
+  txt(x,`亮起 ${fmt(cells,2)} 格 ÷ 10 000 格 = ${r2(VP.ppm/1e4)}%`,w/2,gy+side+18,{c:'#c9d1dc',f:'12px "Noto Sans TC",sans-serif'});
+}
+
+/* =============== 模式 ④ 例題 =============== */
+const rnd=(a,b,st=1)=>Math.round((a+Math.random()*(b-a))/st)*st;
+let QP;
+function bookQ(){return {e1:{s:20,w:80},e2:{deg:22,vol:0.6},e3:{ppm:1000,g:100},e4:{ppm:0.01,kg:1},e5:{T:25,sol:36,salt:4,w:10}};}
+function newQ(){return {e1:{s:rnd(5,40,5),w:rnd(40,200,10)},e2:{deg:rnd(10,45,0.5),vol:[0.3,0.5,0.6,0.75,1][rnd(0,4)]},e3:{ppm:[500,1000,1100,1450][rnd(0,3)],g:[10,20,50,100,150][rnd(0,4)]},e4:{ppm:[0.01,0.04,0.5,2][rnd(0,3)],kg:[1,2,5,10][rnd(0,3)]},e5:{T:25,sol:36,salt:rnd(3,8,0.5),w:[10,20][rnd(0,1)]}};}
+function buildQ(){
+  const P=QP;const e5=P.e5,dis5=Math.min(e5.salt,e5.sol*e5.w/100);
+  const opts5=[[`${fmt(e5.salt,1)}/${e5.w}`,e5.salt/e5.w],[`${fmt(e5.sol*e5.w/100,1)}/${e5.w}`,(e5.sol*e5.w/100)/e5.w],[`${fmt(e5.sol*e5.w/100,1)}/(${e5.w}+${fmt(e5.sol*e5.w/100,1)})`,dis5/(e5.w+dis5)],[`${fmt(e5.salt,1)}/(${e5.w}+${fmt(e5.salt,1)})`,e5.salt/(e5.w+e5.salt)]];
+  const right5=e5.salt>=e5.sol*e5.w/100?2:3;
+  const Q=[
+    {h:'例 1　重量百分率濃度',p:`將 ${P.e1.s} g 的糖完全溶於 ${P.e1.w} g 的水中，糖水的重量百分率濃度是多少？`,ans:P.e1.s/(P.e1.s+P.e1.w)*100,u:'%',tol:0.15,
+      ex:`${P.e1.s} ÷（${P.e1.s} + ${P.e1.w}）× 100% = <b>${r1(P.e1.s/(P.e1.s+P.e1.w)*100)}%</b>。分母是溶液（溶質＋溶劑），不是只有水。`},
+    {h:'例 2　體積百分率濃度',p:`一瓶 ${fmt(P.e2.deg,1)} 度、容量 ${P.e2.vol} L 的酒，含有酒精多少 mL？`,ans:P.e2.vol*1000*P.e2.deg/100,u:'mL',tol:0.6,
+      ex:`${P.e2.vol} L = ${fmt(P.e2.vol*1000,0)} mL，${fmt(P.e2.vol*1000,0)} × ${fmt(P.e2.deg,1)}% = <b>${fmt(P.e2.vol*1000*P.e2.deg/100,1)} mL</b>。`},
+    {h:'例 3　百萬分點濃度',p:`某牙膏含氟 ${P.e3.ppm} ppm，${P.e3.g} g 的這種牙膏中含氟多少 mg？`,ans:P.e3.g*1000*P.e3.ppm/1e6,u:'mg',tol:0.01,
+      ex:`${P.e3.g} g = ${fmt(P.e3.g*1000,0)} mg，${fmt(P.e3.g*1000,0)} × ${P.e3.ppm} ÷ 10⁶ = <b>${fmt(P.e3.g*1000*P.e3.ppm/1e6,3)} mg</b>。`},
+    {h:'例 4　微量濃度（殘留容許量）',p:`某藥品在肉品中的殘留容許量為 ${P.e4.ppm} ppm，表示 ${P.e4.kg} kg 的肉中最多可含這種藥品多少 mg？`,ans:P.e4.kg*1e6*P.e4.ppm/1e6,u:'mg',tol:0.0005,
+      ex:`1 kg = 10⁶ mg，${P.e4.ppm} ppm 表示每 10⁶ mg 中含 ${P.e4.ppm} mg，所以 ${P.e4.kg} kg 最多含 <b>${fmt(P.e4.kg*P.e4.ppm,3)} mg</b>。`},
+    {h:'例 5　溶解度與飽和溶液',p:`已知 25 ℃ 時 100 g 水最多可溶解 36 g 食鹽。在 25 ℃ 將 ${fmt(e5.salt,1)} g 食鹽加入 ${e5.w} g 水中充分攪拌，所得溶液的重量百分率濃度怎麼算？`,choice:opts5,right:right5,
+      ex:`${e5.w} g 水最多溶 36 × ${e5.w}/100 = ${fmt(e5.sol*e5.w/100,1)} g。${e5.salt>=e5.sol*e5.w/100?`加入 ${fmt(e5.salt,1)} g 只溶得了 ${fmt(dis5,1)} g，是<b>飽和溶液</b>，${fmt(e5.salt-dis5,1)} g 沉在杯底不算。`:`${fmt(e5.salt,1)} g 全部溶解，<b>未飽和</b>。`}濃度 = ${fmt(dis5,1)} ÷（${e5.w} + ${fmt(dis5,1)}）× 100% ≈ <b>${r1(dis5/(e5.w+dis5)*100)}%</b>。`}
+  ];
+  const L=$('qList');L.innerHTML='';
+  Q.forEach((q,i)=>{const d=document.createElement('div');d.className='q';
+    if(q.choice){
+      d.innerHTML=`<h3>${q.h}</h3><p>${q.p}</p><div class="opts">${q.choice.map((c,k)=>`<button type="button" data-k="${k}">(${'ABCD'[k]}) ${c[0]} × 100%</button>`).join('')}</div><div class="ans" aria-live="polite"></div>`;
+      d.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const ok=+b.dataset.k===q.right;const a=d.querySelector('.ans');a.className='ans '+(ok?'ok':'bad');a.innerHTML=(ok?'✔ 正確！':'✘ 再想想：沉在杯底的食鹽算不算溶質？')+(ok?' '+q.ex:'');});
+    }else{
+      d.innerHTML=`<h3>${q.h}</h3><p>${q.p}</p><div class="row"><input type="number" step="any" aria-label="答案"><span class="unit">${q.u}</span><button type="button">檢查</button><button type="button" data-show>看解析</button></div><div class="ans" aria-live="polite"></div>`;
+      const inp=d.querySelector('input'),a=d.querySelector('.ans');
+      d.querySelector('button:not([data-show])').onclick=()=>{const v=parseFloat(inp.value);if(isNaN(v)){a.className='ans';a.textContent='先輸入答案。';return;}const ok=Math.abs(v-q.ans)<=Math.max(q.tol,Math.abs(q.ans)*0.01);a.className='ans '+(ok?'ok':'bad');a.innerHTML=ok?'✔ 正確！'+q.ex:'✘ 不對喔，再算一次，或按「看解析」。';};
+      d.querySelector('[data-show]').onclick=()=>{a.className='ans';a.innerHTML=q.ex;};
+    }
+    L.appendChild(d);});
+}
+$('qNew').onclick=()=>{QP=newQ();buildQ();};
+$('qBook').onclick=()=>{QP=bookQ();buildQ();};
+
+/* =============== 共用 =============== */
+let mode='mix';
+const MODES={mix:'mMix',dil:'mDil',vp:'mVp',quiz:'mQuiz'};
+function show(m){mode=m;document.querySelectorAll('.modebar button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===m)));Object.entries(MODES).forEach(([k,id])=>$(id).hidden=k!==m);if(m==='mix')readMix();}
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>show(b.dataset.m));
+function loop(){
+  if(mode==='mix')drawMix();
+  else if(mode==='dil')drawDil();
+  else if(mode==='vp'){drawWine();drawPpm();}
+  requestAnimationFrame(loop);
+}
+syncSliders();readMix();drawTblT();readDil();readVp();QP=bookQ();buildQ();
+requestAnimationFrame(loop);
+window.__cc={M,eq,solub,solubAt,DL,VP,show,setS};
+})();
+</script>
+</body>
+</html>

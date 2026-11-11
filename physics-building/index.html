@@ -1,136 +1,128 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>物理大樓</title>
+<title>物理研究院</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1f3347">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="物理大樓">
-
+<meta name="apple-mobile-web-app-title" content="物理研究院">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
-/* Layout: 左邊是大樓立面（每層樓一冊、窗戶＝教室），右邊是選到的樓層走廊（教室門牌），點門進教室全螢幕開模擬 */
+/* Layout: 院區 3D 場景（左：模擬大樓、右：競賽大樓，3F 空橋相連）＋ 右側導覽面板（院區名錄／樓層教室） */
 :root{
-  --sky:#dfe7ec; --ground:#c9d1c4; --paper:#f7f6f2; --ink:#1c2228; --muted:#5b6670; --line:#cfd4d6;
-  --wall:#d8cfc2; --wall-2:#c9bfb1; --wall-edge:#8d8272; --glass:#5f7a8c; --glass-lit:#ffd978;
-  --plate:#1f3347; --plate-ink:#f4f1e8; --rail:#9aa3a8;
+  --sky:#dfe7ec; --sky-top:#a9c8dc; --ground:#c9d1c4; --paper:#f7f6f2; --ink:#1c2228; --muted:#5b6670; --line:#cfd4d6;
+  --wall:#d8cfc2; --wall-t:#cdd2d6; --slab:#eeeae2; --trim:#3a4650; --glass:#5f7a8c; --glass-lit:#ffd978;
+  --plate:#1f3347; --plate-t:#2c2b45; --plate-ink:#f4f1e8; --rail:#9aa3a8;
+  --lawn:#9cbf7f; --leaf:#5f8f4e; --trunk:#6b4f36; --night:0;
   --f1:#3d7d4c; --f2:#c2652a; --f3:#2b64b8; --f4:#7a4fb5; --f5:#167a82; --f6:#b03a4a; --f7:#5a5f9e; --fr:#8a6a12;
+  --g-kin:#2f6fa8; --g-dyn:#2b5cb8; --g-energy:#3b4fb0; --g-rot:#5a4fb5; --g-grav:#6b4aa8;
+  --g-wave:#167a82; --g-fluid:#2f7d62; --g-heat:#c2652a; --g-estat:#b03a4a; --g-em:#9a3a7a;
+  --g-opt:#8a6a12; --g-mod:#6a5f9e; --g-math:#4f5a63;
   --shadow:0 12px 30px rgba(28,34,40,.14);
-  --sky-top:#a9c8dc; --slab:#eeeae2; --trim:#3a4650; --leaf:#5f8f4e; --trunk:#6b4f36; --lawn:#9cbf7f; --night:0;
   --f-sign:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --sky:#141b22; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
-  --wall:#4a4540; --wall-2:#3e3a35; --wall-edge:#24211e; --glass:#22333f; --glass-lit:#ffcf5a;
-  --plate:#0f1c28; --plate-ink:#f4f1e8; --rail:#56616a;
+  --sky:#141b22; --sky-top:#05080d; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
+  --wall:#4a4540; --wall-t:#3d434a; --slab:#6b6660; --trim:#11171c; --glass:#22333f; --glass-lit:#ffcf5a;
+  --plate:#0f1c28; --plate-t:#1a1930; --plate-ink:#f4f1e8; --rail:#56616a;
+  --lawn:#24331f; --leaf:#2e4a2a; --trunk:#3b2b1e; --night:1;
   --f1:#7cc58c; --f2:#f0a06b; --f3:#86aef2; --f4:#bc9df0; --f5:#64cbd2; --f6:#ef8d9a; --f7:#a7acee; --fr:#e3c056;
-  --sky-top:#05080d; --slab:#6b6660; --trim:#11171c; --leaf:#2e4a2a; --trunk:#3b2b1e; --lawn:#24331f; --night:1;
+  --g-kin:#7fb4e6; --g-dyn:#86a6f2; --g-energy:#9aa2f0; --g-rot:#b0a2f0; --g-grav:#c3a2ea;
+  --g-wave:#64cbd2; --g-fluid:#6fcaa6; --g-heat:#f0a06b; --g-estat:#ef8d9a; --g-em:#e693c9;
+  --g-opt:#e3c056; --g-mod:#b3aeea; --g-math:#a9b4bc;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --sky:#141b22; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
-  --wall:#4a4540; --wall-2:#3e3a35; --wall-edge:#24211e; --glass:#22333f; --glass-lit:#ffcf5a;
-  --plate:#0f1c28; --plate-ink:#f4f1e8; --rail:#56616a;
+  --sky:#141b22; --sky-top:#05080d; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
+  --wall:#4a4540; --wall-t:#3d434a; --slab:#6b6660; --trim:#11171c; --glass:#22333f; --glass-lit:#ffcf5a;
+  --plate:#0f1c28; --plate-t:#1a1930; --plate-ink:#f4f1e8; --rail:#56616a;
+  --lawn:#24331f; --leaf:#2e4a2a; --trunk:#3b2b1e; --night:1;
   --f1:#7cc58c; --f2:#f0a06b; --f3:#86aef2; --f4:#bc9df0; --f5:#64cbd2; --f6:#ef8d9a; --f7:#a7acee; --fr:#e3c056;
-  --sky-top:#05080d; --slab:#6b6660; --trim:#11171c; --leaf:#2e4a2a; --trunk:#3b2b1e; --lawn:#24331f; --night:1;
+  --g-kin:#7fb4e6; --g-dyn:#86a6f2; --g-energy:#9aa2f0; --g-rot:#b0a2f0; --g-grav:#c3a2ea;
+  --g-wave:#64cbd2; --g-fluid:#6fcaa6; --g-heat:#f0a06b; --g-estat:#ef8d9a; --g-em:#e693c9;
+  --g-opt:#e3c056; --g-mod:#b3aeea; --g-math:#a9b4bc;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}
 
 [hidden]{display:none!important}
 body{margin:0;overflow-wrap:anywhere;background:var(--sky);color:var(--ink);font-family:var(--f-sign);font-size:15px;line-height:1.65}
-.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
 h1,h2,h3{margin:0;text-wrap:balance}
-button{font:inherit;color:inherit}
+button,a{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--glass-lit);outline-offset:2px}
 
 .top{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.top h1{font-size:clamp(28px,4.4vw,40px);font-weight:900;letter-spacing:.04em}
+.top>div:first-child{flex:1 1 280px;min-width:0}
+.top h1{font-size:clamp(28px,4.4vw,40px);font-weight:900;letter-spacing:.06em}
 .top p{margin:2px 0 0;color:var(--muted)}
-.top>div:first-child{flex:1 1 260px;min-width:0}
 .count{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
 
-.site{display:grid;grid-template-columns:minmax(320px,500px) minmax(0,1fr);gap:28px;align-items:start}
+.site{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,1fr);gap:24px;align-items:start}
 
-/* ---------- 3D building ---------- */
-.scene{position:relative;height:640px;border-radius:18px;overflow:hidden;background:linear-gradient(to bottom,var(--sky-top) 0%,var(--sky) 62%,var(--ground) 100%);box-shadow:var(--shadow);touch-action:pan-y;cursor:grab}
+/* ---------- 3D campus ---------- */
+.scene{position:relative;height:660px;border-radius:18px;overflow:hidden;background:linear-gradient(to bottom,var(--sky-top) 0%,var(--sky) 62%,var(--ground) 100%);box-shadow:var(--shadow);touch-action:pan-y;cursor:grab}
 .scene:active{cursor:grabbing}
 .scene canvas{display:block;width:100%;height:100%}
 .labels{position:absolute;inset:0;pointer-events:none}
-.flabel{position:absolute;left:0;top:0;pointer-events:auto;display:flex;align-items:center;gap:7px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 11px 3px 4px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:opacity .2s,background .2s,color .2s}
-.flabel i{font-style:normal;font-family:var(--f-mono);font-size:11.5px;min-width:26px;height:22px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--fc);color:var(--paper)}
+.flabel{position:absolute;left:0;top:0;pointer-events:auto;display:flex;align-items:center;gap:6px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:2px 9px 2px 3px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:background .2s,color .2s}
+.flabel i{font-style:normal;font-family:var(--f-mono);font-size:11px;min-width:28px;height:20px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--fc);color:var(--paper)}
 .flabel.on{background:var(--fc);color:var(--paper)}
 .flabel.on i{background:var(--paper);color:var(--fc)}
 .flabel:hover{outline:2px solid var(--fc)}
-.scene.narrow .flabel{padding:3px}
+.scene.narrow .flabel{padding:2px}
 .scene.narrow .flabel .nm{display:none}
-.replay{position:absolute;left:14px;bottom:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.replay:hover{outline:2px solid var(--glass-lit)}
+.blabel{position:absolute;left:0;top:0;pointer-events:auto;border:0;cursor:pointer;background:var(--bp);color:var(--plate-ink);font-weight:900;letter-spacing:.3em;font-size:13px;padding:4px 10px 4px 14px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.2);white-space:nowrap}
 .hint{position:absolute;right:14px;bottom:12px;font-size:12px;color:var(--muted);background:color-mix(in srgb,var(--paper) 80%,transparent);padding:3px 10px;border-radius:999px;pointer-events:none}
-.building{position:relative}
-.fallback{padding-top:8px}
-.roof-sign{margin:0 26px;background:var(--plate);color:var(--plate-ink);text-align:center;padding:6px 0 7px;border-radius:4px 4px 0 0;font-weight:900;letter-spacing:.5em;font-size:18px;position:relative}
-.roof-sign small{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.6em;opacity:.7;font-weight:500}
-.tower{background:var(--wall-2);border:2px solid var(--wall-edge);border-bottom:0;display:flex;flex-direction:column}
-.floor{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:stretch;border-top:2px solid var(--wall-edge);background:var(--wall);cursor:pointer;text-align:left;padding:0;border-left:0;border-right:0;border-bottom:0;position:relative;transition:background .2s}
-.floor:first-child{border-top:0}
-.floor .lvl{display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-weight:600;font-size:14px;background:var(--wall-2);border-right:2px solid var(--wall-edge);color:var(--ink)}
-.floor .face{padding:10px 12px 8px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.floor .wins{display:flex;gap:8px;flex-wrap:wrap}
-.win{width:30px;height:24px;background:var(--glass);border:2px solid var(--wall-edge);border-radius:2px;position:relative;transition:background .25s,box-shadow .25s}
-.win::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--wall-edge)}
-.floor .tag{display:flex;align-items:baseline;gap:8px;min-width:0}
-.floor .tag b{font-size:15px;font-weight:700;white-space:nowrap}
-.floor .tag span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.floor:hover,.floor:focus-visible{background:color-mix(in srgb,var(--wall) 82%,var(--fc))}
-.floor:hover .win,.floor.on .win{background:var(--glass-lit);box-shadow:0 0 10px color-mix(in srgb,var(--glass-lit) 60%,transparent)}
-.floor.on{background:color-mix(in srgb,var(--wall) 72%,var(--fc))}
-.floor.on .lvl{background:var(--fc);color:var(--paper)}
-.floor.on::after{content:"";position:absolute;right:-16px;top:50%;width:0;height:0;border:9px solid transparent;border-left-color:var(--fc);transform:translateY(-50%)}
-.lobby{background:var(--wall);border:2px solid var(--wall-edge);border-top:2px solid var(--wall-edge);display:flex;justify-content:center;align-items:end;gap:10px;padding:10px 0 0;height:66px}
-.door-main{width:44px;height:54px;background:var(--glass);border:2px solid var(--wall-edge);border-bottom:0}
-.lobby-sign{align-self:center;font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.2em}
-.ground{height:14px;background:var(--ground);border-radius:0 0 8px 8px;margin:0 -10px}
+.home{position:absolute;left:14px;bottom:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.nogl{padding:28px;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:14px}
 
-/* ---------- right panel ---------- */
+/* ---------- panel ---------- */
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
 .panel-head{display:flex;align-items:center;gap:16px;padding:18px 22px;border-bottom:4px solid var(--fc,var(--plate))}
-.badge{font-family:var(--f-mono);font-weight:600;font-size:26px;min-width:58px;height:58px;border-radius:10px;background:var(--fc,var(--plate));color:var(--paper);display:flex;align-items:center;justify-content:center}
-.panel-head h2{font-size:24px;font-weight:900}
+.badge{font-family:var(--f-mono);font-weight:600;font-size:24px;min-width:58px;height:58px;padding:0 6px;border-radius:10px;background:var(--fc,var(--plate));color:var(--paper);display:flex;align-items:center;justify-content:center}
+.panel-head h2{font-size:23px;font-weight:900}
 .panel-head p{margin:0;color:var(--muted);font-size:14px}
+.panel-head .bld{font-size:12px;letter-spacing:.25em;color:var(--muted);font-weight:700}
 .elevator{display:flex;gap:6px;flex-wrap:wrap;padding:12px 22px;border-bottom:1px solid var(--line);align-items:center}
 .elevator .lab{font-size:12px;color:var(--muted);margin-right:4px;letter-spacing:.1em}
-.ebtn{width:38px;height:38px;border-radius:50%;border:2px solid var(--rail);background:var(--paper);font-family:var(--f-mono);font-weight:600;font-size:13px;cursor:pointer}
+.ebtn{min-width:38px;height:38px;padding:0 4px;border-radius:999px;border:2px solid var(--rail);background:var(--paper);font-family:var(--f-mono);font-weight:600;font-size:12.5px;cursor:pointer}
 .ebtn[aria-current="true"]{border-color:var(--glass-lit);box-shadow:0 0 0 3px color-mix(in srgb,var(--glass-lit) 45%,transparent);background:var(--plate);color:var(--plate-ink)}
+.ebtn.out{border-style:dashed;font-family:var(--f-sign);font-size:12px;padding:0 10px}
 
-/* directory (lobby view) */
-.dir{padding:20px 22px 24px;display:flex;flex-direction:column;gap:2px}
-.dir h3{font-size:14px;letter-spacing:.3em;color:var(--muted);margin-bottom:8px}
-.dir-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 6px;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer;border-radius:6px}
+.dir{padding:16px 22px 22px;display:flex;flex-direction:column;gap:18px}
+.dir section{display:flex;flex-direction:column}
+.dir h3{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14px;letter-spacing:.3em;color:var(--muted);margin-bottom:6px}
+.dir h3 small{letter-spacing:.05em;font-weight:500;font-family:var(--f-mono);font-size:12px}
+.dir-row{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:center;padding:7px 6px;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer;border-radius:6px}
 .dir-row:hover{background:color-mix(in srgb,var(--paper) 85%,var(--fc))}
-.dir-row .n{font-family:var(--f-mono);font-weight:600;font-size:18px;color:var(--fc)}
-.dir-row b{font-size:16px}
-.dir-row small{display:block;color:var(--muted);font-size:13px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dir-row .k{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.dir-row .n{font-family:var(--f-mono);font-weight:600;font-size:15px;color:var(--fc)}
+.dir-row b{font-size:15px}
+.dir-row small{display:block;color:var(--muted);font-size:12.5px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* corridor */
-.corridor{padding:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;background:linear-gradient(to bottom,transparent 0,transparent calc(100% - 28px),color-mix(in srgb,var(--line) 70%,transparent) calc(100% - 28px))}
-.room{display:flex;flex-direction:column;align-items:stretch;background:none;border:0;padding:0;cursor:pointer;text-align:left;min-width:0}
-.room .plate{background:var(--plate);color:var(--plate-ink);border-radius:6px 6px 0 0;padding:8px 12px 9px;display:flex;flex-direction:column;gap:1px}
-.room .plate .no{font-family:var(--f-mono);font-size:12px;opacity:.75;letter-spacing:.1em}
-.room .plate b{font-size:16px;line-height:1.35}
-.room .door{position:relative;border:3px solid var(--wall-edge);border-top:0;background:color-mix(in srgb,var(--wall) 70%,var(--fc));padding:14px 14px 16px;display:flex;flex-direction:column;gap:8px;min-height:150px;transition:transform .2s}
-.room .door::before{content:"";position:absolute;right:14px;top:14px;width:34px;height:44px;background:var(--glass);border:2px solid var(--wall-edge);border-radius:2px}
-.room .door::after{content:"";position:absolute;right:12px;top:50%;width:8px;height:20px;background:var(--rail);border-radius:4px}
-.room .door p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink);padding-right:48px}
-.room .door .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
-.tag2{font-size:11.5px;padding:1px 7px;border-radius:4px;background:var(--paper);color:var(--muted);border:1px solid var(--line)}
-.tag2.net{color:var(--f2);border-color:currentColor}
-.room:hover .door,.room:focus-visible .door{transform:translateY(-3px)}
-.room:hover .door::before,.room:focus-visible .door::before{background:var(--glass-lit)}
+.corridor{padding:20px 22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.room{display:flex;flex-direction:column;min-width:0}
+.room .plate{background:var(--plate-t);color:var(--plate-ink);border-radius:6px 6px 0 0;padding:7px 10px 8px}
+.room .plate .no{font-family:var(--f-mono);font-size:11.5px;opacity:.75;letter-spacing:.08em;display:block}
+.room .plate b{font-size:14.5px;line-height:1.4;display:block}
+.room .door{position:relative;border:3px solid var(--rail);border-top:0;background:color-mix(in srgb,var(--wall-t) 75%,var(--fc));min-height:70px;padding:10px;display:flex;align-items:flex-end}
+.room .door::after{content:"";position:absolute;right:10px;top:40%;width:7px;height:16px;background:var(--rail);border-radius:4px}
+.soon{font-size:11.5px;padding:1px 7px;border-radius:4px;background:var(--paper);color:var(--muted);border:1px solid var(--line)}
+.note{margin:0 22px 20px;padding:10px 14px;border-radius:8px;background:color-mix(in srgb,var(--paper) 88%,var(--fc,var(--plate)));font-size:13.5px;color:var(--ink)}
+.go{display:inline-flex;align-items:center;gap:8px;margin:18px 22px 6px;padding:10px 18px;border-radius:999px;background:var(--fc,var(--plate));color:var(--paper);text-decoration:none;font-weight:700}
+.go:hover{filter:brightness(1.08)}
+.body-text{padding:16px 22px 4px;margin:0;font-size:14.5px}
 
-/* classroom overlay */
+.corridor.sim{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+button.room{border:0;background:none;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.corridor.sim .room .plate{background:var(--plate)}
+.corridor.sim .room .door{border-color:var(--trim);background:color-mix(in srgb,var(--wall) 70%,var(--fc));min-height:118px;flex-direction:column;align-items:stretch;gap:8px;transition:transform .2s}
+.corridor.sim .room .door::after{top:16px}
+.room .desc{font-size:13px;line-height:1.55;padding-right:16px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.room .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.soon.net{color:var(--f2);border-color:currentColor}
+button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3px)}
 .classroom{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--sky)}
 .cbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--plate);color:var(--plate-ink);padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .cbar .back{border:1px solid color-mix(in srgb,var(--plate-ink) 40%,transparent);background:none;color:var(--plate-ink);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:700}
@@ -141,12 +133,9 @@ button{font:inherit;color:inherit}
 .modes button[aria-pressed="true"]{background:var(--plate-ink);color:var(--plate)}
 .classroom iframe{flex:1;width:100%;border:0;background:#fff;padding-bottom:env(safe-area-inset-bottom,0px)}
 html.in-class,html.in-class body{overflow:hidden}
-
-@media (max-width:820px){
+@media (max-width:900px){
   .site{grid-template-columns:1fr}
-  .floor.on::after{display:none}
-  .building{max-width:560px;margin:0 auto;width:100%}
-  .scene{height:480px}
+  .scene{height:520px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -154,23 +143,19 @@ html.in-class,html.in-class body{overflow:hidden}
 <div class="wrap">
   <div class="top">
     <div>
-      <h1>物理大樓</h1>
-      <p>一層樓一冊，每間教室一個物理模擬。點樓層進走廊，點門進教室。</p>
+      <h1>物理研究院</h1>
+      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連。</p>
     </div>
     <div class="count" id="count"></div>
   </div>
   <div class="site">
-    <div class="building">
-      <div class="scene" id="scene" role="group" aria-label="物理大樓 3D 模型，可拖曳旋轉，點樓層進入">
+    <div>
+      <div class="scene" id="scene" role="group" aria-label="物理研究院 3D 院區，可拖曳旋轉，點樓層進入">
         <div class="labels" id="labels"></div>
-        <div class="hint">拖曳旋轉・點樓層進入</div>
+        <div class="hint">拖曳旋轉・點樓層查看</div>
+        <button type="button" class="home" id="homeBtn">院區導覽</button>
       </div>
-      <div class="fallback" id="fallback" hidden aria-label="大樓立面">
-        <div class="roof-sign">物理大樓<small>PHYSICS</small></div>
-        <div class="tower" id="tower"></div>
-        <div class="lobby"><span class="lobby-sign">大廳</span><span class="door-main"></span><span class="door-main"></span><span class="lobby-sign">入口</span></div>
-        <div class="ground"></div>
-      </div>
+      <div class="nogl" id="nogl" hidden>這台裝置無法顯示 3D 院區，請用右側的院區導覽選樓層。</div>
     </div>
     <section class="panel" id="panel" aria-live="polite"></section>
   </div>
@@ -187,39 +172,41 @@ html.in-class,html.in-class body{overflow:hidden}
 
 <script src="vendor/three.min.js"></script>
 <script>
-const FLOORS=[
-  {id:"R",lvl:"RF",name:"競賽研究室",sub:"學科能力競賽試題",color:"var(--fr)",rooms:[
+/* 模擬大樓：一層樓一冊，每間教室一個模擬（模擬檔在 sims/）。
+   新增教室時加在該樓層 rooms 的最後面：{t:標題, d:說明, sims:[["模式名稱或空字串","檔名不含.html"]], net:需要網路才加 true} */
+const SIM=[
+  {id:"R",lvl:"RF",name:"競賽",sub:"",color:"var(--fr)",rooms:[
     {t:"雙彈簧懸掛木塊的簡諧振盪",d:"兩條彈簧固定在相距 2ℓ 的兩點，下掛木塊。用完整非線性力以 RK4 積分，再和近似公式比較平衡位置與週期。可直接拖曳木塊。",sims:[["","comp-double-spring"]]},
     {t:"韋伯擺（Wilberforce 擺）",d:"垂直振動和扭轉之間來回交換能量，出現拍現象。記錄 z(t)，由拍的節點間隔求耦合係數 ε 與自然角頻率 ω₀。",sims:[["","comp-wilberforce"]]}
   ]},
   {id:"7",lvl:"7F",name:"選修物理五",sub:"近代物理",color:"var(--f7)",rooms:[
-    {t:"戴維森－革末實驗",d:"先調整電子的加速電壓，再轉動探測器，找出散射強度最強的角度，觀察散射強度隨角度的分布。",sims:[["","e5-davisson"]]},
+    {t:"戴維森－革末實驗",d:"先調整電子的加速電壓，再轉動探測器，找出散射強度最強的角度，觀察散射強度隨角度的分布。",sims:[["","e5-davisson"]],net:true},
     {t:"中子內部結構",d:"三個價夸克 u d d 以膠子交換色荷，被色通量管綁在一起。拖曳夸克往外拉，看弦拉伸的能量與斷裂。",sims:[["","e5-neutron"]]}
   ]},
   {id:"6",lvl:"6F",name:"選修物理四",sub:"電磁學",color:"var(--f6)",rooms:[
-    {t:"電磁感應",d:"以動畫呈現電磁感應現象（感應模式）。",sims:[["","e4-induction"]]},
-    {t:"圓形線圈磁場分布",d:"用完整橢圓積分計算圓形線圈平面內的磁場 B(r)，看 r 接近線圈半徑時磁場急劇增加。",sims:[["","e4-loop-field"]]}
+    {t:"電磁感應",d:"以動畫呈現電磁感應現象（感應模式）。",sims:[["","e4-induction"]],net:true},
+    {t:"圓形線圈磁場分布",d:"用完整橢圓積分計算圓形線圈平面內的磁場 B(r)，看 r 接近線圈半徑時磁場急劇增加。",sims:[["","e4-loop-field"]],net:true}
   ]},
   {id:"5",lvl:"5F",name:"選修物理三",sub:"波動",color:"var(--f5)",rooms:[
-    {t:"水波干涉",d:"在 3D 水面上放置多個波源，波依疊加原理合成，可以移動波源觀察干涉圖樣。",sims:[["","e3-ripple"]]},
+    {t:"水波干涉",d:"在 3D 水面上放置多個波源，波依疊加原理合成，可以移動波源觀察干涉圖樣。",sims:[["","e3-ripple"]],net:true},
     {t:"共鳴空氣柱：開管與閉管",d:"同一個節點數同時驅動開管與閉管，比較兩者的波長、頻率與諧波次序，並顯示氣體分子的疏密。",sims:[["","e3-air-column"]]}
   ]},
   {id:"4",lvl:"4F",name:"選修物理二",sub:"力學二",color:"var(--f4)",rooms:[
-    {t:"衛星軌道模擬器",d:"在圓形與橢圓軌道上放衛星，也可以建立雙星系統，觀察軌道週期與速度變化，有平面與立體視角。",sims:[["","e2-orbit"]]},
+    {t:"衛星軌道模擬器",d:"在圓形與橢圓軌道上放衛星，也可以建立雙星系統，觀察軌道週期與速度變化，有平面與立體視角。",sims:[["","e2-orbit"]],net:true},
     {t:"鉛直面半圓軌道（考慮摩擦）",d:"木塊進入鉛直半圓軌道，正向力和摩擦力隨位置改變，以 RK4 積分求最高點速度與是否脫離軌道。",sims:[["","e2-semicircle"]]}
   ]},
   {id:"3",lvl:"3F",name:"選修物理一",sub:"力學一",color:"var(--f3)",rooms:[
-    {t:"碗中的圓周運動",d:"鋼球在光滑半球形碗內做等速率圓周運動。調整它與鉛直方向的夾角，看圓周半徑、速率等計算結果。",sims:[["","e1-bowl"]]},
+    {t:"碗中的圓周運動",d:"鋼球在光滑半球形碗內做等速率圓周運動。調整它與鉛直方向的夾角，看圓周半徑、速率等計算結果。",sims:[["","e1-bowl"]],net:true},
     {t:"連接體：施力與摩擦力",d:"木塊疊在金屬板上，對上方木塊施力 F，看兩者一起加速或相對滑動時摩擦力 f 如何變化。",sims:[["","e1-blocks"]]},
-    {t:"三體引力",d:"兩個固定質量對第三個質量的引力，調整位置與初速，看圓周、往返、逃逸等運動模式。",sims:[["","e1-three-body"]]}
+    {t:"三體引力",d:"兩個固定質量對第三個質量的引力，調整位置與初速，看圓周、往返、逃逸等運動模式。",sims:[["","e1-three-body"]],net:true}
   ]},
   {id:"2",lvl:"2F",name:"基礎物理",sub:"",color:"var(--f2)",rooms:[
-    {t:"布朗運動",d:"橘色大粒子受到大量藍色小分子不均勻碰撞而不規則運動。可調整分子運動速度、顯示軌跡，並紀錄數據匯出 CSV。",sims:[["","b-brownian"]]},
+    {t:"布朗運動",d:"橘色大粒子受到大量藍色小分子不均勻碰撞而不規則運動。可調整分子運動速度、顯示軌跡，並紀錄數據匯出 CSV。",sims:[["","b-brownian"]],net:true},
     {t:"都卜勒效應",d:"波源與觀察者相對運動時，觀測到的頻率改變。三種模式：直線運動、圓周運動、簡諧運動。",sims:[["直線運動","b-doppler-linear"],["圓周運動","b-doppler-circle"],["簡諧運動","b-doppler-shm"]]},
     {t:"麥克風運作原理",d:"動圈式、電容式、碳粒式三種麥克風，看振膜振動如何變成電訊號，並在示波器上比較輸出。",sims:[["","b-microphone"]]},
     {t:"電子雙狹縫",d:"電子一顆一顆打在屏上，累積出干涉條紋。調整加速電壓、狹縫間距與屏距，看物質波波長如何決定條紋間距。",sims:[["","b-electron-slit"]]},
     {t:"黑體輻射",d:"調整溫度看輻射強度隨波長的分布、峰值位置與顏色；打開古典預測看紫外災變，再用能階階梯理解普朗克的 E = nhf。",sims:[["","b-blackbody"]]},
-    {t:"光電效應",d:"改變光的波長、強度與金屬板，看光子打出光電子、最大動能 hf − W；可切換古典理論預測比較，記錄數據算出普朗克常數；調整兩板電壓畫出 I–V 曲線、找截止電壓。另有鋅板驗電器實驗（範例 6-1）。",sims:[["光電管","b-photoelectric"],["鋅板驗電器","b-electroscope"]]},
+    {t:"光電效應",d:"改變光的波長、強度與金屬板，看光子打出光電子、最大動能 hf − W；可切換古典理論預測比較，記錄數據算出普朗克常數。另有鋅板驗電器實驗（範例 6-1）。",sims:[["光電管","b-photoelectric"],["鋅板驗電器","b-electroscope"]]},
     {t:"原子光譜",d:"白熾燈、加熱氣體、白光穿過低溫氣體三種光源，比較連續、發射、吸收光譜；對照各元素譜線，練習解讀恆星與太陽光譜。",sims:[["","b-spectra"]]},
     {t:"波耳氫原子模型",d:"點選能階讓電子躍遷，放出或吸收光子並算出波長；用白光照射得到吸收光譜，連鎖掉落找出 n(n−1)/2 種頻率。",sims:[["","b-bohr"]]},
     {t:"法蘭克－赫茲實驗",d:"電子穿過汞蒸氣，掃描加速電壓記錄板極電流，看電流每隔約 4.9 V 掉一次；由峰間距算出汞原子的激發能與放出的紫外光波長，證明原子有能階。可換成氖氣看一層層的發光區。",sims:[["","b-franck-hertz"]]},
@@ -232,7 +219,8 @@ const FLOORS=[
     {t:"摩擦力：從靜摩擦到動摩擦",d:"水平拉力 F 由零慢慢增加：木塊不動時靜摩擦力 f = F，超過最大靜摩擦力就開始滑動、摩擦力掉到動摩擦力，用 F − fₖ = ma 算加速度；即時畫出 f–F 圖（圖 2-13）。可調質量、最大靜摩擦力與動摩擦力，附範例 2-5（10 kg、8 kgw、7 kgw）。",sims:[["","b-friction"]]},
     {t:"克卜勒三定律",d:"行星沿橢圓軌道繞太陽，太陽在一個焦點上：調整近日距與遠日距，看平均軌道半徑 R = (r_min + r_max)/2 與兩焦點繩長 2R；把一圈分成 N 段相等時間，畫出掃過的扇形，面積都相同、近日點跑得快；第三定律把八大行星畫在對數 R³–T² 圖上，R³/T² = 1 AU³/y²。可切換衛星繞地球（月球、同步衛星、太空站），附範例 2-6 超級月亮、範例 2-7 海王星 164 年。",sims:[["","b-kepler"]]},
     {t:"反應時間尺與自由落體",d:"同學放開直尺、你看到就抓住，由落下距離 H 算反應時間 t = √(2H/g)，可打開尺上的反應時間刻度、改到月球上試試，或讓模擬同學接尺。再做章末探究活動：從不同高度放球計時，畫 H–t 與 H–t² 圖，看 H ∝ t²、由斜率 ½g 求重力加速度；比較光電計時與手按碼錶，可載入課本數據（50 cm 0.34 s … 200 cm 0.65 s）。",sims:[["","b-free-fall"]]},
-    {t:"拉塞福 α 粒子散射",d:"α 粒子射向金箔：比較湯姆森葡萄乾布丁模型（只會小角度偏折）與拉塞福原子核模型（少數大角度偏折、極少數反彈）。放大單一原子調整瞄準距離 b、動能與靶原子序，看 tan(θ/2) = d/(2b) 與最接近距離；再做金箔實驗，環形偵測屏累積各角度計數，和拉塞福公式比較，由「大部分直穿、極少數反彈」推得原子核約 10⁻¹⁴ m、原子約 10⁻¹⁰ m（圖 3-5～3-7）。",sims:[["","b-rutherford"]]}
+    {t:"拉塞福 α 粒子散射",d:"α 粒子射向金箔：比較湯姆森葡萄乾布丁模型（只會小角度偏折）與拉塞福原子核模型（少數大角度偏折、極少數反彈）。放大單一原子調整瞄準距離 b、動能與靶原子序，看 tan(θ/2) = d/(2b) 與最接近距離；再做金箔實驗，環形偵測屏累積各角度計數，和拉塞福公式比較，由「大部分直穿、極少數反彈」推得原子核約 10⁻¹⁴ m、原子約 10⁻¹⁰ m（圖 3-5～3-7）。",sims:[["","b-rutherford"]]},
+    {t:"原子核積木與夸克",d:"用質子、中子拼出原子核，即時顯示 ᴬ_Z X 標示、元素名稱與 A = Z + N，做範例 3-1 鋂-241（95 個質子、146 個中子）並練習看標示說出質子數與中子數；點一個核子放大到夸克，看質子 uud、中子 udd 的電量加總（+1 e、0）；再看弱核力造成的 β 衰變：碳-14 → 氮-14 + 電子 + 反微中子，中子裡一個 d 變成 u，以及一群自由中子以平均壽命 887 秒隨機衰變（圖 3-8、圖 3-9、圖 3-16）。",sims:[["","b-nucleus-quark"]]}
   ]},
   {id:"1",lvl:"1F",name:"國中自然",sub:"",color:"var(--f1)",rooms:[
     {t:"台灣電力系統：電壓相位",d:"比較住宅的單相三線制和工廠的三相四線制，看各線電壓的波形、相位差與相量圖。",sims:[["","j-power-phase"]]},
@@ -242,86 +230,113 @@ const FLOORS=[
     {t:"質量與體積的關係・密度",d:"實驗 1-1：用排水法和電子天平測不同大小的鋁塊與不同體積的水，畫 M–V 圖；沒扣除量筒質量的直線不過原點，延長到縱軸就是量筒質量，扣除後通過原點，斜率就是密度 D = M / V。比較表 1-4 各種物質的等體積質量與等質量體積、猜神秘物體；並練習例 3 由圖求量筒質量與液體密度。",sims:[["","j-density"]]},
     {t:"簡易物質分離",d:"實驗 2-1：食鹽和碳粉加水攪拌溶解、過濾、再加熱蒸發濾液取回食鹽；用粒子模型看食鹽粒子穿過濾紙孔隙、碳粉留下。調整食鹽、碳粉與水量，水太少時沒溶解的食鹽會留在濾渣裡。完成分離流程圖，並比較用磁鐵分離鐵粉與細砂。",sims:[["","j-separation"]]},
     {t:"濾紙色層分析",d:"探索活動：在濾紙條距底端 1.5 cm 處點上黑色墨水小點，下端浸入水中約 0.3 cm，水藉毛細作用往上爬，不同色素被濾紙吸附的能力不同而跑出不同距離，分出多種顏色（圖 2-6）。可換綠、紫、紅色水性筆與油性筆，調整小點高度與浸水深度（小點泡在水裡會怎樣？），並排比較四種墨水、看粒子模型中色素被纖維吸住與被水帶走。",sims:[["","j-chromatography"]]},
-    {t:"純物質與混合物・擴散",d:"圖 2-7：純水和加了 2 匙、3 匙食鹽的食鹽水用相同的火加熱，比較溫度－時間圖：純水沸點固定在 100.0 ℃，食鹽越多沸點越高，而且沸騰時水蒸發、溶液變濃，溫度還會慢慢上升，所以混合物沒有固定的沸點。圖 2-11：黑糖放入水中，用粒子模型看黑糖粒子由濃度高處往低處擴散到均勻分布，比較冷水、熱水與攪拌。",sims:[["","j-boiling-diffusion"]]}
+    {t:"純物質與混合物・擴散",d:"圖 2-7：純水和加了 2 匙、3 匙食鹽的食鹽水用相同的火加熱，比較溫度－時間圖：純水沸點固定在 100.0 ℃，食鹽越多沸點越高，而且沸騰時水蒸發、溶液變濃，溫度還會慢慢上升，所以混合物沒有固定的沸點。圖 2-11：黑糖放入水中，用粒子模型看黑糖粒子由濃度高處往低處擴散到均勻分布，比較冷水、熱水與攪拌。",sims:[["","j-boiling-diffusion"]]},
+    {t:"濃度與溶解度",d:"溶質＋溶劑＝溶液：把食鹽或蔗糖一匙一匙拖進燒杯，即時算出重量百分率濃度與 ppm；20 ℃ 時 100 g 水最多溶 35.9 g 食鹽，多的沉在杯底成為飽和溶液，濃度停在 35.9 ÷（100 + 35.9）≈ 26.4%，可加水、改水溫比較（表 2-1、圖 2-13）。另有加水稀釋（圖 2-12）、料理米酒 19.5 度的體積百分率、牙膏 1450 ppm 的百萬分點濃度，以及例 1～5 換數字練習。",sims:[["","j-concentration"]]}
   ]}
 ];
-FLOORS.forEach(f=>f.rooms.forEach((r,i)=>{r.no=(f.id==="R"?"R":f.id)+String(i+1).padStart(2,"0");r.f=f;}));
-const ROOMS=FLOORS.flatMap(f=>f.rooms);
+/* 競賽大樓：物奧＋學科能力競賽的概念，由下往上 */
+const THEORY=[
+  {id:"1",lvl:"1F",name:"運動學",en:"Kinematics",color:"--g-kin",rooms:["位移、速度與加速度","等加速度運動","拋體運動","相對運動","圓周運動學"]},
+  {id:"2",lvl:"2F",name:"牛頓力學",en:"Newtonian Dynamics",color:"--g-dyn",rooms:["牛頓三定律與力圖","摩擦力","連結體與滑輪","非慣性座標與假想力","圓周運動動力學"]},
+  {id:"3",lvl:"3F",name:"功、能量與動量",en:"Energy & Momentum",color:"--g-energy",rooms:["功與功能定理","力學能守恆","動量與衝量","碰撞","質心與變質量系統"]},
+  {id:"4",lvl:"4F",name:"轉動與剛體",en:"Rotation",color:"--g-rot",rooms:["力矩與靜力平衡","轉動慣量","角動量守恆","滾動","剛體平面運動"]},
+  {id:"5",lvl:"5F",name:"萬有引力",en:"Gravitation",color:"--g-grav",rooms:["克卜勒定律","重力位能與脫離速度","軌道力學","潮汐與多體問題"]},
+  {id:"6",lvl:"6F",name:"振動與波動",en:"Oscillations & Waves",color:"--g-wave",rooms:["簡諧運動","阻尼與受迫振動","波的傳播與疊加","駐波與共振","都卜勒效應"]},
+  {id:"7",lvl:"7F",name:"流體力學",en:"Fluids",color:"--g-fluid",rooms:["靜壓與浮力","表面張力","連續方程式與白努利","黏滯力"]},
+  {id:"8",lvl:"8F",name:"熱學",en:"Thermal Physics",color:"--g-heat",rooms:["溫度與熱膨脹","熱傳導與輻射","理想氣體與氣體動力論","熱力學第一定律","熱機與熵"]},
+  {id:"9",lvl:"9F",name:"靜電學",en:"Electrostatics",color:"--g-estat",rooms:["庫侖定律與電場","高斯定律","電位與電位能","導體與電容","介電質"]},
+  {id:"10",lvl:"10F",name:"電路與電磁",en:"Circuits & EM",color:"--g-em",rooms:["直流電路與克希荷夫定律","RC 電路","磁場與勞侖茲力","必歐－沙伐與安培定律","電磁感應與 LC 振盪"]},
+  {id:"11",lvl:"11F",name:"光學",en:"Optics",color:"--g-opt",rooms:["反射、折射與成像","透鏡與光學儀器","干涉","繞射與光柵","偏振"]},
+  {id:"12",lvl:"12F",name:"近代物理",en:"Modern Physics",color:"--g-mod",rooms:["狹義相對論","光電效應與光子","物質波","原子模型與光譜","原子核與衰變"]},
+  {id:"R",lvl:"RF",name:"數學方法",en:"Mathematical Tools",color:"--g-math",rooms:["向量與座標","微積分在物理中的用法","微分方程","量綱分析與估算","近似方法"]}
+];
+const BRIDGE_LEVEL="3";
+
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const SUBS={"1":"物理・化學","2":"高一"};
+SIM.forEach(f=>{f.color=f.color.replace(/^var\((.*)\)$/,"$1"); if(!f.sub) f.sub=SUBS[f.id]||"";
+  f.rooms.forEach((r,i)=>{r.no=f.id+String(i+1).padStart(2,"0"); r.f=f;});});
+const SIM_UP=SIM.slice().sort((a,b)=>(a.id==="R")-(b.id==="R")||Number(a.id)-Number(b.id));   // 1F … 7F, RF
+const ROOMS=SIM.flatMap(f=>f.rooms);
+const tFloor=id=>THEORY.find(f=>f.id===id), sFloor=id=>SIM.find(f=>f.id===id);
+const roomCount=THEORY.reduce((a,f)=>a+f.rooms.length,0);
+$("#count").textContent=`競賽大樓 ${THEORY.length} 層・${roomCount} 間教室｜模擬大樓 ${SIM.length} 層・${ROOMS.length} 間教室`;
 
-document.getElementById("count").textContent=`${FLOORS.length} 層樓・${ROOMS.length} 間教室`;
+/* ---------- routing: #t3 競賽大樓 3F、#s3 模擬大樓 3F、#bridge 空橋 ---------- */
+function current(){
+  const h=location.hash.slice(1);
+  let m=/^r(\w+)$/.exec(h); if(m){const r=ROOMS.find(x=>x.no===m[1]); if(r) return {b:"s",id:r.f.id,room:r};}
+  m=/^t(\w+)$/.exec(h); if(m&&tFloor(m[1])) return {b:"t",id:m[1]};
+  m=/^s(\w+)$/.exec(h); if(m&&sFloor(m[1])) return {b:"s",id:m[1]};
+  if(h==="bridge") return {b:"bridge"};
+  return {b:null};
+}
+const go=h=>{location.hash=h;};
+$("#homeBtn").onclick=()=>{history.replaceState(null,"",location.pathname+location.search);route();};
 
-/* building */
-function buildTower(){
-  const t=$("#tower");t.innerHTML="";
-  FLOORS.forEach(f=>{
-    const b=document.createElement("button");b.type="button";b.className="floor";b.id="fl-"+f.id;
-    b.style.setProperty("--fc",f.color);
-    b.setAttribute("aria-label",`${f.lvl} ${f.name}，${f.rooms.length} 間教室`);
-    b.innerHTML=`<span class="lvl">${f.lvl}</span><span class="face"><span class="wins">${f.rooms.map(()=>'<i class="win"></i>').join("")}</span><span class="tag"><b>${esc(f.name)}</b><span>${esc(f.sub)}</span></span></span>`;
-    b.onclick=()=>{location.hash="f"+f.id;};
-    t.appendChild(b);
-  });
+function elevator(b,activeId){
+  const list=b==="t"?THEORY:SIM_UP;
+  return `<div class="elevator" role="group" aria-label="${b==="t"?"競賽大樓":"模擬大樓"}電梯">
+    <span class="lab">${b==="t"?"競賽":"模擬"}電梯</span>
+    ${list.map(f=>`<button type="button" class="ebtn" data-h="${b}${f.id}" aria-current="${f.id===activeId}" title="${esc(f.name)}">${f.lvl}</button>`).join("")}
+    <button type="button" class="ebtn out" data-h="bridge">空橋</button></div>`;
+}
+function dirRow(b,f){
+  return `<button type="button" class="dir-row" data-h="${b}${f.id}" style="--fc:var(${f.color})">
+    <span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${esc(b==="t"?f.rooms.join("・"):(f.sub?f.sub+"・":"")+f.rooms.length+" 間教室")}</small></span></button>`;
+}
+function route(){
+  const p=$("#panel"), c=current();
+  if(c.b==="t"){
+    const f=tFloor(c.id);
+    p.style.setProperty("--fc",`var(${f.color})`);
+    p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">競賽大樓</div><h2>${esc(f.name)}</h2><p>${esc(f.en)}・${f.rooms.length} 間教室</p></div></div>
+      ${elevator("t",f.id)}
+      <div class="corridor">${f.rooms.map((r,i)=>`<div class="room"><div class="plate"><span class="no">${f.lvl.replace("F","")}${String(i+1).padStart(2,"0")}</span><b>${esc(r)}</b></div><div class="door"><span class="soon">教室籌備中</span></div></div>`).join("")}</div>
+      ${f.id===BRIDGE_LEVEL?`<p class="note">本層有空橋通往模擬大樓 3F（選修物理一・力學一）。</p>`:""}`;
+  }else if(c.b==="s"){
+    const f=sFloor(c.id);
+    p.style.setProperty("--fc",`var(${f.color})`);
+    p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">模擬大樓</div><h2>${esc(f.name)}</h2><p>${f.sub?esc(f.sub)+"・":""}${f.rooms.length} 間教室</p></div></div>
+      ${elevator("s",f.id)}
+      <div class="corridor sim">${f.rooms.map(r=>`<button type="button" class="room" data-h="r${r.no}"><span class="plate"><span class="no">${r.no}</span><b>${esc(r.t)}</b></span><span class="door"><span class="desc">${esc(r.d)}</span><span class="tags">${r.sims.length>1?`<span class="soon">${r.sims.length} 種模式</span>`:""}${r.net?`<span class="soon net">需要網路</span>`:""}</span></span></button>`).join("")}</div>
+      ${f.id===BRIDGE_LEVEL?`<p class="note">本層有空橋通往競賽大樓 3F（功、能量與動量）。</p>`:""}`;
+  }else if(c.b==="bridge"){
+    p.style.setProperty("--fc","var(--plate)");
+    p.innerHTML=`<div class="panel-head"><div class="badge">3F</div><div><div class="bld">連通空橋</div><h2>競賽 ⇄ 模擬</h2><p>同一個概念，先懂原理，再動手模擬</p></div></div>
+      <div class="dir"><section><h3>從空橋可以走到</h3>${dirRow("t",tFloor("3"))}${dirRow("s",sFloor("3"))}</section></div>`;
+  }else{
+    p.style.setProperty("--fc","var(--plate)");
+    p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
+      <div class="dir">
+        <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}</section>
+        <section><h3>連通空橋 <small>3F</small></h3><button type="button" class="dir-row" data-h="bridge" style="--fc:var(--plate)"><span class="n">3F</span><span><b>競賽 ⇄ 模擬</b><small>競賽 3F 功、能量與動量 ⇄ 模擬 3F 選修物理一</small></span></button></section>
+        <section><h3>模擬大樓 <small>${SIM.length} 層・${ROOMS.length} 間</small></h3>${SIM_UP.slice().reverse().map(f=>dirRow("s",f)).join("")}</section>
+      </div>`;
+  }
+  p.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>go(b.dataset.h));
+  if(c.room) enter(c.room); else if(!cls.hidden) leave();
 }
 
-function elevator(cur){
-  return `<div class="elevator"><span class="lab">電梯</span>${[...FLOORS].reverse().map(f=>`<button type="button" class="ebtn" data-f="${f.id}" aria-label="${f.lvl} ${esc(f.name)}" aria-current="${cur===f.id}">${f.id==="R"?"R":f.id}</button>`).join("")}<button type="button" class="ebtn" data-f="" aria-label="大廳樓層指南" aria-current="${cur===null}">大</button></div>`;
-}
-
-function showLobby(){
-  const p=$("#panel");p.style.removeProperty("--fc");
-  p.innerHTML=`<div class="panel-head"><div class="badge">B</div><div><h2>大廳・樓層指南</h2><p>由下往上，從國中自然到競賽研究室</p></div></div>`+elevator(null)+
-  `<div class="dir"><h3>樓層指南</h3>${FLOORS.map(f=>`<button type="button" class="dir-row" data-f="${f.id}" style="--fc:${f.color}"><span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${f.rooms.map(r=>esc(r.t)).join("・")}</small></span><span class="k">${f.rooms.length} 間</span></button>`).join("")}</div>`;
-  wire(p);
-}
-
-function showFloor(f){
-  const p=$("#panel");p.style.setProperty("--fc",f.color);
-  p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><h2>${esc(f.name)}</h2><p>${f.sub?esc(f.sub)+"・":""}${f.rooms.length} 間教室</p></div></div>`+elevator(f.id)+
-  `<div class="corridor">${f.rooms.map(r=>`<button type="button" class="room" data-r="${r.no}" style="--fc:${f.color}"><span class="plate"><span class="no">${r.no}</span><b>${esc(r.t)}</b></span><span class="door"><p>${esc(r.d)}</p><span class="tags">${r.sims.length>1?`<span class="tag2">${r.sims.length} 種模式</span>`:""}${r.net?`<span class="tag2 net">需要網路</span>`:""}</span></span></button>`).join("")}</div>`;
-  wire(p);
-}
-function wire(p){
-  p.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{location.hash=b.dataset.f?"f"+b.dataset.f:"lobby";});
-  p.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{location.hash="r"+b.dataset.r;});
-}
-
-/* classroom */
-const cls=$("#classroom"),frame=$("#cFrame");let opener=null;
+/* ---------- 教室：全螢幕開模擬 ---------- */
+const cls=$("#classroom"), cFrame=$("#cFrame");
 function enter(r,mode=0){
-  $("#cNo").textContent=r.no;$("#cName").textContent=r.t;
-  const m=$("#cModes");m.innerHTML="";
-  if(r.sims.length>1){r.sims.forEach(([label],i)=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.setAttribute("aria-pressed",String(i===mode));b.onclick=()=>enter(r,i);m.appendChild(b);});}
-  frame.src="sims/"+r.sims[mode][1]+".html";
-  if(cls.hidden){opener=document.activeElement;cls.hidden=false;document.documentElement.classList.add("in-class");$("#leave").focus();}
+  $("#cNo").textContent=r.no; $("#cName").textContent=r.t;
+  const m=$("#cModes"); m.innerHTML="";
+  if(r.sims.length>1) r.sims.forEach(([label],i)=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.setAttribute("aria-pressed",String(i===mode));b.onclick=()=>enter(r,i);m.appendChild(b);});
+  cFrame.src="sims/"+r.sims[mode][1]+".html";
+  if(cls.hidden){cls.hidden=false;document.documentElement.classList.add("in-class");$("#leave").focus();}
 }
-function leave(){
-  cls.hidden=true;frame.src="about:blank";document.documentElement.classList.remove("in-class");
-}
-$("#leave").onclick=()=>{const r=current();location.hash=r?"f"+r.f.id:"lobby";};
+function leave(){cls.hidden=true;cFrame.src="about:blank";document.documentElement.classList.remove("in-class");}
+$("#leave").onclick=()=>{const c=current();go(c.room?"s"+c.room.f.id:"");};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!cls.hidden)$("#leave").click();});
 
-/* routing */
-function current(){const m=/^#r(\w+)$/.exec(location.hash);return m?ROOMS.find(r=>r.no===m[1]):null;}
-function route(){
-  const h=location.hash;
-  document.querySelectorAll(".floor").forEach(b=>b.classList.remove("on"));
-  const rm=current();
-  if(rm){showFloor(rm.f);$("#fl-"+rm.f.id).classList.add("on");enter(rm);return;}
-  if(!cls.hidden)leave();
-  const fm=/^#f(\w+)$/.exec(h);const f=fm&&FLOORS.find(x=>x.id===fm[1]);
-  if(f){showFloor(f);$("#fl-"+f.id).classList.add("on");}else showLobby();
-}
-buildTower();
-/* ---------- 3D building ---------- */
-function selectedFloorId(){
-  const r=current(); if(r) return r.f.id;
-  const m=/^#f(\w+)$/.exec(location.hash); return m?m[1]:null;
-}
+/* ---------- 3D campus ---------- */
 function init3D(){
   if(!window.THREE) return false;
-  const box=document.getElementById("scene"), labelBox=document.getElementById("labels");
+  const box=$("#scene"), labelBox=$("#labels");
   let renderer;
   try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch(e){return false;}
   if(!renderer.getContext()) return false;
@@ -330,263 +345,317 @@ function init3D(){
   renderer.outputEncoding=THREE.sRGBEncoding;
   box.insertBefore(renderer.domElement,labelBox);
 
-  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-  const col=v=>{const m=/var\((--[\w-]+)\)/.exec(v);const name=m?m[1]:(v.startsWith("--")?v:null);return new THREE.Color(name?(css(name)||"#999999"):v).convertSRGBToLinear();};
+  const col=n=>new THREE.Color(css(n)||"#999999").convertSRGBToLinear();
   const scene=new THREE.Scene();
-  const cam=new THREE.PerspectiveCamera(30,1,0.1,300);
-
-  /* lights */
-  const hemi=new THREE.HemisphereLight(0xffffff,0x88907a,0.75); scene.add(hemi);
-  const sun=new THREE.DirectionalLight(0xffffff,0.95);
-  sun.position.set(14,26,18); sun.castShadow=true;
+  const cam=new THREE.PerspectiveCamera(30,1,.1,400);
+  const hemi=new THREE.HemisphereLight(0xffffff,0x88907a,.75); scene.add(hemi);
+  const sun=new THREE.DirectionalLight(0xffffff,.95); sun.position.set(14,26,18); sun.castShadow=true;
   sun.shadow.mapSize.set(2048,2048);
-  Object.assign(sun.shadow.camera,{left:-16,right:16,top:20,bottom:-6,near:1,far:80});
-  sun.shadow.bias=-0.0008; scene.add(sun);
+  Object.assign(sun.shadow.camera,{left:-22,right:22,top:24,bottom:-8,near:1,far:100});
+  scene.add(sun);
   const glow=new THREE.PointLight(0xffd27a,0,14); scene.add(glow);
 
-  /* materials (colors filled by applyTheme) */
   const M={
-    wall:new THREE.MeshStandardMaterial({roughness:.85}),
-    slab:new THREE.MeshStandardMaterial({roughness:.7}),
-    trim:new THREE.MeshStandardMaterial({roughness:.5,metalness:.3}),
-    glass:new THREE.MeshStandardMaterial({roughness:.15,metalness:.55}),
-    lawn:new THREE.MeshStandardMaterial({roughness:1}),
-    pave:new THREE.MeshStandardMaterial({roughness:.95}),
-    leaf:new THREE.MeshStandardMaterial({roughness:.9,flatShading:true}),
-    trunk:new THREE.MeshStandardMaterial({roughness:.9})
+    wall:new THREE.MeshStandardMaterial({roughness:.85}), wallT:new THREE.MeshStandardMaterial({roughness:.75}),
+    slab:new THREE.MeshStandardMaterial({roughness:.7}), trim:new THREE.MeshStandardMaterial({roughness:.5,metalness:.3}),
+    glass:new THREE.MeshStandardMaterial({roughness:.15,metalness:.55}), lawn:new THREE.MeshStandardMaterial({roughness:1}),
+    pave:new THREE.MeshStandardMaterial({roughness:.95}), leaf:new THREE.MeshStandardMaterial({roughness:.9,flatShading:true}),
+    trunk:new THREE.MeshStandardMaterial({roughness:.9}),
+    tube:new THREE.MeshStandardMaterial({color:0xaed3e6,transparent:true,opacity:.28,roughness:.1,metalness:.2,depthWrite:false})
   };
   const mesh=(g,m,x,y,z,cast=true,recv=true)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=recv;return o;};
   const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
 
-  const W=8, D=5, H=1.2, BASE=1.5;
-  const tower=new THREE.Group(); scene.add(tower);
+  const H=1.08, BASE=1.4, W=6.4, D=4.8, SX=-6.4, TX=6.4;
+  const floorObjs={}, pickables=[];
 
   /* ground */
-  const lawn=mesh(new THREE.CylinderGeometry(18,18,.3,64),M.lawn,0,-.15,0,false,true); scene.add(lawn);
-  scene.add(mesh(B(3.2,.04,9),M.pave,0,.02,D/2+4.5,false,true));
-  scene.add(mesh(B(W+3,.06,D+3),M.pave,0,.03,0,false,true));
+  scene.add(mesh(new THREE.CylinderGeometry(26,26,.3,72),M.lawn,0,-.15,0,false,true));
+  scene.add(mesh(B(W+2.6,.06,D+2.6),M.pave,SX,.03,0,false,true));
+  scene.add(mesh(B(W+2.6,.06,D+2.6),M.pave,TX,.03,0,false,true));
+  scene.add(mesh(B(TX-SX,.05,2.2),M.pave,0,.025,D/2+2.6,false,true));
+  scene.add(mesh(B(2.6,.04,9),M.pave,0,.02,D/2+7,false,true));
 
-  /* lobby */
-  const lobby=new THREE.Group(); tower.add(lobby);
-  lobby.add(mesh(B(W-.6,BASE,D-.6),M.wall,0,BASE/2,0));
-  lobby.add(mesh(B(W-1.4,BASE*.78,.06),M.glass,0,BASE*.42,(D-.6)/2+.03,false,false));
-  for(let i=-3;i<=3;i++) lobby.add(mesh(B(.08,BASE*.8,.1),M.trim,i*(W-1.4)/6,BASE*.42,(D-.6)/2+.07,false,false));
-  lobby.add(mesh(B(3.4,.14,1.6),M.slab,0,BASE*.86,(D-.6)/2+.8));
-  [-1.5,1.5].forEach(x=>lobby.add(mesh(new THREE.CylinderGeometry(.07,.07,BASE*.86,10),M.trim,x,BASE*.43,(D-.6)/2+1.5)));
-  lobby.add(mesh(B(3,.1,.5),M.slab,0,.05,(D-.6)/2+1.9));
+  function lobby(x,mat){
+    const g=new THREE.Group(); g.position.x=x; scene.add(g);
+    g.add(mesh(B(W-.6,BASE,D-.6),mat,0,BASE/2,0));
+    g.add(mesh(B(W-1.4,BASE*.78,.06),M.glass,0,BASE*.42,(D-.6)/2+.03,false,false));
+    for(let i=-3;i<=3;i++) g.add(mesh(B(.08,BASE*.8,.1),M.trim,i*(W-1.4)/6,BASE*.42,(D-.6)/2+.07,false,false));
+    g.add(mesh(B(3,.14,1.4),M.slab,0,BASE*.86,(D-.6)/2+.7));
+    [-1.3,1.3].forEach(px=>g.add(mesh(new THREE.CylinderGeometry(.07,.07,BASE*.86,10),M.trim,px,BASE*.43,(D-.6)/2+1.3)));
+  }
 
-  /* floors */
-  const floorObjs={}; const pickables=[];
-  const upper=FLOORS.filter(f=>f.id!=="R").slice().reverse();      // 1F … 7F
-  const roofY=BASE+upper.length*H;
-  function buildFloor(f,y,w,d,h){
-    const g=new THREE.Group(); g.position.y=y; tower.add(g);
+  /* 模擬大樓：窗戶＝教室；競賽大樓：直向鰭板立面 */
+  function buildFloor(key,f,bld,x,y,w,d,h,nWin){
+    const g=new THREE.Group(); g.position.set(x,y,0); scene.add(g);
     const accentMat=new THREE.MeshStandardMaterial({roughness:.5});
     const lit=new THREE.MeshStandardMaterial({roughness:.2,metalness:.2,emissive:new THREE.Color(0),emissiveIntensity:1});
+    const wallM=bld==="t"?M.wallT:M.wall;
     const slab=mesh(B(w+.3,h*.16,d+.3),M.slab,0,h*.08,0); g.add(slab);
-    const body=mesh(B(w,h*.84,d),M.wall,0,h*.16+h*.42,0); g.add(body);
+    const body=mesh(B(w,h*.84,d),wallM,0,h*.58,0); g.add(body);
     const band=mesh(B(w+.32,h*.05,.05),accentMat,0,h*.13,(d+.3)/2+.01,false,false); g.add(band);
-    const n=f.rooms.length, span=(w-.8)/n, wins=[];
-    for(let i=0;i<n;i++){
-      const x=-(w-.8)/2+span*(i+.5);
-      const pane=mesh(B(span*.8,h*.52,.06),lit,x,h*.16+h*.44,d/2+.02,false,false); g.add(pane); wins.push(pane);
-      g.add(mesh(B(.06,h*.52,.09),M.trim,x,h*.16+h*.44,d/2+.05,false,false));
-      g.add(mesh(B(span*.86,.05,.16),M.trim,x,h*.16+h*.17,d/2+.06,false,false));
+    const parts=[slab,body,band];
+    if(bld==="t"){
+      const strip=mesh(B(w-.5,h*.56,.06),lit,0,h*.6,d/2+.02,false,false); g.add(strip); parts.push(strip);
+      const fins=Math.max(4,nWin*2);
+      for(let i=0;i<=fins;i++){const fx=-(w-.5)/2+(w-.5)*i/fins; g.add(mesh(B(.07,h*.6,.22),wallM,fx,h*.6,d/2+.1,false,false));}
+      [-1,1].forEach(s=>g.add(mesh(B(.06,h*.56,d-.8),lit,s*(w/2+.02),h*.6,0,false,false)));
+    }else{
+      const span=(w-.8)/nWin;
+      for(let i=0;i<nWin;i++){
+        const wx=-(w-.8)/2+span*(i+.5);
+        const pane=mesh(B(span*.8,h*.52,.06),lit,wx,h*.6,d/2+.02,false,false); g.add(pane); parts.push(pane);
+        g.add(mesh(B(.06,h*.52,.09),M.trim,wx,h*.6,d/2+.05,false,false));
+        g.add(mesh(B(span*.86,.05,.16),M.trim,wx,h*.33,d/2+.06,false,false));
+      }
+      [-1,1].forEach(s=>{for(let k=0;k<2;k++) g.add(mesh(B(.06,h*.46,d*.28),M.glass,s*(w/2+.02),h*.6,-d/4+k*d/2,false,false));});
     }
-    [-1,1].forEach(s=>{for(let k=0;k<2;k++){g.add(mesh(B(.06,h*.46,d*.28),M.glass,s*(w/2+.02),h*.16+h*.44,-d/4+k*d/2,false,false));}});
-    [slab,body,band,...wins].forEach(o=>{o.userData.floor=f.id;pickables.push(o);});
-    floorObjs[f.id]={f,g,lit,accentMat,y,h,w,d,off:0,glow:0};
-    return g;
+    parts.forEach(o=>{o.userData.key=key;pickables.push(o);});
+    floorObjs[key]={key,f,bld,g,lit,accentMat,x,y,h,w,d,z0:0,off:0,glow:0};
+    return floorObjs[key];
   }
-  upper.forEach((f,i)=>buildFloor(f,BASE+i*H,W,D,H));
-  /* roof deck + parapet */
-  tower.add(mesh(B(W+.3,.18,D+.3),M.slab,0,roofY+.09,0));
-  [[0,(D+.3)/2,W+.3,.08],[0,-(D+.3)/2,W+.3,.08]].forEach(([x,z,w,d])=>tower.add(mesh(B(w,.35,d),M.slab,x,roofY+.35,z)));
-  [[(W+.3)/2,0],[-(W+.3)/2,0]].forEach(([x,z])=>tower.add(mesh(B(.08,.35,D+.3),M.slab,x,roofY+.35,z)));
-  /* RF penthouse */
-  const rf=FLOORS.find(f=>f.id==="R");
-  if(rf){const g=buildFloor(rf,roofY+.18,4.4,3.2,1.15); g.position.x=-1.2; g.position.z=-.4;}
-  /* rooftop sign */
-  const sc=document.createElement("canvas"); sc.width=1024; sc.height=256;
-  const cx=sc.getContext("2d");
-  const signTex=new THREE.CanvasTexture(sc); signTex.encoding=THREE.sRGBEncoding; signTex.anisotropy=4;
-  const sign=mesh(new THREE.PlaneGeometry(3.2,.8),new THREE.MeshBasicMaterial({map:signTex,transparent:true}),2.2,roofY+1.05,D/2-.1,false,false);
-  tower.add(sign);
-  [1.0,3.4].forEach(x=>tower.add(mesh(B(.06,.7,.06),M.trim,x,roofY+.55,D/2-.12,false,false)));
-  tower.add(mesh(new THREE.CylinderGeometry(.03,.03,1.6,8),M.trim,-2.6,roofY+2.3,-1.2));
-  tower.add(mesh(new THREE.SphereGeometry(.08,10,8),new THREE.MeshBasicMaterial({color:0xff5a4a}),-2.6,roofY+3.1,-1.2,false,false));
-  function drawSign(){
-    cx.clearRect(0,0,1024,256);
-    cx.fillStyle=css("--plate")||"#1f3347"; roundRect(cx,8,8,1008,240,28); cx.fill();
-    cx.fillStyle=css("--plate-ink")||"#f4f1e8"; cx.textAlign="center";
-    cx.font='900 120px "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif'; cx.fillText("物 理 大 樓",512,150);
-    cx.font='600 40px "IBM Plex Mono",monospace'; cx.globalAlpha=.7; cx.fillText("P H Y S I C S",512,212); cx.globalAlpha=1;
-    signTex.needsUpdate=true;
+
+  function signTexture(main,sub,plateVar){
+    const c=document.createElement("canvas"); c.width=1024; c.height=256;
+    const tex=new THREE.CanvasTexture(c); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=4;
+    tex.redraw=()=>{const x=c.getContext("2d"); x.clearRect(0,0,1024,256);
+      x.fillStyle=css(plateVar)||"#1f3347"; x.beginPath(); x.roundRect?x.roundRect(8,8,1008,240,28):x.rect(8,8,1008,240); x.fill();
+      x.fillStyle=css("--plate-ink")||"#f4f1e8"; x.textAlign="center";
+      x.font='900 118px "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif'; x.fillText(main,512,148);
+      x.font='600 40px "IBM Plex Mono",monospace'; x.globalAlpha=.7; x.fillText(sub,512,212); x.globalAlpha=1; tex.needsUpdate=true;};
+    return tex;
   }
-  function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+  const signs=[];
+  function roofSign(x,roofY,main,sub,plateVar){
+    const tex=signTexture(main,sub,plateVar); signs.push(tex);
+    scene.add(mesh(new THREE.PlaneGeometry(3.2,.8),new THREE.MeshBasicMaterial({map:tex,transparent:true}),x+1.4,roofY+1.05,D/2-.1,false,false));
+    [x+.2,x+2.6].forEach(px=>scene.add(mesh(B(.06,.7,.06),M.trim,px,roofY+.55,D/2-.12,false,false)));
+  }
+  function roof(x,roofY){
+    scene.add(mesh(B(W+.3,.18,D+.3),M.slab,x,roofY+.09,0));
+    [(D+.3)/2,-(D+.3)/2].forEach(z=>scene.add(mesh(B(W+.3,.35,.08),M.slab,x,roofY+.35,z)));
+    [(W+.3)/2,-(W+.3)/2].forEach(dx=>scene.add(mesh(B(.08,.35,D+.3),M.slab,x+dx,roofY+.35,0)));
+  }
+
+  /* 模擬大樓（左） */
+  lobby(SX,M.wall);
+  const simUpper=SIM_UP.filter(f=>f.id!=="R");
+  simUpper.forEach((f,i)=>buildFloor("s"+f.id,f,"s",SX,BASE+i*H,W,D,H,Math.max(1,Math.min(f.rooms.length,10))));
+  const simRoof=BASE+simUpper.length*H; roof(SX,simRoof);
+  {const o=buildFloor("sR",sFloor("R"),"s",SX-1.1,simRoof+.18,4.2,3,1.1,Math.max(1,Math.min(sFloor("R").rooms.length,5))); o.z0=-.4;}
+  roofSign(SX,simRoof,"模 擬 大 樓","S I M U L A T I O N","--plate");
+
+  /* 競賽大樓（右） */
+  lobby(TX,M.wallT);
+  const thUpper=THEORY.filter(f=>f.id!=="R");
+  thUpper.forEach((f,i)=>buildFloor("t"+f.id,f,"t",TX,BASE+i*H,W,D,H,f.rooms.length));
+  const thRoof=BASE+thUpper.length*H; roof(TX,thRoof);
+  {const o=buildFloor("tR",tFloor("R"),"t",TX-1.1,thRoof+.18,4.2,3,1.1,3); o.z0=-.4;}
+  roofSign(TX,thRoof,"競 賽 大 樓","C O N T E S T","--plate-t");
+  /* 競賽大樓頂：天文台圓頂 */
+  scene.add(mesh(new THREE.CylinderGeometry(.9,.9,.5,24),M.wallT,TX+1.9,thRoof+.43,-1.2));
+  scene.add(mesh(new THREE.SphereGeometry(.9,24,12,0,Math.PI*2,0,Math.PI/2),M.slab,TX+1.9,thRoof+.68,-1.2));
+
+  /* 3F 空橋 */
+  const bi=simUpper.findIndex(f=>f.id===BRIDGE_LEVEL), by=BASE+bi*H;
+  const bx0=SX+W/2, bx1=TX-W/2, bl=bx1-bx0, bcx=(bx0+bx1)/2, bw=1.6;
+  const bridge=new THREE.Group(); bridge.position.set(bcx,by,.4); scene.add(bridge);
+  const bFloor=mesh(B(bl,.14,bw),M.slab,0,.07,0); bridge.add(bFloor);
+  const bRoof=mesh(B(bl,.1,bw+.1),M.trim,0,H*.86,0); bridge.add(bRoof);
+  const bTube=mesh(B(bl,H*.72,bw),M.tube,0,H*.5,0,false,false); bridge.add(bTube);
+  for(let i=0;i<=6;i++){const px=-bl/2+bl*i/6;[-1,1].forEach(s=>bridge.add(mesh(B(.06,H*.72,.06),M.trim,px,H*.5,s*bw/2)));}
+  [-1,1].forEach(s=>bridge.add(mesh(B(bl,.05,.05),M.trim,0,H*.42,s*bw/2)));
+  [bFloor,bRoof,bTube].forEach(o=>{o.userData.key="bridge";pickables.push(o);});
+  const bridgeLit=new THREE.MeshStandardMaterial({color:0xfff3d6,emissive:new THREE.Color(0xffe2a0).convertSRGBToLinear(),emissiveIntensity:0});
+  bridge.add(mesh(B(bl-.4,.03,.5),bridgeLit,0,H*.8,0,false,false));
+  /* 空橋支柱 */
+  [bcx-bl/4,bcx+bl/4].forEach(px=>scene.add(mesh(new THREE.CylinderGeometry(.12,.12,by,10),M.trim,px,by/2,.4)));
+
+  /* 院區裡四處走動的 12 個人（11 男 1 女） */
+  const lin=h=>new THREE.Color(h).convertSRGBToLinear();
+  const matCache={}, mat=h=>matCache[h]||(matCache[h]=new THREE.MeshStandardMaterial({color:lin(h),roughness:.8}));
+  function makePerson(o){
+    const root=new THREE.Group(), body=new THREE.Group(); root.add(body); root.scale.setScalar(o.s||.85);
+    const limb=(m,w,h,d,px,py)=>{const g=new THREE.Group();g.position.set(px,py,0);g.add(mesh(B(w,h,d),m,0,-h/2,0));body.add(g);return g;};
+    const legM=o.female?mat(o.skin):mat(o.pants);
+    const legs=[limb(legM,o.female?.09:.12,.44,o.female?.1:.14,-.08,.46),limb(legM,o.female?.09:.12,.44,o.female?.1:.14,.08,.46)];
+    legs.forEach(l=>l.add(mesh(B(.13,.06,.2),mat("#1b1b1b"),0,-.44,.03)));
+    if(o.female) body.add(mesh(new THREE.CylinderGeometry(.17,.25,.3,14),mat(o.pants),0,.4,0));
+    body.add(mesh(B(.36,.44,.22),mat(o.shirt),0,.68,0));
+    if(o.bag) body.add(mesh(B(.28,.32,.12),mat(o.bag),0,.7,-.17));
+    const arms=[limb(mat(o.shirt),.09,.4,.11,-.23,.88),limb(mat(o.shirt),.09,.4,.11,.23,.88)];
+    arms.forEach(a=>a.add(mesh(B(.08,.08,.09),mat(o.skin),0,-.42,0)));
+    body.add(mesh(new THREE.SphereGeometry(.14,14,10),mat(o.skin),0,1.04,0));
+    body.add(mesh(new THREE.SphereGeometry(.145,14,8,0,Math.PI*2,0,Math.PI*.55),mat(o.hair),0,1.06,-.01));
+    if(o.female){body.add(mesh(B(.27,.36,.08),mat(o.hair),0,.94,-.1));}
+    return {root,body,legs,arms};
+  }
+  const PEOPLE=[
+    {shirt:"#f4f4f0",pants:"#25344a",bag:"#c2652a",hair:"#2a2420",skin:"#e8c09a",zone:"bridge"},
+    {shirt:"#2b64b8",pants:"#2d2d30",bag:"#3d7d4c",hair:"#1b1714",skin:"#d9a97e",zone:"bridge"},
+    {shirt:"#f4f4f0",pants:"#7a2e3a",bag:"#5a5f9e",hair:"#3a2a1c",skin:"#f0caa5",female:true},
+    {shirt:"#3d7d4c",pants:"#25344a",bag:null,hair:"#1b1714",skin:"#e2b48a"},
+    {shirt:"#c9a227",pants:"#3b3f46",bag:"#1f3347",hair:"#2a2420",skin:"#d9a97e"},
+    {shirt:"#f4f4f0",pants:"#25344a",bag:"#2b64b8",hair:"#1b1714",skin:"#e8c09a"},
+    {shirt:"#b03a4a",pants:"#2d2d30",bag:null,hair:"#2a2420",skin:"#cfa07a"},
+    {shirt:"#7a8a99",pants:"#25344a",bag:"#c2652a",hair:"#1b1714",skin:"#e8c09a",s:.9},
+    {shirt:"#1f3347",pants:"#5b4a3a",bag:null,hair:"#3a2a1c",skin:"#f0caa5"},
+    {shirt:"#f4f4f0",pants:"#2d2d30",bag:"#7a4fb5",hair:"#1b1714",skin:"#d9a97e"},
+    {shirt:"#167a82",pants:"#25344a",bag:null,hair:"#2a2420",skin:"#e2b48a"},
+    {shirt:"#e0e4e8",pants:"#3b3f46",bag:"#8a6a12",hair:"#5a5550",skin:"#e8c09a",s:.92}
+  ];
+  /* 可走的地面：大樓前廣場、大樓後方、兩棟之間的通道 */
+  const ZONES={
+    front:{x0:-16,x1:16,z0:D/2+1.6,z1:D/2+9},
+    back:{x0:-15,x1:15,z0:-D/2-7,z1:-D/2-1.6},
+    gap:{x0:bx0+.8,x1:bx1-.8,z0:-D/2,z1:D/2+1}
+  };
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  const zoneOf=p=>p.z>D/2+1.2?"front":p.z<-D/2-1.2?"back":"gap";
+  const randIn=k=>{const z=ZONES[k];return new THREE.Vector3(rnd(z.x0,z.x1),0,rnd(z.z0,z.z1));};
+  function planGround(w){
+    const from=zoneOf(w.root.position), r=Math.random(), to=r<.6?"front":r<.85?"back":"gap";
+    const dest=randIn(to), path=[];
+    const gapPt=z=>new THREE.Vector3(rnd(ZONES.gap.x0,ZONES.gap.x1),0,z);
+    if(from!==to){
+      if(from==="front") path.push(gapPt(D/2+1.4));
+      if(from==="back") path.push(gapPt(-D/2-1.4));
+      if(to==="front") path.push(gapPt(D/2+1.4));
+      if(to==="back") path.push(gapPt(-D/2-1.4));
+    }
+    path.push(dest); w.path=path;
+  }
+  const walkers=PEOPLE.map((o,i)=>{
+    const p=makePerson(o), w={...p,o,path:[],wait:rnd(0,2.5),t:rnd(0,6),speed:rnd(.85,1.25)};
+    if(o.zone==="bridge"){bridge.add(p.root);p.root.position.set(rnd(-bl/2+.6,bl/2-.6),.14,(i?.35:-.35));w.dir=i?-1:1;}
+    else{scene.add(p.root);const s=randIn(i%4===0?"back":"front");p.root.position.copy(s);p.root.rotation.y=rnd(0,Math.PI*2);}
+    return w;
+  });
+  function stepWalkers(dt){
+    walkers.forEach(w=>{
+      const pos=w.root.position; let moving=false;
+      if(w.wait>0){w.wait-=dt;}
+      else if(w.o.zone==="bridge"){
+        pos.x+=w.dir*dt*.8*w.speed; moving=true;
+        if(pos.x>bl/2-.6||pos.x<-bl/2+.6){pos.x=Math.max(-bl/2+.6,Math.min(bl/2-.6,pos.x));w.dir*=-1;w.wait=rnd(.6,2.5);}
+        w.root.rotation.y=w.dir>0?Math.PI/2:-Math.PI/2;
+      }else{
+        if(!w.path.length) planGround(w);
+        const tgt=w.path[0], dx=tgt.x-pos.x, dz=tgt.z-pos.z, d=Math.hypot(dx,dz), sp=1.6*w.speed*dt;
+        if(d<=sp){pos.x=tgt.x;pos.z=tgt.z;w.path.shift();if(!w.path.length)w.wait=rnd(1,4.5);}
+        else{pos.x+=dx/d*sp;pos.z+=dz/d*sp;moving=true;
+          let ry=Math.atan2(dx,dz)-w.root.rotation.y; ry=Math.atan2(Math.sin(ry),Math.cos(ry)); w.root.rotation.y+=ry*Math.min(1,dt*8);}
+      }
+      if(moving){w.t+=dt*8.5*w.speed;const s=Math.sin(w.t)*.55;
+        w.legs[0].rotation.x=s;w.legs[1].rotation.x=-s;w.arms[0].rotation.x=-s*.8;w.arms[1].rotation.x=s*.8;w.body.position.y=Math.abs(Math.cos(w.t))*.03;}
+      else{[...w.legs,...w.arms].forEach(l=>l.rotation.x*=.8);w.body.position.y*=.8;}
+    });
+  }
 
   /* trees */
-  const trees=[[-7.5,3.5],[-8.5,-1],[7.6,3.2],[8.3,-1.6],[-5.6,7.5],[5.8,7.8],[-10,4.2],[10.2,4.4],[0,-8]];
-  trees.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
+  [[-14,3.5],[-15,-2],[14.2,3.4],[15,-2],[-9,8.5],[9,8.6],[-4,9.5],[4,9.6],[0,-7],[-3,-9],[3.5,-8.5],[-17,6],[17.5,6]].forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.65*s,0),M.leaf,x+.3*s,2.1*s,z-.1));});
 
-  /* glass elevator (front-right corner) */
-  const EX=W/2+.62, EZ=D/2-.55, shaftH=roofY+1.5;
-  const shaftMat=new THREE.MeshStandardMaterial({color:0xaed3e6,transparent:true,opacity:.2,roughness:.1,metalness:.2,depthWrite:false});
-  tower.add(mesh(B(.95,shaftH,.95),shaftMat,EX,shaftH/2,EZ,false,false));
-  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>tower.add(mesh(B(.06,shaftH,.06),M.trim,EX+a*.47,shaftH/2,EZ+b*.47)));
-  for(let y=BASE;y<shaftH;y+=H) tower.add(mesh(B(1,.05,1),M.trim,EX,y,EZ,false,false));
-  tower.add(mesh(B(1,.06,1),M.trim,EX,shaftH,EZ,false,false));
-  const cabMat=new THREE.MeshStandardMaterial({color:0xfff3d6,roughness:.4,emissive:new THREE.Color(0xffe2a0).convertSRGBToLinear(),emissiveIntensity:.6});
-  const cab=new THREE.Group(); tower.add(cab); cab.position.set(EX,.06,EZ);
-  cab.add(mesh(B(.84,.06,.84),M.trim,0,0,0)); cab.add(mesh(B(.84,.06,.84),M.trim,0,1.08,0));
-  cab.add(mesh(B(.62,.03,.62),cabMat,0,1.04,0,false,false));
-  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>cab.add(mesh(B(.04,1.08,.04),M.trim,a*.4,.54,b*.4,false,false)));
-  scene.add(mesh(B(1.2,.05,1.6),M.pave,EX,.04,EZ+.9,false,true));
-
-  /* a student */
-  const lin=h=>new THREE.Color(h).convertSRGBToLinear();
-  const mat=h=>new THREE.MeshStandardMaterial({color:lin(h),roughness:.8});
-  const skinM=mat("#e8c09a"), shirtM=mat("#f4f4f0"), pantsM=mat("#25344a"), hairM=mat("#2a2420"), bagM=mat("#c2652a"), shoeM=mat("#1b1b1b");
-  const person=new THREE.Group(); tower.add(person);
-  const body=new THREE.Group(); person.add(body); body.scale.setScalar(.95);
-  const limb=(m,w,h,d,px,py)=>{const g=new THREE.Group();g.position.set(px,py,0);const o=mesh(B(w,h,d),m,0,-h/2,0);g.add(o);body.add(g);return g;};
-  const legL=limb(pantsM,.12,.44,.14,-.08,.46), legR=limb(pantsM,.12,.44,.14,.08,.46);
-  [legL,legR].forEach(l=>l.add(mesh(B(.13,.06,.2),shoeM,0,-.44,.03)));
-  body.add(mesh(B(.36,.44,.22),shirtM,0,.68,0));
-  body.add(mesh(B(.28,.32,.12),bagM,0,.7,-.17));
-  const armL=limb(shirtM,.09,.4,.11,-.23,.88), armR=limb(shirtM,.09,.4,.11,.23,.88);
-  [armL,armR].forEach(a=>a.add(mesh(B(.08,.08,.09),skinM,0,-.42,0)));
-  body.add(mesh(new THREE.SphereGeometry(.14,16,12),skinM,0,1.04,0));
-  body.add(mesh(new THREE.SphereGeometry(.145,16,10,0,Math.PI*2,0,Math.PI*.55),hairM,0,1.06,-.01));
-
-  const P0=new THREE.Vector3(0,0,D/2+7), P1=new THREE.Vector3(.9,0,D/2+2.6), P2=new THREE.Vector3(EX,0,EZ+1.15), P3=new THREE.Vector3(EX,.06,EZ);
-  let route=[P1], inside=false, cabY=.06, cabTarget=.06, revealed=null, wantFloor, walkT=0, arriveAt=0;
-  person.position.copy(P0);
-  const floorY=id=>{if(!id)return .06;const o=floorObjs[id];return o.y+o.h*.16;};
-  function restartWalk(){person.position.copy(P0);person.visible=true;inside=false;cabY=cabTarget=.06;revealed=null;route=[P1];wantFloor=undefined;}
-  const replay=document.createElement("button");replay.type="button";replay.className="replay";replay.textContent="重新走進大樓";
-  replay.onclick=restartWalk; box.appendChild(replay);
-
-  function stepPerson(sel,dt,now){
-    if(reduce){revealed=sel;cabY=floorY(sel);cab.position.y=cabY;person.visible=!sel;if(!sel)person.position.copy(P1);return;}
-    if(sel!==wantFloor){
-      wantFloor=sel; revealed=null;
-      if(sel){
-        if(inside){cabTarget=floorY(sel);person.visible=true;}
-        else{const far=person.position.z>P1.z+.2;route=far?[P1,P2,P3]:[P2,P3];}
-      }else{
-        if(inside){cabTarget=.06;person.visible=true;}
-        else if(!route.length) route=[P1];
-      }
-    }
-    if(route.length){
-      const tgt=route[0], dx=tgt.x-person.position.x, dz=tgt.z-person.position.z, d=Math.hypot(dx,dz), sp=3.2*dt;
-      if(d<=sp){person.position.x=tgt.x;person.position.z=tgt.z;route.shift();
-        if(!route.length&&tgt===P3){inside=true;cabTarget=floorY(wantFloor);}}
-      else{person.position.x+=dx/d*sp;person.position.z+=dz/d*sp;person.rotation.y=Math.atan2(dx,dz);}
-      walkT+=dt*9;
-      const sw=Math.sin(walkT)*.6; legL.rotation.x=sw; legR.rotation.x=-sw; armL.rotation.x=-sw*.8; armR.rotation.x=sw*.8;
-      body.position.y=Math.abs(Math.cos(walkT))*.03;
-    }else{
-      legL.rotation.x*=.8;legR.rotation.x*=.8;armL.rotation.x*=.8;armR.rotation.x*=.8;body.position.y*=.8;
-      if(!inside&&!wantFloor) person.rotation.y+=(Math.PI-person.rotation.y)*.08;
-    }
-    if(inside){
-      const dy=cabTarget-cabY, sp=3.2*dt;
-      if(Math.abs(dy)<=sp){
-        cabY=cabTarget;
-        if(wantFloor){ if(!revealed){ if(!arriveAt) arriveAt=now+350; if(now>=arriveAt){revealed=wantFloor;person.visible=false;arriveAt=0;} } }
-        else{inside=false;person.visible=true;person.position.set(P3.x,0,P3.z);person.rotation.y=0;route=[P2,P1];}
-      }else{cabY+=Math.sign(dy)*sp;person.visible=true;person.rotation.y=0;}
-      person.position.set(P3.x,cabY,P3.z);
-    }
-    cab.position.y=cabY;
-  }
-
   /* labels */
   const labels={};
-  FLOORS.forEach(f=>{const b=document.createElement("button");b.type="button";b.className="flabel";b.style.setProperty("--fc",f.color);
-    b.innerHTML=`<i>${f.lvl}</i><span class="nm">${esc(f.name)}</span>`;b.setAttribute("aria-label",`${f.lvl} ${f.name}，${f.rooms.length} 間教室`);
-    b.onclick=()=>{location.hash="f"+f.id;};labelBox.appendChild(b);labels[f.id]=b;});
+  Object.values(floorObjs).forEach(o=>{
+    const b=document.createElement("button"); b.type="button"; b.className="flabel"; b.style.setProperty("--fc",`var(${o.f.color})`);
+    b.innerHTML=`<i>${o.f.lvl}</i><span class="nm">${esc(o.f.name)}</span>`;
+    b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
+    b.onclick=()=>go(o.key); labelBox.appendChild(b); labels[o.key]=b;
+  });
+  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"]].map(([k,x,y,t,pv])=>{
+    const b=document.createElement("button"); b.type="button"; b.className="blabel"; b.textContent=t; b.style.setProperty("--bp",`var(${pv})`);
+    b.onclick=()=>go(k==="bridge"?"bridge":k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:0)};
+  });
 
   let night=false;
   function applyTheme(){
     night=css("--night")==="1";
-    M.wall.color=col("--wall"); M.slab.color=col("--slab"); M.trim.color=col("--trim");
+    M.wall.color=col("--wall"); M.wallT.color=col("--wall-t"); M.slab.color=col("--slab"); M.trim.color=col("--trim");
     M.glass.color=col("--glass"); M.lawn.color=col("--lawn"); M.pave.color=col("--ground");
     M.leaf.color=col("--leaf"); M.trunk.color=col("--trunk");
     Object.values(floorObjs).forEach(o=>{o.accentMat.color=col(o.f.color); o.lit.color=col("--glass");});
     hemi.intensity=night?.28:.75; sun.intensity=night?.22:.95; sun.color=new THREE.Color(night?0x9fb4d9:0xfff4e0);
-    drawSign();
+    bridgeLit.emissiveIntensity=night?.9:.15;
+    signs.forEach(t=>t.redraw());
   }
   applyTheme();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>signs.forEach(t=>t.redraw()));
   const mq=window.matchMedia("(prefers-color-scheme: dark)");
   (mq.addEventListener?mq.addEventListener("change",applyTheme):mq.addListener(applyTheme));
   new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 
-  /* camera orbit */
+  /* camera */
   const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let az=.55, el=.24, dist=30, lastUser=-1e9, t0=performance.now();
-  const target=new THREE.Vector3(0,(roofY+2)/2,0);
+  const topY=thRoof+2.6;
+  let az=.38, el=.2, dist=40, lastUser=-1e9; const t0=performance.now();
+  const target=new THREE.Vector3(0,topY/2,0);
   function fit(){
-    const w=box.clientWidth,h=box.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; box.classList.toggle("narrow",w<480);
+    const w=box.clientWidth,h=box.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; box.classList.toggle("narrow",w<560);
     const vf=THREE.MathUtils.degToRad(cam.fov)/2, hf=Math.atan(Math.tan(vf)*cam.aspect);
-    dist=Math.max((roofY+3.4)/2/Math.tan(vf),(W+D+3)/2/Math.tan(hf))*1.12;
+    dist=Math.max((topY+1.5)/2/Math.tan(vf),(TX-SX+W+6)/2/Math.tan(hf))*1.08;
     cam.updateProjectionMatrix();
   }
   fit(); new ResizeObserver(fit).observe(box);
 
-  let drag=null, moved=0;
+  let drag=null, moved=0, hover=null;
   const ray=new THREE.Raycaster(), ptr=new THREE.Vector2();
-  function pick(e){const r=renderer.domElement.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);const hit=ray.intersectObjects(pickables,false)[0];return hit?hit.object.userData.floor:null;}
-  let hover=null;
+  function pick(e){const r=renderer.domElement.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);const hit=ray.intersectObjects(pickables,false)[0];return hit?hit.object.userData.key:null;}
   renderer.domElement.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,az,el};moved=0;});
   window.addEventListener("pointermove",e=>{
     if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;moved=Math.max(moved,Math.abs(dx)+Math.abs(dy));
-      if(moved>4){az=drag.az-dx*.008; el=Math.min(.62,Math.max(.04,drag.el+dy*.004)); lastUser=performance.now();}}
+      if(moved>4){az=drag.az-dx*.007; el=Math.min(.62,Math.max(.03,drag.el+dy*.004)); lastUser=performance.now();}}
     else if(e.target===renderer.domElement){hover=pick(e);renderer.domElement.style.cursor=hover?"pointer":"";}
   });
-  window.addEventListener("pointerup",e=>{if(drag&&moved<=4&&e.target===renderer.domElement){const id=pick(e);if(id)location.hash="f"+id;}drag=null;});
+  window.addEventListener("pointerup",e=>{if(drag&&moved<=4&&e.target===renderer.domElement){const k=pick(e);if(k)go(k);}drag=null;});
   renderer.domElement.addEventListener("pointerleave",()=>{hover=null;});
 
-  const v=new THREE.Vector3(), lit=new THREE.Color(css("--glass-lit")||"#ffd978");
+  const v=new THREE.Vector3(), litC=new THREE.Color();
   let last=performance.now();
+  function place(el,x,y,anchorRight){
+    const W2=box.clientWidth, w=el.offsetWidth;
+    let px=anchorRight?x-w:x; px=Math.max(6,Math.min(W2-w-6,px));
+    el.style.transform=`translate(${px}px,${y-11}px)`;
+  }
   function frame(now){
     requestAnimationFrame(frame);
     const dt=Math.min(.05,(now-last)/1000); last=now;
-    if(!document.getElementById("classroom").hidden) return;
-    const idle=now-lastUser>3500 && !drag && !reduce;
-    const a=az+(idle?Math.sin((now-t0)/5200)*.22:0);
+    const idle=now-lastUser>3500&&!drag&&!reduce;
+    const a=az+(idle?Math.sin((now-t0)/6000)*.18:0);
     cam.position.set(target.x+dist*Math.sin(a)*Math.cos(el),target.y+dist*Math.sin(el),target.z+dist*Math.cos(a)*Math.cos(el));
     cam.lookAt(target);
-    const sel=selectedFloorId(); lit.set(css("--glass-lit")||"#ffd978").convertSRGBToLinear();
-    stepPerson(sel,dt,now);
+    if(!cls.hidden) return;
+    const c=current(), sel=c.b==="t"||c.b==="s"?c.b+c.id:null;
+    litC.set(css("--glass-lit")||"#ffd978").convertSRGBToLinear();
     let gl=null;
     Object.values(floorObjs).forEach(o=>{
-      const on=o.f.id===revealed, hv=o.f.id===hover||(o.f.id===sel&&!on);
-      const tOff=on?.85:(hv?.25:0), tGlow=on?1:(hv?.65:(night?.22:0));
-      o.off+= (tOff-o.off)*(reduce?1:.12); o.glow+=(tGlow-o.glow)*(reduce?1:.12);
-      o.g.position.z=(o.f.id==="R"?-.4:0)+o.off;
-      o.lit.emissive.copy(lit).multiplyScalar(o.glow*1.1);
+      const on=o.key===sel, hv=o.key===hover;
+      o.off+=((on?.8:hv?.22:0)-o.off)*(reduce?1:.12);
+      o.glow+=((on?1:hv?.6:night?.22:0)-o.glow)*(reduce?1:.12);
+      o.g.position.z=o.z0+o.off;
+      o.lit.emissive.copy(litC).multiplyScalar(o.glow*1.1);
       if(on) gl=o;
-      const lb=labels[o.f.id];
-      v.set(o.g.position.x-o.w/2-.15,o.y+o.h*.55,o.g.position.z+o.d/2).project(cam);
-      const x=(v.x*.5+.5)*box.clientWidth, y=(-v.y*.5+.5)*box.clientHeight;
-      lb.style.transform=`translate(${Math.max(Math.min(x, box.clientWidth-8), lb.offsetWidth+8)-lb.offsetWidth}px,${y-12}px)`;
-      lb.classList.toggle("on",o.f.id===sel);
+      const lb=labels[o.key], left=o.bld==="s";
+      v.set(o.x+(left?-o.w/2-.2:o.w/2+.2),o.y+o.h*.55,o.g.position.z+o.d/2).project(cam);
+      place(lb,(v.x*.5+.5)*box.clientWidth,(-v.y*.5+.5)*box.clientHeight,left);
+      lb.classList.toggle("on",on);
     });
-    if(gl){glow.position.set(0,gl.y+gl.h*.6,gl.g.position.z+gl.d/2+1.2);glow.intensity+=((night?1.4:.6)-glow.intensity)*.1;}else glow.intensity*=.9;
+    bLabels.forEach(({b,p})=>{v.copy(p).project(cam);place(b,(v.x*.5+.5)*box.clientWidth-b.offsetWidth/2,(-v.y*.5+.5)*box.clientHeight,false);});
+    const bOn=c.b==="bridge"||hover==="bridge";
+    bridgeLit.emissiveIntensity+=((bOn?1.4:night?.9:.15)-bridgeLit.emissiveIntensity)*.1;
+    if(gl){glow.position.set(gl.x,gl.y+gl.h*.6,gl.g.position.z+gl.d/2+1.2);glow.intensity+=((night?1.4:.6)-glow.intensity)*.1;}else glow.intensity*=.9;
+    if(!reduce) stepWalkers(dt);
     renderer.render(scene,cam);
   }
   requestAnimationFrame(frame);
   return true;
 }
-if(!init3D()){document.getElementById("scene").hidden=true;document.getElementById("fallback").hidden=false;}
 route();
 window.addEventListener("hashchange",route);
+if(!init3D()){$("#scene").hidden=true;$("#nogl").hidden=false;}
 </script>
 
 <script>

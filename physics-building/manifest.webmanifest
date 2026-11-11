@@ -1,7 +1,7 @@
 {
- "name": "物理大樓",
- "short_name": "物理大樓",
- "description": "一層樓一冊，每間教室一個物理模擬",
+ "name": "物理研究院",
+ "short_name": "物理研究院",
+ "description": "物理研究院：模擬大樓與競賽大樓，國中到競賽的物理模擬",
  "lang": "zh-Hant-TW",
  "start_url": "./",
  "scope": "./",
