@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>氧氣與二氧化碳的製備</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--teal:#4fd1c5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:pan-y}
+#cvA{height:360px}
+#cvT{height:300px}
+#cvG{height:190px}
+@media(max-width:560px){#cvA{height:300px}#cvT{height:260px}}
+.lab{font-size:13px;color:var(--muted);margin:10px 0 6px}
+.lab:first-child{margin-top:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.35;cursor:default;border-color:var(--line)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.sl{display:flex;align-items:center;gap:10px;margin-top:2px}
+.sl span{font-size:13.5px;min-width:64px}
+.sl input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
+.sl b{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);min-width:70px;text-align:right}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:10px;cursor:pointer}
+.chk input{accent-color:var(--acc);width:17px;height:17px;flex:none}
+.fb{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;border:1px solid var(--line);background:#0a0f1a;color:var(--muted);min-height:48px}
+.fb.ok{border-color:#1f6f55;background:#071a14;color:#bff5dc}
+.fb.mid{border-color:#7a6320;background:#1a1505;color:#ffe7a3}
+.fb.bad{border-color:#7a2a2a;background:#1a0808;color:#ffc9c9}
+.fb b{color:var(--acc);font-weight:500}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;margin-top:6px}
+@media(max-width:420px){.stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:16px;color:var(--phos);font-weight:700}
+.stat b.w{color:#fff}.stat b.c{color:var(--cyan)}.stat b.a{color:var(--acc)}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.ctl{grid-template-columns:1fr}}
+.bottles{display:flex;flex-wrap:wrap;gap:6px}
+.bottles button{padding:6px 10px;font-size:12.5px}
+.bottles button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.bottles button small{color:var(--muted);font-family:"JetBrains Mono",monospace;margin-left:4px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted);padding:0 16px 10px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 2-3 · 實驗 2-2 氣體的製備</div>
+  <h1>氧氣與二氧化碳的製備</h1>
+  <p class="lede" id="lede"></p>
+
+  <div class="modebar" role="group" aria-label="製備哪一種氣體">
+    <button type="button" data-m="O2" aria-pressed="true">① 製備氧氣（雙氧水＋二氧化錳）</button>
+    <button type="button" data-m="CO2" aria-pressed="false">② 製備二氧化碳（大理石＋稀鹽酸）</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">實驗裝置・排水集氣法</span><span class="n" id="appN"></span></div>
+      <div class="box"><canvas id="cvA" aria-label="錐形瓶、薊頭漏斗、導管與水槽中倒立的集氣瓶"></canvas></div>
+      <div class="pad" style="padding-top:0">
+        <div class="stat">
+          <div>經過時間<b class="w" id="rT">0.0 s</b></div>
+          <div id="rFunL">漏斗剩下雙氧水<b class="c" id="rFun">—</b></div>
+          <div>收集速率<b id="rRate">—</b></div>
+          <div>這一瓶已收集<b id="rCur">—</b></div>
+          <div>收集的瓶數<b class="w" id="rN">—</b></div>
+          <div id="rSolidL">二氧化錳<b class="a" id="rSolid">—</b></div>
+        </div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">檢驗氣體</span><span class="n" id="testN">選一瓶，再選檢驗方法</span></div>
+      <div class="box"><canvas id="cvT" aria-label="檢驗集氣瓶中的氣體"></canvas></div>
+      <div class="pad" style="padding-top:0">
+        <div class="lab">選一瓶氣體</div>
+        <div class="bottles" id="bList"></div>
+        <div class="lab">檢驗方法</div>
+        <div class="seg">
+          <button type="button" id="tInc">放入點燃的線香</button>
+          <button type="button" id="tLime">倒入澄清石灰水</button>
+        </div>
+        <div class="fb" id="fbT" aria-live="polite">先收集幾瓶氣體，再拿來和「空氣瓶」比較。</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="ctl">
+    <section class="card"><div class="pad">
+      <div id="ctlO2">
+        <div class="lab">漏斗裡的雙氧水（50 mL）濃度</div>
+        <div class="seg" id="segConc">
+          <button type="button" data-c="3">3%</button>
+          <button type="button" data-c="6">6%</button>
+          <button type="button" data-c="10" aria-pressed="true">10%（課本）</button>
+        </div>
+        <div class="lab">錐形瓶裡的二氧化錳</div>
+        <div class="sl"><span>二氧化錳</span><input type="range" id="slMn" min="0" max="3" step="0.5" value="1" aria-label="二氧化錳質量"><b id="vMn"></b></div>
+      </div>
+      <div id="ctlCO2" hidden>
+        <div class="lab">漏斗裡的稀鹽酸（50 mL）濃度</div>
+        <div class="seg" id="segAcid">
+          <button type="button" data-c="5">5%</button>
+          <button type="button" data-c="10" aria-pressed="true">10%</button>
+        </div>
+        <div class="lab">吸濾瓶裡的大理石（碳酸鈣）</div>
+        <div class="sl"><span>大理石</span><input type="range" id="slMb" min="1" max="10" step="0.5" value="5" aria-label="大理石質量"><b id="vMb"></b></div>
+        <div class="seg" id="segForm" style="margin-top:6px">
+          <button type="button" data-f="lump" aria-pressed="true">塊狀</button>
+          <button type="button" data-f="powder">粉末</button>
+        </div>
+      </div>
+      <div class="lab">滴加速率（旋開漏斗上的滴管）</div>
+      <div class="sl"><span>滴加</span><input type="range" id="slDrip" min="0.2" max="2" step="0.1" value="1" aria-label="滴加速率"><b id="vDrip"></b></div>
+      <label class="chk"><input type="checkbox" id="ckSub" checked> 薊頭漏斗下端浸在液面下（步驟 3、4）</label>
+      <label class="chk"><input type="checkbox" id="ckAuto" checked> 一瓶集滿就在水中蓋上玻璃片、換下一瓶</label>
+      <div class="seg" style="margin-top:12px">
+        <button type="button" class="primary" id="bGo">開始滴加</button>
+        <button type="button" id="bNext">換下一瓶</button>
+        <button type="button" id="bReset">重新開始</button>
+        <button type="button" id="bSpeed" aria-pressed="false">快轉 ×4</button>
+      </div>
+      <div class="fb" id="fbA" aria-live="polite"></div>
+    </div></section>
+    <section class="card">
+      <div class="head"><span class="t">收集到的氣體體積－時間</span><span class="n">斜率越大＝水位下降越快</span></div>
+      <div class="box"><canvas id="cvG" aria-label="收集氣體體積對時間的圖"></canvas></div>
+      <div class="legend" id="legend"></div>
+      <div class="pad" style="padding-top:0">
+        <div class="note" id="note"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>模型說明：</b>漏斗中的液體以設定速率滴入瓶中；雙氧水在二氧化錳表面分解（分解速率和瓶中雙氧水的量、二氧化錳多寡有關），稀鹽酸和大理石反應（粉末接觸面積大、反應較快）。產生的氣體和瓶內原有的空氣混合後一起由導管排出，滴入的液體也會把等體積的氣體擠出去。氣體體積以 25 ℃、1 大氣壓估計（每 1 g 過氧化氫最多約放出 360 mL 氧氣；每 1 g 碳酸鈣最多約放出 245 mL 二氧化碳）。集氣瓶容量 250 mL。二氧化碳略溶於水，實際收集時會有少量溶入水槽，這裡忽略。<br>
+    <b>對應課本：</b>國中自然 2 上 第 2 章 2-3 空氣與生活：實驗 2-2 氧氣製備與排水集氣法（p.60–61）、圖 2-15 排水集氣法收集氧氣、圖 2-16 氧氣瓶中的線香燃燒更劇烈（p.62）、圖 2-17 排水集氣法收集二氧化碳、圖 2-18 澄清石灰水加入二氧化碳廣口瓶中的變化（p.63）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const f0=v=>String(Math.round(v)), f1=v=>(Math.round(v*10)/10).toFixed(1);
+
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return {x,w,h};}
+function txt(x,s,X,Y,o={}){x.font=o.f||'12px "Noto Sans TC",sans-serif';x.fillStyle=o.c||'#c9d1dc';x.textAlign=o.a||'center';x.textBaseline=o.b||'middle';x.fillText(s,X,Y);}
+
+// ---- 常數 ----
+const VM=24.5;                 // 25 ℃、1 atm 每莫耳氣體 L（只在程式內換算，畫面不出現莫耳）
+const O2_PER_G=VM/68*1000;     // 2 H2O2(68 g) → O2 ：每 g 過氧化氫 ≈ 360 mL 氧氣
+const CO2_PER_G_HCL=VM/73*1000;// CaCO3 + 2 HCl(73 g) → CO2 ：每 g 氯化氫 ≈ 336 mL
+const HCL_PER_G_CACO3=73/100;  // 每 g 碳酸鈣需要 0.73 g 氯化氫
+const RHO_H2O2={3:1.01,6:1.02,10:1.035}, RHO_HCL={5:1.023,10:1.048};
+const FUN0=50;                 // 漏斗內液體 mL
+const V_HEAD=160;              // 瓶內＋導管原有空氣 mL
+const CAP=250;                 // 集氣瓶容量 mL
+const MAXB=8;
+
+// ---- 狀態 ----
+const P={mode:'O2',conc:10,mn:1,acid:10,mb:5,form:'lump',drip:1,sub:true,auto:true,speed:1};
+let S;
+const runs=[];   // 圖上保留的前幾次紀錄
+function reset(keepRun){
+  if(S&&keepRun!==false&&S.curve.length>3) {runs.unshift({mode:S.mode,label:S.label,curve:S.curve,col:null}); if(runs.length>3)runs.pop();}
+  S={mode:P.mode,t:0,running:false,fun:FUN0,liq:0,react:0,mbLeft:P.mb,
+     ha:V_HEAD,hp:0,             // 瓶內氣體：原有空氣、產生的氣體（mL）
+     made:0,lost:0,collected:0,  // 產生總量、由漏斗跑掉、進入集氣瓶
+     bottles:[{a:0,p:0}],cur:0,rate:0,curve:[[0,0]],label:runLabel(),bubF:[],bubT:[],flaskWater:30,
+     done:false,lastNote:''};
+  sel=-1;test=null;
+  ui();
+}
+function runLabel(){return P.mode==='O2'?`${P.conc}% 雙氧水・MnO₂ ${P.mn} g・${P.drip} mL/s${P.sub?'':'・漏斗沒浸到'}`:`${P.acid}% 稀鹽酸・大理石 ${P.mb} g ${P.form==='lump'?'塊狀':'粉末'}・${P.drip} mL/s${P.sub?'':'・漏斗沒浸到'}`;}
+
+// ---- 物理／化學步進 ----
+function step(dt){
+  if(!S.running) return;
+  S.t+=dt;
+  const add=Math.min(S.fun,P.drip*dt); S.fun-=add; S.liq+=add;
+  let dP=0;
+  if(S.mode==='O2'){
+    S.react+=add*RHO_H2O2[P.conc]*P.conc/100;          // 瓶中過氧化氫 g
+    const k=0.00004+0.11*Math.pow(P.mn,0.8);           // 沒有二氧化錳時分解極慢
+    const dm=S.react*(1-Math.exp(-k*dt)); S.react-=dm; dP=dm*O2_PER_G;
+  }else{
+    S.react+=add*RHO_HCL[P.acid]*P.acid/100;           // 瓶中氯化氫 g
+    const area=S.mbLeft>0?Math.pow(S.mbLeft/5,2/3)*(P.form==='powder'?3:1):0;
+    const k=0.09*area;
+    let dh=S.react*(1-Math.exp(-k*dt));
+    dh=Math.min(dh,S.mbLeft*HCL_PER_G_CACO3);
+    S.react-=dh; S.mbLeft=Math.max(0,S.mbLeft-dh/HCL_PER_G_CACO3); dP=dh*CO2_PER_G_HCL;
+  }
+  S.made+=dP;
+  // 瓶內氣體均勻混合：加入產生的氣體，再由「產生量＋滴入液體擠出的體積」排出
+  S.hp+=dP; const tot=S.ha+S.hp, out=Math.min(tot-1,dP+add), fa=S.ha/tot;
+  S.ha-=out*fa; S.hp-=out*(1-fa);
+  const esc=P.sub?0:0.8;                               // 漏斗下端沒浸到：大部分氣體由漏斗跑掉
+  const toB=out*(1-esc); S.lost+=out*esc; S.collected+=toB;
+  S.rate+=(toB/dt-S.rate)*Math.min(1,dt*3);
+  // 進集氣瓶
+  let rem=toB;
+  while(rem>1e-9){
+    const b=S.bottles[S.cur], v=b.a+b.p, room=CAP-v;
+    const put=Math.min(rem,Math.max(0,room));
+    b.a+=put*fa; b.p+=put*(1-fa); rem-=put;
+    if(v+put>=CAP-1e-6){
+      if(P.auto&&S.bottles.length<MAXB){S.bottles.push({a:0,p:0});S.cur++;}
+      else {S.lost+=rem; rem=0;}   // 滿了沒換瓶：氣泡從瓶口溢出
+    }
+  }
+  // 氣泡動畫
+  const sh=Math.min(0.9,dP/dt/60*dt*6);
+  if(Math.random()<sh) S.bubF.push({u:rnd(.1,.9),y:0,s:rnd(1.5,3)});
+  if(Math.random()<Math.min(0.9,toB/dt/60*dt*7)) S.bubT.push({y:0,dx:rnd(-3,3),s:rnd(2,3.6)});
+  if(!P.sub&&Math.random()<Math.min(0.9,out*esc/dt/60*dt*6)) S.bubF.push({u:.5,y:0,s:2.5,esc:1});
+  S.curve.push([S.t,S.collected]); if(S.curve.length>2400) S.curve=S.curve.filter((_,i)=>i%2===0);
+  if(S.fun<=0&&dP/dt<0.3&&!S.done){S.done=true;S.running=false;msg();}
+}
+
+// ---- 繪圖：裝置 ----
+const COL={O2:'#7cc4ff',CO2:'#c8d0da'};
+function drawApp(){
+  const {x,w,h}=fit($('cvA')); if(w<60) return; x.clearRect(0,0,w,h);
+  const by=h-18; x.fillStyle='#0d1220';x.fillRect(0,by,w,18);
+  const sc=Math.min(1,w/560,h/340);
+  // 錐形瓶（吸濾瓶）
+  const fx=w*0.2, fw=110*sc, fh=150*sc, ft=by-fh, neck=26*sc;
+  const flaskPath=()=>{x.beginPath();x.moveTo(fx-neck/2,ft);x.lineTo(fx-neck/2,ft+40*sc);x.lineTo(fx-fw/2,by-6);x.quadraticCurveTo(fx-fw/2,by,fx-fw/2+8,by);x.lineTo(fx+fw/2-8,by);x.quadraticCurveTo(fx+fw/2,by,fx+fw/2,by-6);x.lineTo(fx+neck/2,ft+40*sc);x.lineTo(fx+neck/2,ft);};
+  x.save();
+  flaskPath();
+  x.save();x.clip();
+  // 液體
+  const lv=(S.flaskWater+S.liq)/130*fh*0.62+6*sc, ly=by-lv;
+  const lc=S.mode==='O2'?'rgba(70,140,220,.45)':'rgba(150,190,230,.35)';
+  x.fillStyle=lc;x.fillRect(fx-fw/2,ly,fw,lv);
+  x.strokeStyle='rgba(160,220,255,.7)';x.beginPath();x.moveTo(fx-fw/2,ly);x.lineTo(fx+fw/2,ly);x.stroke();
+  // 固體
+  if(S.mode==='O2'){ if(P.mn>0){x.fillStyle='#222';const n=Math.round(P.mn*40);for(let i=0;i<n;i++){const u=((i*37)%97)/97-0.5,v=((i*53)%89)/89;x.fillRect(fx+u*fw*0.75,by-3-v*5*sc*Math.sqrt(P.mn),2.2,2.2);}}}
+  else{ const m=S.mbLeft; if(m>0){ if(P.form==='lump'){const n=Math.ceil(m/1.2);for(let i=0;i<n;i++){const r=(7+((i*13)%5))*sc*Math.cbrt(Math.min(1,m/(n*1.2))+.2);const cx=fx-fw*0.3+((i*29)%10)/10*fw*0.6;x.fillStyle='#d9dde3';x.beginPath();x.ellipse(cx,by-4-r*0.6,r,r*0.7,i,0,7);x.fill();x.strokeStyle='#9aa3ad';x.stroke();}}
+      else{x.fillStyle='#e8ecf0';const n=Math.round(m*30);for(let i=0;i<n;i++){const u=((i*37)%97)/97-0.5,v=((i*53)%89)/89;x.fillRect(fx+u*fw*0.75,by-3-v*4*sc*Math.sqrt(m/3),2,2);}}}}
+  // 瓶內氣泡
+  S.bubF.forEach(b=>{b.y+=1.6;const yy=by-6-b.y; if(b.esc) return; x.fillStyle='rgba(220,240,255,.75)';x.beginPath();x.arc(fx-fw*0.35+b.u*fw*0.7,yy,b.s*sc+0.5,0,7);x.fill();});
+  S.bubF=S.bubF.filter(b=>!b.esc?by-6-b.y>ly:b.y<200);
+  x.restore();
+  flaskPath();x.strokeStyle='rgba(200,225,255,.75)';x.lineWidth=2;x.stroke();x.restore();
+  // 側管
+  const sy=ft+18*sc; x.strokeStyle='rgba(200,225,255,.75)';x.lineWidth=2;x.beginPath();x.moveTo(fx+neck/2,sy);x.lineTo(fx+neck/2+22*sc,sy-4*sc);x.stroke();
+  // 橡皮塞
+  x.fillStyle='#8a3a2e';x.fillRect(fx-neck/2-3,ft-12*sc,neck+6,14*sc);
+  // 薊頭漏斗
+  const tubeBot=P.sub?by-8*sc:ly-22*sc, fy=ft-80*sc;
+  x.strokeStyle='rgba(200,225,255,.8)';x.lineWidth=2;
+  x.beginPath();x.moveTo(fx-2,fy+14*sc);x.lineTo(fx-2,tubeBot);x.moveTo(fx+2,fy+14*sc);x.lineTo(fx+2,tubeBot);x.stroke();
+  const br=18*sc; x.beginPath();x.arc(fx,fy,br,0,Math.PI*2);x.stroke();
+  x.beginPath();x.moveTo(fx-br*0.7,fy-br*0.7);x.lineTo(fx-br*0.9,fy-br*1.3);x.moveTo(fx+br*0.7,fy-br*0.7);x.lineTo(fx+br*0.9,fy-br*1.3);x.stroke();
+  // 漏斗內液體
+  const ff=S.fun/FUN0; if(ff>0){x.save();x.beginPath();x.arc(fx,fy,br-2,0,7);x.clip();x.fillStyle=S.mode==='O2'?'rgba(120,180,255,.55)':'rgba(255,240,170,.45)';x.fillRect(fx-br,fy+br-2*br*Math.min(1,ff*1.1),2*br,2*br);x.restore();}
+  // 滴管
+  if(S.running&&S.fun>0){x.fillStyle='#b78fa8';x.fillRect(fx+br*0.4,fy-br*2.6,6*sc,br*1.4);x.fillStyle=S.mode==='O2'?'#9cc9ff':'#fff0b0';const ph=(S.t*P.drip*2)%1;x.beginPath();x.arc(fx+br*0.4+3*sc,fy-br*1.1+ph*br*0.8,2.2,0,7);x.fill();}
+  // 由漏斗跑掉的氣泡
+  if(!P.sub){S.bubF.filter(b=>b.esc).forEach(b=>{x.fillStyle='rgba(255,140,140,.8)';x.beginPath();x.arc(fx+Math.sin(b.y/9)*4,fy-br-b.y*0.6,2.4,0,7);x.fill();});
+    txt(x,'氣體由漏斗跑掉！',fx,fy-br*2.9-6,{c:'#ff9a9a',f:'bold 12px "Noto Sans TC"'});}
+  txt(x,S.mode==='O2'?'薊頭漏斗（雙氧水）':'薊頭漏斗（稀鹽酸）',fx,Math.max(10,fy-br*3.6),{c:'#8492aa',f:'11px "Noto Sans TC"'});
+  txt(x,S.mode==='O2'?(P.mn>0?`二氧化錳 ${P.mn} g`:'沒有二氧化錳'):`大理石 ${f1(S.mbLeft)} g`,fx,by+9,{c:'#8492aa',f:'11px "Noto Sans TC"'});
+
+  // 水槽
+  const tl=w*0.5, tw=w*0.46, th=110*sc, tt=by-th, wl=tt+16*sc;
+  x.fillStyle='rgba(60,130,200,.28)';x.fillRect(tl,wl,tw,by-wl);
+  x.strokeStyle='rgba(200,225,255,.6)';x.lineWidth=2;x.strokeRect(tl,tt,tw,th);
+  // 集氣瓶（倒立）
+  const bx=tl+tw*0.62, bw=58*sc, bh=104*sc, bb=by-10*sc, btop=bb-bh;
+  const B=S.bottles[S.cur], gv=B.a+B.p, gfrac=gv/CAP;
+  x.save();x.beginPath();x.rect(bx-bw/2,btop,bw,bh);x.clip();
+  x.fillStyle='rgba(60,130,200,.45)';x.fillRect(bx-bw/2,btop,bw,bh);
+  const gh=bh*gfrac; const gcol=S.mode==='O2'?'rgba(200,230,255,.10)':'rgba(230,230,230,.10)';
+  x.fillStyle='#04060b';x.fillRect(bx-bw/2,btop,bw,gh);x.fillStyle=gcol;x.fillRect(bx-bw/2,btop,bw,gh);
+  x.strokeStyle='rgba(160,220,255,.8)';x.beginPath();x.moveTo(bx-bw/2,btop+gh);x.lineTo(bx+bw/2,btop+gh);x.stroke();
+  x.restore();
+  x.strokeStyle='rgba(220,235,255,.85)';x.lineWidth=2;x.beginPath();x.moveTo(bx-bw*0.3,bb);x.lineTo(bx-bw/2,bb-12*sc);x.lineTo(bx-bw/2,btop+6);x.quadraticCurveTo(bx-bw/2,btop,bx-bw/2+6,btop);x.lineTo(bx+bw/2-6,btop);x.quadraticCurveTo(bx+bw/2,btop,bx+bw/2,btop+6);x.lineTo(bx+bw/2,bb-12*sc);x.lineTo(bx+bw*0.3,bb);x.stroke();
+  // 刻度
+  x.strokeStyle='rgba(200,225,255,.35)';x.lineWidth=1;for(let i=1;i<5;i++){const yy=btop+bh*i/5;x.beginPath();x.moveTo(bx+bw/2-10,yy);x.lineTo(bx+bw/2-2,yy);x.stroke();}
+  txt(x,`${f0(gv)} / ${CAP} mL`,bx,btop-10,{c:'#ffd166',f:'600 12px "JetBrains Mono"'});
+  // 導管
+  x.strokeStyle='#c98a6a';x.lineWidth=5*sc+1;x.lineCap='round';
+  const ox=fx+neck/2+22*sc, oy=sy-4*sc, ex=bx-6*sc, ey=bb-14*sc;
+  x.beginPath();x.moveTo(ox,oy);x.bezierCurveTo(ox+60*sc,oy-50*sc,tl-10,tt-50*sc,tl+20*sc,wl+10*sc);x.quadraticCurveTo(tl+40*sc,by-6*sc,ex-20*sc,by-8*sc);x.lineTo(ex,ey);x.stroke();
+  // 槽中氣泡升入瓶中
+  S.bubT.forEach(b=>{b.y+=2.2; x.fillStyle='rgba(225,245,255,.85)';x.beginPath();x.arc(ex+b.dx,ey-b.y,b.s*sc+.5,0,7);x.fill();});
+  S.bubT=S.bubT.filter(b=>ey-b.y>btop+gh);
+  // 已收集的瓶子（蓋玻璃片，放在桌上）
+  const done=S.bottles.slice(0,S.cur); const rw=Math.min(22*sc+4,(tl-fx-fw/2-10)/Math.max(1,done.length));
+  done.forEach((b,i)=>{const cx=w*0.5+8+i*(16*sc+6); if(cx>w-10) return; const hh=30*sc, ww=14*sc; x.strokeStyle='rgba(220,235,255,.7)';x.lineWidth=1.3;x.strokeRect(cx,tt-hh-6,ww,hh);x.fillStyle='rgba(180,220,255,.35)';x.fillRect(cx-2,tt-hh-8,ww+4,2.5);txt(x,String(i+1),cx+ww/2,tt-hh/2-6,{c:'#ffd166',f:'600 10px "JetBrains Mono"'});});
+  if(done.length) txt(x,'已收集',w*0.5+8,tt-38*sc-14,{c:'#8492aa',f:'11px "Noto Sans TC"',a:'left'});
+  txt(x,'水槽',tl+tw-20,by-8,{c:'#8492aa',f:'11px "Noto Sans TC"'});
+  $('appN').textContent=S.mode==='O2'?'雙氧水 → 水＋氧氣':'碳酸鈣＋鹽酸 → 氯化鈣＋水＋二氧化碳';
+}
+
+// ---- 繪圖：檢驗 ----
+let sel=-1, test=null; // test={kind:'inc'|'lime',t0}
+function bottleGas(i){ // 回傳氧氣、二氧化碳體積百分率
+  if(i<0) return {o2:21,co2:0.04,name:'空氣瓶'};
+  const b=S.bottles[i], v=b.a+b.p||1;
+  const air=b.a/v, pr=b.p/v;
+  return S.mode==='O2'?{o2:21*air+100*pr,co2:0.04*air,name:`第 ${i+1} 瓶`,v:b.a+b.p}:{o2:21*air,co2:0.04*air+100*pr,name:`第 ${i+1} 瓶`,v:b.a+b.p};
+}
+function incenseLevel(o2){ // 0 熄滅、1 一般微亮、2 較旺、3 劇烈燃燒
+  if(o2<16) return 0; if(o2<28) return 1; if(o2<70) return 2; return 3;}
+function limeCloud(co2){ return co2<1?0:clamp((co2-1)/40,0.15,1);}
+function drawTest(){
+  const {x,w,h}=fit($('cvT')); if(w<60) return; x.clearRect(0,0,w,h);
+  const by=h-16; x.fillStyle='#0d1220';x.fillRect(0,by,w,16);
+  const g=bottleGas(sel);
+  const bw=Math.min(120,w*0.36), bh=Math.min(170,h*0.62), bx=w/2, bt=by-bh;
+  x.strokeStyle='rgba(220,235,255,.8)';x.lineWidth=2;
+  x.beginPath();x.moveTo(bx-bw*0.28,bt);x.lineTo(bx-bw*0.28,bt+14);x.quadraticCurveTo(bx-bw/2,bt+22,bx-bw/2,bt+40);x.lineTo(bx-bw/2,by-6);x.quadraticCurveTo(bx-bw/2,by,bx-bw/2+6,by);x.lineTo(bx+bw/2-6,by);x.quadraticCurveTo(bx+bw/2,by,bx+bw/2,by-6);x.lineTo(bx+bw/2,bt+40);x.quadraticCurveTo(bx+bw/2,bt+22,bx+bw*0.28,bt+14);x.lineTo(bx+bw*0.28,bt);x.stroke();
+  txt(x,g.name,bx,16,{c:'#ffd166',f:'bold 14px "Noto Sans TC"'});
+  txt(x,`氧氣約 ${f0(g.o2)}%　二氧化碳約 ${g.co2<1?'0.04':f0(g.co2)}%`,bx,36,{c:'#8492aa',f:'12px "Noto Sans TC"'});
+  if(sel>=0&&g.v<CAP-1) txt(x,`（這瓶只收集了 ${f0(g.v)} mL，其餘是水）`,bx,54,{c:'#ff9a9a',f:'11px "Noto Sans TC"'});
+  if(!test){ x.fillStyle='rgba(180,220,255,.35)';x.fillRect(bx-bw*0.34,bt-3,bw*0.68,3); return; }
+  const t=(performance.now()-test.t0)/1000;
+  if(test.kind==='inc'){
+    const lv=incenseLevel(g.o2), dip=clamp(t/1.2,0,1);
+    const tipY=bt-20+dip*(bh*0.5), tipX=bx+6;
+    x.strokeStyle='#a0703c';x.lineWidth=3;x.beginPath();x.moveTo(tipX+24,Math.max(64,tipY-120));x.lineTo(tipX,tipY);x.stroke();
+    const out=dip>=1&&lv===0&&t>1.6;
+    if(!out){
+      const k=dip<1?1:[0.3,1,1.6,2.8][lv]*(lv===0?Math.max(0,1-(t-1.2)/0.4):1);
+      const fl=performance.now()/90;
+      x.fillStyle='rgba(255,90,40,.9)';x.beginPath();x.arc(tipX,tipY,3.5,0,7);x.fill();
+      if(k>=1.5){ const fh=12*k*(1+0.12*Math.sin(fl)); const gr=x.createRadialGradient(tipX,tipY-fh*0.4,1,tipX,tipY-fh*0.4,fh);gr.addColorStop(0,'rgba(255,240,170,.95)');gr.addColorStop(.5,'rgba(255,160,40,.7)');gr.addColorStop(1,'rgba(255,90,20,0)');x.fillStyle=gr;x.beginPath();x.ellipse(tipX,tipY-fh*0.4,fh*0.45,fh,0,0,7);x.fill();}
+      else { x.fillStyle=`rgba(255,150,60,${0.25*k})`;x.beginPath();x.arc(tipX,tipY,7*k,0,7);x.fill();
+        x.strokeStyle='rgba(200,200,210,.35)';x.lineWidth=1.5;x.beginPath();x.moveTo(tipX,tipY-4);x.quadraticCurveTo(tipX-8+4*Math.sin(fl/3),tipY-20,tipX+2,tipY-36);x.stroke(); }
+    }else{
+      x.fillStyle='#444';x.beginPath();x.arc(tipX,tipY,3,0,7);x.fill();
+      x.strokeStyle='rgba(200,200,210,.5)';x.lineWidth=1.5;x.beginPath();x.moveTo(tipX,tipY-4);x.quadraticCurveTo(tipX+10,tipY-24,tipX-4,tipY-50);x.stroke();
+    }
+  }else{
+    const pour=clamp(t/1.4,0,1), shake=clamp((t-1.4)/1.8,0,1);
+    const lh=bh*0.2*pour, ly=by-lh;
+    const cl=limeCloud(g.co2)*shake;
+    x.save();x.beginPath();x.rect(bx-bw/2+2,ly,bw-4,lh);x.clip();
+    x.fillStyle=`rgba(${Math.round(150+100*cl)},${Math.round(200+50*cl)},${Math.round(235+15*cl)},${0.28+0.6*cl})`;x.fillRect(bx-bw/2,ly,bw,lh);x.restore();
+    if(pour<1){x.fillStyle='rgba(170,215,240,.6)';x.fillRect(bx-2,bt-20,4,ly-bt+20);}
+    if(shake>0&&shake<1){txt(x,'搖一搖…',bx,bt+bh*0.4,{c:'#8492aa'});}
+  }
+}
+// ---- 圖 ----
+const RC=['#7dffc4','#ffd166','#43d6ff','#ff7a7a'];
+function drawGraph(){
+  const {x,w,h}=fit($('cvG')); if(w<60) return; x.clearRect(0,0,w,h);
+  const L=46,R=10,T=10,B=26, pw=w-L-R, ph=h-T-B;
+  const all=[S,...runs.filter(r=>r.mode===S.mode)];
+  let tmax=20, vmax=CAP;
+  all.forEach(r=>{const c=r.curve[r.curve.length-1];tmax=Math.max(tmax,c[0]);vmax=Math.max(vmax,c[1]);});
+  tmax=Math.ceil(tmax/10)*10; vmax=Math.ceil(vmax/250)*250;
+  x.strokeStyle='#26304a';x.lineWidth=1;
+  for(let i=0;i<=vmax/250;i++){const yy=T+ph-ph*i*250/vmax;x.beginPath();x.moveTo(L,yy);x.lineTo(L+pw,yy);x.stroke();if(vmax/250<=8||i%2===0)txt(x,String(i*250),L-6,yy,{a:'right',c:'#5b6880',f:'10px "JetBrains Mono"'});}
+  const st=tmax<=60?10:tmax<=150?30:60;
+  for(let t=0;t<=tmax;t+=st){const xx=L+pw*t/tmax;txt(x,String(t),xx,T+ph+12,{c:'#5b6880',f:'10px "JetBrains Mono"'});}
+  txt(x,'mL',L+4,T+4,{a:'left',c:'#5b6880',f:'10px "JetBrains Mono"'}); txt(x,'時間 (s)',L+pw-24,T+ph+12,{c:'#5b6880',f:'10px "Noto Sans TC"'});
+  all.forEach((r,i)=>{x.strokeStyle=RC[i];x.lineWidth=i?1.5:2.2;x.globalAlpha=i?0.75:1;x.beginPath();r.curve.forEach(([t,v],j)=>{const xx=L+pw*t/tmax,yy=T+ph-ph*v/vmax;j?x.lineTo(xx,yy):x.moveTo(xx,yy);});x.stroke();x.globalAlpha=1;});
+  const lg=all.map((r,i)=>`<span><i style="background:${RC[i]}"></i>${i?'前一次：':'這次：'}${r.label}</span>`).join('');
+  if($('legend').innerHTML!==lg) $('legend').innerHTML=lg;
+}
+
+// ---- 文字 ----
+function setFb(id,html,cls){const e=$(id); if(e.dataset.h!==html){e.innerHTML=html;e.dataset.h=html;} e.className='fb'+(cls?' '+cls:'');}
+function msg(){
+  if(!S.running&&S.t===0){
+    setFb('fbA',S.mode==='O2'?'步驟 1～4 已完成：集氣瓶裝滿水倒立在水槽中、錐形瓶裡放入二氧化錳並加少許水淹過漏斗下端。按「開始滴加」把雙氧水由薊頭漏斗緩緩加入。':'大理石已放入吸濾瓶，加少許水淹過薊頭漏斗下端，集氣瓶裝滿水倒立在水槽中。按「開始滴加」由漏斗緩緩滴入稀鹽酸。','');return;}
+  const r=S.rate;
+  if(!P.sub){setFb('fbA','<b>漏斗下端沒有浸在液面下</b>，產生的氣體大部分從漏斗口跑掉，集氣瓶幾乎收不到氣體。課本步驟 3 提醒：漏斗下端要在液面下。','bad');return;}
+  if(S.mode==='O2'&&P.mn===0){setFb('fbA',S.t>3?'沒有二氧化錳，雙氧水在室溫下只會<b>緩慢分解</b>。集氣瓶裡收到的少量氣體，大多是被滴入的液體<b>擠出來的空氣</b>。':'沒有二氧化錳時，看看氣泡多不多……','mid');return;}
+  if(S.done){
+    if(S.mode==='O2') setFb('fbA',`雙氧水滴完，反應結束：共收集 ${f0(S.collected)} mL 氣體。二氧化錳仍是 <b>${P.mn} g</b>——它只是讓雙氧水分解得更快，本身沒有被用掉，可以回收再用。`,'ok');
+    else setFb('fbA',S.mbLeft<0.05?`大理石用完了，再滴稀鹽酸也不會產生氣體：共收集 ${f0(S.collected)} mL。大理石越多，能產生的二氧化碳越多。`:`稀鹽酸滴完，反應結束：共收集 ${f0(S.collected)} mL，大理石還剩 ${f1(S.mbLeft)} g。稀鹽酸用完了，大理石有剩。`,'ok');
+    return;}
+  if(S.bottles.length===1&&S.cur===0) setFb('fbA',`氣體把集氣瓶裡的水往下擠，<b>水位下降</b>（約 ${f1(r)} mL/s）。注意：<b>第一瓶</b>收到的多半是錐形瓶與導管裡原有的空氣，比較不純。`,'');
+  else setFb('fbA',`第 ${S.cur+1} 瓶收集中，水位下降速率約 <b>${f1(r)} mL/s</b>。可以改變${S.mode==='O2'?'雙氧水濃度、二氧化錳多寡':'稀鹽酸濃度、大理石塊狀或粉末'}或滴加速率，比較圖上的斜率。`,'');
+}
+function testMsg(){
+  if(!test){setFb('fbT',S.bottles.length>1||S.bottles[0].a+S.bottles[0].p>1?'選一瓶，再選檢驗方法。先試「空氣瓶」當作比較。':'先收集幾瓶氣體，再拿來和「空氣瓶」比較。','');return;}
+  const g=bottleGas(sel);
+  if(test.kind==='inc'){
+    const lv=incenseLevel(g.o2);
+    if(lv===3) setFb('fbT',`線香在${g.name}裡<b>燒得很劇烈，冒出火焰</b>——氧氣濃度很高（約 ${f0(g.o2)}%）。氧氣可以幫助燃燒，具有<b>助燃性</b>（圖 2-16）。`,'ok');
+    else if(lv===2) setFb('fbT',`線香在${g.name}裡比在空氣中燒得旺，但不如純氧那麼劇烈（氧氣約 ${f0(g.o2)}%）。${sel===0&&S.mode==='O2'?'第一瓶混有裝置裡原有的空氣，所以比較不純。':''}`,'mid');
+    else if(lv===1) setFb('fbT',`線香在${g.name}裡和平常一樣慢慢燃燒、微微發亮（氧氣約 ${f0(g.o2)}%）。`,'');
+    else setFb('fbT',`線香放進${g.name}就<b>熄滅</b>了：瓶裡幾乎是二氧化碳（約 ${f0(g.co2)}%），二氧化碳<b>不可燃、也不助燃</b>。`,'bad');
+  }else{
+    const c=limeCloud(g.co2);
+    if(c>0.5) setFb('fbT',`澄清石灰水搖一搖就<b>變成白色混濁</b>：${g.name}裡有大量二氧化碳（約 ${f0(g.co2)}%）。這是檢驗二氧化碳的方法（圖 2-18）。`,'ok');
+    else if(c>0) setFb('fbT',`石灰水有一點混濁：${g.name}裡含有一些二氧化碳（約 ${f0(g.co2)}%），第一瓶混有原來的空氣。`,'mid');
+    else setFb('fbT',`澄清石灰水<b>仍然澄清</b>：${g.name}裡的二氧化碳很少（空氣中只有約 0.04%），短時間看不出變化。${S.mode==='O2'&&sel>=0?'氧氣不會讓石灰水變混濁。':''}`,'');
+  }
+}
+function note(){
+  $('note').innerHTML=S.mode==='O2'
+   ?'<b>想一想：</b>① 為什麼漏斗下端要浸在液面下？② 為什麼第一瓶氣體最好不要拿來檢驗？③ 雙氧水濃度變大、滴加變快，圖線斜率怎麼變？④ 二氧化錳放 0.5 g 和 3 g，最後收集到的氧氣總量一樣嗎？（提示：總量由雙氧水決定，二氧化錳只改變快慢。）'
+   :'<b>想一想：</b>① 大理石換成粉末，斜率怎麼變？最後總量變了嗎？② 大理石只放 1 g 時，為什麼稀鹽酸還沒滴完就不冒氣泡了？③ 把收集到的二氧化碳瓶用線香和石灰水檢驗，和空氣瓶比較。④ 二氧化碳略溶於水，但溶得不多，所以仍可用排水集氣法收集。';
+  $('lede').innerHTML=S.mode==='O2'
+   ?'雙氧水在室溫下會緩慢分解成<b>水和氧氣</b>，加入<b>二氧化錳</b>可以讓它分解得更快。氧氣不易溶於水，所以用<b>排水集氣法</b>收集：集氣瓶先裝滿水倒立在水槽中，氧氣進入瓶中把水排出。再用點燃的線香檢驗——氧氣具有<b>助燃性</b>。'
+   :'大理石（主要成分是碳酸鈣）和稀鹽酸反應會產生<b>二氧化碳</b>。二氧化碳是無色無味、略溶於水的氣體，實驗室也常用<b>排水集氣法</b>收集。檢驗的方法是加入<b>澄清石灰水</b>，搖一搖會變成<b>白色混濁</b>。';
+}
+function bList(){
+  const items=[[-1,'空氣瓶','']];
+  S.bottles.forEach((b,i)=>{const v=b.a+b.p; if(v>1) items.push([i,`第 ${i+1} 瓶`,i===S.cur&&v<CAP-1?`${f0(v)} mL`:'']);});
+  const html=items.map(([i,n,s])=>`<button type="button" data-b="${i}" aria-pressed="${i===sel}">${n}${s?`<small>${s}</small>`:''}</button>`).join('');
+  const e=$('bList'); if(e.dataset.h!==html){e.innerHTML=html;e.dataset.h=html;e.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.b;test=null;bList();testMsg();});}
+}
+function ui(){
+  $('ctlO2').hidden=P.mode!=='O2'; $('ctlCO2').hidden=P.mode!=='CO2';
+  $('vMn').textContent=P.mn+' g'; $('vMb').textContent=P.mb+' g'; $('vDrip').textContent=f1(P.drip)+' mL/s';
+  $('rFunL').firstChild.textContent=P.mode==='O2'?'漏斗剩下雙氧水':'漏斗剩下稀鹽酸';
+  $('rSolidL').firstChild.textContent=P.mode==='O2'?'二氧化錳':'大理石剩下';
+  $('bGo').textContent=S.running?'暫停':(S.done?'已結束':(S.t>0?'繼續滴加':'開始滴加')); $('bGo').disabled=S.done;
+  note(); msg(); bList(); testMsg();
+}
+function readings(){
+  $('rT').textContent=f1(S.t)+' s';
+  $('rFun').textContent=f1(S.fun)+' mL';
+  $('rRate').textContent=S.running?f1(S.rate)+' mL/s':'—';
+  const B=S.bottles[S.cur]; $('rCur').textContent=f0(B.a+B.p)+' mL';
+  $('rN').textContent=String(S.bottles.filter(b=>b.a+b.p>=CAP-1).length)+' 瓶滿';
+  $('rSolid').textContent=P.mode==='O2'?P.mn+' g（不變）':f1(S.mbLeft)+' g';
+}
+
+// ---- 事件 ----
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>{P.mode=b.dataset.m;document.querySelectorAll('.modebar button').forEach(q=>q.setAttribute('aria-pressed',String(q===b)));reset(false);runs.length=0;});
+function segBind(id,key,attr){document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{const v=b.dataset[attr];P[key]=isNaN(+v)?v:+v;document.querySelectorAll(`#${id} button`).forEach(q=>q.setAttribute('aria-pressed',String(q===b)));reset();});}
+segBind('segConc','conc','c'); segBind('segAcid','acid','c'); segBind('segForm','form','f');
+$('slMn').oninput=e=>{P.mn=+e.target.value;reset();};
+$('slMb').oninput=e=>{P.mb=+e.target.value;reset();};
+$('slDrip').oninput=e=>{P.drip=+e.target.value;$('vDrip').textContent=f1(P.drip)+' mL/s';if(S.t===0) S.label=runLabel(); else S.label=S.label.replace(/[\d.]+ mL\/s.*$/,'變速');};
+$('ckSub').onchange=e=>{P.sub=e.target.checked;if(S.t===0)S.label=runLabel();msg();};
+$('ckAuto').onchange=e=>{P.auto=e.target.checked;};
+$('bGo').onclick=()=>{if(S.done)return;S.running=!S.running;ui();};
+$('bNext').onclick=()=>{const B=S.bottles[S.cur];if(B.a+B.p>1&&S.bottles.length<MAXB){S.bottles.push({a:0,p:0});S.cur++;bList();}};
+$('bReset').onclick=()=>reset();
+$('bSpeed').onclick=e=>{P.speed=P.speed===1?4:1;e.target.setAttribute('aria-pressed',String(P.speed===4));};
+$('tInc').onclick=()=>{test={kind:'inc',t0:performance.now()};testMsg();};
+$('tLime').onclick=()=>{test={kind:'lime',t0:performance.now()};testMsg();};
+
+let last=0, acc=0;
+function loop(t){
+  const dt=Math.min(0.05,(t-last)/1000||0); last=t;
+  const was=S.running;
+  for(let i=0;i<P.speed;i++){ for(let k=0;k<4;k++) step(dt/4); }
+  if(was!==S.running) ui();
+  acc+=dt; if(acc>0.25){acc=0; if(S.running) msg(); bList();}
+  readings(); drawApp(); drawTest(); drawGraph();
+  requestAnimationFrame(loop);
+}
+reset(false);
+requestAnimationFrame(t=>{last=t;loop(t);});
+window.__gas={P,S:()=>S,step,reset,bottleGas,runs};
+})();
+</script>
+</body>
+</html>
