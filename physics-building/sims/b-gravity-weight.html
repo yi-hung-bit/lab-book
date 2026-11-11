@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>萬有引力與重量</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--cF:#ff8a5c;--vio:#8b8cff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(139,140,255,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+h2{font-size:18px;margin:26px 0 0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h2 small{font-size:13px;color:var(--muted);font-weight:400}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+#cvA{height:270px}#plA{height:210px}#cvB{height:300px}#plB{height:210px}
+@media(max-width:560px){#cvA{height:230px}#cvB{height:260px}#plA,#plB{height:190px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.read .wide{grid-column:1/-1}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.opt{font-family:"JetBrains Mono","Noto Sans TC",monospace}
+.opt.ok{background:rgba(125,255,196,.15);border-color:var(--phos);color:var(--phos)}
+.opt.no{background:rgba(255,122,122,.12);border-color:var(--red);color:var(--red)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.big{font-family:"JetBrains Mono",monospace;font-size:20px;color:var(--phos);font-weight:700;margin-top:8px;word-break:break-all}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">3-3 · Gravitation &amp; Weight</div>
+  <h1>萬有引力與重量</h1>
+  <p class="lede">任兩個有質量的物體互相吸引：F = Gm₁m₂/r²，G = 6.67 × 10⁻¹¹ N·m²/kg²。兩物體受到的力大小相同、方向相反（作用力與反作用力）；距離加倍，力只剩 1/4。地球對物體的引力就是物體的重量，離地心越遠，重力加速度 g = GM<sub>E</sub>/r² 越小。</p>
+
+  <h2>① 兩物體間的引力 <small>拖曳任一個球改變距離（圖 3-11）</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">萬有引力定律</span><span class="n" id="nA"></span></div>
+      <div class="box"><canvas id="cvA" aria-label="兩質點間的萬有引力，可拖曳"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t">F–r 圖</span><span class="n">以「基準」時的力 F₀ 與距離 r₀ 為單位</span></div>
+      <div class="box"><canvas id="plA" aria-label="引力與距離的關係圖"></canvas></div>
+      <div class="legend"><span><i style="background:var(--vio)"></i>F/F₀ = (r₀/r)²（目前質量）</span><span><i style="background:var(--acc)"></i>目前</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">質量與距離</span><span class="n">G = 6.67 × 10⁻¹¹ N·m²/kg²</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg" id="presets"></div>
+        <div class="ctl"><div class="r"><label for="sM1">m₁</label><span id="oM1"></span></div><input type="range" id="sM1" min="0" max="25" step="0.01"></div>
+        <div class="ctl"><div class="r"><label for="sM2">m₂</label><span id="oM2"></span></div><input type="range" id="sM2" min="0" max="25" step="0.01"></div>
+        <div class="ctl"><div class="r"><label for="sR">距離 r</label><span id="oR"></span></div><input type="range" id="sR" min="-1" max="9" step="0.005"></div>
+        <div class="seg" style="margin-top:10px">
+          <button id="rHalf">r × ½</button><button id="rDbl">r × 2</button><button id="rTri">r × 3</button><button id="mDbl">m₁ × 2</button><button id="setBase">設目前為基準</button>
+        </div>
+        <div class="read">
+          <div class="wide"><small>引力 F = Gm₁m₂/r²</small><b id="rF"></b></div>
+          <div><small>換成公斤重</small><b id="rKgw"></b></div>
+          <div><small>和基準比 F/F₀</small><b id="rRatio"></b></div>
+          <div><small>m₁ 的加速度 F/m₁</small><b id="rA1"></b></div>
+          <div><small>m₂ 的加速度 F/m₂</small><b id="rA2"></b></div>
+        </div>
+        <div class="note" id="seeA"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>② 重量隨所受重力變化 <small>1 公斤的蘋果離地心越遠越輕（圖 3-12）</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">離地心距離 r</span><span class="n">拖曳蘋果和磅秤</span></div>
+      <div class="box"><canvas id="cvB" aria-label="不同高度的蘋果與磅秤，可拖曳"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t">g–r 圖</span><span class="n">g = GM<sub>E</sub>/r²</span></div>
+      <div class="box"><canvas id="plB" aria-label="重力加速度與離地心距離的關係圖"></canvas></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">位置與質量</span><span class="n">M<sub>E</sub> = 5.97 × 10²⁴ kg，R<sub>E</sub> = 6.37 × 10⁶ m</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg" id="spots"></div>
+        <div class="ctl"><div class="r"><label for="sRB">離地心距離 r</label><span id="oRB"></span></div><input type="range" id="sRB" min="1" max="4" step="0.01" value="1"></div>
+        <div class="ctl"><div class="r"><label for="sMB">蘋果質量 m</label><span id="oMB"></span></div><input type="range" id="sMB" min="0.1" max="5" step="0.1" value="1"></div>
+        <div class="read">
+          <div><small>重力加速度 g′</small><b id="rg"></b></div>
+          <div><small>g′ ÷ 地表 g</small><b id="rgr"></b></div>
+          <div><small>蘋果所受重力 F′ = mg′</small><b id="rW"></b></div>
+          <div><small>磅秤讀數</small><b id="rKg"></b></div>
+          <div class="wide"><small>離地面高度 h = r − R<sub>E</sub></small><b id="rH"></b></div>
+        </div>
+        <div class="note" id="seeB"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>③ 課本範例 <small>範例 3-2、範例 3-3</small></h2>
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">範例 3-2 重力</span><span class="n">90 kg 與 100 kg 的兩位運動員相距 1 m</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="qq"><p>把兩人視為質點，彼此間的重力為多少牛頓？多少公斤重？</p>
+          <div class="seg"><button id="ex2set">在 ① 設定</button><button data-a="ex2a">看答案</button></div>
+          <div class="ans" id="ex2a" hidden>F = (6.67 × 10⁻¹¹)(90)(100)/(1)² = <b>6.0 × 10⁻⁷ N</b> ≈ 6 × 10⁻⁸ kgw。大約是把一杯 600 mL 的飲料分成一千萬份後一份的重量，所以人與人之間的引力根本察覺不到。</div></div>
+        <div class="qq"><p>如果兩人相距 2 m 呢？</p>
+          <div class="seg"><button id="ex2b">在 ① 試試</button><button data-a="ex2c">看說明</button></div>
+          <div class="ans" id="ex2c" hidden>距離加倍，力變成 1/4：<b>1.5 × 10⁻⁷ N</b>。</div></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">範例 3-3 地球質量的估算</span><span class="n">100 學測</span></div>
+      <div class="pad" style="padding-top:2px">
+        <p style="font-size:14px">小君想從重力常數 G、地表的重力加速度 g 和地球半徑 R 估算地球質量 M，正確的式子是哪一個？</p>
+        <div class="seg" id="opts" style="margin-top:8px"></div>
+        <div class="note" id="optNote">先選一個，再看看代入數字的結果。</div>
+        <div class="ctl"><div class="r"><label for="sG">地表 g</label><span id="oG"></span></div><input type="range" id="sG" min="9.70" max="9.90" step="0.01" value="9.80"></div>
+        <div class="ctl"><div class="r"><label for="sRE">地球半徑 R</label><span id="oRE"></span></div><input type="range" id="sRE" min="6.30" max="6.45" step="0.01" value="6.37"></div>
+        <div class="big" id="rM"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>想一想</h2>
+  <div class="two">
+    <section class="card"><div class="pad">
+      <div class="qq"><p>1 公斤的蘋果放在離地心 3R<sub>E</sub> 的地方，磅秤讀數是多少？</p><div class="seg"><button id="q1">移到 3R<sub>E</sub></button><button data-a="qa1">看說明</button></div><div class="ans" id="qa1" hidden>距離變 3 倍，g′ = g/9，讀數 <b>1/9 ≈ 0.11 kgw</b>（約 1.09 N）。</div></div>
+      <div class="qq"><p>國際太空站離地面約 400 km，那裡的 g′ 只比地表小一點，為什麼太空人還是「飄起來」？</p><div class="seg"><button id="q2">移到太空站高度</button><button data-a="qa2">看說明</button></div><div class="ans" id="qa2" hidden>r = 6.77 × 10⁶ m，g′ ≈ <b>8.7 m/s²</b>，大約是地表的 89%，重力並沒有消失。太空站和太空人一起繞地球「自由落下」，重力全部用來提供繞地球運動所需的向心力，磅秤讀數才會是零，稱為失重狀態。本頁的磅秤假想是靜止放在那個高度（例如一座很高的塔上）。</div></div>
+    </div></section>
+    <section class="card"><div class="pad">
+      <div class="qq"><p>地球吸 1 公斤蘋果的力是 9.8 N，蘋果吸地球的力是多少？為什麼掉下來的是蘋果而不是地球？</p><div class="seg"><button id="q3">在 ① 設定地球與蘋果</button><button data-a="qa3">看說明</button></div><div class="ans" id="qa3" hidden>作用力與反作用力大小相同，蘋果也以 <b>9.8 N</b> 吸地球。但 a = F/m：蘋果 a = 9.8 m/s²，地球 a = 9.8 ÷ (5.97 × 10²⁴) ≈ <b>1.6 × 10⁻²⁴ m/s²</b>，小到完全看不出來。</div></div>
+      <div class="qq"><p>計算地球對地表物體的重力時，r 要代什麼？</p><div class="seg"><button data-a="qa4">看說明</button></div><div class="ans" id="qa4" hidden>均勻球體對外部質點的引力，可視為質量全部集中在球心，所以 r 是<b>物體到地心</b>的距離，在地表就是地球半徑 R<sub>E</sub>，不是到地面的距離。</div></div>
+    </div></section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>萬有引力與質量乘積成正比、與距離平方成反比；兩物體受的引力大小相同、方向相反、作用在不同物體上，但質量小的那個加速度大。g = GM<sub>E</sub>/R<sub>E</sub>² 中的 R<sub>E</sub> 是到地心的距離；離地心 2R<sub>E</sub> 時 g 只剩 1/4，1 kgw 的蘋果只剩 0.25 kgw。本頁地表取 g = 9.8 m/s²，各位置的 g′ = 9.8 × (R<sub>E</sub>/r)²。<br>
+    <b>課本對照：</b>基礎物理 Ch03 3-3 基本交互作用（p.69 萬有引力定律、圖 3-11；p.70 重力加速度、圖 3-12；p.71 範例 3-2、範例 3-3）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const G=6.67e-11, ME=5.97e24, RE=6.37e6, G0=9.8;
+const SUP={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
+function sci(x,d=2){
+  if(x===0) return "0";
+  const e=Math.floor(Math.log10(Math.abs(x))), m=x/Math.pow(10,e);
+  let mm=+m.toFixed(d-1), ee=e; if(Math.abs(mm)>=10){mm/=10;ee++;}
+  if(ee>=-2&&ee<=3){const v=+x.toPrecision(d);return String(v);}
+  return mm.toFixed(d-1)+" × 10"+String(ee).split("").map(c=>SUP[c]).join("");
+}
+const fix=(x,d)=>{const r=+x.toFixed(d);return(Object.is(r,-0)?0:r).toFixed(d);};
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w,h};}
+function arrow(g,x1,y1,x2,y2,col,lw=4){
+  const L=Math.hypot(x2-x1,y2-y1);if(L<2)return;const ux=(x2-x1)/L,uy=(y2-y1)/L;
+  g.strokeStyle=col;g.fillStyle=col;g.lineWidth=lw;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2-ux*8,y2-uy*8);g.stroke();
+  g.beginPath();g.moveTo(x2+ux*2,y2+uy*2);g.lineTo(x2-ux*11-uy*7,y2-uy*11+ux*7);g.lineTo(x2-ux*11+uy*7,y2-uy*11-ux*7);g.closePath();g.fill();
+}
+function axes(g,w,h,L,R,T,B,xs,ys,xl,yl,X,Y){
+  g.font="11px 'JetBrains Mono',monospace";
+  xs.forEach(a=>{g.strokeStyle="rgba(120,140,180,.14)";g.lineWidth=1;g.beginPath();g.moveTo(X(a),T);g.lineTo(X(a),h-B);g.stroke();g.fillStyle="#5b6880";g.textAlign="center";g.textBaseline="top";g.fillText(a,X(a),h-B+5);});
+  ys.forEach(a=>{g.strokeStyle="rgba(120,140,180,.14)";g.beginPath();g.moveTo(L,Y(a));g.lineTo(w-R,Y(a));g.stroke();g.fillStyle="#5b6880";g.textAlign="right";g.textBaseline="middle";g.fillText(a,L-6,Y(a));});
+  g.fillStyle="#8492aa";g.textAlign="left";g.textBaseline="top";g.fillText(yl,6,3);g.textAlign="right";g.textBaseline="bottom";g.fillText(xl,w-R,h-B-3);
+  g.strokeStyle="#5b6880";g.lineWidth=1.5;g.beginPath();g.moveTo(L,T);g.lineTo(L,h-B);g.lineTo(w-R,h-B);g.stroke();
+}
+
+/* ================= ① 兩物體 ================= */
+const PRE=[
+  {k:"兩位運動員",m1:90,m2:100,r:1,n1:"90 kg",n2:"100 kg"},
+  {k:"兩顆鉛球",m1:7.26,m2:7.26,r:0.5},
+  {k:"地球與蘋果",m1:ME,m2:1,r:RE,n1:"地球",n2:"蘋果"},
+  {k:"地球與月球",m1:ME,m2:7.35e22,r:3.84e8,n1:"地球",n2:"月球"}
+];
+let m1=90,m2=100,r=1,base={m1:90,m2:100,r:1},names=["m₁","m₂"],ang=-0.35,cur=0;
+const F=()=>G*m1*m2/(r*r), Fb=()=>G*base.m1*base.m2/(base.r*base.r);
+function setBase(){base={m1,m2,r};}
+function applyPre(i){const p=PRE[i];cur=i;m1=p.m1;m2=p.m2;r=p.r;names=[p.n1||"m₁",p.n2||"m₂"];setBase();syncA();}
+function syncA(){$("#sM1").value=Math.log10(m1);$("#sM2").value=Math.log10(m2);$("#sR").value=Math.log10(r);
+  [...$("#presets").children].forEach((b,i)=>b.classList.toggle("on",i===cur));}
+PRE.forEach((p,i)=>{const b=document.createElement("button");b.textContent=p.k;b.onclick=()=>applyPre(i);$("#presets").appendChild(b);});
+const clampR=x=>Math.min(1e9,Math.max(0.1,x));
+$("#sM1").oninput=e=>{m1=Math.pow(10,+e.target.value);cur=-1;names=["m₁","m₂"];syncA();};
+$("#sM2").oninput=e=>{m2=Math.pow(10,+e.target.value);cur=-1;names=["m₁","m₂"];syncA();};
+$("#sR").oninput=e=>{r=Math.pow(10,+e.target.value);};
+$("#rHalf").onclick=()=>{r=clampR(r/2);syncA();};
+$("#rDbl").onclick=()=>{r=clampR(r*2);syncA();};
+$("#rTri").onclick=()=>{r=clampR(r*3);syncA();};
+$("#mDbl").onclick=()=>{m1=Math.min(1e25,m1*2);cur=-1;syncA();};
+$("#setBase").onclick=()=>setBase();
+function fmtLen(x){if(x>=1e5) return sci(x,3)+" m"+(x>=1e6?`（${fix(x/RE,2)} R_E）`:"");if(x>=1000)return fix(x/1000,2)+" km";if(x>=1)return fix(x,2)+" m";return fix(x*100,1)+" cm";}
+function fmtM(x){return (x>=1e5?sci(x,3):fix(x,x<10?2:0))+" kg";}
+
+/* 畫面配置：基準距離 r₀ 對應 dRef 像素 */
+let geomA={};
+function drawA(){
+  const {g,w,h}=fit($("#cvA"));g.clearRect(0,0,w,h);
+  const cx=w/2,cy=h/2,dRef=Math.min(w*0.34,170);
+  const maxPix=Math.min(w*0.86,h*0.84/Math.max(.2,Math.abs(Math.sin(ang)))), minPix=46;
+  let pix=dRef*r/base.r;const off=pix>maxPix?"far":pix<minPix?"near":"";pix=Math.max(minPix,Math.min(maxPix,pix));
+  const ux=Math.cos(ang),uy=Math.sin(ang);
+  const p1={x:cx-ux*pix/2,y:cy-uy*pix/2},p2={x:cx+ux*pix/2,y:cy+uy*pix/2};
+  const rad=m=>Math.max(9,Math.min(26,6+Math.log10(m+1)*0.9));
+  const r1=rad(m1),r2=rad(m2);
+  geomA={p1,p2,cx,cy,dRef,pix};
+  // 距離線
+  g.setLineDash([5,5]);g.strokeStyle="rgba(132,146,170,.5)";g.lineWidth=1.2;g.beginPath();g.moveTo(p1.x,p1.y);g.lineTo(p2.x,p2.y);g.stroke();g.setLineDash([]);
+  g.fillStyle="#8492aa";g.font="12px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="middle";
+  g.save();g.translate(cx-uy*16,cy+ux*16);g.fillText("r = "+fmtLen(r),0,0);g.restore();
+  // 力箭頭（長度 ∝ F/F₀）
+  const ratio=F()/Fb();let L=48*ratio;const cut=L>pix*0.45-6;L=Math.min(L,pix*0.45-6);
+  if(ratio>0&&L<3&&F()>0)L=3;
+  arrow(g,p1.x+ux*r1,p1.y+uy*r1,p1.x+ux*(r1+L),p1.y+uy*(r1+L),"#ff8a5c");
+  arrow(g,p2.x-ux*r2,p2.y-uy*r2,p2.x-ux*(r2+L),p2.y-uy*(r2+L),"#ff8a5c");
+  // 球
+  [[p1,r1,"#43d6ff",names[0]],[p2,r2,"#8b8cff",names[1]]].forEach(([p,rr,c,n])=>{
+    const gr=g.createRadialGradient(p.x-rr*.35,p.y-rr*.35,rr*.2,p.x,p.y,rr);gr.addColorStop(0,"#fff");gr.addColorStop(.25,c);gr.addColorStop(1,"#1b2336");
+    g.fillStyle=gr;g.beginPath();g.arc(p.x,p.y,rr,0,7);g.fill();
+    g.fillStyle="#e8edf6";g.font="700 13px 'Noto Sans TC',sans-serif";g.textAlign="center";g.textBaseline="bottom";g.fillText(n,p.x,p.y-rr-6);
+  });
+  g.fillStyle="#ff8a5c";g.font="700 13px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="top";
+  g.fillText("F",8,8);g.fillStyle="#8492aa";g.font="12px 'Noto Sans TC',sans-serif";
+  g.fillText(cut?"箭頭太長，已截短":"兩支箭頭一樣長",22,9);
+  if(off){g.textAlign="right";g.fillText(off==="far"?"距離太遠，畫面已縮小":"距離太近，畫面已放大",w-8,9);}
+  $("#nA").textContent=`F/F₀ = ${ratio>=100||ratio<0.01?sci(ratio,3):fix(ratio,3)}`;
+}
+function plotA(){
+  const {g,w,h}=fit($("#plA"));g.clearRect(0,0,w,h);
+  const L=40,R=12,T=22,B=26,xm=4,k=(m1*m2)/(base.m1*base.m2);
+  const cr=F()/Fb(), ymax=Math.max(4.2,Math.min(cr*1.15,40));
+  const X=v=>L+(w-L-R)*v/xm,Y=v=>T+(h-T-B)*(1-Math.min(v,ymax*1.05)/ymax);
+  const ys=[];const st=ymax>20?10:ymax>8?2:1;for(let a=0;a<=ymax;a+=st)ys.push(a);
+  axes(g,w,h,L,R,T,B,[0,1,2,3,4],ys,"r / r₀","F / F₀",X,Y);
+  g.save();g.beginPath();g.rect(L,T,w-L-R,h-T-B);g.clip();
+  g.strokeStyle="#8b8cff";g.lineWidth=2.2;g.beginPath();
+  for(let i=0;i<=300;i++){const x=0.2+i*(xm-0.2)/300,y=k/(x*x);i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y));}g.stroke();
+  // 1, 1/4, 1/9 記號
+  g.fillStyle="#5b6880";g.font="11px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="bottom";
+  [[1,"1"],[2,"1/4"],[3,"1/9"]].forEach(([x,t])=>{const y=k/(x*x);g.beginPath();g.arc(X(x),Y(y),3,0,7);g.fill();if(Math.abs(k-1)<1e-6)g.fillText(t,X(x)+5,Y(y)-3);});
+  const rx=r/base.r;if(rx<=xm){g.fillStyle="#ffd166";g.beginPath();g.arc(X(rx),Y(cr),6,0,7);g.fill();g.strokeStyle="#04060b";g.lineWidth=2;g.stroke();}
+  g.restore();
+}
+function uiA(){
+  const f=F();
+  $("#oM1").textContent=fmtM(m1);$("#oM2").textContent=fmtM(m2);$("#oR").textContent=fmtLen(r);
+  $("#rF").textContent=sci(f,3)+" N";$("#rKgw").textContent=sci(f/G0,3)+" kgw";
+  const ratio=f/Fb();$("#rRatio").textContent=(ratio>=100||ratio<0.01)?sci(ratio,3):fix(ratio,3);
+  $("#rA1").textContent=sci(f/m1,3)+" m/s²";$("#rA2").textContent=sci(f/m2,3)+" m/s²";
+  const rr=r/base.r, mk=(m1*m2)/(base.m1*base.m2);
+  let msg;
+  if(Math.abs(mk-1)<1e-6&&Math.abs(rr-1)<1e-6) msg="<b>這是基準狀態 F₀。</b>試試「r × 2」：距離加倍，引力變成 1/4；「r × 3」變成 1/9。兩個球上的箭頭永遠一樣長、方向相反。";
+  else if(Math.abs(mk-1)<1e-6) msg=`距離變成基準的 <b>${fix(rr,2)}</b> 倍，引力變成 1 ÷ ${fix(rr,2)}² = <b>${fix(1/(rr*rr),3)}</b> 倍（平方反比）。`;
+  else if(Math.abs(rr-1)<1e-6) msg=`m₁m₂ 變成基準的 <b>${mk>=100||mk<0.01?sci(mk,3):fix(mk,2)}</b> 倍，引力也變成同樣倍數（與質量乘積成正比）。`;
+  else msg=`F/F₀ = (m₁m₂ 的倍數) ÷ (r 的倍數)² = ${mk>=100||mk<0.01?sci(mk,3):fix(mk,2)} ÷ ${fix(rr,2)}² = <b>${ratio>=100||ratio<0.01?sci(ratio,3):fix(ratio,3)}</b>。`;
+  if(m1/m2>1e3||m2/m1>1e3) msg+=" 兩物體受力相同，但質量差很多，<b>加速度 a = F/m 差很多</b>，所以看起來只有小的在動。";
+  $("#seeA").innerHTML=msg;
+}
+// 拖曳
+(function(){
+  const cv=$("#cvA");let drag=null;
+  const pos=e=>{const b=cv.getBoundingClientRect();return{x:e.clientX-b.left,y:e.clientY-b.top};};
+  cv.addEventListener("pointerdown",e=>{const p=pos(e),{p1,p2}=geomA;const d1=Math.hypot(p.x-p1.x,p.y-p1.y),d2=Math.hypot(p.x-p2.x,p.y-p2.y);
+    if(Math.min(d1,d2)<40){drag=d1<d2?1:2;cv.setPointerCapture(e.pointerId);e.preventDefault();}});
+  cv.addEventListener("pointermove",e=>{if(!drag)return;const p=pos(e),{p1,p2,dRef}=geomA;const o=drag===1?p2:p1;
+    let dx=p.x-o.x,dy=p.y-o.y;if(drag===1){dx=-dx;dy=-dy;}const pix=Math.max(46,Math.hypot(dx,dy));
+    let a=Math.atan2(dy,dx);if(Math.cos(a)<0)a+=Math.PI;a=Math.atan2(Math.sin(a),Math.cos(a));ang=Math.max(-0.6,Math.min(0.6,a));
+    r=clampR(base.r*pix/dRef);syncA();});
+  const up=()=>{drag=null;};cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
+})();
+
+/* ================= ② 重量隨高度 ================= */
+let rb=1,mb=1;
+const SPOTS=[["地表",1],["2R_E",2],["3R_E",3],["太空站 400 km",(RE+4e5)/RE]];
+SPOTS.forEach(([t,v])=>{const b=document.createElement("button");b.textContent=t.replace("R_E","Rₑ");b.onclick=()=>{rb=Math.min(4,v);$("#sRB").value=rb;};$("#spots").appendChild(b);});
+$("#sRB").oninput=e=>{rb=+e.target.value;};
+$("#sMB").oninput=e=>{mb=+e.target.value;};
+let geomB={};
+function drawB(){
+  const {g,w,h}=fit($("#cvB"));g.clearRect(0,0,w,h);
+  const ang=-0.3, rmax=+$("#sRB").max, Rp=Math.min((w-70)/(rmax*Math.cos(ang)+0.1), (h-90)/(rmax*Math.sin(-ang)+0.05)), ox=18, oy=h-14;
+  geomB={ox,oy,Rp,ang};
+  // 同心虛線圓
+  g.setLineDash([4,6]);g.lineWidth=1;
+  for(let k=2;k<=Math.floor(rmax);k++){g.strokeStyle="rgba(132,146,170,.3)";g.beginPath();g.arc(ox,oy,k*Rp,-Math.PI/2,0);g.stroke();
+    g.fillStyle="#5b6880";g.font="11px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="bottom";g.fillText(k+"Rₑ",ox+k*Rp,oy-2);}
+  g.setLineDash([]);
+  // 地球
+  const gr=g.createRadialGradient(ox+Rp*.3,oy-Rp*.3,Rp*.1,ox,oy,Rp);gr.addColorStop(0,"#5aa0e6");gr.addColorStop(1,"#1d4e8f");
+  g.fillStyle=gr;g.beginPath();g.arc(ox,oy,Rp,-Math.PI/2,0);g.lineTo(ox,oy);g.closePath();g.fill();
+  g.fillStyle="#3d7d4c";g.globalAlpha=.6;g.beginPath();g.ellipse(ox+Rp*.45,oy-Rp*.5,Rp*.2,Rp*.13,.6,0,7);g.fill();g.globalAlpha=1;
+  g.fillStyle="#fff";g.beginPath();g.arc(ox,oy,3.5,0,7);g.fill();g.fillStyle="#e8edf6";g.font="12px 'Noto Sans TC',sans-serif";g.textAlign="left";g.textBaseline="bottom";g.fillText("地心",ox+8,oy+13);
+  // 物體位置
+  const px=ox+rb*Rp*Math.cos(ang),py=oy+rb*Rp*Math.sin(ang);
+  g.strokeStyle="#ff7a7a";g.lineWidth=2;g.beginPath();g.moveTo(ox,oy);g.lineTo(px,py);g.stroke();
+  g.fillStyle="#ff9f9f";g.font="700 13px 'JetBrains Mono',monospace";g.save();{const rm=Math.max(0.6,(1+rb)/2-0.2);g.translate(ox+rm*Rp*Math.cos(ang),oy+rm*Rp*Math.sin(ang));}g.rotate(ang);g.textAlign="center";g.textBaseline="top";g.fillText("r = "+fix(rb,2)+" Rₑ",0,5);g.restore();
+  // 磅秤 + 蘋果（直立在該處）
+  const s=Math.max(.75,Math.min(1.1,w/520));
+  g.save();g.translate(px,py);
+  g.fillStyle="#e07b1f";g.beginPath();g.moveTo(-34*s,0);g.lineTo(34*s,0);g.lineTo(28*s,-20*s);g.lineTo(-28*s,-20*s);g.closePath();g.fill();
+  g.fillStyle="#cfd8e3";g.fillRect(-20*s,-16*s,40*s,12*s);
+  g.fillStyle="#04130c";g.fillRect(-18*s,-15*s,36*s,10*s);
+  const kg=mb/(rb*rb);g.fillStyle="#7dffc4";g.font=`700 ${Math.round(9*s)}px 'JetBrains Mono',monospace`;g.textAlign="center";g.textBaseline="middle";g.fillText(kg.toFixed(2),0,-10*s);
+  g.fillStyle="#f29a2e";g.fillRect(-30*s,-24*s,60*s,4*s);
+  const ar=13*s*Math.cbrt(mb);
+  const ag=g.createRadialGradient(-ar*.3,-24*s-ar-ar*.3,ar*.2,0,-24*s-ar,ar);ag.addColorStop(0,"#ff7d7d");ag.addColorStop(1,"#b3162b");
+  g.fillStyle=ag;g.beginPath();g.arc(0,-24*s-ar,ar,0,7);g.fill();
+  g.strokeStyle="#6b4523";g.lineWidth=2;g.beginPath();g.moveTo(0,-24*s-2*ar+2);g.lineTo(2,-24*s-2*ar-6);g.stroke();
+  g.fillStyle="#5f8f4e";g.beginPath();g.ellipse(7,-24*s-2*ar-5,6,3,-.4,0,7);g.fill();
+  // 重力箭頭（指向地心）
+  g.restore();
+  const ux=-Math.cos(ang),uy=-Math.sin(ang);const L=Math.max(6,56/(rb*rb)*Math.sqrt(mb));
+  arrow(g,px+ux*4,py+uy*4,px+ux*(4+L),py+uy*(4+L),"#ff8a5c",3);
+  g.fillStyle="#ff8a5c";g.font="700 12px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="top";g.fillText("F′",px+ux*(4+L)+6,py+uy*(4+L)+2);
+  // 文字
+  g.fillStyle="#e8edf6";g.font="700 13px 'Noto Sans TC',sans-serif";g.textAlign="left";g.textBaseline="top";
+  g.fillText(`${fix(mb,1)} kg 的蘋果`,10,10);g.fillStyle="#8492aa";g.font="12px 'JetBrains Mono',monospace";
+  g.fillText(`g′ = ${fix(G0/(rb*rb),2)} m/s²`,10,30);g.fillText(`讀數 ${kg.toFixed(2)} kgw`,10,48);
+  geomB.px=px;geomB.py=py;
+}
+function plotB(){
+  const {g,w,h}=fit($("#plB"));g.clearRect(0,0,w,h);
+  const L=40,R=12,T=22,B=26,xm=+$("#sRB").max,ym=10;
+  const X=v=>L+(w-L-R)*v/xm,Y=v=>T+(h-T-B)*(1-v/ym);
+  const xs=[];for(let a=0;a<=xm;a++)xs.push(a);
+  axes(g,w,h,L,R,T,B,xs,[0,2,4,6,8,10],"r (Rₑ)","g (m/s²)",X,Y);
+  g.fillStyle="rgba(29,78,143,.25)";g.fillRect(X(0),T,X(1)-X(0),h-T-B);
+  g.fillStyle="#5b6880";g.font="11px 'Noto Sans TC',sans-serif";g.textAlign="center";g.textBaseline="top";g.fillText("地球內部",X(0.5),T+2);
+  g.strokeStyle="#43d6ff";g.lineWidth=2.2;g.beginPath();
+  for(let i=0;i<=300;i++){const x=1+i*(xm-1)/300,y=G0/(x*x);i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y));}g.stroke();
+  g.fillStyle="#8492aa";g.font="11px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="bottom";
+  [[1,"9.8"],[2,"g/4"],[3,"g/9"]].forEach(([x,t])=>{if(x>xm)return;g.beginPath();g.arc(X(x),Y(G0/(x*x)),3,0,7);g.fill();g.fillText(t,X(x)+5,Y(G0/(x*x))-3);});
+  g.fillStyle="#ffd166";g.beginPath();g.arc(X(rb),Y(G0/(rb*rb)),6,0,7);g.fill();g.strokeStyle="#04060b";g.lineWidth=2;g.stroke();
+}
+function uiB(){
+  const gp=G0/(rb*rb);
+  $("#oRB").textContent=`${fix(rb,2)} Rₑ = ${sci(rb*RE,3)} m`;$("#oMB").textContent=fix(mb,1)+" kg";
+  $("#rg").textContent=fix(gp,2)+" m/s²";$("#rgr").textContent=fix(1/(rb*rb),3)+`（1/${fix(rb*rb,2)}）`;
+  $("#rW").textContent=fix(mb*gp,2)+" N";$("#rKg").textContent=fix(mb/(rb*rb),2)+" kgw";
+  const hh=(rb-1)*RE;$("#rH").textContent=hh<1?"0（在地面上）":(hh<1e6?fix(hh/1000,0)+" km":sci(hh/1000,3)+" km");
+  let msg;
+  if(rb<1.005) msg=`<b>在地表：</b>r = R<sub>E</sub>，g = GM<sub>E</sub>/R<sub>E</sub>² = 9.8 m/s²，${fix(mb,1)} kg 的蘋果重 ${fix(mb,1)} kgw = ${fix(mb*G0,1)} N。`;
+  else msg=`離地心 ${fix(rb,2)} R<sub>E</sub>：g′ = g × (R<sub>E</sub>/r)² = 9.8 ÷ ${fix(rb*rb,2)} = <b>${fix(gp,2)} m/s²</b>。蘋果的<b>質量不變</b>（仍是 ${fix(mb,1)} kg），變的是它所受的重力，也就是重量。`;
+  if(Math.abs(rb-2)<0.01) msg+=" 距離加倍，重量只剩 <b>1/4</b>：1 kgw → 0.25 kgw（圖 3-12）。";
+  $("#seeB").innerHTML=msg;
+}
+(function(){
+  const cv=$("#cvB");let drag=false;
+  const pos=e=>{const b=cv.getBoundingClientRect();return{x:e.clientX-b.left,y:e.clientY-b.top};};
+  cv.addEventListener("pointerdown",e=>{const p=pos(e);if(Math.hypot(p.x-geomB.px,p.y-(geomB.py-30))<55){drag=true;cv.setPointerCapture(e.pointerId);e.preventDefault();}});
+  cv.addEventListener("pointermove",e=>{if(!drag)return;const p=pos(e),{ox,oy,Rp,ang}=geomB;
+    const d=((p.x-ox)*Math.cos(ang)+(p.y-oy)*Math.sin(ang))/Rp;rb=Math.max(1,Math.min(+$("#sRB").max,d));$("#sRB").value=rb;});
+  const up=()=>{drag=false;};cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
+})();
+
+/* ================= ③ 範例 ================= */
+$("#ex2set").onclick=()=>{applyPre(0);document.querySelector("h2").scrollIntoView({behavior:"smooth"});};
+$("#ex2b").onclick=()=>{applyPre(0);r=2;syncA();document.querySelector("h2").scrollIntoView({behavior:"smooth"});};
+const OPTS=[["A","gR²/G",(g,R)=>g*R*R/G,true],["B","GR²/g",(g,R)=>G*R*R/g],["C","Gg/R²",(g,R)=>G*g/(R*R)],["D","R²/(gG)",(g,R)=>R*R/(g*G)],["E","gGR²",(g,R)=>g*G*R*R]];
+let pick=-1;
+OPTS.forEach(([k,t],i)=>{const b=document.createElement("button");b.className="opt";b.textContent=`(${k}) M = ${t}`;b.onclick=()=>{pick=i;uiC();};$("#opts").appendChild(b);});
+$("#sG").oninput=uiC;$("#sRE").oninput=uiC;
+function uiC(){
+  const g=+$("#sG").value,R=+$("#sRE").value*1e6;
+  $("#oG").textContent=fix(g,2)+" m/s²";$("#oRE").textContent=sci(R,3)+" m";
+  [...$("#opts").children].forEach((b,i)=>{b.classList.remove("ok","no");if(pick===i)b.classList.add(OPTS[i][3]?"ok":"no");});
+  const M=g*R*R/G;
+  $("#rM").textContent=`M = gR²/G = ${sci(M,3)} kg`;
+  if(pick<0) return;
+  const o=OPTS[pick],v=o[2](g,R);
+  $("#optNote").innerHTML=o[3]?`<b>答對了！</b>地表物體的重量 mg = GMm/R²，消去 m 得 g = GM/R²，所以 M = gR²/G。代入數字得到約 ${sci(M,3)} kg，和地球質量 5.97 × 10²⁴ kg 相符。`
+    :`代入數字得 ${sci(v,3)}，單位也不是 kg，<b>不合理</b>。從 mg = GMm/R² 出發，解出 M 試試。`;
+}
+
+/* ================= 想一想 ================= */
+$("#q1").onclick=()=>{rb=3;$("#sRB").value=3;mb=1;$("#sMB").value=1;document.querySelectorAll("h2")[1].scrollIntoView({behavior:"smooth"});};
+$("#q2").onclick=()=>{rb=(RE+4e5)/RE;$("#sRB").value=rb;document.querySelectorAll("h2")[1].scrollIntoView({behavior:"smooth"});};
+$("#q3").onclick=()=>{applyPre(2);document.querySelector("h2").scrollIntoView({behavior:"smooth"});};
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("#"+b.dataset.a).hidden=false;});
+
+applyPre(0);uiC();
+function loop(){drawA();plotA();uiA();drawB();plotB();uiB();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+window.__gw=()=>({m1,m2,r,F:F(),Fb:Fb(),rb,mb,g:G0/(rb*rb)});
+})();
+</script>
+</body>
+</html>
