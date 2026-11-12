@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>庫侖定律與電力線</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--cF:#ff8a5c;--vio:#8b8cff;--pos:#ff5d6c;--neg:#4f8dff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,93,108,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+h2{font-size:18px;margin:26px 0 0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h2 small{font-size:13px;color:var(--muted);font-weight:400}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+#cvA{height:440px}#cvB{height:220px}#plB{height:190px}
+@media(max-width:560px){#cvA{height:360px}#cvB{height:200px}#plB{height:170px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]:disabled{opacity:.35}
+label.ck{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer}
+label.ck input{accent-color:#ffd166;width:16px;height:16px}
+.read{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.read .wide{grid-column:1/-1}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+table.cmp{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+table.cmp th,table.cmp td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+table.cmp th{color:var(--dim);font-weight:500;background:#0a0f1a}
+table.cmp td b{font-family:"JetBrains Mono",monospace;color:var(--phos);font-weight:700}
+.big{font-family:"JetBrains Mono",monospace;font-size:20px;color:var(--phos);font-weight:700;margin-top:8px;word-break:break-all}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">3-3 · Coulomb's Law &amp; Field Lines</div>
+  <h1>庫侖定律與電力線</h1>
+  <p class="lede">兩個點電荷之間的靜電力 F = kq₁q₂/r²，k = 8.99 × 10⁹ N·m²/C²，電量單位是庫侖（1 C = 1 A·s）。同性電荷相斥、異性電荷相吸，兩電荷受力大小相同、方向相反。電荷在周圍產生電場，用電力線表示：由正電荷出發、終止於負電荷，電量加倍、線數也加倍，線越密的地方電場越強。</p>
+
+  <h2>① 點電荷的電力線 <small>拖曳電荷改變位置；點一下電荷可調電量（圖 3-14）</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">電力線</span><span class="n" id="nA">畫面寬 1.00 m</span></div>
+      <div class="box"><canvas id="cvA" aria-label="點電荷與電力線，可拖曳電荷與測試電荷"></canvas></div>
+      <div class="legend"><span><i style="background:var(--pos)"></i>正電荷</span><span><i style="background:var(--neg)"></i>負電荷</span><span><i style="background:#cfd8e8"></i>電力線</span><span><i style="background:var(--acc)"></i>測試電荷 +Q 受的合力</span><span><i style="background:var(--vio)"></i>各電荷給的力</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">擺放電荷</span><span class="n">q 以 μC（10⁻⁶ C）為單位</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg" id="presets"></div>
+        <div class="ctl"><div class="r"><label for="sQ" id="lQ">選取的電荷</label><span id="oQ"></span></div><input type="range" id="sQ" min="-4" max="4" step="1"></div>
+        <div class="seg" style="margin-top:10px">
+          <button id="addP">＋ 加正電荷</button><button id="addN">－ 加負電荷</button><button id="del">刪除選取的</button>
+        </div>
+        <div class="seg" style="margin-top:10px;gap:10px 16px">
+          <label class="ck"><input type="checkbox" id="cLines" checked>電力線</label>
+          <label class="ck"><input type="checkbox" id="cArrow" checked>箭頭</label>
+          <label class="ck"><input type="checkbox" id="cTest" checked>測試電荷 +Q</label>
+          <label class="ck"><input type="checkbox" id="cParts" checked>分力</label>
+        </div>
+        <div class="read">
+          <div class="wide"><small>測試電荷 +Q = +1 μC 所受合力</small><b id="rF"></b></div>
+          <div><small>該處電場 E = F/Q</small><b id="rE"></b></div>
+          <div><small>合力方向（由 +x 逆時針）</small><b id="rDir"></b></div>
+          <div class="wide"><small>選取電荷與最近的電荷</small><b id="rPair" style="font-size:13.5px"></b></div>
+        </div>
+        <div class="note" id="seeA"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>② 合力為零的位置 <small>範例 3-4：+4q 與 +9q 相距 d，+Q 放在哪裡不受力？</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">三電荷在同一直線上</span><span class="n">拖曳 +Q（黃色）</span></div>
+      <div class="box"><canvas id="cvB" aria-label="兩固定電荷與一個可沿直線拖曳的電荷"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t">合力–位置圖</span><span class="n">向右為正，單位 kqQ/d²，縱軸取對數</span></div>
+      <div class="box"><canvas id="plB" aria-label="合力與位置的關係圖"></canvas></div>
+      <div class="legend"><span><i style="background:var(--pos)"></i>左電荷給的力</span><span><i style="background:var(--cyan)"></i>右電荷給的力</span><span><i style="background:var(--acc)"></i>合力</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">調整電量</span><span class="n">兩端電荷固定，相距 d</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg" id="presetsB"></div>
+        <div class="ctl"><div class="r"><label for="sA">左電荷 q<sub>A</sub></label><span id="oA"></span></div><input type="range" id="sA" min="-9" max="9" step="1"></div>
+        <div class="ctl"><div class="r"><label for="sB">右電荷 q<sub>B</sub></label><span id="oB"></span></div><input type="range" id="sB" min="-9" max="9" step="1"></div>
+        <div class="ctl"><div class="r"><label for="sX">+Q 到左電荷的距離 x</label><span id="oX"></span></div><input type="range" id="sX" min="-0.6" max="1.6" step="0.001"></div>
+        <div class="seg" style="margin-top:10px"><button id="toZero">移到合力為零的位置</button><button id="flipQ">Q 換成負電荷</button></div>
+        <div class="read">
+          <div><small>左電荷給 Q 的力</small><b id="rFA"></b></div>
+          <div><small>右電荷給 Q 的力</small><b id="rFB"></b></div>
+          <div class="wide"><small>合力（向右為正）</small><b id="rFN"></b></div>
+          <div class="wide"><small>合力為零的位置</small><b id="rZ"></b></div>
+        </div>
+        <div class="note" id="seeB"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>③ 和萬有引力比一比 <small>同樣是「平方反比」，大小差很多</small></h2>
+  <div class="two">
+    <section class="card"><div class="pad">
+      <table class="cmp">
+        <tr><th></th><th>萬有引力</th><th>靜電力</th></tr>
+        <tr><td>公式</td><td>F = Gm₁m₂/r²</td><td>F = kq₁q₂/r²</td></tr>
+        <tr><td>常數</td><td>G = 6.67 × 10⁻¹¹ N·m²/kg²</td><td>k = 8.99 × 10⁹ N·m²/C²</td></tr>
+        <tr><td>來源</td><td>質量（只有正的）</td><td>電荷（有正有負）</td></tr>
+        <tr><td>方向</td><td>只有吸引</td><td>同性相斥、異性相吸</td></tr>
+        <tr><td>距離加倍</td><td>變 1/4</td><td>變 1/4</td></tr>
+      </table>
+      <div class="ctl"><div class="r"><label for="sR">氫原子中電子與質子的距離 r</label><span id="oR"></span></div><input type="range" id="sR" min="0.5" max="4" step="0.01" value="1"></div>
+      <div class="read">
+        <div><small>靜電力 F<sub>e</sub></small><b id="rFe"></b></div>
+        <div><small>萬有引力 F<sub>g</sub></small><b id="rFg"></b></div>
+        <div class="wide"><small>F<sub>e</sub> / F<sub>g</sub>（和距離無關）</small><b id="rRatio"></b></div>
+      </div>
+      <div class="note">兩者都和 1/r² 成正比，所以比值不隨距離改變。原子裡電子被原子核抓住靠的是<b>靜電力</b>，萬有引力小到可以忽略；但天體大多接近電中性，正負電荷的作用互相抵消，所以主宰天體運動的是萬有引力。</div>
+    </div></section>
+    <section class="card"><div class="pad">
+      <div class="head" style="padding:0 0 4px"><span class="t">想一想</span></div>
+      <div class="qq"><p>一個 −2q 的電荷，要畫幾條電力線？方向朝哪裡？（以 +q 畫 8 條為準）</p><div class="seg"><button id="q1">在 ① 擺出來</button><button data-a="qa1">看說明</button></div><div class="ans" id="qa1" hidden>電量加倍、線數加倍，畫 <b>16 條</b>；負電荷的電力線<b>從外面指向電荷</b>（終止於負電荷）。</div></div>
+      <div class="qq"><p>等量異性電荷（電偶極）中間，電力線最密的地方在哪？測試電荷放在兩電荷正中間，合力朝哪？</p><div class="seg"><button id="q2">在 ① 擺出來</button><button data-a="qa2">看說明</button></div><div class="ans" id="qa2" hidden>兩電荷之間的連線附近最密。+Q 被正電荷推、被負電荷拉，兩個力<b>同方向</b>，合力由正電荷指向負電荷。</div></div>
+      <div class="qq"><p>兩個等量同性電荷的正中間，電場是多少？那裡有電力線通過嗎？</p><div class="seg"><button id="q3">在 ① 擺出來</button><button data-a="qa3">看說明</button></div><div class="ans" id="qa3" hidden>兩個力大小相等、方向相反，<b>電場為零</b>，所以正中間附近沒有電力線，電力線在兩電荷之間被「推開」。</div></div>
+      <div class="qq"><p>（課本想一想）相斥的甲、乙兩保麗龍球一定帶同性電荷嗎？相吸的丙、丁一定帶異性電荷嗎？</p><div class="seg"><button data-a="qa4">看說明</button></div><div class="ans" id="qa4" hidden>相斥<b>一定</b>同性。相吸<b>不一定</b>異性：帶電體也會吸引不帶電的物體（例如趣味實作「彎曲的水流」，帶電氣球吸引水流），因為帶電體使中性物體內的電荷重新分布，靠近的一側帶異性電。</div></div>
+    </div></section>
+  </div>
+
+  <footer><b>說明：</b>① 的電力線由每個正電荷均勻射出 8|q| 條（以 1 μC 為 q），沿電場方向逐步描出；負電荷剩下沒被接上的線，從負電荷往外反向補畫。電力線只是表示電場的工具，線與線之間的空白處電場並不是零。② 的力以 kqQ/d² 為單位，q 是電量刻度。參考：基礎物理 第 3 章 3-3 基本交互作用（p.74–75 圖 3-14、範例 3-4）。</footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const K=8.99e9;
+const sup=n=>String(n).replace(/-/g,"⁻").replace(/\d/g,d=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[d]);
+function sci(v,p=3){if(v===0)return"0";const s=v<0?"−":"";v=Math.abs(v);const e=Math.floor(Math.log10(v));const m=v/10**e;
+  if(e>=-2&&e<=3) return s+v.toPrecision(p).replace(/\.?0+$/,m=>m.includes(".")?"":m);
+  return s+m.toFixed(p-1)+" × 10"+sup(e);}
+const fix=(v,d)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+const qs=q=>(q>0?"+":q<0?"−":"")+Math.abs(q)+" μC";
+
+function setup(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
+  const w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+  const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return {x,W:r.width,H:r.height};}
+
+/* ================= ① 電力線 ================= */
+const cvA=$("#cvA");
+let charges=[], sel=0, test={x:.5,y:.15}, dirty=true;
+const opt={lines:true,arrow:true,test:true,parts:true};
+const PRE=[
+  ["+q",[[0,0,1]],{x:.25,y:-.25}],
+  ["−q",[[0,0,-1]],{x:.25,y:-.25}],
+  ["−2q",[[0,0,-2]],{x:.25,y:-.25}],
+  ["+q 與 +q",[[-.17,0,1],[.17,0,1]],{x:0,y:0}],
+  ["+q 與 −q",[[-.17,0,1],[.17,0,-1]],{x:0,y:0}],
+  ["+2q 與 −q",[[-.15,0,2],[.15,0,-1]],{x:0,y:-.2}],
+  ["四極",[[-.14,-.14,1],[.14,.14,1],[-.14,.14,-1],[.14,-.14,-1]],{x:0,y:.3}]
+];
+let geo={W:1,H:1,s:1};
+const toPx=(x,y)=>[geo.W/2+x*geo.s,geo.H/2-y*geo.s];
+const toW=(px,py)=>[(px-geo.W/2)/geo.s,(geo.H/2-py)/geo.s];
+function applyPre(i){const p=PRE[i];charges=p[1].map(([x,y,q])=>({x,y,q}));sel=0;test={...p[2]};dirty=true;
+  [...$("#presets").children].forEach((b,j)=>b.classList.toggle("on",j===i));syncQ();}
+PRE.forEach((p,i)=>{const b=document.createElement("button");b.textContent=p[0];b.onclick=()=>applyPre(i);$("#presets").appendChild(b);});
+function clearPre(){[...$("#presets").children].forEach(b=>b.classList.remove("on"));}
+function syncQ(){const c=charges[sel];$("#sQ").disabled=!c;$("#del").disabled=!c;
+  if(c){$("#sQ").value=c.q;$("#oQ").textContent=qs(c.q);$("#lQ").textContent=`選取的電荷（第 ${sel+1} 個）`;}else{$("#oQ").textContent="—";$("#lQ").textContent="選取的電荷";}}
+$("#sQ").oninput=()=>{const c=charges[sel];if(!c)return;c.q=+$("#sQ").value;clearPre();dirty=true;syncQ();};
+function addCharge(q){if(charges.length>=6)return;const hw=geo.W/geo.s/2-.06,hh=geo.H/geo.s/2-.06;
+  charges.push({x:(Math.random()*2-1)*hw*.6,y:(Math.random()*2-1)*hh*.6,q});sel=charges.length-1;clearPre();dirty=true;syncQ();}
+$("#addP").onclick=()=>addCharge(1);$("#addN").onclick=()=>addCharge(-1);
+$("#del").onclick=()=>{if(!charges[sel])return;charges.splice(sel,1);sel=Math.max(0,sel-1);clearPre();dirty=true;syncQ();};
+[["cLines","lines"],["cArrow","arrow"],["cTest","test"],["cParts","parts"]].forEach(([id,k])=>$("#"+id).onchange=e=>{opt[k]=e.target.checked;dirty=true;});
+
+/* 場：以 μC 與 m 計，回傳 E（N/C） */
+function field(x,y){let ex=0,ey=0;for(const c of charges){if(!c.q)continue;const dx=x-c.x,dy=y-c.y,r2=dx*dx+dy*dy;if(r2<1e-10)continue;const r=Math.sqrt(r2),f=K*c.q*1e-6/(r2*r);ex+=f*dx;ey+=f*dy;}return [ex,ey];}
+const RC=.022; // 電荷半徑（m）
+function trace(x,y,dir){ // dir=+1 順電場, −1 逆電場
+  const pts=[[x,y]],h=.004,lim=Math.max(geo.W,geo.H)/geo.s*1.2;let end=null;
+  for(let i=0;i<1400;i++){
+    let [ex,ey]=field(x,y);let m=Math.hypot(ex,ey);if(m===0)break;
+    const mx=x+dir*h/2*ex/m,my=y+dir*h/2*ey/m;[ex,ey]=field(mx,my);m=Math.hypot(ex,ey);if(m===0)break;
+    x+=dir*h*ex/m;y+=dir*h*ey/m;pts.push([x,y]);
+    if(Math.abs(x)>lim||Math.abs(y)>lim)break;
+    let hit=-1;for(let j=0;j<charges.length;j++){const c=charges[j];if(c.q&&Math.hypot(x-c.x,y-c.y)<RC*.9){hit=j;break;}}
+    if(hit>=0&&i>3){end=hit;break;}
+  }
+  return {pts,end};
+}
+let LINES=[];
+function compute(){
+  LINES=[];const per=8,arr=charges.map(()=>[]);
+  charges.forEach((c,ci)=>{if(c.q<=0)return;const n=per*c.q;
+    for(let k=0;k<n;k++){const a=(k+.5)/n*2*Math.PI;const t=trace(c.x+RC*Math.cos(a),c.y+RC*Math.sin(a),1);
+      LINES.push(t.pts);if(t.end!==null&&charges[t.end].q<0){const e=charges[t.end],p=t.pts[t.pts.length-1];arr[t.end].push(Math.atan2(p[1]-e.y,p[0]-e.x));}}});
+  charges.forEach((c,ci)=>{if(c.q>=0)return;let need=per*(-c.q)-arr[ci].length;if(need<=0)return;
+    const angs=arr[ci].slice().sort((a,b)=>a-b);const add=[];
+    if(!angs.length){for(let k=0;k<need;k++)add.push((k+.5)/need*2*Math.PI);}
+    else{const all=angs.slice();while(need-->0){all.sort((a,b)=>a-b);let best=0,bg=-1;
+      for(let i=0;i<all.length;i++){const a=all[i],b=i+1<all.length?all[i+1]:all[0]+2*Math.PI;if(b-a>bg){bg=b-a;best=i;}}
+      const na=all[best]+bg/2;all.push(na>Math.PI?na-2*Math.PI:na);add.push(na);}}
+    add.forEach(a=>{const t=trace(c.x+RC*Math.cos(a),c.y+RC*Math.sin(a),-1);LINES.push(t.pts.slice().reverse());});});
+  dirty=false;
+}
+function arrowHead(x,px,py,ang,sz,col){x.save();x.translate(px,py);x.rotate(ang);x.fillStyle=col;x.beginPath();x.moveTo(sz,0);x.lineTo(-sz*.7,sz*.6);x.lineTo(-sz*.7,-sz*.6);x.closePath();x.fill();x.restore();}
+function vec(x,x0,y0,dx,dy,col,w){const L=Math.hypot(dx,dy);if(L<2)return;x.strokeStyle=col;x.lineWidth=w;x.beginPath();x.moveTo(x0,y0);x.lineTo(x0+dx,y0+dy);x.stroke();arrowHead(x,x0+dx,y0+dy,Math.atan2(dy,dx),6+w,col);}
+function testForces(){const parts=charges.filter(c=>c.q).map(c=>{const dx=test.x-c.x,dy=test.y-c.y,r=Math.hypot(dx,dy);const f=K*c.q*1e-6*1e-6/(r*r);return {c,fx:f*dx/r,fy:f*dy/r,r};});
+  const fx=parts.reduce((a,p)=>a+p.fx,0),fy=parts.reduce((a,p)=>a+p.fy,0);return {parts,fx,fy};}
+function drawA(){
+  const {x,W,H}=setup(cvA);
+  const s=W/1.0;if(geo.W!==W||geo.H!==H||geo.s!==s){geo={W,H,s};dirty=true;}
+  if(dirty)compute();
+  x.clearRect(0,0,W,H);
+  // 格線 10 cm
+  x.strokeStyle="#111a2b";x.lineWidth=1;
+  for(let gx=-1;gx<=1.0001;gx+=.1){const [px]=toPx(gx,0);x.beginPath();x.moveTo(px,0);x.lineTo(px,H);x.stroke();}
+  for(let gy=-1;gy<=1.0001;gy+=.1){const [,py]=toPx(0,gy);x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke();}
+  if(opt.lines){x.strokeStyle="rgba(207,216,232,.78)";x.lineWidth=1.3;
+    for(const L of LINES){x.beginPath();L.forEach((p,i)=>{const [px,py]=toPx(p[0],p[1]);i?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();
+      if(opt.arrow&&L.length>8){ // 每段約 0.14 m 一個箭頭
+        let acc=0;for(let i=1;i<L.length;i++){acc+=Math.hypot(L[i][0]-L[i-1][0],L[i][1]-L[i-1][1]);
+          if(acc>=.14&&i<L.length-3){acc=0;const [a,b]=toPx(L[i][0],L[i][1]),[c,d]=toPx(L[i+1][0],L[i+1][1]);if(a>-5&&a<W+5&&b>-5&&b<H+5)arrowHead(x,a,b,Math.atan2(d-b,c-a),4.5,"rgba(207,216,232,.9)");}}}}}
+  // 電荷
+  charges.forEach((c,i)=>{const [px,py]=toPx(c.x,c.y),r=Math.max(11,RC*s*(1+.12*Math.abs(c.q)));
+    const col=c.q>0?"#ff5d6c":c.q<0?"#4f8dff":"#6b7280";
+    const g=x.createRadialGradient(px-r*.35,py-r*.35,r*.15,px,py,r);g.addColorStop(0,"#fff");g.addColorStop(.35,col);g.addColorStop(1,col);
+    x.fillStyle=g;x.beginPath();x.arc(px,py,r,0,7);x.fill();
+    if(i===sel){x.strokeStyle="#ffd166";x.lineWidth=2.5;x.beginPath();x.arc(px,py,r+4,0,7);x.stroke();}
+    x.fillStyle="#fff";x.font="700 12px 'JetBrains Mono',monospace";x.textAlign="center";x.textBaseline="middle";
+    x.fillText((c.q>0?"+":c.q<0?"−":"")+(Math.abs(c.q)===1?"":Math.abs(c.q))+(c.q?"q":"0"),px,py);});
+  // 測試電荷
+  if(opt.test){const [px,py]=toPx(test.x,test.y);const t=testForces();const Fm=Math.hypot(t.fx,t.fy);
+    const scl=f=>{const L=f>0?Math.min(110,18*Math.log10(1+f/0.02)+12):0;return L;};
+    if(opt.parts) t.parts.forEach(p=>{const m=Math.hypot(p.fx,p.fy),L=scl(m);vec(x,px,py,p.fx/m*L,-p.fy/m*L,"rgba(139,140,255,.95)",2);});
+    if(Fm>0){const L=scl(Fm);vec(x,px,py,t.fx/Fm*L,-t.fy/Fm*L,"#ffd166",3.2);}
+    x.fillStyle="#ffd166";x.beginPath();x.arc(px,py,8,0,7);x.fill();x.fillStyle="#231a02";x.font="700 11px 'JetBrains Mono',monospace";x.textAlign="center";x.textBaseline="middle";x.fillText("+Q",px,py+.5);}
+  // 比例尺
+  x.fillStyle="#5b6880";x.font="12px 'JetBrains Mono',monospace";x.textAlign="left";x.textBaseline="alphabetic";
+  const [s0]=toPx(0,0);x.strokeStyle="#5b6880";x.lineWidth=2;x.beginPath();x.moveTo(10,H-12);x.lineTo(10+.1*s,H-12);x.stroke();x.fillText("10 cm",14+.1*s,H-8);
+}
+function uiA(){
+  if(opt.test){const t=testForces(),F=Math.hypot(t.fx,t.fy);
+    $("#rF").textContent=F>0?sci(F,3)+" N":"0 N（合力為零）";$("#rE").textContent=sci(F/1e-6,3)+" N/C";
+    $("#rDir").textContent=F>0?fix(((Math.atan2(t.fy,t.fx)*180/Math.PI)+360)%360,0)+"°":"—";}
+  else{$("#rF").textContent="（已隱藏測試電荷）";$("#rE").textContent="—";$("#rDir").textContent="—";}
+  const c=charges[sel];let txt="—";
+  if(c&&charges.length>1){let best=null;charges.forEach((o,j)=>{if(j===sel)return;const r=Math.hypot(o.x-c.x,o.y-c.y);if(!best||r<best.r)best={o,r};});
+    const f=K*c.q*best.o.q*1e-12/(best.r*best.r);
+    txt=`${qs(c.q)} 與 ${qs(best.o.q)} 相距 ${fix(best.r*100,1)} cm：F = kq₁q₂/r² = ${sci(Math.abs(f),3)} N，${c.q*best.o.q>0?"互相排斥":c.q*best.o.q<0?"互相吸引":"沒有作用"}`;}
+  else if(c) txt=`${qs(c.q)}（只有一個電荷，加一個電荷看它們之間的力）`;
+  $("#rPair").textContent=txt;
+  const pos=charges.filter(c=>c.q>0).reduce((a,c)=>a+c.q,0),neg=-charges.filter(c=>c.q<0).reduce((a,c)=>a+c.q,0);
+  let msg=`正電荷共 +${pos}q，畫出 <b>${8*pos} 條</b>電力線；負電荷共 −${neg}q，需要接收 ${8*neg} 條。`;
+  if(pos&&neg&&pos!==neg) msg+=pos>neg?` 正電荷多，有 ${8*(pos-neg)} 條線跑到很遠的地方（無窮遠）。`:` 負電荷多，有 ${8*(neg-pos)} 條線從很遠的地方進來。`;
+  if(pos&&neg&&pos===neg) msg+=" 正負相等，從正電荷出發的線幾乎都終止在負電荷上。";
+  msg+=" 電力線<b>不會相交</b>；某點電場的方向就是電力線在該點的切線方向。";
+  $("#seeA").innerHTML=msg;
+}
+(function(){let drag=null;
+  const pos=e=>{const r=cvA.getBoundingClientRect();return toW(e.clientX-r.left,e.clientY-r.top);};
+  cvA.addEventListener("pointerdown",e=>{const [wx,wy]=pos(e);let best=null;
+    charges.forEach((c,i)=>{const d=Math.hypot(c.x-wx,c.y-wy)*geo.s;if(d<26&&(!best||d<best.d))best={d,i,t:"c"};});
+    if(opt.test){const d=Math.hypot(test.x-wx,test.y-wy)*geo.s;if(d<22&&(!best||d<best.d))best={d,t:"t"};}
+    if(!best)return;drag=best;if(best.t==="c"){sel=best.i;syncQ();}cvA.setPointerCapture(e.pointerId);e.preventDefault();});
+  cvA.addEventListener("pointermove",e=>{if(!drag)return;let [wx,wy]=pos(e);const hw=geo.W/geo.s/2-.02,hh=geo.H/geo.s/2-.02;
+    wx=Math.max(-hw,Math.min(hw,wx));wy=Math.max(-hh,Math.min(hh,wy));
+    if(drag.t==="c"){charges[drag.i].x=wx;charges[drag.i].y=wy;clearPre();dirty=true;}else{test.x=wx;test.y=wy;}});
+  const up=()=>{drag=null;};cvA.addEventListener("pointerup",up);cvA.addEventListener("pointercancel",up);
+})();
+
+/* ================= ② 範例 3-4 ================= */
+const cvB=$("#cvB"),plB=$("#plB");
+let qA=4,qB=9,X=.5,Qs=1;
+const PB=[["範例 3-4：+4q、+9q",4,9],["+q、+q",1,1],["+q、+4q",1,4],["+4q、−q",4,-1],["+q、−q",1,-1]];
+PB.forEach((p,i)=>{const b=document.createElement("button");b.textContent=p[0];b.onclick=()=>{qA=p[1];qB=p[2];$("#sA").value=qA;$("#sB").value=qB;markB();};$("#presetsB").appendChild(b);});
+function markB(){[...$("#presetsB").children].forEach((b,i)=>b.classList.toggle("on",PB[i][1]===qA&&PB[i][2]===qB));}
+$("#sA").oninput=()=>{qA=+$("#sA").value;markB();};$("#sB").oninput=()=>{qB=+$("#sB").value;markB();};
+$("#sX").oninput=()=>{X=+$("#sX").value;};
+$("#flipQ").onclick=()=>{Qs=-Qs;$("#flipQ").textContent=Qs>0?"Q 換成負電荷":"Q 換回正電荷";};
+// 位置 x（以 d 為單位）的力，向右為正，單位 kqQ/d²
+function FA(x){if(Math.abs(x)<1e-6)return NaN;return qA*Qs*Math.sign(x)/(x*x);}
+function FB(x){const u=x-1;if(Math.abs(u)<1e-6)return NaN;return qB*Qs*Math.sign(u)/(u*u);}
+function zeros(){ // 解 FA+FB=0
+  const out=[];if(!qA&&!qB)return out;if(!qA||!qB)return out;
+  const ra=Math.sqrt(Math.abs(qA)),rb=Math.sqrt(Math.abs(qB));
+  if(qA*qB>0){out.push(ra/(ra+rb));}
+  else if(ra!==rb){const x=ra/(ra-rb);out.push(x);}
+  return out;}
+$("#toZero").onclick=()=>{const z=zeros();if(z.length){X=Math.max(-.6,Math.min(1.6,z[0]));$("#sX").value=X;}};
+let gB={};
+function drawB(){
+  const {x,W,H}=setup(cvB);const L=W*.14,R=W*.86,sd=(R-L)/2.2,x0=L+.6*sd,cy=H*.52;gB={x0,sd,W};
+  x.clearRect(0,0,W,H);
+  x.strokeStyle="#334155";x.lineWidth=1.5;x.setLineDash([5,5]);x.beginPath();x.moveTo(8,cy);x.lineTo(W-8,cy);x.stroke();x.setLineDash([]);
+  const px=u=>x0+u*sd;
+  // d 標示
+  x.strokeStyle="#5b6880";x.fillStyle="#8492aa";x.lineWidth=1;x.beginPath();x.moveTo(px(0),cy+34);x.lineTo(px(1),cy+34);x.stroke();
+  x.font="12px 'JetBrains Mono',monospace";x.textAlign="center";x.fillText("d",px(.5),cy+48);
+  const ball=(u,q,lab)=>{const r=Math.min(22,10+Math.sqrt(Math.abs(q))*4);const col=q>0?"#ff5d6c":q<0?"#4f8dff":"#6b7280";x.fillStyle=col;x.beginPath();x.arc(px(u),cy,r,0,7);x.fill();
+    x.fillStyle="#fff";x.font="700 12px 'JetBrains Mono',monospace";x.textBaseline="middle";x.fillText(lab,px(u),cy);x.textBaseline="alphabetic";};
+  ball(0,qA,(qA>0?"+":qA<0?"−":"")+(Math.abs(qA)===1?"":Math.abs(qA))+(qA?"q":"0"));
+  ball(1,qB,(qB>0?"+":qB<0?"−":"")+(Math.abs(qB)===1?"":Math.abs(qB))+(qB?"q":"0"));
+  // 平衡點
+  zeros().forEach(z=>{if(z<-.6||z>1.6)return;x.strokeStyle="#7dffc4";x.lineWidth=1.5;x.setLineDash([3,3]);x.beginPath();x.moveTo(px(z),cy-40);x.lineTo(px(z),cy+26);x.stroke();x.setLineDash([]);
+    x.fillStyle="#7dffc4";x.font="11px 'Noto Sans TC'";x.fillText("F = 0",px(z),cy-44);});
+  // Q 與力
+  const fa=FA(X),fb=FB(X),fn=fa+fb;const sc=f=>Math.sign(f)*Math.min(W*.28,22*Math.log10(1+Math.abs(f)/.5));
+  const qx=px(X);
+  if(isFinite(fa))vec(x,qx,cy-14,sc(fa),0,"#ff5d6c",2.5);
+  if(isFinite(fb))vec(x,qx,cy-24,sc(fb),0,"#43d6ff",2.5);
+  if(isFinite(fn))vec(x,qx,cy+14,sc(fn),0,"#ffd166",3.5);
+  x.fillStyle="#ffd166";x.beginPath();x.arc(qx,cy,9,0,7);x.fill();x.fillStyle="#231a02";x.font="700 10px 'JetBrains Mono',monospace";x.textBaseline="middle";x.fillText(Qs>0?"+Q":"−Q",qx,cy+.5);x.textBaseline="alphabetic";
+}
+function plotB(){
+  const {x,W,H}=setup(plB);x.clearRect(0,0,W,H);const {x0,sd}=gB;const W0=gB.W||W;
+  const px=u=>x0*(W/W0)+u*sd*(W/W0),LM=Math.log10(1+200),py=f=>H/2-Math.sign(f)*Math.min(1,Math.log10(1+Math.abs(f))/LM)*(H/2-12);
+  x.strokeStyle="#1c2538";x.lineWidth=1;x.beginPath();x.moveTo(0,H/2);x.lineTo(W,H/2);x.stroke();
+  [0,1].forEach(u=>{x.strokeStyle="#334155";x.setLineDash([3,4]);x.beginPath();x.moveTo(px(u),6);x.lineTo(px(u),H-6);x.stroke();x.setLineDash([]);});
+  const curve=(fn,col,w)=>{x.strokeStyle=col;x.lineWidth=w;x.beginPath();let on=false;
+    for(let i=0;i<=W;i++){const u=(i-px(0))/(px(1)-px(0));const f=fn(u);if(!isFinite(f)||Math.abs(u)<.02||Math.abs(u-1)<.02){on=false;continue;}
+      const y=py(f);on?x.lineTo(i,y):x.moveTo(i,y);on=true;}x.stroke();};
+  curve(FA,"rgba(255,93,108,.6)",1.3);curve(FB,"rgba(67,214,255,.6)",1.3);curve(u=>FA(u)+FB(u),"#ffd166",2.2);
+  const f=FA(X)+FB(X);if(isFinite(f)){x.fillStyle="#fff";x.beginPath();x.arc(px(X),py(f),4,0,7);x.fill();}
+  x.fillStyle="#5b6880";x.font="11px 'JetBrains Mono',monospace";x.textAlign="left";x.fillText("+200（對數刻度）",4,14);x.fillText("−200",4,H-4);[1,10].forEach(v=>{[v,-v].forEach(f=>{x.strokeStyle="#141c2c";x.beginPath();x.moveTo(0,py(f));x.lineTo(W,py(f));x.stroke();});x.fillText("±"+v,4,py(v)-3);});x.textAlign="center";x.fillText("A",px(0),H-4);x.fillText("B",px(1),H-4);
+}
+const fmtF=f=>isFinite(f)?(f>0?"→ ":f<0?"← ":"")+fix(Math.abs(f),3)+" kqQ/d²":"—";
+function uiB(){
+  $("#oA").textContent=(qA>0?"+":qA<0?"−":"")+Math.abs(qA)+"q";$("#oB").textContent=(qB>0?"+":qB<0?"−":"")+Math.abs(qB)+"q";
+  $("#oX").textContent=fix(X,3)+" d";
+  const fa=FA(X),fb=FB(X),fn=fa+fb;
+  $("#rFA").textContent=fmtF(fa);$("#rFB").textContent=fmtF(fb);
+  $("#rFN").textContent=Math.abs(fn)<.02?"≈ 0（合力為零）":fmtF(fn);
+  const z=zeros();
+  $("#rZ").textContent=z.length?z.map(v=>"x = "+fix(v,3)+" d"+(Math.abs(v-.4)<1e-9?"（= 2d/5）":"")).join("、"):"不存在（沒有地方能讓兩力互相抵消）";
+  let m;
+  if(qA*qB>0) m=`兩端電荷<b>同號</b>，只有在兩者<b>之間</b>，兩個力才會方向相反。大小相等時 |q<sub>A</sub>|/x² = |q<sub>B</sub>|/y²，所以 x : y = √|q<sub>A</sub>| : √|q<sub>B</sub>| = ${fix(Math.sqrt(Math.abs(qA)),2)} : ${fix(Math.sqrt(Math.abs(qB)),2)}，靠近電量<b>小</b>的那一個。`;
+  else if(qA*qB<0&&Math.abs(qA)!==Math.abs(qB)) m=`兩端電荷<b>異號</b>，兩者之間的兩個力同方向（不能抵消），零點在兩者<b>外側</b>、靠近電量較小的那一邊。`;
+  else if(qA*qB<0) m=`等量異號：之間兩力同向，外側近的那個永遠比較大，<b>找不到</b>合力為零的位置。`;
+  else m="把兩端都設成有電荷，看看合力為零的位置。";
+  m+=` 改變 Q 的正負或大小，零點<b>位置不變</b>（Q 會被約掉）。`;
+  if(qA===4&&qB===9) m+=` 範例 3-4：x : y = 2 : 3，x + y = d，所以 x = <b>2d/5</b>。`;
+  $("#seeB").innerHTML=m;
+}
+(function(){let drag=false;const pos=e=>{const r=cvB.getBoundingClientRect();return (e.clientX-r.left-gB.x0)/gB.sd;};
+  cvB.addEventListener("pointerdown",e=>{const u=pos(e);if(Math.abs(u-X)*gB.sd<26){drag=true;cvB.setPointerCapture(e.pointerId);e.preventDefault();}});
+  cvB.addEventListener("pointermove",e=>{if(!drag)return;X=Math.max(-.6,Math.min(1.6,pos(e)));$("#sX").value=X;});
+  const up=()=>{drag=false;};cvB.addEventListener("pointerup",up);cvB.addEventListener("pointercancel",up);
+})();
+
+/* ================= ③ ================= */
+const e=1.602e-19,me=9.11e-31,mp=1.673e-27,G=6.67e-11,a0=5.29e-11;
+function uiC(){const r=+$("#sR").value*a0;$("#oR").textContent=sci(r,3)+" m";
+  const Fe=K*e*e/(r*r),Fg=G*me*mp/(r*r);$("#rFe").textContent=sci(Fe,3)+" N";$("#rFg").textContent=sci(Fg,3)+" N";$("#rRatio").textContent=sci(Fe/Fg,3)+" 倍";}
+$("#sR").oninput=uiC;uiC();
+
+/* 想一想 */
+const toA=()=>document.querySelector("h2").scrollIntoView({behavior:"smooth"});
+$("#q1").onclick=()=>{applyPre(2);toA();};$("#q2").onclick=()=>{applyPre(4);toA();};$("#q3").onclick=()=>{applyPre(3);toA();};
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("#"+b.dataset.a).hidden=false;});
+
+applyPre(4);$("#sA").value=qA;$("#sB").value=qB;$("#sX").value=X;markB();
+function loop(){drawA();uiA();drawB();plotB();uiB();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+window.__cf=()=>({charges,test,lines:LINES.length,FA:FA(X),FB:FB(X),X,zeros:zeros(),tf:testForces()});
+})();
+</script>
+</body>
+</html>
