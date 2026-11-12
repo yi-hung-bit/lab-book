@@ -2,7 +2,7 @@
 """把 claude.ai「物理研究院」的已發佈檔案同步到 physics-building/（GitHub Pages 線上版）。
 
 用法：python3 tools/sync_from_artifact.py <下載的物理研究院資料夾>
-  資料夾內要有 index.html 與 sims/*.html（用 Artifact read 的 paths + out_dir 下載）。
+  資料夾內要有 index.html 與 sims/*.html，以及 q/*.jpg（物奧題庫截圖，若有）。
 
 做的事：
 1. index.html：用物理研究院的頁面，加上 PWA（manifest、圖示、service worker），three.js 改用 vendor/ 本地檔。
@@ -75,6 +75,16 @@ def main(src):
         (updated if os.path.exists(dst) else added).append(f)
         open(dst, "w", encoding="utf-8").write(localize(open(a, encoding="utf-8").read(), "../"))
         state[f] = h
+    # q/：物奧題庫截圖（題目與詳解），整個資料夾照抄
+    qsrc = os.path.join(src, "q")
+    if os.path.isdir(qsrc):
+        qdst = os.path.join(PB, "q"); os.makedirs(qdst, exist_ok=True)
+        nq = 0
+        for f in sorted(os.listdir(qsrc)):
+            a, b = os.path.join(qsrc, f), os.path.join(qdst, f)
+            if not os.path.exists(b) or sha(a) != sha(b):
+                shutil.copyfile(a, b); nq += 1
+        print("q/ 題庫截圖更新:", nq)
     json.dump(state, open(STATE, "w", encoding="utf-8"), ensure_ascii=False, indent=1, sort_keys=True)
     # sw.js
     swp = os.path.join(PB, "sw.js"); sw = open(swp, encoding="utf-8").read()
