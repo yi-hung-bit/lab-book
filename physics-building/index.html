@@ -21,6 +21,7 @@
   --g-kin:#2f6fa8; --g-dyn:#2b5cb8; --g-energy:#3b4fb0; --g-rot:#5a4fb5; --g-grav:#6b4aa8;
   --g-wave:#167a82; --g-fluid:#2f7d62; --g-heat:#c2652a; --g-estat:#b03a4a; --g-em:#9a3a7a;
   --g-opt:#8a6a12; --g-mod:#6a5f9e; --g-math:#4f5a63;
+  --gym:#b5532e; --gym-wall:#e4ddd0; --gym-roof:#7c8d96;
   --shadow:0 12px 30px rgba(28,34,40,.14);
   --f-sign:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -34,6 +35,7 @@
   --g-kin:#7fb4e6; --g-dyn:#86a6f2; --g-energy:#9aa2f0; --g-rot:#b0a2f0; --g-grav:#c3a2ea;
   --g-wave:#64cbd2; --g-fluid:#6fcaa6; --g-heat:#f0a06b; --g-estat:#ef8d9a; --g-em:#e693c9;
   --g-opt:#e3c056; --g-mod:#b3aeea; --g-math:#a9b4bc;
+  --gym:#f08a5d; --gym-wall:#4d4842; --gym-roof:#3a464d;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}}
 :root[data-theme="dark"]{
   --sky:#141b22; --sky-top:#05080d; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
@@ -44,6 +46,7 @@
   --g-kin:#7fb4e6; --g-dyn:#86a6f2; --g-energy:#9aa2f0; --g-rot:#b0a2f0; --g-grav:#c3a2ea;
   --g-wave:#64cbd2; --g-fluid:#6fcaa6; --g-heat:#f0a06b; --g-estat:#ef8d9a; --g-em:#e693c9;
   --g-opt:#e3c056; --g-mod:#b3aeea; --g-math:#a9b4bc;
+  --gym:#f08a5d; --gym-wall:#4d4842; --gym-roof:#3a464d;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}
 
 [hidden]{display:none!important}
@@ -149,6 +152,16 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
 .backrow:hover{color:var(--ink)}
 .qview .modes button:disabled{opacity:.35;cursor:default}
 .qbody{flex:1;overflow:auto;background:var(--sky);padding-block:16px calc(24px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;align-items:center;gap:0}
+.arcade{padding:18px 22px 6px;display:flex;flex-direction:column;gap:12px}
+.game{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"no txt tag" "no txt play";gap:4px 14px;align-items:center;padding:14px 16px;border-radius:12px;border:2px solid var(--fc);background:color-mix(in srgb,var(--paper) 90%,var(--fc));text-decoration:none;color:var(--ink);transition:transform .15s}
+.game:hover,.game:focus-visible{transform:translateY(-2px)}
+.game .gno{grid-area:no;font-family:var(--f-mono);font-weight:600;font-size:26px;color:var(--fc)}
+.game .gtxt{grid-area:txt;min-width:0}
+.game .gtxt b{display:block;font-size:16px}
+.game .gtxt small{display:block;color:var(--muted);font-size:13px;line-height:1.5}
+.game .gtag{grid-area:tag;justify-self:end;font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--fc);color:var(--fc)}
+.game .gplay{grid-area:play;justify-self:end;font-weight:700;font-size:13.5px;background:var(--fc);color:var(--paper);border-radius:999px;padding:4px 12px;white-space:nowrap}
+@media (max-width:480px){.game{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"no txt" "tag play"}.game .gtag{justify-self:start}}
 .qbody img{display:block;width:100%;max-width:900px;height:auto;background:#fff}
 .qbody img+img{border-top:1px dashed #d5dade}
 .qmeta{width:100%;max-width:900px;font-size:13px;color:var(--muted);margin-bottom:8px}
@@ -163,7 +176,7 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
   <div class="top">
     <div>
       <h1>物理研究院</h1>
-      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連。</p>
+      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連，後方有休閒中心。</p>
     </div>
     <div class="count" id="count"></div>
   </div>
@@ -286,6 +299,10 @@ const QB={"2016-01":["運動學","01-1_力學_運動",1],"2016-02":["動量、�
 const QROOM={"1-1":["2016-01","2019-03","2025-05","2026-18"],"3-4":["2016-02","2017-01","2019-07","2022-11","2023-10","2024-07"],"1-3":["2016-03","2016-04","2018-04","2024-01"],"7-4":["2016-05"],"7-1":["2016-06","2017-12","2018-14","2018-17","2019-11","2020-04","2020-05","2021-05","2022-05","2025-16","2026-15","2026-23"],"8-4":["2016-07","2017-15","2017-17","2018-05","2019-14","2020-07","2020-13","2020-17","2022-02","2022-18","2023-12","2025-14","2025-21","2026-03"],"8-1":["2016-08","2018-02","2023-16"],"8-2":["2016-09","2016-10","2019-09","2021-17","2022-16","2024-11","2024-16","2025-06","2026-02"],"3-5":["2016-11","2019-13","2020-11","2025-09","2026-07"],"3-1":["2016-12","2021-06","2025-12"],"5-2":["2016-13","2018-11","2020-09","2023-17"],"6-1":["2016-14","2016-15","2018-13","2020-15","2021-03","2021-09","2021-18","2022-10","2023-11","2024-02","2024-09","2024-18","2024-20","2025-19"],"4-5":["2016-16","2021-07","2023-14","2023-21","2024-17","2025-08","2025-20","2026-19"],"1-2":["2017-02","2019-01","2020-03"],"2-5":["2017-03","2019-05","2021-04"],"4-4":["2017-04","2017-08","2018-08","2021-11","2022-08","2022-09","2023-15","2023-18"],"3-3":["2017-05","2018-12","2022-07","2022-12","2023-08"],"2-1":["2017-06","2020-01","2020-02","2024-12","2026-01"],"5-3":["2017-07","2018-06","2020-08","2020-12","2021-13","2023-19","2025-07","2025-11","2026-16"],"4-3":["2017-09","2019-08","2021-10","2021-12","2022-06","2026-12"],"2-4":["2017-10"],"7-3":["2017-11","2018-16","2019-02","2019-12","2022-03","2022-13","2023-20","2025-15","2026-14"],"6-5":["2017-13","2023-06"],"8-3":["2017-14","2017-16","2018-09","2019-04","2021-15","2021-16","2022-15","2023-13","2024-08","2024-13","2025-01","2025-03","2025-04","2025-10","2026-17"],"1-5":["2018-01"],"4-1":["2018-03","2022-21","2023-07","2024-05","2025-13","2025-18","2026-09"],"11-1":["2018-07","2021-01","2021-02","2022-17"],"5-4":["2018-10","2019-10","2022-19","2024-19","2026-20","2026-22"],"7-2":["2018-15","2020-14","2026-10","2026-11"],"8-5":["2019-06","2023-09","2024-15","2026-08"],"6-3":["2019-15","2022-20","2024-03","2025-02","2025-22"],"4-2":["2020-06","2020-10","2024-06","2025-17"],"6-4":["2020-16","2022-14","2023-03"],"6-2":["2021-08"],"5-1":["2021-14","2024-10","2026-21"],"R-4":["2022-01"],"4-6":["2022-04","2026-13"],"2-2":["2023-01","2024-04","2026-05"],"10-1":["2023-02"],"10-5":["2023-04"],"2-3":["2023-05","2024-14","2026-04"],"9-1":["2023-22"],"1-4":["2026-06"]};
 THEORY.forEach(f=>{f.rooms=f.rooms.map((t,i)=>({t,no:(f.id==="R"?"R":f.id)+"-"+(i+1),qs:QROOM[(f.id)+"-"+(i+1)]||[],f}));});
 const QOWN={}; THEORY.forEach(f=>f.rooms.forEach(r=>r.qs.forEach(q=>QOWN[q]=r)));
+/* 休閒中心：小遊戲（連到外部網址，在新分頁開啟）。新增遊戲就在 GAMES 加一筆 {t:名稱, d:說明, url:網址, tag:標籤} */
+const GAMES=[
+  {t:"物理快打：科學家格鬥賽",d:"選牛頓、愛因斯坦等科學家和電腦對戰，用萬有引力蘋果之類的物理必殺技一決勝負。",url:"https://yi-hung-bit.github.io/physics-fighter/",tag:"格鬥"}
+];
 const BRIDGE_LEVEL="3";
 
 const $=s=>document.querySelector(s);
@@ -309,6 +326,7 @@ function current(){
   m=/^t(\w+)$/.exec(h); if(m&&tFloor(m[1])) return {b:"t",id:m[1]};
   m=/^s(\w+)$/.exec(h); if(m&&sFloor(m[1])) return {b:"s",id:m[1]};
   if(h==="bridge") return {b:"bridge"};
+  if(h==="gym") return {b:"gym"};
   return {b:null};
 }
 const go=h=>{location.hash=h;};
@@ -350,6 +368,11 @@ function route(){
       ${elevator("s",f.id)}
       <div class="corridor sim">${f.rooms.map(r=>`<button type="button" class="room" data-h="r${r.no}"><span class="plate"><span class="no">${r.no}</span><b>${esc(r.t)}</b></span><span class="door"><span class="desc">${esc(r.d)}</span><span class="tags">${r.sims.length>1?`<span class="soon">${r.sims.length} 種模式</span>`:""}${r.net?`<span class="soon net">需要網路</span>`:""}</span></span></button>`).join("")}</div>
       ${f.id===BRIDGE_LEVEL?`<p class="note">本層有空橋通往競賽大樓 3F（功、能量與動量）。</p>`:""}`;
+  }else if(c.b==="gym"){
+    p.style.setProperty("--fc","var(--gym)");
+    p.innerHTML=`<div class="panel-head"><div class="badge">玩</div><div><div class="bld">院區後方</div><h2>休閒中心</h2><p>下課來玩物理小遊戲・${GAMES.length} 款</p></div></div>
+      <div class="arcade">${GAMES.map((g,i)=>`<a class="game" href="${esc(g.url)}" target="_blank" rel="noopener"><span class="gno">${String(i+1).padStart(2,"0")}</span><span class="gtxt"><b>${esc(g.t)}</b><small>${esc(g.d)}</small></span><span class="gtag">${esc(g.tag||"")}</span><span class="gplay">開始玩 ↗</span></a>`).join("")}</div>
+      <p class="note">遊戲會在新分頁開啟，玩完關掉分頁就回到研究院。</p>`;
   }else if(c.b==="bridge"){
     p.style.setProperty("--fc","var(--plate)");
     p.innerHTML=`<div class="panel-head"><div class="badge">3F</div><div><div class="bld">連通空橋</div><h2>競賽 ⇄ 模擬</h2><p>同一個概念，先懂原理，再動手模擬</p></div></div>
@@ -359,6 +382,7 @@ function route(){
     p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
       <div class="dir">
         <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}</section>
+        <section><h3>休閒中心 <small>${GAMES.length} 款遊戲</small></h3><button type="button" class="dir-row" data-h="gym" style="--fc:var(--gym)"><span class="n">玩</span><span><b>休閒中心</b><small>${esc(GAMES.map(g=>g.t).join("・"))}</small></span></button></section>
         <section><h3>連通空橋 <small>3F</small></h3><button type="button" class="dir-row" data-h="bridge" style="--fc:var(--plate)"><span class="n">3F</span><span><b>競賽 ⇄ 模擬</b><small>競賽 3F 功、能量與動量 ⇄ 模擬 3F 選修物理一</small></span></button></section>
         <section><h3>模擬大樓 <small>${SIM.length} 層・${ROOMS.length} 間</small></h3>${SIM_UP.slice().reverse().map(f=>dirRow("s",f)).join("")}</section>
       </div>`;
@@ -572,7 +596,7 @@ function init3D(){
   /* 可走的地面：大樓前廣場、大樓後方、兩棟之間的通道 */
   const ZONES={
     front:{x0:-16,x1:16,z0:D/2+1.6,z1:D/2+9},
-    back:{x0:-15,x1:15,z0:-D/2-7,z1:-D/2-1.6},
+    back:{x0:-15,x1:10,z0:-D/2-7,z1:-D/2-1.6},
     gap:{x0:bx0+.8,x1:bx1-.8,z0:-D/2,z1:D/2+1}
   };
   const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -618,7 +642,32 @@ function init3D(){
   }
 
   /* trees */
-  [[-14,3.5],[-15,-2],[14.2,3.4],[15,-2],[-9,8.5],[9,8.6],[-4,9.5],[4,9.6],[0,-7],[-3,-9],[3.5,-8.5],[-17,6],[17.5,6]].forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
+  /* 休閒中心（體育館）：在兩棟大樓後方，圓弧屋頂 */
+  const GX=17.6, GZ=-5.6, GR=-.75, GW=10, GD=5.4, GH=2.4;
+  const gymWall=new THREE.MeshStandardMaterial({roughness:.8}), gymRoof=new THREE.MeshStandardMaterial({roughness:.55,metalness:.25,side:THREE.DoubleSide}), gymAcc=new THREE.MeshStandardMaterial({roughness:.5});
+  const gym=new THREE.Group(); gym.position.set(GX,0,GZ); gym.rotation.y=GR; scene.add(gym);
+  gym.add(mesh(B(GW+5,.06,GD+3.4),M.pave,0,.03,.9,false,true));
+  const gBody=mesh(B(GW,GH,GD),gymWall,0,GH/2,0); gym.add(gBody);
+  const vault=mesh(new THREE.CylinderGeometry(GD/2+.15,GD/2+.15,GW+.3,32,1,false,0,Math.PI),gymRoof,0,GH,0); vault.rotation.z=Math.PI/2; vault.scale.set(.55,1,1);
+  gym.add(vault);
+  const gBand=mesh(B(GW+.04,.22,GD+.04),gymAcc,0,GH-.11,0,false,false); gym.add(gBand);
+  const gGlass=mesh(B(GW-2.4,GH*.62,.06),M.glass,0,GH*.36,GD/2+.03,false,false); gym.add(gGlass);
+  for(let i=0;i<=8;i++) gym.add(mesh(B(.07,GH*.64,.1),M.trim,-(GW-2.4)/2+(GW-2.4)*i/8,GH*.36,GD/2+.07,false,false));
+  gym.add(mesh(B(3.2,.12,1.2),M.slab,0,GH*.74,GD/2+.6));
+  [-1.4,1.4].forEach(px=>gym.add(mesh(new THREE.CylinderGeometry(.06,.06,GH*.74,10),M.trim,px,GH*.37,GD/2+1.1)));
+  const gymSign=signTexture("休 閒 中 心","R E C R E A T I O N","--gym"); signs.push(gymSign);
+  gym.add(mesh(new THREE.PlaneGeometry(3.6,.9),new THREE.MeshBasicMaterial({map:gymSign,transparent:true}),0,GH+.6,GD/2+.3,false,false));
+  [-1.5,1.5].forEach(px=>gym.add(mesh(B(.06,.5,.06),M.trim,px,GH+.15,GD/2+.26,false,false)));
+  [gBody,vault,gBand,gGlass].forEach(o=>{o.userData.key="gym";pickables.push(o);});
+  const gymLit=new THREE.MeshStandardMaterial({color:0xfff3d6,emissive:new THREE.Color(0xffd27a).convertSRGBToLinear(),emissiveIntensity:0});
+  gym.add(mesh(B(GW-2.6,.05,.08),gymLit,0,GH*.68,GD/2+.09,false,false));
+  /* 籃球架 */
+  [-1,1].forEach(sx=>{const hx=sx*(GW/2+1.6);
+    gym.add(mesh(new THREE.CylinderGeometry(.05,.05,1.6,8),M.trim,hx,.8,GD/2+1.2));
+    gym.add(mesh(B(.06,.5,.7),M.slab,hx-sx*.05,1.7,GD/2+1.2));
+    const rim=mesh(new THREE.TorusGeometry(.18,.025,6,16),gymAcc,hx-sx*.28,1.55,GD/2+1.2,false,false); rim.rotation.x=Math.PI/2; gym.add(rim);});
+
+  [[-14,3.5],[-15,-2],[13.6,4.4],[12.4,-10.5],[-9,8.5],[9,8.6],[-4,9.5],[4,9.6],[-8.6,-8],[8.8,-8.2],[-12,-12],[11,-12.5],[-17,6],[21.5,2.5]].forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.65*s,0),M.leaf,x+.3*s,2.1*s,z-.1));});
@@ -631,9 +680,9 @@ function init3D(){
     b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
     b.onclick=()=>go(o.key); labelBox.appendChild(b); labels[o.key]=b;
   });
-  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"]].map(([k,x,y,t,pv])=>{
+  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"]].map(([k,x,y,t,pv])=>{
     const b=document.createElement("button"); b.type="button"; b.className="blabel"; b.textContent=t; b.style.setProperty("--bp",`var(${pv})`);
-    b.onclick=()=>go(k==="bridge"?"bridge":k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:0)};
+    b.onclick=()=>go(k==="bridge"||k==="gym"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:0)};
   });
 
   let night=false;
@@ -642,6 +691,7 @@ function init3D(){
     M.wall.color=col("--wall"); M.wallT.color=col("--wall-t"); M.slab.color=col("--slab"); M.trim.color=col("--trim");
     M.glass.color=col("--glass"); M.lawn.color=col("--lawn"); M.pave.color=col("--ground");
     M.leaf.color=col("--leaf"); M.trunk.color=col("--trunk");
+    gymWall.color=col("--gym-wall"); gymRoof.color=col("--gym-roof"); gymAcc.color=col("--gym");
     Object.values(floorObjs).forEach(o=>{o.accentMat.color=col(o.f.color); o.lit.color=col("--glass");});
     hemi.intensity=night?.28:.75; sun.intensity=night?.22:.95; sun.color=new THREE.Color(night?0x9fb4d9:0xfff4e0);
     bridgeLit.emissiveIntensity=night?.9:.15;
@@ -657,11 +707,11 @@ function init3D(){
   const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const topY=thRoof+2.6;
   let az=.38, el=.2, dist=40, lastUser=-1e9; const t0=performance.now();
-  const target=new THREE.Vector3(0,topY/2,0);
+  const target=new THREE.Vector3(6,topY/2-1,0);
   function fit(){
     const w=box.clientWidth,h=box.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; box.classList.toggle("narrow",w<560);
     const vf=THREE.MathUtils.degToRad(cam.fov)/2, hf=Math.atan(Math.tan(vf)*cam.aspect);
-    dist=Math.max((topY+1.5)/2/Math.tan(vf),(TX-SX+W+6)/2/Math.tan(hf))*1.08;
+    dist=Math.max((topY+1.5)/2/Math.tan(vf),38/2/Math.tan(hf))*1.0;
     cam.updateProjectionMatrix();
   }
   fit(); new ResizeObserver(fit).observe(box);
@@ -709,6 +759,8 @@ function init3D(){
       lb.classList.toggle("on",on);
     });
     bLabels.forEach(({b,p})=>{v.copy(p).project(cam);place(b,(v.x*.5+.5)*box.clientWidth-b.offsetWidth/2,(-v.y*.5+.5)*box.clientHeight,false);});
+    const gOn=c.b==="gym"||hover==="gym";
+    gymLit.emissiveIntensity+=((gOn?1.6:night?1:.1)-gymLit.emissiveIntensity)*.1;
     const bOn=c.b==="bridge"||hover==="bridge";
     bridgeLit.emissiveIntensity+=((bOn?1.4:night?.9:.15)-bridgeLit.emissiveIntensity)*.1;
     if(gl){glow.position.set(gl.x,gl.y+gl.h*.6,gl.g.position.z+gl.d/2+1.2);glow.intensity+=((night?1.4:.6)-glow.intensity)*.1;}else glow.intensity*=.9;
@@ -722,7 +774,6 @@ route();
 window.addEventListener("hashchange",route);
 if(!init3D()){$("#scene").hidden=true;$("#nogl").hidden=false;}
 </script>
-
 
 <script>
 if("serviceWorker" in navigator){
