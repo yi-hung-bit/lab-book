@@ -22,6 +22,7 @@
   --g-wave:#167a82; --g-fluid:#2f7d62; --g-heat:#c2652a; --g-estat:#b03a4a; --g-em:#9a3a7a;
   --g-opt:#8a6a12; --g-mod:#6a5f9e; --g-math:#4f5a63;
   --gym:#b5532e; --gym-wall:#e4ddd0; --gym-roof:#7c8d96;
+  --lib:#8e2f25; --lib-wall:#efe6d2; --lib-roof:#33433d; --lib-stone:#b9b2a3;
   --shadow:0 12px 30px rgba(28,34,40,.14);
   --f-sign:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -36,6 +37,7 @@
   --g-wave:#64cbd2; --g-fluid:#6fcaa6; --g-heat:#f0a06b; --g-estat:#ef8d9a; --g-em:#e693c9;
   --g-opt:#e3c056; --g-mod:#b3aeea; --g-math:#a9b4bc;
   --gym:#f08a5d; --gym-wall:#4d4842; --gym-roof:#3a464d;
+  --lib:#e07a66; --lib-wall:#4a4339; --lib-roof:#24302b; --lib-stone:#5a554c;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}}
 :root[data-theme="dark"]{
   --sky:#141b22; --sky-top:#05080d; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
@@ -47,6 +49,7 @@
   --g-wave:#64cbd2; --g-fluid:#6fcaa6; --g-heat:#f0a06b; --g-estat:#ef8d9a; --g-em:#e693c9;
   --g-opt:#e3c056; --g-mod:#b3aeea; --g-math:#a9b4bc;
   --gym:#f08a5d; --gym-wall:#4d4842; --gym-roof:#3a464d;
+  --lib:#e07a66; --lib-wall:#4a4339; --lib-roof:#24302b; --lib-stone:#5a554c;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}
 
 [hidden]{display:none!important}
@@ -74,8 +77,7 @@ button,a{font:inherit;color:inherit}
 .flabel.on{background:var(--fc);color:var(--paper)}
 .flabel.on i{background:var(--paper);color:var(--fc)}
 .flabel:hover{outline:2px solid var(--fc)}
-.scene.narrow .flabel{padding:2px}
-.scene.narrow .flabel .nm{display:none}
+.flabel{visibility:hidden}
 .blabel{position:absolute;left:0;top:0;pointer-events:auto;border:0;cursor:pointer;background:var(--bp);color:var(--plate-ink);font-weight:900;letter-spacing:.3em;font-size:13px;padding:4px 10px 4px 14px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.2);white-space:nowrap}
 .hint{position:absolute;right:14px;bottom:12px;font-size:12px;color:var(--muted);background:color-mix(in srgb,var(--paper) 80%,transparent);padding:3px 10px;border-radius:999px;pointer-events:none}
 .home{position:absolute;left:14px;bottom:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
@@ -152,6 +154,31 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
 .backrow:hover{color:var(--ink)}
 .qview .modes button:disabled{opacity:.35;cursor:default}
 .qbody{flex:1;overflow:auto;background:var(--sky);padding-block:16px calc(24px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;align-items:center;gap:0}
+.shelves{padding:18px 22px 6px;display:grid;gap:14px}
+.shelf{border:2px solid var(--fc);border-radius:10px;overflow:hidden;background:color-mix(in srgb,var(--paper) 94%,var(--fc))}
+.shelf header{display:flex;align-items:baseline;gap:10px;padding:8px 14px;background:var(--fc);color:var(--paper)}
+.shelf header b{font-size:16px;letter-spacing:.2em}
+.shelf header span{font-size:13px;opacity:.9}
+.shelf ol{list-style:none;margin:0;padding:4px 12px 8px}
+.shelf li{display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:6px 2px;border-top:1px dashed var(--line)}
+.shelf li:first-child{border-top:0}
+.shelf .cno{color:var(--fc);font-weight:700}
+.shelf .ct{font-size:14.5px}
+.shelf .cp{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.shelf .ct small{display:block;font-size:11.5px;color:var(--muted)}
+.shelf .cfiles{grid-column:2/-1;display:flex;flex-direction:column;gap:6px;padding-bottom:4px}
+.shelf .cfile{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.shelf .cfile em{font-style:normal;font-size:12.5px;color:var(--muted);margin-right:auto}
+.shelf .cfile button{font-size:12.5px;font-weight:700;padding:3px 12px;border-radius:999px;border:1px solid var(--fc);color:var(--fc);background:var(--paper);cursor:pointer}
+.shelf .cfile button.pd{background:var(--fc);color:var(--paper)}
+.shelf .cfile button:disabled{opacity:.4;cursor:default}
+.pvpage{position:relative;max-width:100%;background:#fff;margin:0 auto 10px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.pvpage span{position:absolute;right:8px;bottom:6px;font-family:var(--f-mono);font-size:11px;color:#888;z-index:1}
+.pvpage canvas{display:block}
+.pvmsg{color:var(--muted);margin:30px 0}
+.shelf .cact{display:flex;gap:6px}
+.shelf .cact a{font-size:12.5px;font-weight:700;text-decoration:none;padding:2px 10px;border-radius:999px;border:1px solid var(--fc);color:var(--fc)}
+.shelf .cact a:last-child{background:var(--fc);color:var(--paper)}
 .arcade{padding:18px 22px 6px;display:flex;flex-direction:column;gap:12px}
 .game{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"no txt tag" "no txt play";gap:4px 14px;align-items:center;padding:14px 16px;border-radius:12px;border:2px solid var(--fc);background:color-mix(in srgb,var(--paper) 90%,var(--fc));text-decoration:none;color:var(--ink);transition:transform .15s}
 .game:hover,.game:focus-visible{transform:translateY(-2px)}
@@ -176,7 +203,7 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
   <div class="top">
     <div>
       <h1>物理研究院</h1>
-      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連，後方有休閒中心。</p>
+      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連，旁邊有物理藏經閣與休閒中心。</p>
     </div>
     <div class="count" id="count"></div>
   </div>
@@ -184,7 +211,7 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
     <div>
       <div class="scene" id="scene" role="group" aria-label="物理研究院 3D 院區，可拖曳旋轉，點樓層進入">
         <div class="labels" id="labels"></div>
-        <div class="hint">拖曳旋轉・點樓層查看</div>
+        <div class="hint">拖曳旋轉・點樓層或建築查看</div>
         <button type="button" class="home" id="homeBtn">院區導覽</button>
       </div>
       <div class="nogl" id="nogl" hidden>這台裝置無法顯示 3D 院區，請用右側的院區導覽選樓層。</div>
@@ -192,6 +219,15 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
     <section class="panel" id="panel" aria-live="polite"></section>
   </div>
 </div>
+
+<section class="classroom pdfview" id="pdfview" hidden aria-label="選訓教材閱覽">
+  <div class="cbar">
+    <button type="button" class="back" id="pvClose">← 回到藏經閣</button>
+    <b id="pvTitle"></b><span class="no" id="pvInfo"></span>
+    <div class="modes"><button type="button" id="pvDl">下載 PDF</button></div>
+  </div>
+  <div class="qbody" id="pvBody"></div>
+</section>
 
 <section class="classroom qview" id="qview" hidden aria-label="題目與詳解">
   <div class="cbar">
@@ -301,8 +337,17 @@ const QROOM={"1-1":["2016-01","2019-03","2025-05","2026-18"],"3-4":["2016-02","2
 THEORY.forEach(f=>{f.rooms=f.rooms.map((t,i)=>({t,no:(f.id==="R"?"R":f.id)+"-"+(i+1),qs:QROOM[(f.id)+"-"+(i+1)]||[],f}));});
 const QOWN={}; THEORY.forEach(f=>f.rooms.forEach(r=>r.qs.forEach(q=>QOWN[q]=r)));
 /* 休閒中心：小遊戲（連到外部網址，在新分頁開啟）。新增遊戲就在 GAMES 加一筆 {t:名稱, d:說明, url:網址, tag:標籤} */
+/* 物理藏經閣：物奧國家代表隊選訓教材。每章 files 列出放在 library/ 的 PDF：{label:版本名稱, pdf:檔名, by:整理者}；空陣列表示還沒上架 */
+const LIBRARY=[
+  {vol:"第一冊",theme:"力學・熱學",chapters:[{t:"力學",p:1,files:[]},{t:"剛體力學",p:42,files:[]},{t:"振動和波",p:81,files:[{label:"文字版",pdf:"v1-03-oscillations-waves-text.pdf",by:"林明瑞 整理",pages:42}]},{t:"熱力學與分子動力論",p:118,files:[{label:"文字版",pdf:"v1-04-thermodynamics-text.pdf",by:"王婉美 整理",pages:43}]}]},
+  {vol:"第二冊",theme:"電磁・光學",chapters:[{t:"電荷與電場",p:1,files:[]},{t:"電流與磁場",p:24,files:[]},{t:"電磁波",p:112,files:[]},{t:"光學",p:130,files:[]},{t:"如何處理物體的移動和轉動",p:180,files:[]},{t:"物理例題集錦",p:205,files:[]}]},
+  {vol:"第三冊",theme:"近代物理・實驗",chapters:[{t:"力學續論",p:1,files:[]},{t:"狹義相對論",p:54,files:[]},{t:"量子物理",p:95,files:[]},{t:"物質",p:110,files:[]},{t:"微中子",p:144,files:[]},{t:"熵的統計觀點",p:155,files:[]},{t:"實驗數據的處理",p:159,files:[]}]}
+];
+const LIB_TITLE="2009 年國際物理奧林匹亞競賽 國家代表隊選訓教材";
 const GAMES=[
-  {t:"物理快打：科學家格鬥賽",d:"選牛頓、愛因斯坦等科學家和電腦對戰，用萬有引力蘋果之類的物理必殺技一決勝負。",url:"https://yi-hung-bit.github.io/physics-fighter/",tag:"格鬥"}
+  {t:"物理快打：科學家格鬥賽",d:"選牛頓、愛因斯坦等科學家和電腦對戰，用萬有引力蘋果之類的物理必殺技一決勝負。",url:"https://yi-hung-bit.github.io/physics-fighter/",tag:"格鬥"},
+  {t:"物理炸彈超人：科學家大亂鬥",d:"16 位物理學家各有炸彈特性與超能力，例如牛頓的萬有引力蘋果；可 4 人大亂鬥、1v1 單挑，或兩人同一台電腦對戰。",url:"https://yi-hung-bit.github.io/PHYSICS-BOMBER/",tag:"炸彈"},
+  {t:"物理學家 12 合 1",d:"紅白機風格的物理小遊戲合輯：包立方塊、伽利略推翻亞里斯多德、牛頓的蘋果、量子掃雷……用方向鍵和 Z／X 操作。",url:"https://yi-hung-bit.github.io/physics-fighter/10in1/",tag:"合輯"}
 ];
 const BRIDGE_LEVEL="3";
 
@@ -328,6 +373,7 @@ function current(){
   m=/^s(\w+)$/.exec(h); if(m&&sFloor(m[1])) return {b:"s",id:m[1]};
   if(h==="bridge") return {b:"bridge"};
   if(h==="gym") return {b:"gym"};
+  if(h==="lib") return {b:"lib"};
   return {b:null};
 }
 const go=h=>{location.hash=h;};
@@ -369,6 +415,17 @@ function route(){
       ${elevator("s",f.id)}
       <div class="corridor sim">${f.rooms.map(r=>`<button type="button" class="room" data-h="r${r.no}"><span class="plate"><span class="no">${r.no}</span><b>${esc(r.t)}</b></span><span class="door"><span class="desc">${esc(r.d)}</span><span class="tags">${r.sims.length>1?`<span class="soon">${r.sims.length} 種模式</span>`:""}${r.net?`<span class="soon net">需要網路</span>`:""}</span></span></button>`).join("")}</div>
       ${f.id===BRIDGE_LEVEL?`<p class="note">本層有空橋通往競賽大樓 3F（功、能量與動量）。</p>`:""}`;
+  }else if(c.b==="lib"){
+    p.style.setProperty("--fc","var(--lib)");
+    const nCh=LIBRARY.reduce((a,v)=>a+v.chapters.length,0), nUp=LIBRARY.reduce((a,v)=>a+v.chapters.filter(ch=>ch.files.length).length,0);
+    p.innerHTML=`<div class="panel-head"><div class="badge">經</div><div><div class="bld">院區左側</div><h2>物理藏經閣</h2><p>${esc(LIB_TITLE)}・${LIBRARY.length} 冊 ${nCh} 章・已上架 ${nUp} 章</p></div></div>
+      <div class="shelves">${LIBRARY.map((v,vi)=>`<section class="shelf"><header><b>${esc(v.vol)}</b><span>${esc(v.theme)}</span></header>
+        <ol>${v.chapters.map((ch,i)=>`<li><span class="cno">${"一二三四五六七八九十"[i]}</span><span class="ct">${esc(ch.t)}${ch.files.length?`<small>${esc(ch.files[0].by||"")}</small>`:""}</span><span class="cp">p.${ch.p}</span>${ch.files.length?"":`<span class="soon">待上架</span>`}
+          ${ch.files.length?`<span class="cfiles">${ch.files.map((f,fi)=>`<span class="cfile" data-pdf="${esc(f.pdf)}"><em>${esc(f.label)}・${f.pages} 頁</em><button type="button" class="pv" data-v="${vi}" data-c="${i}" data-f="${fi}">閱覽</button><button type="button" class="pd" data-v="${vi}" data-c="${i}" data-f="${fi}">下載</button></span>`).join("")}</span>`:""}</li>`).join("")}</ol></section>`).join("")}</div>
+      <p class="note">閱覽會在這裡直接翻頁看，下載會存成 PDF 檔。</p>`;
+    p.querySelectorAll(".pv").forEach(b=>b.onclick=()=>openPdf(libFile(b)));
+    p.querySelectorAll(".pd").forEach(b=>b.onclick=()=>downloadPdf(libFile(b),b));
+    p.querySelectorAll(".cfile").forEach(el=>fetch("library/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.classList.add("off");el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("em").textContent+="・僅限研究院";}));
   }else if(c.b==="gym"){
     p.style.setProperty("--fc","var(--gym)");
     p.innerHTML=`<div class="panel-head"><div class="badge">玩</div><div><div class="bld">院區後方</div><h2>休閒中心</h2><p>下課來玩物理小遊戲・${GAMES.length} 款</p></div></div>
@@ -383,6 +440,7 @@ function route(){
     p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
       <div class="dir">
         <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}</section>
+        <section><h3>物理藏經閣 <small>選訓教材 ${LIBRARY.length} 冊</small></h3><button type="button" class="dir-row" data-h="lib" style="--fc:var(--lib)"><span class="n">經</span><span><b>物理藏經閣</b><small>${esc(LIBRARY.map(v=>v.vol+" "+v.theme).join("・"))}</small></span></button></section>
         <section><h3>休閒中心 <small>${GAMES.length} 款遊戲</small></h3><button type="button" class="dir-row" data-h="gym" style="--fc:var(--gym)"><span class="n">玩</span><span><b>休閒中心</b><small>${esc(GAMES.map(g=>g.t).join("・"))}</small></span></button></section>
         <section><h3>連通空橋 <small>3F</small></h3><button type="button" class="dir-row" data-h="bridge" style="--fc:var(--plate)"><span class="n">3F</span><span><b>競賽 ⇄ 模擬</b><small>競賽 3F 功、能量與動量 ⇄ 模擬 3F 選修物理一</small></span></button></section>
         <section><h3>模擬大樓 <small>${SIM.length} 層・${ROOMS.length} 間</small></h3>${SIM_UP.slice().reverse().map(f=>dirRow("s",f)).join("")}</section>
@@ -391,6 +449,55 @@ function route(){
   p.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>go(b.dataset.h));
   if(c.room) enter(c.room); else if(!cls.hidden) leave();
   if(c.q) openQ(c.q); else if(!qv.hidden) closeQ();
+}
+
+/* ---------- 藏經閣：PDF 閱覽與下載 ---------- */
+const libFile=b=>{const v=LIBRARY[b.dataset.v], ch=v.chapters[b.dataset.c], f=ch.files[b.dataset.f]; return {v,ch,f,url:"library/"+f.pdf,name:`選訓教材 ${v.vol} ${ch.t}（${f.label}）.pdf`};};
+let pdfLib=null;
+function loadPdfJs(){
+  if(pdfLib) return pdfLib;
+  pdfLib=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    sc.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib);};
+    sc.onerror=()=>{pdfLib=null;rej(new Error("load"));}; document.head.appendChild(sc);});
+  return pdfLib;
+}
+const pv=$("#pdfview"); let pvDoc=null, pvObs=null;
+async function openPdf(it){
+  $("#pvTitle").textContent=`${it.v.vol}・${it.ch.t}`; $("#pvInfo").textContent=`${it.f.label}・${it.f.by||""}`;
+  const body=$("#pvBody"); body.innerHTML=`<p class="pvmsg">載入中…</p>`; body.scrollTop=0;
+  pv.hidden=false; document.documentElement.classList.add("in-class"); $("#pvClose").focus();
+  $("#pvDl").onclick=()=>downloadPdf(it,$("#pvDl"));
+  try{
+    const lib=await loadPdfJs();
+    const doc=await lib.getDocument({url:it.url}).promise; if(pv.hidden) return; pvDoc=doc;
+    body.innerHTML=""; const w=Math.min(body.clientWidth-8,980);
+    const first=await doc.getPage(1), vp0=first.getViewport({scale:1}), ratio=vp0.height/vp0.width;
+    if(pvObs) pvObs.disconnect();
+    pvObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&!e.target.dataset.done){e.target.dataset.done=1;drawPage(doc,+e.target.dataset.n,e.target);}}),{root:body,rootMargin:"600px 0px"});
+    for(let n=1;n<=doc.numPages;n++){const d=document.createElement("div");d.className="pvpage";d.dataset.n=n;d.style.width=w+"px";d.style.height=Math.round(w*ratio)+"px";d.innerHTML=`<span>${n} / ${doc.numPages}</span>`;body.appendChild(d);pvObs.observe(d);}
+    $("#pvInfo").textContent=`${it.f.label}・${it.f.by||""}・共 ${doc.numPages} 頁`;
+  }catch(e){ body.innerHTML=`<p class="pvmsg">這份 PDF 現在打不開，請檢查網路後再試一次，或直接下載。</p>`; }
+}
+async function drawPage(doc,n,box){
+  const pg=await doc.getPage(n), w=box.clientWidth, dpr=Math.min(window.devicePixelRatio||1,2);
+  const vp=pg.getViewport({scale:w/pg.getViewport({scale:1}).width*dpr});
+  const cv=document.createElement("canvas"); cv.width=vp.width; cv.height=vp.height; cv.style.width="100%";
+  await pg.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise;
+  box.appendChild(cv);
+}
+function closePdf(){pv.hidden=true;document.documentElement.classList.remove("in-class");if(pvObs)pvObs.disconnect();if(pvDoc){pvDoc.destroy();pvDoc=null;}$("#pvBody").innerHTML="";}
+$("#pvClose").onclick=closePdf;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pv.hidden)closePdf();});
+async function downloadPdf(it,btn){
+  const old=btn.textContent; btn.disabled=true; btn.textContent="準備中…";
+  try{
+    const blob=await (await fetch(it.url)).blob();
+    const dl=window.claude?.use?await window.claude.use("downloads"):null;
+    if(dl){ await dl.save({filename:it.name,data:blob}); }
+    else{ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=it.name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000); }
+    btn.textContent="已下載";
+  }catch(e){ btn.textContent=e&&e.code==="declined"?old:"下載失敗"; }
+  setTimeout(()=>{btn.textContent=old;btn.disabled=false;},2500);
 }
 
 /* ---------- 題目與詳解 ---------- */
@@ -596,8 +703,8 @@ function init3D(){
   ];
   /* 可走的地面：大樓前廣場、大樓後方、兩棟之間的通道 */
   const ZONES={
-    front:{x0:-16,x1:16,z0:D/2+1.6,z1:D/2+9},
-    back:{x0:-15,x1:10,z0:-D/2-7,z1:-D/2-1.6},
+    front:{x0:-11,x1:16,z0:D/2+1.6,z1:D/2+9},
+    back:{x0:-10,x1:10,z0:-D/2-7,z1:-D/2-1.6},
     gap:{x0:bx0+.8,x1:bx1-.8,z0:-D/2,z1:D/2+1}
   };
   const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -668,7 +775,30 @@ function init3D(){
     gym.add(mesh(B(.06,.5,.7),M.slab,hx-sx*.05,1.7,GD/2+1.2));
     const rim=mesh(new THREE.TorusGeometry(.18,.025,6,16),gymAcc,hx-sx*.28,1.55,GD/2+1.2,false,false); rim.rotation.x=Math.PI/2; gym.add(rim);});
 
-  [[-14,3.5],[-15,-2],[13.6,4.4],[12.4,-10.5],[-9,8.5],[9,8.6],[-4,9.5],[4,9.6],[-8.6,-8],[8.8,-8.2],[-12,-12],[11,-12.5],[-17,6],[21.5,2.5]].forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
+  /* 物理藏經閣：模擬大樓左側的兩層樓閣，重簷屋頂 */
+  const LX=-17.4, LZ=6.4, LR=.9;
+  const libWall=new THREE.MeshStandardMaterial({roughness:.85}), libRoof=new THREE.MeshStandardMaterial({roughness:.6,flatShading:true}), libRed=new THREE.MeshStandardMaterial({roughness:.5}), libStone=new THREE.MeshStandardMaterial({roughness:.95});
+  const lib=new THREE.Group(); lib.position.set(LX,0,LZ); lib.rotation.y=LR; scene.add(lib);
+  const LW=6.4, LD=4.6;
+  lib.add(mesh(B(LW+4,.06,LD+4),M.pave,0,.03,.6,false,true));
+  const lBase=mesh(B(LW+1.2,.5,LD+1.2),libStone,0,.25,0); lib.add(lBase);
+  lib.add(mesh(B(2.4,.25,1),libStone,0,.125,LD/2+1.05));
+  const lBody1=mesh(B(LW,1.9,LD),libWall,0,.5+.95,0); lib.add(lBody1);
+  const lBody2=mesh(B(LW-1.6,1.4,LD-1.2),libWall,0,.5+1.9+.55+.7,0); lib.add(lBody2);
+  const roofAt=(w,d,y,h)=>{const r=mesh(new THREE.ConeGeometry(1,h,4,1),libRoof,0,y+h/2,0); r.rotation.y=Math.PI/4; r.scale.set(w/Math.SQRT2,1,d/Math.SQRT2); lib.add(r); return r;};
+  const lRoof1=roofAt(LW+1.6,LD+1.6,.5+1.9,.85);
+  const lRoof2=roofAt(LW,LD+.6,.5+1.9+.55+1.4,1.5);
+  lib.add(mesh(new THREE.SphereGeometry(.16,10,8),libRed,0,.5+1.9+.55+1.4+1.55,0));
+  for(let i=0;i<6;i++){const cx=-LW/2+.35+i*(LW-.7)/5; lib.add(mesh(new THREE.CylinderGeometry(.09,.09,1.9,10),libRed,cx,.5+.95,LD/2+.12));}
+  const lDoor=mesh(B(1.3,1.5,.06),libRed,0,.5+.75,LD/2+.04,false,false); lib.add(lDoor);
+  [-1,1].forEach(sx=>lib.add(mesh(B(1.1,.9,.06),M.glass,sx*2,.5+1.15,LD/2+.04,false,false)));
+  const libLit=new THREE.MeshStandardMaterial({color:0xfff3d6,emissive:new THREE.Color(0xffc870).convertSRGBToLinear(),emissiveIntensity:0});
+  [-1,1].forEach(sx=>lib.add(mesh(B(.9,.7,.05),libLit,sx*1.1,.5+1.9+.55+.75,(LD-1.2)/2+.03,false,false)));
+  const libSign=signTexture("物 理 藏 經 閣","L I B R A R Y","--lib"); signs.push(libSign);
+  lib.add(mesh(new THREE.PlaneGeometry(2.6,.65),new THREE.MeshBasicMaterial({map:libSign,transparent:true}),0,.5+1.9+.3,LD/2+.62,false,false));
+  [lBase,lBody1,lBody2,lRoof1,lRoof2,lDoor].forEach(o=>{o.userData.key="lib";pickables.push(o);});
+
+  [[-14,-1.5],[-12.2,-4.2],[13.6,4.4],[12.4,-10.5],[-9,8.5],[9,8.6],[-6,12],[4,9.6],[-8.6,-8],[8.8,-8.2],[-12,-12],[11,-12.5],[-22.5,-5],[21.5,2.5]].forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.65*s,0),M.leaf,x+.3*s,2.1*s,z-.1));});
@@ -681,9 +811,9 @@ function init3D(){
     b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
     b.onclick=()=>go(o.key); labelBox.appendChild(b); labels[o.key]=b;
   });
-  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"]].map(([k,x,y,t,pv])=>{
+  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"]].map(([k,x,y,t,pv])=>{
     const b=document.createElement("button"); b.type="button"; b.className="blabel"; b.textContent=t; b.style.setProperty("--bp",`var(${pv})`);
-    b.onclick=()=>go(k==="bridge"||k==="gym"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:0)};
+    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:k==="lib"?LZ:0)};
   });
 
   let night=false;
@@ -693,6 +823,7 @@ function init3D(){
     M.glass.color=col("--glass"); M.lawn.color=col("--lawn"); M.pave.color=col("--ground");
     M.leaf.color=col("--leaf"); M.trunk.color=col("--trunk");
     gymWall.color=col("--gym-wall"); gymRoof.color=col("--gym-roof"); gymAcc.color=col("--gym");
+    libWall.color=col("--lib-wall"); libRoof.color=col("--lib-roof"); libRed.color=col("--lib"); libStone.color=col("--lib-stone");
     Object.values(floorObjs).forEach(o=>{o.accentMat.color=col(o.f.color); o.lit.color=col("--glass");});
     hemi.intensity=night?.28:.75; sun.intensity=night?.22:.95; sun.color=new THREE.Color(night?0x9fb4d9:0xfff4e0);
     bridgeLit.emissiveIntensity=night?.9:.15;
@@ -708,11 +839,11 @@ function init3D(){
   const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const topY=thRoof+2.6;
   let az=.38, el=.2, dist=40, lastUser=-1e9; const t0=performance.now();
-  const target=new THREE.Vector3(6,topY/2-1,0);
+  const target=new THREE.Vector3(0,topY/2-1,0);
   function fit(){
     const w=box.clientWidth,h=box.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; box.classList.toggle("narrow",w<560);
     const vf=THREE.MathUtils.degToRad(cam.fov)/2, hf=Math.atan(Math.tan(vf)*cam.aspect);
-    dist=Math.max((topY+1.5)/2/Math.tan(vf),38/2/Math.tan(hf))*1.0;
+    dist=Math.max((topY+1.5)/2/Math.tan(vf),46/2/Math.tan(hf))*1.0;
     cam.updateProjectionMatrix();
   }
   fit(); new ResizeObserver(fit).observe(box);
@@ -743,7 +874,7 @@ function init3D(){
     const a=az+(idle?Math.sin((now-t0)/6000)*.18:0);
     cam.position.set(target.x+dist*Math.sin(a)*Math.cos(el),target.y+dist*Math.sin(el),target.z+dist*Math.cos(a)*Math.cos(el));
     cam.lookAt(target);
-    if(!cls.hidden||!qv.hidden) return;
+    if(!cls.hidden||!qv.hidden||!pv.hidden) return;
     const c=current(), sel=c.b==="t"||c.b==="s"?c.b+c.id:null;
     litC.set(css("--glass-lit")||"#ffd978").convertSRGBToLinear();
     let gl=null;
@@ -758,8 +889,11 @@ function init3D(){
       v.set(o.x+(left?-o.w/2-.2:o.w/2+.2),o.y+o.h*.55,o.g.position.z+o.d/2).project(cam);
       place(lb,(v.x*.5+.5)*box.clientWidth,(-v.y*.5+.5)*box.clientHeight,left);
       lb.classList.toggle("on",on);
+      const show=on||hv; lb.style.visibility=show?"visible":"hidden"; lb.style.pointerEvents=show?"auto":"none";
     });
     bLabels.forEach(({b,p})=>{v.copy(p).project(cam);place(b,(v.x*.5+.5)*box.clientWidth-b.offsetWidth/2,(-v.y*.5+.5)*box.clientHeight,false);});
+    const lOn=c.b==="lib"||hover==="lib";
+    libLit.emissiveIntensity+=((lOn?1.8:night?1.1:.15)-libLit.emissiveIntensity)*.1;
     const gOn=c.b==="gym"||hover==="gym";
     gymLit.emissiveIntensity+=((gOn?1.6:night?1:.1)-gymLit.emissiveIntensity)*.1;
     const bOn=c.b==="bridge"||hover==="bridge";
