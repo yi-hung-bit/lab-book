@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>磁力線與地磁</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--nred:#ff4f5e;--sblue:#4f8dff;--vio:#8b8cff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(79,141,255,.09),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+h2{font-size:18px;margin:26px 0 0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h2 small{font-size:13px;color:var(--muted);font-weight:400}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+#cvA{height:460px}#cvB{height:440px}
+@media(max-width:560px){#cvA{height:380px}#cvB{height:360px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button:disabled{opacity:.4;cursor:default}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+label.ck{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer}
+label.ck input{accent-color:#ffd166;width:16px;height:16px}
+.read{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.read .wide{grid-column:1/-1}
+.read .wide b{font-family:"Noto Sans TC",sans-serif;font-size:14px}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">3-3 · Magnetic Field Lines &amp; Earth's Magnetism</div>
+  <h1>磁力線與地磁</h1>
+  <p class="lede">磁鐵周圍存在磁場。法拉第在磁棒附近灑下鐵粉，看到特定的分布，於是提出磁力線的觀念：磁力線的切線方向就是磁場方向，可以用小磁針測量（磁針 N 極所指的方向）；磁力線越密，磁場越強。磁棒外部的磁力線由 N 極出發到 S 極，內部由 S 極到 N 極，是一條條封閉曲線，彼此不相交。</p>
+
+  <h2>① 磁棒的磁力線 <small>拖曳磁棒或小磁針；點選磁棒後可旋轉、翻轉（圖 3-13①）</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">磁棒周圍</span><span class="n" id="nA">畫面寬 40 cm</span></div>
+      <div class="box"><canvas id="cvA" aria-label="磁棒與磁力線，可拖曳磁棒與小磁針"></canvas></div>
+      <div class="legend"><span><i style="background:#cfd8e8"></i>磁力線</span><span><i style="background:var(--nred)"></i>N 極</span><span><i style="background:var(--sblue)"></i>S 極</span><span><i style="background:var(--acc)"></i>可拖曳的小磁針（紅端是 N）</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">擺放磁棒</span><span class="n" id="selName">選取：磁棒 1</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg" id="presets"></div>
+        <div class="seg" style="margin-top:10px">
+          <button id="rotL">↺ 轉 45°</button><button id="rotR">↻ 轉 45°</button><button id="flip">N、S 對調</button><button id="add">＋ 第二根磁棒</button>
+        </div>
+        <div class="seg" style="margin-top:10px;gap:10px 16px">
+          <label class="ck"><input type="checkbox" id="cLines" checked>磁力線</label>
+          <label class="ck"><input type="checkbox" id="cIron">灑鐵粉</label>
+          <label class="ck"><input type="checkbox" id="cGrid">一群小磁針</label>
+          <label class="ck"><input type="checkbox" id="cInside" checked>磁棒內部的線</label>
+        </div>
+        <div class="read">
+          <div><small>小磁針處的磁場方向（由 +x 逆時針）</small><b id="rDir"></b></div>
+          <div><small>相對磁場強度（磁棒中心 = 1）</small><b id="rB"></b></div>
+          <div class="wide"><small>兩根磁棒之間</small><b id="rPair"></b></div>
+        </div>
+        <div class="note" id="seeA"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>② 地球的磁力線 <small>地球像一根巨大的磁棒，磁軸與自轉軸約夾 11°（圖 3-13②）</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">地球剖面</span><span class="n">拖曳指南針到地球周圍任何位置</span></div>
+      <div class="box"><canvas id="cvB" aria-label="地球磁場與可拖曳的指南針"></canvas></div>
+      <div class="legend"><span><i style="background:#ff8a5c"></i>自轉軸（地理北極在上）</span><span><i style="background:#cfd8e8"></i>磁軸與磁力線</span><span><i style="background:var(--acc)"></i>指南針</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">地磁</span><span class="n">簡化成地心一個磁偶極</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg" id="spots"></div>
+        <div class="ctl"><div class="r"><label for="sTilt">磁軸與自轉軸的夾角</label><span id="oTilt"></span></div><input type="range" id="sTilt" min="0" max="30" step="1" value="11"></div>
+        <div class="seg" style="margin-top:10px;gap:10px 16px">
+          <label class="ck"><input type="checkbox" id="cBar" checked>地球內的「磁棒」</label>
+          <label class="ck"><input type="checkbox" id="cFlip">磁極倒轉（地質年代曾發生）</label>
+        </div>
+        <div class="read">
+          <div><small>指南針 N 極大約指向</small><b id="rPoint"></b></div>
+          <div><small>磁針與水平面的夾角（磁傾角）</small><b id="rDip"></b></div>
+          <div class="wide"><small>說明</small><b id="rWhy"></b></div>
+        </div>
+        <div class="note">地理北極附近是地磁的 <b>S 極</b>，所以指南針的 N 極被吸引、大致指向北方；地理南極附近是地磁的 <b>N 極</b>。磁軸與自轉軸不重合，所以指南針指的「磁北」和真正的北方差一個角度（磁偏角），而且地磁的磁極位置會慢慢移動。</div>
+      </div>
+    </section>
+  </div>
+
+  <h2>③ 想一想 <small>課本旁欄的問題，先猜再看說明</small></h2>
+  <section class="card" style="margin-top:12px"><div class="pad">
+    <div class="qq"><p>磁力線的方向必定由 N 極出發到 S 極嗎？</p><div class="seg"><button id="q1">在 ① 看磁棒內部</button><button data-a="qa1">看說明</button></div><div class="ans" id="qa1" hidden>只有在<b>磁棒外部</b>是由 N 到 S；在<b>磁棒內部</b>由 S 到 N。磁力線是<b>沒有起點也沒有終點的封閉曲線</b>（和電力線由正電荷出發、終止於負電荷不同）。把磁棒切成兩半，每一半仍各有 N、S 兩極。</div></div>
+    <div class="qq"><p>若將一個小磁鐵在磁場中釋放，它運動的軌跡就是某一條磁力線嗎？</p><div class="seg"><button data-a="qa2">看說明</button></div><div class="ans" id="qa2" hidden><b>不是。</b>磁力線只告訴我們「小磁針會轉向哪個方向」：小磁針受到力矩，轉到 N 極沿著磁力線的切線方向。小磁鐵兩極受力方向相反，在不均勻的磁場中合力通常指向<b>磁場較強處</b>（被吸向磁極），而且運動還有慣性，所以軌跡一般不會沿著磁力線走。</div></div>
+    <div class="qq"><p>兩根磁棒同極相對與異極相對，磁力線看起來有什麼不同？</p><div class="seg"><button id="q3a">擺出 N 對 N</button><button id="q3b">擺出 N 對 S</button><button data-a="qa3">看說明</button></div><div class="ans" id="qa3" hidden><b>異極相對</b>：磁力線從一根的 N 極直接連到另一根的 S 極，像被拉緊的橡皮筋，兩磁棒互相吸引。<b>同極相對</b>：兩邊的磁力線互相「推開」、不相交，中間有一點磁場為零（鐵粉幾乎不排列），兩磁棒互相排斥。</div></div>
+    <div class="qq"><p>在台灣把指南針放平，N 極指向北方。如果把指南針立起來（可以上下轉），N 極會朝上還是朝下？</p><div class="seg"><button id="q4">在 ② 看北半球</button><button data-a="qa4">看說明</button></div><div class="ans" id="qa4" hidden>北半球的地磁磁力線<b>斜斜地進入地面</b>（往地磁 S 極去），所以 N 極會<b>朝下傾斜</b>；越靠近磁極越陡，在磁極上方幾乎垂直。南半球則 N 極朝上傾斜，在磁赤道附近是水平的。</div></div>
+  </div></section>
+
+  <footer><b>說明：</b>① 把磁棒看成沿長邊的均勻磁化（等效為兩側相反方向的面電流），在平面上計算磁場，再從磁棒中央截面等間隔出發描出磁力線，所以線的疏密反映磁場強弱，而且每條線都是封閉的；兩根磁棒互相吸引或排斥由磁棒 2 所受的合力判斷。② 地磁用地心的磁偶極近似（真實地磁較不規則）；磁傾角由該處磁場方向與當地水平面的夾角算出，偶極近似下地表滿足 tan I = 2 tan λ（λ 為磁緯）。參考：基礎物理 第 3 章 3-3 基本交互作用（p.72–73 圖 3-13）。</footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const fix=(v,d)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+function setup(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
+  const w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+  const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return {x,W:r.width,H:r.height};}
+function arrowHead(x,px,py,ang,sz,col){x.save();x.translate(px,py);x.rotate(ang);x.fillStyle=col;x.beginPath();x.moveTo(sz,0);x.lineTo(-sz*.7,sz*.6);x.lineTo(-sz*.7,-sz*.6);x.closePath();x.fill();x.restore();}
+function needle(x,px,py,ang,L,w){ // ang: 畫面角度（N 端方向）
+  x.save();x.translate(px,py);x.rotate(ang);
+  x.fillStyle="#ff4f5e";x.beginPath();x.moveTo(L,0);x.lineTo(0,w);x.lineTo(0,-w);x.closePath();x.fill();
+  x.fillStyle="#dfe6f2";x.beginPath();x.moveTo(-L,0);x.lineTo(0,w);x.lineTo(0,-w);x.closePath();x.fill();
+  x.fillStyle="#0c1322";x.beginPath();x.arc(0,0,Math.max(1.5,w*.45),0,7);x.fill();x.restore();}
+
+/* ================= ① 磁棒 ================= */
+/* 世界座標：單位 m，畫面寬 0.40 m；磁棒 12 cm × 3 cm，沿長邊磁化（N 在 +u 端）。
+   均勻磁化 M 等效為上、下兩長邊的面電流 ±K（垂直紙面），B 由解析積分求得。 */
+let VIEW=0.40; const LEN=0.12, WID=0.03;
+const cvA=$("#cvA");
+let mags=[], sel=0, probe={x:0,y:0.09}, dirty=true;
+const opt={lines:true,iron:false,grid:false,inside:true};
+const PRE=[
+  ["一根磁棒",[[0,0,0]],{x:0,y:.085}],
+  ["N 對 S（相吸）",[[-.09,0,0],[.09,0,0]],{x:0,y:.03}],
+  ["N 對 N（相斥）",[[-.09,0,0],[.09,0,180]],{x:0,y:.05}],
+  ["並排同向",[[0,.035,0],[0,-.035,0]],{x:0,y:.1}],
+  ["並排反向",[[0,.035,0],[0,-.035,180]],{x:.1,y:0}],
+  ["T 字",[[-.06,0,0],[.07,0,90]],{x:0,y:.08}]
+];
+/* 單一面電流段（局部座標，沿 u 由 u1 到 u2，位於 v=v0，電流 +z 強度 s）在 (u,v) 的磁場 */
+function sheetB(u,v,u1,u2,v0,s){let d=v-v0;if(Math.abs(d)<1e-7)d=d<0?-1e-7:1e-7;
+  const a1=u1-u,a2=u2-u;
+  const bx=-s*(Math.atan(a2/d)-Math.atan(a1/d));
+  const by=-s*.5*(Math.log(a2*a2+d*d)-Math.log(a1*a1+d*d));
+  return [bx,by];}
+function magB(m,x,y){const c=Math.cos(m.a),s=Math.sin(m.a),dx=x-m.x,dy=y-m.y;
+  const u=dx*c+dy*s,v=-dx*s+dy*c,h=LEN/2,w=WID/2;
+  const t=sheetB(u,v,-h,h,w,1),b=sheetB(u,v,-h,h,-w,-1);
+  const bu=t[0]+b[0],bv=t[1]+b[1];return [bu*c-bv*s,bu*s+bv*c];}
+function field(x,y){let bx=0,by=0;for(const m of mags){const [a,b]=magB(m,x,y);bx+=a;by+=b;}return [bx,by];}
+const B0=(()=>{const m={x:0,y:0,a:0};return Math.hypot(...magB(m,0,0));})();
+function inMag(m,x,y,pad=0){const c=Math.cos(m.a),s=Math.sin(m.a),dx=x-m.x,dy=y-m.y;
+  return Math.abs(dx*c+dy*s)<LEN/2+pad&&Math.abs(-dx*s+dy*c)<WID/2+pad;}
+
+let geo={W:1,H:1,s:1};
+const toPx=(x,y)=>[geo.W/2+x*geo.s,geo.H/2-y*geo.s];
+const toW=(px,py)=>[(px-geo.W/2)/geo.s,(geo.H/2-py)/geo.s];
+
+function trace(x0,y0){ // 由 (x0,y0) 順著 B 描線，回到起點附近即封閉
+  const pts=[[x0,y0]],h=.0012,lim=Math.max(geo.W,geo.H)/geo.s*.9;let x=x0,y=y0,closed=false,len=0;
+  for(let i=0;i<4000;i++){
+    let [bx,by]=field(x,y);let m=Math.hypot(bx,by);if(m<1e-9)break;
+    const mx=x+h/2*bx/m,my=y+h/2*by/m;[bx,by]=field(mx,my);m=Math.hypot(bx,by);if(m<1e-9)break;
+    x+=h*bx/m;y+=h*by/m;len+=h;pts.push([x,y]);
+    if(Math.abs(x)>lim||Math.abs(y)>lim)break;
+    if(len>.02&&Math.hypot(x-x0,y-y0)<.0015){pts.push([x0,y0]);closed=true;break;}
+  }
+  return {pts,closed};
+}
+let LINES=[], IRON=[], ironSeed=[];
+(function(){let s=12345;const r=()=>(s=(s*16807)%2147483647)/2147483647;for(let i=0;i<2600;i++)ironSeed.push([r()-.5,r()-.5,r()]);})();
+function compute(){
+  LINES=[];
+  mags.forEach(m=>{const n=9,c=Math.cos(m.a),s=Math.sin(m.a);
+    for(let k=0;k<n;k++){const v=(-.5+(k+.5)/n)*WID;const x0=m.x-v*s,y0=m.y+v*c;
+      // 若此起點已被別條線經過就略過，避免重複
+      const f=trace(x0,y0);if(f.closed){LINES.push(f.pts);continue;}
+      // 沒有封閉（出了畫面）→ 也往反方向描，接成一條
+      const bk=traceBack(x0,y0);LINES.push(bk.reverse().concat(f.pts.slice(1)));}});
+  // 鐵粉
+  const hw=geo.W/geo.s/2,hh=geo.H/geo.s/2;IRON=[];
+  for(const [rx,ry,rr] of ironSeed){const x=rx*2*hw,y=ry*2*hh;if(mags.some(m=>inMag(m,x,y,.002)))continue;
+    const [bx,by]=field(x,y),m=Math.hypot(bx,by);if(m<1e-9)continue;const st=m/B0;
+    if(rr>Math.min(1,st*6+.04))continue; // 磁場弱的地方鐵粉排列不明顯
+    IRON.push([x,y,bx/m,by/m,Math.min(1,.25+st*3)]);}
+  dirty=false;
+}
+function traceBack(x0,y0){const pts=[[x0,y0]],h=.0012,lim=Math.max(geo.W,geo.H)/geo.s*.9;let x=x0,y=y0;
+  for(let i=0;i<4000;i++){let [bx,by]=field(x,y);let m=Math.hypot(bx,by);if(m<1e-9)break;
+    const mx=x-h/2*bx/m,my=y-h/2*by/m;[bx,by]=field(mx,my);m=Math.hypot(bx,by);if(m<1e-9)break;
+    x-=h*bx/m;y-=h*by/m;pts.push([x,y]);if(Math.abs(x)>lim||Math.abs(y)>lim)break;}
+  return pts;}
+
+function drawMag(x,m,i){const c=Math.cos(m.a),s=Math.sin(m.a);const [px,py]=toPx(m.x,m.y);
+  x.save();x.translate(px,py);x.rotate(-m.a);const L=LEN*geo.s,W=WID*geo.s;
+  x.fillStyle="#ff4f5e";x.fillRect(0,-W/2,L/2,W);x.fillStyle="#4f8dff";x.fillRect(-L/2,-W/2,L/2,W);
+  if(opt.inside&&opt.lines){x.globalAlpha=.55;}
+  x.fillStyle="#fff";x.font="700 "+Math.max(11,W*.55)+"px 'JetBrains Mono',monospace";x.textAlign="center";x.textBaseline="middle";
+  x.save();x.translate(L/2-W*.55,0);x.rotate(m.a);x.fillText("N",0,1);x.restore();
+  x.save();x.translate(-L/2+W*.55,0);x.rotate(m.a);x.fillText("S",0,1);x.restore();
+  x.globalAlpha=1;
+  if(i===sel&&mags.length>1){x.strokeStyle="#ffd166";x.lineWidth=2;x.strokeRect(-L/2-3,-W/2-3,L+6,W+6);}
+  x.restore();}
+function drawA(){
+  const {x,W,H}=setup(cvA);const nv=W<520?0.30:0.40;if(nv!==VIEW){VIEW=nv;$("#nA").textContent=`畫面寬 ${Math.round(VIEW*100)} cm`;}const s=W/VIEW;
+  if(geo.W!==W||geo.H!==H||geo.s!==s){geo={W,H,s};dirty=true;}
+  if(dirty)compute();
+  x.clearRect(0,0,W,H);
+  x.strokeStyle="#0f1727";x.lineWidth=1;
+  for(let g=-1;g<=1.0001;g+=.02){const [px]=toPx(g,0),[,py]=toPx(0,g);x.beginPath();x.moveTo(px,0);x.lineTo(px,H);x.stroke();x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke();}
+  if(opt.iron){x.lineCap="round";for(const [ix,iy,ux,uy,a] of IRON){const [px,py]=toPx(ix,iy);x.strokeStyle=`rgba(190,198,212,${a})`;x.lineWidth=1.3;
+    x.beginPath();x.moveTo(px-ux*3.2,py+uy*3.2);x.lineTo(px+ux*3.2,py-uy*3.2);x.stroke();}}
+  mags.forEach((m,i)=>drawMag(x,m,i));
+  if(opt.lines){
+    for(const L of LINES){
+      x.strokeStyle="rgba(207,216,232,.8)";x.lineWidth=1.3;x.beginPath();let pen=false;
+      for(const p of L){const ins=mags.some(m=>inMag(m,p[0],p[1]));const [px,py]=toPx(p[0],p[1]);
+        if(ins&&!opt.inside){pen=false;continue;}
+        if(!pen){x.moveTo(px,py);pen=true;}else x.lineTo(px,py);}
+      x.stroke();
+      // 箭頭：每 4 cm 一個
+      let acc=.02;for(let i=1;i<L.length-1;i++){acc+=Math.hypot(L[i][0]-L[i-1][0],L[i][1]-L[i-1][1]);
+        if(acc>=.04){const ins=mags.some(m=>inMag(m,L[i][0],L[i][1]));if(ins&&!opt.inside)continue;acc=0;
+          const [a,b]=toPx(L[i][0],L[i][1]),[c,d]=toPx(L[i+1][0],L[i+1][1]);
+          if(a>-5&&a<W+5&&b>-5&&b<H+5)arrowHead(x,a,b,Math.atan2(d-b,c-a),4.5,ins?"#ffd166":"rgba(207,216,232,.95)");}}
+    }
+  }
+  if(opt.grid){const st=.025;for(let gx=-VIEW/2+st/2;gx<VIEW/2;gx+=st)for(let gy=-H/s/2+st/2;gy<H/s/2;gy+=st){
+    if(mags.some(m=>inMag(m,gx,gy,.006)))continue;const [bx,by]=field(gx,gy);if(Math.hypot(bx,by)<1e-6)continue;
+    const [px,py]=toPx(gx,gy);needle(x,px,py,Math.atan2(-by,bx),Math.min(st*s*.38,10),2.2);}}
+  // 小磁針
+  {const [px,py]=toPx(probe.x,probe.y);const [bx,by]=field(probe.x,probe.y);
+    x.fillStyle="rgba(10,15,26,.85)";x.strokeStyle="#ffd166";x.lineWidth=2;x.beginPath();x.arc(px,py,17,0,7);x.fill();x.stroke();
+    if(Math.hypot(bx,by)>1e-6) needle(x,px,py,Math.atan2(-by,bx),13,4);}
+  // 比例尺
+  x.fillStyle="#5b6880";x.strokeStyle="#5b6880";x.lineWidth=2;x.font="12px 'JetBrains Mono',monospace";
+  x.beginPath();x.moveTo(10,H-12);x.lineTo(10+.05*s,H-12);x.stroke();x.fillText("5 cm",14+.05*s,H-8);
+}
+function pairForce(){ // 磁棒 2 所受合力（以磁棒 1 的磁場作用在磁棒 2 的面電流上）
+  if(mags.length<2)return null;const [m1,m2]=mags;const c=Math.cos(m2.a),s=Math.sin(m2.a);let fx=0,fy=0;const n=40;
+  for(const [v,I] of [[WID/2,1],[-WID/2,-1]])for(let k=0;k<n;k++){const u=(-.5+(k+.5)/n)*LEN;
+    const x0=m2.x+u*c-v*s,y0=m2.y+u*s+v*c;const [bx,by]=magB(m1,x0,y0);fx+=I*(-by);fy+=I*bx;}
+  const dx=m2.x-m1.x,dy=m2.y-m1.y,d=Math.hypot(dx,dy)||1;return {fx,fy,rad:(fx*dx+fy*dy)/d,mag:Math.hypot(fx,fy)};}
+function uiA(){
+  const [bx,by]=field(probe.x,probe.y),b=Math.hypot(bx,by);
+  const inside=mags.some(m=>inMag(m,probe.x,probe.y));
+  $("#rDir").textContent=b>1e-6?fix(((Math.atan2(by,bx)*180/Math.PI)+360)%360,0)+"°":"—";
+  $("#rB").textContent=b>1e-6?(b/B0).toFixed(b/B0<.1?3:2):"≈ 0";
+  const pf=pairForce();
+  $("#rPair").textContent=!pf?"只有一根磁棒":pf.mag<1e-4?"距離很遠，幾乎沒有作用":(pf.rad>0?"互相排斥（磁棒 2 被推開）":"互相吸引（磁棒 2 被拉近）")+(Math.abs(pf.rad)<.5*pf.mag?"，同時有力矩使它轉動":"");
+  let t;
+  if(inside) t="小磁針在<b>磁棒內部</b>：這裡的磁場由 S 極指向 N 極，和外部方向相反。";
+  else if(b/B0<.02) t="這裡的磁場很弱，小磁針幾乎不受影響（兩根同極相對時，中間有一點磁場為零）。";
+  else t="小磁針的 N 極總是轉到<b>磁力線的切線方向</b>。把它拖近磁極，磁力線變密、磁場變強；拖到磁棒側邊中央，磁場方向和磁棒平行但由 N 指向 S。";
+  $("#seeA").innerHTML=t;
+}
+function applyPre(i){const p=PRE[i],k=cvA.getBoundingClientRect().width<520?.82:1;mags=p[1].map(([x,y,a])=>({x:x*k,y:y*k,a:a*Math.PI/180}));sel=0;probe={x:p[2].x*k,y:p[2].y*k};dirty=true;
+  [...$("#presets").children].forEach((b,j)=>b.classList.toggle("on",j===i));syncSel();}
+PRE.forEach((p,i)=>{const b=document.createElement("button");b.textContent=p[0];b.onclick=()=>applyPre(i);$("#presets").appendChild(b);});
+function clearPre(){[...$("#presets").children].forEach(b=>b.classList.remove("on"));}
+function syncSel(){$("#selName").textContent=`選取：磁棒 ${sel+1}`;$("#add").textContent=mags.length>1?"－ 移除磁棒 2":"＋ 第二根磁棒";}
+$("#rotL").onclick=()=>{mags[sel].a+=Math.PI/4;clearPre();dirty=true;};
+$("#rotR").onclick=()=>{mags[sel].a-=Math.PI/4;clearPre();dirty=true;};
+$("#flip").onclick=()=>{mags[sel].a+=Math.PI;clearPre();dirty=true;};
+$("#add").onclick=()=>{if(mags.length>1){mags.pop();sel=0;}else{const k=VIEW>.35?1:.82;mags[0].x=-.09*k;mags.push({x:.09*k,y:0,a:0});sel=1;}clearPre();dirty=true;syncSel();};
+[["cLines","lines"],["cIron","iron"],["cGrid","grid"],["cInside","inside"]].forEach(([id,k])=>$("#"+id).onchange=e=>{opt[k]=e.target.checked;});
+{let drag=null;const pos=e=>{const r=cvA.getBoundingClientRect();return toW(e.clientX-r.left,e.clientY-r.top);};
+  cvA.addEventListener("pointerdown",e=>{const [wx,wy]=pos(e);
+    if(Math.hypot(wx-probe.x,wy-probe.y)*geo.s<24){drag={t:"p"};}
+    else{const i=mags.findIndex(m=>inMag(m,wx,wy,8/geo.s));if(i>=0){sel=i;syncSel();drag={t:"m",i,ox:wx-mags[i].x,oy:wy-mags[i].y};}
+      else{probe={x:wx,y:wy};drag={t:"p"};}}
+    cvA.setPointerCapture(e.pointerId);e.preventDefault();});
+  cvA.addEventListener("pointermove",e=>{if(!drag)return;const [wx,wy]=pos(e);const hw=geo.W/geo.s/2-.01,hh=geo.H/geo.s/2-.01;
+    const cl=(v,a)=>Math.max(-a,Math.min(a,v));
+    if(drag.t==="p")probe={x:cl(wx,hw),y:cl(wy,hh)};else{const m=mags[drag.i];m.x=cl(wx-drag.ox,hw-.03);m.y=cl(wy-drag.oy,hh-.02);clearPre();dirty=true;}});
+  const up=()=>{drag=null;};cvA.addEventListener("pointerup",up);cvA.addEventListener("pointercancel",up);}
+
+/* ================= ② 地磁 ================= */
+const cvB=$("#cvB");
+let tilt=11*Math.PI/180, flipE=false, comp={r:1.6,th:Math.PI/2-40*Math.PI/180}; // th：由 +x 逆時針（地心座標，北在上）
+const SPOTS=[["北半球中緯度",1.0,40],["赤道上空",1.0,0],["地理北極",1.0,90],["南半球",1.0,-40],["遠處太空",2.3,30]];
+SPOTS.forEach(([n,r,lat])=>{const b=document.createElement("button");b.textContent=n;b.onclick=()=>{comp={r,th:lat*Math.PI/180};};$("#spots").appendChild(b);});
+// 磁偶極 m：指向「磁棒 N 極」→ 位於地理南方附近；預設 m 由地心指向下方偏 tilt
+function mVec(){const a=-Math.PI/2+tilt;const s=flipE?-1:1;return [s*Math.cos(a),s*Math.sin(a)];} // 南半球那一端（往下並向右偏）
+function dipB(x,y){const [mx,my]=mVec();const r=Math.hypot(x,y),ux=x/r,uy=y/r,d=mx*ux+my*uy;return [(3*d*ux-mx)/r**3,(3*d*uy-my)/r**3];}
+function drawB(){
+  const {x,W,H}=setup(cvB);const R=Math.min(W,H)*.2,cx=W/2,cy=H/2;
+  const P=(wx,wy)=>[cx+wx*R,cy-wy*R];
+  x.clearRect(0,0,W,H);
+  // 星點
+  x.fillStyle="#1a2335";for(let i=0;i<70;i++){const sx=(i*97%W),sy=(i*57%H);x.fillRect(sx,sy,1.5,1.5);}
+  const [mx,my]=mVec();const ax=Math.atan2(my,mx); // 偶極方向
+  // 磁力線 r = L sin²ψ，ψ 由磁軸量起
+  x.strokeStyle="rgba(207,216,232,.6)";x.lineWidth=1.2;
+  const Ls=[1.35,1.8,2.5,3.6,5.5,9];
+  for(const L of Ls)for(const side of [1,-1]){x.beginPath();let pen=false;const pts=[];
+    for(let k=0;k<=240;k++){const psi=k/240*Math.PI;const r=L*Math.sin(psi)**2;if(r<1){pen=false;pts.push(null);continue;}
+      const ang=ax+side*psi;const wx=r*Math.cos(ang),wy=r*Math.sin(ang);const [px,py]=P(wx,wy);pts.push([px,py,wx,wy]);
+      if(!pen){x.moveTo(px,py);pen=true;}else x.lineTo(px,py);}
+    x.stroke();
+    // 箭頭在 ψ=90°（磁赤道上）
+    const mid=pts[120];if(mid){const [bx,by]=dipB(mid[2],mid[3]);if(mid[0]>0&&mid[0]<W&&mid[1]>0&&mid[1]<H)arrowHead(x,mid[0],mid[1],Math.atan2(-by,bx),5,"rgba(207,216,232,.95)");}
+  }
+  // 地球
+  const g=x.createRadialGradient(cx-R*.35,cy-R*.35,R*.1,cx,cy,R);g.addColorStop(0,"#3d8ad8");g.addColorStop(1,"#14508f");
+  x.fillStyle=g;x.beginPath();x.arc(cx,cy,R,0,7);x.fill();
+  // 簡化陸塊
+  x.save();x.beginPath();x.arc(cx,cy,R,0,7);x.clip();x.fillStyle="rgba(240,180,40,.75)";
+  [[-.3,.55,.38,.25],[.25,.2,.3,.45],[-.05,-.45,.22,.35],[.55,-.15,.18,.22]].forEach(([a,b,c,d])=>{x.beginPath();x.ellipse(cx+a*R,cy-b*R,c*R,d*R,.4,0,7);x.fill();});x.restore();
+  // 磁棒
+  if($("#cBar").checked){x.save();x.translate(cx,cy);x.rotate(-ax);const L=R*.75,w=R*.13;
+    x.fillStyle="rgba(255,79,94,.92)";x.fillRect(0,-w/2,L,w);x.fillStyle="rgba(79,141,255,.92)";x.fillRect(-L,-w/2,L,w);
+    x.fillStyle="#fff";x.font="700 13px 'JetBrains Mono',monospace";x.textAlign="center";x.textBaseline="middle";
+    x.save();x.translate(L-10,0);x.rotate(ax);x.fillText("N",0,1);x.restore();x.save();x.translate(-L+10,0);x.rotate(ax);x.fillText("S",0,1);x.restore();x.restore();}
+  // 自轉軸與磁軸
+  x.setLineDash([6,5]);x.strokeStyle="#ff8a5c";x.lineWidth=2;x.beginPath();x.moveTo(cx,cy-R*1.55);x.lineTo(cx,cy+R*1.55);x.stroke();x.setLineDash([]);
+  x.strokeStyle="rgba(207,216,232,.85)";x.lineWidth=1.5;x.beginPath();x.moveTo(cx-Math.cos(ax)*R*1.45,cy+Math.sin(ax)*R*1.45);x.lineTo(cx+Math.cos(ax)*R*1.45,cy-Math.sin(ax)*R*1.45);x.stroke();
+  x.fillStyle="#ff8a5c";x.font="600 12.5px 'Noto Sans TC',sans-serif";x.textAlign="left";x.fillText("自轉軸",cx+6,cy-R*1.5);
+  x.fillStyle="#39d98a";x.beginPath();x.arc(cx,cy-R,4,0,7);x.fill();x.fillText("地理北極",cx+8,cy-R-6);
+  x.fillStyle="#cfd8e8";const ex=cx-Math.cos(ax)*R*1.45,ey=cy+Math.sin(ax)*R*1.45;x.textAlign="right";x.fillText("磁軸",ex-4,ey);
+  x.fillStyle="#8492aa";x.textAlign="left";x.fillText(`夾角 ${Math.round(tilt*180/Math.PI)}°`,cx+8,cy-R*1.28);
+  // 指南針
+  const wx=comp.r*Math.cos(comp.th),wy=comp.r*Math.sin(comp.th);const [px,py]=P(wx,wy);const [bx,by]=dipB(wx,wy);
+  x.fillStyle="rgba(10,15,26,.85)";x.strokeStyle="#ffd166";x.lineWidth=2;x.beginPath();x.arc(px,py,19,0,7);x.fill();x.stroke();
+  needle(x,px,py,Math.atan2(-by,bx),15,4.5);
+  // 當地水平線
+  const tx=-Math.sin(comp.th),ty=Math.cos(comp.th);x.strokeStyle="rgba(255,209,102,.35)";x.lineWidth=1;x.setLineDash([3,3]);
+  x.beginPath();x.moveTo(px-tx*30,py+ty*30);x.lineTo(px+tx*30,py-ty*30);x.stroke();x.setLineDash([]);
+  drawB.geo={cx,cy,R};
+}
+function uiB(){
+  $("#oTilt").textContent=Math.round(tilt*180/Math.PI)+"°";
+  const wx=comp.r*Math.cos(comp.th),wy=comp.r*Math.sin(comp.th);const [bx,by]=dipB(wx,wy),b=Math.hypot(bx,by);
+  // 當地「北方」切線方向：沿地表往北極 = (−sinθ, cosθ) 在右半邊；用 +y 分量判斷
+  const ur=[Math.cos(comp.th),Math.sin(comp.th)];const tN=[-Math.sin(comp.th),Math.cos(comp.th)];
+  const north=Math.cos(comp.th)>=0?tN:[-tN[0],-tN[1]]; // 往地理北極的水平方向
+  const bh=bx*north[0]+by*north[1],bv=bx*ur[0]+by*ur[1];
+  const dip=Math.atan2(-bv,Math.abs(bh))*180/Math.PI; // 正：N 極朝下
+  const lat=Math.round(Math.atan2(wy,Math.abs(wx))*180/Math.PI);
+  $("#rPoint").textContent=Math.abs(bh)<1e-9?"—":(bh>0?"北方":"南方");
+  $("#rDip").textContent=(dip>=0?"N 極朝下 ":"N 極朝上 ")+Math.abs(dip).toFixed(0)+"°";
+  let w;
+  if(Math.abs(dip)>75) w="靠近地磁的磁極，磁力線幾乎垂直進出地面，水平放的指南針轉向不明顯。";
+  else if(Math.abs(dip)<12) w="靠近磁赤道，磁力線幾乎與地面平行，指南針水平指向南北。";
+  else if(flipE) w="磁極倒轉時，指南針的 N 極改指向南方——岩石中保存的古地磁記錄了這種倒轉。";
+  else w=dip>0?"地磁赤道以北（例如台灣）：磁力線斜斜進入地面，水平的指南針 N 極指北，可上下轉的磁針 N 極朝下傾斜。":"地磁赤道以南：磁力線斜斜離開地面，指南針 N 極仍指北，但可上下轉的磁針 N 極朝上傾斜。";
+  if(comp.r>2.0) w="離地球越遠，磁力線越疏、磁場越弱（偶極磁場約與距離的三次方成反比）。這裡的磁場約是地表同緯度的 "+(1/comp.r**3).toFixed(3)+" 倍。";
+  $("#rWhy").textContent=w+(comp.r<=2.0?`（此處地理緯度約 ${lat>0?"北緯 ":lat<0?"南緯 ":""}${Math.abs(lat)}°）`:"");
+}
+$("#sTilt").oninput=e=>{tilt=+e.target.value*Math.PI/180;};
+$("#cFlip").onchange=e=>{flipE=e.target.checked;};
+{let drag=false;const pos=e=>{const r=cvB.getBoundingClientRect(),{cx,cy,R}=drawB.geo;return [(e.clientX-r.left-cx)/R,(cy-(e.clientY-r.top))/R];};
+  const set=e=>{let [wx,wy]=pos(e);let r=Math.hypot(wx,wy);const {cx,cy,R}=drawB.geo;const lim=Math.min(cx,cy)/R-.12;
+    r=Math.max(1.0,Math.min(lim,r));if(r<1.12)r=1.0;comp={r,th:Math.atan2(wy,wx)};};
+  cvB.addEventListener("pointerdown",e=>{drag=true;set(e);cvB.setPointerCapture(e.pointerId);e.preventDefault();});
+  cvB.addEventListener("pointermove",e=>{if(drag)set(e);});
+  const up=()=>{drag=false;};cvB.addEventListener("pointerup",up);cvB.addEventListener("pointercancel",up);}
+
+/* ================= 想一想 ================= */
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=$("#"+b.dataset.a);a.hidden=!a.hidden;});
+$("#q1").onclick=()=>{applyPre(0);$("#cInside").checked=true;opt.inside=true;probe={x:.02,y:0};cvA.scrollIntoView({behavior:"smooth",block:"center"});};
+$("#q3a").onclick=()=>{applyPre(2);cvA.scrollIntoView({behavior:"smooth",block:"center"});};
+$("#q3b").onclick=()=>{applyPre(1);cvA.scrollIntoView({behavior:"smooth",block:"center"});};
+$("#q4").onclick=()=>{comp={r:1.0,th:40*Math.PI/180};cvB.scrollIntoView({behavior:"smooth",block:"center"});};
+
+applyPre(0);
+function loop(){drawA();uiA();drawB();uiB();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
