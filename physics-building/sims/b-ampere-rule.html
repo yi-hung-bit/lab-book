@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電流磁效應與安培右手定則</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--nred:#ff4f5e;--sblue:#4f8dff;--vio:#8b8cff;--cu:#e39a5b;--cur:#ff5fa2}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,95,162,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+h2{font-size:18px;margin:26px 0 0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h2 small{font-size:13px;color:var(--muted);font-weight:400}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+#cvA{height:430px}#cvB{height:420px}#cvC{height:420px}#cvD{height:380px}
+@media(max-width:560px){#cvA{height:520px}#cvB{height:360px}#cvC{height:340px}#cvD{height:330px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+label.ck{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer}
+label.ck input{accent-color:#ffd166;width:16px;height:16px}
+.read{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.read .wide{grid-column:1/-1}
+.read .wide b{font-family:"Noto Sans TC",sans-serif;font-size:14px}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.ok{color:var(--phos)!important}.bad{color:var(--nred)!important}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">4-1 · Magnetic Effect of Current &amp; Ampère's Right-Hand Rule</div>
+  <h1>電流磁效應與安培右手定則</h1>
+  <p class="lede">1820 年厄斯特發現：導線通電時，旁邊的磁針會偏轉，電流會在周圍產生磁場。長直導線的磁場是一圈圈以導線為中心的同心圓，越靠近導線越強、電流越大越強；方向用安培右手定則判斷：<b style="color:var(--acc);font-weight:500">右手握住導線，拇指指電流方向，四指彎曲的方向就是磁場方向</b>。環形導線與螺線管則反過來：四指沿電流方向彎曲，拇指指的是線圈中心（管內）的磁場方向。</p>
+
+  <h2>① 示範實驗 1：導線上方的小羅盤 <small>先斷電讓磁針與導線平行，再通電觀察 N 極偏轉（p.96）</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">俯視圖＋剖面圖</span><span class="n">導線沿南北方向放置</span></div>
+      <div class="box"><canvas id="cvA" aria-label="長直導線與小羅盤，通電後磁針偏轉"></canvas></div>
+      <div class="legend"><span><i style="background:var(--cu)"></i>導線</span><span><i style="background:var(--cur)"></i>電流 I</span><span><i style="background:var(--sblue)"></i>地磁水平分量 B<sub>地</sub></span><span><i style="background:var(--phos)"></i>導線的磁場 B<sub>線</sub></span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">實驗操作</span><span class="n" id="nA"></span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button id="sw" class="on">開關：接通</button><button id="dirA">電流向北 ↑</button></div>
+        <div class="seg" style="margin-top:8px"><button data-pos="1" class="on">羅盤在導線上方</button><button data-pos="-1">羅盤在導線下方</button></div>
+        <div class="ctl"><div class="r"><label for="sI">電流 I</label><span id="oI"></span></div><input type="range" id="sI" min="0.2" max="5" step="0.1" value="2"></div>
+        <div class="ctl"><div class="r"><label for="sR">羅盤中心到導線的距離 r</label><span id="oR"></span></div><input type="range" id="sR" min="0.5" max="10" step="0.1" value="1"></div>
+        <div class="ctl"><div class="r"><label for="sN">導線繞的匝數（探究 2）</label><span id="oN"></span></div><input type="range" id="sN" min="1" max="10" step="1" value="1"></div>
+        <div class="read">
+          <div><small>導線在羅盤處的磁場 B<sub>線</sub></small><b id="rBw"></b></div>
+          <div><small>地磁水平分量 B<sub>地</sub></small><b>35 μT（向北）</b></div>
+          <div><small>N 極偏離北方</small><b id="rAng"></b></div>
+          <div><small>B<sub>線</sub> ÷ B<sub>地</sub> = tan θ</small><b id="rTan"></b></div>
+          <div class="wide"><small>右手定則判斷</small><b id="rRule"></b></div>
+        </div>
+        <div class="note" id="seeA"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>② 長直導線的同心圓磁力線 <small>電流垂直紙面；拖曳黃色小磁針到各處（圖 4-1、圖 4-2）</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">剖面（看導線的截面）</span><span class="n">畫面寬 20 cm</span></div>
+      <div class="box"><canvas id="cvB" aria-label="長直導線截面的同心圓磁力線，可拖曳小磁針"></canvas></div>
+      <div class="legend"><span><i style="background:#cfd8e8"></i>磁力線（越內圈越密）</span><span><i style="background:var(--acc)"></i>可拖曳的小磁針（紅端是 N）</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">電流方向與大小</span><span class="n">⊙ 射出紙面、⊗ 射入紙面</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button data-dirb="1" class="on">⊙ 電流射出紙面</button><button data-dirb="-1">⊗ 電流射入紙面</button></div>
+        <div class="ctl"><div class="r"><label for="sIB">電流 I</label><span id="oIB"></span></div><input type="range" id="sIB" min="0" max="20" step="0.5" value="10"></div>
+        <div class="seg" style="margin-top:10px;gap:10px 16px">
+          <label class="ck"><input type="checkbox" id="cRing" checked>一圈小磁針</label>
+          <label class="ck"><input type="checkbox" id="cIron">灑鐵屑</label>
+          <label class="ck"><input type="checkbox" id="cHand" checked>右手示意</label>
+        </div>
+        <div class="read">
+          <div><small>小磁針到導線的距離 r</small><b id="rRB"></b></div>
+          <div><small>該處磁場 B</small><b id="rBB"></b></div>
+          <div class="wide"><small>和距離 2 cm 處比較</small><b id="rCmp"></b></div>
+        </div>
+        <div class="note">磁力線是<b>以導線為圓心的同心圓</b>，切線方向就是磁場方向；<b>越靠近導線越密</b>（磁場越強），距離加倍磁場減半，B 與 I 成正比、與 r 成反比。課本旁的問題「同心圓磁力線疏密是否相同？」答案是不同。（補充：B = μ₀I／2πr，μ₀ = 4π × 10⁻⁷ T·m/A）</div>
+      </div>
+    </section>
+  </div>
+
+  <h2>③ 環形導線與螺線管 <small>剖面看磁力線；四指沿電流方向彎曲，拇指指管內磁場（圖 4-2 下、圖 4-3）</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">剖面（含中心軸的平面）</span><span class="n" id="nC"></span></div>
+      <div class="box"><canvas id="cvC" aria-label="環形導線或螺線管的磁力線剖面"></canvas></div>
+      <div class="legend"><span><i style="background:var(--cu)"></i>導線截面 ⊙／⊗</span><span><i style="background:#cfd8e8"></i>磁力線</span><span><i style="background:var(--nred)"></i>N 端</span><span><i style="background:var(--sblue)"></i>S 端</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">線圈</span><span class="n">半徑 3 cm</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button data-shape="loop" class="on">環形導線（1 圈）</button><button data-shape="sol">螺線管</button></div>
+        <div class="seg" style="margin-top:8px"><button id="dirC">反轉電流方向</button></div>
+        <div class="ctl" id="wrapNC"><div class="r"><label for="sNC">螺線管匝數</label><span id="oNC"></span></div><input type="range" id="sNC" min="2" max="30" step="1" value="12"></div>
+        <div class="ctl" id="wrapLC"><div class="r"><label for="sLC">螺線管長度</label><span id="oLC"></span></div><input type="range" id="sLC" min="4" max="16" step="0.5" value="12"></div>
+        <div class="ctl"><div class="r"><label for="sIC">電流 I</label><span id="oIC"></span></div><input type="range" id="sIC" min="0.5" max="5" step="0.1" value="2"></div>
+        <div class="read">
+          <div><small>中心的磁場</small><b id="rBC"></b></div>
+          <div><small>中心磁場方向</small><b id="rDC"></b></div>
+          <div class="wide"><small>像一根棒狀磁鐵</small><b id="rNS"></b></div>
+        </div>
+        <div class="note" id="seeC"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>④ 範例練習：磁場的疊加 <small>每條導線的磁場用右手定則判斷方向，再加起來</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t" id="tD">範例 4-1</span><span class="n">點導線可以改電流方向</span></div>
+      <div class="box"><canvas id="cvD" aria-label="範例的導線與各點的磁場"></canvas></div>
+      <div class="legend" id="lgD"></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">題目</span><span class="n">先自己判斷再看答案</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button data-ex="1" class="on">範例 4-1　三條平行導線</button><button data-ex="2">範例 4-2　兩條斜交導線</button></div>
+        <div class="seg" style="margin-top:8px"><button id="resetD">恢復課本的電流方向</button><button id="showD">顯示各導線的磁場</button></div>
+        <div class="note" id="qD" style="color:var(--txt)"></div>
+        <div class="read" id="rD"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>想一想</h2>
+  <div id="quiz"></div>
+
+  <footer><b>說明：</b>① 羅盤處的磁場 = 地磁水平分量（取台灣附近約 3.5 × 10⁻⁵ T，向北）＋導線的磁場 B = μ₀NI／2πr（N 匝導線疊在一起），磁針 N 極指向合磁場方向，偏角 tan θ = B<sub>線</sub>／B<sub>地</sub>；這裡只看水平分量，羅盤在導線正上方或正下方時導線的磁場剛好是水平的。② 磁力線畫在磁場等差的半徑上（r ∝ I／n），所以電流越大、越靠近導線，線越密。③ 環形線圈用完整的必歐－沙伐定律（橢圓積分）計算每一圈的磁場再相加，從中心截面等間隔出發描出磁力線；長螺線管管內近似 B = μ₀nI（n 為每公尺匝數）。④ 範例的導線視為無限長，磁場大小與距離成反比。參考：基礎物理 第 4 章 4-1 電流的磁效應（p.91–96 圖 4-1～4-3、範例 4-1、範例 4-2、示範實驗 1）。</footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const fix=(v,d)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+const MU0=4*Math.PI*1e-7;
+function setup(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
+  const w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+  const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return {x,W:r.width,H:r.height};}
+function arrowHead(x,px,py,ang,sz,col){x.save();x.translate(px,py);x.rotate(ang);x.fillStyle=col;x.beginPath();x.moveTo(sz,0);x.lineTo(-sz*.7,sz*.6);x.lineTo(-sz*.7,-sz*.6);x.closePath();x.fill();x.restore();}
+function arrow(x,x0,y0,x1,y1,col,lw=2.5,hs=8){const a=Math.atan2(y1-y0,x1-x0),L=Math.hypot(x1-x0,y1-y0);if(L<1)return;
+  x.strokeStyle=col;x.lineWidth=lw;x.beginPath();x.moveTo(x0,y0);x.lineTo(x1-Math.cos(a)*hs*.6,y1-Math.sin(a)*hs*.6);x.stroke();arrowHead(x,x1,y1,a,hs,col);}
+function needle(x,px,py,ang,L,w){x.save();x.translate(px,py);x.rotate(ang);
+  x.fillStyle="#ff4f5e";x.beginPath();x.moveTo(L,0);x.lineTo(0,w);x.lineTo(0,-w);x.closePath();x.fill();
+  x.fillStyle="#dfe6f2";x.beginPath();x.moveTo(-L,0);x.lineTo(0,w);x.lineTo(0,-w);x.closePath();x.fill();
+  x.fillStyle="#0c1322";x.beginPath();x.arc(0,0,Math.max(1.5,w*.45),0,7);x.fill();x.restore();}
+function wireDot(x,px,py,R,dir,col="#e39a5b"){ // dir +1 ⊙ 射出、-1 ⊗ 射入
+  x.fillStyle="#2a1a10";x.strokeStyle=col;x.lineWidth=2;x.beginPath();x.arc(px,py,R,0,7);x.fill();x.stroke();
+  x.strokeStyle=x.fillStyle="#ffd9b8";
+  if(dir>0){x.beginPath();x.arc(px,py,R*.28,0,7);x.fill();}
+  else if(dir<0){const k=R*.5;x.lineWidth=2;x.beginPath();x.moveTo(px-k,py-k);x.lineTo(px+k,py+k);x.moveTo(px+k,py-k);x.lineTo(px-k,py+k);x.stroke();}}
+const fmtB=b=>{const u=b*1e6;return u>=100?u.toFixed(0)+" μT":u>=10?u.toFixed(1)+" μT":u.toFixed(2)+" μT";};
+const sci=v=>{if(v===0)return "0";const e=Math.floor(Math.log10(Math.abs(v)));const m=v/10**e;return m.toFixed(2)+" × 10"+String(e).replace("-","⁻").replace(/\d/g,d=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[d]);};
+
+/* ================= ① 示範實驗 1 ================= */
+const BE=35e-6;
+const A={on:true,dir:1,pos:1,I:2,r:1,N:1,th:0,vel:0};
+const cvA=$("#cvA");
+function bwA(){return A.on?MU0*A.N*A.I/(2*Math.PI*A.r/100):0;}
+function targetA(){ // 磁針 N 極偏角（由北向東為正）
+  // 電流向北(+y)、羅盤在上方(+z)：B = ŷ×ẑ = +x̂ 東；下方 → 西；電流反向 → 再反
+  const bx=bwA()*A.dir*A.pos;return Math.atan2(bx,BE);}
+function uiA(){
+  $("#oI").textContent=A.I.toFixed(1)+" A";$("#oR").textContent=A.r.toFixed(1)+" cm";$("#oN").textContent=A.N+" 匝";
+  const bw=bwA(),t=targetA(),deg=t*180/Math.PI;
+  $("#rBw").textContent=A.on?fmtB(bw):"0（斷電）";
+  $("#rAng").textContent=Math.abs(deg)<.05?"0°（指北）":Math.abs(deg).toFixed(1)+"° 偏"+(deg>0?"東":"西");
+  $("#rTan").textContent=A.on?(bw/BE).toFixed(2):"0";
+  $("#nA").textContent=A.on?"通電中":"未通電";
+  const east=A.dir*A.pos>0;
+  $("#rRule").textContent=A.on?`拇指指${A.dir>0?"北":"南"}（電流方向），四指在導線${A.pos>0?"上方":"下方"}彎向${east?"東":"西"} → N 極偏${east?"東":"西"}`:"沒有電流就沒有磁場，磁針只受地磁影響，指北且與導線平行";
+  let s;
+  if(!A.on) s="步驟 1：開關打開，<b>磁針與導線平行</b>（都指南北）。按「接通」看看 N 極往哪邊偏。";
+  else if(A.r>=6) s="步驟 3(1)：羅盤拉遠後，導線的磁場變弱（<b>B ∝ 1/r</b>），地磁占上風，偏轉幅度變小。";
+  else if(A.N>1) s=`探究 2：${A.N} 匝導線疊在一起，相當於電流變成 ${A.N} 倍，磁場也變成 ${A.N} 倍，偏得更多，但不會超過 90°（地磁一直在）。`;
+  else s=`把羅盤從導線上方移到下方，或把電流反向，<b>偏轉方向都會相反</b>；兩個同時改，偏轉方向不變。偏角由 B<sub>線</sub> 和 B<sub>地</sub> 的合成決定：tan θ = B<sub>線</sub>／B<sub>地</sub>。`;
+  $("#seeA").innerHTML=s;
+}
+function drawA(){
+  const {x,W,H}=setup(cvA);x.clearRect(0,0,W,H);
+  const side=W>=520; // 寬：左右兩格；窄：上下兩格
+  const P1=side?{x:0,y:0,w:W*.62,h:H}:{x:0,y:0,w:W,h:H*.6};
+  const P2=side?{x:W*.62,y:0,w:W*.38,h:H}:{x:0,y:H*.6,w:W,h:H*.4};
+  // ---- 俯視 ----
+  x.save();x.beginPath();x.rect(P1.x,P1.y,P1.w,P1.h);x.clip();
+  x.fillStyle="#0b1120";x.fillRect(P1.x,P1.y,P1.w,P1.h);
+  x.strokeStyle="rgba(120,140,170,.08)";x.lineWidth=1;
+  for(let gx=P1.x+20;gx<P1.x+P1.w;gx+=28){x.beginPath();x.moveTo(gx,P1.y);x.lineTo(gx,P1.y+P1.h);x.stroke();}
+  for(let gy=P1.y+20;gy<P1.y+P1.h;gy+=28){x.beginPath();x.moveTo(P1.x,gy);x.lineTo(P1.x+P1.w,gy);x.stroke();}
+  const cx=P1.x+P1.w/2,cy=P1.y+P1.h/2,R=Math.min(P1.w,P1.h)*.28;
+  x.fillStyle="#8492aa";x.font="600 13px 'Noto Sans TC'";x.textAlign="center";
+  x.fillText("北",cx,P1.y+18);x.fillText("南",cx,P1.y+P1.h-8);x.textAlign="left";x.fillText("東",P1.x+P1.w-22,cy+5);x.fillText("西",P1.x+8,cy+5);
+  x.font="12px 'Noto Sans TC'";x.fillStyle="#5b6880";x.fillText("俯視",P1.x+8,P1.y+18);
+  const drawWire=()=>{for(let k=0;k<A.N;k++){const off=(k-(A.N-1)/2)*3;x.strokeStyle=k%2?"#c9824a":"#e39a5b";x.lineWidth=A.N>1?3:6;x.beginPath();x.moveTo(cx+off,P1.y+26);x.lineTo(cx+off,P1.y+P1.h-24);x.stroke();}
+    if(A.on){const t=performance.now()/1000;x.fillStyle="#ff5fa2";for(let k=0;k<6;k++){let yy=((k/6+t*.25*A.dir)%1+1)%1;yy=P1.y+30+yy*(P1.h-60);arrowHead(x,cx+12,yy,A.dir>0?-Math.PI/2:Math.PI/2,6,"rgba(255,95,162,.75)");}
+      x.fillStyle="#ff5fa2";x.font="italic 700 15px serif";x.fillText("I",cx+20,P1.y+44);}};
+  const drawCompass=()=>{x.globalAlpha=A.pos<0?.85:1;
+    x.fillStyle="#141c2e";x.strokeStyle="#9aa6bb";x.lineWidth=2;x.beginPath();x.arc(cx,cy,R,0,7);x.fill();x.stroke();
+    x.strokeStyle="#33405a";x.lineWidth=1;for(let k=0;k<36;k++){const a=k*Math.PI/18,l=k%9?5:10;x.beginPath();x.moveTo(cx+Math.sin(a)*(R-2),cy-Math.cos(a)*(R-2));x.lineTo(cx+Math.sin(a)*(R-2-l),cy-Math.cos(a)*(R-2-l));x.stroke();}
+    x.fillStyle="#cfd8e8";x.font="700 12px 'JetBrains Mono'";x.textAlign="center";x.fillText("N",cx,cy-R+22);x.fillText("S",cx,cy+R-14);x.textAlign="left";
+    needle(x,cx,cy,A.th-Math.PI/2,R*.82,R*.11);x.globalAlpha=1;};
+  if(A.pos>0){drawWire();drawCompass();}else{drawCompass();x.globalAlpha=.95;drawWire();x.globalAlpha=1;}
+  // 向量
+  const bwx=bwA()*A.dir*A.pos;
+  const bw2=104,bh=92,bx0=P1.x+P1.w-bw2-6,by0=P1.y+6;
+  x.fillStyle="rgba(7,10,18,.85)";x.strokeStyle="#222c42";x.lineWidth=1;x.beginPath();x.roundRect?x.roundRect(bx0,by0,bw2,bh,8):x.rect(bx0,by0,bw2,bh);x.fill();x.stroke();
+  const vx=bx0+bw2/2,vy=by0+bh-14,L=48,m=Math.max(BE,Math.abs(bwx));const ex=L*BE/m, wx=L*bwx/m;
+  arrow(x,vx,vy,vx,vy-ex,"#4f8dff",2.5,8);
+  if(Math.abs(wx)>1){arrow(x,vx,vy-ex,vx+wx,vy-ex,"#7dffc4",2.5,8);x.setLineDash([4,4]);arrow(x,vx,vy,vx+wx,vy-ex,"#ffd166",2,7);x.setLineDash([]);}
+  x.font="11px 'Noto Sans TC'";x.fillStyle="#4f8dff";x.fillText("B地",vx+(wx>0?-26:4),vy-4);
+  if(Math.abs(wx)>1){x.fillStyle="#7dffc4";x.fillText("B線",vx+wx/2-10,vy-ex-6);}
+  x.fillStyle="#5b6880";x.fillText("合成",bx0+6,by0+14);
+  if(A.pos<0){x.fillStyle="#ffd166";x.font="12px 'Noto Sans TC'";x.fillText("羅盤在導線下方",P1.x+8,P1.y+36);}
+  x.restore();
+  // ---- 剖面（由南往北看：導線截面，電流向北 = 射入紙面 ⊗） ----
+  x.save();x.beginPath();x.rect(P2.x,P2.y,P2.w,P2.h);x.clip();
+  x.fillStyle="#070b15";x.fillRect(P2.x,P2.y,P2.w,P2.h);
+  x.strokeStyle="#222c42";x.beginPath();if(side){x.moveTo(P2.x+.5,P2.y);x.lineTo(P2.x+.5,P2.y+P2.h);}else{x.moveTo(P2.x,P2.y+.5);x.lineTo(P2.x+P2.w,P2.y+.5);}x.stroke();
+  x.fillStyle="#5b6880";x.font="12px 'Noto Sans TC'";x.fillText("剖面：站在南邊往北看",P2.x+8,P2.y+18);
+  const qx=P2.x+P2.w/2,qy=P2.y+P2.h/2+6;
+  x.fillStyle="#8492aa";x.fillText("上",qx-6,P2.y+36);x.fillText("下",qx-6,P2.y+P2.h-8);x.fillText("西",P2.x+8,qy+4);x.fillText("東",P2.x+P2.w-22,qy+4);
+  const rpx=Math.min(P2.h*.32,P2.w*.36)*Math.min(1,.35+A.r/10*.65);
+  const d=A.on?(A.dir>0?-1:1):0; // 電流向北 → 從南往北看是射入 ⊗
+  if(A.on){x.strokeStyle="rgba(125,255,196,.45)";x.lineWidth=1.3;[.45,1,1.6].forEach(f=>{const rr=rpx*f;x.beginPath();x.arc(qx,qy,rr,0,7);x.stroke();
+      const ccw=d>0; // ⊙ 逆時針
+      [0,Math.PI].forEach(a0=>{const a=a0+.6;arrowHead(x,qx+Math.cos(a)*rr,qy+Math.sin(a)*rr,a+(ccw?-Math.PI/2:Math.PI/2),5,"rgba(125,255,196,.8)");});});}
+  wireDot(x,qx,qy,9,d);
+  const py=qy-A.pos*rpx;
+  x.fillStyle="#141c2e";x.strokeStyle="#9aa6bb";x.lineWidth=1.5;x.beginPath();x.ellipse(qx,py,22,6,0,0,7);x.fill();x.stroke();
+  if(A.on){const bx=A.dir*A.pos;arrow(x,qx,py-14,qx+bx*34,py-14,"#7dffc4",2.2,7);}
+  x.fillStyle="#cfd8e8";x.font="11.5px 'Noto Sans TC'";x.fillText("羅盤",qx+26,py+4);
+  x.restore();
+}
+$("#sw").onclick=()=>{A.on=!A.on;$("#sw").classList.toggle("on",A.on);$("#sw").textContent=A.on?"開關：接通":"開關：打開（斷電）";uiA();};
+$("#dirA").onclick=()=>{A.dir*=-1;$("#dirA").textContent=A.dir>0?"電流向北 ↑":"電流向南 ↓";uiA();};
+$$("[data-pos]").forEach(b=>b.onclick=()=>{A.pos=+b.dataset.pos;$$("[data-pos]").forEach(c=>c.classList.toggle("on",c===b));uiA();});
+[["sI","I"],["sR","r"],["sN","N"]].forEach(([id,k])=>$("#"+id).oninput=e=>{A[k]=+e.target.value;uiA();});
+
+/* ================= ② 長直導線剖面 ================= */
+const Bst={dir:1,I:10,probe:{x:.045,y:.025},ring:true,iron:false,hand:true,drag:false};
+const cvB=$("#cvB");const VB=.20;let gB={W:1,H:1,s:1};
+const toPxB=(X,Y)=>[gB.W/2+X*gB.s,gB.H/2-Y*gB.s], toWB=(px,py)=>[(px-gB.W/2)/gB.s,(gB.H/2-py)/gB.s];
+const ironB=[];(function(){let s=777;const r=()=>(s=(s*16807)%2147483647)/2147483647;for(let i=0;i<2200;i++)ironB.push([r()-.5,r()-.5,r()]);})();
+function bAt(X,Y){const r=Math.hypot(X,Y);const B=MU0*Bst.I/(2*Math.PI*Math.max(r,1e-4));const ux=-Y/r*Bst.dir,uy=X/r*Bst.dir;return {B,ux,uy,r};} // ⊙ 逆時針
+function uiB(){$("#oIB").textContent=Bst.I.toFixed(1)+" A";
+  const {B,r}=bAt(Bst.probe.x,Bst.probe.y);$("#rRB").textContent=(r*100).toFixed(1)+" cm";$("#rBB").textContent=Bst.I>0?fmtB(B):"0";
+  $("#rCmp").textContent=Bst.I>0?`2 cm 處 ${fmtB(MU0*Bst.I/(2*Math.PI*.02))}，這裡是它的 ${(0.02/r).toFixed(2)} 倍（= 2 cm ÷ ${(r*100).toFixed(1)} cm）`:"沒有電流，小磁針只受地磁（這裡不畫）";}
+function drawB(){const {x,W,H}=setup(cvB);gB={W,H,s:Math.min(W,H*1.4)/VB};x.clearRect(0,0,W,H);
+  const [ox,oy]=toPxB(0,0);
+  if(Bst.iron&&Bst.I>0){x.lineWidth=1.2;for(const [rx,ry,rr] of ironB){const X=rx*W/gB.s,Y=ry*H/gB.s;const b=bAt(X,Y);if(b.r<.006)continue;const st=b.B/(MU0*20/(2*Math.PI*.01));if(rr>Math.min(1,st*5+.05))continue;
+      const [px,py]=toPxB(X,Y);x.strokeStyle=`rgba(190,200,215,${Math.min(.9,.3+st*2)})`;x.beginPath();x.moveTo(px-b.ux*4,py+b.uy*4);x.lineTo(px+b.ux*4,py-b.uy*4);x.stroke();}}
+  if(Bst.I>0){ // 第 n 條線半徑 r_n ∝ I/n，相鄰兩圈的 B 差相同
+    for(let n=1;n<=14;n++){const rr=(.10*Bst.I/20)/n*2.2;if(rr<.006||rr>.16)continue;const R=rr*gB.s;
+      x.strokeStyle="rgba(207,216,232,.55)";x.lineWidth=1.3;x.beginPath();x.arc(ox,oy,R,0,7);x.stroke();
+      const ccw=Bst.dir>0;[.3,.3+Math.PI*2/3,.3+Math.PI*4/3].forEach(a=>{const px=ox+Math.cos(a)*R,py=oy-Math.sin(a)*R;arrowHead(x,px,py,-a+(ccw?-Math.PI/2:Math.PI/2),5,"rgba(207,216,232,.85)");});}}
+  if(Bst.ring&&Bst.I>0){for(let k=0;k<8;k++){const a=k*Math.PI/4,X=Math.cos(a)*.035,Y=Math.sin(a)*.035,b=bAt(X,Y);const [px,py]=toPxB(X,Y);
+      x.fillStyle="#141c2e";x.strokeStyle="#5b6880";x.beginPath();x.arc(px,py,11,0,7);x.fill();x.stroke();needle(x,px,py,Math.atan2(-b.uy,b.ux),9,2.4);}}
+  wireDot(x,ox,oy,12,Bst.I>0?Bst.dir:0);
+  x.fillStyle="#ff5fa2";x.font="italic 700 14px serif";x.fillText("I",ox+15,oy-12);
+  // 探針
+  const b=bAt(Bst.probe.x,Bst.probe.y);const [px,py]=toPxB(Bst.probe.x,Bst.probe.y);
+  x.fillStyle="#1d1704";x.strokeStyle="#ffd166";x.lineWidth=2.5;x.beginPath();x.arc(px,py,17,0,7);x.fill();x.stroke();
+  needle(x,px,py,Bst.I>0?Math.atan2(-b.uy,b.ux):-Math.PI/2,14,3.4);
+  x.setLineDash([3,4]);x.strokeStyle="rgba(255,209,102,.4)";x.lineWidth=1;x.beginPath();x.moveTo(ox,oy);x.lineTo(px,py);x.stroke();x.setLineDash([]);
+  // 右手示意
+  if(Bst.hand){const hx=W-78,hy=62;x.fillStyle="rgba(10,15,26,.85)";x.strokeStyle="#222c42";x.beginPath();x.roundRect?x.roundRect(hx-60,hy-48,128,104,10):x.rect(hx-60,hy-48,128,104);x.fill();x.stroke();
+    x.fillStyle="#8492aa";x.font="11.5px 'Noto Sans TC'";x.fillText("安培右手定則",hx-52,hy-30);
+    // 拇指（電流）：⊙ 拇指朝向自己 → 畫成點；四指彎曲 → 圓弧箭頭
+    wireDot(x,hx,hy+14,8,Bst.dir);x.strokeStyle="#ffc69a";x.lineWidth=5;x.lineCap="round";
+    const ccw=Bst.dir>0,sa=ccw?-.4:.4,ea=ccw?-Math.PI*1.7:Math.PI*1.7;x.beginPath();x.arc(hx,hy+14,24,sa,ea,ccw);x.stroke();x.lineCap="butt";
+    arrowHead(x,hx+Math.cos(ea)*24,hy+14+Math.sin(ea)*24,ea+(ccw?-Math.PI/2:Math.PI/2),7,"#ffc69a");
+    x.fillStyle="#cfd8e8";x.font="11px 'Noto Sans TC'";x.fillText("拇指＝I",hx-52,hy+52);x.fillText("四指＝B",hx+8,hy+52);}
+}
+function posB(e){const r=cvB.getBoundingClientRect();return toWB(e.clientX-r.left,e.clientY-r.top);}
+cvB.addEventListener("pointerdown",e=>{const [X,Y]=posB(e);if(Math.hypot(X-Bst.probe.x,Y-Bst.probe.y)<26/gB.s){Bst.drag=true;cvB.setPointerCapture(e.pointerId);}});
+cvB.addEventListener("pointermove",e=>{if(!Bst.drag)return;let [X,Y]=posB(e);const r=Math.hypot(X,Y);if(r<.01){X*=.01/r;Y*=.01/r;}
+  const hw=gB.W/gB.s/2-.008,hh=gB.H/gB.s/2-.008;Bst.probe.x=Math.max(-hw,Math.min(hw,X));Bst.probe.y=Math.max(-hh,Math.min(hh,Y));uiB();});
+cvB.addEventListener("pointerup",()=>Bst.drag=false);
+$$("[data-dirb]").forEach(b=>b.onclick=()=>{Bst.dir=+b.dataset.dirb;$$("[data-dirb]").forEach(c=>c.classList.toggle("on",c===b));uiB();});
+$("#sIB").oninput=e=>{Bst.I=+e.target.value;uiB();};
+$("#cRing").onchange=e=>Bst.ring=e.target.checked;$("#cIron").onchange=e=>Bst.iron=e.target.checked;$("#cHand").onchange=e=>Bst.hand=e.target.checked;
+
+/* ================= ③ 環形導線與螺線管 ================= */
+/* 單一圓環（半徑 a，位於 z=z0，電流 I，從 +z 往下看逆時針為正）在 (ρ,z) 的磁場：完整橢圓積分 */
+function ellipKE(m){let a=1,b=Math.sqrt(1-m),c=Math.sqrt(m),sum=c*c/2,p=.5;
+  for(let i=0;i<30&&Math.abs(c)>1e-15;i++){const an=(a+b)/2;c=(a-b)/2;b=Math.sqrt(a*b);a=an;p*=2;sum+=p*c*c;}
+  const K=Math.PI/(2*a);return [K,K*(1-sum)];}
+function loopB(a,I,rho,z){const q=(a+rho)**2+z*z,m=4*a*rho/q;if(m>=1)return [0,0];const [K,E]=ellipKE(m);const d=(a-rho)**2+z*z;const c=MU0*I/(2*Math.PI*Math.sqrt(q));
+  const bz=c*(K+(a*a-rho*rho-z*z)/d*E);const br=rho<1e-9?0:c*z/rho*(-K+(a*a+rho*rho+z*z)/d*E);return [br,bz];}
+const C={shape:"loop",dir:1,N:12,L:12,I:2,lines:[]};
+const AR=.03;
+function coils(){if(C.shape==="loop")return [0];const L=C.L/100,out=[];for(let i=0;i<C.N;i++)out.push(C.N===1?0:-L/2+L*i/(C.N-1));return out;}
+function fieldC(X,Z){ // X 為截面上的徑向座標（可正負），Z 為軸向
+  let bx=0,bz=0;const rho=Math.abs(X),sg=X<0?-1:1;for(const z0 of coils()){const [br,b]=loopB(AR,C.I*C.dir,rho,Z-z0);bx+=br*sg;bz+=b;}return [bx,bz];}
+let gC={W:1,H:1,s:1,VW:.3};
+const toPxC=(Z,X)=>[gC.W/2+Z*gC.s,gC.H/2-X*gC.s]; // 軸向畫成水平
+function traceC(x0,z0,sgn){const pts=[[x0,z0]];let X=x0,Z=z0;const h=.0015,limZ=gC.W/gC.s/2+.01,limX=gC.H/gC.s/2+.01;const cs=coils();let len=0;
+  for(let i=0;i<2500;i++){let [bx,bz]=fieldC(X,Z);let m=Math.hypot(bx,bz);if(m<1e-12)break;const mx=X+sgn*h/2*bx/m,mz=Z+sgn*h/2*bz/m;[bx,bz]=fieldC(mx,mz);m=Math.hypot(bx,bz);if(m<1e-12)break;
+    X+=sgn*h*bx/m;Z+=sgn*h*bz/m;len+=h;pts.push([X,Z]);if(Math.abs(Z)>limZ||Math.abs(X)>limX)return {pts,closed:false};
+    if(cs.some(z0=>Math.hypot(Math.abs(X)-AR,Z-z0)<.0012))return {pts,closed:false};
+    if(len>.01&&Math.hypot(X-x0,Z-z0)<.0014){pts.push([x0,z0]);return {pts,closed:true};}}
+  return {pts,closed:false};}
+function geoC(){const r=cvC.getBoundingClientRect();const W=Math.max(r.width,50),H=Math.max(r.height,50);const VW=C.shape==="loop"?.16:Math.max(.16,C.L/100+.08);gC={W,H,s:Math.min(W/VW,H/.13),VW};}
+function computeC(){geoC();C.lines=[];const n=C.shape==="loop"?9:11;
+  for(let k=0;k<n;k++){const x0=(-1+(2*k+1)/n)*AR*.94;const f=traceC(x0,0,1);if(f.closed){C.lines.push(f.pts);continue;}const b=traceC(x0,0,-1);C.lines.push(b.pts.reverse().concat(f.pts.slice(1)));}}
+function uiC(){$("#oNC").textContent=C.N+" 匝";$("#oLC").textContent=C.L.toFixed(1)+" cm";$("#oIC").textContent=C.I.toFixed(1)+" A";
+  $("#wrapNC").hidden=$("#wrapLC").hidden=C.shape==="loop";
+  const [,bz]=fieldC(0,0);$("#rBC").textContent=fmtB(Math.abs(bz));
+  $("#rDC").textContent=bz>0?"向右 →":"向左 ←";
+  $("#rNS").textContent=bz>0?"右端是 N 極、左端是 S 極（磁力線從右端出來）":"左端是 N 極、右端是 S 極（磁力線從左端出來）";
+  $("#nC").textContent=C.shape==="loop"?"單圈環形導線":`${C.N} 匝、長 ${C.L} cm`;
+  if(C.shape==="loop") $("#seeC").innerHTML=`環中心的磁場 B = μ₀I／2a（a = 3 cm）。上下兩個截面的電流方向相反（一個 ⊙、一個 ⊗），各自繞出同心圓，在環中心<b>方向相同而加強</b>。四指沿電流方向彎，拇指就指中心磁場方向。`;
+  else{const n=(C.N/(C.L/100));const ideal=MU0*n*C.I;$("#seeC").innerHTML=`管內磁場<b>接近均勻</b>、方向平行中心軸；管外像棒狀磁鐵。長螺線管近似 B = μ₀nI = ${fmtB(ideal)}（n = ${n.toFixed(0)} 匝/m），實際中心值 ${fmtB(Math.abs(fieldC(0,0)[1]))}${C.L<8?"；管子越短、越粗，越不像理想螺線管":""}。匝數越密、電流越大，磁場越強。`;}
+  computeC();}
+function drawC(){const {x,W,H}=setup(cvC);geoC();
+  x.clearRect(0,0,W,H);const [cx,cy]=toPxC(0,0);
+  x.setLineDash([5,5]);x.strokeStyle="rgba(132,146,170,.35)";x.lineWidth=1;x.beginPath();x.moveTo(0,cy);x.lineTo(W,cy);x.stroke();x.setLineDash([]);
+  x.fillStyle="#5b6880";x.font="11.5px 'Noto Sans TC'";x.fillText("中心軸",6,cy-6);
+  // 線圈本體（淡色）
+  const cs=coils();const zl=Math.min(...cs),zr=Math.max(...cs);const [l1,t1]=toPxC(zl,AR),[r1,b1]=toPxC(zr,-AR);
+  x.fillStyle="rgba(227,154,91,.06)";x.fillRect(l1-10,t1,r1-l1+20,b1-t1);
+  // 磁力線
+  x.lineWidth=1.4;C.lines.forEach(pts=>{x.strokeStyle="rgba(207,216,232,.6)";x.beginPath();pts.forEach(([X,Z],i)=>{const [px,py]=toPxC(Z,X);i?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();
+    const step=Math.max(30,Math.floor(pts.length/3));for(let i=Math.floor(step/2);i<pts.length-2;i+=step){const [a,b]=toPxC(pts[i][1],pts[i][0]),[c,d]=toPxC(pts[i+2][1],pts[i+2][0]);arrowHead(x,a,b,Math.atan2(d-b,c-a),5,"rgba(207,216,232,.9)");}});
+  // 導線截面：上方 X=+AR，從 +z 看逆時針(dir>0) → 上方截面電流方向：在 (x=+a) 處逆時針電流沿 +y → 剖面 (z,x) 看… 以 (z 水平向右, x 向上) 平面，法向 = ẑ×x̂ = ŷ 指向觀者？
+  // ẑ×x̂ = ŷ，所以 +y 指出紙面：上方截面電流 +y → ⊙；下方 (x=-a) 電流 -y → ⊗
+  cs.forEach(z0=>{const [px,py]=toPxC(z0,AR),[qx,qy]=toPxC(z0,-AR);const R=Math.max(4,Math.min(9,(cs.length>1?(toPxC(cs[1],0)[0]-toPxC(cs[0],0)[0])*.42:9)));wireDot(x,px,py,R,C.dir);wireDot(x,qx,qy,R,-C.dir);});
+  // N/S 標示
+  const [,bz]=fieldC(0,0);const right=bz>0;const [ex]=toPxC(zr,0),[sx]=toPxC(zl,0);
+  x.font="900 22px 'JetBrains Mono'";x.fillStyle=right?"#ff4f5e":"#4f8dff";x.fillText(right?"N":"S",ex+16,cy-12);x.fillStyle=right?"#4f8dff":"#ff4f5e";x.fillText(right?"S":"N",sx-32,cy-12);
+  // 中心磁場箭頭
+  arrow(x,cx-(right?22:-22),cy,cx+(right?22:-22),cy,"#ffd166",3,9);
+  // 右手示意（左上）
+  x.fillStyle="rgba(10,15,26,.85)";x.strokeStyle="#222c42";x.beginPath();x.roundRect?x.roundRect(8,8,132,56,9):x.rect(8,8,132,56);x.fill();x.stroke();
+  x.fillStyle="#cfd8e8";x.font="11.5px 'Noto Sans TC'";x.fillText("四指沿電流 ⊙→⊗ 彎",16,28);x.fillText(`拇指 = 管內 B（${right?"向右":"向左"}）`,16,50);
+}
+$$("[data-shape]").forEach(b=>b.onclick=()=>{C.shape=b.dataset.shape;$$("[data-shape]").forEach(c=>c.classList.toggle("on",c===b));uiC();});
+$("#dirC").onclick=()=>{C.dir*=-1;uiC();};
+[["sNC","N"],["sLC","L"],["sIC","I"]].forEach(([id,k])=>$("#"+id).oninput=e=>{C[k]=+e.target.value;uiC();});
+
+/* ================= ④ 範例 ================= */
+const D={ex:1,w1:[-1,1,-1],w2:[1,1],show:false,hit:[]};
+function uiD(){
+  $$("[data-ex]").forEach(c=>c.classList.toggle("on",+c.dataset.ex===D.ex));
+  $("#tD").textContent=D.ex===1?"範例 4-1":"範例 4-2";$("#showD").textContent=D.show?"隱藏各導線的磁場":"顯示各導線的磁場";
+  const rd=$("#rD");
+  if(D.ex===1){
+    $("#qD").innerHTML=`甲、乙、丙三條長直導線電流量值都是 I，間距都是 d，P 在甲、乙中間。課本：甲 ⊗、乙 ⊙、丙 ⊗。<b>P 點的磁場方向為何？</b>`;
+    const xs=[0,2,3],xp=1;let tot=0;const parts=xs.map((xw,i)=>{const r=xp-xw;const by=D.w1[i]*Math.sign(r)/Math.abs(r);tot+=by;return by;}); // ⊙(+1) 在右側 r>0：ẑ×x̂=ŷ 向上
+    const nm=["甲","乙","丙"];
+    rd.innerHTML=parts.map((b,i)=>`<div><small>${nm[i]}（${D.w1[i]>0?"⊙":"⊗"}，距離 ${Math.abs(xp-xs[i])}d）</small><b>${b>0?"向上":"向下"} ${Math.abs(b)===1?"1":"½"} 單位</b></div>`).join("")+
+      `<div><small>P 點合磁場</small><b class="${tot===0?"":"ok"}">${Math.abs(tot)<1e-9?"0（沒有磁場）":(tot>0?"向上 ":"向下 ")+(Math.abs(tot)%1?Math.abs(tot).toFixed(1):Math.abs(tot))+" 單位"}</b></div>
+      <div class="wide"><small>想法</small><b>距離 d 的磁場算 1 單位，2d 的只有 ½ 單位（B ∝ 1/r）。課本答案：B甲 = B乙 ＞ B丙，合磁場向下。</b></div>`;
+  }else{
+    $("#qD").innerHTML=`兩條長直導線 A、B 都通過原點，與 x 軸夾 45°，電流量值相同、方向如箭頭。y 軸上有甲、丙，x 軸上有乙、丁。<b>四點有沒有磁場？方向為何？</b>（點導線可反轉電流）`;
+    const res=ptsD().map(p=>{const s=p.a+p.b;return `<div><small>${p.n}：A 給 ${p.a>0?"⊙":"⊗"}，B 給 ${p.b>0?"⊙":"⊗"}</small><b class="${s?"ok":""}">${s===0?"沒有磁場":s>0?"有，垂直穿出紙面 ⊙":"有，垂直穿入紙面 ⊗"}</b></div>`;});
+    rd.innerHTML=res.join("")+`<div class="wide"><small>想法</small><b>四點到兩導線的垂直距離相同，兩個磁場大小相等；方向相同就加倍，相反就抵消。</b></div>`;
+  }
+}
+function ptsD(){ // 導線 A 方向 (1,1)·w2[0]、B 方向 (1,-1)·w2[1]；點在平面上，B 垂直紙面，符號 = sign(u × r)
+  const P=[["甲",0,1],["乙",-1,0],["丙",0,-1],["丁",1,0]];
+  return P.map(([n,X,Y])=>{const a=Math.sign(D.w2[0]*(1*Y-1*X)),b=Math.sign(D.w2[1]*(1*Y-(-1)*X));return {n,X,Y,a,b};});}
+const cvD=$("#cvD");
+function drawD(){const {x,W,H}=setup(cvD);x.clearRect(0,0,W,H);D.hit=[];
+  if(D.ex===1){const d=Math.min(W/4.4,110),x0=W/2-1.5*d,y0=H*.45;
+    x.strokeStyle="#33405a";x.setLineDash([4,5]);x.beginPath();x.moveTo(x0-20,y0);x.lineTo(x0+3*d+20,y0);x.stroke();x.setLineDash([]);
+    const xs=[0,2,3],nm=["甲","乙","丙"];
+    xs.forEach((xw,i)=>{const px=x0+xw*d;wireDot(x,px,y0,14,D.w1[i]);D.hit.push({x:px,y:y0,r:22,f:()=>{D.w1[i]*=-1;uiD();}});
+      x.fillStyle="#cfd8e8";x.font="700 14px 'Noto Sans TC'";x.textAlign="center";x.fillText(nm[i],px,y0-24);x.textAlign="left";});
+    const pP=x0+d;x.fillStyle="#ffd166";x.beginPath();x.arc(pP,y0,4,0,7);x.fill();x.font="italic 700 15px serif";x.fillText("P",pP+6,y0-8);
+    x.fillStyle="#8492aa";x.font="12px 'JetBrains Mono'";x.textAlign="center";[0,1,2].forEach(k=>x.fillText("d",x0+(k+.5)*d,y0+30));x.textAlign="left";
+    let tot=0;const sc=Math.min(60,H*.18);const cols=["#7dffc4","#43d6ff","#8b8cff"];
+    xs.forEach((xw,i)=>{const r=1-xw;const by=D.w1[i]*Math.sign(r)/Math.abs(r);tot+=by;if(D.show){const ox=pP-30+i*16;arrow(x,ox,y0+50,ox,y0+50-by*sc,cols[i],2.2,7);x.fillStyle=cols[i];x.font="11px 'Noto Sans TC'";x.fillText(nm[i],ox-5,y0+50-by*sc-(by>0?8:-14));}});
+    if(Math.abs(tot)>1e-9){const ox=pP+40;arrow(x,ox,y0+50,ox,y0+50-tot*sc*.8,"#ffd166",3.5,10);x.fillStyle="#ffd166";x.font="12px 'Noto Sans TC'";x.fillText("合磁場",ox+8,y0+50-tot*sc*.4);}
+    $("#lgD").innerHTML=`<span><i style="background:var(--acc)"></i>P 點合磁場</span>${D.show?'<span><i style="background:#7dffc4"></i>甲</span><span><i style="background:#43d6ff"></i>乙</span><span><i style="background:#8b8cff"></i>丙</span>':""}<span>點 ⊙／⊗ 改方向</span>`;
+  }else{const s=Math.min(W,H)*.36,cx=W/2,cy=H/2;
+    x.strokeStyle="#5b6880";x.lineWidth=1;arrow(x,cx-s*1.2,cy,cx+s*1.25,cy,"#5b6880",1,7);arrow(x,cx,cy+s*1.2,cx,cy-s*1.25,"#5b6880",1,7);
+    x.fillStyle="#8492aa";x.font="italic 13px serif";x.fillText("x",cx+s*1.25,cy+16);x.fillText("y",cx+8,cy-s*1.2);
+    const pts=ptsD();
+    if(D.show){for(let gx=-4;gx<=4;gx++)for(let gy=-4;gy<=4;gy++){const X=gx/4,Y=gy/4;if(Math.abs(Y-X)<.08||Math.abs(Y+X)<.08)continue;
+        const a=Math.sign(D.w2[0]*(Y-X))/(Math.abs(Y-X)/Math.SQRT2),b=Math.sign(D.w2[1]*(Y+X))/(Math.abs(Y+X)/Math.SQRT2),t=a+b;const px=cx+X*s,py=cy-Y*s;
+        x.globalAlpha=Math.min(.9,.2+Math.abs(t)*.12);if(Math.abs(t)<.05){x.fillStyle="#5b6880";x.fillRect(px-1,py-1,2,2);}else if(t>0){x.fillStyle="#7dffc4";x.beginPath();x.arc(px,py,2.4,0,7);x.fill();}else{x.strokeStyle="#ff8a9a";x.lineWidth=1.5;x.beginPath();x.moveTo(px-3,py-3);x.lineTo(px+3,py+3);x.moveTo(px+3,py-3);x.lineTo(px-3,py+3);x.stroke();}x.globalAlpha=1;}}
+    const wire=(ux,uy,sg,col,lab)=>{const L=s*1.05;const x0=cx-ux*L*sg,y0=cy+uy*L*sg,x1=cx+ux*L*sg,y1=cy-uy*L*sg;arrow(x,x0,y0,x1,y1,col,3,11);x.fillStyle=col;x.font="italic 700 15px serif";x.fillText(lab,cx+ux*L*(sg>0?1:-1)*1.05+4,cy-uy*L*(sg>0?1:-1)*1.05);
+      D.hit.push({x:cx+ux*L*.6,y:cy-uy*L*.6,r:26,f:()=>{if(lab==="A")D.w2[0]*=-1;else D.w2[1]*=-1;uiD();}});D.hit.push({x:cx-ux*L*.6,y:cy+uy*L*.6,r:26,f:D.hit[D.hit.length-1].f});};
+    wire(Math.SQRT1_2,Math.SQRT1_2,D.w2[0],"#ff5fa2","A");wire(Math.SQRT1_2,-Math.SQRT1_2,D.w2[1],"#43d6ff","B");
+    const off=s*.82;pts.forEach(p=>{const px=cx+p.X*off,py=cy-p.Y*off;x.fillStyle="#cfd8e8";x.beginPath();x.arc(px,py,4,0,7);x.fill();
+      x.font="700 14px 'Noto Sans TC'";x.fillText(p.n,px+(p.X<0?-20:8),py+(p.Y<0?20:-8));const t=p.a+p.b;
+      if(t){wireDot(x,px+(p.X?0:22),py+(p.X?-22:0),8,t>0?1:-1,"#ffd166");}else{x.fillStyle="#5b6880";x.font="11px 'Noto Sans TC'";x.fillText("0",px+(p.X?-3:16),py+(p.X?-14:4));}});
+    $("#lgD").innerHTML=`<span><i style="background:#ff5fa2"></i>導線 A</span><span><i style="background:#43d6ff"></i>導線 B</span><span><i style="background:var(--acc)"></i>各點合磁場 ⊙／⊗</span>${D.show?'<span>小點 ⊙＝穿出、×＝穿入</span>':""}`;}
+}
+cvD.addEventListener("pointerdown",e=>{const r=cvD.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;const h=D.hit.find(o=>Math.hypot(o.x-px,o.y-py)<o.r);if(h)h.f();});
+$$("[data-ex]").forEach(b=>b.onclick=()=>{D.ex=+b.dataset.ex;uiD();});
+$("#resetD").onclick=()=>{D.w1=[-1,1,-1];D.w2=[1,1];uiD();};
+$("#showD").onclick=()=>{D.show=!D.show;uiD();};
+
+/* ================= 想一想 ================= */
+const Q=[
+  ["示範實驗中，羅盤放在導線上方時 N 極偏東。把羅盤移到導線下方，同時把電流反向，N 極會偏哪邊？",["偏東","偏西","不偏"],0,"兩個改變各使磁場反向一次，<b>反兩次等於沒反</b>，仍然偏東。可以在 ① 直接試。"],
+  ["長直導線旁 2 cm 處的磁場是 40 μT，同一條導線在 4 cm 處、電流加倍時的磁場是多少？",["20 μT","40 μT","80 μT"],1,"B ∝ I／r：電流 ×2、距離 ×2，<b>B 不變，仍是 40 μT</b>。"],
+  ["從螺線管右端往左看，電流是逆時針方向流動。管內磁場朝哪個方向？右端是 N 還是 S？",["向右，右端是 N","向左，右端是 S"],0,"四指沿逆時針彎曲時，拇指指向觀察者，也就是<b>朝右（出來）</b>，所以磁力線從右端出來，<b>右端是 N 極</b>。"],
+  ["示範實驗中只把匝數從 1 匝增加到 4 匝（電流與距離不變），導線的磁場與偏角會怎樣？",["磁場變 4 倍，偏角也變 4 倍","磁場變 4 倍，偏角增加但小於 4 倍","磁場與偏角都不變"],1,"磁場和匝數成正比，但偏角是 tan θ = B<sub>線</sub>／B<sub>地</sub>，<b>偏角不和磁場成正比，最多接近 90°</b>。"]
+];
+$("#quiz").innerHTML=Q.map((q,i)=>`<div class="qq"><p>${i+1}. ${q[0]}</p><div class="seg">${q[1].map((o,j)=>`<button data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><div class="ans" id="ans${i}" hidden></div></div>`).join("");
+$$("[data-q]").forEach(b=>b.onclick=()=>{const i=+b.dataset.q,j=+b.dataset.o,q=Q[i];$$(`[data-q="${i}"]`).forEach(c=>c.classList.toggle("on",c===b));const a=$("#ans"+i);a.hidden=false;a.innerHTML=(j===q[2]?'<b>答對了！</b>':'<b class="bad">再想想。</b>')+" "+q[3];});
+
+/* ================= loop ================= */
+uiA();uiB();uiC();uiD();
+let lastW=0;
+function frame(){
+  const t=targetA();A.vel+=(t-A.th)*.08;A.vel*=.82;A.th+=A.vel;
+  drawA();drawB();drawC();drawD();
+  requestAnimationFrame(frame);}
+new ResizeObserver(()=>{const w=cvC.getBoundingClientRect().width;if(Math.abs(w-lastW)>2){lastW=w;computeC();}}).observe(cvC);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

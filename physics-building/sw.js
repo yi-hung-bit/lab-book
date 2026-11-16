@@ -1,5 +1,5 @@
 // 物理大樓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v28";
+const VERSION="v29";
 const CACHE="physics-building-"+VERSION;
 const FILES=[
  "./",
@@ -13,6 +13,7 @@ const FILES=[
  "vendor/react.production.min.js",
  "vendor/react-dom.production.min.js",
  "vendor/chart.umd.min.js",
+ "sims/b-ampere-rule.html",
  "sims/b-blackbody.html",
  "sims/b-bohr.html",
  "sims/b-brownian.html",
