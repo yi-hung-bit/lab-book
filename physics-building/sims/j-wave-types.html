@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>橫波與縱波・波的各部位</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--pink:#ff8fd0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(67,214,255,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.modebar{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;max-width:100%}
+.modebar button{border:0;border-radius:0;padding:9px 16px;background:var(--panel2);font-size:14px}
+.modebar button[aria-pressed="true"]{background:var(--acc);color:#231a02;font-weight:700}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0;margin-top:14px}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 12px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:pan-y}
+#cv{height:340px}
+@media(max-width:560px){#cv{height:250px}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.lab{font-size:13px;color:var(--muted);margin:10px 0 6px}
+.lab:first-child{margin-top:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 12px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.sl{display:flex;align-items:center;gap:10px;margin-top:2px}
+.sl span{font-size:13.5px;min-width:64px}
+.sl input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
+.sl b{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);min-width:82px;text-align:right}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:8px;cursor:pointer}
+.chk input{accent-color:var(--acc);width:17px;height:17px;flex:none}
+.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;margin-top:6px}
+@media(max-width:420px){.stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat div{font-size:12.5px;color:var(--muted)}
+.stat b{display:block;font-family:"JetBrains Mono",monospace;font-size:16px;color:var(--phos);font-weight:700}
+.stat b.w{color:#fff}.stat b.c{color:var(--cyan)}.stat b.a{color:var(--acc)}.stat b.p{color:var(--pink)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.note p+p{margin-top:6px}
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:10px}
+.cmp div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;color:var(--muted)}
+.cmp div.on{border-color:var(--acc);color:var(--txt)}
+.cmp b{display:block;color:var(--txt);font-size:14px}
+.q{border-top:1px dashed var(--line);padding:10px 0}
+.q:first-child{border-top:0;padding-top:0}
+.q p{font-size:14px;margin-bottom:6px}
+.fb{margin-top:6px;font-size:13.5px;min-height:1.6em;color:var(--muted)}
+.fb.ok{color:#bff5dc}.fb.bad{color:#ffc9c9}
+.q button.ok{border-color:#1f6f55;background:#071a14}
+.q button.bad{border-color:#7a2a2a;background:#1a0808}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">2上 3-1 · 波的傳播與波的性質</div>
+  <h1>橫波與縱波・波的各部位</h1>
+  <p class="lede">彈簧一端用手擺動，振動一節一節傳出去就是<b>波</b>。比較<b>左右擺動</b>（橫波）和<b>前後推拉</b>（縱波）時，彈簧上每一圈怎麼動；看綁著緞帶的那一圈有沒有跟著波跑走，並找出波峰、波谷、振幅、波長、密部與疏部。</p>
+
+  <div class="modebar" role="group" aria-label="選擇波的種類">
+    <button type="button" data-m="T" aria-pressed="true">① 彈簧左右擺動：橫波</button>
+    <button type="button" data-m="L" aria-pressed="false">② 彈簧前後推拉：縱波</button>
+    <button type="button" data-m="W" aria-pressed="false">③ 水波上的樹葉</button>
+  </div>
+
+  <section class="card">
+    <div class="head"><span class="t" id="cvT">彈簧（俯視圖）</span><span class="n" id="cvN"></span></div>
+    <div class="box"><canvas id="cv" aria-label="波在彈簧或水面上傳播的動畫"></canvas></div>
+    <div class="pad" style="padding-top:0">
+      <div class="seg">
+        <button type="button" class="primary" id="bPlay">暫停</button>
+        <button type="button" id="bReset">重新開始</button>
+        <button type="button" id="bSlow" aria-pressed="false">慢動作</button>
+      </div>
+      <div class="stat" style="margin-top:12px">
+        <div>波的種類<b class="w" id="rKind">—</b></div>
+        <div>振動方向 vs 前進方向<b class="a" id="rDir">—</b></div>
+        <div>手每秒擺動<b id="rF">—</b></div>
+        <div>振幅<b class="c" id="rA">—</b></div>
+        <div>波長 λ<b class="c" id="rL">—</b></div>
+        <div id="rRibL">緞帶離原位置<b class="p" id="rRib">—</b></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="card"><div class="pad">
+      <div class="lab">擺動幅度（手擺得多大）</div>
+      <div class="sl"><span>幅度</span><input type="range" id="slA" min="4" max="24" step="1" value="14" aria-label="擺動幅度"><b id="vA"></b></div>
+      <div class="lab">擺動快慢（手每秒來回幾次）</div>
+      <div class="sl"><span>快慢</span><input type="range" id="slF" min="0.5" max="2.5" step="0.1" value="1" aria-label="擺動快慢"><b id="vF"></b></div>
+      <label class="chk"><input type="checkbox" id="cLab" checked>標出波的各部位</label>
+      <label class="chk"><input type="checkbox" id="cTrail" checked>畫出緞帶（樹葉）走過的路徑</label>
+      <label class="chk"><input type="checkbox" id="cEq" checked>顯示平衡位置（還沒振動時的位置）</label>
+      <div class="note" id="tip"></div>
+    </div></section>
+    <section class="card"><div class="pad">
+      <div class="lab">橫波與縱波比一比</div>
+      <div class="cmp">
+        <div id="cmpT"><b>橫波（高低波）</b>介質振動方向和波前進方向<b style="display:inline;color:var(--acc)">互相垂直</b>，看得到波峰、波谷。例：繩波、彈簧左右擺動。</div>
+        <div id="cmpL"><b>縱波（疏密波）</b>介質振動方向和波前進方向<b style="display:inline;color:var(--acc)">互相平行</b>，看得到密部、疏部。例：聲波、彈簧前後推拉。</div>
+      </div>
+      <div class="note" id="explain"></div>
+    </div></section>
+  </div>
+
+  <section class="card"><div class="pad">
+    <div class="lab">想一想（點選答案）</div>
+    <div id="quiz"></div>
+  </div></section>
+
+  <footer>
+    <b>模型說明：</b>彈簧上的波以固定的波速 2.0 m/s 前進（同一條彈簧，波速不變），畫面寬 4 m；手的擺動以「一傳一」的方式往右傳，第 x 公尺處的線圈重複手在 x ÷ 2.0 秒前的動作。假設彈簧夠長（或遠端不反彈），先不考慮波的反射。縱波時線圈前後擺動的幅度太大會互相碰撞，因此會自動限制。水波中的樹葉其實會畫小圓圈，這裡只畫出上下的部分；不管哪一種，樹葉都不會跟著波前進。<br>
+    <b>來源：</b>國中自然 2 上 第 3 章 3-1 波的傳播（WARM UP、① 波的傳播、② 波的性質，p.76–78 圖 3-1～3-4）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const f0=v=>String(Math.round(v)), f1=v=>(Math.round(v*10)/10).toFixed(1);
+function fit(c){const d=Math.min(2,devicePixelRatio||1);const w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return {x,w,h};}
+function txt(x,s,X,Y,o={}){x.font=o.f||'12px "Noto Sans TC",sans-serif';x.fillStyle=o.c||'#c9d1dc';x.textAlign=o.a||'center';x.textBaseline=o.b||'middle';x.fillText(s,X,Y);}
+
+// ---- 常數 ----
+const V=2.0;          // 波速 m/s
+const L=4.0;          // 畫面長度 m
+const N=80;           // 線圈數（每 5 cm 一圈）
+const DX=L/N;
+const RIB=1.6;        // 緞帶位置 m
+const DT=1/500;       // 積分步長
+const HN=Math.ceil((L/V+1)/DT)+10;
+
+// ---- 狀態 ----
+const P={mode:'T',A:0.14,f:1.0,slow:false,run:true,lab:true,trail:true,eq:true};
+let t=0, th=0, Hth, HA, hi=0, trail=[];
+function reset(){t=0;th=0;hi=0;Hth=new Float64Array(HN);HA=new Float64Array(HN);trail=[];}
+// 有效振幅：縱波時限制，避免線圈相撞（A·k < 0.75）
+function effA(){return P.mode==='L'?Math.min(P.A,0.75*V/(2*Math.PI*P.f)):P.A;}
+function step(dt){
+  let n=Math.round(dt/DT);
+  while(n-->0){t+=DT;th+=2*Math.PI*P.f*DT;Hth[hi%HN]=th;HA[hi%HN]=effA();hi++;}
+}
+// 手在 τ 秒前的位移（τ 之前還沒開始就是 0）
+function src(tau){
+  const tt=t-tau; if(tt<=0) return 0;
+  const kf=tt/DT-1, k=Math.floor(kf), fr=kf-k;
+  const val=j=>(j<0||j>=hi||hi-j>=HN)?0:HA[j%HN]*Math.sin(Hth[j%HN]);
+  if(k>=hi-1) return val(hi-1);
+  return val(k)*(1-fr)+val(k+1)*fr;
+}
+const disp=x=>src(x/V);
+
+// ---- 繪圖 ----
+const cv=$('cv'); let VEX=1;
+function arrow(x,x1,y1,x2,y2,col,w=2,head=7){x.strokeStyle=col;x.fillStyle=col;x.lineWidth=w;x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();const a=Math.atan2(y2-y1,x2-x1);x.beginPath();x.moveTo(x2,y2);x.lineTo(x2-head*Math.cos(a-.45),y2-head*Math.sin(a-.45));x.lineTo(x2-head*Math.cos(a+.45),y2-head*Math.sin(a+.45));x.closePath();x.fill();}
+function dbl(x,x1,y1,x2,y2,col){arrow(x,(x1+x2)/2,(y1+y2)/2,x1,y1,col,2,6);arrow(x,(x1+x2)/2,(y1+y2)/2,x2,y2,col,2,6);}
+function bracketH(x,x1,x2,y,label,col){x.strokeStyle=col;x.lineWidth=1.5;x.beginPath();x.moveTo(x1,y-5);x.lineTo(x1,y+5);x.moveTo(x2,y-5);x.lineTo(x2,y+5);x.moveTo(x1,y);x.lineTo(x2,y);x.stroke();
+  x.font='600 12px "Noto Sans TC",sans-serif';const tw=x.measureText(label).width+10;x.fillStyle='#04060b';x.fillRect((x1+x2)/2-tw/2,y-9,tw,18);txt(x,label,(x1+x2)/2,y,{c:col,f:'600 12px "Noto Sans TC",sans-serif'});}
+
+function features(){
+  // 在畫面範圍內找出波峰/波谷（橫波）或密部/疏部（縱波）
+  const M=800, xs=[], ys=[];
+  for(let i=0;i<=M;i++){const X=i/M*L;xs.push(X);ys.push(disp(X));}
+  const front=Math.min(V*t,L);
+  const out={crest:[],trough:[],comp:[],rare:[]};
+  if(P.mode!=='L'){
+    for(let i=1;i<M;i++){if(xs[i]>front-0.02)break;const A=Math.max(0.01,HA[(Math.max(0,hi-1-Math.round(xs[i]/V/DT)))%HN]||P.A);
+      if(ys[i]>ys[i-1]&&ys[i]>=ys[i+1]&&ys[i]>0.8*A) out.crest.push([xs[i],ys[i]]);
+      if(ys[i]<ys[i-1]&&ys[i]<=ys[i+1]&&ys[i]<-0.8*A) out.trough.push([xs[i],ys[i]]);}
+  }else{
+    const g=[];for(let i=1;i<M;i++) g.push((ys[i+1]-ys[i-1])/(xs[i+1]-xs[i-1]));
+    const gm=Math.max(1e-6,...g.map(Math.abs));
+    for(let j=1;j<g.length-1;j++){const i=j+1;if(xs[i]>front-0.05)break;
+      if(xs[i]<0.05) continue;
+      if(g[j]<g[j-1]&&g[j]<=g[j+1]&&g[j]<-0.6*gm) out.comp.push([xs[i]+ys[i],0,g[j]]);
+      if(g[j]>g[j-1]&&g[j]>=g[j+1]&&g[j]>0.6*gm) out.rare.push([xs[i]+ys[i],0,-g[j]]);}
+  }
+  // 合併太靠近的點（同一個波峰／密部只留一個）
+  const merge=a=>{const r=[];a.forEach(p=>{const q=r[r.length-1];if(q&&p[0]-q[0]<0.25){if((p[2]||0)<(q[2]||0)) r[r.length-1]=p;}else r.push(p);});return r;};
+  out.comp=merge(out.comp);out.rare=merge(out.rare);out.crest=merge(out.crest.map(c=>[c[0],c[1],-c[1]]));out.trough=merge(out.trough.map(c=>[c[0],c[1],c[1]]));
+  return out;
+}
+
+function draw(){
+  const {x,w,h}=fit(cv);
+  x.clearRect(0,0,w,h);
+  const m=Math.max(44,w*0.05), sx=(w-m-14)/L, X=xm=>m+xm*sx;
+  const y0=P.mode==='W'?h*0.5:h*0.55;
+  // 橫波與水波：上下方向放大顯示，讓小振幅也看得清楚（縱波維持同比例）
+  const sy=P.mode==='L'?sx:Math.max(sx,h*0.28/0.24); VEX=sy/sx;
+  const front=V*t;
+  // 前進方向箭頭
+  arrow(x,X(0.15),20,X(Math.min(1.2,L*0.3)),20,'#43d6ff',2,8);
+  txt(x,'波前進方向',X(Math.min(1.2,L*0.3))+8,20,{a:'left',c:'#43d6ff',f:'600 12px "Noto Sans TC",sans-serif'});
+  // 波傳到這裡
+  if(front<L){const fx=X(front);x.setLineDash([4,4]);x.strokeStyle='#5b6880';x.lineWidth=1;x.beginPath();x.moveTo(fx,34);x.lineTo(fx,h-8);x.stroke();x.setLineDash([]);
+    txt(x,'波傳到這裡',fx,h-14,{c:'#8492aa',f:'11px "Noto Sans TC",sans-serif',a:fx>w-70?'right':'center'});}
+  // 平衡位置
+  if(P.eq&&P.mode!=='L'){x.setLineDash([6,5]);x.strokeStyle='#33405a';x.lineWidth=1;x.beginPath();x.moveTo(X(0),y0);x.lineTo(w-6,y0);x.stroke();x.setLineDash([]);
+    txt(x,'平衡位置',w-8,y0-9,{a:'right',c:'#5b6880',f:'11px "Noto Sans TC",sans-serif'});}
+
+  if(P.mode==='W'){
+    // 水面
+    x.beginPath();x.moveTo(X(0),h);for(let i=0;i<=200;i++){const xm=i/200*L;x.lineTo(X(xm),y0-disp(xm)*sy);}x.lineTo(w,y0-disp(L)*sy);x.lineTo(w,h);x.closePath();
+    const gr=x.createLinearGradient(0,y0-40,0,h);gr.addColorStop(0,'rgba(67,214,255,.45)');gr.addColorStop(1,'rgba(20,60,110,.25)');x.fillStyle=gr;x.fill();
+    x.strokeStyle='#8fe6ff';x.lineWidth=2;x.beginPath();for(let i=0;i<=200;i++){const xm=i/200*L,Y=y0-disp(xm)*sy;i?x.lineTo(X(xm),Y):x.moveTo(X(xm),Y);}x.stroke();
+    // 波源：上下點水的小球
+    const yb=y0-disp(0)*sy-8;x.fillStyle='#ffd166';x.beginPath();x.arc(X(0),yb,9,0,7);x.fill();
+    x.strokeStyle='#ffd166';x.lineWidth=2;x.beginPath();x.moveTo(X(0),yb-9);x.lineTo(X(0),26);x.stroke();
+    txt(x,'波源',X(0)+14,yb-16,{a:'left',c:'#ffd166',f:'11px "Noto Sans TC",sans-serif'});
+  }else{
+    // 手
+    const hy=P.mode==='T'?y0-disp(0)*sy:y0, hx=P.mode==='L'?X(disp(0)):X(0);
+    x.fillStyle='#e8c09a';x.beginPath();x.roundRect?x.roundRect(hx-22,hy-11,20,22,6):x.rect(hx-22,hy-11,20,22);x.fill();
+    if(P.mode==='T') dbl(x,hx-12,hy-28,hx-12,hy+28,'#ffd166'); else dbl(x,hx-40,hy+24,hx+8,hy+24,'#ffd166');
+    // 彈簧線圈
+    const R=P.mode==='T'?Math.min(9,h*0.035):Math.min(26,h*0.1);
+    if(P.mode==='T'){x.strokeStyle='rgba(200,210,225,.75)';x.lineWidth=2.5;x.beginPath();for(let i=0;i<=N;i++){const xm=i*DX,Y=y0-disp(xm)*sy;i?x.lineTo(X(xm),Y):x.moveTo(X(xm),Y);}x.stroke();}
+    for(let i=0;i<=N;i++){
+      const xm=i*DX, d=disp(xm);
+      const cx=P.mode==='L'?X(xm+d):X(xm), cy=P.mode==='T'?y0-d*sy:y0;
+      x.strokeStyle='#b9c4d6';x.lineWidth=1.6;
+      x.beginPath();x.ellipse(cx,cy,3.2,R,0,0,7);x.stroke();
+    }
+    if(P.mode==='L'){x.strokeStyle='#33405a';x.lineWidth=1;x.beginPath();x.moveTo(X(0),y0);x.lineTo(w-6,y0);x.stroke();}
+  }
+
+  // 緞帶／樹葉
+  const dR=disp(RIB);
+  const rx=P.mode==='L'?X(RIB+dR):X(RIB), ry=P.mode==='L'?y0:y0-dR*sy;
+  trail.push([rx,ry]); if(trail.length>240) trail.shift();
+  if(P.trail&&trail.length>2){x.strokeStyle='rgba(255,143,208,.55)';x.lineWidth=3;x.lineCap='round';x.beginPath();trail.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke();x.lineCap='butt';}
+  // 原位置記號
+  x.strokeStyle='rgba(255,143,208,.6)';x.lineWidth=1;x.setLineDash([3,3]);x.beginPath();x.moveTo(X(RIB),36);x.lineTo(X(RIB),h-26);x.stroke();x.setLineDash([]);
+  if(P.mode==='W'){
+    x.save();x.translate(rx,ry-3);x.rotate(-Math.atan((disp(RIB+0.02)-disp(RIB-0.02))/0.04));x.fillStyle='#5fc46a';x.beginPath();x.ellipse(0,0,13,5,0,0,7);x.fill();x.strokeStyle='#2f7d3a';x.lineWidth=1;x.beginPath();x.moveTo(-12,0);x.lineTo(12,0);x.stroke();x.restore();
+    txt(x,'樹葉',X(RIB),Math.min(h-30,y0+P.A*sy+30),{c:'#ff8fd0',f:'600 12px "Noto Sans TC",sans-serif'});
+  }else{
+    x.fillStyle='#ff5cb8';x.beginPath();x.moveTo(rx,ry-8);x.lineTo(rx+11,ry-20);x.lineTo(rx+13,ry-6);x.closePath();x.fill();
+    x.beginPath();x.arc(rx,ry,5,0,7);x.fill();
+    txt(x,'緞帶',X(RIB),P.mode==='L'?y0+Math.min(26,h*0.1)+38:Math.min(h-30,y0+P.A*sy+34),{c:'#ff8fd0',f:'600 12px "Noto Sans TC",sans-serif'});
+  }
+
+  // 標示各部位
+  if(P.lab&&t>0.3){
+    const F=features(), col='#ffd166';
+    if(P.mode!=='L'){
+      const cr=F.crest, tr=F.trough;
+      if(cr.length){const [cx,cy]=cr[cr.length-1];const px=X(cx),py=y0-cy*sy;
+        txt(x,'波峰',px,py-(P.mode==='W'?22:18),{c:col,f:'700 12px "Noto Sans TC",sans-serif'});
+        // 振幅
+        x.setLineDash([2,3]);x.strokeStyle='#43d6ff';x.lineWidth=1;x.beginPath();x.moveTo(px,py);x.lineTo(px,y0);x.stroke();x.setLineDash([]);
+        dbl(x,px+0,py,px+0,y0,'#43d6ff');
+        txt(x,'振幅',px+6,(py+y0)/2,{a:'left',c:'#43d6ff',f:'600 11px "Noto Sans TC",sans-serif'});
+      }
+      if(tr.length){const [tx,ty]=tr[tr.length-1];txt(x,'波谷',X(tx),y0-ty*sy+18,{c:col,f:'700 12px "Noto Sans TC",sans-serif'});}
+      if(cr.length>1){const a=X(cr[0][0]),b=X(cr[1][0]);const yy=Math.max(42,y0-P.A*sy-38);
+        x.setLineDash([2,3]);x.strokeStyle='rgba(125,255,196,.5)';x.beginPath();x.moveTo(a,yy);x.lineTo(a,y0-cr[0][1]*sy);x.moveTo(b,yy);x.lineTo(b,y0-cr[1][1]*sy);x.stroke();x.setLineDash([]);
+        bracketH(x,a,b,yy,'波長 λ','#7dffc4');}
+    }else{
+      const R=Math.min(26,h*0.1);
+      F.comp.forEach(([cx],i)=>{if(i<4) txt(x,'密',X(cx),y0-R-10,{c:col,f:'700 12px "Noto Sans TC",sans-serif'});});
+      F.rare.forEach(([cx],i)=>{if(i<4) txt(x,'疏',X(cx),y0-R-10,{c:'#8492aa',f:'700 12px "Noto Sans TC",sans-serif'});});
+      if(F.comp.length>1){const a=X(F.comp[0][0]),b=X(F.comp[1][0]);bracketH(x,a,b,y0+R+16,'波長 λ（密部到相鄰密部）','#7dffc4');}
+    }
+  }
+}
+
+// ---- UI ----
+const TXT={
+  T:{kind:'橫波',dir:'互相垂直 ⊥',cvT:'彈簧（從上往下看，放在桌面）',tip:'<b>試試看：</b>按「慢動作」，盯著粉紅色緞帶——它只在原處左右（圖上是上下）來回，從來沒有往右跑。往右跑的是「振動」這個擾動，也就是波傳遞的能量。',
+     ex:'<p>手<b>左右擺動</b>，彈簧每一圈也跟著左右擺，但波卻往<b>前</b>傳：振動方向和波前進方向<b>垂直</b>，這種波叫<b>橫波</b>（高低波）。</p><p>最高處是<b>波峰</b>、最低處是<b>波谷</b>；波峰（或波谷）到平衡位置的距離是<b>振幅</b>；相鄰兩個波峰（或兩個波谷）的距離是<b>波長 λ</b>。</p>'},
+  L:{kind:'縱波',dir:'互相平行 ∥',cvT:'彈簧（側面看）',tip:'<b>試試看：</b>把「擺動快慢」調大，密部和疏部變得更擠、波長變短；再看緞帶：它在原位置附近前後來回，一樣沒有跟著波前進。',
+     ex:'<p>手<b>前後推拉</b>，彈簧每一圈也前後振動，波往前傳：振動方向和波前進方向<b>平行</b>，這種波叫<b>縱波</b>（疏密波）。</p><p>線圈擠在一起的地方是<b>密部</b>、拉開的地方是<b>疏部</b>；相鄰兩個密部（或兩個疏部）的距離是<b>波長 λ</b>。聲波就是空氣的縱波。</p>'},
+  W:{kind:'水波（看成橫波）',dir:'樹葉上下、波往前',cvT:'水面（側面看）',tip:'<b>試試看：</b>水波一圈圈往外傳，樹葉卻只在原處上下起伏，並不會被「推」到岸邊。這說明波前進時，<b>介質</b>（水）並不跟著前進。',
+     ex:'<p>小球上下點水，水面的起伏一圈圈向外傳出去，但水面上的<b>樹葉只在原處上下振動</b>，不會隨波前進。</p><p>波傳播時，傳出去的是<b>能量</b>，介質本身只在原來位置附近振動。水面的高處、低處也可以叫波峰、波谷。</p>'}
+};
+function ui(){
+  const T=TXT[P.mode];
+  document.querySelectorAll('.modebar button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===P.mode)));
+  $('cvT').textContent=T.cvT; $('tip').innerHTML=T.tip; $('explain').innerHTML=T.ex;
+  $('cmpT').classList.toggle('on',P.mode!=='L'); $('cmpL').classList.toggle('on',P.mode==='L');
+  $('rKind').textContent=T.kind; $('rDir').textContent=T.dir;
+  $('rRibL').firstChild.textContent=P.mode==='W'?'樹葉離原位置':'緞帶離原位置';
+  $('cEq').parentElement.style.display=P.mode==='L'?'none':'';
+  $('bPlay').textContent=P.run?'暫停':'播放'; $('bSlow').setAttribute('aria-pressed',String(P.slow));
+}
+function readouts(){
+  const lam=V/P.f*100, A=effA()*100;
+  $('vA').textContent=f0(P.A*100)+' cm'; $('vF').textContent=f1(P.f)+' 次/秒';
+  $('rF').textContent=f1(P.f)+' 次';
+  $('rA').textContent=f0(A)+' cm'+(P.mode==='L'&&effA()<P.A-1e-6?'（已限制）':'');
+  $('rL').textContent=f0(lam)+' cm';
+  const d=disp(RIB)*100;
+  $('rRib').textContent=(t*V<RIB?'波還沒到':((d>=0?'+':'−')+f1(Math.abs(d))+' cm'));
+  $('cvN').textContent=`t = ${f1(t)} s・波速 ${f1(V)} m/s`+(VEX>1.05?`・上下放大 ${f1(VEX)} 倍`:'');
+}
+document.querySelectorAll('.modebar button').forEach(b=>b.onclick=()=>{P.mode=b.dataset.m;reset();ui();});
+$('bPlay').onclick=()=>{P.run=!P.run;ui();};
+$('bReset').onclick=()=>{reset();P.run=true;ui();};
+$('bSlow').onclick=()=>{P.slow=!P.slow;ui();};
+$('slA').oninput=e=>{P.A=+e.target.value/100;};
+$('slF').oninput=e=>{P.f=+e.target.value;};
+$('cLab').onchange=e=>P.lab=e.target.checked;
+$('cTrail').onchange=e=>{P.trail=e.target.checked;trail=[];};
+$('cEq').onchange=e=>P.eq=e.target.checked;
+
+// ---- 想一想 ----
+const QZ=[
+  {q:'橫波中，介質的振動方向和波前進的方向？',o:['互相垂直','互相平行','方向相同而且一起前進'],a:0,ok:'對！左右擺動、往前傳，兩者垂直。',no:'看模式①：緞帶上下（左右）擺，波卻往右跑，兩者垂直。'},
+  {q:'縱波中，相鄰兩個密部之間的距離叫做什麼？',o:['振幅','波長','波峰'],a:1,ok:'對！密部到相鄰密部（或疏部到相鄰疏部）就是一個波長。',no:'打開模式②的標示：相鄰兩個「密」之間的距離就是波長。'},
+  {q:'波傳過彈簧時，綁在彈簧上的緞帶會怎麼動？',o:['跟著波一起往前跑','只在原位置附近來回振動','停在原處完全不動'],a:1,ok:'對！波傳遞的是能量，介質只在原處振動。',no:'打開「畫出緞帶走過的路徑」：緞帶的路徑只是一小段來回，沒有往前跑。'},
+  {q:'手擺動的快慢不變，只把擺動幅度加大，波長會？',o:['變長','不變','變短'],a:1,ok:'對！幅度改變的是振幅；快慢不變時，波長不變。',no:'只拉「幅度」滑桿，看看讀數的波長有沒有改變。'},
+  {q:'同一條彈簧，手擺得越快（每秒次數越多），波長會？',o:['變長','不變','變短'],a:2,ok:'對！波前進的快慢不變，擺得越快，一個波佔的長度越短。',no:'把「快慢」滑桿往右拉，看相鄰兩個波峰（或密部）是不是更靠近了。'},
+  {q:'下列哪一種波是縱波？',o:['繩子上下甩動產生的繩波','在空氣中傳播的聲波','水面上的漣漪'],a:1,ok:'對！聲波是空氣疏密相間的縱波（下一節會看到）。',no:'聲波靠空氣一疏一密傳出去，振動方向和前進方向平行。'}
+];
+$('quiz').innerHTML=QZ.map((z,i)=>`<div class="q"><p>${i+1}. ${z.q}</p><div class="seg">${z.o.map((o,j)=>`<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join('')}</div><div class="fb" id="fb${i}"></div></div>`).join('');
+$('quiz').querySelectorAll('button').forEach(b=>b.onclick=()=>{const i=+b.dataset.q,j=+b.dataset.o,z=QZ[i],ok=j===z.a;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('ok','bad'));b.classList.add(ok?'ok':'bad');
+  const fb=$('fb'+i);fb.className='fb '+(ok?'ok':'bad');fb.textContent=ok?z.ok:z.no;});
+
+// ---- 主迴圈 ----
+reset();ui();
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(P.run) step(dt*(P.slow?0.25:1));
+  draw();readouts();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__wave={get t(){return t;},disp,features,P,effA};
+})();
+</script>
+</body>
+</html>
