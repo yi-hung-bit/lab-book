@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#3c2712" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="檔案室" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>教學檔案室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+      * { box-sizing: border-box; }
+      :root {
+        --paper: #f3ecdc;
+        --paper-2: #fbf6ea;
+        --paper-3: #ece1c9;
+        --ink: #2e2115;
+        --ink-soft: #6b5843;
+        --line: #d8c9a8;
+        --wood-1: #5d4023;
+        --wood-2: #3c2712;
+        --wood-edge: #2a1a0b;
+        --brass: #b98c2f;
+        --brass-bright: #d9ab3c;
+        --brass-ink: #3a2a08;
+        --stamp: #b3352b;
+        --accent: #7a4a21;
+        --danger: #a02c22;
+        --card-shadow: 0 1px 2px rgba(46, 30, 10, .18), 0 8px 20px -12px rgba(46, 30, 10, .45);
+        --desk-bg: #efe5cd;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #17120d;
+          --paper-2: #221a12;
+          --paper-3: #2b2115;
+          --ink: #eee2cb;
+          --ink-soft: #b39d78;
+          --line: #4a3a24;
+          --wood-1: #4a3018;
+          --wood-2: #2a1a0b;
+          --wood-edge: #180e04;
+          --brass: #c49a3a;
+          --brass-bright: #e0b64e;
+          --brass-ink: #2c1e05;
+          --stamp: #e0685e;
+          --accent: #d9a45f;
+          --danger: #e0685e;
+          --card-shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 22px -12px rgba(0,0,0,.7);
+          --desk-bg: #20180f;
+        }
+      }
+      html { color-scheme: light dark; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      .serif { font-family: "Noto Serif TC", "Songti TC", serif; }
+
+      /* ---------- 閱覽大廳：木書牆 ---------- */
+      .hall {
+        background:
+          repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 2px, transparent 2px 110px),
+          repeating-linear-gradient(0deg, rgba(255,235,200,.045) 0 3px, transparent 3px 9px),
+          linear-gradient(180deg, var(--wood-1), var(--wood-2));
+        border-bottom: 6px solid var(--wood-edge);
+        color: #f3e7cd;
+        padding: calc(18px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 20px calc(16px + env(safe-area-inset-left));
+      }
+      .install-tip { display: none; margin-top: 12px; font-size: .84rem; color: #f0d894; background: rgba(20,11,3,.45); border: 1px dashed rgba(217,171,60,.55); border-radius: 6px; padding: 8px 12px; }
+      .install-tip.show { display: block; }
+      .hall-inner { max-width: 1080px; margin: 0 auto; }
+      .spines { display: flex; align-items: flex-end; gap: 3px; height: 34px; margin-bottom: 12px; opacity: .9; }
+      .spines i { display: block; width: 9px; border-radius: 2px 2px 0 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,.35); }
+      .hall-top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 22px; }
+      .plate {
+        background: linear-gradient(180deg, #e8c86a, var(--brass-bright) 45%, #a87c24);
+        color: var(--brass-ink);
+        border: 1px solid #7d5c14;
+        border-radius: 6px;
+        padding: 8px 16px 9px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 6px rgba(0,0,0,.4);
+      }
+      .plate h1 { margin: 0; font-size: 1.45rem; letter-spacing: .14em; font-weight: 900; line-height: 1.2; }
+      .plate p { margin: 2px 0 0; font-size: .78rem; letter-spacing: .08em; font-weight: 700; opacity: .85; }
+      .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+      .stat {
+        min-width: 92px; text-align: center;
+        background: rgba(20, 11, 3, .45);
+        border: 1px solid rgba(217, 171, 60, .55);
+        border-radius: 6px; padding: 6px 12px 7px;
+      }
+      .stat b { display: block; font-size: 1.3rem; line-height: 1.15; color: #f0cd72; font-family: "Noto Serif TC", serif; }
+      .stat span { font-size: .72rem; letter-spacing: .18em; color: #d9c491; }
+      .hall-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .btn {
+        appearance: none; border: 1px solid var(--line); background: var(--paper-2); color: var(--ink);
+        border-radius: 6px; padding: 7px 14px; font: inherit; font-size: .9rem; font-weight: 500;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 2.25rem;
+      }
+      .btn:hover { border-color: var(--brass); }
+      .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--brass-bright); outline-offset: 1px; }
+      .btn-brass {
+        background: linear-gradient(180deg, #e8c86a, var(--brass-bright) 50%, #b0821f);
+        border-color: #7d5c14; color: var(--brass-ink); font-weight: 700;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 2px 5px rgba(0,0,0,.35);
+      }
+      .btn-ghost-dark { background: rgba(20,11,3,.4); border-color: rgba(217,171,60,.55); color: #f0d894; }
+      .btn-ghost-dark:hover { border-color: #f0cd72; }
+      .btn-danger { color: var(--danger); border-color: var(--danger); }
+      .btn-small { padding: 4px 10px; font-size: .82rem; min-height: 2rem; }
+
+      main { max-width: 1080px; margin: 0 auto; padding: 18px calc(16px + env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
+
+      /* ---------- 檢索台 ---------- */
+      .desk {
+        background: var(--desk-bg);
+        border: 1px solid var(--line);
+        border-top: 5px solid var(--wood-1);
+        border-radius: 4px 4px 10px 10px;
+        box-shadow: var(--card-shadow);
+        padding: 14px 16px 12px;
+      }
+      .desk-label { font-size: .74rem; letter-spacing: .3em; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
+      .desk-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+      .search-wrap { flex: 1 1 260px; position: relative; }
+      .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-soft); pointer-events: none; }
+      .search-wrap input {
+        width: 100%; padding: 9px 12px 9px 38px; font: inherit; font-size: .95rem;
+        background: var(--paper-2); border: 1px solid var(--line); border-radius: 6px; color: var(--ink);
+      }
+      .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+      .chips:empty { display: none; }
+      .chip {
+        border: 1px solid var(--line); background: var(--paper-2); color: var(--ink);
+        border-radius: 999px; padding: 5px 13px; font: inherit; font-size: .83rem; cursor: pointer; min-height: 2rem;
+      }
+      .chip[aria-pressed="true"] { background: var(--wood-1); border-color: var(--wood-2); color: #f3e7cd; font-weight: 700; }
+      .chip .n { opacity: .65; font-size: .76rem; margin-left: 3px; }
+
+      /* ---------- 檔案櫃 ---------- */
+      .section-head { display: flex; align-items: baseline; gap: 12px; margin: 26px 2px 12px; }
+      .section-head h2 { margin: 0; font-size: 1.08rem; letter-spacing: .12em; font-weight: 700; }
+      .section-head .rule { flex: 1; border-top: 1px solid var(--line); }
+      .section-head .hint { font-size: .8rem; color: var(--ink-soft); }
+      .cabinets { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
+      .cabinet {
+        text-align: left; cursor: pointer; font: inherit; color: #f0e3c4;
+        border: 1px solid var(--wood-edge); border-radius: 8px; padding: 12px 13px 11px; min-height: 6.4rem;
+        background:
+          repeating-linear-gradient(0deg, rgba(255,235,200,.05) 0 3px, transparent 3px 9px),
+          linear-gradient(180deg, var(--wood-1), var(--wood-2));
+        box-shadow: inset 0 0 0 3px rgba(0,0,0,.18), var(--card-shadow);
+        display: flex; flex-direction: column; gap: 6px; position: relative;
+      }
+      .cabinet:hover { filter: brightness(1.07); }
+      .cabinet[aria-pressed="true"] { box-shadow: inset 0 0 0 3px rgba(0,0,0,.18), 0 0 0 2px var(--brass-bright), var(--card-shadow); }
+      .cabinet .drawer-line { border-top: 1px dashed rgba(240,205,114,.35); }
+      .cabinet .cname { font-family: "Noto Serif TC", serif; font-weight: 700; font-size: 1rem; letter-spacing: .05em; line-height: 1.3; word-break: break-word; }
+      .cabinet .cplate {
+        align-self: flex-start; background: linear-gradient(180deg, #e8c86a, #b0821f);
+        color: var(--brass-ink); font-size: .7rem; font-weight: 700; letter-spacing: .14em;
+        border-radius: 3px; padding: 2px 8px; border: 1px solid #7d5c14;
+      }
+      .cabinet .ccount { margin-top: auto; font-size: .78rem; color: #d9c491; display: flex; align-items: center; gap: 8px; }
+      .cabinet .handle { width: 34px; height: 7px; border-radius: 4px; background: linear-gradient(180deg, #e8c86a, #8a6414); box-shadow: 0 1px 2px rgba(0,0,0,.5); margin-left: auto; }
+
+      /* ---------- 層架與卷宗卡 ---------- */
+      .shelf-group { margin-top: 8px; }
+      .shelf-title { display: flex; align-items: center; gap: 10px; margin: 22px 2px 10px; }
+      .shelf-title h3 { margin: 0; font-size: .98rem; font-family: "Noto Serif TC", serif; letter-spacing: .08em; }
+      .shelf-title .cnt { font-size: .78rem; color: var(--ink-soft); }
+      .shelf-title .rule { flex: 1; border-top: 3px solid var(--wood-1); border-bottom: 1px solid var(--line); height: 4px; }
+      .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 13px; }
+      .vcard {
+        display: flex; background: var(--paper-2); border: 1px solid var(--line); border-radius: 6px;
+        box-shadow: var(--card-shadow); overflow: hidden; cursor: pointer; text-align: left; font: inherit; color: var(--ink);
+        padding: 0; width: 100%;
+      }
+      .vcard:hover { border-color: var(--brass); }
+      .spine {
+        flex: 0 0 44px; display: flex; align-items: center; justify-content: center;
+        writing-mode: vertical-rl; letter-spacing: .28em; font-size: .76rem; font-weight: 700; color: #f5ecd7;
+        padding: 10px 0; text-shadow: 0 1px 2px rgba(0,0,0,.4);
+        box-shadow: inset -3px 0 5px rgba(0,0,0,.28), inset 3px 0 5px rgba(255,255,255,.12);
+      }
+      .vbody { flex: 1; min-width: 0; padding: 11px 13px 10px; position: relative; }
+      .callno { font-size: .72rem; letter-spacing: .12em; color: var(--ink-soft); font-weight: 700; }
+      .vtitle { font-family: "Noto Serif TC", serif; font-weight: 700; font-size: 1.02rem; line-height: 1.4; margin: 3px 44px 4px 0; word-break: break-word; }
+      .vmeta { font-size: .8rem; color: var(--ink-soft); }
+      .vnote { font-size: .83rem; color: var(--ink-soft); margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+      .vfoot { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: .76rem; color: var(--ink-soft); }
+      .stamp {
+        position: absolute; top: 10px; right: 10px; transform: rotate(7deg);
+        border: 2px solid var(--stamp); color: var(--stamp); border-radius: 4px;
+        font-size: .66rem; font-weight: 700; letter-spacing: .1em; padding: 2px 6px; opacity: .85;
+        max-width: 92px; text-align: center; line-height: 1.35;
+      }
+      .empty {
+        border: 1.5px dashed var(--line); border-radius: 8px; padding: 30px 18px; text-align: center;
+        color: var(--ink-soft); background: var(--paper-2);
+      }
+      .empty .serif { font-size: 1.05rem; color: var(--ink); display: block; margin-bottom: 5px; }
+      .result-meta { font-size: .82rem; color: var(--ink-soft); margin: 14px 2px 0; }
+
+      /* ---------- 底頁說明 ---------- */
+      .colophon {
+        margin-top: 40px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-2);
+        padding: 16px 18px; font-size: .86rem; color: var(--ink-soft);
+      }
+      .colophon h2 { margin: 0 0 8px; font-size: .95rem; color: var(--ink); letter-spacing: .1em; }
+      .colophon ol { margin: 6px 0 0; padding-left: 1.3em; }
+      .colophon li { margin: 3px 0; }
+      .colophon code { background: var(--paper-3); border-radius: 4px; padding: 0 5px; font-size: .82em; }
+
+      /* ---------- 抽屜式表單（sheet） ---------- */
+      .backdrop {
+        position: fixed; inset: 0; background: rgba(24, 14, 4, .55); opacity: 0; pointer-events: none; transition: opacity .18s; z-index: 40;
+      }
+      .backdrop.open { opacity: 1; pointer-events: auto; }
+      .sheet {
+        position: fixed; left: 50%; bottom: 0; transform: translate(-50%, 105%); transition: transform .22s ease;
+        width: min(620px, 100%); max-height: 92dvh; overflow-y: auto; z-index: 50;
+        background: var(--paper-2); color: var(--ink);
+        border: 1px solid var(--line); border-top: 6px solid var(--wood-1);
+        border-radius: 12px 12px 0 0; box-shadow: 0 -12px 40px rgba(0,0,0,.35);
+        padding: 18px 20px 26px;
+      }
+      .sheet.open { transform: translate(-50%, 0); }
+      @media (min-width: 700px) {
+        .sheet { bottom: auto; top: 50%; transform: translate(-50%, -46%); opacity: 0; pointer-events: none; border-radius: 12px; transition: opacity .18s, transform .18s; }
+        .sheet.open { transform: translate(-50%, -50%); opacity: 1; pointer-events: auto; }
+      }
+      .sheet h2 { margin: 0 0 4px; font-size: 1.15rem; font-family: "Noto Serif TC", serif; letter-spacing: .06em; }
+      .sheet .sub { font-size: .82rem; color: var(--ink-soft); margin-bottom: 14px; }
+      .sheet-head { display: flex; align-items: flex-start; gap: 10px; }
+      .sheet-head .grow { flex: 1; min-width: 0; }
+      .icon-btn {
+        appearance: none; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+        width: 2.25rem; height: 2.25rem; border-radius: 6px; cursor: pointer; font-size: 1rem; line-height: 1; flex: 0 0 auto;
+      }
+      .field { margin-bottom: 13px; }
+      .field label { display: block; font-size: .8rem; font-weight: 700; letter-spacing: .06em; margin-bottom: 5px; }
+      .field input, .field select, .field textarea {
+        width: 100%; font: inherit; font-size: .93rem; padding: 8px 11px;
+        background: var(--paper); border: 1px solid var(--line); border-radius: 6px; color: var(--ink);
+      }
+      .field textarea { resize: vertical; min-height: 3.2rem; }
+      .field .hint { font-size: .76rem; color: var(--ink-soft); margin-top: 4px; }
+      .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      @media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+      .kind-tabs { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+      .kind-tabs button {
+        flex: 1; appearance: none; border: 0; background: var(--paper); color: var(--ink-soft);
+        font: inherit; font-weight: 700; font-size: .9rem; padding: 9px; cursor: pointer; min-height: 2.5rem;
+      }
+      .kind-tabs button[aria-pressed="true"] { background: var(--wood-1); color: #f3e7cd; }
+      .sheet-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+      .sheet-actions .spacer { flex: 1; }
+      .meta-table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: 10px 0; }
+      .meta-table th { text-align: left; color: var(--ink-soft); font-weight: 700; padding: 5px 10px 5px 0; white-space: nowrap; vertical-align: top; width: 5.2rem; }
+      .meta-table td { padding: 5px 0; word-break: break-word; }
+      .preview-frame { width: 100%; height: 380px; border: 1px solid var(--line); border-radius: 6px; background: #fff; margin-top: 10px; }
+      .preview-img { max-width: 100%; border: 1px solid var(--line); border-radius: 6px; margin-top: 10px; }
+      .folder-row { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+      .folder-row input { flex: 1; min-width: 0; font: inherit; font-size: .92rem; padding: 7px 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; color: var(--ink); }
+      .folder-row .cnt { font-size: .78rem; color: var(--ink-soft); white-space: nowrap; }
+      .banner {
+        display: none; margin-top: 14px; border: 1px solid var(--brass); background: var(--paper-2);
+        border-radius: 8px; padding: 11px 14px; font-size: .88rem; align-items: center; gap: 10px; flex-wrap: wrap;
+      }
+      .banner.show { display: flex; }
+      .toast {
+        position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 20px); z-index: 80;
+        background: var(--wood-2); color: #f3e7cd; border: 1px solid var(--brass);
+        padding: 9px 18px; border-radius: 999px; font-size: .88rem; opacity: 0; pointer-events: none; transition: all .2s;
+        max-width: calc(100vw - 32px); text-align: center;
+      }
+      .toast.show { opacity: 1; transform: translate(-50%, 0); }
+      .err { color: var(--danger); font-size: .82rem; margin-top: 6px; display: none; }
+      .err.show { display: block; }
+      @media (prefers-reduced-motion: reduce) {
+        .sheet, .backdrop, .toast { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hall">
+      <div class="hall-inner">
+        <div class="spines" aria-hidden="true">
+          <i style="height:30px;background:#6d2f26"></i><i style="height:24px;background:#274435"></i><i style="height:33px;background:#31435f"></i><i style="height:27px;background:#7a5a1e"></i><i style="height:31px;background:#4c2d4f"></i><i style="height:22px;background:#20504c"></i><i style="height:34px;background:#713622"></i><i style="height:26px;background:#374f27"></i><i style="height:30px;background:#5c2436"></i><i style="height:25px;background:#2c4a63"></i><i style="height:32px;background:#66501f"></i><i style="height:28px;background:#43302a"></i><i style="height:23px;background:#274435"></i><i style="height:31px;background:#6d2f26"></i><i style="height:27px;background:#31435f"></i><i style="height:34px;background:#20504c"></i><i style="height:25px;background:#7a5a1e"></i><i style="height:30px;background:#4c2d4f"></i>
+        </div>
+        <div class="hall-top">
+          <div class="plate">
+            <h1 class="serif">教學檔案室</h1>
+            <p>個人版 ・ 可離線使用</p>
+          </div>
+          <div class="stats" role="group" aria-label="館藏統計">
+            <div class="stat"><b id="statFiles">0</b><span>卷宗總數</span></div>
+            <div class="stat"><b id="statCabinets">0</b><span>檔案櫃</span></div>
+            <div class="stat"><b id="statUnfiled">0</b><span>未歸櫃</span></div>
+          </div>
+        </div>
+        <div class="hall-actions">
+          <button class="btn btn-brass" id="btnAddTop" type="button">＋ 新增卷宗</button>
+          <button class="btn btn-ghost-dark" id="btnInstall" type="button" hidden>📲 安裝成 App</button>
+          <button class="btn btn-ghost-dark" id="btnExport" type="button">匯出目錄</button>
+          <button class="btn btn-ghost-dark" id="btnImport" type="button">匯入目錄</button>
+          <input type="file" id="importInput" accept="application/json,.json" hidden />
+        </div>
+        <div class="install-tip" id="iosTip">要裝到 iPhone／iPad 主畫面：用 Safari 開這頁，按下方「分享」⬆️，再選「加入主畫面」。</div>
+        <div class="banner" id="importBanner" role="alert">
+          <span id="importBannerText"></span>
+          <button class="btn btn-brass btn-small" id="btnImportConfirm" type="button">取代目前目錄</button>
+          <button class="btn btn-small" id="btnImportCancel" type="button">取消</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="desk" aria-label="檢索台">
+        <div class="desk-label">檢 索 台 ・ 目 錄 卡</div>
+        <div class="desk-row">
+          <div class="search-wrap">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.8-3.8"></path></svg>
+            <input id="searchInput" type="search" placeholder="搜尋卷宗名稱、備註、年級、學期……（考卷、會議與科務文件都收）" aria-label="搜尋卷宗" />
+          </div>
+          <button class="btn" id="btnFolders" type="button">管理檔案櫃</button>
+          <button class="btn" id="btnClearFilters" type="button" hidden>清除篩選</button>
+        </div>
+        <div class="chips" id="catChips" role="group" aria-label="分類篩選"></div>
+      </section>
+
+      <div class="section-head">
+        <h2 class="serif">檔案櫃</h2>
+        <div class="rule"></div>
+        <span class="hint">點櫃門走進那一櫃</span>
+      </div>
+      <div class="cabinets" id="cabinetRow"></div>
+
+      <p class="result-meta" id="resultMeta"></p>
+      <div id="shelfArea"></div>
+
+      <section class="colophon">
+        <h2 class="serif">這支檔案怎麼用</h2>
+        <div>這是個人用的檔案室，網址上只有程式本身，你登記的卷宗不會上傳到任何伺服器。</div>
+        <ol>
+          <li>裝成 App：Android／電腦版 Chrome 按上方「安裝成 App」（或瀏覽器選單的「安裝應用程式／加到主畫面」）；iPhone 用 Safari 的「分享 → 加入主畫面」。裝好後沒網路也能開。</li>
+          <li>資料存在這台裝置的這個 App 裡：手機和電腦各有一份，不會自動同步。要搬資料或備份，用「匯出目錄」存成 JSON，到另一台「匯入目錄」。</li>
+          <li>上傳的檔案本體只存在上傳那台裝置裡，匯出的 JSON 不含檔案本體；需要兩邊都看得到的檔案，建議放雲端硬碟、卷宗用「連結」方式登記（開啟時仍照雲端硬碟的權限）。</li>
+        </ol>
+      </section>
+    </main>
+
+    <div class="backdrop" id="backdrop"></div>
+
+    <!-- 新增 / 編輯卷宗 -->
+    <section class="sheet" id="editSheet" role="dialog" aria-modal="true" aria-labelledby="editTitle" hidden>
+      <div class="sheet-head">
+        <div class="grow">
+          <h2 id="editTitle">卷宗入庫</h2>
+          <div class="sub" id="editSub">填寫編目資料，存檔後即上架。</div>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="關閉">✕</button>
+      </div>
+      <div class="kind-tabs" role="group" aria-label="新增方式">
+        <button type="button" id="tabLink" aria-pressed="true">貼上連結</button>
+        <button type="button" id="tabUpload" aria-pressed="false">上傳檔案</button>
+      </div>
+      <form id="editForm" novalidate>
+        <div class="field">
+          <label for="fTitle">卷宗名稱 *</label>
+          <input id="fTitle" type="text" placeholder="例如：114-1 高一物理第一次段考卷、11月科務會議紀錄" autocomplete="off" />
+        </div>
+        <div id="linkFields">
+          <div class="field">
+            <label for="fUrl">連結網址 *</label>
+            <input id="fUrl" type="url" inputmode="url" placeholder="貼上雲端硬碟或協作平台的分享連結" autocomplete="off" />
+            <div class="hint">卡片會自動標示來源（如 Google 雲端硬碟）。</div>
+          </div>
+        </div>
+        <div id="uploadFields" hidden>
+          <div class="field">
+            <label for="fFile">選擇檔案 *</label>
+            <input id="fFile" type="file" />
+            <div class="hint" id="fileHint">上限 25 MB。PDF 可在頁面內預覽，圖片直接顯示，其他格式可下載。檔案只存放在這台裝置的瀏覽器裡。</div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="fFolder">歸入檔案櫃</label>
+            <select id="fFolder"></select>
+          </div>
+          <div class="field">
+            <label for="fCategory">分類</label>
+            <input id="fCategory" type="text" list="catList" placeholder="段考、科務會議……" autocomplete="off" />
+            <datalist id="catList"></datalist>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="fGrade">年級</label>
+            <input id="fGrade" type="text" list="gradeList" placeholder="高一、國二、全科……" autocomplete="off" />
+            <datalist id="gradeList">
+              <option value="國一"></option><option value="國二"></option><option value="國三"></option>
+              <option value="高一"></option><option value="高二"></option><option value="高三"></option>
+              <option value="全校"></option><option value="科務"></option>
+            </datalist>
+          </div>
+          <div class="field">
+            <label for="fSemester">學年學期</label>
+            <input id="fSemester" type="text" placeholder="例如：114學年度第1學期" autocomplete="off" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="fNote">備註</label>
+          <textarea id="fNote" placeholder="命題老師、會議結論、連結權限等補充說明"></textarea>
+        </div>
+        <p class="err" id="formErr"></p>
+        <div class="sheet-actions">
+          <button class="btn btn-danger" type="button" id="btnDeleteInForm" hidden>刪除卷宗</button>
+          <span class="spacer"></span>
+          <button class="btn" type="button" data-close>取消</button>
+          <button class="btn btn-brass" type="submit" id="btnSave">存檔入庫</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 調閱預覽 -->
+    <section class="sheet" id="previewSheet" role="dialog" aria-modal="true" aria-labelledby="pvTitle" hidden>
+      <div class="sheet-head">
+        <div class="grow">
+          <h2 id="pvTitle">調閱卷宗</h2>
+          <div class="sub" id="pvCallno"></div>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="關閉">✕</button>
+      </div>
+      <div id="pvBody"></div>
+      <div class="sheet-actions">
+        <button class="btn btn-danger" type="button" id="btnDeleteInPreview">刪除卷宗</button>
+        <span class="spacer"></span>
+        <button class="btn" type="button" id="btnEditInPreview">編輯</button>
+        <a class="btn btn-brass" id="btnOpenInPreview" href="#" target="_blank" rel="noopener" hidden>開啟連結</a>
+        <button class="btn btn-brass" type="button" id="btnDownloadFile" hidden>下載檔案</button>
+      </div>
+    </section>
+
+    <!-- 檔案櫃管理 -->
+    <section class="sheet" id="folderSheet" role="dialog" aria-modal="true" aria-labelledby="folderTitle" hidden>
+      <div class="sheet-head">
+        <div class="grow">
+          <h2 id="folderTitle">管理檔案櫃</h2>
+          <div class="sub">新增、改名或移除櫃子；移除櫃子時，裡面的卷宗會移到「未歸櫃」。</div>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="關閉">✕</button>
+      </div>
+      <div id="folderList"></div>
+      <form id="folderForm" style="margin-top:14px">
+        <div class="field">
+          <label for="newFolderName">新增檔案櫃</label>
+          <div style="display:flex;gap:8px">
+            <input id="newFolderName" type="text" placeholder="例如：高一物理、科務會議專櫃" autocomplete="off" style="flex:1" />
+            <button class="btn btn-brass" type="submit">新增</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      (function () {
+        "use strict";
+        var LS_KEY = "teaching-archive-standalone-v1";
+        var MAX_UPLOAD = 25 * 1024 * 1024;
+        var CATEGORY_PRESETS = ["段考", "模擬考", "考古題", "學測複習", "科務會議", "會議紀錄", "科務資料", "行政文件", "教學計畫", "課程資料", "研習資料", "成績分析", "其他"];
+        var SPINE_COLORS = ["#6d2f26", "#274435", "#31435f", "#7a5a1e", "#4c2d4f", "#20504c", "#713622", "#374f27", "#5c2436", "#2c4a63", "#66501f", "#43302a"];
+
+        function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+        function esc(s) {
+          return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+          });
+        }
+        function spineColor(cat) {
+          var h = 0, s = String(cat || "其他");
+          for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+          return SPINE_COLORS[h % SPINE_COLORS.length];
+        }
+        function fmtSize(n) {
+          if (!n && n !== 0) return "";
+          if (n < 1024) return n + " B";
+          if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+          return (n / 1024 / 1024).toFixed(1) + " MB";
+        }
+        function fmtDate(ts) {
+          var d = new Date(ts);
+          return d.getFullYear() + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0");
+        }
+        function sourceLabel(url) {
+          try {
+            var h = new URL(url).hostname.toLowerCase();
+            if (h.indexOf("drive.google") >= 0) return "Google 雲端硬碟";
+            if (h.indexOf("docs.google") >= 0) return "Google 文件";
+            if (h.indexOf("classroom.google") >= 0) return "Google Classroom";
+            if (h.indexOf("onedrive") >= 0 || h.indexOf("sharepoint") >= 0) return "OneDrive";
+            if (h.indexOf("dropbox") >= 0) return "Dropbox";
+            if (h.indexOf("notion") >= 0) return "Notion";
+            if (h.indexOf("hackmd") >= 0) return "HackMD";
+            return h.replace(/^www\./, "");
+          } catch (e) { return "網頁連結"; }
+        }
+        function callNumber(f) {
+          var parts = [f.category || "未分類"];
+          if (f.grade) parts.push(f.grade);
+          if (f.semester) parts.push(f.semester);
+          return parts.join(" ・ ");
+        }
+
+        /* ---------- 狀態與儲存 ---------- */
+        var state = { folders: [], files: [] };
+        function load() {
+          try {
+            var raw = localStorage.getItem(LS_KEY);
+            if (raw) {
+              var parsed = JSON.parse(raw);
+              if (parsed && Array.isArray(parsed.folders) && Array.isArray(parsed.files)) state = parsed;
+            }
+          } catch (e) { /* 讀不到就從空檔案室開始 */ }
+        }
+        function save() {
+          try { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+          catch (e) { toast("瀏覽器儲存空間不足，目錄未能存下"); }
+        }
+
+        /* ---------- IndexedDB：上傳檔案本體 ---------- */
+        var idbPromise = null;
+        function idb() {
+          if (idbPromise) return idbPromise;
+          idbPromise = new Promise(function (resolve, reject) {
+            if (!("indexedDB" in window)) { reject(new Error("no-idb")); return; }
+            var req = indexedDB.open("teaching-archive-standalone", 1);
+            req.onupgradeneeded = function () { req.result.createObjectStore("blobs"); };
+            req.onsuccess = function () { resolve(req.result); };
+            req.onerror = function () { reject(req.error); };
+          });
+          return idbPromise;
+        }
+        function idbPut(id, blob) {
+          return idb().then(function (db) {
+            return new Promise(function (resolve, reject) {
+              var tx = db.transaction("blobs", "readwrite");
+              tx.objectStore("blobs").put(blob, id);
+              tx.oncomplete = resolve; tx.onerror = function () { reject(tx.error); };
+            });
+          });
+        }
+        function idbGet(id) {
+          return idb().then(function (db) {
+            return new Promise(function (resolve, reject) {
+              var req = db.transaction("blobs", "readonly").objectStore("blobs").get(id);
+              req.onsuccess = function () { resolve(req.result || null); };
+              req.onerror = function () { reject(req.error); };
+            });
+          }).catch(function () { return null; });
+        }
+        function idbDel(id) {
+          return idb().then(function (db) {
+            return new Promise(function (resolve) {
+              var tx = db.transaction("blobs", "readwrite");
+              tx.objectStore("blobs").delete(id);
+              tx.oncomplete = resolve; tx.onerror = resolve;
+            });
+          }).catch(function () {});
+        }
+
+        /* ---------- 介面參照 ---------- */
+        var $ = function (id) { return document.getElementById(id); };
+        var els = {
+          statFiles: $("statFiles"), statCabinets: $("statCabinets"), statUnfiled: $("statUnfiled"),
+          search: $("searchInput"), chips: $("catChips"), cabinets: $("cabinetRow"),
+          shelf: $("shelfArea"), resultMeta: $("resultMeta"), clearFilters: $("btnClearFilters"),
+          backdrop: $("backdrop"), toast: $("toast"),
+          editSheet: $("editSheet"), previewSheet: $("previewSheet"), folderSheet: $("folderSheet"),
+          importBanner: $("importBanner"), importBannerText: $("importBannerText")
+        };
+        var view = { folder: "all", category: "all", query: "" };
+        var toastTimer = null;
+        function toast(msg) {
+          els.toast.textContent = msg;
+          els.toast.classList.add("show");
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () { els.toast.classList.remove("show"); }, 2600);
+        }
+
+        /* ---------- 篩選與渲染 ---------- */
+        function folderName(id) {
+          if (!id) return "未歸櫃";
+          var f = state.folders.find(function (x) { return x.id === id; });
+          return f ? f.name : "未歸櫃";
+        }
+        function filteredFiles() {
+          var q = view.query.trim().toLowerCase();
+          return state.files.filter(function (f) {
+            if (view.folder === "none" && f.folderId) return false;
+            if (view.folder !== "all" && view.folder !== "none" && f.folderId !== view.folder) return false;
+            if (view.category !== "all" && (f.category || "其他") !== view.category) return false;
+            if (q) {
+              var hay = [f.title, f.note, f.category, f.grade, f.semester, folderName(f.folderId)].join(" ").toLowerCase();
+              if (hay.indexOf(q) < 0) return false;
+            }
+            return true;
+          }).sort(function (a, b) { return b.createdAt - a.createdAt; });
+        }
+        function renderStats() {
+          els.statFiles.textContent = state.files.length;
+          els.statCabinets.textContent = state.folders.length;
+          els.statUnfiled.textContent = state.files.filter(function (f) { return !f.folderId; }).length;
+        }
+        function renderChips() {
+          var counts = {};
+          state.files.forEach(function (f) { var c = f.category || "其他"; counts[c] = (counts[c] || 0) + 1; });
+          var cats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+          var html = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (view.category === "all") + '">全部分類<span class="n">' + state.files.length + "</span></button>";
+          cats.forEach(function (c) {
+            html += '<button type="button" class="chip" data-cat="' + esc(c) + '" aria-pressed="' + (view.category === c) + '">' + esc(c) + '<span class="n">' + counts[c] + "</span></button>";
+          });
+          els.chips.innerHTML = state.files.length ? html : "";
+          Array.prototype.forEach.call(els.chips.querySelectorAll(".chip"), function (chip) {
+            chip.addEventListener("click", function () { view.category = chip.getAttribute("data-cat"); render(); });
+          });
+        }
+        function renderCabinets() {
+          function cab(key, name, count, plate) {
+            return '<button type="button" class="cabinet" data-folder="' + esc(key) + '" aria-pressed="' + (view.folder === key) + '">' +
+              '<span class="cplate">' + esc(plate) + '</span>' +
+              '<span class="cname serif">' + esc(name) + "</span>" +
+              '<span class="drawer-line"></span>' +
+              '<span class="ccount">' + count + ' 份卷宗<span class="handle"></span></span></button>';
+          }
+          var html = cab("all", "閱覽大廳・全部卷宗", state.files.length, "總目錄");
+          html += cab("none", "未歸櫃", state.files.filter(function (f) { return !f.folderId; }).length, "待編目");
+          state.folders.forEach(function (fd) {
+            html += cab(fd.id, fd.name, state.files.filter(function (f) { return f.folderId === fd.id; }).length, "檔案櫃");
+          });
+          els.cabinets.innerHTML = html;
+          Array.prototype.forEach.call(els.cabinets.querySelectorAll(".cabinet"), function (c) {
+            c.addEventListener("click", function () { view.folder = c.getAttribute("data-folder"); render(); });
+          });
+        }
+        function cardHTML(f) {
+          var stamp = f.kind === "link" ? sourceLabel(f.url) : (f.mime && f.mime.indexOf("pdf") >= 0 ? "PDF" : "上傳檔案");
+          var meta = [f.grade, f.semester].filter(Boolean).join(" ・ ");
+          return '<button type="button" class="vcard" data-open="' + f.id + '">' +
+            '<span class="spine" style="background:' + spineColor(f.category) + '">' + esc(f.category || "其他") + "</span>" +
+            '<span class="vbody">' +
+            '<span class="stamp">' + esc(stamp) + "</span>" +
+            '<span class="callno">索書號 ' + esc(callNumber(f)) + "</span>" +
+            '<span class="vtitle serif">' + esc(f.title) + "</span>" +
+            (meta ? '<span class="vmeta">' + esc(meta) + "</span>" : "") +
+            (f.note ? '<span class="vnote">' + esc(f.note) + "</span>" : "") +
+            '<span class="vfoot"><span>' + esc(folderName(f.folderId)) + "</span><span>・</span><span>入庫 " + fmtDate(f.createdAt) + "</span>" +
+            (f.kind === "upload" && f.size ? "<span>・</span><span>" + fmtSize(f.size) + "</span>" : "") +
+            "</span></span></button>";
+        }
+        function renderShelf() {
+          var list = filteredFiles();
+          var hasFilter = view.folder !== "all" || view.category !== "all" || view.query.trim() !== "";
+          els.clearFilters.hidden = !hasFilter;
+          if (!state.files.length) {
+            els.resultMeta.textContent = "";
+            els.shelf.innerHTML = '<div class="empty"><span class="serif">檔案室目前是空的</span>按下「新增卷宗」，把第一份考卷、會議紀錄或科務文件入庫。</div>';
+            return;
+          }
+          els.resultMeta.textContent = "共 " + list.length + " 份卷宗" + (hasFilter ? "（已套用篩選）" : "");
+          if (!list.length) {
+            els.shelf.innerHTML = '<div class="empty"><span class="serif">找不到符合的卷宗</span>換個關鍵字，或清除篩選再試一次。</div>';
+            return;
+          }
+          var html = "";
+          if (view.folder === "all") {
+            var groups = [], seen = {};
+            list.forEach(function (f) {
+              var key = f.folderId || "__none";
+              if (!seen[key]) { seen[key] = { name: folderName(f.folderId), items: [] }; groups.push(seen[key]); }
+              seen[key].items.push(f);
+            });
+            groups.forEach(function (g) {
+              html += '<div class="shelf-group"><div class="shelf-title"><h3>' + esc(g.name) + '</h3><span class="cnt">' + g.items.length + ' 份</span><div class="rule"></div></div><div class="cards">' +
+                g.items.map(cardHTML).join("") + "</div></div>";
+            });
+          } else {
+            html = '<div class="cards" style="margin-top:14px">' + list.map(cardHTML).join("") + "</div>";
+          }
+          els.shelf.innerHTML = html;
+          Array.prototype.forEach.call(els.shelf.querySelectorAll("[data-open]"), function (card) {
+            card.addEventListener("click", function () { openPreview(card.getAttribute("data-open")); });
+          });
+        }
+        function render() { renderStats(); renderChips(); renderCabinets(); renderShelf(); }
+
+        /* ---------- Sheet 開關 ---------- */
+        var openSheetEl = null;
+        function openSheet(el) {
+          closeSheets();
+          el.hidden = false;
+          requestAnimationFrame(function () { el.classList.add("open"); els.backdrop.classList.add("open"); });
+          openSheetEl = el;
+        }
+        function closeSheets() {
+          [els.editSheet, els.previewSheet, els.folderSheet].forEach(function (s) { s.classList.remove("open"); s.hidden = true; });
+          els.backdrop.classList.remove("open");
+          openSheetEl = null;
+          revokePreviewUrl();
+        }
+        els.backdrop.addEventListener("click", closeSheets);
+        Array.prototype.forEach.call(document.querySelectorAll("[data-close]"), function (b) {
+          b.addEventListener("click", closeSheets);
+        });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheets(); });
+
+        /* ---------- 新增 / 編輯 ---------- */
+        var editingId = null, formKind = "link", pendingUploadReplaced = false;
+        var fTitle = $("fTitle"), fUrl = $("fUrl"), fFile = $("fFile"), fFolder = $("fFolder"),
+            fCategory = $("fCategory"), fGrade = $("fGrade"), fSemester = $("fSemester"), fNote = $("fNote"),
+            formErr = $("formErr");
+        $("catList").innerHTML = CATEGORY_PRESETS.map(function (c) { return '<option value="' + esc(c) + '"></option>'; }).join("");
+        function setKind(kind) {
+          formKind = kind;
+          $("tabLink").setAttribute("aria-pressed", kind === "link");
+          $("tabUpload").setAttribute("aria-pressed", kind === "upload");
+          $("linkFields").hidden = kind !== "link";
+          $("uploadFields").hidden = kind !== "upload";
+        }
+        $("tabLink").addEventListener("click", function () { setKind("link"); });
+        $("tabUpload").addEventListener("click", function () { setKind("upload"); });
+        fFile.addEventListener("change", function () {
+          var file = fFile.files[0];
+          $("fileHint").textContent = file
+            ? "已選：" + file.name + "（" + fmtSize(file.size) + "）" + (file.size > MAX_UPLOAD ? " — 超過 25 MB 上限，請換小一點的檔案" : "")
+            : "上限 25 MB。PDF 可在頁面內預覽，圖片直接顯示，其他格式可下載。檔案只存放在這台裝置的瀏覽器裡。";
+        });
+        function fillFolderSelect(selected) {
+          var html = '<option value="">未歸櫃</option>' + state.folders.map(function (fd) {
+            return '<option value="' + fd.id + '"' + (fd.id === selected ? " selected" : "") + ">" + esc(fd.name) + "</option>";
+          }).join("");
+          fFolder.innerHTML = html;
+        }
+        function openAdd() {
+          editingId = null; pendingUploadReplaced = false;
+          $("editTitle").textContent = "卷宗入庫";
+          $("editSub").textContent = "填寫編目資料，存檔後即上架。";
+          $("btnDeleteInForm").hidden = true;
+          $("btnSave").textContent = "存檔入庫";
+          fTitle.value = ""; fUrl.value = ""; fFile.value = ""; fCategory.value = ""; fGrade.value = ""; fSemester.value = ""; fNote.value = "";
+          formErr.classList.remove("show");
+          fillFolderSelect(view.folder !== "all" && view.folder !== "none" ? view.folder : "");
+          setKind("link");
+          openSheet(els.editSheet);
+          setTimeout(function () { fTitle.focus(); }, 60);
+        }
+        function openEdit(id) {
+          var f = state.files.find(function (x) { return x.id === id; });
+          if (!f) return;
+          closeSheets();
+          editingId = id; pendingUploadReplaced = false;
+          $("editTitle").textContent = "編輯卷宗";
+          $("editSub").textContent = "索書號 " + callNumber(f) + " ・ 入庫 " + fmtDate(f.createdAt);
+          $("btnDeleteInForm").hidden = false;
+          $("btnSave").textContent = "儲存變更";
+          fTitle.value = f.title; fCategory.value = f.category || ""; fGrade.value = f.grade || "";
+          fSemester.value = f.semester || ""; fNote.value = f.note || "";
+          fUrl.value = f.kind === "link" ? f.url : "";
+          fFile.value = "";
+          $("fileHint").textContent = f.kind === "upload"
+            ? "目前檔案：" + (f.fileName || "上傳檔案") + "（" + fmtSize(f.size) + "）。不選新檔案就保留原檔。"
+            : "上限 25 MB。PDF 可在頁面內預覽，圖片直接顯示，其他格式可下載。";
+          formErr.classList.remove("show");
+          fillFolderSelect(f.folderId || "");
+          setKind(f.kind);
+          openSheet(els.editSheet);
+        }
+        function showErr(msg) { formErr.textContent = msg; formErr.classList.add("show"); }
+        $("editForm").addEventListener("submit", function (e) {
+          e.preventDefault();
+          formErr.classList.remove("show");
+          var title = fTitle.value.trim();
+          if (!title) { showErr("請填卷宗名稱。"); fTitle.focus(); return; }
+          var existing = editingId ? state.files.find(function (x) { return x.id === editingId; }) : null;
+          var data = {
+            title: title,
+            folderId: fFolder.value || null,
+            category: fCategory.value.trim() || "其他",
+            grade: fGrade.value.trim(),
+            semester: fSemester.value.trim(),
+            note: fNote.value.trim()
+          };
+          var done = function (extra) {
+            Object.keys(extra).forEach(function (k) { data[k] = extra[k]; });
+            if (existing) {
+              Object.keys(data).forEach(function (k) { existing[k] = data[k]; });
+              toast("卷宗已更新");
+            } else {
+              data.id = uid(); data.createdAt = Date.now();
+              state.files.push(data);
+              toast("卷宗已入庫");
+            }
+            save(); closeSheets(); render();
+          };
+          if (formKind === "link") {
+            var url = fUrl.value.trim();
+            if (!url) { showErr("請貼上連結網址。"); return; }
+            if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+            if (existing && existing.kind === "upload") idbDel(existing.id);
+            done({ kind: "link", url: url, fileName: "", mime: "", size: 0 });
+          } else {
+            var file = fFile.files[0];
+            if (!file && !existing) { showErr("請選擇要上傳的檔案。"); return; }
+            if (!file && existing && existing.kind === "link") { showErr("這份卷宗原本是連結，請選擇檔案再儲存，或切回「貼上連結」。"); return; }
+            if (!file) { done({ kind: "upload", url: "", fileName: existing.fileName, mime: existing.mime, size: existing.size }); return; }
+            if (file.size > MAX_UPLOAD) { showErr("檔案超過 25 MB 上限，請換小一點的檔案。"); return; }
+            var targetId = existing ? existing.id : uid();
+            if (existing) { editingId = targetId; }
+            idbPut(targetId, file).then(function () {
+              if (!existing) { /* 新卷宗沿用預先產生的 id */ }
+              var extra = { kind: "upload", url: "", fileName: file.name, mime: file.type || "", size: file.size };
+              if (existing) { done(extra); }
+              else {
+                data.id = targetId; data.createdAt = Date.now();
+                Object.keys(extra).forEach(function (k) { data[k] = extra[k]; });
+                state.files.push(data);
+                save(); closeSheets(); render(); toast("卷宗已入庫");
+              }
+            }).catch(function () { showErr("這台裝置的瀏覽器無法存放上傳檔案，請改用「貼上連結」登記雲端檔案。"); });
+          }
+        });
+
+        /* ---------- 刪除（兩段確認） ---------- */
+        function armDelete(btn, id) {
+          if (btn.getAttribute("data-armed") === "1") {
+            var f = state.files.find(function (x) { return x.id === id; });
+            state.files = state.files.filter(function (x) { return x.id !== id; });
+            if (f && f.kind === "upload") idbDel(id);
+            save(); closeSheets(); render(); toast("卷宗已刪除");
+          } else {
+            btn.setAttribute("data-armed", "1");
+            btn.textContent = "確定刪除？再按一次";
+            setTimeout(function () { btn.removeAttribute("data-armed"); btn.textContent = "刪除卷宗"; }, 3200);
+          }
+        }
+        $("btnDeleteInForm").addEventListener("click", function () { if (editingId) armDelete(this, editingId); });
+
+        /* ---------- 調閱預覽 ---------- */
+        var previewId = null, previewUrl = null;
+        function revokePreviewUrl() { if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; } }
+        function openPreview(id) {
+          var f = state.files.find(function (x) { return x.id === id; });
+          if (!f) return;
+          previewId = id;
+          $("pvTitle").textContent = f.title;
+          $("pvCallno").textContent = "索書號 " + callNumber(f);
+          var rows = [
+            ["分類", f.category || "其他"],
+            ["檔案櫃", folderName(f.folderId)],
+            ["年級", f.grade || "—"],
+            ["學年學期", f.semester || "—"],
+            ["來源", f.kind === "link" ? sourceLabel(f.url) : "上傳檔案" + (f.fileName ? "：" + f.fileName : "")],
+            ["入庫日期", fmtDate(f.createdAt)]
+          ];
+          if (f.kind === "upload" && f.size) rows.push(["檔案大小", fmtSize(f.size)]);
+          var html = '<table class="meta-table">' + rows.map(function (r) {
+            return "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + "</td></tr>";
+          }).join("") + "</table>";
+          if (f.note) html += '<p style="font-size:.9rem;white-space:pre-wrap;word-break:break-word">' + esc(f.note) + "</p>";
+          html += '<div id="pvMedia"></div>';
+          $("pvBody").innerHTML = html;
+          var openBtn = $("btnOpenInPreview"), dlBtn = $("btnDownloadFile");
+          var delBtn = $("btnDeleteInPreview");
+          delBtn.removeAttribute("data-armed"); delBtn.textContent = "刪除卷宗";
+          if (f.kind === "link") {
+            openBtn.hidden = false; openBtn.href = f.url; dlBtn.hidden = true;
+          } else {
+            openBtn.hidden = true; dlBtn.hidden = false;
+            idbGet(f.id).then(function (blob) {
+              var media = $("pvMedia");
+              if (!media) return;
+              if (!blob) { media.innerHTML = '<p class="err show">這台裝置上找不到檔案本體（可能是在別台裝置上傳的），請改用連結方式登記。</p>'; dlBtn.hidden = true; return; }
+              previewUrl = URL.createObjectURL(blob);
+              if ((f.mime || "").indexOf("pdf") >= 0) {
+                media.innerHTML = '<iframe class="preview-frame" title="PDF 預覽" src="' + previewUrl + '"></iframe>';
+              } else if ((f.mime || "").indexOf("image/") === 0) {
+                media.innerHTML = '<img class="preview-img" alt="' + esc(f.title) + '" src="' + previewUrl + '">';
+              }
+              dlBtn.onclick = function () {
+                var a = document.createElement("a");
+                a.href = previewUrl; a.download = f.fileName || "download";
+                document.body.appendChild(a); a.click(); a.remove();
+              };
+            });
+          }
+          openSheet(els.previewSheet);
+        }
+        $("btnEditInPreview").addEventListener("click", function () { if (previewId) openEdit(previewId); });
+        $("btnDeleteInPreview").addEventListener("click", function () { if (previewId) armDelete(this, previewId); });
+
+        /* ---------- 檔案櫃管理 ---------- */
+        function renderFolderList() {
+          var html = state.folders.map(function (fd) {
+            var cnt = state.files.filter(function (f) { return f.folderId === fd.id; }).length;
+            return '<div class="folder-row"><input type="text" value="' + esc(fd.name) + '" data-rename="' + fd.id + '" aria-label="櫃名" />' +
+              '<span class="cnt">' + cnt + ' 份</span>' +
+              '<button type="button" class="btn btn-small" data-save-folder="' + fd.id + '">改名</button>' +
+              '<button type="button" class="btn btn-small btn-danger" data-del-folder="' + fd.id + '">移除</button></div>';
+          }).join("");
+          $("folderList").innerHTML = html || '<p style="color:var(--ink-soft);font-size:.88rem">還沒有自建檔案櫃，用下方欄位新增第一座。</p>';
+          Array.prototype.forEach.call($("folderList").querySelectorAll("[data-save-folder]"), function (b) {
+            b.addEventListener("click", function () {
+              var id = b.getAttribute("data-save-folder");
+              var input = $("folderList").querySelector('[data-rename="' + id + '"]');
+              var name = input.value.trim();
+              if (!name) { toast("櫃名不能空白"); return; }
+              var fd = state.folders.find(function (x) { return x.id === id; });
+              if (fd) { fd.name = name; save(); render(); renderFolderList(); toast("檔案櫃已改名"); }
+            });
+          });
+          Array.prototype.forEach.call($("folderList").querySelectorAll("[data-del-folder]"), function (b) {
+            b.addEventListener("click", function () {
+              if (b.getAttribute("data-armed") === "1") {
+                var id = b.getAttribute("data-del-folder");
+                state.folders = state.folders.filter(function (x) { return x.id !== id; });
+                state.files.forEach(function (f) { if (f.folderId === id) f.folderId = null; });
+                if (view.folder === id) view.folder = "all";
+                save(); render(); renderFolderList(); toast("檔案櫃已移除，卷宗移到未歸櫃");
+              } else {
+                b.setAttribute("data-armed", "1"); b.textContent = "確定移除？";
+                setTimeout(function () { b.removeAttribute("data-armed"); b.textContent = "移除"; }, 3000);
+              }
+            });
+          });
+        }
+        $("btnFolders").addEventListener("click", function () { renderFolderList(); openSheet(els.folderSheet); });
+        $("folderForm").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var name = $("newFolderName").value.trim();
+          if (!name) return;
+          state.folders.push({ id: uid(), name: name });
+          $("newFolderName").value = "";
+          save(); render(); renderFolderList(); toast("檔案櫃已新增");
+        });
+
+        /* ---------- 搜尋與篩選 ---------- */
+        els.search.addEventListener("input", function () { view.query = els.search.value; renderShelf(); renderChipsStateOnly(); });
+        function renderChipsStateOnly() { /* 搜尋不重建 chips，避免輸入焦點遺失；僅更新結果 */ els.clearFilters.hidden = !(view.folder !== "all" || view.category !== "all" || view.query.trim() !== ""); }
+        els.clearFilters.addEventListener("click", function () {
+          view = { folder: "all", category: "all", query: "" };
+          els.search.value = "";
+          render();
+        });
+        $("btnAddTop").addEventListener("click", openAdd);
+
+        /* ---------- 安裝成 App（PWA） ---------- */
+        var installEvt = null;
+        var isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+        window.addEventListener("beforeinstallprompt", function (e) {
+          e.preventDefault(); installEvt = e;
+          if (!isStandalone) $("btnInstall").hidden = false;
+        });
+        $("btnInstall").addEventListener("click", function () {
+          if (!installEvt) return;
+          installEvt.prompt();
+          installEvt.userChoice.then(function () { installEvt = null; $("btnInstall").hidden = true; });
+        });
+        window.addEventListener("appinstalled", function () { $("btnInstall").hidden = true; toast("已安裝，之後可從主畫面開啟"); });
+        var ua = navigator.userAgent || "";
+        var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        if (isIOS && !isStandalone) $("iosTip").classList.add("show");
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+        }
+        // 請瀏覽器把資料視為永久保存，避免久沒開被清掉
+        if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(function () {}); }
+
+        /* ---------- 匯出 / 匯入目錄 ---------- */
+        $("btnExport").addEventListener("click", function () {
+          var payload = {
+            app: "teaching-archive-standalone",
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            folders: state.folders,
+            files: state.files.map(function (f) {
+              var copy = {}; Object.keys(f).forEach(function (k) { copy[k] = f[k]; });
+              return copy;
+            })
+          };
+          var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "教學檔案室目錄.json";
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+          toast("目錄已匯出（上傳檔案的本體不在 JSON 內）");
+        });
+        var pendingImport = null;
+        $("btnImport").addEventListener("click", function () { $("importInput").click(); });
+        $("importInput").addEventListener("change", function () {
+          var file = this.files[0];
+          this.value = "";
+          if (!file) return;
+          var reader = new FileReader();
+          reader.onload = function () {
+            try {
+              var parsed = JSON.parse(String(reader.result));
+              if (!parsed || !Array.isArray(parsed.folders) || !Array.isArray(parsed.files)) throw new Error("bad");
+              pendingImport = parsed;
+              els.importBannerText.textContent = "已讀取匯入檔：檔案櫃 " + parsed.folders.length + " 座、卷宗 " + parsed.files.length + " 份。匯入會取代目前這台裝置上的目錄。";
+              els.importBanner.classList.add("show");
+            } catch (e) { toast("這不是有效的目錄匯出檔"); }
+          };
+          reader.readAsText(file);
+        });
+        $("btnImportCancel").addEventListener("click", function () {
+          pendingImport = null; els.importBanner.classList.remove("show");
+        });
+        $("btnImportConfirm").addEventListener("click", function () {
+          if (!pendingImport) return;
+          state = { folders: pendingImport.folders, files: pendingImport.files };
+          pendingImport = null;
+          els.importBanner.classList.remove("show");
+          view = { folder: "all", category: "all", query: "" };
+          els.search.value = "";
+          save(); render(); toast("目錄已匯入");
+        });
+
+        load();
+        render();
+      })();
+    </script>
+  </body>
+</html>
