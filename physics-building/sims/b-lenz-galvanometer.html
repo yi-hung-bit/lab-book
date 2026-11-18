@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電磁感應與冷次定律</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--nred:#ff4f5e;--sblue:#4f8dff;--vio:#8b8cff;--cu:#e39a5b;--cur:#ff5fa2;--frc:#5be37d}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,95,162,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+h2{font-size:18px;margin:26px 0 0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h2 small{font-size:13px;color:var(--muted);font-weight:400}
+.lede{color:var(--muted);max-width:78ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc);font-weight:500}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+#cvA{height:380px}#cvAg{height:130px}#cvB{height:330px}#cvBg{height:170px}#cvC{height:330px}#cvCg{height:160px}
+@media(max-width:560px){#cvA{height:330px}#cvB{height:280px}#cvC{height:300px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.lab{font-size:12.5px;color:var(--dim);margin:10px 0 4px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.read .wide{grid-column:1/-1}
+.read .wide b{font-family:"Noto Sans TC",sans-serif;font-size:14px}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:10px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:8px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.ok{color:var(--phos)!important}.bad{color:var(--nred)!important}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">4-2 · Electromagnetic Induction · Lenz's Law</div>
+  <h1>電磁感應與冷次定律（檢流計實驗）</h1>
+  <p class="lede">1831 年法拉第發現：只要<b>穿過線圈的磁力線數量改變</b>，線圈上就會產生<b>感應電流</b>，這就是電磁感應。感應電流的方向由<b>冷次定律</b>決定：感應電流所產生的磁場，會抵抗線圈中磁力線數量的變化。磁棒靠近就推它、遠離就拉住它，所以要移動磁棒一定要出力——這份力做的功，正是感應電流電能的來源。</p>
+
+  <h2>① 磁棒與螺線管 <small>示範實驗 2・圖 4-6：拖曳磁棒，看檢流計 Ⓖ 的指針</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">螺線管＋檢流計</span><span class="n">可直接左右拖曳磁棒</span></div>
+      <div class="box"><canvas id="cvA" aria-label="磁棒在螺線管旁移動，檢流計指針偏轉"></canvas></div>
+      <div class="legend"><span><i style="background:var(--sblue)"></i>磁棒的磁力線</span><span><i style="background:var(--cur)"></i>感應電流 I</span><span><i style="background:var(--vio)"></i>感應電流的磁場</span></div>
+      <div class="box" style="margin-top:0"><canvas id="cvAg" aria-label="感應電流隨時間的變化"></canvas></div>
+      <div class="legend"><span><i style="background:var(--cur)"></i>經過檢流計的電流（X→Y 為正）</span><span><i style="background:var(--sblue)"></i>穿過線圈的磁力線數</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">實驗操作</span><span class="n" id="nA"></span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="lab">自動移動（速度用下面的拉桿調）</div>
+        <div class="seg" id="segMv">
+          <button data-v="mIn">磁棒靠近</button><button data-v="mOut">磁棒遠離</button>
+          <button data-v="cIn">線圈靠近</button><button data-v="cOut">線圈遠離</button>
+          <button data-v="both">兩者一起向右</button><button data-v="stop" class="on">靜止</button>
+        </div>
+        <div class="ctl"><div class="r"><label for="sV">移動速度</label><span id="oV"></span></div><input type="range" id="sV" min="0.05" max="1" step="0.05" value="0.3"></div>
+        <div class="lab">磁棒朝向線圈的磁極</div>
+        <div class="seg" id="segPole"><button data-v="N" class="on">N 極朝向線圈</button><button data-v="S">S 極朝向線圈</button></div>
+        <div class="lab">螺線管</div>
+        <div class="seg" id="segTurn"><button data-v="100">100 匝</button><button data-v="300" class="on">300 匝</button><button data-v="600">600 匝</button></div>
+        <div class="seg" style="margin-top:6px"><button id="core">管內放軟鐵棒：否</button><button id="resetA">磁棒放回原位</button></div>
+        <div class="read">
+          <div><small>磁棒相對線圈的速度</small><b id="rV"></b></div>
+          <div><small>穿過線圈的磁力線數（相對）</small><b id="rPhi"></b></div>
+          <div><small>感應電動勢（延伸）</small><b id="rE"></b></div>
+          <div><small>感應電流</small><b id="rI"></b></div>
+          <div class="wide"><small>冷次定律怎麼看</small><b id="rLenz"></b></div>
+        </div>
+        <div class="note">本模擬設定：電流由 <b>X 經檢流計流到 Y</b> 時，指針<b>向右</b>偏；Y→X 時向左偏。檢流計是零點在中央的電流計，偏轉的方向告訴我們電流方向，偏多少告訴我們電流大小。</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">範例 4-3・先猜再看</span><span class="n" id="qScore">答對 0 / 0</span></div>
+      <div class="pad" style="padding-top:2px">
+        <p style="font-size:14px">螺線管裡有軟鐵棒，磁鐵 <b style="color:var(--sblue)">S 極</b>朝向螺線管。選一個條件，先猜檢流計的電流方向，再按「放上實驗台」看結果。</p>
+        <div class="seg" id="segEx" style="margin-top:8px"><button data-v="1" class="on">(1) 磁鐵快速靠近</button><button data-v="2">(2) 磁鐵快速遠離</button><button data-v="3">(3) 兩者以相同速度向右</button></div>
+        <div class="qq"><p id="exQ"></p>
+          <div class="seg" id="exOpt"><button data-v="XY">X → Y</button><button data-v="YX">Y → X</button><button data-v="0">沒有感應電流</button></div>
+          <div class="ans" id="exAns"></div>
+        </div>
+        <div class="seg" style="margin-top:10px"><button id="exRun">放上實驗台</button></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">示範實驗 2 的問題</span><span class="n">邊做邊想</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="note" style="margin-top:4px">1. 磁棒<b>靜止</b>在管口上方、或停在管內時，指針動不動？產生感應電流的條件是什麼？<br>2. 磁棒<b>放入</b>和<b>拿出</b>，指針偏的方向一樣嗎？<br>3. 由指針偏轉方向，能不能判斷磁棒往哪裡動？把 N 極換成 S 極又會怎樣？<br>4. 磁棒<b>慢慢放入</b>和<b>快速放入</b>，指針偏轉有什麼不同？<br>5. 匝數加倍、管內放軟鐵棒，指針偏轉又如何？</div>
+        <div class="note"><b>想一想（課本 p.98）</b>：火車載著磁鐵等速行駛，通過由封閉螺線管線圈做成的長山洞。「即將進入」與「即將離開」山洞時，火車會加速還是減速？<br><span style="color:var(--dim)">提示：拿上面的「磁棒靠近」「磁棒遠離」來看，感應電流的磁場對磁鐵是推還是拉？</span> <button id="trainAns" style="margin-top:6px">看答案</button><span id="trainTxt" hidden> 兩種情況都會<b>減速</b>：進入時線圈排斥火車、離開時線圈吸住火車，感應電流總是阻礙相對運動。</span></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>② 線圈進入、停在、離開磁場 <small>圖 4-5：數一數線圈裡有幾條磁力線</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">俯視圖</span><span class="n">點點區域是均勻磁場，可拖曳線圈</span></div>
+      <div class="box"><canvas id="cvB" aria-label="線圈通過均勻磁場區域"></canvas></div>
+      <div class="box" style="margin-top:0"><canvas id="cvBg" aria-label="磁力線數與感應電流隨時間的變化"></canvas></div>
+      <div class="legend"><span><i style="background:var(--sblue)"></i>線圈內磁力線數</span><span><i style="background:var(--cur)"></i>感應電流（逆時針為正）</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">操作</span><span class="n">磁場寬 30 cm、0.50 T</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button id="playB" class="on">▶ 移動中</button><button id="resetB">回到起點</button></div>
+        <div class="lab">磁場方向</div>
+        <div class="seg" id="segBdir"><button data-v="out" class="on">⊙ 射出紙面</button><button data-v="in">⊗ 射入紙面</button></div>
+        <div class="lab">線圈形狀</div>
+        <div class="seg" id="segShape"><button data-v="ring" class="on">圓形線圈（半徑 5 cm）</button><button data-v="sq">方形線圈（邊長 10 cm）</button></div>
+        <div class="ctl"><div class="r"><label for="sVB">線圈速度</label><span id="oVB"></span></div><input type="range" id="sVB" min="0.05" max="0.5" step="0.05" value="0.2"></div>
+        <div class="read">
+          <div><small>線圈內的磁力線（每點代表一條）</small><b id="rNB"></b></div>
+          <div><small>磁通量（延伸）</small><b id="rPhiB"></b></div>
+          <div><small>感應電流（線圈電阻 0.5 Ω）</small><b id="rIB"></b></div>
+          <div><small>線圈所在位置</small><b id="rWhere"></b></div>
+          <div class="wide"><small>為什麼這樣流</small><b id="rWhy"></b></div>
+        </div>
+        <div class="note">線圈完全在磁場裡時雖然還在動，但線圈內的磁力線數量<b>沒有變</b>，所以沒有感應電流。關鍵不是「有沒有磁場」或「有沒有在動」，而是「<b>磁力線數量有沒有改變</b>」。</div>
+      </div>
+    </section>
+  </div>
+
+  <h2>③ 開關打開與關上的瞬間 <small>範例 4-4：主線圈與副線圈繞在同一個軟鐵環上</small></h2>
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">軟鐵環＋兩組線圈</span><span class="n" id="nC"></span></div>
+      <div class="box"><canvas id="cvC" aria-label="主線圈開關切換時副線圈的檢流計偏轉"></canvas></div>
+      <div class="box" style="margin-top:0"><canvas id="cvCg" aria-label="主線圈電流與副線圈電流隨時間的變化"></canvas></div>
+      <div class="legend"><span><i style="background:var(--acc)"></i>主線圈電流</span><span><i style="background:var(--cur)"></i>副線圈經檢流計的電流（X→Y 為正）</span></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">操作</span><span class="n">開關 S 一開始是關上的</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button id="swC" class="on">開關 S：關上（按一下打開）</button></div>
+        <div class="read">
+          <div><small>主線圈電流</small><b id="rIp"></b></div>
+          <div><small>鐵環中的磁力線</small><b id="rPhiC"></b></div>
+          <div class="wide"><small>副線圈與檢流計</small><b id="rIs"></b></div>
+        </div>
+        <div class="qq"><p>範例 4-4：下列時間點，Ⓖ 中有沒有電流？方向為何？先作答再操作開關驗證。</p>
+          <div id="q44"></div>
+          <div class="ans" id="q44a"></div>
+        </div>
+        <div class="note">開關切換的<b>瞬間</b>，主線圈電流在變，鐵環中的磁力線數跟著變，副線圈才有感應電流；開關維持打開或關上一段時間，磁力線數不再改變，指針回到零。打開時電流消失得很快，所以那一下通常偏得更大。</div>
+      </div>
+    </section>
+  </div>
+
+  <footer><b>關於模型</b>：磁棒以兩個磁極（磁荷）表示，穿過每一匝的磁力線數用其磁場積分計算，再把各匝相加；軟鐵棒以「磁力線變為 4 倍」示意。感應電動勢 ε = −N ΔΦ/Δt 與數值屬延伸內容，基礎物理只要求判斷「有沒有」與「方向」。螺線管長 10 cm、半徑 2 cm，磁棒長 8 cm，線圈與檢流計總電阻 50 Ω。<br><b>來源</b>：基礎物理 第 4 章 4-2 電磁感應 p.97–103（圖 4-5、圖 4-6、範例 4-3、範例 4-4、示範實驗 2、想一想）。</footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const fix=(v,d)=>(v<-1e-12?"−":"")+Math.abs(v).toFixed(d);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C={cur:css("--cur"),b:css("--sblue"),vio:css("--vio"),acc:css("--acc"),cu:css("--cu"),n:css("--nred"),s:css("--sblue"),txt:css("--txt"),mut:css("--muted"),dim:css("--dim"),phos:css("--phos"),line:css("--line")};
+function setup(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
+  const w=Math.max(10,Math.round(r.width)),h=Math.max(10,Math.round(r.height));
+  if(cv.width!==w*dpr||cv.height!==h*dpr){cv.width=w*dpr;cv.height=h*dpr;}
+  const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return {x,w,h};}
+function seg(id,cb){const g=$(id);g.querySelectorAll("button").forEach(b=>b.onclick=()=>{g.querySelectorAll("button").forEach(o=>o.classList.toggle("on",o===b));cb(b.dataset.v);});}
+function setSeg(id,v){$(id).querySelectorAll("button").forEach(o=>o.classList.toggle("on",o.dataset.v===v));}
+function arrow(x,c,x0,y0,x1,y1,w=3,head=10){const a=Math.atan2(y1-y0,x1-x0),L=Math.hypot(x1-x0,y1-y0);if(L<2)return;
+  x.strokeStyle=c;x.fillStyle=c;x.lineWidth=w;x.lineCap="round";x.beginPath();x.moveTo(x0,y0);x.lineTo(x1-Math.cos(a)*head*.6,y1-Math.sin(a)*head*.6);x.stroke();
+  x.beginPath();x.moveTo(x1,y1);x.lineTo(x1-head*Math.cos(a-.42),y1-head*Math.sin(a-.42));x.lineTo(x1-head*Math.cos(a+.42),y1-head*Math.sin(a+.42));x.closePath();x.fill();}
+function text(x,s,px,py,c=C.mut,f="13px 'Noto Sans TC'",al="center"){x.fillStyle=c;x.font=f;x.textAlign=al;x.textBaseline="middle";x.fillText(s,px,py);}
+function rr(x,X,Y,W,H,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+W,Y,X+W,Y+H,r);x.arcTo(X+W,Y+H,X,Y+H,r);x.arcTo(X,Y+H,X,Y,r);x.arcTo(X,Y,X+W,Y,r);x.closePath();}
+
+/* 檢流計：零點在中央，val 介於 −1..1 */
+function galvo(x,cx,cy,R,val,lab){
+  x.fillStyle="#e9e4d6";rr(x,cx-R,cy-R*.95,2*R,R*1.5,8);x.fill();
+  x.strokeStyle="#20283a";x.lineWidth=2;x.stroke();
+  x.strokeStyle="#333";x.lineWidth=1.2;
+  for(let i=-10;i<=10;i++){const a=-Math.PI/2+i*0.07;const r1=R*.78,r2=R*(i%5?0.7:0.62);
+    x.beginPath();x.moveTo(cx+r1*Math.cos(a),cy+R*.35+r1*Math.sin(a));x.lineTo(cx+r2*Math.cos(a),cy+R*.35+r2*Math.sin(a));x.stroke();}
+  text(x,"0",cx,cy+R*.35-R*.52,"#333","bold 10px 'JetBrains Mono'");
+  const pin=Math.abs(val)>1;const v=Math.max(-1.08,Math.min(1.08,val));const a=-Math.PI/2+v*0.7;
+  x.strokeStyle=pin?"#d11":"#111";x.lineWidth=2;x.beginPath();x.moveTo(cx,cy+R*.35);x.lineTo(cx+R*.82*Math.cos(a),cy+R*.35+R*.82*Math.sin(a));x.stroke();
+  x.fillStyle="#111";x.beginPath();x.arc(cx,cy+R*.35,3.5,0,7);x.fill();
+  text(x,"G",cx,cy+R*.38+12,"#20283a","bold 12px 'JetBrains Mono'");
+  if(lab){text(x,"X",cx-R-10,cy+R*.45,C.txt,"italic 600 13px serif");text(x,"Y",cx+R+10,cy+R*.45,C.txt,"italic 600 13px serif");}
+}
+function strip(x,w,h,series,opts){ // series: [{d:[], c, scale}]
+  x.fillStyle="#04060b";x.fillRect(0,0,w,h);
+  const y0=h/2;x.strokeStyle="#1f2940";x.lineWidth=1;x.beginPath();x.moveTo(0,y0);x.lineTo(w,y0);x.stroke();
+  series.forEach(s=>{const d=s.d,n=d.length;if(n<2)return;x.strokeStyle=s.c;x.lineWidth=2;x.beginPath();
+    for(let i=0;i<n;i++){const px=w-(n-1-i)*(w/(opts.N-1));const py=(s.base!=null?s.base(h):y0)-d[i]*s.k(h);i?x.lineTo(px,py):x.moveTo(px,py);}x.stroke();});
+  text(x,opts.label,8,12,C.dim,"11px 'Noto Sans TC'","left");
+  text(x,"現在 →",w-6,h-10,C.dim,"11px 'Noto Sans TC'","right");
+}
+
+/* ================= ① 磁棒與螺線管 ================= */
+const A={xc:-0.07,xm:0.13,pole:"N",turns:300,core:false,mv:"stop",v:0.3,drag:false,dragOff:0,
+  Lc:0.10,a:0.02,Lm:0.08,q:1.2e-4,R:50,lam:null,emf:0,I:0,th:0,om:0,hist:[],phiHist:[],vrel:0,lastXm:0.13,lastXc:-0.07,mvDist:0};
+const N_HIST=240;
+function phiLoop(x0,xN,xS){ // B 的磁通量（向 +x 為正），磁荷模型＋磁化，連續
+  const a=A.a,q=A.q,dS=x0-xS,dN=x0-xN;
+  return q/2*(dS/Math.hypot(dS,a)-dN/Math.hypot(dN,a));
+}
+function poles(){const L=A.Lm/2;return A.pole==="N"?{xN:A.xm-L,xS:A.xm+L}:{xN:A.xm+L,xS:A.xm-L};}
+function linkage(){const {xN,xS}=poles();let s=0;const K=40;
+  for(let i=0;i<K;i++){const x0=A.xc-A.Lc/2+A.Lc*(i+.5)/K;s+=phiLoop(x0,xN,xS);}
+  return s/K*A.turns*(A.core?4:1);}
+function avgPhiPerTurn(){return linkage()/A.turns;}
+const VIEW={l:-0.20,r:0.30};
+function clampA(){
+  const minGap=A.core?(A.Lc/2+A.Lm/2+0.004):(-A.Lc/2+A.Lm/2-0.01); // 有軟鐵棒時磁棒不能進管
+  const lo=A.xc+minGap, hi=VIEW.r-A.Lm/2-0.005;
+  let hit=false;
+  if(A.xm<lo){A.xm=lo;hit=true;} if(A.xm>hi){A.xm=hi;hit=true;}
+  const clo=VIEW.l+A.Lc/2+0.005, chi=A.xm-minGap;
+  if(A.xc<clo){A.xc=clo;hit=true;} if(A.xc>chi){A.xc=chi;hit=true;}
+  return hit;
+}
+seg("#segMv",v=>{A.mv=v;A.mvDist=0;});
+seg("#segPole",v=>{A.pole=v;A.lam=null;});
+seg("#segTurn",v=>{A.turns=+v;A.lam=null;});
+$("#core").onclick=()=>{A.core=!A.core;$("#core").textContent="管內放軟鐵棒："+(A.core?"是":"否");$("#core").classList.toggle("on",A.core);clampA();A.lam=null;};
+$("#resetA").onclick=()=>{A.xc=-0.07;A.xm=0.13;A.mv="stop";setSeg("#segMv","stop");clampA();A.lam=null;};
+const sV=$("#sV");sV.oninput=()=>{A.v=+sV.value;};
+// 拖曳
+const cvA=$("#cvA");let scA=1,oxA=0;
+function toX(px){return VIEW.l+(px-oxA)/scA;}
+cvA.addEventListener("pointerdown",e=>{const r=cvA.getBoundingClientRect();const wx=toX(e.clientX-r.left);
+  if(Math.abs(wx-A.xm)<A.Lm/2+0.02){A.drag=true;A.dragOff=wx-A.xm;A.mv="stop";setSeg("#segMv","stop");cvA.setPointerCapture(e.pointerId);}});
+cvA.addEventListener("pointermove",e=>{if(!A.drag)return;const r=cvA.getBoundingClientRect();A.xm=toX(e.clientX-r.left)-A.dragOff;clampA();});
+const endDrag=()=>{A.drag=false;};cvA.addEventListener("pointerup",endDrag);cvA.addEventListener("pointercancel",endDrag);
+
+// 範例 4-3
+let exSel="1",exGuess=null,score=[0,0],exAnswered={};
+const EXQ={"1":"(1) 磁鐵快速靠近螺線管","2":"(2) 磁鐵快速遠離螺線管","3":"(3) 螺線管與磁鐵一起以相同的速度向右移動"};
+const EXA={"1":"XY","2":"YX","3":"0"};
+const EXW={"1":"S 極靠近，線圈裡向右（指向磁鐵 S 極）的磁力線增加；感應電流要產生向左的磁場來抵抗，螺線管右端變成 S 極、推開磁鐵，電流 X → Y。",
+  "2":"S 極遠離，線圈裡向右的磁力線減少；感應電流要產生向右的磁場來補回，螺線管右端變成 N 極、拉住磁鐵，電流 Y → X。",
+  "3":"兩者都在動，但相對位置不變，穿過線圈的磁力線數量沒有改變，所以沒有感應電流。"};
+function exShow(){$("#exQ").textContent=EXQ[exSel]+"，檢流計 Ⓖ 的電流方向？";$("#exAns").innerHTML="";
+  $("#exOpt").querySelectorAll("button").forEach(b=>b.classList.remove("on"));exGuess=null;}
+seg("#segEx",v=>{exSel=v;exShow();});
+$("#exOpt").querySelectorAll("button").forEach(b=>b.onclick=()=>{exGuess=b.dataset.v;
+  $("#exOpt").querySelectorAll("button").forEach(o=>o.classList.toggle("on",o===b));
+  const ok=exGuess===EXA[exSel];if(!exAnswered[exSel]){exAnswered[exSel]=1;score[1]++;if(ok)score[0]++;}
+  $("#qScore").textContent=`答對 ${score[0]} / ${score[1]}`;
+  $("#exAns").innerHTML=(ok?'<b>答對！</b> ':'<b class="bad">再想想。</b> ')+EXW[exSel]+" 按「放上實驗台」看檢流計。";});
+$("#exRun").onclick=()=>{A.pole="S";setSeg("#segPole","S");A.core=true;$("#core").textContent="管內放軟鐵棒：是";$("#core").classList.add("on");
+  A.v=0.35;sV.value=0.35;
+  if(exSel==="1"){A.xc=-0.08;A.xm=0.24;A.mv="mIn";}
+  else if(exSel==="2"){A.xc=-0.08;A.xm=0.014;A.mv="mOut";}
+  else {A.xc=-0.14;A.xm=-0.03;A.mv="both";}
+  clampA();A.lam=null;A.mvDist=0;setSeg("#segMv",A.mv);
+  cvA.scrollIntoView({behavior:"smooth",block:"center"});};
+exShow();
+$("#trainAns").onclick=()=>{$("#trainTxt").hidden=false;$("#trainAns").hidden=true;};
+
+function stepA(dt){
+  const xm0=A.xm,xc0=A.xc;
+  if(!A.drag&&A.mv!=="stop"){
+    const d=A.v*dt;
+    if(A.mv==="mIn")A.xm-=d;else if(A.mv==="mOut")A.xm+=d;else if(A.mv==="cIn")A.xc+=d;else if(A.mv==="cOut")A.xc-=d;
+    else if(A.mv==="both"){if(A.xm+A.Lm/2+d>VIEW.r-0.005){A.mv="stop";setSeg("#segMv","stop");}else{A.xm+=d;A.xc+=d;}}
+    if(clampA()&&A.mv!=="both"){A.mv="stop";setSeg("#segMv","stop");}
+    if(A.mv==="mOut"&&A.xm+A.Lm/2>VIEW.r-0.01){A.mv="stop";setSeg("#segMv","stop");}
+  }
+  const vr=((A.xm-xm0)-(A.xc-xc0))/dt; A.vrel+= (vr-A.vrel)*Math.min(1,dt/0.06);
+  const lam=linkage();
+  let emf=0; if(A.lam!==null) emf=-(lam-A.lam)/dt; A.lam=lam;
+  A.emf+=(emf-A.emf)*Math.min(1,dt/0.03);
+  A.I=A.emf/A.R;
+  // 指針：二階阻尼
+  const FS=0.004; // 滿刻度 4 mA
+  const target=A.I/FS*-1; // 正方向：X→Y；I>0 表示產生 +x 磁場的電流，經 G 為 Y→X
+  const w=14,z=.55; A.om+=(-2*z*w*A.om-w*w*(A.th-target))*dt; A.th+=A.om*dt;
+}
+function drawA(){
+  const {x,w,h}=setup(cvA);
+  scA=w/(VIEW.r-VIEW.l)*0.98;oxA=w*0.01;
+  const X=wx=>oxA+(wx-VIEW.l)*scA, cy=h*0.38;
+  x.fillStyle="#04060b";x.fillRect(0,0,w,h);
+  const {xN,xS}=poles();const pN={x:X(xN),y:cy},pS={x:X(xS),y:cy};
+  const coilR=A.a*scA*1.7, magR=Math.max(9,0.015*scA);
+  // 磁力線（H 場，從 N 極出發）
+  x.save();x.strokeStyle="rgba(79,141,255,.45)";x.lineWidth=1.3;
+  const nl=14;
+  for(let k=0;k<nl;k++){const ang=(k+.5)/nl*2*Math.PI;let px=pN.x+Math.cos(ang)*magR*1.1,py=pN.y+Math.sin(ang)*magR*1.1;
+    // 避開磁棒本體方向
+    x.beginPath();x.moveTo(px,py);
+    for(let s=0;s<700;s++){
+      const dxN=px-pN.x,dyN=py-pN.y,dxS=px-pS.x,dyS=py-pS.y;const rN=Math.hypot(dxN,dyN),rS=Math.hypot(dxS,dyS);
+      if(rS<magR*.9)break;
+      let bx=dxN/rN**3-dxS/rS**3,by=dyN/rN**3-dyS/rS**3;const bm=Math.hypot(bx,by);if(bm===0)break;
+      px+=bx/bm*3;py+=by/bm*3;x.lineTo(px,py);
+      if(px<-20||px>w+20||py<-20||py>h*0.8)break;}
+    x.stroke();}
+  x.restore();
+  // 線圈
+  const cl=X(A.xc-A.Lc/2),cr=X(A.xc+A.Lc/2),top=cy-coilR,bot=cy+coilR;
+  const nloops=Math.round(A.turns/30)+4;
+  // 背面
+  x.strokeStyle="rgba(227,154,91,.45)";x.lineWidth=2;
+  for(let i=0;i<nloops;i++){const xx=cl+(cr-cl)*(i+.5)/nloops;x.beginPath();x.ellipse(xx,cy,coilR*.28,coilR,0,-Math.PI/2,Math.PI/2,true);x.stroke();}
+  if(A.core){x.fillStyle="#5d6470";rr(x,cl-6,cy-coilR*.55,cr-cl+12,coilR*1.1,3);x.fill();text(x,"軟鐵棒",(cl+cr)/2,cy-coilR-24,C.dim,"11px 'Noto Sans TC'");}
+  // 磁棒
+  const ml=X(A.xm-A.Lm/2),mr=X(A.xm+A.Lm/2);const nLeft=A.pole==="N";
+  x.fillStyle=nLeft?C.n:C.s;x.fillRect(ml,cy-magR,(mr-ml)/2,magR*2);
+  x.fillStyle=nLeft?C.s:C.n;x.fillRect((ml+mr)/2,cy-magR,(mr-ml)/2,magR*2);
+  text(x,nLeft?"N":"S",(ml*3+mr)/4,cy,"#fff","bold 13px 'JetBrains Mono'");text(x,nLeft?"S":"N",(ml+mr*3)/4,cy,"#fff","bold 13px 'JetBrains Mono'");
+  // 前面線圈（電流箭頭）
+  const Iabs=Math.abs(A.I),glow=Math.min(1,Iabs/0.0015);
+  for(let i=0;i<nloops;i++){const xx=cl+(cr-cl)*(i+.5)/nloops;
+    x.strokeStyle=C.cu;x.lineWidth=2.6;x.beginPath();x.ellipse(xx,cy,coilR*.28,coilR,0,-Math.PI/2,Math.PI/2,false);x.stroke();}
+  if(glow>0.04){ // 產生 +x 磁場的電流在前面向下流
+    const down=A.I>0;x.globalAlpha=0.3+0.7*glow;
+    for(let i=1;i<nloops;i+=2){const xx=cl+(cr-cl)*(i+.5)/nloops+coilR*.28;arrow(x,C.cur,xx,down?cy-coilR*.45:cy+coilR*.45,xx,down?cy+coilR*.45:cy-coilR*.45,2.4,8);}
+    // 感應磁場箭頭與磁極
+    const dir=A.I>0?1:-1;arrow(x,C.vio,(cl+cr)/2-dir*(cr-cl)*.35,cy+coilR+16,(cl+cr)/2+dir*(cr-cl)*.35,cy+coilR+16,3,10);
+    text(x,"感應電流的磁場",(cl+cr)/2,cy+coilR+32,C.vio,"11px 'Noto Sans TC'");
+    const rPole=A.I>0?"N":"S",lPole=A.I>0?"S":"N";
+    const pc=p=>p==="N"?C.n:C.s;
+    x.fillStyle=pc(lPole);x.beginPath();x.arc(cl-12,cy-coilR-10,10,0,7);x.fill();text(x,lPole,cl-12,cy-coilR-10,"#fff","bold 12px 'JetBrains Mono'");
+    x.fillStyle=pc(rPole);x.beginPath();x.arc(cr+12,cy-coilR-10,10,0,7);x.fill();text(x,rPole,cr+12,cy-coilR-10,"#fff","bold 12px 'JetBrains Mono'");
+    x.globalAlpha=1;}
+  // 線路到檢流計
+  const GR=Math.min(38,w*0.09),gx=Math.min(Math.max((cl+cr)/2,GR+40),w-GR-40),gy=h*0.8;
+  const xL=Math.min(cl-8,gx-GR-22),xR=Math.max(cr+8,gx+GR+22),yb=gy+GR*.45,yt=cy+coilR*.2;
+  x.strokeStyle="#9aa3b5";x.lineWidth=2;x.beginPath();
+  x.moveTo(cl,yt);x.lineTo(xL,yt);x.lineTo(xL,yb);x.lineTo(gx-GR,yb);
+  x.moveTo(cr,yt);x.lineTo(xR,yt);x.lineTo(xR,yb);x.lineTo(gx+GR,yb);x.stroke();
+  if(glow>0.04){const xy=A.I<0;x.globalAlpha=0.3+0.7*glow;const ym=(yt+yb)/2;
+    arrow(x,C.cur,xL,xy?ym-16:ym+16,xL,xy?ym+16:ym-16,2.6,9);arrow(x,C.cur,xR,xy?ym+16:ym-16,xR,xy?ym-16:ym+16,2.6,9);x.globalAlpha=1;
+    text(x,xy?"經 Ⓖ：X → Y":"經 Ⓖ：Y → X",gx,gy-GR*.95-12,C.cur,"bold 12px 'Noto Sans TC'");}
+  galvo(x,gx,gy,GR,A.th,true);
+  // 速度箭頭
+  if(Math.abs(A.vrel)>0.01){const mc=(ml+mr)/2;arrow(x,C.acc,mc,cy-magR-14,mc+Math.sign(A.vrel)*Math.min(60,20+Math.abs(A.vrel)*50),cy-magR-14,2.5,9);}
+  if(A.mv==="both"||A.mv==="cIn"||A.mv==="cOut"){const s=A.mv==="cOut"?-1:1;arrow(x,C.acc,(cl+cr)/2,top-30,(cl+cr)/2+s*40,top-30,2.5,9);text(x,"v",(cl+cr)/2+s*48,top-30,C.acc,"italic 13px serif");}
+  if(A.mv==="both"){const mc=(ml+mr)/2;arrow(x,C.acc,mc,cy-magR-14,mc+40,cy-magR-14,2.5,9);}
+}
+function drawAg(){
+  const cv=$("#cvAg");const {x,w,h}=setup(cv);
+  strip(x,w,h,[{d:A.phiHist,c:"rgba(79,141,255,.85)",k:hh=>hh*0.42},{d:A.hist,c:C.cur,k:hh=>hh*0.42}],{N:N_HIST,label:"最近 4 秒"});
+}
+function readA(){
+  const relv=A.vrel;$("#oV").textContent=A.v.toFixed(2)+" m/s";
+  $("#nA").textContent=`${A.turns} 匝・${A.core?"有":"無"}軟鐵棒`;
+  $("#rV").textContent=Math.abs(relv)<0.005?"0（相對靜止）":(relv<0?"靠近 ":"遠離 ")+Math.abs(relv).toFixed(2)+" m/s";
+  const ph=avgPhiPerTurn()*(A.core?1:1);const ref=A.q*(A.core?4:1);
+  $("#rPhi").textContent=fix(ph/ (A.q)*100,0)+" %";
+  $("#rE").textContent=fix(A.emf*1000,1)+" mV";
+  const Ima=A.I*1000;const dirTxt=Math.abs(Ima)<0.02?"":(A.I<0?"（X → Y）":"（Y → X）");
+  $("#rI").textContent=(Math.abs(Ima)<0.02?"0":fix(Math.abs(Ima),2))+" mA"+dirTxt;
+  let lz;
+  if(Math.abs(Ima)<0.02) lz="穿過線圈的磁力線數沒有改變 → 沒有感應電流，指針停在 0。";
+  else{
+    const near=A.I>0?"N":"S"; // 線圈右端（靠磁棒）
+    const face=A.pole;const approach=relv<0;
+    lz=`磁力線數${approach?"增加":"減少"} → 線圈靠近磁棒的一端成為 ${near} 極，和磁棒的 ${face} 極${near===face?"互斥（推開，抵抗靠近）":"相吸（拉住，抵抗遠離）"}。`;
+  }
+  $("#rLenz").textContent=lz;
+}
+
+/* ================= ② 線圈通過均勻磁場 ================= */
+const B={x:-0.22,v:0.2,play:true,out:true,shape:"ring",B:0.5,x1:0,x2:0.30,R:0.5,phiPrev:null,emf:0,hist:[],phiHist:[],drag:false,off:0};
+const cvB=$("#cvB");let scB=1,oxB=0;const VB={l:-0.30,r:0.60};
+function areaIn(){const x1=B.x1,x2=B.x2;
+  if(B.shape==="sq"){const L=0.10,l=B.x-L/2,r=B.x+L/2;return Math.max(0,Math.min(r,x2)-Math.max(l,x1))*L;}
+  const r=0.05;const A1=c=>{const u=Math.max(-1,Math.min(1,(c-B.x)/r));return r*r*(Math.acos(-u)+u*Math.sqrt(1-u*u));};
+  return A1(x2)-A1(x1);}
+function totalArea(){return B.shape==="sq"?0.01:Math.PI*0.0025;}
+$("#playB").onclick=()=>{B.play=!B.play;$("#playB").textContent=B.play?"▶ 移動中":"❚❚ 暫停";$("#playB").classList.toggle("on",B.play);};
+$("#resetB").onclick=()=>{B.x=-0.22;B.phiPrev=null;B.hist=[];B.phiHist=[];};
+seg("#segBdir",v=>{B.out=v==="out";B.phiPrev=null;});
+seg("#segShape",v=>{B.shape=v;B.phiPrev=null;});
+const sVB=$("#sVB");sVB.oninput=()=>{B.v=+sVB.value;};
+const toXB=px=>VB.l+(px-oxB)/scB;
+cvB.addEventListener("pointerdown",e=>{const r=cvB.getBoundingClientRect();const wx=toXB(e.clientX-r.left);if(Math.abs(wx-B.x)<0.07){B.drag=true;B.off=wx-B.x;cvB.setPointerCapture(e.pointerId);}});
+cvB.addEventListener("pointermove",e=>{if(!B.drag)return;const r=cvB.getBoundingClientRect();B.x=Math.max(VB.l+0.06,Math.min(VB.r-0.06,toXB(e.clientX-r.left)-B.off));});
+const endB=()=>{B.drag=false;};cvB.addEventListener("pointerup",endB);cvB.addEventListener("pointercancel",endB);
+let dots=[];
+function stepB(dt){
+  if(B.play&&!B.drag){B.x+=B.v*dt;if(B.x>VB.r-0.06){B.x=VB.l+0.07;B.phiPrev=null;}}
+  const phi=B.B*areaIn()*(B.out?1:-1); // 射出紙面為正
+  let emf=0;if(B.phiPrev!==null)emf=-(phi-B.phiPrev)/dt;B.phiPrev=phi;
+  B.emf+=(emf-B.emf)*Math.min(1,dt/0.03);
+}
+function drawB(){
+  const {x,w,h}=setup(cvB);scB=w/(VB.r-VB.l);oxB=0;const X=wx=>oxB+(wx-VB.l)*scB,cy=h*0.5;
+  x.fillStyle="#04060b";x.fillRect(0,0,w,h);
+  const fx1=X(B.x1),fx2=X(B.x2);x.fillStyle="rgba(79,141,255,.07)";x.fillRect(fx1,8,fx2-fx1,h-16);
+  x.strokeStyle="rgba(79,141,255,.35)";x.setLineDash([5,5]);x.strokeRect(fx1,8,fx2-fx1,h-16);x.setLineDash([]);
+  // 點點（磁力線）：以世界座標 2 cm 為間隔
+  const sp=0.02;let inside=0;const r=0.05,L=0.10;
+  const yr=Math.floor((h/2-10)/scB/sp)*sp;
+  for(let wx=B.x1+sp/2;wx<B.x2;wx+=sp)for(let wy=-yr+sp/2;wy<yr;wy+=sp){
+    const px=X(wx),py=cy+wy*scB;if(py<12||py>h-12)continue;
+    const inLoop=B.shape==="sq"?(Math.abs(wx-B.x)<L/2&&Math.abs(wy)<L/2):(Math.hypot(wx-B.x,wy)<r);
+    if(inLoop)inside++;
+    x.strokeStyle=inLoop?C.b:"rgba(79,141,255,.5)";x.fillStyle=x.strokeStyle;x.lineWidth=1.2;
+    const rad=inLoop?4:3;
+    if(B.out){x.beginPath();x.arc(px,py,rad*.45,0,7);x.fill();}
+    else{x.beginPath();x.moveTo(px-rad*.7,py-rad*.7);x.lineTo(px+rad*.7,py+rad*.7);x.moveTo(px+rad*.7,py-rad*.7);x.lineTo(px-rad*.7,py+rad*.7);x.stroke();}
+  }
+  B.inside=inside;
+  text(x,B.out?"B ⊙ 射出紙面":"B ⊗ 射入紙面",(fx1+fx2)/2,20,C.b,"12px 'Noto Sans TC'");
+  // 線圈
+  const lx=X(B.x);x.strokeStyle=C.cu;x.lineWidth=5;
+  if(B.shape==="sq"){x.strokeRect(lx-L/2*scB,cy-L/2*scB,L*scB,L*scB);}else{x.beginPath();x.arc(lx,cy,r*scB,0,7);x.stroke();}
+  const I=B.emf/B.R; // I>0：逆時針（從紙面上方看，產生射出紙面的磁場）
+  const g=Math.min(1,Math.abs(I)/0.01);
+  if(g>0.03){x.globalAlpha=.3+.7*g;const ccw=I>0;const rad=(B.shape==="sq"?L/2:r)*scB+9;
+    for(let k=0;k<4;k++){const a0=k*Math.PI/2+Math.PI/4;const a1=a0+(ccw?-0.55:0.55);
+      // 螢幕 y 向下，逆時針（螢幕上看）角度遞減
+      x.strokeStyle=C.cur;x.lineWidth=3;x.beginPath();x.arc(lx,cy,rad,Math.min(a0,a1),Math.max(a0,a1));x.stroke();
+      const ex=lx+rad*Math.cos(a1),ey=cy+rad*Math.sin(a1);const tang=a1+(ccw?-Math.PI/2:Math.PI/2);
+      arrow(x,C.cur,ex-Math.cos(tang)*6,ey-Math.sin(tang)*6,ex+Math.cos(tang)*4,ey+Math.sin(tang)*4,3,10);}
+    // 感應磁場符號
+    const indOut=I>0;x.strokeStyle=C.vio;x.fillStyle=C.vio;x.lineWidth=2.5;x.beginPath();x.arc(lx,cy,11,0,7);x.stroke();
+    if(indOut){x.beginPath();x.arc(lx,cy,3.5,0,7);x.fill();}else{x.beginPath();x.moveTo(lx-6,cy-6);x.lineTo(lx+6,cy+6);x.moveTo(lx+6,cy-6);x.lineTo(lx-6,cy+6);x.stroke();}
+    x.globalAlpha=1;}
+  arrow(x,C.acc,lx,cy+(B.shape==="sq"?L/2:r)*scB+22,lx+34,cy+(B.shape==="sq"?L/2:r)*scB+22,2.5,9);
+  text(x,"v",lx+44,cy+(B.shape==="sq"?L/2:r)*scB+22,C.acc,"italic 14px serif");
+}
+function readB(){
+  $("#oVB").textContent=B.v.toFixed(2)+" m/s";
+  const ain=areaIn(),at=totalArea();const I=B.emf/B.R;
+  $("#rNB").textContent="約 "+Math.round(ain/0.0004)+" 條";
+  $("#rPhiB").textContent=fix(B.B*ain*1000,2)+" mWb";
+  const Im=I*1000;$("#rIB").textContent=Math.abs(Im)<0.05?"0 mA":fix(Math.abs(Im),1)+" mA "+(I>0?"逆時針":"順時針");
+  const fr=ain/at;let where;const moving=Math.abs(B.emf)>1e-5;
+  where=fr<0.002?"在磁場外":fr>0.998?"完全在磁場內":(B.x<(B.x1+B.x2)/2?"正在進入磁場":"正在離開磁場");
+  $("#rWhere").textContent=where;
+  let why;const dirB=B.out?"射出紙面":"射入紙面",anti=B.out?"射入紙面":"射出紙面";
+  if(Math.abs(Im)<0.05) why=fr>0.998?"在磁場內移動，但線圈內的磁力線數不變 → 沒有感應電流。":(B.play||B.drag?"線圈外沒有磁力線、數量也沒變 → 沒有感應電流。":"線圈不動，磁力線數不變 → 沒有感應電流。");
+  else if(B.x<(B.x1+B.x2)/2) why=`${dirB}的磁力線增加 → 感應電流產生${anti}的磁場來抵抗，所以${I>0?"逆":"順"}時針流。`;
+  else why=`${dirB}的磁力線減少 → 感應電流產生${dirB}的磁場來補回，所以${I>0?"逆":"順"}時針流（和進入時相反）。`;
+  $("#rWhy").textContent=why;
+}
+function drawBg(){const cv=$("#cvBg");const {x,w,h}=setup(cv);
+  const pm=B.B*totalArea();
+  strip(x,w,h,[{d:B.phiHist,c:"rgba(79,141,255,.9)",k:hh=>hh*0.4/pm},{d:B.hist,c:C.cur,k:hh=>hh*0.4/0.05}],{N:N_HIST,label:"最近 4 秒（磁力線數：射出紙面為正）"});}
+
+/* ================= ③ 範例 4-4 ================= */
+const Cc={on:true,Ip:1,emf:0,hist:[],ipHist:[],th:0,om:0,Is:0};
+const IMAX=1,TON=0.25,TOFF=0.08;
+$("#swC").onclick=()=>{Cc.on=!Cc.on;$("#swC").textContent=Cc.on?"開關 S：關上（按一下打開）":"開關 S：打開（按一下關上）";$("#swC").classList.toggle("on",Cc.on);};
+function stepC(dt){
+  const tgt=Cc.on?IMAX:0,tau=Cc.on?TON:TOFF;const Ip0=Cc.Ip;Cc.Ip+=(tgt-Cc.Ip)*(1-Math.exp(-dt/tau));
+  const dI=(Cc.Ip-Ip0)/dt;
+  // 方向：主電流增加 → 副線圈 Y→X（負）；減少 → X→Y（正）
+  Cc.IsmA=-dI*2.4*TON; // 關上瞬間峰值約 2.4 mA
+  const target=Cc.IsmA/10; // 滿刻度 10 mA
+  const w=14,z=.55;Cc.om+=(-2*z*w*Cc.om-w*w*(Cc.th-target))*dt;Cc.th+=Cc.om*dt;
+}
+function drawC(){const {x,w,h}=setup($("#cvC"));x.fillStyle="#04060b";x.fillRect(0,0,w,h);
+  const cx=w*0.46,cy=h*0.44,RW=Math.min(w*0.28,190),RH=Math.min(h*0.32,110),T=Math.max(14,RW*0.16);
+  // 鐵環
+  x.fillStyle="#5d6470";rr(x,cx-RW,cy-RH,2*RW,2*RH,6);x.fill();x.fillStyle="#04060b";x.fillRect(cx-RW+T,cy-RH+T,2*RW-2*T,2*RH-2*T);
+  text(x,"軟鐵環",cx,cy-RH-10,C.dim,"11px 'Noto Sans TC'");
+  // 磁力線（鐵環中，順時針方向示意）
+  const fl=Cc.Ip/IMAX;if(fl>0.02){x.globalAlpha=fl;x.strokeStyle=C.b;x.lineWidth=2;x.setLineDash([7,6]);x.lineDashOffset=-performance.now()/60;
+    rr(x,cx-RW+T/2,cy-RH+T/2,2*RW-T,2*RH-T,4);x.stroke();x.setLineDash([]);
+    arrow(x,C.b,cx-14,cy-RH+T/2,cx+14,cy-RH+T/2,2.5,9);arrow(x,C.b,cx+14,cy+RH-T/2,cx-14,cy+RH-T/2,2.5,9);x.globalAlpha=1;}
+  // 線圈
+  const coil=(xx)=>{x.strokeStyle=C.cu;x.lineWidth=2.6;for(let i=0;i<6;i++){const yy=cy-RH*0.55+i*RH*0.22;x.beginPath();x.ellipse(xx,yy,T*0.85,5,0,0,7);x.stroke();}};
+  const lx=cx-RW+T/2,rx=cx+RW-T/2;coil(lx);coil(rx);
+  text(x,"主線圈",lx,cy+RH+16,C.mut,"12px 'Noto Sans TC'");text(x,"副線圈",rx,cy+RH+16,C.mut,"12px 'Noto Sans TC'");
+  // 主電路
+  const ex=Math.max(18,lx-T-40);x.strokeStyle="#9aa3b5";x.lineWidth=2;x.beginPath();
+  x.moveTo(lx-T*0.85,cy-RH*0.55);x.lineTo(ex,cy-RH*0.55);x.lineTo(ex,cy-12);x.moveTo(ex,cy+12);x.lineTo(ex,cy+RH*0.55);x.lineTo(lx-T*0.85,cy+RH*0.55);x.stroke();
+  // 電池
+  x.strokeStyle=C.txt;x.lineWidth=3;x.beginPath();x.moveTo(ex-10,cy-4);x.lineTo(ex+10,cy-4);x.stroke();x.lineWidth=2;x.beginPath();x.moveTo(ex-5,cy+4);x.lineTo(ex+5,cy+4);x.stroke();
+  // 開關（畫在上方線上）
+  const sx=(ex+lx-T*0.85)/2,sy=cy-RH*0.55;x.fillStyle="#04060b";x.fillRect(sx-12,sy-3,24,6);
+  x.strokeStyle=C.acc;x.lineWidth=2.5;x.beginPath();x.moveTo(sx-12,sy);x.lineTo(Cc.on?sx+12:sx+8,Cc.on?sy:sy-12);x.stroke();
+  x.fillStyle=C.acc;x.beginPath();x.arc(sx-12,sy,3,0,7);x.arc(sx+12,sy,3,0,7);x.fill();text(x,"S",sx,sy-16,C.acc,"italic 600 13px serif");
+  if(Cc.Ip>0.03){x.globalAlpha=Math.min(1,Cc.Ip);arrow(x,C.acc,ex,cy+RH*0.5,ex,cy+RH*0.2,2.4,8);x.globalAlpha=1;}
+  // 副電路與檢流計
+  const gx=Math.min(w-34,rx+T+46),GR=Math.min(30,w*0.08);
+  x.strokeStyle="#9aa3b5";x.lineWidth=2;x.beginPath();x.moveTo(rx+T*0.85,cy-RH*0.55);x.lineTo(gx,cy-RH*0.55);x.lineTo(gx,cy-GR);
+  x.moveTo(gx,cy+GR*0.8);x.lineTo(gx,cy+RH*0.55);x.lineTo(rx+T*0.85,cy+RH*0.55);x.stroke();
+  text(x,"Y",gx+12,cy-RH*0.55-10,C.txt,"italic 600 13px serif");text(x,"X",gx+12,cy+RH*0.55+12,C.txt,"italic 600 13px serif");
+  galvo(x,gx,cy-GR*0.1,GR,Cc.th,false);
+  const g=Math.min(1,Math.abs(Cc.IsmA)/0.6);
+  if(g>0.05){x.globalAlpha=.3+.7*g;const up=Cc.IsmA>0;// X→Y：從下往上經 G
+    arrow(x,C.cur,gx-GR-12,up?cy+RH*0.45:cy-RH*0.45+10,gx-GR-12,up?cy+RH*0.45-30:cy-RH*0.45+40,2.4,8);
+    text(x,up?"X → Y":"Y → X",gx-GR-12,cy+RH*0.55+14+12,C.cur,"bold 12px 'JetBrains Mono'");x.globalAlpha=1;}
+}
+function drawCg(){const {x,w,h}=setup($("#cvCg"));
+  strip(x,w,h,[{d:Cc.ipHist,c:C.acc,k:hh=>hh*0.4},{d:Cc.hist,c:C.cur,k:hh=>hh*0.4/10}],{N:N_HIST,label:"最近 4 秒"});}
+function readC(){
+  $("#nC").textContent=Cc.on?"S 關上":"S 打開";
+  $("#rIp").textContent=(Cc.Ip*1000).toFixed(0)+" mA";
+  $("#rPhiC").textContent=Math.abs(Cc.Ip-(Cc.on?IMAX:0))<0.01?(Cc.on?"多，且不變":"零，且不變"):(Cc.on?"正在增加":"正在減少");
+  const v=Cc.IsmA;$("#rIs").textContent=Math.abs(v)<0.05?"沒有電流，指針在 0":(v>0?"X → Y，":"Y → X，")+Math.abs(v).toFixed(1)+" mA"+(Math.abs(v)>10?"（超過滿刻度！）":"");
+}
+const Q44=[["(1) S 打開的瞬間","XY","主線圈電流突然消失，鐵環中的磁力線減少，副線圈產生感應電流抵抗減少：X → Y。"],
+  ["(2) S 打開一段時間後","0","主線圈沒有電流，磁力線數維持為零不變：沒有感應電流。"],
+  ["(3) S 再關上的瞬間","YX","主線圈電流增加，鐵環中磁力線增加，感應電流要抵抗增加，方向和 (1) 相反：Y → X。"],
+  ["(4) S 關上一段時間後","0","主線圈電流穩定，磁力線數不變：沒有感應電流。"]];
+const q44=$("#q44");Q44.forEach((q,i)=>{const d=document.createElement("div");d.style.marginTop="8px";
+  d.innerHTML=`<div style="font-size:13.5px">${q[0]}</div><div class="seg" style="margin-top:4px"><button data-v="XY">X → Y</button><button data-v="YX">Y → X</button><button data-v="0">沒有電流</button></div>`;
+  d.querySelectorAll("button").forEach(b=>b.onclick=()=>{d.querySelectorAll("button").forEach(o=>o.classList.toggle("on",o===b));
+    const ok=b.dataset.v===q[1];$("#q44a").innerHTML=`${q[0]}：${ok?"<b>答對！</b>":'<b class="bad">不對喔。</b>'} ${q[2]}`;});
+  q44.appendChild(d);});
+
+/* ================= 主迴圈 ================= */
+let last=performance.now(),acc=0;
+function loop(t){let dt=Math.min(0.05,(t-last)/1000);last=t;
+  const n=Math.max(1,Math.ceil(dt/0.01));for(let i=0;i<n;i++){stepA(dt/n);stepB(dt/n);stepC(dt/n);}
+  acc+=dt;if(acc>=4/N_HIST){acc=0;
+    const push=(a,v)=>{a.push(v);if(a.length>N_HIST)a.shift();};
+    push(A.hist,Math.max(-1.2,Math.min(1.2,-A.I/0.004)));push(A.phiHist,avgPhiPerTurn()/A.q/(A.core?4:1));
+    push(B.hist,B.emf/B.R);push(B.phiHist,B.phiPrev||0);
+    push(Cc.hist,Math.max(-12,Math.min(12,Cc.IsmA)));push(Cc.ipHist,Cc.Ip);}
+  drawA();drawAg();readA();drawB();drawBg();readB();drawC();drawCg();readC();
+  requestAnimationFrame(loop);}
+clampA();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
