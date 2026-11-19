@@ -748,7 +748,11 @@ function init3D(){
     {shirt:"#1f3347",pants:"#5b4a3a",bag:null,hair:"#3a2a1c",skin:"#f0caa5"},
     {shirt:"#f4f4f0",pants:"#2d2d30",bag:"#7a4fb5",hair:"#1b1714",skin:"#d9a97e"},
     {shirt:"#167a82",pants:"#25344a",bag:null,hair:"#2a2420",skin:"#e2b48a"},
-    {shirt:"#e0e4e8",pants:"#3b3f46",bag:"#8a6a12",hair:"#5a5550",skin:"#e8c09a",s:.92}
+    {shirt:"#e0e4e8",pants:"#3b3f46",bag:"#8a6a12",hair:"#5a5550",skin:"#e8c09a",s:.92},
+    {shirt:"#c2652a",pants:"#25344a",bag:null,hair:"#1b1714",skin:"#e2b48a"},
+    {shirt:"#3d7d4c",pants:"#2d2d30",bag:"#1f3347",hair:"#2a2420",skin:"#d9a97e",s:.95},
+    {shirt:"#8a6a12",pants:"#3b3f46",bag:null,hair:"#3a2a1c",skin:"#f0caa5"},
+    {shirt:"#2b64b8",pants:"#5b4a3a",bag:"#b03a4a",hair:"#1b1714",skin:"#e8c09a",s:.9}
   ];
   /* 可走的地面：大樓前廣場、大樓後方、兩棟之間的通道 */
   const ZONES={
@@ -759,16 +763,39 @@ function init3D(){
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const zoneOf=p=>p.z>D/2+1.2?"front":p.z<-D/2-1.2?"back":"gap";
   const randIn=k=>{const z=ZONES[k];return new THREE.Vector3(rnd(z.x0,z.x1),0,rnd(z.z0,z.z1));};
+  /* 園區步道網：沿著外環道、後方道路、兩側道路走到藏經閣、二階資料庫、休閒中心、停車場、入口 */
+  const wRX=PW/2-1.9, wZ0=PZ-PD/2+1.9, wZ1=PZ+PD/2-1.9, wBZ=-D/2-2.6, wSR=12.4;
+  const NODES={
+    p0:[0,D/2+1.4], pL:[-8,D/2+1.4], pR:[8,D/2+1.4], fL:[-8,wZ1], fR:[8,wZ1], gb:[0,wBZ],
+    bL:[-wSR,wBZ], bR:[wSR,wBZ], bLL:[-wRX,wBZ], bRR:[wRX,wBZ], cp:[-16.4,wBZ], gy:[18.7,wBZ],
+    cpD:[-16.4,-6.4], gyD:[18.7,-6.9],
+    sL:[-wSR,11.2], sR:[wSR,10.7], lib:[-17.6,11.2], db:[17.6,10.7],
+    rL:[-wSR,wZ1], rR:[wSR,wZ1], cLF:[-wRX,wZ1], cRF:[wRX,wZ1], cLB:[-wRX,wZ0], cRB:[wRX,wZ0], mB:[0,wZ0]
+  };
+  const EDGES=[["p0","pL"],["p0","pR"],["pL","fL"],["pR","fR"],["p0","gb"],
+    ["gb","bL"],["gb","bR"],["bL","cp"],["cp","bLL"],["bR","gy"],["gy","bRR"],["cp","cpD"],["gy","gyD"],
+    ["bL","sL"],["sL","rL"],["bR","sR"],["sR","rR"],["sL","lib"],["sR","db"],
+    ["fL","fR"],["fL","rL"],["rL","cLF"],["fR","rR"],["rR","cRF"],
+    ["cLF","bLL"],["bLL","cLB"],["cRF","bRR"],["bRR","cRB"],["cLB","mB"],["mB","cRB"]];
+  const NB={}; Object.keys(NODES).forEach(k=>NB[k]=[]);
+  const nd=(a,b)=>Math.hypot(NODES[a][0]-NODES[b][0],NODES[a][1]-NODES[b][1]);
+  EDGES.forEach(([a,b])=>{NB[a].push(b);NB[b].push(a);});
+  const nearest=(x,z)=>Object.keys(NODES).reduce((m,k)=>{const d=Math.hypot(NODES[k][0]-x,NODES[k][1]-z);return d<m[1]?[k,d]:m;},["p0",1e9])[0];
+  function route(a,b){ // Dijkstra
+    const dist={[a]:0}, prev={}, todo=new Set(Object.keys(NODES));
+    while(todo.size){let u=null;todo.forEach(k=>{if(dist[k]!=null&&(u===null||dist[k]<dist[u]))u=k;}); if(u===null||u===b)break; todo.delete(u);
+      NB[u].forEach(v=>{const d=dist[u]+nd(u,v); if(dist[v]==null||d<dist[v]){dist[v]=d;prev[v]=u;}});}
+    const out=[b]; while(out[0]!==a&&prev[out[0]]) out.unshift(prev[out[0]]); return out;
+  }
+  const FAR=["lib","db","cpD","gyD","fL","fR","rL","rR","cLF","cRF","cLB","cRB","mB","bLL","bRR","sL","sR"];
+  const jit=(x,z,j)=>new THREE.Vector3(x+rnd(-j,j),0,z+rnd(-j,j));
   function planGround(w){
-    const from=zoneOf(w.root.position), r=Math.random(), to=r<.6?"front":r<.85?"back":"gap";
-    const dest=randIn(to), path=[];
-    const gapPt=z=>new THREE.Vector3(rnd(ZONES.gap.x0,ZONES.gap.x1),0,z);
-    if(from!==to){
-      if(from==="front") path.push(gapPt(D/2+1.4));
-      if(from==="back") path.push(gapPt(-D/2-1.4));
-      if(to==="front") path.push(gapPt(D/2+1.4));
-      if(to==="back") path.push(gapPt(-D/2-1.4));
-    }
+    const pos=w.root.position, r=Math.random();
+    let dest, endNode;
+    if(r<.5){ endNode=FAR[Math.floor(Math.random()*FAR.length)]; const [x,z]=NODES[endNode]; dest=jit(x,z,.6); }
+    else{ const k=r<.75?"front":r<.9?"back":"gap"; dest=randIn(k); endNode=nearest(dest.x,dest.z); }
+    const startNode=nearest(pos.x,pos.z), path=[];
+    if(startNode!==endNode) route(startNode,endNode).forEach(k=>{const [x,z]=NODES[k]; path.push(jit(x,z,.35));});
     path.push(dest); w.path=path;
   }
   const walkers=PEOPLE.map((o,i)=>{
