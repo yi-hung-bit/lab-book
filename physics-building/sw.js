@@ -1,5 +1,5 @@
 // 物理大樓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v34";
+const VERSION="v35";
 const CACHE="physics-building-"+VERSION;
 const FILES=[
  "./",
@@ -13,7 +13,6 @@ const FILES=[
  "vendor/react.production.min.js",
  "vendor/react-dom.production.min.js",
  "vendor/chart.umd.min.js",
- "sims/b-ampere-rule.html",
  "sims/b-blackbody.html",
  "sims/b-bohr.html",
  "sims/b-brownian.html",
@@ -24,18 +23,15 @@ const FILES=[
  "sims/b-doppler-shm.html",
  "sims/b-electron-slit.html",
  "sims/b-electroscope.html",
- "sims/b-em-spectrum.html",
  "sims/b-franck-hertz.html",
  "sims/b-free-fall.html",
  "sims/b-friction.html",
  "sims/b-galileo-incline.html",
  "sims/b-gravity-weight.html",
  "sims/b-kepler.html",
- "sims/b-lenz-galvanometer.html",
  "sims/b-magnetic-field.html",
  "sims/b-microphone.html",
  "sims/b-motion-graphs.html",
- "sims/b-motor-generator.html",
  "sims/b-nucleus-quark.html",
  "sims/b-pendulum.html",
  "sims/b-photoelectric.html",
@@ -65,8 +61,7 @@ const FILES=[
  "sims/j-gas-prep.html",
  "sims/j-power-phase.html",
  "sims/j-ruler-reading.html",
- "sims/j-separation.html",
- "sims/j-wave-types.html"
+ "sims/j-separation.html"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE&&k.startsWith("physics-building-")).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
