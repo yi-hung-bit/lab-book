@@ -126,14 +126,14 @@ button,a{font:inherit;color:inherit}
 .body-text{padding:16px 22px 4px;margin:0;font-size:14.5px}
 
 .corridor.sim{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
-button.room{border:0;background:none;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit}
+button.room,a.room{border:0;background:none;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit;text-decoration:none}
 .corridor.sim .room .plate{background:var(--plate)}
 .corridor.sim .room .door{border-color:var(--trim);background:color-mix(in srgb,var(--wall) 70%,var(--fc));min-height:118px;flex-direction:column;align-items:stretch;gap:8px;transition:transform .2s}
 .corridor.sim .room .door::after{top:16px}
 .room .desc{font-size:13px;line-height:1.55;padding-right:16px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .room .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
 .soon.net{color:var(--f2);border-color:currentColor}
-button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3px)}
+button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.room:focus-visible .door{transform:translateY(-3px)}
 .classroom{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--sky)}
 .cbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--plate);color:var(--plate-ink);padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .cbar .back{border:1px solid color-mix(in srgb,var(--plate-ink) 40%,transparent);background:none;color:var(--plate-ink);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:700}
@@ -147,7 +147,7 @@ html.in-class,html.in-class body{overflow:hidden}
 .corridor:not(.sim) .room .door{min-height:64px;align-items:center}
 .room .cnt{font-size:13px;color:var(--ink)}
 .room .cnt b{font-family:var(--f-mono);font-size:22px;margin-right:2px}
-button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3px)}
+button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.room:focus-visible .door{transform:translateY(-3px)}
 .corridor .room .door{transition:transform .2s}
 .qlist{padding:16px 22px 8px;display:flex;flex-direction:column;gap:12px}
 .qyear{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;align-items:start}
@@ -322,7 +322,10 @@ const SIM=[
     {t:"磁力線與地磁",d:"拖曳磁棒與小磁針，看磁力線的切線方向就是磁場方向：外部由 N 極到 S 極、內部由 S 極到 N 極，是不相交的封閉曲線；可灑鐵粉、擺一群小磁針，比較同極相斥與異極相吸的磁力線。再看地球像一根巨大磁棒：地理北極附近是磁 S 極、磁軸與自轉軸約夾 11°，把指南針拖到地球各處看它的指向與磁傾角（圖 3-13）。",sims:[["","b-magnetic-field"]]},
     {t:"電流磁效應與安培右手定則",d:"示範實驗 1：南北向導線通電，上方或下方的小羅盤 N 極偏東或偏西，可調電流、距離與匝數，看 tan θ = B線／B地；長直導線截面的同心圓磁力線越靠近越密，拖曳小磁針看 B ∝ I／r；環形導線與螺線管的磁力線剖面（管內均勻、管外像棒狀磁鐵），右手定則判斷 N、S 端；附範例 4-1 三條導線在 P 點的合磁場、範例 4-2 兩斜交導線四點有無磁場（圖 4-1～4-3）。",sims:[["","b-ampere-rule"]]},
     {t:"載流導線受磁力與電動機・發電機",d:"U 形磁鐵中的通電導線受力擺動：改變電流或磁場方向（⊙ ⊗ → ← ↑ ↓）看受力反向，電流與磁場平行時不受力，用右手開掌定則（拇指 I、四指 B、掌心 F）判斷並練習；線圈加換向器成為電動機，每轉半圈電流反向而持續轉動，換成滑環只會來回擺動；反過來用手轉線圈成為發電機，感應電流點亮燈泡、看交流與直流輸出波形，感應電流受的磁力阻礙轉動，比較電能→力學能與力學能→電能（小百科 p.95、圖 4-4、圖 4-7）。",sims:[["","b-motor-generator"]]},
-    {t:"電磁感應與冷次定律（檢流計實驗）",d:"示範實驗 2：拖曳磁棒靠近、停住、遠離螺線管，看檢流計 Ⓖ 指針左右偏轉，移動越快偏越大，可換 N／S 極、匝數與軟鐵棒；線圈靠磁棒的一端感應出同極推開、異極拉住，感應電流的磁場總是抵抗磁力線數量的變化（冷次定律，圖 4-6）。再看線圈進入、停在、離開均勻磁場時數一數線圈內的磁力線（圖 4-5），並做範例 4-3 磁鐵與螺線管三種移動方式、範例 4-4 開關打開與關上瞬間副線圈的電流方向，附想一想：載磁鐵的火車通過線圈山洞。",sims:[["","b-lenz-galvanometer"]]}
+    {t:"電磁感應與冷次定律（檢流計實驗）",d:"示範實驗 2：拖曳磁棒靠近、停住、遠離螺線管，看檢流計 Ⓖ 指針左右偏轉，移動越快偏越大，可換 N／S 極、匝數與軟鐵棒；線圈靠磁棒的一端感應出同極推開、異極拉住，感應電流的磁場總是抵抗磁力線數量的變化（冷次定律，圖 4-6）。再看線圈進入、停在、離開均勻磁場時數一數線圈內的磁力線（圖 4-5），並做範例 4-3 磁鐵與螺線管三種移動方式、範例 4-4 開關打開與關上瞬間副線圈的電流方向，附想一想：載磁鐵的火車通過線圈山洞。",sims:[["","b-lenz-galvanometer"]]},
+    {t:"電磁波與電磁波譜",d:"電場 E 與磁場 B 互相垂直、同相振盪並與傳遞方向垂直的 3D 動畫（可拖曳轉動、改變傳遞方向），用右手由 E 轉向 B 判斷傳遞方向並練習（範例 4-6）；拖曳頻率從無線電波到 γ 射線，即時算 λ = c／f，標出波段、生活應用與差不多大的物體（圖 4-10），附範例 4-7 5G 28 GHz → 1.07 cm；再看微波爐 2.45 GHz（約 12.2 cm）的電場讓水分子來回轉動而加熱（圖 4-11）。",sims:[["","b-em-spectrum"]]},
+    {t:"惠更斯原理與反射定律",d:"惠更斯反射實驗室：用波前上每一點發出的次波畫出反射波前，推導入射角等於反射角。",sims:[],url:"https://yi-hung-bit.github.io/huygens-reflection-lab/"},
+    {t:"惠更斯原理與折射定律",d:"惠更斯折射實驗室：互動波前模擬，看波進入不同介質時波速改變、波前轉折，推導司乃耳定律。",sims:[],url:"https://yi-hung-bit.github.io/huygens-refraction-lab/"}
   ]},
   {id:"1",lvl:"1F",name:"國中自然",sub:"",color:"var(--f1)",rooms:[
     {t:"台灣電力系統：電壓相位",d:"比較住宅的單相三線制和工廠的三相四線制，看各線電壓的波形、相位差與相量圖。",sims:[["","j-power-phase"]]},
@@ -368,7 +371,7 @@ const LIBRARY=[
 ];
 /* 二階資料庫：物奧國家代表隊複選（二階）題目與詳解，PDF 放在 db2/；新增年份就在 DB2 加一筆 {y:年份, files:[{k,label,pdf,pages}]} */
 const DB2=[{"y":1994,"files":[{"k":"q","label":"題目","pdf":"fy-1994-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1994-a.pdf","pages":7}]},{"y":1995,"files":[{"k":"q","label":"題目","pdf":"fy-1995-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1995-a.pdf","pages":8}]},{"y":1996,"files":[{"k":"q","label":"題目","pdf":"fy-1996-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1996-a.pdf","pages":8},{"k":"semi","label":"準決選題目","pdf":"fy-1996-semi.pdf","pages":3}]},{"y":1997,"files":[{"k":"q","label":"題目","pdf":"fy-1997-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-1997-a.pdf","pages":7},{"k":"semi","label":"準決選題目","pdf":"fy-1997-semi.pdf","pages":3}]},{"y":1998,"files":[{"k":"q","label":"題目","pdf":"fy-1998-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1998-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1998-semi.pdf","pages":3}]},{"y":1999,"files":[{"k":"q","label":"題目","pdf":"fy-1999-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1999-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1999-semi.pdf","pages":3}]},{"y":2000,"files":[{"k":"q","label":"題目","pdf":"fy-2000-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2000-a.pdf","pages":11}]},{"y":2001,"files":[{"k":"q","label":"題目","pdf":"fy-2001-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2001-a.pdf","pages":10}]},{"y":2002,"files":[{"k":"q","label":"題目","pdf":"fy-2002-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-2002-a.pdf","pages":12}]},{"y":2003,"files":[{"k":"q","label":"題目","pdf":"fy-2003-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2003-a.pdf","pages":11}]},{"y":2004,"files":[{"k":"q","label":"題目","pdf":"fy-2004-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2004-a.pdf","pages":9}]},{"y":2005,"files":[{"k":"q","label":"題目","pdf":"fy-2005-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2005-a.pdf","pages":12}]},{"y":2006,"files":[{"k":"q","label":"題目","pdf":"fy-2006-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2006-a.pdf","pages":12}]},{"y":2007,"files":[{"k":"q","label":"題目","pdf":"fy-2007-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2007-a.pdf","pages":18}]},{"y":2008,"files":[{"k":"q","label":"題目","pdf":"fy-2008-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2008-a.pdf","pages":11}]},{"y":2009,"files":[{"k":"q","label":"題目","pdf":"fy-2009-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2009-a.pdf","pages":20}]},{"y":2010,"files":[{"k":"q","label":"題目","pdf":"fy-2010-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2010-a.pdf","pages":12}]},{"y":2011,"files":[{"k":"q","label":"題目","pdf":"fy-2011-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2011-a.pdf","pages":14}]},{"y":2012,"files":[{"k":"q","label":"題目","pdf":"fy-2012-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2012-a.pdf","pages":10}]},{"y":2013,"files":[{"k":"q","label":"題目","pdf":"fy-2013-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2013-a.pdf","pages":12}]},{"y":2014,"files":[{"k":"q","label":"題目","pdf":"fy-2014-q.pdf","pages":9},{"k":"a","label":"詳解","pdf":"fy-2014-a.pdf","pages":14}]},{"y":2017,"files":[{"k":"q","label":"題目","pdf":"fy-2017-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2017-a.pdf","pages":7}]},{"y":2018,"files":[{"k":"a","label":"詳解","pdf":"fy-2018-a.pdf","pages":14,"note":"翻拍"}]},{"y":2019,"files":[{"k":"a","label":"詳解","pdf":"fy-2019-a.pdf","pages":10,"note":"翻拍"}]},{"y":2020,"files":[{"k":"a","label":"詳解","pdf":"fy-2020-a.pdf","pages":10,"note":"翻拍"}]},{"y":2021,"files":[{"k":"a","label":"詳解","pdf":"fy-2021-a.pdf","pages":11,"note":"翻拍"}]},{"y":2026,"files":[{"k":"q","label":"題目","pdf":"fy-2026-q.pdf","pages":10,"note":"翻拍"},{"k":"a","label":"參考解答","pdf":"fy-2026-a.pdf","pages":15,"note":"翻拍"}]}];
-const DB2_TITLE="物理奧林匹亞 國家代表隊複選（二階）";
+const DB2_TITLE="大學申請入學 第二階段物理筆試";
 const LIB_TITLE="2009 年國際物理奧林匹亞競賽 國家代表隊選訓教材";
 const GAMES=[
   {t:"物理快打：科學家格鬥賽",d:"選牛頓、愛因斯坦等科學家和電腦對戰，用萬有引力蘋果之類的物理必殺技一決勝負。",url:"https://yi-hung-bit.github.io/physics-fighter/",tag:"格鬥"},
@@ -443,7 +446,7 @@ function route(){
     p.style.setProperty("--fc",`var(${f.color})`);
     p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">模擬大樓</div><h2>${esc(f.name)}</h2><p>${f.sub?esc(f.sub)+"・":""}${f.rooms.length} 間教室</p></div></div>
       ${elevator("s",f.id)}
-      <div class="corridor sim">${f.rooms.map(r=>`<button type="button" class="room" data-h="r${r.no}"><span class="plate"><span class="no">${r.no}</span><b>${esc(r.t)}</b></span><span class="door"><span class="desc">${esc(r.d)}</span><span class="tags">${r.sims.length>1?`<span class="soon">${r.sims.length} 種模式</span>`:""}${r.net?`<span class="soon net">需要網路</span>`:""}</span></span></button>`).join("")}</div>
+      <div class="corridor sim">${f.rooms.map(r=>`${r.url?`<a class="room" href="${esc(r.url)}" target="_blank" rel="noopener">`:`<button type="button" class="room" data-h="r${r.no}">`}<span class="plate"><span class="no">${r.no}</span><b>${esc(r.t)}</b></span><span class="door"><span class="desc">${esc(r.d)}</span><span class="tags">${r.sims.length>1?`<span class="soon">${r.sims.length} 種模式</span>`:""}${r.net?`<span class="soon net">需要網路</span>`:""}${r.url?`<span class="soon net">開新分頁</span>`:""}</span></span>${r.url?"</a>":"</button>"}`).join("")}</div>
       ${f.id===BRIDGE_LEVEL?`<p class="note">本層有空橋通往競賽大樓 3F（功、能量與動量）。</p>`:""}`;
   }else if(c.b==="lib"){
     p.style.setProperty("--fc","var(--lib)");
