@@ -17,12 +17,14 @@
   --wall:#d8cfc2; --wall-t:#cdd2d6; --slab:#eeeae2; --trim:#3a4650; --glass:#5f7a8c; --glass-lit:#ffd978;
   --plate:#1f3347; --plate-t:#2c2b45; --plate-ink:#f4f1e8; --rail:#9aa3a8;
   --lawn:#9cbf7f; --leaf:#5f8f4e; --trunk:#6b4f36; --night:0;
+  --road:#6d757c; --curb:#e9ebe6; --solar:#22385a; --water:#7fb7cf;
   --f1:#3d7d4c; --f2:#c2652a; --f3:#2b64b8; --f4:#7a4fb5; --f5:#167a82; --f6:#b03a4a; --f7:#5a5f9e; --fr:#8a6a12;
   --g-kin:#2f6fa8; --g-dyn:#2b5cb8; --g-energy:#3b4fb0; --g-rot:#5a4fb5; --g-grav:#6b4aa8;
   --g-wave:#167a82; --g-fluid:#2f7d62; --g-heat:#c2652a; --g-estat:#b03a4a; --g-em:#9a3a7a;
   --g-opt:#8a6a12; --g-mod:#6a5f9e; --g-math:#4f5a63;
   --gym:#b5532e; --gym-wall:#e4ddd0; --gym-roof:#7c8d96;
   --lib:#8e2f25; --lib-wall:#efe6d2; --lib-roof:#33433d; --lib-stone:#b9b2a3;
+  --db:#2a6170; --db-wall:#dfe3e5; --db-glass:#3d5866;
   --shadow:0 12px 30px rgba(28,34,40,.14);
   --f-sign:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -32,24 +34,28 @@
   --wall:#4a4540; --wall-t:#3d434a; --slab:#6b6660; --trim:#11171c; --glass:#22333f; --glass-lit:#ffcf5a;
   --plate:#0f1c28; --plate-t:#1a1930; --plate-ink:#f4f1e8; --rail:#56616a;
   --lawn:#24331f; --leaf:#2e4a2a; --trunk:#3b2b1e; --night:1;
+  --road:#262c31; --curb:#4a5157; --solar:#152338; --water:#24485a;
   --f1:#7cc58c; --f2:#f0a06b; --f3:#86aef2; --f4:#bc9df0; --f5:#64cbd2; --f6:#ef8d9a; --f7:#a7acee; --fr:#e3c056;
   --g-kin:#7fb4e6; --g-dyn:#86a6f2; --g-energy:#9aa2f0; --g-rot:#b0a2f0; --g-grav:#c3a2ea;
   --g-wave:#64cbd2; --g-fluid:#6fcaa6; --g-heat:#f0a06b; --g-estat:#ef8d9a; --g-em:#e693c9;
   --g-opt:#e3c056; --g-mod:#b3aeea; --g-math:#a9b4bc;
   --gym:#f08a5d; --gym-wall:#4d4842; --gym-roof:#3a464d;
   --lib:#e07a66; --lib-wall:#4a4339; --lib-roof:#24302b; --lib-stone:#5a554c;
+  --db:#6cc3d4; --db-wall:#3f474d; --db-glass:#1d2b33;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}}
 :root[data-theme="dark"]{
   --sky:#141b22; --sky-top:#05080d; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
   --wall:#4a4540; --wall-t:#3d434a; --slab:#6b6660; --trim:#11171c; --glass:#22333f; --glass-lit:#ffcf5a;
   --plate:#0f1c28; --plate-t:#1a1930; --plate-ink:#f4f1e8; --rail:#56616a;
   --lawn:#24331f; --leaf:#2e4a2a; --trunk:#3b2b1e; --night:1;
+  --road:#262c31; --curb:#4a5157; --solar:#152338; --water:#24485a;
   --f1:#7cc58c; --f2:#f0a06b; --f3:#86aef2; --f4:#bc9df0; --f5:#64cbd2; --f6:#ef8d9a; --f7:#a7acee; --fr:#e3c056;
   --g-kin:#7fb4e6; --g-dyn:#86a6f2; --g-energy:#9aa2f0; --g-rot:#b0a2f0; --g-grav:#c3a2ea;
   --g-wave:#64cbd2; --g-fluid:#6fcaa6; --g-heat:#f0a06b; --g-estat:#ef8d9a; --g-em:#e693c9;
   --g-opt:#e3c056; --g-mod:#b3aeea; --g-math:#a9b4bc;
   --gym:#f08a5d; --gym-wall:#4d4842; --gym-roof:#3a464d;
   --lib:#e07a66; --lib-wall:#4a4339; --lib-roof:#24302b; --lib-stone:#5a554c;
+  --db:#6cc3d4; --db-wall:#3f474d; --db-glass:#1d2b33;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}
 
 [hidden]{display:none!important}
@@ -179,6 +185,19 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
 .shelf .cact{display:flex;gap:6px}
 .shelf .cact a{font-size:12.5px;font-weight:700;text-decoration:none;padding:2px 10px;border-radius:999px;border:1px solid var(--fc);color:var(--fc)}
 .shelf .cact a:last-child{background:var(--fc);color:var(--paper)}
+.dbyears{padding:14px 22px 6px;display:grid;gap:8px}
+.dbdec{font-size:12.5px;letter-spacing:.3em;color:var(--muted);font-weight:700;margin:8px 0 0}
+.dbrow{display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-left:4px solid var(--fc);border-radius:8px;background:color-mix(in srgb,var(--paper) 94%,var(--fc))}
+.dbrow .yy{font-family:var(--f-mono);font-weight:600;font-size:17px;color:var(--fc);padding-top:3px}
+.dbrow .yy small{display:block;font-family:var(--f-sign);font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0}
+.dbfiles{display:flex;flex-direction:column;gap:5px}
+.dbfile{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dbfile em{font-style:normal;font-size:13px;margin-right:auto}
+.dbfile em small{color:var(--muted);font-size:12px}
+.dbfile button{font-size:12.5px;font-weight:700;padding:3px 12px;border-radius:999px;border:1px solid var(--fc);color:var(--fc);background:var(--paper);cursor:pointer}
+.dbfile button.pd{background:var(--fc);color:var(--paper)}
+.dbfile button:disabled{opacity:.4;cursor:default}
+.dbmiss{font-size:12px;color:var(--muted)}
 .arcade{padding:18px 22px 6px;display:flex;flex-direction:column;gap:12px}
 .game{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"no txt tag" "no txt play";gap:4px 14px;align-items:center;padding:14px 16px;border-radius:12px;border:2px solid var(--fc);background:color-mix(in srgb,var(--paper) 90%,var(--fc));text-decoration:none;color:var(--ink);transition:transform .15s}
 .game:hover,.game:focus-visible{transform:translateY(-2px)}
@@ -203,7 +222,7 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
   <div class="top">
     <div>
       <h1>物理研究院</h1>
-      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連，旁邊有物理藏經閣與休閒中心。</p>
+      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連，旁邊有物理藏經閣、二階資料庫與休閒中心。</p>
     </div>
     <div class="count" id="count"></div>
   </div>
@@ -222,7 +241,7 @@ button.room:hover .door,button.room:focus-visible .door{transform:translateY(-3p
 
 <section class="classroom pdfview" id="pdfview" hidden aria-label="選訓教材閱覽">
   <div class="cbar">
-    <button type="button" class="back" id="pvClose">← 回到藏經閣</button>
+    <button type="button" class="back" id="pvClose">← 返回</button>
     <b id="pvTitle"></b><span class="no" id="pvInfo"></span>
     <div class="modes"><button type="button" id="pvDl">下載 PDF</button></div>
   </div>
@@ -303,7 +322,8 @@ const SIM=[
     {t:"磁力線與地磁",d:"拖曳磁棒與小磁針，看磁力線的切線方向就是磁場方向：外部由 N 極到 S 極、內部由 S 極到 N 極，是不相交的封閉曲線；可灑鐵粉、擺一群小磁針，比較同極相斥與異極相吸的磁力線。再看地球像一根巨大磁棒：地理北極附近是磁 S 極、磁軸與自轉軸約夾 11°，把指南針拖到地球各處看它的指向與磁傾角（圖 3-13）。",sims:[["","b-magnetic-field"]]},
     {t:"電流磁效應與安培右手定則",d:"示範實驗 1：南北向導線通電，上方或下方的小羅盤 N 極偏東或偏西，可調電流、距離與匝數，看 tan θ = B線／B地；長直導線截面的同心圓磁力線越靠近越密，拖曳小磁針看 B ∝ I／r；環形導線與螺線管的磁力線剖面（管內均勻、管外像棒狀磁鐵），右手定則判斷 N、S 端；附範例 4-1 三條導線在 P 點的合磁場、範例 4-2 兩斜交導線四點有無磁場（圖 4-1～4-3）。",sims:[["","b-ampere-rule"]]},
     {t:"載流導線受磁力與電動機・發電機",d:"U 形磁鐵中的通電導線受力擺動：改變電流或磁場方向（⊙ ⊗ → ← ↑ ↓）看受力反向，電流與磁場平行時不受力，用右手開掌定則（拇指 I、四指 B、掌心 F）判斷並練習；線圈加換向器成為電動機，每轉半圈電流反向而持續轉動，換成滑環只會來回擺動；反過來用手轉線圈成為發電機，感應電流點亮燈泡、看交流與直流輸出波形，感應電流受的磁力阻礙轉動，比較電能→力學能與力學能→電能（小百科 p.95、圖 4-4、圖 4-7）。",sims:[["","b-motor-generator"]]},
-    {t:"電磁感應與冷次定律（檢流計實驗）",d:"示範實驗 2：拖曳磁棒靠近、停住、遠離螺線管，看檢流計 Ⓖ 指針左右偏轉，移動越快偏越大，可換 N／S 極、匝數與軟鐵棒；線圈靠磁棒的一端感應出同極推開、異極拉住，感應電流的磁場總是抵抗磁力線數量的變化（冷次定律，圖 4-6）。再看線圈進入、停在、離開均勻磁場時數一數線圈內的磁力線（圖 4-5），並做範例 4-3 磁鐵與螺線管三種移動方式、範例 4-4 開關打開與關上瞬間副線圈的電流方向，附想一想：載磁鐵的火車通過線圈山洞。",sims:[["","b-lenz-galvanometer"]]}
+    {t:"電磁感應與冷次定律（檢流計實驗）",d:"示範實驗 2：拖曳磁棒靠近、停住、遠離螺線管，看檢流計 Ⓖ 指針左右偏轉，移動越快偏越大，可換 N／S 極、匝數與軟鐵棒；線圈靠磁棒的一端感應出同極推開、異極拉住，感應電流的磁場總是抵抗磁力線數量的變化（冷次定律，圖 4-6）。再看線圈進入、停在、離開均勻磁場時數一數線圈內的磁力線（圖 4-5），並做範例 4-3 磁鐵與螺線管三種移動方式、範例 4-4 開關打開與關上瞬間副線圈的電流方向，附想一想：載磁鐵的火車通過線圈山洞。",sims:[["","b-lenz-galvanometer"]]},
+    {t:"電磁波與電磁波譜",d:"電場 E 與磁場 B 互相垂直、同相振盪並與傳遞方向垂直的 3D 動畫（可拖曳轉動、改變傳遞方向），用右手由 E 轉向 B 判斷傳遞方向並練習（範例 4-6）；拖曳頻率從無線電波到 γ 射線，即時算 λ = c／f，標出波段、生活應用與差不多大的物體（圖 4-10），附範例 4-7 5G 28 GHz → 1.07 cm；再看微波爐 2.45 GHz（約 12.2 cm）的電場讓水分子來回轉動而加熱（圖 4-11）。",sims:[["","b-em-spectrum"]]}
   ]},
   {id:"1",lvl:"1F",name:"國中自然",sub:"",color:"var(--f1)",rooms:[
     {t:"台灣電力系統：電壓相位",d:"比較住宅的單相三線制和工廠的三相四線制，看各線電壓的波形、相位差與相量圖。",sims:[["","j-power-phase"]]},
@@ -343,10 +363,13 @@ const QOWN={}; THEORY.forEach(f=>f.rooms.forEach(r=>r.qs.forEach(q=>QOWN[q]=r)))
 /* 休閒中心：小遊戲（連到外部網址，在新分頁開啟）。新增遊戲就在 GAMES 加一筆 {t:名稱, d:說明, url:網址, tag:標籤} */
 /* 物理藏經閣：物奧國家代表隊選訓教材。每章 files 列出放在 library/ 的 PDF：{label:版本名稱, pdf:檔名, by:整理者}；空陣列表示還沒上架 */
 const LIBRARY=[
-  {vol:"第一冊",theme:"力學・熱學",chapters:[{t:"力學",p:1,files:[]},{t:"剛體力學",p:42,files:[]},{t:"振動和波",p:81,files:[{label:"文字版",pdf:"v1-03-oscillations-waves-text.pdf",by:"林明瑞 整理",pages:42}]},{t:"熱力學與分子動力論",p:118,files:[{label:"文字版",pdf:"v1-04-thermodynamics-text.pdf",by:"王婉美 整理",pages:43}]}]},
+  {vol:"第一冊",theme:"力學・熱學",chapters:[{t:"力學",p:1,files:[]},{t:"剛體力學",p:42,files:[{label:"文字版",pdf:"v1-02-rigid-body-text.pdf",by:"郭鴻銘 整理",pages:49}]},{t:"振動和波",p:81,files:[{label:"文字版",pdf:"v1-03-oscillations-waves-text.pdf",by:"林明瑞 整理",pages:42}]},{t:"熱力學與分子動力論",p:118,files:[{label:"文字版",pdf:"v1-04-thermodynamics-text.pdf",by:"王婉美 整理",pages:43}]}]},
   {vol:"第二冊",theme:"電磁・光學",chapters:[{t:"電荷與電場",p:1,files:[]},{t:"電流與磁場",p:24,files:[]},{t:"電磁波",p:112,files:[]},{t:"光學",p:130,files:[]},{t:"如何處理物體的移動和轉動",p:180,files:[]},{t:"物理例題集錦",p:205,files:[]}]},
   {vol:"第三冊",theme:"近代物理・實驗",chapters:[{t:"力學續論",p:1,files:[]},{t:"狹義相對論",p:54,files:[]},{t:"量子物理",p:95,files:[]},{t:"物質",p:110,files:[]},{t:"微中子",p:144,files:[]},{t:"熵的統計觀點",p:155,files:[]},{t:"實驗數據的處理",p:159,files:[]}]}
 ];
+/* 二階資料庫：物奧國家代表隊複選（二階）題目與詳解，PDF 放在 db2/；新增年份就在 DB2 加一筆 {y:年份, files:[{k,label,pdf,pages}]} */
+const DB2=[{"y":1994,"files":[{"k":"q","label":"題目","pdf":"fy-1994-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1994-a.pdf","pages":7}]},{"y":1995,"files":[{"k":"q","label":"題目","pdf":"fy-1995-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1995-a.pdf","pages":8}]},{"y":1996,"files":[{"k":"q","label":"題目","pdf":"fy-1996-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1996-a.pdf","pages":8},{"k":"semi","label":"準決選題目","pdf":"fy-1996-semi.pdf","pages":3}]},{"y":1997,"files":[{"k":"q","label":"題目","pdf":"fy-1997-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-1997-a.pdf","pages":7},{"k":"semi","label":"準決選題目","pdf":"fy-1997-semi.pdf","pages":3}]},{"y":1998,"files":[{"k":"q","label":"題目","pdf":"fy-1998-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1998-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1998-semi.pdf","pages":3}]},{"y":1999,"files":[{"k":"q","label":"題目","pdf":"fy-1999-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1999-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1999-semi.pdf","pages":3}]},{"y":2000,"files":[{"k":"q","label":"題目","pdf":"fy-2000-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2000-a.pdf","pages":11}]},{"y":2001,"files":[{"k":"q","label":"題目","pdf":"fy-2001-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2001-a.pdf","pages":10}]},{"y":2002,"files":[{"k":"q","label":"題目","pdf":"fy-2002-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-2002-a.pdf","pages":12}]},{"y":2003,"files":[{"k":"q","label":"題目","pdf":"fy-2003-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2003-a.pdf","pages":11}]},{"y":2004,"files":[{"k":"q","label":"題目","pdf":"fy-2004-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2004-a.pdf","pages":9}]},{"y":2005,"files":[{"k":"q","label":"題目","pdf":"fy-2005-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2005-a.pdf","pages":12}]},{"y":2006,"files":[{"k":"q","label":"題目","pdf":"fy-2006-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2006-a.pdf","pages":12}]},{"y":2007,"files":[{"k":"q","label":"題目","pdf":"fy-2007-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2007-a.pdf","pages":18}]},{"y":2008,"files":[{"k":"q","label":"題目","pdf":"fy-2008-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2008-a.pdf","pages":11}]},{"y":2009,"files":[{"k":"q","label":"題目","pdf":"fy-2009-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2009-a.pdf","pages":20}]},{"y":2010,"files":[{"k":"q","label":"題目","pdf":"fy-2010-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2010-a.pdf","pages":12}]},{"y":2011,"files":[{"k":"q","label":"題目","pdf":"fy-2011-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2011-a.pdf","pages":14}]},{"y":2012,"files":[{"k":"q","label":"題目","pdf":"fy-2012-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2012-a.pdf","pages":10}]},{"y":2013,"files":[{"k":"q","label":"題目","pdf":"fy-2013-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2013-a.pdf","pages":12}]},{"y":2014,"files":[{"k":"q","label":"題目","pdf":"fy-2014-q.pdf","pages":9},{"k":"a","label":"詳解","pdf":"fy-2014-a.pdf","pages":14}]},{"y":2017,"files":[{"k":"q","label":"題目","pdf":"fy-2017-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2017-a.pdf","pages":7}]},{"y":2018,"files":[{"k":"a","label":"詳解","pdf":"fy-2018-a.pdf","pages":14,"note":"翻拍"}]},{"y":2019,"files":[{"k":"a","label":"詳解","pdf":"fy-2019-a.pdf","pages":10,"note":"翻拍"}]},{"y":2020,"files":[{"k":"a","label":"詳解","pdf":"fy-2020-a.pdf","pages":10,"note":"翻拍"}]},{"y":2021,"files":[{"k":"a","label":"詳解","pdf":"fy-2021-a.pdf","pages":11,"note":"翻拍"}]},{"y":2026,"files":[{"k":"q","label":"題目","pdf":"fy-2026-q.pdf","pages":10,"note":"翻拍"},{"k":"a","label":"參考解答","pdf":"fy-2026-a.pdf","pages":15,"note":"翻拍"}]}];
+const DB2_TITLE="物理奧林匹亞 國家代表隊複選（二階）";
 const LIB_TITLE="2009 年國際物理奧林匹亞競賽 國家代表隊選訓教材";
 const GAMES=[
   {t:"物理快打：科學家格鬥賽",d:"選牛頓、愛因斯坦等科學家和電腦對戰，用萬有引力蘋果之類的物理必殺技一決勝負。",url:"https://yi-hung-bit.github.io/physics-fighter/",tag:"格鬥"},
@@ -381,6 +404,7 @@ function current(){
   if(h==="bridge") return {b:"bridge"};
   if(h==="gym") return {b:"gym"};
   if(h==="lib") return {b:"lib"};
+  if(h==="db") return {b:"db"};
   return {b:null};
 }
 const go=h=>{location.hash=h;};
@@ -433,6 +457,17 @@ function route(){
     p.querySelectorAll(".pv").forEach(b=>b.onclick=()=>openPdf(libFile(b)));
     p.querySelectorAll(".pd").forEach(b=>b.onclick=()=>downloadPdf(libFile(b),b));
     p.querySelectorAll(".cfile").forEach(el=>fetch("library/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.classList.add("off");el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("em").textContent+="・僅限研究院";}));
+  }else if(c.b==="db"){
+    p.style.setProperty("--fc","var(--db)");
+    const nf=DB2.reduce((a,d)=>a+d.files.length,0), yrs=DB2.slice().reverse(), decs={};
+    yrs.forEach(d=>{const k=Math.floor(d.y/10)*10;(decs[k]=decs[k]||[]).push(d);});
+    p.innerHTML=`<div class="panel-head"><div class="badge">二</div><div><div class="bld">院區右前方</div><h2>二階資料庫</h2><p>${esc(DB2_TITLE)}・${DB2.length} 屆・${nf} 份 PDF</p></div></div>
+      <div class="dbyears">${Object.keys(decs).sort((a,b)=>b-a).map(k=>`<p class="dbdec">${k} 年代</p>`+decs[k].map(d=>{const has=t=>d.files.some(f=>f.k===t);
+        return `<div class="dbrow"><span class="yy">${d.y}</span><div class="dbfiles">${d.files.map((f,fi)=>`<span class="dbfile" data-pdf="${esc(f.pdf)}"><em>${esc(f.label)} <small>${f.pages} 頁${f.note?"・"+esc(f.note):""}</small></em><button type="button" class="pv" data-y="${d.y}" data-f="${fi}">閱覽</button><button type="button" class="pd" data-y="${d.y}" data-f="${fi}">下載</button></span>`).join("")}${has("q")?"":`<span class="dbmiss">題目尚未收錄</span>`}${has("a")?"":`<span class="dbmiss">詳解尚未收錄</span>`}</div></div>`;}).join("")).join("")}</div>
+      <p class="note">閱覽會在這裡直接翻頁看，下載會存成 PDF 檔。2018–2021 詳解與 2026 試題是紙本翻拍。</p>`;
+    p.querySelectorAll(".dbfile .pv").forEach(b=>b.onclick=()=>openPdf(dbFile(b)));
+    p.querySelectorAll(".dbfile .pd").forEach(b=>b.onclick=()=>downloadPdf(dbFile(b),b));
+    p.querySelectorAll(".dbfile").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
   }else if(c.b==="gym"){
     p.style.setProperty("--fc","var(--gym)");
     p.innerHTML=`<div class="panel-head"><div class="badge">玩</div><div><div class="bld">院區後方</div><h2>休閒中心</h2><p>下課來玩物理小遊戲・${GAMES.length} 款</p></div></div>
@@ -448,6 +483,7 @@ function route(){
       <div class="dir">
         <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}</section>
         <section><h3>物理藏經閣 <small>選訓教材 ${LIBRARY.length} 冊</small></h3><button type="button" class="dir-row" data-h="lib" style="--fc:var(--lib)"><span class="n">經</span><span><b>物理藏經閣</b><small>${esc(LIBRARY.map(v=>v.vol+" "+v.theme).join("・"))}</small></span></button></section>
+        <section><h3>二階資料庫 <small>物奧複選 ${DB2.length} 屆</small></h3><button type="button" class="dir-row" data-h="db" style="--fc:var(--db)"><span class="n">二</span><span><b>二階資料庫</b><small>${DB2[0].y}–${DB2[DB2.length-1].y} 物奧國家代表隊複選題目與詳解</small></span></button></section>
         <section><h3>休閒中心 <small>${GAMES.length} 款遊戲</small></h3><button type="button" class="dir-row" data-h="gym" style="--fc:var(--gym)"><span class="n">玩</span><span><b>休閒中心</b><small>${esc(GAMES.map(g=>g.t).join("・"))}</small></span></button></section>
         <section><h3>連通空橋 <small>3F</small></h3><button type="button" class="dir-row" data-h="bridge" style="--fc:var(--plate)"><span class="n">3F</span><span><b>競賽 ⇄ 模擬</b><small>競賽 3F 功、能量與動量 ⇄ 模擬 3F 選修物理一</small></span></button></section>
         <section><h3>模擬大樓 <small>${SIM.length} 層・${ROOMS.length} 間</small></h3>${SIM_UP.slice().reverse().map(f=>dirRow("s",f)).join("")}</section>
@@ -459,6 +495,7 @@ function route(){
 }
 
 /* ---------- 藏經閣：PDF 閱覽與下載 ---------- */
+const dbFile=b=>{const d=DB2.find(x=>x.y==b.dataset.y), f=d.files[b.dataset.f]; return {v:{vol:"二階"},ch:{t:d.y+" 年"},f:{label:f.label,by:"物奧複選"},url:"db2/"+f.pdf,name:`物奧二階 ${d.y} ${f.label}.pdf`};};
 const libFile=b=>{const v=LIBRARY[b.dataset.v], ch=v.chapters[b.dataset.c], f=ch.files[b.dataset.f]; return {v,ch,f,url:"library/"+f.pdf,name:`選訓教材 ${v.vol} ${ch.t}（${f.label}）.pdf`};};
 let pdfLib=null;
 function loadPdfJs(){
@@ -574,11 +611,14 @@ function init3D(){
   const floorObjs={}, pickables=[];
 
   /* ground */
-  scene.add(mesh(new THREE.CylinderGeometry(26,26,.3,72),M.lawn,0,-.15,0,false,true));
+  /* 科技園區基地：方整草坪＋外環道 */
+  const PW=54, PD=36, PZ=.6;
+  scene.add(mesh(B(PW+1.2,.5,PD+1.2),M.slab,0,-.35,PZ,false,true));
+  scene.add(mesh(B(PW,.3,PD),M.lawn,0,-.15,PZ,false,true));
   scene.add(mesh(B(W+2.6,.06,D+2.6),M.pave,SX,.03,0,false,true));
   scene.add(mesh(B(W+2.6,.06,D+2.6),M.pave,TX,.03,0,false,true));
   scene.add(mesh(B(TX-SX,.05,2.2),M.pave,0,.025,D/2+2.6,false,true));
-  scene.add(mesh(B(2.6,.04,9),M.pave,0,.02,D/2+7,false,true));
+  scene.add(mesh(B(3.4,.04,PZ+PD/2-1.9-(D/2+2.6)),M.pave,0,.02,(D/2+2.6+PZ+PD/2-1.9)/2,false,true));
 
   function lobby(x,mat){
     const g=new THREE.Group(); g.position.x=x; scene.add(g);
@@ -710,7 +750,7 @@ function init3D(){
   ];
   /* 可走的地面：大樓前廣場、大樓後方、兩棟之間的通道 */
   const ZONES={
-    front:{x0:-11,x1:16,z0:D/2+1.6,z1:D/2+9},
+    front:{x0:-9.5,x1:9.5,z0:D/2+1.6,z1:D/2+7.6},
     back:{x0:-10,x1:10,z0:-D/2-7,z1:-D/2-1.6},
     gap:{x0:bx0+.8,x1:bx1-.8,z0:-D/2,z1:D/2+1}
   };
@@ -758,10 +798,10 @@ function init3D(){
 
   /* trees */
   /* 休閒中心（體育館）：在兩棟大樓後方，圓弧屋頂 */
-  const GX=17.6, GZ=-5.6, GR=-.75, GW=10, GD=5.4, GH=2.4;
+  const GX=18.7, GZ=-10.6, GR=0, GW=8.4, GD=5.4, GH=2.4;
   const gymWall=new THREE.MeshStandardMaterial({roughness:.8}), gymRoof=new THREE.MeshStandardMaterial({roughness:.55,metalness:.25,side:THREE.DoubleSide}), gymAcc=new THREE.MeshStandardMaterial({roughness:.5});
   const gym=new THREE.Group(); gym.position.set(GX,0,GZ); gym.rotation.y=GR; scene.add(gym);
-  gym.add(mesh(B(GW+5,.06,GD+3.4),M.pave,0,.03,.9,false,true));
+  gym.add(mesh(B(GW+2,.06,GD+2.6),M.pave,0,.03,.9,false,true));
   const gBody=mesh(B(GW,GH,GD),gymWall,0,GH/2,0); gym.add(gBody);
   const vault=mesh(new THREE.CylinderGeometry(GD/2+.15,GD/2+.15,GW+.3,32,1,false,0,Math.PI),gymRoof,0,GH,0); vault.rotation.z=Math.PI/2; vault.scale.set(.55,1,1);
   gym.add(vault);
@@ -777,17 +817,17 @@ function init3D(){
   const gymLit=new THREE.MeshStandardMaterial({color:0xfff3d6,emissive:new THREE.Color(0xffd27a).convertSRGBToLinear(),emissiveIntensity:0});
   gym.add(mesh(B(GW-2.6,.05,.08),gymLit,0,GH*.68,GD/2+.09,false,false));
   /* 籃球架 */
-  [-1,1].forEach(sx=>{const hx=sx*(GW/2+1.6);
+  [-1,1].forEach(sx=>{const hx=sx*(GW/2-.6);
     gym.add(mesh(new THREE.CylinderGeometry(.05,.05,1.6,8),M.trim,hx,.8,GD/2+1.2));
     gym.add(mesh(B(.06,.5,.7),M.slab,hx-sx*.05,1.7,GD/2+1.2));
     const rim=mesh(new THREE.TorusGeometry(.18,.025,6,16),gymAcc,hx-sx*.28,1.55,GD/2+1.2,false,false); rim.rotation.x=Math.PI/2; gym.add(rim);});
 
   /* 物理藏經閣：模擬大樓左側的兩層樓閣，重簷屋頂 */
-  const LX=-17.4, LZ=6.4, LR=.9;
+  const LX=-17.6, LZ=7.6, LR=0;
   const libWall=new THREE.MeshStandardMaterial({roughness:.85}), libRoof=new THREE.MeshStandardMaterial({roughness:.6,flatShading:true}), libRed=new THREE.MeshStandardMaterial({roughness:.5}), libStone=new THREE.MeshStandardMaterial({roughness:.95});
   const lib=new THREE.Group(); lib.position.set(LX,0,LZ); lib.rotation.y=LR; scene.add(lib);
   const LW=6.4, LD=4.6;
-  lib.add(mesh(B(LW+4,.06,LD+4),M.pave,0,.03,.6,false,true));
+  lib.add(mesh(B(LW+2.4,.06,LD+3),M.pave,0,.03,.6,false,true));
   const lBase=mesh(B(LW+1.2,.5,LD+1.2),libStone,0,.25,0); lib.add(lBase);
   lib.add(mesh(B(2.4,.25,1),libStone,0,.125,LD/2+1.05));
   const lBody1=mesh(B(LW,1.9,LD),libWall,0,.5+.95,0); lib.add(lBody1);
@@ -805,7 +845,106 @@ function init3D(){
   lib.add(mesh(new THREE.PlaneGeometry(2.6,.65),new THREE.MeshBasicMaterial({map:libSign,transparent:true}),0,.5+1.9+.3,LD/2+.62,false,false));
   [lBase,lBody1,lBody2,lRoof1,lRoof2,lDoor].forEach(o=>{o.userData.key="lib";pickables.push(o);});
 
-  [[-14,-1.5],[-12.2,-4.2],[13.6,4.4],[12.4,-10.5],[-9,8.5],[9,8.6],[-6,12],[4,9.6],[-8.6,-8],[8.8,-8.2],[-12,-12],[11,-12.5],[-22.5,-5],[21.5,2.5]].forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
+  /* 二階資料庫：模擬大樓的對面（右前方），像資料中心的方塊大樓 */
+  const DX=17.6, DZ=7.6, DR=0, DW=5.6, DD=4.2, DH=3.6;
+  const dbWall=new THREE.MeshStandardMaterial({roughness:.75}), dbAcc=new THREE.MeshStandardMaterial({roughness:.45}), dbGlass=new THREE.MeshStandardMaterial({roughness:.2,metalness:.5});
+  const dbLit=new THREE.MeshStandardMaterial({color:0xd8f4ff,emissive:new THREE.Color(0x7fe0ff).convertSRGBToLinear(),emissiveIntensity:0});
+  const db=new THREE.Group(); db.position.set(DX,0,DZ); db.rotation.y=DR; scene.add(db);
+  db.add(mesh(B(DW+2.4,.06,DD+3),M.pave,0,.03,.6,false,true));
+  const dPlinth=mesh(B(DW+.6,.3,DD+.6),M.slab,0,.15,0); db.add(dPlinth);
+  const dBody=mesh(B(DW,DH,DD),dbWall,0,.3+DH/2,0); db.add(dBody);
+  const dFace=mesh(B(DW-1.2,DH-.9,.08),dbGlass,0,.3+DH/2+.15,DD/2+.04,false,false); db.add(dFace);
+  for(let r=0;r<6;r++){const ry=.3+.75+r*(DH-1.2)/5.2; db.add(mesh(B(DW-1.5,.07,.05),dbLit,0,ry,DD/2+.1,false,false));
+    for(let k=0;k<4;k++) db.add(mesh(B(.09,.09,.05),dbAcc,-(DW-1.5)/2+.3+k*.22,ry+.16,DD/2+.1,false,false));}
+  [-1,1].forEach(sx=>db.add(mesh(B(.35,DH+.2,.35),dbAcc,sx*(DW/2-.05),.3+(DH+.2)/2,DD/2-.05)));
+  const dRoof=mesh(B(DW+.3,.22,DD+.3),M.slab,0,.3+DH+.11,0); db.add(dRoof);
+  [[-1.4,-.8],[0,-.8],[1.4,-.8]].forEach(([x,z])=>db.add(mesh(B(.9,.45,.9),M.trim,x,.3+DH+.45,z)));
+  db.add(mesh(B(1.4,1.2,.08),dbGlass,0,.3+.6,DD/2+.12,false,false));
+  db.add(mesh(B(2.2,.1,.9),M.slab,0,.3+1.3,DD/2+.5));
+  const dbSign=signTexture("二 階 資 料 庫","A R C H I V E","--db"); signs.push(dbSign);
+  db.add(mesh(new THREE.PlaneGeometry(3.2,.8),new THREE.MeshBasicMaterial({map:dbSign,transparent:true}),0,.3+DH+.95,DD/2-.1,false,false));
+  [-1.3,1.3].forEach(px=>db.add(mesh(B(.06,.6,.06),M.trim,px,.3+DH+.45,DD/2-.12,false,false)));
+  [dPlinth,dBody,dFace,dRoof].forEach(o=>{o.userData.key="db";pickables.push(o);});
+
+  /* ===== 科技園區：環道、路燈、中央大道、原子雕塑、太陽能停車場、風力發電機 ===== */
+  const roadM=new THREE.MeshStandardMaterial({roughness:.95}), curbM=new THREE.MeshStandardMaterial({roughness:.8});
+  const lineM=new THREE.MeshStandardMaterial({color:0xf2f2ea,roughness:.6});
+  const solarM=new THREE.MeshStandardMaterial({roughness:.25,metalness:.6});
+  const waterM=new THREE.MeshStandardMaterial({roughness:.1,metalness:.3,transparent:true,opacity:.9});
+  const lampLit=new THREE.MeshStandardMaterial({color:0xfff6dc,emissive:new THREE.Color(0xffe2a0).convertSRGBToLinear(),emissiveIntensity:0});
+  const tick=[];
+  const RX=PW/2-1.9, RZ0=PZ-PD/2+1.9, RZ1=PZ+PD/2-1.9, RW=2;
+  /* 外環道（含白色虛線） */
+  /* 園區內道路：大樓後方的東西向道路、兩側南北向道路、穿過空橋下的中央連絡道 */
+  const BZ=-D/2-2.6, SR=12.4, IW=1.7;
+  const inner=[[0,BZ,2*RX,IW],[-SR,(BZ+RZ1)/2,IW,RZ1-BZ],[SR,(BZ+RZ1)/2,IW,RZ1-BZ],[0,(BZ+D/2+1.8)/2,IW,D/2+1.8-BZ]];
+  [[0,RZ0,2*RX+RW,RW],[0,RZ1,2*RX+RW,RW],[-RX,(RZ0+RZ1)/2,RW,RZ1-RZ0],[RX,(RZ0+RZ1)/2,RW,RZ1-RZ0],...inner].forEach(([x,z,w,d])=>{
+    scene.add(mesh(B(w,.05,d),roadM,x,.025,z,false,true));
+    const along=w>d, L=along?w:d;
+    for(let t=-L/2+1;t<L/2-.5;t+=2.2) scene.add(mesh(B(along?1.1:.1,.02,along?.1:1.1),lineM,along?x+t:x,.06,along?z:z+t,false,false));
+  });
+  [[RZ0-RW/2-.1],[RZ0+RW/2+.1],[RZ1-RW/2-.1],[RZ1+RW/2+.1]].forEach(([z])=>scene.add(mesh(B(2*RX+RW,.1,.16),curbM,0,.05,z,false,false)));
+  /* 路燈 */
+  function lamp(x,z){
+    scene.add(mesh(new THREE.CylinderGeometry(.05,.07,2.2,8),M.trim,x,1.1,z));
+    scene.add(mesh(B(.55,.08,.2),M.trim,x,2.2,z));
+    scene.add(mesh(B(.4,.04,.16),lampLit,x,2.15,z,false,false));
+  }
+  [-19,-13,-7,7,13,19].forEach(x=>{lamp(x,RZ1-RW/2-.5);lamp(x,RZ0+RW/2+.5);});
+  [-19,-7,7,19].forEach(x=>lamp(x,BZ-IW/2-.4));
+  [-.4,4,8.4].forEach(z=>{lamp(-SR-IW/2-.4,z);lamp(SR+IW/2+.4,z);});
+  [RZ0+7,RZ0+15,RZ0+23].forEach(z=>{lamp(-RX+RW/2+.5,z);lamp(RX-RW/2-.5,z);});
+  [D/2+4,D/2+7.5].forEach(z=>{lamp(-2.2,z);lamp(2.2,z);});
+  /* 園區入口：原子雕塑水池＋入口標牌 */
+  const AZ=RZ1-3.2;
+  scene.add(mesh(new THREE.CylinderGeometry(1.7,1.8,.3,40),curbM,0,.15,AZ));
+  const pool=mesh(new THREE.CylinderGeometry(1.5,1.5,.06,40),waterM,0,.31,AZ,false,true); scene.add(pool);
+  const atom=new THREE.Group(); atom.position.set(0,2.1,AZ); scene.add(atom);
+  scene.add(mesh(new THREE.CylinderGeometry(.06,.1,1.8,10),M.trim,0,1.1,AZ));
+  const nucM=new THREE.MeshStandardMaterial({color:0xffd27a,emissive:new THREE.Color(0xffb347).convertSRGBToLinear(),emissiveIntensity:.5,roughness:.3});
+  atom.add(mesh(new THREE.SphereGeometry(.26,20,14),nucM,0,0,0));
+  const ringM=new THREE.MeshStandardMaterial({roughness:.3,metalness:.7});
+  const eM=new THREE.MeshStandardMaterial({color:0x8fe3ff,emissive:new THREE.Color(0x4fc8ff).convertSRGBToLinear(),emissiveIntensity:.8});
+  const orbits=[0,Math.PI/3,-Math.PI/3].map((a,i)=>{const g=new THREE.Group(); g.rotation.set(Math.PI/2+.25,a,0); atom.add(g);
+    const r=mesh(new THREE.TorusGeometry(.9,.025,8,64),ringM,0,0,0,false,false); g.add(r);
+    const e=mesh(new THREE.SphereGeometry(.09,12,8),eM,.9,0,0,false,false); g.add(e); return {e,ph:i*2.1};});
+  tick.push((dt,t)=>{atom.rotation.y+=dt*.25; orbits.forEach(o=>{const a=t/700+o.ph;o.e.position.set(Math.cos(a)*.9,Math.sin(a)*.9,0);});});
+  const parkSign=signTexture("物 理 研 究 院","P H Y S I C S   P A R K","--plate"); signs.push(parkSign);
+  scene.add(mesh(B(4.2,1.1,.3),curbM,-5.6,.55,RZ1-2.2));
+  scene.add(mesh(new THREE.PlaneGeometry(4,1),new THREE.MeshBasicMaterial({map:parkSign,transparent:true}),-5.6,.6,RZ1-2.04,false,false));
+  /* 太陽能停車場（左後方） */
+  const PKX=-16.4, PKZ=-9.6;
+  scene.add(mesh(B(10,.05,6.4),roadM,PKX,.03,PKZ,false,true));
+  for(let i=0;i<6;i++) scene.add(mesh(B(.08,.02,2.2),lineM,PKX-4+i*1.6,.06,PKZ-1.6,false,false));
+  for(let i=0;i<6;i++) scene.add(mesh(B(.08,.02,2.2),lineM,PKX-4+i*1.6,.06,PKZ+1.6,false,false));
+  [-1.6,1.6].forEach(dz=>{
+    const panel=mesh(B(9,.08,2.4),solarM,PKX,1.75,PKZ+dz); panel.rotation.x=dz<0?-.18:.18; scene.add(panel);
+    for(let i=0;i<4;i++) scene.add(mesh(new THREE.CylinderGeometry(.06,.06,1.7,8),M.trim,PKX-4+i*2.67,.85,PKZ+dz*1.25));
+    for(let k=1;k<6;k++) panel.add(mesh(B(.03,.1,2.35),M.trim,-4.5+k*1.5,0,0,false,false));
+  });
+  const carC=["#c2652a","#2b64b8","#f4f4f0","#3b3f46","#167a82","#b03a4a","#c9a227"];
+  [[-3.2,-1.6],[-1.6,-1.6],[1.6,-1.6],[3.2,-1.6],[-2.4,1.6],[0,1.6],[2.4,1.6]].forEach(([dx,dz],i)=>{
+    const g=new THREE.Group(); g.position.set(PKX+dx,0,PKZ+dz); g.rotation.y=Math.PI/2; scene.add(g);
+    g.add(mesh(B(1.5,.35,.7),mat(carC[i%carC.length]),0,.3,0));
+    g.add(mesh(B(.8,.28,.62),M.glass,-.05,.6,0));
+    [[-.5,.36],[.5,.36],[-.5,-.36],[.5,-.36]].forEach(([wx,wz])=>{const w=mesh(new THREE.CylinderGeometry(.14,.14,.1,10),mat("#1b1b1b"),wx,.14,wz);w.rotation.x=Math.PI/2;g.add(w);});
+  });
+  /* 風力發電機 */
+  function turbine(x,z,h,ph){
+    scene.add(mesh(new THREE.CylinderGeometry(.08,.16,h,10),curbM,x,h/2,z));
+    scene.add(mesh(B(.5,.3,.3),curbM,x,h+.05,z));
+    const hub=new THREE.Group(); hub.position.set(x,h+.05,z+.2); scene.add(hub);
+    hub.add(mesh(new THREE.SphereGeometry(.12,10,8),curbM,0,0,0));
+    for(let k=0;k<3;k++){const bl=new THREE.Group(); bl.rotation.z=k*Math.PI*2/3; bl.add(mesh(B(.12,1.9,.04),curbM,0,.95,0)); hub.add(bl);}
+    tick.push((dt)=>{hub.rotation.z+=dt*(.9+ph*.2);});
+  }
+  turbine(-21.6,-2.2,6.5,0); turbine(-21.6,2.4,5.6,1);
+  /* 中央大道兩側植栽 */
+  const TREES=[[-2.4,D/2+5.6],[2.4,D/2+5.6],[-2.4,D/2+9],[2.4,D/2+9],
+    [-22,RZ1-2.6],[-9.6,RZ1-2.6],[9.6,RZ1-2.6],[22,RZ1-2.6],
+    [-6,RZ0+2.2],[0,RZ0+2.2],[5,RZ0+2.2],[-15,-1.6],[-9.8,-6.8],[9.8,-6.8],
+    [21.6,-1.6],[21.6,2],[-22.9,3.4],[22.9,3.4],[-14.6,2.4],[14.6,2.4]];
+  TREES.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.65*s,0),M.leaf,x+.3*s,2.1*s,z-.1));});
@@ -818,9 +957,9 @@ function init3D(){
     b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
     b.onclick=()=>go(o.key); labelBox.appendChild(b); labels[o.key]=b;
   });
-  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"]].map(([k,x,y,t,pv])=>{
+  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"]].map(([k,x,y,t,pv])=>{
     const b=document.createElement("button"); b.type="button"; b.className="blabel"; b.textContent=t; b.style.setProperty("--bp",`var(${pv})`);
-    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:k==="lib"?LZ:0)};
+    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"||k==="db"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:k==="lib"?LZ:k==="db"?DZ:0)};
   });
 
   let night=false;
@@ -830,10 +969,13 @@ function init3D(){
     M.glass.color=col("--glass"); M.lawn.color=col("--lawn"); M.pave.color=col("--ground");
     M.leaf.color=col("--leaf"); M.trunk.color=col("--trunk");
     gymWall.color=col("--gym-wall"); gymRoof.color=col("--gym-roof"); gymAcc.color=col("--gym");
+    dbWall.color=col("--db-wall"); dbAcc.color=col("--db"); dbGlass.color=col("--db-glass");
     libWall.color=col("--lib-wall"); libRoof.color=col("--lib-roof"); libRed.color=col("--lib"); libStone.color=col("--lib-stone");
     Object.values(floorObjs).forEach(o=>{o.accentMat.color=col(o.f.color); o.lit.color=col("--glass");});
     hemi.intensity=night?.28:.75; sun.intensity=night?.22:.95; sun.color=new THREE.Color(night?0x9fb4d9:0xfff4e0);
     bridgeLit.emissiveIntensity=night?.9:.15;
+    roadM.color=col("--road"); curbM.color=col("--curb"); ringM.color=col("--curb"); solarM.color=col("--solar"); waterM.color=col("--water");
+    lampLit.emissiveIntensity=night?1.8:.05;
     signs.forEach(t=>t.redraw());
   }
   applyTheme();
@@ -850,7 +992,7 @@ function init3D(){
   function fit(){
     const w=box.clientWidth,h=box.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; box.classList.toggle("narrow",w<560);
     const vf=THREE.MathUtils.degToRad(cam.fov)/2, hf=Math.atan(Math.tan(vf)*cam.aspect);
-    dist=Math.max((topY+1.5)/2/Math.tan(vf),46/2/Math.tan(hf))*1.0;
+    dist=Math.max((topY+1.5)/2/Math.tan(vf),50/2/Math.tan(hf))*1.0;
     cam.updateProjectionMatrix();
   }
   fit(); new ResizeObserver(fit).observe(box);
@@ -899,6 +1041,8 @@ function init3D(){
       const show=on||hv; lb.style.visibility=show?"visible":"hidden"; lb.style.pointerEvents=show?"auto":"none";
     });
     bLabels.forEach(({b,p})=>{v.copy(p).project(cam);place(b,(v.x*.5+.5)*box.clientWidth-b.offsetWidth/2,(-v.y*.5+.5)*box.clientHeight,false);});
+    const dOn=c.b==="db"||hover==="db";
+    dbLit.emissiveIntensity+=((dOn?2:night?1.2:.25)-dbLit.emissiveIntensity)*.1;
     const lOn=c.b==="lib"||hover==="lib";
     libLit.emissiveIntensity+=((lOn?1.8:night?1.1:.15)-libLit.emissiveIntensity)*.1;
     const gOn=c.b==="gym"||hover==="gym";
@@ -906,7 +1050,7 @@ function init3D(){
     const bOn=c.b==="bridge"||hover==="bridge";
     bridgeLit.emissiveIntensity+=((bOn?1.4:night?.9:.15)-bridgeLit.emissiveIntensity)*.1;
     if(gl){glow.position.set(gl.x,gl.y+gl.h*.6,gl.g.position.z+gl.d/2+1.2);glow.intensity+=((night?1.4:.6)-glow.intensity)*.1;}else glow.intensity*=.9;
-    if(!reduce) stepWalkers(dt);
+    if(!reduce){ stepWalkers(dt); tick.forEach(f=>f(dt,now)); }
     renderer.render(scene,cam);
   }
   requestAnimationFrame(frame);

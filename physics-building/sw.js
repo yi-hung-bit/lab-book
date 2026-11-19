@@ -1,5 +1,5 @@
 // 物理大樓 離線快取。更新內容時把 VERSION 加 1，學生下次開啟就會拿到新版。
-const VERSION="v33";
+const VERSION="v34";
 const CACHE="physics-building-"+VERSION;
 const FILES=[
  "./",
@@ -24,6 +24,7 @@ const FILES=[
  "sims/b-doppler-shm.html",
  "sims/b-electron-slit.html",
  "sims/b-electroscope.html",
+ "sims/b-em-spectrum.html",
  "sims/b-franck-hertz.html",
  "sims/b-free-fall.html",
  "sims/b-friction.html",
