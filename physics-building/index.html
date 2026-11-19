@@ -377,6 +377,8 @@ const DB2_TITLE="大學申請入學 第二階段物理筆試";
 const DB2_BOOK="普通物理銜接講義";
 /* 學生版（GitHub Pages）：二階講義與藏經閣只能線上閱覽，不提供下載按鈕 */
 const DB2_VIEW_ONLY=/github\.io$/.test(location.hostname);
+/* 學生版先關閉競賽大樓複賽室 */
+const FY_CLOSED=DB2_VIEW_ONLY;
 const LIB_TITLE="2009 年國際物理奧林匹亞競賽 國家代表隊選訓教材";
 const GAMES=[
   {t:"物理快打：科學家格鬥賽",d:"選牛頓、愛因斯坦等科學家和電腦對戰，用萬有引力蘋果之類的物理必殺技一決勝負。",url:"https://yi-hung-bit.github.io/physics-fighter/",tag:"格鬥"},
@@ -412,7 +414,7 @@ function current(){
   if(h==="gym") return {b:"gym"};
   if(h==="lib") return {b:"lib"};
   if(h==="db") return {b:"db"};
-  if(h==="fy") return {b:"fy"};
+  if(h==="fy"&&!FY_CLOSED) return {b:"fy"};
   return {b:null};
 }
 const go=h=>{location.hash=h;};
@@ -447,7 +449,7 @@ function route(){
       ${elevator("t",f.id)}
       <div class="corridor">${f.rooms.map((r,i)=>`<button type="button" class="room" data-h="u${f.id}-${i+1}"><span class="plate"><span class="no">${roomNo(r)}</span><b>${esc(r.t)}</b></span><span class="door">${r.qs.length?`<span class="cnt"><b>${r.qs.length}</b> 題</span>`:`<span class="soon">籌備中</span>`}</span></button>`).join("")}</div>
       ${f.id===BRIDGE_LEVEL?`<p class="note">本層有空橋通往模擬大樓 3F（選修物理一・力學一）。</p>`:""}
-      <p class="note">各層題目是物奧初選；複賽歷屆試題與詳解在 <button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t);display:inline-flex;width:auto;padding:2px 10px;margin:0 2px"><b>複賽室</b></button>。</p>`;
+      ${FY_CLOSED?"":`<p class="note">各層題目是物奧初選；複賽歷屆試題與詳解在 <button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t);display:inline-flex;width:auto;padding:2px 10px;margin:0 2px"><b>複賽室</b></button>。</p>`}`;
   }else if(c.b==="s"){
     const f=sFloor(c.id);
     p.style.setProperty("--fc",`var(${f.color})`);
@@ -502,7 +504,7 @@ function route(){
     p.style.setProperty("--fc","var(--plate)");
     p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
       <div class="dir">
-        <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button></section>
+        <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button>`}</section>
         <section><h3>物理藏經閣 <small>選訓教材 ${LIBRARY.length} 冊</small></h3><button type="button" class="dir-row" data-h="lib" style="--fc:var(--lib)"><span class="n">經</span><span><b>物理藏經閣</b><small>${esc(LIBRARY.map(v=>v.vol+" "+v.theme).join("・"))}</small></span></button></section>
         <section><h3>二階資料庫 <small>申請入學二階筆試</small></h3><button type="button" class="dir-row" data-h="db" style="--fc:var(--db)"><span class="n">二</span><span><b>二階資料庫</b><small>${esc(DB2_BOOK)}・依章閱覽與下載</small></span></button></section>
         <section><h3>休閒中心 <small>${GAMES.length} 款遊戲</small></h3><button type="button" class="dir-row" data-h="gym" style="--fc:var(--gym)"><span class="n">玩</span><span><b>休閒中心</b><small>${esc(GAMES.map(g=>g.t).join("・"))}</small></span></button></section>
