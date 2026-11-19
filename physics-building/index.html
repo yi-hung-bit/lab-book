@@ -375,6 +375,8 @@ const OLY2=[{"y":1994,"files":[{"k":"q","label":"題目","pdf":"fy-1994-q.pdf","
 const DB2=[{"no": "全", "t": "普通物理銜接講義（全本）", "g": "全本", "pdf": "ge-full.pdf", "pages": 310}, {"no": "前", "t": "封面・給讀者・目錄", "g": "導讀", "pdf": "ge-front.pdf", "pages": 11}, {"no": "0", "t": "導讀與數學工具", "g": "導讀", "pdf": "ge-00.pdf", "pages": 9}, {"no": "1", "t": "運動學", "g": "力學", "pdf": "ge-01.pdf", "pages": 13}, {"no": "2", "t": "靜力平衡", "g": "力學", "pdf": "ge-02.pdf", "pages": 13}, {"no": "3", "t": "牛頓運動定律", "g": "力學", "pdf": "ge-03.pdf", "pages": 16}, {"no": "4", "t": "功與能", "g": "力學", "pdf": "ge-04.pdf", "pages": 18}, {"no": "5", "t": "行星運動與萬有引力", "g": "力學", "pdf": "ge-05.pdf", "pages": 13}, {"no": "6", "t": "碰撞", "g": "力學", "pdf": "ge-06.pdf", "pages": 13}, {"no": "7", "t": "轉動", "g": "力學", "pdf": "ge-07.pdf", "pages": 19}, {"no": "8", "t": "流體力學", "g": "流體與熱學", "pdf": "ge-08.pdf", "pages": 18}, {"no": "9", "t": "熱力學", "g": "流體與熱學", "pdf": "ge-09.pdf", "pages": 22}, {"no": "10", "t": "振動與聲波", "g": "波動與光學", "pdf": "ge-10.pdf", "pages": 16}, {"no": "11", "t": "幾何光學", "g": "波動與光學", "pdf": "ge-11.pdf", "pages": 18}, {"no": "12", "t": "物理光學", "g": "波動與光學", "pdf": "ge-12.pdf", "pages": 20}, {"no": "13", "t": "靜電學", "g": "電磁學", "pdf": "ge-13.pdf", "pages": 16}, {"no": "14", "t": "電路", "g": "電磁學", "pdf": "ge-14.pdf", "pages": 22}, {"no": "15", "t": "磁場", "g": "電磁學", "pdf": "ge-15.pdf", "pages": 13}, {"no": "16", "t": "電磁感應", "g": "電磁學", "pdf": "ge-16.pdf", "pages": 13}, {"no": "17", "t": "近代物理", "g": "近代物理", "pdf": "ge-17.pdf", "pages": 15}, {"no": "A", "t": "模擬試題", "g": "附錄", "pdf": "ge-A.pdf", "pages": 4}, {"no": "B", "t": "歷屆題號與章節對照", "g": "附錄", "pdf": "ge-B.pdf", "pages": 2}, {"no": "C", "t": "常數與公式速查", "g": "附錄", "pdf": "ge-C.pdf", "pages": 3}, {"no": "D", "t": "近年試題速查（111、113、114年）", "g": "附錄", "pdf": "ge-D.pdf", "pages": 3}];
 const DB2_TITLE="大學申請入學 第二階段物理筆試";
 const DB2_BOOK="普通物理銜接講義";
+/* 學生版（GitHub Pages）：二階講義只能線上閱覽，不提供下載按鈕 */
+const DB2_VIEW_ONLY=/github\.io$/.test(location.hostname);
 const LIB_TITLE="2009 年國際物理奧林匹亞競賽 國家代表隊選訓教材";
 const GAMES=[
   {t:"物理快打：科學家格鬥賽",d:"選牛頓、愛因斯坦等科學家和電腦對戰，用萬有引力蘋果之類的物理必殺技一決勝負。",url:"https://yi-hung-bit.github.io/physics-fighter/",tag:"格鬥"},
@@ -482,8 +484,8 @@ function route(){
     const nch=DB2.filter(d=>/^\d+$/.test(d.no)).length;
     p.innerHTML=`<div class="panel-head"><div class="badge">二</div><div><div class="bld">院區右前方</div><h2>二階資料庫</h2><p>${esc(DB2_TITLE)}・${esc(DB2_BOOK)}・${nch} 章</p></div></div>
       <div class="dbyears">${groups.map(g=>`<p class="dbdec">${esc(g.g)}</p>`+g.rows.map(d=>{const fi=DB2.indexOf(d);
-        return `<div class="dbrow"><span class="yy">${esc(d.no)}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(d.pdf)}"><em>${esc(d.t)} <small>${d.pages} 頁</small></em><button type="button" class="pv" data-i="${fi}">閱覽</button><button type="button" class="pd" data-i="${fi}">下載</button></span></div></div>`;}).join("")).join("")}</div>
-      <p class="note">以台大電機系申請入學第二階段物理筆試為目標的銜接講義，依章拆開；閱覽會在這裡直接翻頁看，下載會存成 PDF 檔。之後會再依主題整理歷屆試題。</p>`;
+        return `<div class="dbrow"><span class="yy">${esc(d.no)}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(d.pdf)}"><em>${esc(d.t)} <small>${d.pages} 頁</small></em><button type="button" class="pv" data-i="${fi}">閱覽</button>${DB2_VIEW_ONLY?"":`<button type="button" class="pd" data-i="${fi}">下載</button>`}</span></div></div>`;}).join("")).join("")}</div>
+      <p class="note">以台大電機系申請入學第二階段物理筆試為目標的銜接講義，依章拆開；${DB2_VIEW_ONLY?"點「閱覽」在這裡直接翻頁看。":"閱覽會在這裡直接翻頁看，下載會存成 PDF 檔。"}之後會再依主題整理歷屆試題。</p>`;
     p.querySelectorAll(".dbfile .pv").forEach(b=>b.onclick=()=>openPdf(dbFile(b)));
     p.querySelectorAll(".dbfile .pd").forEach(b=>b.onclick=()=>downloadPdf(dbFile(b),b));
     p.querySelectorAll(".dbfile").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
@@ -531,6 +533,7 @@ async function openPdf(it){
   const body=$("#pvBody"); body.innerHTML=`<p class="pvmsg">載入中…</p>`; body.scrollTop=0;
   pv.hidden=false; document.documentElement.classList.add("in-class"); $("#pvClose").focus();
   $("#pvDl").onclick=()=>downloadPdf(it,$("#pvDl"));
+  $("#pvDl").hidden=DB2_VIEW_ONLY&&it.url.startsWith("db2/ge-");
   try{
     const lib=await loadPdfJs();
     const doc=await lib.getDocument({url:it.url}).promise; if(pv.hidden) return; pvDoc=doc;
