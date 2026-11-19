@@ -14,4 +14,5 @@
 ## 內容
 - `index.html`：大樓主頁；`sims/`：模擬
 - `q/`：競賽大樓的物奧初選題庫截圖（題目與詳解，檔名 年份-題號-頁序.jpg）
+- `library/`：藏經閣的講義 PDF（公開下載）；二階資料庫的 PDF 不放在這裡
 - `vendor/`：three.js、React、Chart.js 本地副本（離線可用）
