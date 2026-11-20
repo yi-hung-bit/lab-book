@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光的折射與司乃耳定律</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--ray:#ff9f43;--x1:#ff5c8a;--x2:#84cc16}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(67,214,255,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:74ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono","Noto Sans TC",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;touch-action:none}
+canvas{display:block;width:100%}
+#main{height:440px;cursor:crosshair}
+#depth{height:300px}
+@media(max-width:560px){#main{height:360px}#depth{height:260px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button.on{border-color:var(--cyan);color:var(--cyan)}
+select{font-family:inherit;font-size:13.5px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+#sA{background:linear-gradient(90deg,#7a4b1a,var(--ray))}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pair label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
+.chk{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted);margin-top:10px}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.read b.x1{color:var(--x1)} .read b.x2{color:var(--x2)}
+@media(max-width:400px){.read{grid-template-columns:repeat(2,1fr)}}
+.state{margin-top:12px;padding:10px 14px;border-radius:11px;font-weight:700;font-size:14.5px;text-align:center;border:1px solid var(--line)}
+.state.to{background:rgba(67,214,255,.1);color:var(--cyan);border-color:rgba(67,214,255,.4)}
+.state.away{background:rgba(255,159,67,.1);color:var(--ray);border-color:rgba(255,159,67,.4)}
+.state.tir{background:rgba(255,92,138,.1);color:var(--x1);border-color:rgba(255,92,138,.4)}
+.state.st{background:rgba(132,204,22,.1);color:var(--x2);border-color:rgba(132,204,22,.4)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.tbl{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-family:"JetBrains Mono","Noto Sans TC",monospace}
+th,td{border:1px solid var(--line);padding:5px 6px;text-align:center;white-space:nowrap}
+th{color:var(--muted);font-weight:500;background:#0a0f1a}
+td.k{color:var(--acc);font-weight:700}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">4-4 · Refraction &amp; Snell's Law</div>
+  <h1>光的折射與司乃耳定律</h1>
+  <p class="lede">光斜斜地從一種介質射進另一種介質，在界面上一部分反射、一部分折射。以入射點 O 為圓心畫半徑 R = 10 cm 的輔助圓，入射線、折射線和圓的交點到法線的距離 x₁、x₂，不管入射角多大，比值 x₁ / x₂ 都是定值，這就是司乃耳定律；光從真空射入介質時，這個定值就是介質的折射率 n = c / v。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">輔助圓與光線（圖 4-15）</span><span class="n">在上半部拖曳，改變入射角</span></div>
+      <div class="box"><canvas id="main" aria-label="入射光、反射光與折射光，以及半徑 10 cm 的輔助圓"></canvas></div>
+      <div class="legend"><span><i style="background:var(--ray)"></i>入射線、折射線</span><span><i style="background:#8a6a3a"></i>部分反射</span><span><i style="background:var(--x1)"></i>x₁</span><span><i style="background:var(--x2)"></i>x₂</span><span><i style="background:#cfe8ff"></i>波前（間距 = 波長）</span></div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">介質與入射角</span><span class="n">R = 10 cm</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="pair">
+          <div><label for="m1">上方（入射）介質 n₁</label><select id="m1"></select></div>
+          <div><label for="m2">下方（折射）介質 n₂</label><select id="m2"></select></div>
+        </div>
+        <div class="ctl" id="c1" hidden><div class="r"><label for="n1">自訂 n₁</label><span id="on1"></span></div><input type="range" id="n1" min="1" max="2.5" step="0.01" value="1.2"></div>
+        <div class="ctl" id="c2" hidden><div class="r"><label for="n2">自訂 n₂</label><span id="on2"></span></div><input type="range" id="n2" min="1" max="2.5" step="0.01" value="1.6"></div>
+        <div class="seg" style="margin-top:10px"><button id="swap">⇅ 上下介質對調</button><button id="rec" class="primary">＋ 記錄這一筆</button></div>
+        <div class="ctl"><div class="r"><label for="sA">入射角 θ₁</label><span id="oA"></span></div><input type="range" id="sA" min="0" max="89" step="0.1" value="45"></div>
+        <label class="chk"><input type="checkbox" id="wave" checked> 顯示波前（同頻率，光速變慢則波長變短）</label>
+        <div class="state" id="state"></div>
+        <div class="read">
+          <div><small>折射角 θ₂</small><b id="r2"></b></div>
+          <div><small>x₁</small><b class="x1" id="rx1"></b></div>
+          <div><small>x₂</small><b class="x2" id="rx2"></b></div>
+          <div><small>x₁ / x₂</small><b id="rr"></b></div>
+          <div><small>n₂ / n₁</small><b id="rn"></b></div>
+          <div><small>v₁ / v₂</small><b id="rvv"></b></div>
+          <div><small>v₁ = c / n₁</small><b id="rv1"></b></div>
+          <div><small>v₂ = c / n₂</small><b id="rv2"></b></div>
+          <div><small>λ₂ / λ₁</small><b id="rl"></b></div>
+        </div>
+        <div class="note" id="see"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">我的測量表（仿表 4-2）</span><span class="n" id="tblNote"></span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button id="t42">載入表 4-2：真空 → 水</button><button id="clr">清除</button></div>
+        <div class="tbl"><table><thead><tr><th>介質</th><th>θ₁</th><th>θ₂</th><th>x₁ (cm)</th><th>x₂ (cm)</th><th>x₁/x₂</th></tr></thead><tbody id="tb"></tbody></table></div>
+        <div class="note">換幾個入射角記錄看看：θ₁ 變了，x₁、x₂ 都跟著變，但同一組介質的 <b>x₁ / x₂ 不變</b>。換一組介質，定值就不同。光從真空射入時，這個定值就叫做該介質的折射率 n。</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">折射率參考值（知識延長線）</span><span class="n">黃光</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="tbl"><table><thead><tr><th>介質</th><th>n</th><th>光速 v (×10⁸ m/s)</th></tr></thead><tbody id="tn"></tbody></table></div>
+        <div class="note">n = c / v，所以 n 越大，光在其中越慢。從 n₁ 進入 n₂ 時 <b>n₁x₁ = n₂x₂</b>、x₁/x₂ = v₁/v₂ = λ₁/λ₂：頻率不變，光變慢，波長就跟著變短。</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">範例 4-8 司乃耳定律</span><span class="n">空氣 → 玻璃，a = 6 cm、b = 4 cm</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button id="e48">把上圖設成範例 4-8</button><button id="e48b">θ₁ 減小到 a = 3 cm</button></div>
+        <div class="qq"><p>(1) 玻璃對空氣的折射率？(2) θ₁ 減小時 θ₂ 怎麼變？(3) a = 3 cm 時 b = ？</p><div class="seg"><button data-a="a48">看解答</button></div>
+          <div class="ans" id="a48" hidden>(1) n = a / b = 6 / 4 = <b>1.50</b>。(2) θ₁ 減小，θ₂ <b>也減小</b>。(3) a / b = a′ / b′ ⇒ 6 / 4 = 3 / b′ ⇒ b′ = <b>2 cm</b>。按上面兩個按鈕，對照圖中的 x₁、x₂ 讀數。</div></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">範例 4-9 潛水員的光</span><span class="n">由水中以 45° 射入甲、乙、丙</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button data-m="0">水 → 甲（與水面夾 60°）</button><button data-m="1">水 → 乙（45°）</button><button data-m="2">水 → 丙（30°）</button></div>
+        <div class="qq"><p>(1) 射入甲時折射角幾度？(2) 光在甲、乙、丙中的速率快慢順序？</p><div class="seg"><button data-a="a49">看解答</button></div>
+          <div class="ans" id="a49" hidden>(1) 折射角是折射線和<b>法線</b>的夾角：90° − 60° = <b>30°</b>（比 45° 小，偏向法線）。(2) 甲偏向法線 ⇒ 甲比水慢；乙不偏折 ⇒ 和水一樣快；丙偏離法線 ⇒ 比水快。所以 <b>丙 ＞ 乙 ＞ 甲</b>。用 n₁x₁ = n₂x₂ 估算：甲 n ≈ 1.88、乙 n = 1.33、丙 n ≈ 1.09。</div></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <div class="head"><span class="t">折射產生的視覺偏差（圖 4-16）</span><span class="n">從上往下看，水中的杯子比較淺</span></div>
+    <div class="grid" style="margin-top:0;grid-template-columns:1.35fr 1fr">
+      <div class="box" style="margin-top:6px"><canvas id="depth" aria-label="水中物體看起來的位置"></canvas></div>
+      <div class="pad" style="padding-top:6px">
+        <div class="ctl" style="margin-top:0"><div class="r"><label for="dl">液體</label></div><select id="dl"></select></div>
+        <div class="ctl"><div class="r"><label for="dd">實際深度 d</label><span id="odd"></span></div><input type="range" id="dd" min="10" max="60" step="1" value="40"></div>
+        <div class="ctl"><div class="r"><label for="da">眼睛偏離鉛直的角度</label><span id="oda"></span></div><input type="range" id="da" min="0" max="70" step="1" value="10"></div>
+        <div class="read">
+          <div><small>看起來的深度</small><b id="rda"></b></div>
+          <div><small>看起來 / 實際</small><b id="rdr"></b></div>
+          <div><small>正上方看 d / n</small><b id="rdn"></b></div>
+        </div>
+        <div class="note">杯子發出的光到水面時<b>偏離法線</b>，眼睛順著折射光往回看，以為光從比較淺的地方直線射來。從正上方看，深度約只剩 d / n（水中約 3/4）；斜著看會更淺、還往眼睛這側移。</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">想一想</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="qq"><p>光垂直射入水中（θ₁ = 0°）會偏折嗎？光速會變嗎？</p><div class="seg"><button id="t0">試試看</button><button data-a="q1">看說明</button></div><div class="ans" id="q1" hidden>不偏折（x₁ = x₂ = 0，θ₂ = 0°），但光進入水中後速率仍然變成 c / 1.33，<b>波前間距變短</b>。折射的根本原因是光速改變。</div></div>
+        <div class="qq"><p>光從玻璃射向空氣，入射角越來越大，會發生什麼事？</p><div class="seg"><button id="t1">試試看</button><button data-a="q2">看說明</button></div><div class="ans" id="q2" hidden>偏離法線，θ₂ 比 θ₁ 大。θ₁ 大到某個角度（玻璃約 41.8°）時 x₂ 就要等於 R，再大就<b>沒有折射光</b>，光全部反射回玻璃，這叫全反射，選修物理三會詳細學。</div></div>
+        <div class="qq"><p>潛水員在水中抬頭看岸上的人，那個人看起來比實際高還是矮？</p><div class="seg"><button data-a="q3">看說明</button></div><div class="ans" id="q3" hidden>光由空氣（光疏）進入水（光密）時偏向法線，潛水員順著光線往回看，覺得光從更高的地方來，所以岸上的人看起來<b>比實際高</b>。</div></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">教學提示</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="note" style="margin-top:0">
+          1. 先讓學生在同一組介質下記錄 3～4 個入射角，自己發現 x₁ / x₂ 是定值，再命名為折射率。<br>
+          2. 基礎物理用輔助圓的 x₁、x₂ 描述司乃耳定律；x₁ = R sin θ₁ 留待選修物理三再用三角函數表示。<br>
+          3. 判斷偏折口訣：<b>光疏 → 光密偏向法線，光密 → 光疏偏離法線</b>；光密指 n 大、光速慢，不是質量密度大。<br>
+          4. 用惠更斯子波說明波前為什麼轉折，可以搭配 229 教室「惠更斯原理與折射定律」。
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer><b>說明：</b>折射率取課本知識延長線的數值（20 ℃、黃光），真空 1、空氣 1.0003。圖中半徑 R 代表 10 cm；部分反射只畫方向、不代表亮度。光速 c = 3.00 × 10⁸ m/s。</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const C=3.00;
+const MEDIA=[["真空",1],["空氣",1.000293],["水",1.33],["乙醇",1.36],["甘油",1.47],["冰",1.31],["玻璃",1.50],["重玻璃",1.80],["鑽石",2.42],["自訂",null]];
+const S={i1:1,i2:2,n1c:1.2,n2c:1.6,th:45,rows:[],t:0};
+const fmt=(x,d=2)=>Number.isFinite(x)?x.toFixed(d):"—";
+const deg=Math.PI/180;
+["m1","m2"].forEach(id=>{$("#"+id).innerHTML=MEDIA.map(([n,v],i)=>`<option value="${i}">${n}${v?"（"+(v<1.001&&v>1?"1.0003":v.toFixed(2))+"）":""}</option>`).join("");});
+$("#tn").innerHTML=MEDIA.filter(m=>m[1]).map(([n,v])=>`<tr><td>${n}</td><td>${v===1.000293?"1.000 293":v.toFixed(2)}</td><td>${(C/v).toFixed(v===1.000293?4:2)}</td></tr>`).join("");
+$("#dl").innerHTML=[2,3,4].map(i=>`<option value="${i}">${MEDIA[i][0]}（n = ${MEDIA[i][1]}）</option>`).join("");
+
+function n1(){return MEDIA[S.i1][1]??S.n1c} function n2(){return MEDIA[S.i2][1]??S.n2c}
+function nm(i,n){return MEDIA[i][1]?MEDIA[i][0]:"自訂 "+n.toFixed(2)}
+function calc(){
+  const a=n1(),b=n2(),x1=10*Math.sin(S.th*deg), s2=a*Math.sin(S.th*deg)/b;
+  const tir=s2>1, th2=tir?NaN:Math.asin(s2)/deg, x2=tir?NaN:10*s2;
+  return {a,b,x1,x2,th2,tir};
+}
+function syncUI(){
+  $("#m1").value=S.i1; $("#m2").value=S.i2; $("#sA").value=S.th;
+  $("#c1").hidden=MEDIA[S.i1][1]!==null; $("#c2").hidden=MEDIA[S.i2][1]!==null;
+  $("#n1").value=S.n1c; $("#n2").value=S.n2c; $("#on1").textContent=S.n1c.toFixed(2); $("#on2").textContent=S.n2c.toFixed(2);
+  const r=calc();
+  $("#oA").textContent=S.th.toFixed(1)+"°";
+  $("#r2").textContent=r.tir?"無折射":fmt(r.th2,1)+"°";
+  $("#rx1").textContent=fmt(r.x1)+" cm"; $("#rx2").textContent=r.tir?"＞R":fmt(r.x2)+" cm";
+  $("#rr").textContent=r.tir||r.x2<1e-9?(S.th<1e-9?"0/0":"—"):fmt(r.x1/r.x2,3);
+  $("#rn").textContent=fmt(r.b/r.a,3); $("#rvv").textContent=fmt(r.b/r.a,3); $("#rl").textContent=fmt(r.a/r.b,3);
+  $("#rv1").textContent=(C/r.a).toFixed(r.a<1.001?4:2)+"×10⁸"; $("#rv2").textContent=(C/r.b).toFixed(r.b<1.001?4:2)+"×10⁸";
+  const st=$("#state"), N1=nm(S.i1,r.a), N2=nm(S.i2,r.b);
+  if(r.tir){st.className="state tir";st.textContent="沒有折射光：x₂ 會比 R 還大，光全部反射回來（全反射）";}
+  else if(Math.abs(r.a-r.b)<1e-6){st.className="state st";st.textContent="兩介質折射率相同：光速不變，不偏折";}
+  else if(S.th<0.05){st.className="state st";st.textContent="垂直入射：不偏折，但光速與波長改變";}
+  else if(r.b>r.a){st.className="state to";st.textContent=`${N1} → ${N2}：光疏 → 光密，偏向法線（θ₂ ＜ θ₁）`;}
+  else {st.className="state away";st.textContent=`${N1} → ${N2}：光密 → 光疏，偏離法線（θ₂ ＞ θ₁）`;}
+  let msg;
+  if(r.tir){const c=Math.asin(r.b/r.a)/deg; msg=`光從 n 大的介質射向 n 小的介質，θ₁ 超過約 <b>${c.toFixed(1)}°</b> 時，依 n₁x₁ = n₂x₂ 算出的 x₂ 會大於 R = 10 cm，不可能存在，所以沒有折射光。`;}
+  else if(S.th<0.05) msg=`θ₁ = 0 時 x₁ = x₂ = 0，看不出比值；但打開波前可以看到：進入 ${N2} 後波長變成 ${fmt(r.a/r.b,3)} 倍。`;
+  else msg=`x₁ / x₂ = ${fmt(r.x1,2)} / ${fmt(r.x2,2)} = <b>${fmt(r.x1/r.x2,3)}</b>，正好等於 n₂ / n₁ = ${fmt(r.b,3)} / ${fmt(r.a,3)}。光在 ${N1} 中每秒走 ${(C/r.a).toFixed(2)}×10⁸ m，在 ${N2} 中 ${(C/r.b).toFixed(2)}×10⁸ m${r.b>r.a?"，變慢":r.b<r.a?"，變快":""}。`;
+  $("#see").innerHTML=msg;
+}
+
+/* ---------- main canvas ---------- */
+const cv=$("#main"), cx=cv.getContext("2d");
+function fit(c){const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return [r.width,r.height];}
+let W=0,H=0;
+function mediumColor(n){const k=Math.min(1,(n-1)/1.5);return `rgba(${Math.round(40+20*k)},${Math.round(110+60*k)},${Math.round(170+60*k)},${0.06+0.42*k})`;}
+function arrow(g,x0,y0,x1,y1,col,w){g.strokeStyle=col;g.fillStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();
+  const a=Math.atan2(y1-y0,x1-x0),mx=(x0+x1)/2,my=(y0+y1)/2,h=9;g.beginPath();g.moveTo(mx+h*Math.cos(a),my+h*Math.sin(a));g.lineTo(mx-h*Math.cos(a-.45),my-h*Math.sin(a-.45));g.lineTo(mx-h*Math.cos(a+.45),my-h*Math.sin(a+.45));g.closePath();g.fill();}
+function draw(){
+  if(!W){[W,H]=fit(cv);}
+  const g=cx, r=calc(), O={x:W/2,y:H/2}, R=Math.min(W,H)*0.36, L=Math.hypot(W,H);
+  g.clearRect(0,0,W,H);
+  g.fillStyle=mediumColor(r.a); g.fillRect(0,0,W,O.y);
+  g.fillStyle=mediumColor(r.b); g.fillRect(0,O.y,W,H-O.y);
+  g.fillStyle="#9fb3cc"; g.font="13px 'Noto Sans TC',sans-serif"; g.textAlign="left";
+  g.fillText(`${nm(S.i1,r.a)}  n₁ = ${r.a<1.001&&r.a>1?"1.0003":r.a.toFixed(2)}`,10,20);
+  g.fillText(`${nm(S.i2,r.b)}  n₂ = ${r.b<1.001&&r.b>1?"1.0003":r.b.toFixed(2)}`,10,H-12);
+  g.strokeStyle="#4a5a78"; g.lineWidth=1; g.beginPath(); g.moveTo(0,O.y); g.lineTo(W,O.y); g.stroke();
+  g.setLineDash([5,5]); g.beginPath(); g.moveTo(O.x,8); g.lineTo(O.x,H-8); g.stroke(); g.setLineDash([]);
+  g.fillStyle="#8492aa"; g.fillText("法線",O.x+6,16);
+  g.strokeStyle="rgba(232,237,246,.35)"; g.beginPath(); g.arc(O.x,O.y,R,0,Math.PI*2); g.stroke();
+  const t1=S.th*deg, s1=Math.sin(t1), c1=Math.cos(t1);
+  const A={x:O.x-L*s1,y:O.y-L*c1};
+  // reflected (partial)
+  g.globalAlpha=r.tir?1:.45; arrow(g,O.x,O.y,O.x+L*s1,O.y-L*c1,r.tir?"#ff9f43":"#8a6a3a",r.tir?3:2); g.globalAlpha=1;
+  arrow(g,A.x,A.y,O.x,O.y,"#ff9f43",3);
+  let t2=0; if(!r.tir){t2=r.th2*deg; arrow(g,O.x,O.y,O.x+L*Math.sin(t2),O.y+L*Math.cos(t2),"#ff9f43",3);}
+  // wavefronts
+  if($("#wave").checked){
+    const lam0=34, ph=(S.t*0.6)%1;
+    const tick=(ux,uy,u,lam,col)=>{g.strokeStyle=col;g.lineWidth=2;for(let m=-60;m<60;m++){const s=(m+ph)*lam; if(Math.abs(s)>L) continue; if((u<0&&s>0)||(u>0&&s<0)) continue;
+      const px=O.x+ux*s, py=O.y+uy*s, nx=-uy, ny=ux; g.beginPath(); g.moveTo(px-nx*9,py-ny*9); g.lineTo(px+nx*9,py+ny*9); g.stroke();}};
+    tick(s1,c1,-1,lam0/r.a,"rgba(207,232,255,.75)");
+    if(!r.tir) tick(Math.sin(t2),Math.cos(t2),1,lam0/r.b,"rgba(207,232,255,.75)");
+    else tick(s1,-c1,1,lam0/r.a,"rgba(207,232,255,.55)");
+  }
+  // x1 x2
+  const p1={x:O.x-R*s1,y:O.y-R*c1};
+  g.strokeStyle="#ff5c8a"; g.lineWidth=3; g.beginPath(); g.moveTo(p1.x,p1.y); g.lineTo(O.x,p1.y); g.stroke();
+  g.fillStyle="#ff5c8a"; g.font="bold 14px 'JetBrains Mono',monospace"; g.textAlign="center";
+  if(r.x1>0.3) g.fillText("x₁",(p1.x+O.x)/2,p1.y-7);
+  g.beginPath(); g.arc(p1.x,p1.y,4,0,7); g.fill();
+  if(!r.tir){const p2={x:O.x+R*Math.sin(t2),y:O.y+R*Math.cos(t2)};
+    g.strokeStyle="#84cc16"; g.beginPath(); g.moveTo(p2.x,p2.y); g.lineTo(O.x,p2.y); g.stroke();
+    g.fillStyle="#84cc16"; if(r.x2>0.3) g.fillText("x₂",(p2.x+O.x)/2,p2.y+18); g.beginPath(); g.arc(p2.x,p2.y,4,0,7); g.fill();
+    if(r.th2>1){g.strokeStyle="#cfe8ff";g.lineWidth=1.2;g.beginPath();g.arc(O.x,O.y,30,Math.PI/2-t2,Math.PI/2);g.stroke();g.fillStyle="#cfe8ff";g.font="13px 'JetBrains Mono',monospace";g.fillText("θ₂",O.x+16,O.y+48);}
+  }
+  if(S.th>1){g.strokeStyle="#cfe8ff";g.lineWidth=1.2;g.beginPath();g.arc(O.x,O.y,30,-Math.PI/2-t1,-Math.PI/2);g.stroke();g.fillStyle="#cfe8ff";g.font="13px 'JetBrains Mono',monospace";g.fillText("θ₁",O.x-16,O.y-38);}
+  g.fillStyle="#e8edf6"; g.beginPath(); g.arc(O.x,O.y,3.5,0,7); g.fill(); g.font="12px 'JetBrains Mono',monospace"; g.textAlign="left"; g.fillText("O",O.x+6,O.y+14);
+  g.textAlign="right"; g.fillStyle="#8492aa"; g.fillText("R = 10 cm",W-10,20);
+}
+function setFromPointer(e){const b=cv.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;
+  if(y>=b.height/2-2) return; const a=Math.atan2(Math.abs(b.width/2-x),b.height/2-y)/deg; S.th=Math.max(0,Math.min(89,Math.round(a*10)/10)); syncUI();}
+let dragging=false;
+cv.addEventListener("pointerdown",e=>{dragging=true;cv.setPointerCapture(e.pointerId);setFromPointer(e);});
+cv.addEventListener("pointermove",e=>{if(dragging)setFromPointer(e);});
+cv.addEventListener("pointerup",()=>dragging=false);
+
+/* ---------- table ---------- */
+function renderTable(){
+  $("#tb").innerHTML=S.rows.length?S.rows.map(w=>`<tr><td>${w.m}</td><td>${w.a.toFixed(1)}°</td><td>${w.tir?"—":w.b.toFixed(1)+"°"}</td><td>${w.x1.toFixed(2)}</td><td>${w.tir?"—":w.x2.toFixed(2)}</td><td class="k">${w.tir||w.x2<1e-9?"—":(w.x1/w.x2).toFixed(2)}</td></tr>`).join(""):`<tr><td colspan="6" style="color:#5b6880">按「記錄這一筆」把目前的測量加進來</td></tr>`;
+  $("#tblNote").textContent=S.rows.length+" 筆";
+}
+function record(){const r=calc();S.rows.push({m:nm(S.i1,r.a)+"→"+nm(S.i2,r.b),a:S.th,b:r.th2,x1:r.x1,x2:r.x2,tir:r.tir});if(S.rows.length>12)S.rows.shift();renderTable();}
+$("#rec").onclick=record;
+$("#clr").onclick=()=>{S.rows=[];renderTable();};
+$("#t42").onclick=()=>{S.i1=0;S.i2=2;S.rows=[];[30,45,53,60].forEach(a=>{S.th=a;record();});syncUI();};
+
+/* ---------- controls ---------- */
+$("#m1").onchange=e=>{S.i1=+e.target.value;syncUI();};
+$("#m2").onchange=e=>{S.i2=+e.target.value;syncUI();};
+$("#n1").oninput=e=>{S.n1c=+e.target.value;syncUI();};
+$("#n2").oninput=e=>{S.n2c=+e.target.value;syncUI();};
+$("#sA").oninput=e=>{S.th=+e.target.value;syncUI();};
+$("#wave").onchange=syncUI;
+$("#swap").onclick=()=>{[S.i1,S.i2]=[S.i2,S.i1];[S.n1c,S.n2c]=[S.n2c,S.n1c];syncUI();};
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const el=$("#"+b.dataset.a);el.hidden=!el.hidden;});
+$("#e48").onclick=()=>{S.i1=1;S.i2=6;S.th=Math.round(Math.asin(0.6)/deg*10)/10;syncUI();};
+$("#e48b").onclick=()=>{S.i1=1;S.i2=6;S.th=Math.round(Math.asin(0.3)/deg*10)/10;syncUI();};
+const E49=[60,45,30];
+document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const ang=90-E49[+b.dataset.m];
+  S.i1=2;S.i2=MEDIA.length-1;S.n2c=Math.round(1.33*Math.sin(45*deg)/Math.sin(ang*deg)*100)/100;S.th=45;syncUI();});
+$("#t0").onclick=()=>{S.i1=1;S.i2=2;S.th=0;$("#wave").checked=true;syncUI();};
+$("#t1").onclick=()=>{S.i1=6;S.i2=1;S.th=35;syncUI();let k=0;const id=setInterval(()=>{S.th=Math.min(55,S.th+0.5);syncUI();if(++k>40)clearInterval(id);},60);};
+
+/* ---------- apparent depth ---------- */
+const dv=$("#depth"), dg=dv.getContext("2d"); let DW=0,DH=0;
+function apparent(d,n,al){ // al: viewing angle in air (rad); returns image {x,y} (y negative = below surface), exit x
+  const ray=a=>{const sw=Math.sin(a)/n, tw=Math.asin(sw), x=d*Math.tan(tw); return {x,dx:Math.sin(a),dy:Math.cos(a)};};
+  const e=0.002, a0=Math.max(al,1e-4), A=ray(a0), B=ray(a0+e);
+  // lines: P = (x, 0) - s*(dx, dy) (going back/down)
+  // A.x − s·A.dx = B.x − u·B.dx 、 s·A.dy = u·B.dy
+  const s=(B.x-A.x)/(A.dy*B.dx/B.dy-A.dx);
+  return {x:A.x-s*A.dx,y:-s*A.dy,ex:A.x};
+}
+function drawDepth(){
+  if(!DW){[DW,DH]=fit(dv);}
+  const g=dg, n=MEDIA[+$("#dl").value][1], d=+$("#dd").value, al=+$("#da").value*deg;
+  const img=apparent(d,n,al), sc=(DH-60)/70, sy=46, ox=DW*0.32;
+  g.clearRect(0,0,DW,DH);
+  g.fillStyle="rgba(67,160,230,.22)"; g.fillRect(0,sy,DW,DH-sy);
+  g.strokeStyle="#4a5a78"; g.beginPath(); g.moveTo(0,sy); g.lineTo(DW,sy); g.stroke();
+  g.fillStyle="#8492aa"; g.font="12px 'Noto Sans TC',sans-serif"; g.textAlign="left"; g.fillText("空氣",8,18); g.fillText(MEDIA[+$("#dl").value][0],8,sy+18);
+  const P=(x,y)=>({x:ox+x*sc,y:sy-y*sc});
+  const cup=(p,dash,col)=>{g.save();g.setLineDash(dash);g.strokeStyle=col;g.lineWidth=2;g.beginPath();g.moveTo(p.x-14,p.y-16);g.lineTo(p.x-11,p.y+6);g.lineTo(p.x+11,p.y+6);g.lineTo(p.x+14,p.y-16);g.stroke();g.beginPath();g.arc(p.x+17,p.y-5,6,-Math.PI/2,Math.PI/2);g.stroke();g.restore();};
+  const obj=P(0,-d); cup(obj,[],"#e8edf6"); g.fillStyle="#e8edf6"; g.beginPath(); g.arc(obj.x,obj.y,3,0,7); g.fill();
+  const im=P(img.x,img.y); cup(im,[4,3],"#ffd166"); g.fillStyle="#ffd166"; g.beginPath(); g.arc(im.x,im.y,3,0,7); g.fill();
+  const fan=[-0.025,0,0.025];
+  fan.forEach(k=>{const a=Math.max(0.0001,al+k), tw=Math.asin(Math.sin(a)/n), ex=d*Math.tan(tw), E=P(ex,0);
+    g.strokeStyle="#ff9f43"; g.lineWidth=1.6; g.beginPath(); g.moveTo(obj.x,obj.y); g.lineTo(E.x,E.y); const Lr=DW; g.lineTo(E.x+Math.sin(a)*Lr,E.y-Math.cos(a)*Lr); g.stroke();
+    g.setLineDash([4,4]); g.strokeStyle="rgba(255,209,102,.6)"; g.beginPath(); g.moveTo(E.x,E.y); g.lineTo(im.x,im.y); g.stroke(); g.setLineDash([]);});
+  // eye
+  const ea=al, ey=P(img.ex,0), eyeP={x:ey.x+Math.sin(ea)*(sy-14)/Math.max(Math.cos(ea),.3),y:14};
+  const ex=Math.min(DW-16,eyeP.x); g.fillStyle="#e8edf6"; g.beginPath(); g.ellipse(ex,22,12,6,0,0,7); g.fill(); g.fillStyle="#070a12"; g.beginPath(); g.arc(ex,22,3.5,0,7); g.fill();
+  // depth labels
+  g.strokeStyle="#5b6880"; g.lineWidth=1; g.beginPath(); g.moveTo(ox-34,sy); g.lineTo(ox-34,obj.y); g.stroke();
+  g.fillStyle="#cfe8ff"; g.textAlign="right"; g.font="12px 'JetBrains Mono',monospace"; g.fillText(`d = ${d} cm`,ox-38,(sy+obj.y)/2+4);
+  g.textAlign="left"; g.fillStyle="#ffd166"; g.fillText(`看起來 ${(-img.y).toFixed(1)} cm`,Math.min(im.x+26,DW-120),im.y-14);
+  $("#odd").textContent=d+" cm"; $("#oda").textContent=Math.round(al/deg)+"°";
+  $("#rda").textContent=(-img.y).toFixed(1)+" cm"; $("#rdr").textContent=(-img.y/d).toFixed(3); $("#rdn").textContent=(d/n).toFixed(1)+" cm";
+}
+["dl","dd","da"].forEach(id=>$("#"+id).addEventListener("input",drawDepth));
+$("#dl").addEventListener("change",drawDepth);
+addEventListener("resize",()=>{W=0;DW=0;draw();drawDepth();});
+
+let last=performance.now();
+function loop(now){S.t+=(now-last)/1000;last=now;draw();requestAnimationFrame(loop);}
+renderTable(); syncUI(); drawDepth(); requestAnimationFrame(loop);
+window.__test={calc,apparent,S,syncUI};
+</script>
+</body>
+</html>
