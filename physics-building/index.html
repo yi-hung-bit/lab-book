@@ -395,6 +395,8 @@ const GAMES=[
 ];
 /* 實驗大樓：歷屆物理學科能力競賽實驗題的虛擬實驗室（實驗培訓電子書，放在 GitHub Pages，新分頁開啟） */
 const LAB={t:"實驗培訓",d:"歷屆物理學科能力競賽實驗題的虛擬實驗室，整本電子書可以直接翻閱，各章的實驗室都能直接操作。",url:"https://yi-hung-bit.github.io/lab-book/#cover"};
+/* 實驗大樓：上傳的實驗培訓講義（PDF 放在 physics-building/；新增就加一筆 {no, t, g, pdf, pages}） */
+const LABFILES=[{"no":"1","t":"高二選修物理實驗培訓講義","g":"實驗培訓講義","pdf":"shiyan-peixun.pdf","pages":45}];
 const BRIDGE_LEVEL="3";
 
 const $=s=>document.querySelector(s);
@@ -501,10 +503,16 @@ function route(){
     p.querySelectorAll(".dbfile").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
   }else if(c.b==="lab"){
     p.style.setProperty("--fc","var(--lab)");
-    p.innerHTML=`<div class="panel-head"><div class="badge">實</div><div><div class="bld">院區右側・競賽大樓旁</div><h2>實驗大樓</h2><p>學科能力競賽 實驗題虛擬實驗室</p></div></div>
+    const lgroups=[]; LABFILES.forEach(d=>{let g=lgroups.find(x=>x.g===d.g); if(!g){g={g:d.g,rows:[]};lgroups.push(g);} g.rows.push(d);});
+    p.innerHTML=`<div class="panel-head"><div class="badge">實</div><div><div class="bld">院區右側・競賽大樓旁</div><h2>實驗大樓</h2><p>學科能力競賽 實驗題虛擬實驗室・講義 ${LABFILES.length} 份</p></div></div>
       <p class="body-text">${esc(LAB.d)}</p>
       <a class="go" href="${esc(LAB.url)}" target="_blank" rel="noopener">進入${esc(LAB.t)} ↗</a>
+      <div class="dbyears">${lgroups.map(g=>`<p class="dbdec">${esc(g.g)}</p>`+g.rows.map(d=>{const fi=LABFILES.indexOf(d);
+        return `<div class="dbrow"><span class="yy">${esc(d.no)}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(d.pdf)}"><em>${esc(d.t)} <small>${d.pages} 頁</small></em><button type="button" class="pv" data-i="${fi}">閱覽</button><button type="button" class="pd" data-i="${fi}">下載</button></span></div></div>`;}).join("")).join("")}</div>
       <p class="note">競賽大樓放理論，實驗大樓放實驗：同一場競賽的兩個部分。實驗室會在新分頁開啟，用完關掉分頁就回到研究院。</p>`;
+    p.querySelectorAll(".dbfile .pv").forEach(b=>b.onclick=()=>openPdf(labFile(b)));
+    p.querySelectorAll(".dbfile .pd").forEach(b=>b.onclick=()=>downloadPdf(labFile(b),b));
+    p.querySelectorAll(".dbfile").forEach(el=>fetch(el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
   }else if(c.b==="gym"){
     p.style.setProperty("--fc","var(--gym)");
     p.innerHTML=`<div class="panel-head"><div class="badge">玩</div><div><div class="bld">院區後方</div><h2>休閒中心</h2><p>下課來玩物理小遊戲・${GAMES.length} 款</p></div></div>
@@ -519,7 +527,7 @@ function route(){
     p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
       <div class="dir">
         <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button>`}</section>
-        <section><h3>實驗大樓 <small>競賽實驗題</small></h3><button type="button" class="dir-row" data-h="lab" style="--fc:var(--lab)"><span class="n">實</span><span><b>實驗大樓</b><small>${esc(LAB.t)}・歷屆學科能力競賽實驗題虛擬實驗室</small></span></button></section>
+        <section><h3>實驗大樓 <small>競賽實驗題</small></h3><button type="button" class="dir-row" data-h="lab" style="--fc:var(--lab)"><span class="n">實</span><span><b>實驗大樓</b><small>${esc(LAB.t)}・歷屆學科能力競賽實驗題虛擬實驗室・講義 ${LABFILES.length} 份</small></span></button></section>
         <section><h3>物理藏經閣 <small>選訓教材 ${LIBRARY.length} 冊</small></h3><button type="button" class="dir-row" data-h="lib" style="--fc:var(--lib)"><span class="n">經</span><span><b>物理藏經閣</b><small>${esc(LIBRARY.map(v=>v.vol+" "+v.theme).join("・"))}</small></span></button></section>
         <section><h3>二階資料庫 <small>申請入學二階筆試</small></h3><button type="button" class="dir-row" data-h="db" style="--fc:var(--db)"><span class="n">二</span><span><b>二階資料庫</b><small>${esc(DB2_BOOK)}・依章閱覽與下載</small></span></button></section>
         <section><h3>休閒中心 <small>${GAMES.length} 款遊戲</small></h3><button type="button" class="dir-row" data-h="gym" style="--fc:var(--gym)"><span class="n">玩</span><span><b>休閒中心</b><small>${esc(GAMES.map(g=>g.t).join("・"))}</small></span></button></section>
@@ -535,6 +543,7 @@ function route(){
 /* ---------- 藏經閣：PDF 閱覽與下載 ---------- */
 const fyFile=b=>{const d=OLY2.find(x=>x.y==b.dataset.y), f=d.files[b.dataset.f]; return {v:{vol:"複賽"},ch:{t:d.y+" 年"},f:{label:f.label,by:"物奧複賽"},url:"db2/"+f.pdf,name:`物奧複賽 ${d.y} ${f.label}.pdf`};};
 const dbFile=b=>{const d=DB2[b.dataset.i]; return {v:{vol:"二階"},ch:{t:/^\d+$/.test(d.no)?"第 "+d.no+" 章":d.no},f:{label:d.t,by:DB2_BOOK},url:"db2/"+d.pdf,name:`二階 ${DB2_BOOK} ${d.no} ${d.t}.pdf`};};
+const labFile=b=>{const d=LABFILES[b.dataset.i]; return {v:{vol:"實驗"},ch:{t:d.g},f:{label:d.t,by:"實驗培訓"},url:d.pdf,name:`${d.t}.pdf`};};
 const libFile=b=>{const v=LIBRARY[b.dataset.v], ch=v.chapters[b.dataset.c], f=ch.files[b.dataset.f]; return {v,ch,f,url:"library/"+f.pdf,name:`選訓教材 ${v.vol} ${ch.t}（${f.label}）.pdf`};};
 let pdfLib=null;
 function loadPdfJs(){
