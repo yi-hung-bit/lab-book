@@ -632,7 +632,7 @@ function init3D(){
   const hemi=new THREE.HemisphereLight(0xffffff,0x88907a,.75); scene.add(hemi);
   const sun=new THREE.DirectionalLight(0xffffff,.95); sun.position.set(14,26,18); sun.castShadow=true;
   sun.shadow.mapSize.set(2048,2048);
-  Object.assign(sun.shadow.camera,{left:-22,right:22,top:24,bottom:-8,near:1,far:100});
+  Object.assign(sun.shadow.camera,{left:-30,right:30,top:28,bottom:-12,near:1,far:100});
   scene.add(sun);
   const glow=new THREE.PointLight(0xffd27a,0,14); scene.add(glow);
 
@@ -652,7 +652,7 @@ function init3D(){
 
   /* ground */
   /* 科技園區基地：方整草坪＋外環道 */
-  const PW=54, PD=36, PZ=.6;
+  const PW=64, PD=44, PZ=.6;
   scene.add(mesh(B(PW+1.2,.5,PD+1.2),M.slab,0,-.35,PZ,false,true));
   scene.add(mesh(B(PW,.3,PD),M.lawn,0,-.15,PZ,false,true));
   scene.add(mesh(B(W+2.6,.06,D+2.6),M.pave,SX,.03,0,false,true));
@@ -807,14 +807,14 @@ function init3D(){
     p0:[0,D/2+1.4], pL:[-8,D/2+1.4], pR:[8,D/2+1.4], fL:[-8,wZ1], fR:[8,wZ1], gb:[0,wBZ],
     bL:[-wSR,wBZ], bR:[wSR,wBZ], bLL:[-wRX,wBZ], bRR:[wRX,wBZ], cp:[-16.4,wBZ], gy:[18.7,wBZ],
     cpD:[-16.4,-6.4], gyD:[18.7,-6.9], lbR:[wSR,2.8], lab:[18.8,2.8],
-    sL:[-wSR,11.2], sR:[wSR,10.7], lib:[-17.6,11.2], db:[17.6,10.7],
+    sL:[-wSR,15.4], sR:[wSR,15.2], lib:[-17.6,15.4], db:[17.6,15.2], eR:[wSR,5.6], eRR:[wRX,5.6], eM:[17.6,5.6],
     rL:[-wSR,wZ1], rR:[wSR,wZ1], cLF:[-wRX,wZ1], cRF:[wRX,wZ1], cLB:[-wRX,wZ0], cRB:[wRX,wZ0], mB:[0,wZ0]
   };
   const EDGES=[["p0","pL"],["p0","pR"],["pL","fL"],["pR","fR"],["p0","gb"],
     ["gb","bL"],["gb","bR"],["bL","cp"],["cp","bLL"],["bR","gy"],["gy","bRR"],["cp","cpD"],["gy","gyD"],
-    ["bL","sL"],["sL","rL"],["bR","lbR"],["lbR","sR"],["lbR","lab"],["sR","rR"],["sL","lib"],["sR","db"],
+    ["bL","sL"],["sL","rL"],["bR","lbR"],["lbR","lab"],["sR","rR"],["sL","lib"],["sR","db"],
     ["fL","fR"],["fL","rL"],["rL","cLF"],["fR","rR"],["rR","cRF"],
-    ["cLF","bLL"],["bLL","cLB"],["cRF","bRR"],["bRR","cRB"],["cLB","mB"],["mB","cRB"]];
+    ["cLF","bLL"],["bLL","cLB"],["cRF","eRR"],["eRR","bRR"],["lbR","eR"],["eR","sR"],["eR","eM"],["eM","eRR"],["bRR","cRB"],["cLB","mB"],["mB","cRB"]];
   const NB={}; Object.keys(NODES).forEach(k=>NB[k]=[]);
   const nd=(a,b)=>Math.hypot(NODES[a][0]-NODES[b][0],NODES[a][1]-NODES[b][1]);
   EDGES.forEach(([a,b])=>{NB[a].push(b);NB[b].push(a);});
@@ -890,7 +890,7 @@ function init3D(){
     const rim=mesh(new THREE.TorusGeometry(.18,.025,6,16),gymAcc,hx-sx*.28,1.55,GD/2+1.2,false,false); rim.rotation.x=Math.PI/2; gym.add(rim);});
 
   /* 物理藏經閣：模擬大樓左側的兩層樓閣，重簷屋頂 */
-  const LX=-17.6, LZ=7.6, LR=0;
+  const LX=-17.6, LZ=11.5, LR=0;
   const libWall=new THREE.MeshStandardMaterial({roughness:.85}), libRoof=new THREE.MeshStandardMaterial({roughness:.6,flatShading:true}), libRed=new THREE.MeshStandardMaterial({roughness:.5}), libStone=new THREE.MeshStandardMaterial({roughness:.95});
   const lib=new THREE.Group(); lib.position.set(LX,0,LZ); lib.rotation.y=LR; scene.add(lib);
   const LW=6.4, LD=4.6;
@@ -913,7 +913,7 @@ function init3D(){
   [lBase,lBody1,lBody2,lRoof1,lRoof2,lDoor].forEach(o=>{o.userData.key="lib";pickables.push(o);});
 
   /* 二階資料庫：模擬大樓的對面（右前方），像資料中心的方塊大樓 */
-  const DX=17.6, DZ=7.6, DR=0, DW=5.6, DD=4.2, DH=3.6;
+  const DX=17.6, DZ=11.5, DR=0, DW=5.6, DD=4.2, DH=3.6;
   const dbWall=new THREE.MeshStandardMaterial({roughness:.75}), dbAcc=new THREE.MeshStandardMaterial({roughness:.45}), dbGlass=new THREE.MeshStandardMaterial({roughness:.2,metalness:.5});
   const dbLit=new THREE.MeshStandardMaterial({color:0xd8f4ff,emissive:new THREE.Color(0x7fe0ff).convertSRGBToLinear(),emissiveIntensity:0});
   const db=new THREE.Group(); db.position.set(DX,0,DZ); db.rotation.y=DR; scene.add(db);
@@ -978,7 +978,9 @@ function init3D(){
   /* 外環道（含白色虛線） */
   /* 園區內道路：大樓後方的東西向道路、兩側南北向道路、穿過空橋下的中央連絡道 */
   const BZ=-D/2-2.6, SR=12.4, IW=1.7;
-  const inner=[[0,BZ,2*RX,IW],[-SR,(BZ+RZ1)/2,IW,RZ1-BZ],[SR,(BZ+RZ1)/2,IW,RZ1-BZ],[0,(BZ+D/2+1.8)/2,IW,D/2+1.8-BZ]];
+  /* 實驗大樓與二階資料庫之間的東西向道路（東側道路接到外環道） */
+  const EWZ=5.6;
+  const inner=[[(SR+RX)/2,EWZ,RX-SR,IW],[0,BZ,2*RX,IW],[-SR,(BZ+RZ1)/2,IW,RZ1-BZ],[SR,(BZ+RZ1)/2,IW,RZ1-BZ],[0,(BZ+D/2+1.8)/2,IW,D/2+1.8-BZ]];
   [[0,RZ0,2*RX+RW,RW],[0,RZ1,2*RX+RW,RW],[-RX,(RZ0+RZ1)/2,RW,RZ1-RZ0],[RX,(RZ0+RZ1)/2,RW,RZ1-RZ0],...inner].forEach(([x,z,w,d])=>{
     scene.add(mesh(B(w,.05,d),roadM,x,.025,z,false,true));
     const along=w>d, L=along?w:d;
@@ -991,10 +993,11 @@ function init3D(){
     scene.add(mesh(B(.55,.08,.2),M.trim,x,2.2,z));
     scene.add(mesh(B(.4,.04,.16),lampLit,x,2.15,z,false,false));
   }
-  [-19,-13,-7,7,13,19].forEach(x=>{lamp(x,RZ1-RW/2-.5);lamp(x,RZ0+RW/2+.5);});
-  [-19,-7,7,19].forEach(x=>lamp(x,BZ-IW/2-.4));
-  [-.4,4,8.4].forEach(z=>{lamp(-SR-IW/2-.4,z);lamp(SR+IW/2+.4,z);});
-  [RZ0+7,RZ0+15,RZ0+23].forEach(z=>{lamp(-RX+RW/2+.5,z);lamp(RX-RW/2-.5,z);});
+  [-25,-19,-13,-7,7,13,19,25].forEach(x=>{lamp(x,RZ1-RW/2-.5);lamp(x,RZ0+RW/2+.5);});
+  [-25,-19,-7,7,19,25].forEach(x=>lamp(x,BZ-IW/2-.4));
+  [16,21.5,27].forEach(x=>lamp(x,EWZ+IW/2+.4));
+  [-.4,9,13.5,18].forEach(z=>{lamp(-SR-IW/2-.4,z);lamp(SR+IW/2+.4,z);});
+  [RZ0+7,RZ0+15,RZ0+23,RZ0+31].forEach(z=>{lamp(-RX+RW/2+.5,z);lamp(RX-RW/2-.5,z);});
   [D/2+4,D/2+7.5].forEach(z=>{lamp(-2.2,z);lamp(2.2,z);});
   /* 園區入口：原子雕塑水池＋入口標牌 */
   const AZ=RZ1-3.2;
@@ -1044,7 +1047,7 @@ function init3D(){
   const TREES=[[-2.4,D/2+5.6],[2.4,D/2+5.6],[-2.4,D/2+9],[2.4,D/2+9],
     [-22,RZ1-2.6],[-9.6,RZ1-2.6],[9.6,RZ1-2.6],[22,RZ1-2.6],
     [-6,RZ0+2.2],[0,RZ0+2.2],[5,RZ0+2.2],[-15,-1.6],[-9.8,-6.8],[9.8,-6.8],
-    [23.4,-4.6],[-22.9,3.4],[-14.6,2.4]];
+    [23.4,-4.6],[-22.9,3.4],[-14.6,2.4],[25.6,3.4],[25.6,8.6],[-26,-14],[26,-15.5],[-26,9],[-9.6,-14.6]];
   TREES.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
@@ -1058,7 +1061,7 @@ function init3D(){
     b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
     b.onclick=()=>go(o.key); labelBox.appendChild(b); labels[o.key]=b;
   });
-  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"],["lab",EX-2.6,EH+1.1,"實驗大樓","--lab"]].map(([k,x,y,t,pv])=>{
+  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"],["lab",EX-3.4,EH+1.1,"實驗大樓","--lab"]].map(([k,x,y,t,pv])=>{
     const b=document.createElement("button"); b.type="button"; b.className="blabel"; b.textContent=t; b.style.setProperty("--bp",`var(${pv})`);
     b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"||k==="db"||k==="lab"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:k==="lib"?LZ:k==="db"?DZ:k==="lab"?EZ:0)};
   });
@@ -1094,7 +1097,7 @@ function init3D(){
   function fit(){
     const w=box.clientWidth,h=box.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; box.classList.toggle("narrow",w<560);
     const vf=THREE.MathUtils.degToRad(cam.fov)/2, hf=Math.atan(Math.tan(vf)*cam.aspect);
-    dist=Math.max((topY+1.5)/2/Math.tan(vf),50/2/Math.tan(hf))*1.0;
+    dist=Math.max((topY+1.5)/2/Math.tan(vf),(PW+2)/2/Math.tan(hf))*1.0;
     cam.updateProjectionMatrix();
   }
   fit(); new ResizeObserver(fit).observe(box);
