@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>焦耳實驗・熱功當量</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--hot:#ff9f43;--mech:#a78bfa}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,159,67,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono","Noto Sans TC",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%}
+#app{height:400px}
+#graph{height:250px}
+@media(max-width:560px){#app{height:330px}#graph{height:220px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button.on{border-color:var(--cyan);color:var(--cyan)}
+button:disabled{opacity:.45;cursor:default}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]:disabled{opacity:.5}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+@media(max-width:420px){.pair{grid-template-columns:1fr}}
+.read{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:4px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.read b.m{color:var(--mech)} .read b.h{color:var(--hot)} .read b.k{color:var(--acc)}
+.big{margin-top:10px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,209,102,.45);background:rgba(255,209,102,.07);text-align:center}
+.big small{display:block;color:var(--muted);font-size:12.5px}
+.big b{font-family:"JetBrains Mono",monospace;font-size:24px;color:var(--acc)}
+.eq{font-family:"JetBrains Mono","Noto Sans TC",monospace;font-size:13px;color:var(--muted);margin-top:8px;line-height:1.9;word-break:break-word}
+.eq em{font-style:normal;color:var(--txt)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.chk{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted);margin-top:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.tbl{overflow-x:auto;margin-top:10px;max-height:220px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-family:"JetBrains Mono","Noto Sans TC",monospace}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center;white-space:nowrap}
+th{color:var(--muted);font-weight:500;background:#0a0f1a;position:sticky;top:0}
+td.k{color:var(--acc);font-weight:700}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.steps button{flex:1 1 100px}
+.stage{margin-top:10px;padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;min-height:150px}
+.stage h3{font-size:15.5px;margin-bottom:4px}
+.stage p{font-size:13.5px;color:var(--muted)}
+.stage p+p{margin-top:6px}
+.stage .tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid currentColor;margin-bottom:6px}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">1-2 · 5-3 · Joule's Experiment</div>
+  <h1>焦耳實驗・熱功當量</h1>
+  <p class="lede">重錘慢慢落下，繩子帶動水裡的葉輪攪拌，水溫一點一點升高。重錘減少的力學能 <b style="color:var(--mech)">W = nMgh</b> 全部變成水的熱 <b style="color:var(--hot)">Q = mcΔT</b>，兩者相比就得到「1 卡的熱相當於多少焦耳的功」：熱功當量 J = W / Q ≈ 4.186 焦耳／卡。</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t">焦耳的熱功當量實驗（圖 5-10）</span><span class="n">隔熱水桶・葉輪・兩個重錘</span></div>
+      <div class="box"><canvas id="app" aria-label="焦耳實驗裝置：兩個重錘經滑輪拉動繩子，帶動隔熱水桶中的葉輪攪拌水"></canvas></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg">
+          <button class="primary" id="bDrop">▼ 放下重錘一次</button>
+          <button id="bAuto">▶ 連續做 n 次</button>
+          <button id="bFast">快轉 ×1</button>
+          <button id="bReset">↺ 換一桶水重來</button>
+        </div>
+        <div class="pair">
+          <div class="ctl"><div class="r">重錘總質量 M<span id="vM"></span></div><input type="range" id="sM" min="2" max="30" step="1" value="10"></div>
+          <div class="ctl"><div class="r">每次落下高度 h<span id="vH"></span></div><input type="range" id="sH" min="0.5" max="3" step="0.1" value="2"></div>
+          <div class="ctl"><div class="r">重複次數 n<span id="vN"></span></div><input type="range" id="sN" min="1" max="50" step="1" value="20"></div>
+          <div class="ctl"><div class="r">水的質量 m<span id="vW"></span></div><input type="range" id="sW" min="0.1" max="2" step="0.05" value="0.5"></div>
+        </div>
+        <div class="ctl"><div class="r">散熱與容器吸熱（熱量損失）<span id="vL"></span></div><input type="range" id="sL" min="0" max="15" step="1" value="0"></div>
+        <p class="note" id="msg">按「放下重錘一次」：重錘以幾乎等速慢慢下降（水對葉輪的阻力和重力平衡），所以減少的重力位能幾乎全部經由攪拌變成水的熱。換參數前請先「換一桶水重來」。</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">讀數</span><span class="n" id="cnt">已落下 0 次</span></div>
+      <div class="pad" style="padding-top:6px">
+        <div class="read">
+          <div><small>水溫 T</small><b id="rT">20.000 ℃</b></div>
+          <div><small>溫度上升 ΔT</small><b id="rdT">0.000 ℃</b></div>
+          <div><small>重錘減少的力學能 W = nMgh</small><b class="m" id="rW">0 J</b></div>
+          <div><small>水吸收的熱 Q = mcΔT</small><b class="h" id="rQ">0 cal</b></div>
+        </div>
+        <div class="big"><small>熱功當量 J = W ÷ Q（量到的）</small><b id="rJ">— J/cal</b></div>
+        <div class="eq" id="eq">c水 = 1 cal/(g·℃)，g = 9.8 m/s²</div>
+      </div>
+      <div class="head"><span class="t">ΔT – W 圖</span><span class="n">每落下一次記一點</span></div>
+      <div class="box"><canvas id="graph" aria-label="溫度上升對累積功的關係圖"></canvas></div>
+      <label class="chk" style="padding:0 16px 14px;margin-top:0"><input type="checkbox" id="cTheory" checked> 畫出 J = 4.186 J/cal 的理論直線</label>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">假說 → 實驗 → 修正假說</span><span class="n">1-2 科學方法</span></div>
+      <div class="pad" style="padding-top:4px">
+        <div class="steps" id="steps">
+          <button data-s="0" class="on">① 熱質說</button>
+          <button data-s="1">② 倫福德削砲管</button>
+          <button data-s="2">③ 焦耳實驗</button>
+          <button data-s="3">④ 修正假說</button>
+        </div>
+        <div class="stage" id="stage"></div>
+        <label class="chk"><input type="checkbox" id="cCaloric"> 在裝置上顯示「熱質說」的預測</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">實驗紀錄</span><span class="n">每一桶水記一列</span></div>
+      <div class="pad" style="padding-top:4px">
+        <div class="tbl"><table><thead><tr><th>#</th><th>M(kg)</th><th>h(m)</th><th>n</th><th>m(kg)</th><th>ΔT(℃)</th><th>W(J)</th><th>Q(cal)</th><th>J</th></tr></thead><tbody id="log"><tr><td colspan="9" style="color:var(--dim)">做完一桶水（n 次）後會自動記錄</td></tr></tbody></table></div>
+        <div class="qq">
+          <p>練習 1：1 kg 的重錘落下 1 m 一次，全部變成 100 g 水的熱，水溫上升多少？</p>
+          <div class="seg"><button data-a="a1">看解答</button><button data-try="1">用模擬試試</button></div>
+          <div class="ans" id="a1" hidden>W = mgh = 1 × 9.8 × 1 = <b>9.8 J</b>，Q = 9.8 ÷ 4.186 ≈ <b>2.34 cal</b>，ΔT = Q ÷ (mc) = 2.34 ÷ 100 ≈ <b>0.023 ℃</b>。一次的升溫非常小，所以焦耳要用很重的重錘、重複很多次，還要很精密的溫度計。</div>
+        </div>
+        <div class="qq">
+          <p>練習 2：要讓 0.30 kg 的水升高 1.0 ℃，用總質量 20 kg 的重錘每次落下 1.5 m，至少要重複幾次？</p>
+          <div class="seg"><button data-a="a2">看解答</button><button data-try="2">用模擬試試</button></div>
+          <div class="ans" id="a2" hidden>需要的熱 Q = 300 × 1 × 1.0 = 300 cal = 300 × 4.186 ≈ <b>1256 J</b>；每次 W = 20 × 9.8 × 1.5 = <b>294 J</b>；1256 ÷ 294 ≈ 4.3，所以至少 <b>5 次</b>。</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer><b>教學提示：</b>① 焦耳把「功」和「熱」用同一個實驗連起來，證明熱是能量的一種形式，1 卡 = 4.186 焦耳。② 若有散熱或容器吸熱，量到的 Q 偏小，算出的 J 會偏大；拉動「熱量損失」看看誤差往哪邊跑。③ 重錘若落地時還有速度，那部分動能沒有進到水裡；真實實驗讓重錘慢慢下降就是為了減少這項誤差。④ ΔT – W 圖的斜率 = 1 ÷ (J·m·c)，同一桶水的點落在一直線上，斜率越小代表水越多。<br><b>來源：</b>基礎物理 Ch01 1-2 科學方法 p.6–7 圖 1-2；Ch05 5-3 能量守恆 p.155 圖 5-10 焦耳的熱功當量實驗。</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const G=9.8, JTRUE=4.186, T0=20;
+const S={M:10,h:2,n:20,m:0.5,loss:0};
+let done=0, Wsum=0, Qsum=0, T=T0, pts=[], phase="idle", ph=0, auto=false, fast=1, wheel=0, runs=[], logged=false, caloric=false, stirring=0;
+const fmt=(x,d=0)=>Number(x).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+function readSliders(){
+  S.M=+$("#sM").value; S.h=+$("#sH").value; S.n=+$("#sN").value; S.m=+$("#sW").value; S.loss=+$("#sL").value/100;
+  $("#vM").textContent=S.M+" kg"; $("#vH").textContent=S.h.toFixed(1)+" m"; $("#vN").textContent=S.n+" 次";
+  $("#vW").textContent=S.m.toFixed(2)+" kg（"+Math.round(S.m*1000)+" g）"; $("#vL").textContent=Math.round(S.loss*100)+" %";
+}
+function locked(on){["#sM","#sH","#sW","#sL"].forEach(id=>$(id).disabled=on);}
+function resetWater(){
+  done=0;Wsum=0;Qsum=0;T=T0;pts=[];phase="idle";ph=0;auto=false;logged=false;locked(false);
+  $("#bAuto").textContent="▶ 連續做 n 次"; update(); drawGraph();
+  $("#msg").textContent="新的一桶水，水溫 20 ℃。調好重錘質量、落下高度、次數與水量後按「放下重錘一次」或「連續做 n 次」。";
+}
+function startDrop(){
+  if(phase!=="idle") return;
+  if(done>=S.n){ $("#msg").textContent="已經做完 "+S.n+" 次了。可以把重複次數調大繼續做，或按「換一桶水重來」。"; auto=false; $("#bAuto").textContent="▶ 連續做 n 次"; return; }
+  locked(true); phase="drop"; ph=0;
+}
+/* 一次落下：重錘減少 Mgh，水吸收 (1-loss)·Mgh/J */
+function dropStep(dx){
+  const w=S.M*G*S.h*dx;
+  Wsum+=w;
+  const qcal=caloric?0:(1-S.loss)*w/JTRUE;
+  Qsum+=qcal; T+=qcal/(S.m*1000);
+}
+function finishDrop(){
+  done++; pts.push([Wsum,T-T0]); drawGraph();
+  if(done===S.n && !logged){ logged=true; logRun(); }
+  const dT1=caloric?0:(1-S.loss)*S.M*G*S.h/JTRUE/(S.m*1000);
+  $("#msg").innerHTML=caloric
+    ?"熱質說的預測：攪拌不會產生熱質，水溫應該不變……但真實實驗中水溫確實上升了！取消勾選「熱質說」看真實結果。"
+    :`第 ${done} 次：重錘減少 ${fmt(S.M*G*S.h,1)} J 的力學能，水溫上升約 ${dT1.toFixed(4)} ℃。`+(done===S.n?" 已完成 n 次，結果記到實驗紀錄。":"");
+  phase="rewind"; ph=0;
+}
+function logRun(){
+  const dT=T-T0, J=Qsum>0?Wsum/Qsum:NaN;
+  runs.push({M:S.M,h:S.h,n:S.n,m:S.m,dT,W:Wsum,Q:Qsum,J,c:caloric});
+  $("#log").innerHTML=runs.map((r,i)=>`<tr><td>${i+1}</td><td>${r.M}</td><td>${r.h.toFixed(1)}</td><td>${r.n}</td><td>${r.m.toFixed(2)}</td><td>${r.dT.toFixed(3)}</td><td>${fmt(r.W)}</td><td>${fmt(r.Q,1)}</td><td class="k">${isFinite(r.J)?r.J.toFixed(3):"—"}</td></tr>`).join("");
+}
+function update(){
+  const dT=T-T0;
+  $("#rT").textContent=T.toFixed(3)+" ℃"; $("#rdT").textContent=dT.toFixed(3)+" ℃";
+  $("#rW").textContent=fmt(Wsum,1)+" J"; $("#rQ").textContent=fmt(Qsum,1)+" cal";
+  $("#rJ").textContent=Qsum>1e-9?(Wsum/Qsum).toFixed(3)+" J/cal":(Wsum>0?"∞（水沒變熱）":"— J/cal");
+  $("#cnt").textContent=`已落下 ${done} / ${S.n} 次`;
+  const g=Math.round(S.m*1000);
+  $("#eq").innerHTML=`W = n × M × g × h = <em>${done} × ${S.M} × 9.8 × ${S.h.toFixed(1)} = ${fmt(Wsum,1)} J</em><br>Q = m × c × ΔT = <em>${g} × 1 × ${dT.toFixed(3)} = ${fmt(Qsum,1)} cal</em><br>做完 n 次預計：W = ${fmt(S.n*S.M*G*S.h)} J → ΔT ≈ ${(S.n*S.M*G*S.h*(1-S.loss)/JTRUE/g).toFixed(2)} ℃`;
+}
+
+/* ---------- 裝置畫面 ---------- */
+const cv=$("#app"), cx=cv.getContext("2d");
+function fit(c){const r=c.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);c.getContext("2d").setTransform(d,0,0,d,0,0);return [r.width,r.height];}
+let AW=0,AH=0;
+function rr(x,y,w,h,r){cx.beginPath();cx.roundRect?cx.roundRect(x,y,w,h,r):cx.rect(x,y,w,h);}
+function tempColor(dT){const k=Math.min(1,dT/4);return `rgb(${Math.round(40+180*k)},${Math.round(110+20*k)},${Math.round(220-150*k)})`;}
+function drawApp(){
+  const W=AW,H=AH; cx.clearRect(0,0,W,H);
+  const sc=Math.min(1,W/560), mid=W/2, s=v=>v*sc;
+  /* 地面與桌子 */
+  cx.fillStyle="#0e1424"; cx.fillRect(0,H-26,W,26);
+  const tankW=s(150), tankH=s(150), tankX=mid-tankW/2, tankY=H-26-tankH-s(20);
+  cx.fillStyle="#1a2236"; cx.fillRect(tankX-s(30),H-26-s(20),tankW+s(60),s(20));
+  /* 支架、滑輪 */
+  const pulY=s(60), pulL=mid-s(200), pulR=mid+s(200), drumY=tankY-s(40), pr=s(14);
+  cx.strokeStyle="#3a4a66"; cx.lineWidth=s(6);
+  [pulL,pulR].forEach(px=>{cx.beginPath();cx.moveTo(px+(px<mid?-s(22):s(22)),H-26);cx.lineTo(px+(px<mid?-s(22):s(22)),pulY);cx.lineTo(px,pulY);cx.stroke();});
+  /* 重錘位置：phase drop 時 0→1 下降，rewind 時 1→0 回升 */
+  const prog=phase==="drop"?ph:phase==="rewind"?1-ph:0;
+  const top=pulY+s(40), travel=H-26-s(60)-top-s(10);
+  const wy=top+prog*travel;
+  /* 繩子：滑輪 → 轉軸鼓 */
+  cx.strokeStyle="#d9d4c3"; cx.lineWidth=1.5;
+  [pulL,pulR].forEach(px=>{const sgn=px<mid?1:-1;
+    cx.beginPath();cx.moveTo(px,pulY-pr);cx.lineTo(mid-sgn*s(14),drumY-s(6));cx.stroke();
+    cx.beginPath();cx.moveTo(px-sgn*pr,pulY);cx.lineTo(px-sgn*pr,wy);cx.stroke();});
+  /* 滑輪 */
+  [pulL,pulR].forEach(px=>{cx.fillStyle="#26314a";cx.beginPath();cx.arc(px,pulY,pr,0,7);cx.fill();cx.strokeStyle="#8492aa";cx.lineWidth=2;cx.stroke();
+    const a=wheel*(px<mid?1:-1);cx.beginPath();cx.moveTo(px+Math.cos(a)*pr,pulY+Math.sin(a)*pr);cx.lineTo(px-Math.cos(a)*pr,pulY-Math.sin(a)*pr);cx.stroke();});
+  /* 重錘 */
+  const bw=s(16+S.M*0.9), bh=s(22+S.M*0.8);
+  [pulL,pulR].forEach(px=>{const sgn=px<mid?1:-1, x=px-sgn*pr;
+    const gr=cx.createLinearGradient(x-bw/2,0,x+bw/2,0);gr.addColorStop(0,"#5b4fa8");gr.addColorStop(1,"#a78bfa");
+    cx.fillStyle=gr; rr(x-bw/2,wy,bw,bh,s(4)); cx.fill();
+    cx.fillStyle="#fff"; cx.font=`700 ${Math.max(10,s(12))}px JetBrains Mono,monospace`; cx.textAlign="center";
+    cx.fillText((S.M/2)+"kg",x,wy+bh/2+4);});
+  /* 高度標示 */
+  const lx=pulL-pr-bw/2-s(18);
+  if(lx>8){cx.strokeStyle="#ffd166";cx.fillStyle="#ffd166";cx.lineWidth=1;cx.setLineDash([4,4]);
+    cx.beginPath();cx.moveTo(lx-6,top);cx.lineTo(lx+bw/2+s(10),top);cx.moveTo(lx-6,top+travel+bh);cx.lineTo(lx+bw/2+s(10),top+travel+bh);cx.stroke();cx.setLineDash([]);
+    cx.beginPath();cx.moveTo(lx,top+4);cx.lineTo(lx,top+travel+bh-4);cx.stroke();
+    cx.save();cx.translate(lx-6,top+(travel+bh)/2);cx.rotate(-Math.PI/2);cx.textAlign="center";cx.font=`${Math.max(11,s(13))}px JetBrains Mono,monospace`;cx.fillText("h = "+S.h.toFixed(1)+" m",0,0);cx.restore();}
+  /* 轉軸鼓與軸 */
+  cx.fillStyle="#3a4a66"; rr(mid-s(16),drumY-s(10),s(32),s(20),s(4)); cx.fill();
+  cx.strokeStyle="#c8cfdc"; cx.lineWidth=s(4); cx.beginPath(); cx.moveTo(mid,drumY+s(10)); cx.lineTo(mid,tankY+tankH-s(24)); cx.stroke();
+  /* 曲柄 */
+  cx.strokeStyle="#8492aa";cx.lineWidth=s(3);cx.beginPath();cx.moveTo(mid,drumY-s(10));cx.lineTo(mid,drumY-s(24));cx.lineTo(mid+s(18)*Math.cos(phase==="rewind"?-wheel*3:0),drumY-s(24));cx.stroke();
+  /* 隔熱水桶 */
+  cx.fillStyle="#2b2f3a"; rr(tankX-s(8),tankY-s(4),tankW+s(16),tankH+s(10),s(8)); cx.fill();
+  const dT=T-T0; const wc=tempColor(dT);
+  cx.fillStyle="#0b1220"; cx.fillRect(tankX,tankY,tankW,tankH);
+  const lvl=tankY+s(18);
+  const wg=cx.createLinearGradient(0,lvl,0,tankY+tankH); wg.addColorStop(0,wc); wg.addColorStop(1,"#10203a");
+  cx.globalAlpha=.75; cx.fillStyle=wg; cx.fillRect(tankX,lvl,tankW,tankY+tankH-lvl); cx.globalAlpha=1;
+  /* 固定擋板 */
+  cx.fillStyle="#4b5876";
+  for(let k=0;k<3;k++){const y=lvl+s(22)+k*s(38); cx.fillRect(tankX,y,s(22),s(6)); cx.fillRect(tankX+tankW-s(22),y,s(22),s(6));}
+  /* 旋轉葉片（側視：寬度隨 cos 變化） */
+  for(let k=0;k<3;k++){const y=lvl+s(30)+k*s(38);
+    for(let j=0;j<4;j++){const a=wheel*2+j*Math.PI/2+k*.4, w=Math.cos(a)*s(46), front=Math.sin(a)>0;
+      cx.fillStyle=front?"#c8cfdc":"#6d7891"; cx.fillRect(mid+Math.min(0,w),y,Math.abs(w),s(8));}}
+  /* 攪拌造成的小渦流 */
+  if(stirring>0.02){cx.strokeStyle=`rgba(255,255,255,${.25*stirring})`;cx.lineWidth=1;
+    for(let k=0;k<6;k++){const a=wheel*3+k;const x=mid+Math.cos(a)*s(52), y=lvl+s(40)+((k*37+wheel*20)%s(90));cx.beginPath();cx.arc(x,y,s(5),a,a+3);cx.stroke();}}
+  /* 溫度計 */
+  const tx=tankX+tankW-s(34), ty0=tankY-s(70), ty1=lvl+s(70);
+  cx.fillStyle="#e8edf6"; rr(tx-s(5),ty0,s(10),ty1-ty0,s(5)); cx.fill();
+  cx.fillStyle="#ff5c5c"; cx.beginPath(); cx.arc(tx,ty1,s(8),0,7); cx.fill();
+  const frac=Math.min(1,(T-15)/15), colTop=ty1-(ty1-ty0-s(6))*Math.max(0.05,frac);
+  cx.fillRect(tx-s(2.5),colTop,s(5),ty1-colTop);
+  cx.fillStyle="#ffd166"; cx.font=`700 ${Math.max(11,s(13))}px JetBrains Mono,monospace`; cx.textAlign="left";
+  cx.fillText(T.toFixed(3)+" ℃",Math.min(tx+s(12),W-s(90)),ty0+s(10));
+  /* 標籤 */
+  cx.fillStyle="#8492aa"; cx.font=`${Math.max(11,s(12.5))}px Noto Sans TC,sans-serif`; cx.textAlign="center";
+  cx.fillText("隔熱水桶 m = "+Math.round(S.m*1000)+" g",mid,Math.min(H-8,tankY+tankH+s(22)));
+  if(caloric){cx.fillStyle="rgba(255,122,122,.92)";cx.font=`700 ${Math.max(12,s(14))}px Noto Sans TC,sans-serif`;
+    cx.fillText("熱質說：攪拌不會產生熱質，水溫不變？",mid,s(24));}
+  /* 能量流向小條 */
+  if(phase==="drop"){cx.fillStyle="#a78bfa";cx.font=`${Math.max(11,s(12))}px Noto Sans TC,sans-serif`;cx.fillText("重力位能 → 繩子作功 → 葉輪攪拌 → 水的熱",mid,s(40)+(caloric?s(6):0));}
+}
+
+/* ---------- 圖 ---------- */
+const gv=$("#graph"), gx=gv.getContext("2d"); let GW=0,GH=0;
+function drawGraph(){
+  const W=GW,H=GH; gx.clearRect(0,0,W,H);
+  const L=48,R=24,Tp=14,B=34, pw=W-L-R, phh=H-Tp-B;
+  const Wmax=Math.max(S.n*S.M*G*S.h, Wsum, 100)*1.05;
+  const dTmax=Math.max(Wmax/JTRUE/(S.m*1000),(T-T0),0.01)*1.15;
+  const X=w=>L+w/Wmax*pw, Y=t=>Tp+phh-t/dTmax*phh;
+  gx.strokeStyle="#222c42"; gx.lineWidth=1; gx.fillStyle="#5b6880"; gx.font="11px JetBrains Mono,monospace";
+  for(let i=0;i<=4;i++){const y=Tp+phh*i/4; gx.beginPath(); gx.moveTo(L,y); gx.lineTo(W-R,y); gx.stroke(); gx.textAlign="right"; gx.fillText((dTmax*(1-i/4)).toFixed(dTmax<0.1?3:2),L-5,y+4);}
+  for(let i=0;i<=4;i++){const x=L+pw*i/4; gx.beginPath(); gx.moveTo(x,Tp); gx.lineTo(x,Tp+phh); gx.stroke(); gx.textAlign="center"; gx.fillText(fmt(Wmax*i/4),x,Tp+phh+14);}
+  gx.fillStyle="#8492aa"; gx.textAlign="center"; gx.fillText("累積功 W (J)",L+pw/2,H-4);
+  gx.save(); gx.translate(11,Tp+phh/2); gx.rotate(-Math.PI/2); gx.fillText("ΔT (℃)",0,0); gx.restore();
+  if($("#cTheory").checked){gx.strokeStyle="#ffd166"; gx.setLineDash([5,4]); gx.beginPath(); gx.moveTo(X(0),Y(0)); gx.lineTo(X(Wmax),Y(Wmax/JTRUE/(S.m*1000))); gx.stroke(); gx.setLineDash([]);
+    gx.fillStyle="#ffd166"; gx.textAlign="left"; gx.fillText("J = 4.186",L+6,Tp+12);}
+  gx.fillStyle="#7dffc4"; pts.forEach(([w,t])=>{gx.beginPath(); gx.arc(X(w),Y(t),3.2,0,7); gx.fill();});
+  if(pts.length>=2){const [w,t]=pts[pts.length-1]; const slope=t/w; gx.fillStyle="#7dffc4"; gx.textAlign="right";
+    gx.fillText(slope>0?`斜率 = ${slope.toExponential(2)} ℃/J → J = ${(1/(slope*S.m*1000)).toFixed(3)}`:"斜率 = 0（水沒變熱）",W-R-4,Tp+phh-8);}
+}
+
+/* ---------- 迴圈 ---------- */
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  const dur=1.4/fast, rew=.5/fast;
+  if(phase==="drop"){const d=Math.min(1-ph,dt/dur); dropStep(d); ph+=d; wheel+=dt*5*fast; stirring=Math.min(1,stirring+dt*4);
+    if(ph>=1-1e-9) finishDrop(); update();}
+  else if(phase==="rewind"){ph+=dt/rew; wheel+=dt*2*fast; stirring*=.9; if(ph>=1){phase="idle"; ph=0; if(auto&&done<S.n) startDrop(); else {auto=false;$("#bAuto").textContent="▶ 連續做 n 次"; if(done<S.n) locked(true);}}}
+  else stirring*=.92;
+  drawApp();
+  requestAnimationFrame(loop);
+}
+
+/* ---------- 事件 ---------- */
+["#sM","#sH","#sN","#sW","#sL"].forEach(id=>$(id).addEventListener("input",()=>{readSliders(); if(done>=S.n&&!logged&&done>0){logged=true;logRun();} update(); drawGraph();}));
+$("#bDrop").onclick=()=>{auto=false;$("#bAuto").textContent="▶ 連續做 n 次";startDrop();};
+$("#bAuto").onclick=()=>{ if(auto){auto=false;$("#bAuto").textContent="▶ 連續做 n 次";return;} auto=true;$("#bAuto").textContent="⏸ 暫停"; startDrop(); };
+$("#bFast").onclick=()=>{fast=fast===1?4:fast===4?12:1; $("#bFast").textContent="快轉 ×"+fast; $("#bFast").classList.toggle("on",fast>1);};
+$("#bReset").onclick=resetWater;
+$("#cTheory").onchange=drawGraph;
+$("#cCaloric").onchange=e=>{caloric=e.target.checked; resetWater(); if(caloric) $("#msg").textContent="熱質說模式：如果熱是一種不生不滅的「熱質」，單純攪拌水不會產生熱質，水溫應該不變。放下重錘看看熱質說的預測。";};
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=$("#"+b.dataset.a);a.hidden=!a.hidden;b.textContent=a.hidden?"看解答":"收起解答";});
+document.querySelectorAll("[data-try]").forEach(b=>b.onclick=()=>{
+  const p=b.dataset.try==="1"?{M:1,h:1,n:1,m:0.1}:{M:20,h:1.5,n:5,m:0.3};
+  $("#cCaloric").checked=false; caloric=false;
+  $("#sM").value=p.M; $("#sH").value=p.h; $("#sN").value=p.n; $("#sW").value=p.m; $("#sL").value=0; readSliders(); resetWater();
+  $("#msg").textContent=`已設定 M = ${p.M} kg、h = ${p.h} m、n = ${p.n}、m = ${Math.round(p.m*1000)} g，按「連續做 n 次」驗證。`;
+  window.scrollTo({top:0,behavior:"smooth"});});
+
+const STAGES=[
+  {tag:"假說",c:"var(--red)",h:"熱質說：熱是一種看不見的物質",p:["十八世紀許多科學家認為熱是一種沒有質量、不生不滅的流體「熱質」。熱的物體含較多熱質，熱質會從熱的地方流到冷的地方。","用這個假說可以解釋熱傳導與熱平衡，所以當時被廣泛接受。勾選下方「熱質說的預測」，看看它對焦耳實驗的預測。"]},
+  {tag:"新的觀察",c:"var(--hot)",h:"倫福德伯爵：削砲管時熱源源不絕",p:["倫福德在兵工廠用鈍的鑽頭削砲管，發現只要繼續摩擦，產生的熱好像永遠用不完，甚至可以把水燒開。","如果熱是有限的物質，削出來的熱應該會被「用光」。這個觀察讓他懷疑熱質說，主張熱和運動（摩擦作功）有關。"]},
+  {tag:"實驗",c:"var(--cyan)",h:"焦耳：定量測量功與熱的關係",p:["焦耳讓重錘落下帶動葉輪攪拌水，精確量出重錘減少的力學能與水溫的上升。","不論改變重錘質量、落下高度或水量，W ÷ Q 都接近同一個常數，約 4.18 焦耳／卡。用上方模擬改變參數、做好幾桶水，看看「實驗紀錄」裡的 J 是否都一樣。"]},
+  {tag:"修正假說",c:"var(--phos)",h:"熱是能量的一種形式",p:["功可以變成熱，而且一定量的功總是產生一定量的熱：1 卡 = 4.186 焦耳（熱功當量）。熱質說被推翻，取而代之的是「熱是能量」，進而發展出能量守恆定律。","科學方法就是這樣：提出假說 → 用觀察與實驗檢驗 → 不符合時修正假說。"]}
+];
+function showStage(i){const s=STAGES[i];
+  $("#stage").innerHTML=`<span class="tag" style="color:${s.c}">${s.tag}</span><h3>${s.h}</h3>${s.p.map(t=>`<p>${t}</p>`).join("")}`;
+  document.querySelectorAll("#steps button").forEach(b=>b.classList.toggle("on",+b.dataset.s===i));}
+document.querySelectorAll("#steps button").forEach(b=>b.onclick=()=>showStage(+b.dataset.s));
+
+function resize(){[AW,AH]=fit(cv);[GW,GH]=fit(gv);drawGraph();}
+window.addEventListener("resize",resize);
+readSliders(); resize(); showStage(0); update(); drawGraph();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
