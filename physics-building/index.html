@@ -508,7 +508,7 @@ function route(){
       <p class="body-text">${esc(LAB.d)}</p>
       <a class="go" href="${esc(LAB.url)}" target="_blank" rel="noopener">進入${esc(LAB.t)} ↗</a>
       <div class="dbyears">${lgroups.map(g=>`<p class="dbdec">${esc(g.g)}</p>`+g.rows.map(d=>{const fi=LABFILES.indexOf(d);
-        return `<div class="dbrow"><span class="yy">${esc(d.no)}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(d.pdf)}"><em>${esc(d.t)} <small>${d.pages} 頁</small></em><button type="button" class="pv" data-i="${fi}">閱覽</button><button type="button" class="pd" data-i="${fi}">下載</button></span></div></div>`;}).join("")).join("")}</div>
+        return `<div class="dbrow"><span class="yy">${esc(d.no)}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(d.pdf)}"><em>${esc(d.t)} <small>${d.pages} 頁</small></em><button type="button" class="pv" data-i="${fi}">閱覽</button>${DB2_VIEW_ONLY?"":`<button type="button" class="pd" data-i="${fi}">下載</button>`}</span></div></div>`;}).join("")).join("")}</div>
       <p class="note">競賽大樓放理論，實驗大樓放實驗：同一場競賽的兩個部分。實驗室會在新分頁開啟，用完關掉分頁就回到研究院。</p>`;
     p.querySelectorAll(".dbfile .pv").forEach(b=>b.onclick=()=>openPdf(labFile(b)));
     p.querySelectorAll(".dbfile .pd").forEach(b=>b.onclick=()=>downloadPdf(labFile(b),b));
@@ -543,7 +543,7 @@ function route(){
 /* ---------- 藏經閣：PDF 閱覽與下載 ---------- */
 const fyFile=b=>{const d=OLY2.find(x=>x.y==b.dataset.y), f=d.files[b.dataset.f]; return {v:{vol:"複賽"},ch:{t:d.y+" 年"},f:{label:f.label,by:"物奧複賽"},url:"db2/"+f.pdf,name:`物奧複賽 ${d.y} ${f.label}.pdf`};};
 const dbFile=b=>{const d=DB2[b.dataset.i]; return {v:{vol:"二階"},ch:{t:/^\d+$/.test(d.no)?"第 "+d.no+" 章":d.no},f:{label:d.t,by:DB2_BOOK},url:"db2/"+d.pdf,name:`二階 ${DB2_BOOK} ${d.no} ${d.t}.pdf`};};
-const labFile=b=>{const d=LABFILES[b.dataset.i]; return {v:{vol:"實驗"},ch:{t:d.g},f:{label:d.t,by:"實驗培訓"},url:d.pdf,name:`${d.t}.pdf`};};
+const labFile=b=>{const d=LABFILES[b.dataset.i]; return {v:{vol:"實驗"},ch:{t:d.g},f:{label:d.t,by:"實驗培訓"},url:d.pdf,name:`${d.t}.pdf`,viewOnly:true};};
 const libFile=b=>{const v=LIBRARY[b.dataset.v], ch=v.chapters[b.dataset.c], f=ch.files[b.dataset.f]; return {v,ch,f,url:"library/"+f.pdf,name:`選訓教材 ${v.vol} ${ch.t}（${f.label}）.pdf`};};
 let pdfLib=null;
 function loadPdfJs(){
@@ -559,7 +559,7 @@ async function openPdf(it){
   const body=$("#pvBody"); body.innerHTML=`<p class="pvmsg">載入中…</p>`; body.scrollTop=0;
   pv.hidden=false; document.documentElement.classList.add("in-class"); $("#pvClose").focus();
   $("#pvDl").onclick=()=>downloadPdf(it,$("#pvDl"));
-  $("#pvDl").hidden=DB2_VIEW_ONLY&&(it.url.startsWith("db2/ge-")||it.url.startsWith("library/"));
+  $("#pvDl").hidden=DB2_VIEW_ONLY&&(it.url.startsWith("db2/ge-")||it.url.startsWith("library/")||it.viewOnly);
   try{
     const lib=await loadPdfJs();
     const doc=await lib.getDocument({url:it.url}).promise; if(pv.hidden) return; pvDoc=doc;
