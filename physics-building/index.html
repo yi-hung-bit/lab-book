@@ -25,6 +25,7 @@
   --gym:#b5532e; --gym-wall:#e4ddd0; --gym-roof:#7c8d96;
   --lib:#8e2f25; --lib-wall:#efe6d2; --lib-roof:#33433d; --lib-stone:#b9b2a3;
   --db:#2a6170; --db-wall:#dfe3e5; --db-glass:#3d5866;
+  --lab:#5b7f2a; --lab-wall:#e8eae3; --lab-glass:#46606e;
   --shadow:0 12px 30px rgba(28,34,40,.14);
   --f-sign:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -42,6 +43,7 @@
   --gym:#f08a5d; --gym-wall:#4d4842; --gym-roof:#3a464d;
   --lib:#e07a66; --lib-wall:#4a4339; --lib-roof:#24302b; --lib-stone:#5a554c;
   --db:#6cc3d4; --db-wall:#3f474d; --db-glass:#1d2b33;
+  --lab:#a8d36a; --lab-wall:#454a42; --lab-glass:#1f2d35;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}}
 :root[data-theme="dark"]{
   --sky:#141b22; --sky-top:#05080d; --ground:#1f2a24; --paper:#1b2229; --ink:#e6e9ea; --muted:#9aa6ae; --line:#2f3a43;
@@ -56,6 +58,7 @@
   --gym:#f08a5d; --gym-wall:#4d4842; --gym-roof:#3a464d;
   --lib:#e07a66; --lib-wall:#4a4339; --lib-roof:#24302b; --lib-stone:#5a554c;
   --db:#6cc3d4; --db-wall:#3f474d; --db-glass:#1d2b33;
+  --lab:#a8d36a; --lab-wall:#454a42; --lab-glass:#1f2d35;
   --shadow:0 12px 30px rgba(0,0,0,.45); color-scheme:dark}
 
 [hidden]{display:none!important}
@@ -222,7 +225,7 @@ button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.roo
   <div class="top">
     <div>
       <h1>物理研究院</h1>
-      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連，旁邊有物理藏經閣、二階資料庫與休閒中心。</p>
+      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連；競賽大樓旁的實驗大樓是競賽實驗題的虛擬實驗室，另有物理藏經閣、二階資料庫與休閒中心。</p>
     </div>
     <div class="count" id="count"></div>
   </div>
@@ -390,6 +393,8 @@ const GAMES=[
   {t:"物理學家塔防 3D：知識保衛戰",d:"3D 塔防：派牛頓、伽利略、居禮夫人等 12 位物理學家建防禦塔，擋下迷思史萊姆和量子幽靈；3 張地圖，可升級到 Lv.3，還能翻閱 Physgram 冷知識。",url:"https://yi-hung-bit.github.io/physics-fighter/tower-defense/",tag:"塔防"},
   {t:"物理幻想：27 賢者戰紀",d:"太空戰士風格的回合制 RPG：從 27 位物理學家組 3 人小隊（或 1v1 單挑），用物理攻擊、物理奧義、公式道具和極限奧義對戰；3 個戰場、3 種難度。",url:"https://yi-hung-bit.github.io/physics-fighter/fantasy/",tag:"RPG"}
 ];
+/* 實驗大樓：歷屆物理學科能力競賽實驗題的虛擬實驗室（實驗培訓電子書，放在 GitHub Pages，新分頁開啟） */
+const LAB={t:"實驗培訓",d:"歷屆物理學科能力競賽實驗題的虛擬實驗室，整本電子書可以直接翻閱，各章的實驗室都能直接操作。",url:"https://yi-hung-bit.github.io/lab-book/#cover"};
 const BRIDGE_LEVEL="3";
 
 const $=s=>document.querySelector(s);
@@ -414,6 +419,7 @@ function current(){
   m=/^s(\w+)$/.exec(h); if(m&&sFloor(m[1])) return {b:"s",id:m[1]};
   if(h==="bridge") return {b:"bridge"};
   if(h==="gym") return {b:"gym"};
+  if(h==="lab") return {b:"lab"};
   if(h==="lib") return {b:"lib"};
   if(h==="db") return {b:"db"};
   if(h==="fy"&&!FY_CLOSED) return {b:"fy"};
@@ -493,6 +499,12 @@ function route(){
     p.querySelectorAll(".dbfile .pv").forEach(b=>b.onclick=()=>openPdf(dbFile(b)));
     p.querySelectorAll(".dbfile .pd").forEach(b=>b.onclick=()=>downloadPdf(dbFile(b),b));
     p.querySelectorAll(".dbfile").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
+  }else if(c.b==="lab"){
+    p.style.setProperty("--fc","var(--lab)");
+    p.innerHTML=`<div class="panel-head"><div class="badge">實</div><div><div class="bld">院區右側・競賽大樓旁</div><h2>實驗大樓</h2><p>學科能力競賽 實驗題虛擬實驗室</p></div></div>
+      <p class="body-text">${esc(LAB.d)}</p>
+      <a class="go" href="${esc(LAB.url)}" target="_blank" rel="noopener">進入${esc(LAB.t)} ↗</a>
+      <p class="note">競賽大樓放理論，實驗大樓放實驗：同一場競賽的兩個部分。實驗室會在新分頁開啟，用完關掉分頁就回到研究院。</p>`;
   }else if(c.b==="gym"){
     p.style.setProperty("--fc","var(--gym)");
     p.innerHTML=`<div class="panel-head"><div class="badge">玩</div><div><div class="bld">院區後方</div><h2>休閒中心</h2><p>下課來玩物理小遊戲・${GAMES.length} 款</p></div></div>
@@ -507,6 +519,7 @@ function route(){
     p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
       <div class="dir">
         <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button>`}</section>
+        <section><h3>實驗大樓 <small>競賽實驗題</small></h3><button type="button" class="dir-row" data-h="lab" style="--fc:var(--lab)"><span class="n">實</span><span><b>實驗大樓</b><small>${esc(LAB.t)}・歷屆學科能力競賽實驗題虛擬實驗室</small></span></button></section>
         <section><h3>物理藏經閣 <small>選訓教材 ${LIBRARY.length} 冊</small></h3><button type="button" class="dir-row" data-h="lib" style="--fc:var(--lib)"><span class="n">經</span><span><b>物理藏經閣</b><small>${esc(LIBRARY.map(v=>v.vol+" "+v.theme).join("・"))}</small></span></button></section>
         <section><h3>二階資料庫 <small>申請入學二階筆試</small></h3><button type="button" class="dir-row" data-h="db" style="--fc:var(--db)"><span class="n">二</span><span><b>二階資料庫</b><small>${esc(DB2_BOOK)}・依章閱覽與下載</small></span></button></section>
         <section><h3>休閒中心 <small>${GAMES.length} 款遊戲</small></h3><button type="button" class="dir-row" data-h="gym" style="--fc:var(--gym)"><span class="n">玩</span><span><b>休閒中心</b><small>${esc(GAMES.map(g=>g.t).join("・"))}</small></span></button></section>
@@ -793,13 +806,13 @@ function init3D(){
   const NODES={
     p0:[0,D/2+1.4], pL:[-8,D/2+1.4], pR:[8,D/2+1.4], fL:[-8,wZ1], fR:[8,wZ1], gb:[0,wBZ],
     bL:[-wSR,wBZ], bR:[wSR,wBZ], bLL:[-wRX,wBZ], bRR:[wRX,wBZ], cp:[-16.4,wBZ], gy:[18.7,wBZ],
-    cpD:[-16.4,-6.4], gyD:[18.7,-6.9],
+    cpD:[-16.4,-6.4], gyD:[18.7,-6.9], lbR:[wSR,2.8], lab:[18.8,2.8],
     sL:[-wSR,11.2], sR:[wSR,10.7], lib:[-17.6,11.2], db:[17.6,10.7],
     rL:[-wSR,wZ1], rR:[wSR,wZ1], cLF:[-wRX,wZ1], cRF:[wRX,wZ1], cLB:[-wRX,wZ0], cRB:[wRX,wZ0], mB:[0,wZ0]
   };
   const EDGES=[["p0","pL"],["p0","pR"],["pL","fL"],["pR","fR"],["p0","gb"],
     ["gb","bL"],["gb","bR"],["bL","cp"],["cp","bLL"],["bR","gy"],["gy","bRR"],["cp","cpD"],["gy","gyD"],
-    ["bL","sL"],["sL","rL"],["bR","sR"],["sR","rR"],["sL","lib"],["sR","db"],
+    ["bL","sL"],["sL","rL"],["bR","lbR"],["lbR","sR"],["lbR","lab"],["sR","rR"],["sL","lib"],["sR","db"],
     ["fL","fR"],["fL","rL"],["rL","cLF"],["fR","rR"],["rR","cRF"],
     ["cLF","bLL"],["bLL","cLB"],["cRF","bRR"],["bRR","cRB"],["cLB","mB"],["mB","cRB"]];
   const NB={}; Object.keys(NODES).forEach(k=>NB[k]=[]);
@@ -812,7 +825,7 @@ function init3D(){
       NB[u].forEach(v=>{const d=dist[u]+nd(u,v); if(dist[v]==null||d<dist[v]){dist[v]=d;prev[v]=u;}});}
     const out=[b]; while(out[0]!==a&&prev[out[0]]) out.unshift(prev[out[0]]); return out;
   }
-  const FAR=["lib","db","cpD","gyD","fL","fR","rL","rR","cLF","cRF","cLB","cRB","mB","bLL","bRR","sL","sR"];
+  const FAR=["lib","db","lab","cpD","gyD","fL","fR","rL","rR","cLF","cRF","cLB","cRB","mB","bLL","bRR","sL","sR"];
   const jit=(x,z,j)=>new THREE.Vector3(x+rnd(-j,j),0,z+rnd(-j,j));
   function planGround(w){
     const pos=w.root.position, r=Math.random();
@@ -920,6 +933,40 @@ function init3D(){
   [-1.3,1.3].forEach(px=>db.add(mesh(B(.06,.6,.06),M.trim,px,.3+DH+.45,DD/2-.12,false,false)));
   [dPlinth,dBody,dFace,dRoof].forEach(o=>{o.userData.key="db";pickables.push(o);});
 
+  /* 實驗大樓：競賽大樓右側（東側道路外），四層實驗室，鋸齒狀天窗屋頂＋排氣管 */
+  const EX=18.8, EZ=-.4, EW=6.2, ED=4, EH=4.4;
+  const labWall=new THREE.MeshStandardMaterial({roughness:.8}), labAcc=new THREE.MeshStandardMaterial({roughness:.45}), labGlass=new THREE.MeshStandardMaterial({roughness:.2,metalness:.5});
+  const labLit=new THREE.MeshStandardMaterial({color:0xf3ffe0,emissive:new THREE.Color(0xd8ff9a).convertSRGBToLinear(),emissiveIntensity:0});
+  const lab=new THREE.Group(); lab.position.set(EX,0,EZ); scene.add(lab);
+  lab.add(mesh(B(EW+2.2,.06,ED+3),M.pave,0,.03,.6,false,true));
+  const ePlinth=mesh(B(EW+.5,.3,ED+.5),M.slab,0,.15,0); lab.add(ePlinth);
+  const eBody=mesh(B(EW,EH,ED),labWall,0,.3+EH/2,0); lab.add(eBody);
+  /* 四層橫向帶狀窗 */
+  const eWins=[];
+  for(let k=0;k<4;k++){const wy=.3+.62+k*1.05;
+    const w=mesh(B(EW-.7,.5,.06),labLit,0,wy,ED/2+.03,false,false); lab.add(w); eWins.push(w);
+    lab.add(mesh(B(EW-.5,.07,.18),labAcc,0,wy-.31,ED/2+.07,false,false));
+    for(let i=0;i<=6;i++) lab.add(mesh(B(.05,.5,.08),M.trim,-(EW-.7)/2+(EW-.7)*i/6,wy,ED/2+.06,false,false));
+    [-1,1].forEach(sx=>lab.add(mesh(B(.06,.5,ED-1),labGlass,sx*(EW/2+.02),wy,0,false,false)));}
+  /* 入口雨遮與玻璃門 */
+  lab.add(mesh(B(2.6,.12,1.1),M.slab,0,1.35,ED/2+.55));
+  [-1.1,1.1].forEach(px=>lab.add(mesh(new THREE.CylinderGeometry(.05,.05,1.05,10),M.trim,px,.82,ED/2+1)));
+  const eDoor=mesh(B(1.2,.9,.08),labGlass,0,.3+.45,ED/2+.08,false,false); lab.add(eDoor);
+  /* 鋸齒狀天窗屋頂 */
+  const eRoofY=.3+EH;
+  lab.add(mesh(B(EW+.2,.16,ED+.2),M.slab,0,eRoofY+.08,0));
+  const eTeeth=[];
+  for(let k=0;k<3;k++){const z0=-ED/2+.1+k*(ED-.2)/3, dz=(ED-.2)/3;
+    const slope=mesh(B(EW,.08,dz*1.06),labAcc,0,eRoofY+.16+.3,z0+dz/2); slope.rotation.x=-Math.atan2(.6,dz); lab.add(slope); eTeeth.push(slope);
+    lab.add(mesh(B(EW,.6,.05),labGlass,0,eRoofY+.16+.3,z0+dz-.02,false,false));}
+  /* 排氣管 */
+  [[-2.3,-1.2],[-1.6,-1.2],[2.4,-1.3]].forEach(([x,z],i)=>{lab.add(mesh(new THREE.CylinderGeometry(.11,.13,1.4+i*.2,10),M.trim,x,eRoofY+.7+i*.1,z));
+    lab.add(mesh(new THREE.CylinderGeometry(.17,.17,.08,10),M.trim,x,eRoofY+1.42+i*.2,z));});
+  const labSign=signTexture("實 驗 大 樓","L A B O R A T O R Y","--lab"); signs.push(labSign);
+  lab.add(mesh(new THREE.PlaneGeometry(2.8,.7),new THREE.MeshBasicMaterial({map:labSign,transparent:true}),0,1.85,ED/2+.62,false,false));
+  [-1.1,1.1].forEach(px=>lab.add(mesh(B(.05,.4,.05),M.trim,px,1.55,ED/2+.6,false,false)));
+  [ePlinth,eBody,eDoor,...eWins,...eTeeth].forEach(o=>{o.userData.key="lab";pickables.push(o);});
+
   /* ===== 科技園區：環道、路燈、中央大道、原子雕塑、太陽能停車場、風力發電機 ===== */
   const roadM=new THREE.MeshStandardMaterial({roughness:.95}), curbM=new THREE.MeshStandardMaterial({roughness:.8});
   const lineM=new THREE.MeshStandardMaterial({color:0xf2f2ea,roughness:.6});
@@ -997,7 +1044,7 @@ function init3D(){
   const TREES=[[-2.4,D/2+5.6],[2.4,D/2+5.6],[-2.4,D/2+9],[2.4,D/2+9],
     [-22,RZ1-2.6],[-9.6,RZ1-2.6],[9.6,RZ1-2.6],[22,RZ1-2.6],
     [-6,RZ0+2.2],[0,RZ0+2.2],[5,RZ0+2.2],[-15,-1.6],[-9.8,-6.8],[9.8,-6.8],
-    [21.6,-1.6],[21.6,2],[-22.9,3.4],[22.9,3.4],[-14.6,2.4],[14.6,2.4]];
+    [23.4,-4.6],[-22.9,3.4],[-14.6,2.4]];
   TREES.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
@@ -1011,9 +1058,9 @@ function init3D(){
     b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
     b.onclick=()=>go(o.key); labelBox.appendChild(b); labels[o.key]=b;
   });
-  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"]].map(([k,x,y,t,pv])=>{
+  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"],["lab",EX-2.6,EH+1.1,"實驗大樓","--lab"]].map(([k,x,y,t,pv])=>{
     const b=document.createElement("button"); b.type="button"; b.className="blabel"; b.textContent=t; b.style.setProperty("--bp",`var(${pv})`);
-    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"||k==="db"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:k==="lib"?LZ:k==="db"?DZ:0)};
+    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"||k==="db"||k==="lab"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:k==="lib"?LZ:k==="db"?DZ:k==="lab"?EZ:0)};
   });
 
   let night=false;
@@ -1023,6 +1070,7 @@ function init3D(){
     M.glass.color=col("--glass"); M.lawn.color=col("--lawn"); M.pave.color=col("--ground");
     M.leaf.color=col("--leaf"); M.trunk.color=col("--trunk");
     gymWall.color=col("--gym-wall"); gymRoof.color=col("--gym-roof"); gymAcc.color=col("--gym");
+    labWall.color=col("--lab-wall"); labAcc.color=col("--lab"); labGlass.color=col("--lab-glass");
     dbWall.color=col("--db-wall"); dbAcc.color=col("--db"); dbGlass.color=col("--db-glass");
     libWall.color=col("--lib-wall"); libRoof.color=col("--lib-roof"); libRed.color=col("--lib"); libStone.color=col("--lib-stone");
     Object.values(floorObjs).forEach(o=>{o.accentMat.color=col(o.f.color); o.lit.color=col("--glass");});
@@ -1097,6 +1145,8 @@ function init3D(){
     bLabels.forEach(({b,p})=>{v.copy(p).project(cam);place(b,(v.x*.5+.5)*box.clientWidth-b.offsetWidth/2,(-v.y*.5+.5)*box.clientHeight,false);});
     const dOn=c.b==="db"||hover==="db";
     dbLit.emissiveIntensity+=((dOn?2:night?1.2:.25)-dbLit.emissiveIntensity)*.1;
+    const eOn=c.b==="lab"||hover==="lab";
+    labLit.emissiveIntensity+=((eOn?1.6:night?1:.12)-labLit.emissiveIntensity)*.1;
     const lOn=c.b==="lib"||hover==="lib";
     libLit.emissiveIntensity+=((lOn?1.8:night?1.1:.15)-libLit.emissiveIntensity)*.1;
     const gOn=c.b==="gym"||hover==="gym";
