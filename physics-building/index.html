@@ -330,7 +330,8 @@ const SIM=[
     {t:"惠更斯原理與反射定律",d:"惠更斯反射實驗室：用波前上每一點發出的次波畫出反射波前，推導入射角等於反射角。",sims:[],url:"https://yi-hung-bit.github.io/huygens-reflection-lab/"},
     {t:"惠更斯原理與折射定律",d:"惠更斯折射實驗室：互動波前模擬，看波進入不同介質時波速改變、波前轉折，推導司乃耳定律。",sims:[],url:"https://yi-hung-bit.github.io/huygens-refraction-lab/"},
     {t:"光的折射與司乃耳定律",d:"光從空氣、水、玻璃等介質斜射入另一介質：拖曳改變入射角，用半徑 10 cm 的輔助圓量出 x₁、x₂，記錄成表看 x₁ / x₂ 為定值（表 4-2 真空→水 1.33），即折射率 n = c / v；光疏→光密偏向法線、光密→光疏偏離法線，波前間距顯示光變慢、波長變短，入射角太大時沒有折射光。附範例 4-8（a = 6、b = 4 → n = 1.50，a = 3 時 b = 2）、範例 4-9 潛水員的光射入甲乙丙比較光速，以及水中杯子看起來較淺的視覺偏差（圖 4-15、圖 4-16）。",sims:[["","b-snell-refraction"]]},
-    {t:"焦耳實驗・熱功當量",d:"重錘落下帶動葉輪攪拌隔熱水桶裡的水，水溫上升：可調重錘質量、落下高度、重複次數與水量，比較重錘減少的力學能 W = nMgh 與水吸收的熱 Q = mcΔT，求出熱功當量 J = W／Q ≈ 4.186 J/cal，畫 ΔT–W 圖；拉動熱量損失看誤差往哪邊跑。再走一次科學方法：熱質說 → 倫福德削砲管 → 焦耳實驗 → 熱是能量（圖 1-2、圖 5-10）。",sims:[["","b-joule-equivalent"]]}
+    {t:"焦耳實驗・熱功當量",d:"重錘落下帶動葉輪攪拌隔熱水桶裡的水，水溫上升：可調重錘質量、落下高度、重複次數與水量，比較重錘減少的力學能 W = nMgh 與水吸收的熱 Q = mcΔT，求出熱功當量 J = W／Q ≈ 4.186 J/cal，畫 ΔT–W 圖；拉動熱量損失看誤差往哪邊跑。再走一次科學方法：熱質說 → 倫福德削砲管 → 焦耳實驗 → 熱是能量（圖 1-2、圖 5-10）。",sims:[["","b-joule-equivalent"]]},
+    {t:"光的干涉與繞射",d:"楊氏雙狹縫：用惠更斯子波看兩組圓形波疊加出腹線與節線，拖曳探針看程差是整數個波長（亮紋）或半波長的奇數倍（暗紋），可調波長 400～700 nm、縫距、縫寬與屏距，看條紋變密或變疏；單狹縫繞射的中央亮紋約是其他亮紋的 2 倍寬；水波通過寬縫與窄縫、繞過障礙物（圖 4-19）；白光照在肥皂膜與油膜上，膜厚不同、加強的顏色不同（圖 4-18）。",sims:[["","b-light-interference"]]}
   ]},
   {id:"1",lvl:"1F",name:"國中自然",sub:"",color:"var(--f1)",rooms:[
     {t:"台灣電力系統：電壓相位",d:"比較住宅的單相三線制和工廠的三相四線制，看各線電壓的波形、相位差與相量圖。",sims:[["","j-power-phase"]]},
@@ -370,7 +371,7 @@ const QOWN={}; THEORY.forEach(f=>f.rooms.forEach(r=>r.qs.forEach(q=>QOWN[q]=r)))
 /* 休閒中心：小遊戲（連到外部網址，在新分頁開啟）。新增遊戲就在 GAMES 加一筆 {t:名稱, d:說明, url:網址, tag:標籤} */
 /* 物理藏經閣：物奧國家代表隊選訓教材。每章 files 列出放在 library/ 的 PDF：{label:版本名稱, pdf:檔名, by:整理者}；空陣列表示還沒上架 */
 const LIBRARY=[
-  {vol:"第一冊",theme:"力學・熱學",chapters:[{t:"力學",p:1,files:[{label:"文字版",pdf:"v1-01-mechanics-text.pdf",by:"蔣亨進、褚德三 整理",pages:51}]},{t:"剛體力學",p:42,files:[{label:"文字版",pdf:"v1-02-rigid-body-text.pdf",by:"郭鴻銘 整理",pages:49}]},{t:"振動和波",p:81,files:[{label:"文字版",pdf:"v1-03-oscillations-waves-text.pdf",by:"林明瑞 整理",pages:42}]},{t:"熱力學與分子動力論",p:118,files:[{label:"文字版",pdf:"v1-04-thermodynamics-text.pdf",by:"王婉美 整理",pages:43}]}]},
+  {vol:"第一冊",theme:"力學・熱學",chapters:[{t:"力學",p:1,files:[]},{t:"剛體力學",p:42,files:[{label:"文字版",pdf:"v1-02-rigid-body-text.pdf",by:"郭鴻銘 整理",pages:49}]},{t:"振動和波",p:81,files:[{label:"文字版",pdf:"v1-03-oscillations-waves-text.pdf",by:"林明瑞 整理",pages:42}]},{t:"熱力學與分子動力論",p:118,files:[{label:"文字版",pdf:"v1-04-thermodynamics-text.pdf",by:"王婉美 整理",pages:43}]}]},
   {vol:"第二冊",theme:"電磁・光學",chapters:[{t:"電荷與電場",p:1,files:[]},{t:"電流與磁場",p:24,files:[]},{t:"電磁波",p:112,files:[]},{t:"光學",p:130,files:[]},{t:"如何處理物體的移動和轉動",p:180,files:[]},{t:"物理例題集錦",p:205,files:[]}]},
   {vol:"第三冊",theme:"近代物理・實驗",chapters:[{t:"力學續論",p:1,files:[]},{t:"狹義相對論",p:54,files:[]},{t:"量子物理",p:95,files:[]},{t:"物質",p:110,files:[]},{t:"微中子",p:144,files:[]},{t:"熵的統計觀點",p:155,files:[]},{t:"實驗數據的處理",p:159,files:[]}]}
 ];
@@ -395,8 +396,8 @@ const GAMES=[
 ];
 /* 實驗大樓：歷屆物理學科能力競賽實驗題的虛擬實驗室（實驗培訓電子書，放在 GitHub Pages，新分頁開啟） */
 const LAB={t:"實驗培訓",d:"歷屆物理學科能力競賽實驗題的虛擬實驗室，整本電子書可以直接翻閱，各章的實驗室都能直接操作。",url:"https://yi-hung-bit.github.io/lab-book/#cover"};
-/* 實驗大樓：上傳的實驗培訓講義（PDF 放在 physics-building/；新增就加一筆 {no, t, g, pdf, pages}） */
-const LABFILES=[{"no":"1","t":"物理實驗培訓講義","g":"實驗培訓講義","pdf":"shiyan-peixun.pdf","pages":45}];
+/* 實驗大樓講義：只能線上閱覽，不提供下載（PDF 放在 labdoc/） */
+const LABDOCS=[{t:"高二選修物理實驗培訓講義",d:"有效數字・誤差・實驗數據的作圖・光學・十個實驗・實驗報告寫作要點",pdf:"lab-training-notes.pdf",pages:46}];
 const BRIDGE_LEVEL="3";
 
 const $=s=>document.querySelector(s);
@@ -503,16 +504,12 @@ function route(){
     p.querySelectorAll(".dbfile").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
   }else if(c.b==="lab"){
     p.style.setProperty("--fc","var(--lab)");
-    const lgroups=[]; LABFILES.forEach(d=>{let g=lgroups.find(x=>x.g===d.g); if(!g){g={g:d.g,rows:[]};lgroups.push(g);} g.rows.push(d);});
-    p.innerHTML=`<div class="panel-head"><div class="badge">實</div><div><div class="bld">院區右側・競賽大樓旁</div><h2>實驗大樓</h2><p>學科能力競賽 實驗題虛擬實驗室・講義 ${LABFILES.length} 份</p></div></div>
+    p.innerHTML=`<div class="panel-head"><div class="badge">實</div><div><div class="bld">院區右側・競賽大樓旁</div><h2>實驗大樓</h2><p>學科能力競賽 實驗題虛擬實驗室</p></div></div>
       <p class="body-text">${esc(LAB.d)}</p>
       <a class="go" href="${esc(LAB.url)}" target="_blank" rel="noopener">進入${esc(LAB.t)} ↗</a>
-      <div class="dbyears">${lgroups.map(g=>`<p class="dbdec">${esc(g.g)}</p>`+g.rows.map(d=>{const fi=LABFILES.indexOf(d);
-        return `<div class="dbrow"><span class="yy">${esc(d.no)}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(d.pdf)}"><em>${esc(d.t)} <small>${d.pages} 頁</small></em><button type="button" class="pv" data-i="${fi}">閱覽</button>${DB2_VIEW_ONLY?"":`<button type="button" class="pd" data-i="${fi}">下載</button>`}</span></div></div>`;}).join("")).join("")}</div>
-      <p class="note">競賽大樓放理論，實驗大樓放實驗：同一場競賽的兩個部分。實驗室會在新分頁開啟，用完關掉分頁就回到研究院。</p>`;
-    p.querySelectorAll(".dbfile .pv").forEach(b=>b.onclick=()=>openPdf(labFile(b)));
-    p.querySelectorAll(".dbfile .pd").forEach(b=>b.onclick=()=>downloadPdf(labFile(b),b));
-    p.querySelectorAll(".dbfile").forEach(el=>fetch(el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
+      <div class="dbyears"><p class="dbdec">講義（僅供閱讀）</p>${LABDOCS.map((d,i)=>`<div class="dbrow"><span class="yy">${String(i+1).padStart(2,"0")}</span><div class="dbfiles"><span class="dbfile"><em>${esc(d.t)} <small>${d.pages} 頁・${esc(d.d)}</small></em><button type="button" class="lpv" data-i="${i}">閱覽</button></span></div></div>`).join("")}</div>
+      <p class="note">競賽大樓放理論，實驗大樓放實驗：同一場競賽的兩個部分。實驗室會在新分頁開啟，用完關掉分頁就回到研究院；講義點「閱覽」在這裡直接翻頁看。</p>`;
+    p.querySelectorAll(".lpv").forEach(b=>b.onclick=()=>{const d=LABDOCS[b.dataset.i];openPdf({v:{vol:"實驗大樓"},ch:{t:d.t},f:{label:"講義",by:"僅供閱讀"},url:"labdoc/"+d.pdf,name:d.t+".pdf",viewOnly:true});});
   }else if(c.b==="gym"){
     p.style.setProperty("--fc","var(--gym)");
     p.innerHTML=`<div class="panel-head"><div class="badge">玩</div><div><div class="bld">院區後方</div><h2>休閒中心</h2><p>下課來玩物理小遊戲・${GAMES.length} 款</p></div></div>
@@ -527,7 +524,7 @@ function route(){
     p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
       <div class="dir">
         <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button>`}</section>
-        <section><h3>實驗大樓 <small>競賽實驗題</small></h3><button type="button" class="dir-row" data-h="lab" style="--fc:var(--lab)"><span class="n">實</span><span><b>實驗大樓</b><small>${esc(LAB.t)}・歷屆學科能力競賽實驗題虛擬實驗室・講義 ${LABFILES.length} 份</small></span></button></section>
+        <section><h3>實驗大樓 <small>競賽實驗題</small></h3><button type="button" class="dir-row" data-h="lab" style="--fc:var(--lab)"><span class="n">實</span><span><b>實驗大樓</b><small>${esc(LAB.t)}・歷屆學科能力競賽實驗題虛擬實驗室・講義 ${LABDOCS.length} 份</small></span></button></section>
         <section><h3>物理藏經閣 <small>選訓教材 ${LIBRARY.length} 冊</small></h3><button type="button" class="dir-row" data-h="lib" style="--fc:var(--lib)"><span class="n">經</span><span><b>物理藏經閣</b><small>${esc(LIBRARY.map(v=>v.vol+" "+v.theme).join("・"))}</small></span></button></section>
         <section><h3>二階資料庫 <small>申請入學二階筆試</small></h3><button type="button" class="dir-row" data-h="db" style="--fc:var(--db)"><span class="n">二</span><span><b>二階資料庫</b><small>${esc(DB2_BOOK)}・依章閱覽與下載</small></span></button></section>
         <section><h3>休閒中心 <small>${GAMES.length} 款遊戲</small></h3><button type="button" class="dir-row" data-h="gym" style="--fc:var(--gym)"><span class="n">玩</span><span><b>休閒中心</b><small>${esc(GAMES.map(g=>g.t).join("・"))}</small></span></button></section>
@@ -543,7 +540,6 @@ function route(){
 /* ---------- 藏經閣：PDF 閱覽與下載 ---------- */
 const fyFile=b=>{const d=OLY2.find(x=>x.y==b.dataset.y), f=d.files[b.dataset.f]; return {v:{vol:"複賽"},ch:{t:d.y+" 年"},f:{label:f.label,by:"物奧複賽"},url:"db2/"+f.pdf,name:`物奧複賽 ${d.y} ${f.label}.pdf`};};
 const dbFile=b=>{const d=DB2[b.dataset.i]; return {v:{vol:"二階"},ch:{t:/^\d+$/.test(d.no)?"第 "+d.no+" 章":d.no},f:{label:d.t,by:DB2_BOOK},url:"db2/"+d.pdf,name:`二階 ${DB2_BOOK} ${d.no} ${d.t}.pdf`};};
-const labFile=b=>{const d=LABFILES[b.dataset.i]; return {v:{vol:"實驗"},ch:{t:d.g},f:{label:d.t,by:"實驗培訓"},url:d.pdf,name:`${d.t}.pdf`,viewOnly:true};};
 const libFile=b=>{const v=LIBRARY[b.dataset.v], ch=v.chapters[b.dataset.c], f=ch.files[b.dataset.f]; return {v,ch,f,url:"library/"+f.pdf,name:`選訓教材 ${v.vol} ${ch.t}（${f.label}）.pdf`};};
 let pdfLib=null;
 function loadPdfJs(){
@@ -559,7 +555,7 @@ async function openPdf(it){
   const body=$("#pvBody"); body.innerHTML=`<p class="pvmsg">載入中…</p>`; body.scrollTop=0;
   pv.hidden=false; document.documentElement.classList.add("in-class"); $("#pvClose").focus();
   $("#pvDl").onclick=()=>downloadPdf(it,$("#pvDl"));
-  $("#pvDl").hidden=DB2_VIEW_ONLY&&(it.url.startsWith("db2/ge-")||it.url.startsWith("library/")||it.viewOnly);
+  $("#pvDl").hidden=!!it.viewOnly||DB2_VIEW_ONLY&&(it.url.startsWith("db2/ge-")||it.url.startsWith("library/"));
   try{
     const lib=await loadPdfJs();
     const doc=await lib.getDocument({url:it.url}).promise; if(pv.hidden) return; pvDoc=doc;
@@ -1176,6 +1172,7 @@ route();
 window.addEventListener("hashchange",route);
 if(!init3D()){$("#scene").hidden=true;$("#nogl").hidden=false;}
 </script>
+
 
 <script>
 if("serviceWorker" in navigator){

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光的干涉與繞射</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--pink:#ff5c8a;--lime:#84cc16}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(67,214,255,.08),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.tabs button{font-size:14px;padding:8px 14px}
+.tabs button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono","Noto Sans TC",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;touch-action:none}
+canvas{display:block;width:100%}
+#wave{height:360px;cursor:crosshair}
+#scr{height:62px;cursor:ew-resize}
+#plot{height:150px;cursor:ew-resize}
+@media(max-width:560px){#wave{height:290px}}
+.axis{display:flex;justify-content:space-between;padding:0 16px 10px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{border-color:var(--cyan);color:var(--cyan)}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+#sL{background:linear-gradient(90deg,#7f00ff,#0040ff,#00c8ff,#00ff40,#e0ff00,#ffa000,#ff2000)}
+.chk{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted);margin-top:10px}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+@media(max-width:400px){.read{grid-template-columns:repeat(2,1fr)}}
+.state{margin-top:12px;padding:10px 14px;border-radius:11px;font-weight:700;font-size:14.5px;text-align:center;border:1px solid var(--line)}
+.state.c{background:rgba(125,255,196,.1);color:var(--phos);border-color:rgba(125,255,196,.4)}
+.state.d{background:rgba(255,92,138,.1);color:var(--pink);border-color:rgba(255,92,138,.4)}
+.state.m{background:rgba(255,209,102,.1);color:var(--acc);border-color:rgba(255,209,102,.4)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px;border:1px solid #fff3}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">4-4 · Interference &amp; Diffraction</div>
+  <h1>光的干涉與繞射</h1>
+  <p class="lede">兩道光相遇時依疊加原理合成：波峰遇波峰（波谷遇波谷）振幅變大，是建設性干涉；波峰遇波谷互相抵消，是破壞性干涉。1801 年楊氏讓光通過雙狹縫，在屏上看到明暗相間的條紋，證明光是一種波；光通過很窄的單狹縫也會散開，這是繞射。可見光的波長約 400～700 nm。</p>
+
+  <div class="tabs" id="tabs">
+    <button data-m="double" aria-pressed="true">楊氏雙狹縫干涉</button>
+    <button data-m="single" aria-pressed="false">單狹縫繞射</button>
+    <button data-m="water" aria-pressed="false">水波通過寬縫與窄縫</button>
+    <button data-m="film" aria-pressed="false">肥皂泡與油膜的彩色</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t" id="wTitle"></span><span class="n" id="wNote"></span></div>
+      <div class="box"><canvas id="wave" aria-label="波的疊加示意圖"></canvas></div>
+      <div class="legend" id="legend"></div>
+      <div id="realWrap">
+        <div class="head" style="padding-top:2px"><span class="t" id="pTitle"></span><span class="n" id="pNote"></span></div>
+        <div class="box" id="scrBox"><canvas id="scr" aria-label="屏幕上的條紋"></canvas></div>
+        <div class="box" style="margin-top:0"><canvas id="plot" aria-label="強度分布"></canvas></div>
+        <div class="axis" id="axis"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><span class="t">調整與讀數</span><span class="n" id="cNote"></span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg"><button id="play" class="on">⏸ 暫停波動</button><button id="viewBtn">切換：瞬間波形 / 時間平均亮度</button></div>
+        <div id="ctls"></div>
+        <div class="state" id="state"></div>
+        <div class="read" id="read"></div>
+        <div class="note" id="see"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">想一想</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="qq"><p>雙狹縫實驗把紅色雷射（650 nm）換成藍紫色雷射（405 nm），條紋變密還是變疏？</p><div class="seg"><button data-try="q1">試試看</button><button data-a="a1">看說明</button></div><div class="ans" id="a1" hidden>變<b>密</b>。波長越短，相鄰亮紋的距離越小；在 d、L 不變時，條紋間距和波長成正比（650 → 405 nm，約剩 0.62 倍）。</div></div>
+        <div class="qq"><p>把雙狹縫的縫距 d 變小，條紋怎麼變？</p><div class="seg"><button data-try="q2">試試看</button><button data-a="a2">看說明</button></div><div class="ans" id="a2" hidden>條紋變<b>寬（變疏）</b>。兩縫越靠近，要偏到更遠的地方程差才會變成一個波長；條紋間距和 d 成反比。</div></div>
+        <div class="qq"><p>單狹縫變窄，中央亮紋變寬還是變窄？</p><div class="seg"><button data-try="q3">試試看</button><button data-a="a3">看說明</button></div><div class="ans" id="a3" hidden>變<b>寬</b>。縫越窄、越接近波長，繞射越明顯，光散得越開。中央亮紋的寬度約是其他亮紋的 2 倍。</div></div>
+        <div class="qq"><p>隔著門口聽得到房間裡的人說話，卻看不到他，為什麼？</p><div class="seg"><button data-try="q4">試試看</button><button data-a="a4">看說明</button></div><div class="ans" id="a4" hidden>聲波波長約 0.1～1 m，和門寬差不多，<b>繞射明顯</b>；光的波長只有約 5 × 10⁻⁷ m，遠小於門寬，幾乎直線前進。所以要看到光的繞射，狹縫得非常窄。</div></div>
+        <div class="qq"><p>肥皂泡越來越薄時，頂端先出現什麼顏色？為什麼最後會變黑？</p><div class="seg"><button data-try="q5">試試看</button><button data-a="a5">看說明</button></div><div class="ans" id="a5" hidden>膜的上、下表面各反射一道光，兩道光的程差和膜厚有關，不同厚度讓不同顏色建設性干涉。膜厚遠小於波長時，因為其中一道反射光在反射時波峰波谷顛倒，兩道光<b>互相抵消</b>，看起來是黑的，表示泡泡快破了。</div></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">教學提示</span></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="note" style="margin-top:0">
+          1. 先在「瞬間波形」看兩組圓形波的波峰、波谷交錯，再切到「時間平均亮度」，亮帶就是一直建設性干涉的位置，延伸到屏上就是亮紋（圖 4-18(5)）。<br>
+          2. 在屏幕或強度圖上拖曳探針：兩縫到該點的<b>程差是波長整數倍 → 亮紋</b>，是半波長的奇數倍 → 暗紋。<br>
+          3. 基礎物理只要求定性：波長越長、縫距越小、屏越遠 → 條紋越寬；讀數中的 Δy = λL／d 留給選修物理三，可當延伸。<br>
+          4. 「水波通過寬縫與窄縫」對照圖 4-19：縫寬遠大於波長時幾乎直線前進，縫寬接近波長時散成圓形波；障礙物也一樣。<br>
+          5. 電子也有干涉條紋，可接著到 204 教室「電子雙狹縫」比較；水波干涉的 3D 版在 501 教室。
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer><b>說明：</b>上方波動圖是示意圖，波長與狹縫都放大了很多倍（真實的光波長不到 1 μm）；下方屏幕條紋與強度圖用真實尺度計算（小角度近似，雙狹縫 I ∝ cos²(πdy／λL)，勾選縫寬時乘上單縫包絡 sinc²(πay／λL)）。薄膜顏色以垂直入射、兩道反射光的干涉計算，並把各波長的反射強度換算成看到的顏色。</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const S={mode:"double",lam:633,d:0.25,a:0.06,L:2.0,env:true,lines:false,
+  wl:2.0,gap:8,obst:false,mat:0,tmax:1200,tp:300,
+  view:"inst",play:true,ph:0,probe:4.0,film:0.35};
+const MAT=[["肥皂膜（水）",1.33],["油膜（浮在水面上）",1.47]];
+const fmt=(x,d=2)=>Number.isFinite(x)?x.toFixed(d):"—";
+
+/* ---------- 波長 → 顏色 ---------- */
+function lamRGB(l){let r=0,g=0,b=0;
+  if(l<440){r=-(l-440)/60;b=1}else if(l<490){g=(l-440)/50;b=1}else if(l<510){g=1;b=-(l-510)/20}
+  else if(l<580){r=(l-510)/70;g=1}else if(l<645){r=1;g=-(l-645)/65}else{r=1}
+  let f=l<420?0.3+0.7*(l-380)/40:l>680?0.3+0.7*(750-l)/70:1;f=Math.max(0.35,f);
+  return [r,g,b].map(c=>Math.round(255*Math.pow(c*f,0.8)));}
+function lamName(l){return l<450?"紫":l<490?"藍":l<510?"青":l<570?"綠":l<590?"黃":l<620?"橙":"紅";}
+/* CIE 1931 近似（Wyman 2013） */
+function g_(x,m,s1,s2){const t=(x-m)*(x<m?s1:s2);return Math.exp(-.5*t*t);}
+function cie(l){return[1.056*g_(l,599.8,.0264,.0323)+.362*g_(l,442,.0624,.0374)-.065*g_(l,501.1,.049,.0382),
+  .821*g_(l,568.8,.0213,.0247)+.286*g_(l,530.9,.0613,.0322),1.217*g_(l,437,.0845,.0278)+.681*g_(l,459,.0385,.0725)];}
+const XYZ2RGB=[[3.2406,-1.5372,-.4986],[-.9689,1.8758,.0415],[.0557,-.204,1.057]];
+let WB=null;
+function spec2rgb(fn){let X=0,Y=0,Z=0;for(let l=380;l<=730;l+=5){const w=fn(l),c=cie(l);X+=w*c[0];Y+=w*c[1];Z+=w*c[2];}
+  let rgb=XYZ2RGB.map(r=>r[0]*X+r[1]*Y+r[2]*Z);return rgb;}
+WB=spec2rgb(()=>1);
+function filmRGB(t,n,gain=1.25){let lin=spec2rgb(l=>filmR(t,n,l)).map((v,i)=>v/WB[i]*gain);const mn=Math.min(...lin),Y=(lin[0]+lin[1]+lin[2])/3;if(mn<0){const f=Y/(Y-mn+1e-9);lin=lin.map(v=>Y+(v-Y)*f);}const mx=Math.max(...lin);if(mx>1)lin=lin.map(v=>v/mx);
+  return lin.map(v=>Math.round(255*Math.min(1,v<=.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-.055)));}
+function filmR(t,n,l){const s=Math.sin(2*Math.PI*n*t/l);return s*s;}
+
+/* ---------- 真實尺度強度 ---------- */
+function sinc2(x){return Math.abs(x)<1e-9?1:Math.pow(Math.sin(x)/x,2);}
+function Iy(ymm){const lam=S.lam*1e-9,L=S.L,y=ymm*1e-3;
+  if(S.mode==="double"){const d=S.d*1e-3,a=S.a*1e-3;const c=Math.cos(Math.PI*d*y/(lam*L));return c*c*(S.env?sinc2(Math.PI*a*y/(lam*L)):1);}
+  const a=S.a*1e-3;return sinc2(Math.PI*a*y/(lam*L));}
+function Ymax(){if(S.mode==="double")return 20;const w=S.lam*1e-9*S.L/(S.a*1e-3)*1e3;return Math.min(80,Math.max(10,Math.ceil(2.6*w/5)*5));}
+
+/* ---------- 控制項 ---------- */
+const CTL={
+ double:[["sL","波長 λ","lam",400,700,1,v=>v+" nm"],["sD","縫距 d","d",0.1,0.5,0.01,v=>v.toFixed(2)+" mm"],["sA","每條縫的寬度 a","a",0.02,0.1,0.005,v=>v.toFixed(3)+" mm"],["sLL","狹縫到屏幕 L","L",1,3,0.1,v=>v.toFixed(1)+" m"]],
+ single:[["sL","波長 λ","lam",400,700,1,v=>v+" nm"],["sA","縫寬 a","a",0.02,0.2,0.005,v=>v.toFixed(3)+" mm"],["sLL","狹縫到屏幕 L","L",1,3,0.1,v=>v.toFixed(1)+" m"]],
+ water:[["sW","水波波長","wl",1,3,0.1,v=>v.toFixed(1)+" cm"],["sG","開口（或障礙物）寬度","gap",0.5,14,0.1,v=>v.toFixed(1)+" cm"]],
+ film:[["sT","膜底部的厚度","tmax",300,1500,10,v=>v+" nm"]]
+};
+function buildCtl(){
+  const list=CTL[S.mode];let h=list.map(([id,lab,k,mn,mx,st,f])=>`<div class="ctl"><div class="r"><label for="${id}">${lab}</label><span id="o_${id}"></span></div><input type="range" id="${id}" min="${mn}" max="${mx}" step="${st}" value="${S[k]}"></div>`).join("");
+  if(S.mode==="double")h+=`<label class="chk"><input type="checkbox" id="cEnv" ${S.env?"checked":""}> 考慮縫寬（單縫繞射包絡）</label><label class="chk"><input type="checkbox" id="cLines" ${S.lines?"checked":""}> 標出腹線（程差 = 整數個波長）與節線</label><div class="seg" style="margin-top:10px"><button data-lam="650">紅光 650 nm</button><button data-lam="532">綠光 532 nm</button><button data-lam="405">紫光 405 nm</button></div>`;
+  if(S.mode==="single")h+=`<div class="seg" style="margin-top:10px"><button data-lam="650">紅光 650 nm</button><button data-lam="532">綠光 532 nm</button><button data-lam="405">紫光 405 nm</button></div>`;
+  if(S.mode==="water")h+=`<div class="seg" style="margin-top:10px"><button data-ob="0" class="${S.obst?"":"on"}">開口（圖 4-19(1)）</button><button data-ob="1" class="${S.obst?"on":""}">障礙物（圖 4-19(2)）</button></div><div class="seg" style="margin-top:8px"><button data-g="12">寬：12 cm</button><button data-g="2">窄：2 cm</button></div>`;
+  if(S.mode==="film")h+=`<div class="ctl"><div class="r"><label for="sM">薄膜</label></div><div class="seg">${MAT.map((m,i)=>`<button data-mat="${i}" class="${S.mat===i?"on":""}">${m[0]}，n = ${m[1]}</button>`).join("")}</div></div><p class="chk">點一下或拖曳左圖的膜，看那裡的厚度與反射光。</p>`;
+  $("#ctls").innerHTML=h;
+  list.forEach(([id,,k,,,,f])=>{const el=$("#"+id);const o=$("#o_"+id);o.textContent=f(S[k]);el.oninput=()=>{S[k]=+el.value;o.textContent=f(S[k]);changed();};});
+  $("#ctls").querySelectorAll("[data-lam]").forEach(b=>b.onclick=()=>{S.lam=+b.dataset.lam;buildCtl();changed();});
+  $("#ctls").querySelectorAll("[data-ob]").forEach(b=>b.onclick=()=>{S.obst=b.dataset.ob==="1";buildCtl();changed();});
+  $("#ctls").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{S.gap=+b.dataset.g;buildCtl();changed();});
+  $("#ctls").querySelectorAll("[data-mat]").forEach(b=>b.onclick=()=>{S.mat=+b.dataset.mat;buildCtl();changed();});
+  const e=$("#cEnv");if(e)e.onchange=()=>{S.env=e.checked;changed();};
+  const l=$("#cLines");if(l)l.onchange=()=>{S.lines=l.checked;};
+}
+
+/* ---------- 示意波場（複數振幅快取） ---------- */
+const CELL=3;let G=null;
+const cv=$("#wave"),cs=$("#scr"),cp=$("#plot");
+const off=document.createElement("canvas");
+function fit(c){const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return [r.width,r.height];}
+function geom(W,H){
+  if(S.mode==="water"){const lp=S.wl*10;return{bx:Math.round(W*0.22),lp,open:S.gap*10};}
+  const lp=12+(S.lam-400)/300*12;
+  if(S.mode==="double"){const dp=Math.min(H*0.55,lp*(1.6+(S.d-0.1)/0.4*5.4));const ap=Math.max(2,lp*(S.a/0.1)*1.4);return{bx:Math.round(W*0.2),lp,dp,ap};}
+  return{bx:Math.round(W*0.2),lp,ap:lp*(0.5+(S.a-0.02)/0.18*7.5)};
+}
+function buildField(){
+  const [W,H]=fit(cv);const gw=Math.ceil(W/CELL),gh=Math.ceil(H/CELL);
+  const g=geom(W,H),k=2*Math.PI/g.lp,cy=H/2;
+  const re=new Float32Array(gw*gh),im=new Float32Array(gw*gh);
+  let src=[];const ds=g.lp/6;
+  const line=(y0,y1,sgn)=>{const n=Math.max(1,Math.round((y1-y0)/ds));const s=(y1-y0)/n;for(let i=0;i<=n;i++){let w=s/Math.sqrt(g.lp)*sgn;if(i===0||i===n)w*=0.5;src.push([y0+i*s,w]);}};
+  if(S.mode==="double"){if(S.env){line(cy-g.dp/2-g.ap/2,cy-g.dp/2+g.ap/2,1);line(cy+g.dp/2-g.ap/2,cy+g.dp/2+g.ap/2,1);}else{src.push([cy-g.dp/2,1],[cy+g.dp/2,1]);}}
+  else if(S.mode==="single")line(cy-g.ap/2,cy+g.ap/2,1);
+  else if(S.mode==="water"){if(S.obst)line(cy-g.open/2,cy+g.open/2,-1);else line(cy-g.open/2,cy+g.open/2,1);}
+  for(let j=0;j<gh;j++){const y=(j+.5)*CELL;for(let i=0;i<gw;i++){const x=(i+.5)*CELL,p=j*gw+i;
+    if(x<g.bx){if(S.mode==="water"&&S.obst){}re[p]=Math.cos(k*(x-g.bx));im[p]=Math.sin(k*(x-g.bx));continue;}
+    let R=0,I=0;const dx=x-g.bx;
+    if(S.mode==="water"&&S.obst){R=Math.cos(k*dx);I=Math.sin(k*dx);}
+    for(const [sy,w] of src){const r=Math.hypot(dx,y-sy)+0.5;const ph=k*r-Math.PI/4;const a=w/Math.sqrt(r);R+=a*Math.cos(ph);I+=a*Math.sin(ph);}
+    re[p]=R;im[p]=I;}}
+  let ref=1;if(S.mode!=="water"){ref=0;for(let j=0;j<gh;j++)for(let i=Math.floor((g.bx+H*0.35)/CELL);i<gw;i++){const p=j*gw+i;ref=Math.max(ref,Math.hypot(re[p],im[p]));}ref=ref||1;}
+  off.width=gw;off.height=gh;
+  G={W,H,gw,gh,re,im,ref,g,src,img:off.getContext("2d").createImageData(gw,gh)};
+}
+function drawWave(){
+  if(!G)return;const {W,H,gw,gh,re,im,ref,g,img}=G;const x=cv.getContext("2d");
+  if(S.mode==="film"){drawFilm(x,W,H);return;}
+  const c=Math.cos(S.ph),s=Math.sin(S.ph);
+  const col=S.mode==="water"?null:lamRGB(S.lam);const D=img.data;const bxi=g.bx/CELL;
+  for(let p=0;p<gw*gh;p++){let v;
+    if(S.view==="inst"){v=(re[p]*c+im[p]*s)/ref;v=Math.max(-1,Math.min(1,v));}
+    else{v=(re[p]*re[p]+im[p]*im[p])/(ref*ref);v=Math.min(1,v)*2-1;}
+    const q=p*4;
+    if(col){const t=(v+1)/2;const tt=S.view==="inst"?t:Math.pow(t,0.8);D[q]=col[0]*tt;D[q+1]=col[1]*tt;D[q+2]=col[2]*tt;}
+    else{const t=(v+1)/2;D[q]=12+40*t;D[q+1]=70+150*t;D[q+2]=55+70*t;}
+    D[q+3]=255;}
+  off.getContext("2d").putImageData(img,0,0);
+  x.imageSmoothingEnabled=true;x.clearRect(0,0,W,H);x.drawImage(off,0,0,gw*CELL,gh*CELL);
+  const cy=H/2;x.fillStyle="#cfd6e3";
+  if(S.mode==="double"){const ho=S.env?g.ap/2:2;bar(x,g.bx,0,cy-g.dp/2-ho);bar(x,g.bx,cy-g.dp/2+ho,cy+g.dp/2-ho);bar(x,g.bx,cy+g.dp/2+ho,H);
+    if(S.lines)drawLines(x,W,H);}
+  else if(S.mode==="single"){bar(x,g.bx,0,cy-g.ap/2);bar(x,g.bx,cy+g.ap/2,H);}
+  else{if(S.obst){x.fillStyle="#111";x.fillRect(g.bx-4,cy-g.open/2,8,g.open);}else{x.fillStyle="#111";x.fillRect(g.bx-4,0,8,cy-g.open/2);x.fillRect(g.bx-4,cy+g.open/2,8,H);}}
+  if(S.mode!=="water"){/* 右緣的屏幕：時間平均 */
+    const i0=gw-1;x.fillStyle="#000";x.fillRect(W-12,0,12,H);
+    for(let j=0;j<gh;j++){const p=j*gw+i0;let v=Math.min(1,(re[p]*re[p]+im[p]*im[p])/(ref*ref)*3);x.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${v})`;x.fillRect(W-10,j*CELL,8,CELL);}
+    x.fillStyle="#8492aa";x.font='11px "Noto Sans TC",sans-serif';x.textAlign="right";x.fillText("屏",W-15,14);
+    x.textAlign="left";x.fillText(S.mode==="double"?"雙狹縫":"單狹縫",g.bx+6,14);x.fillText("雷射光 →",6,14);}
+  else{x.fillStyle="#e8edf6";x.font='12px "Noto Sans TC",sans-serif';x.textAlign="left";x.fillText("波前進方向 →",6,16);
+    const r=S.gap/S.wl;x.fillText(`寬度 ÷ 波長 = ${r.toFixed(1)}`,g.bx+10,16);}
+}
+function bar(x,bx,y0,y1){if(y1>y0)x.fillRect(bx-3,y0,6,y1-y0);}
+function drawLines(x,W,H){const g=G.g,c=g.dp/2,cy=H/2,bx=g.bx;
+  for(let m=-12;m<=12;m++){for(const half of [0,0.5]){const D=(m+half)*g.lp;if(Math.abs(D)>=2*c-0.5||(half&&m<0&&false))continue;
+    if(half===0.5&&m<-0.5-12)continue;
+    const a0=Math.abs(D)/2;x.strokeStyle=half?"rgba(255,92,138,.9)":"rgba(255,255,255,.85)";x.setLineDash(half?[5,5]:[]);x.lineWidth=1.3;x.beginPath();let st=true;
+    for(let xx=0;xx<=W-bx-12;xx+=3){let yy;if(a0<1e-6)yy=0;else{const b2=c*c-a0*a0;yy=a0*Math.sqrt(1+xx*xx/b2);}const Y=cy+(D>0?yy:-yy);if(Y<0||Y>H){st=true;continue;}st?x.moveTo(bx+xx,Y):x.lineTo(bx+xx,Y);st=false;}
+    x.stroke();}}
+  x.setLineDash([]);}
+/* ---------- 薄膜 ---------- */
+let FROWS=null;
+function buildFilm(H){const n=MAT[S.mat][1];FROWS=[];for(let j=0;j<=200;j++){const t=S.tmax*j/200;FROWS.push(filmRGB(t,n));}}
+function tAt(f){return S.tmax*Math.pow(Math.max(0,f-0.04)/0.96,1.4);}
+function drawFilm(x,W,H){const n=MAT[S.mat][1];const fw=Math.min(W*0.52,H*0.9),fx=16,fy=16,fh=H-32;
+  x.fillStyle="#04060b";x.fillRect(0,0,W,H);
+  for(let j=0;j<fh;j+=2){for(let i=0;i<fw;i+=4){const f=Math.min(1,Math.max(0,j/fh+0.025*Math.sin(i/fw*6+S.ph*0.15+j/40)));const t=tAt(f);const r=FROWS[Math.round(t/S.tmax*200)];x.fillStyle=`rgb(${r[0]},${r[1]},${r[2]})`;x.fillRect(fx+i,fy+j,4,2);}}
+  x.strokeStyle="#cfd6e3";x.lineWidth=3;x.strokeRect(fx-2,fy-2,fw+4,fh+4);
+  const py=fy+S.film*fh;x.strokeStyle="#fff";x.lineWidth=1.5;x.beginPath();x.moveTo(fx-8,py);x.lineTo(fx+fw+8,py);x.stroke();
+  x.fillStyle="#8492aa";x.font='11px "Noto Sans TC",sans-serif';x.textAlign="left";x.fillText("上：薄",fx+4,fy+12);x.fillText("下：厚",fx+4,fy+fh-6);
+  /* 剖面圖 */
+  const ox=fx+fw+24,ow=W-ox-10;if(ow<120)return;const t=tAt(S.film);const th=Math.max(14,Math.min(70,t/S.tmax*70+10));const my=H*0.55;
+  x.fillStyle="rgba(67,214,255,.18)";x.fillRect(ox,my,ow,th);x.strokeStyle="#43d6ff";x.lineWidth=1;x.strokeRect(ox,my,ow,th);
+  x.fillStyle="#8492aa";x.fillText("空氣",ox+4,my-60);x.fillText(MAT[S.mat][0].slice(0,2)+" n = "+n,ox+4,my+th/2+4);x.fillText(S.mat?"水":"空氣",ox+4,my+th+16);
+  const ax=ox+ow*0.3,bx=ox+ow*0.5,cx=ox+ow*0.7,tl=(my-ax*0)-70;
+  const L=(a,b,c2,d,col,dash)=>{x.strokeStyle=col;x.setLineDash(dash||[]);x.lineWidth=2;x.beginPath();x.moveTo(a,b);x.lineTo(c2,d);x.stroke();x.setLineDash([]);};
+  L(ax-ow*0.2,my-60,ax,my,"#e8edf6");L(ax,my,bx,my+th,"#e8edf6",[4,3]);L(bx,my+th,cx,my,"#e8edf6",[4,3]);
+  L(ax,my,ax+ow*0.2,my-60,"#ffd166");L(cx,my,cx+ow*0.2,my-60,"#7dffc4");
+  x.fillStyle="#ffd166";x.fillText("①上表面反射（波峰波谷顛倒）",Math.max(ox,ax-10),my-66);
+  x.fillStyle="#7dffc4";x.fillText("②下表面反射",Math.min(cx,W-90),my-48);
+  x.fillStyle="#e8edf6";x.fillText("程差 ≈ 2nt",bx-24,my+th+32);
+}
+
+/* ---------- 真實尺度：屏幕與強度圖 ---------- */
+function drawReal(){
+  if(S.mode==="water"||S.mode==="film"){drawFilmPlot();return;}
+  const [W,H]=fit(cs),x=cs.getContext("2d"),Y=Ymax(),col=lamRGB(S.lam);
+  x.fillStyle="#000";x.fillRect(0,0,W,H);
+  for(let i=0;i<W;i++){const y=(i/W*2-1)*Y;const v=Math.pow(Iy(y),0.7);x.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${v})`;x.fillRect(i,0,1,H);}
+  const px=(S.probe/Y+1)/2*W;x.strokeStyle="#fff";x.lineWidth=1.5;x.beginPath();x.moveTo(px,0);x.lineTo(px,H);x.stroke();
+  const [W2,H2]=fit(cp),y2=cp.getContext("2d");y2.fillStyle="#04060b";y2.fillRect(0,0,W2,H2);
+  y2.strokeStyle="#1b2336";y2.lineWidth=1;for(let k=-Y;k<=Y;k+=Y>=40?10:5){const xx=(k/Y+1)/2*W2;y2.beginPath();y2.moveTo(xx,0);y2.lineTo(xx,H2);y2.stroke();}
+  const b=H2-8,am=H2-20;
+  if(S.mode==="double"&&S.env){y2.strokeStyle="rgba(169,139,255,.7)";y2.setLineDash([4,4]);y2.beginPath();for(let i=0;i<=W2;i++){const y=(i/W2*2-1)*Y;const e=sinc2(Math.PI*S.a*1e-3*y*1e-3/(S.lam*1e-9*S.L));i?y2.lineTo(i,b-e*am):y2.moveTo(i,b-e*am);}y2.stroke();y2.setLineDash([]);}
+  y2.strokeStyle=`rgb(${col})`;y2.lineWidth=1.8;y2.beginPath();for(let i=0;i<=W2;i++){const y=(i/W2*2-1)*Y;const v=Iy(y);i?y2.lineTo(i,b-v*am):y2.moveTo(i,b-v*am);}y2.stroke();
+  const p2=(S.probe/Y+1)/2*W2;y2.strokeStyle="#fff";y2.beginPath();y2.moveTo(p2,0);y2.lineTo(p2,H2);y2.stroke();
+  y2.fillStyle="#fff";y2.beginPath();y2.arc(p2,b-Iy(S.probe)*am,4,0,7);y2.fill();
+  $("#axis").innerHTML=`<span>−${Y} mm</span><span>0（中央）</span><span>+${Y} mm</span>`;
+}
+function drawFilmPlot(){
+  if(S.mode==="water")return;
+  const [W2,H2]=fit(cp),y2=cp.getContext("2d");y2.fillStyle="#04060b";y2.fillRect(0,0,W2,H2);
+  const n=MAT[S.mat][1],t=tAt(S.film),b=H2-8,am=H2-20;
+  for(let i=0;i<W2;i++){const l=400+300*i/W2;const v=filmR(t,n,l);const c=lamRGB(l);y2.fillStyle=`rgba(${c},${0.85})`;y2.fillRect(i,b-v*am,1,v*am);}
+  y2.strokeStyle="#e8edf6";y2.lineWidth=1.5;y2.beginPath();for(let i=0;i<=W2;i++){const l=400+300*i/W2;const v=filmR(t,n,l);i?y2.lineTo(i,b-v*am):y2.moveTo(i,b-v*am);}y2.stroke();
+  const [W,H]=fit(cs),x=cs.getContext("2d");const rgb=filmRGB(t,n);x.fillStyle=`rgb(${rgb})`;x.fillRect(0,0,W,H);
+  x.fillStyle=(rgb[0]+rgb[1]+rgb[2])>380?"#000":"#fff";x.font='13px "Noto Sans TC",sans-serif';x.fillText("這個厚度看到的反射光顏色",10,H/2+5);
+  $("#axis").innerHTML=`<span>400 nm</span><span>550</span><span>700 nm</span>`;
+}
+
+/* ---------- 讀數與說明 ---------- */
+function update(){
+  const m=S.mode,st=$("#state");let R=[],see="",cls="m",txt="";
+  const lam=S.lam,col=lamRGB(lam),sw=`<i class="sw" style="background:rgb(${col})"></i>`;
+  if(m==="double"){const dy=lam*1e-9*S.L/(S.d*1e-3)*1e3;const pd=S.d*1e-3*S.probe*1e-3/S.L/(lam*1e-9);const fr=Math.abs(pd-Math.round(pd));
+    R=[["波長",sw+lam+" nm "+lamName(lam)+"光"],["相鄰亮紋間距 Δy",fmt(dy,2)+" mm"],["探針位置 y",fmt(S.probe,2)+" mm"],["兩縫到探針的程差",fmt(pd,2)+" λ"],["第幾條亮紋",fr<0.15?(Math.round(pd)===0?"中央亮紋":"第 "+Math.abs(Math.round(pd))+" 條"):"—"],["相對亮度",fmt(Iy(S.probe),2)]];
+    if(fr<0.15){cls="c";txt=`程差 ≈ ${Math.round(pd)} 個波長：波峰遇波峰 → 建設性干涉（亮紋）`;}else if(Math.abs(fr-0.5)<0.15){cls="d";txt=`程差 ≈ ${(Math.floor(pd)+0.5).toFixed(1)} 個波長：波峰遇波谷 → 破壞性干涉（暗紋）`;}else{txt="介於亮紋與暗紋之間";}
+    if(S.env&&Iy(S.probe)<0.05&&fr<0.15){cls="m";txt+="，但這裡剛好落在單縫包絡的暗處，亮紋消失（缺級）";}
+    see=`條紋等距、明暗相間。<b>波長越長、縫距 d 越小、屏越遠，條紋越寬</b>。目前 Δy = λL／d = ${lam} nm × ${S.L.toFixed(1)} m ÷ ${S.d.toFixed(2)} mm ≈ ${fmt(dy,2)} mm（選修物理三的公式，先當延伸）。`;}
+  else if(m==="single"){const w=lam*1e-9*S.L/(S.a*1e-3)*1e3;const pd=S.a*1e-3*S.probe*1e-3/S.L/(lam*1e-9);const ap=Math.abs(pd);
+    R=[["波長",sw+lam+" nm "+lamName(lam)+"光"],["中央亮紋寬度",fmt(2*w,1)+" mm"],["其他亮紋寬度",fmt(w,1)+" mm"],["探針位置 y",fmt(S.probe,2)+" mm"],["縫兩邊緣到探針的程差",fmt(pd,2)+" λ"],["相對亮度",fmt(Iy(S.probe),3)]];
+    if(ap<1){cls="c";txt="在中央亮紋內：光最強";}else if(Math.abs(ap-Math.round(ap))<0.12){cls="d";txt=`邊緣程差 ≈ ${Math.round(ap)} 個波長：縫內各子波兩兩抵消 → 暗紋`;}else{txt="兩側較暗的亮紋";}
+    see=`中央亮紋最寬最亮，約是其他亮紋的 2 倍寬，兩側亮紋越來越暗。<b>縫越窄、波長越長，光散得越開</b>。縫寬 ${S.a.toFixed(3)} mm 是波長的 ${Math.round(S.a*1e6/lam)} 倍。`;}
+  else if(m==="water"){const r=S.gap/S.wl;
+    R=[["水波波長",fmt(S.wl,1)+" cm"],[S.obst?"障礙物寬度":"開口寬度",fmt(S.gap,1)+" cm"],["寬度 ÷ 波長",fmt(r,1)]];
+    if(r>=4){cls="m";txt=S.obst?"障礙物遠大於波長：後面留下明顯的「影子」":"開口遠大於波長：大致直線前進，只有邊緣稍微彎曲";}else if(r<=1.5){cls="c";txt=S.obst?"障礙物和波長差不多：波幾乎繞過去，後面看不出影子":"開口和波長差不多：通過後散成圓形波，繞射明顯";}else{txt="介於兩者之間：通過後明顯散開";}
+    see="對照圖 4-19：波遇到開口或障礙物時，會繞到原本「照不到」的地方，這就是<b>繞射</b>。開口或障礙物的大小越接近波長，繞射越明顯。光的波長只有 10⁻⁷ m 數量級，所以平常看起來光直線前進。";}
+  else{const n=MAT[S.mat][1],t=tAt(S.film),rgb=filmRGB(t,n);let ls=[];for(let k=0;k<12;k++){const l=2*n*t/(k+0.5);if(l>=400&&l<=700)ls.push(Math.round(l));}
+    R=[["這裡的膜厚 t",Math.round(t)+" nm"],["兩道反射光程差 2nt",Math.round(2*n*t)+" nm"],["看到的顏色",`<i class="sw" style="background:rgb(${rgb})"></i>`],["加強的波長",ls.length?ls.join("、")+" nm":"沒有（可見光範圍內）"]];
+    if(t<60){cls="d";txt="膜太薄：兩道反射光互相抵消，看起來是黑的（快破了）";}else if(ls.length===1){cls="c";txt=`主要加強 ${ls[0]} nm（${lamName(ls[0])}光），顏色鮮豔`;}else if(ls.length>=3){txt="同時加強好幾種波長，顏色混在一起變淡";}else{cls="c";txt="加強兩種波長，混成看到的顏色";}
+    see="白光照在薄膜上，上、下表面各反射一道光，兩道光疊加。<b>厚度不同，被加強的顏色就不同</b>，所以肥皂泡和路面油漬（圖 4-18(1)、圖 4-19(5)）呈現彩虹般的條紋。肥皂膜因重力往下流，上薄下厚，形成水平的彩色帶。";}
+  st.className="state "+cls;st.textContent=txt;
+  $("#read").innerHTML=R.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join("");$("#see").innerHTML=see;
+}
+function titles(){const m=S.mode;
+  const T={double:["雙狹縫：惠更斯子波疊加（示意）","拖曳下方探針看程差","屏幕上的干涉條紋（真實尺度）","白線＝探針"],
+    single:["單狹縫：縫內每一點都是新波源（示意）","","屏幕上的繞射條紋（真實尺度）","白線＝探針"],
+    water:["水波槽俯視（圖 4-19）","綠色深淺＝波峰與波谷","",""],
+    film:["直立的肥皂膜（白光照射，看反射光）","點膜改變位置","反射光的強度與波長","探針厚度"]}[m];
+  $("#wTitle").textContent=T[0];$("#wNote").textContent=T[1];$("#pTitle").textContent=T[2];$("#pNote").textContent=T[3];
+  $("#realWrap").hidden=m==="water";$("#viewBtn").hidden=m==="film";$("#cNote").textContent=m==="film"?"白光":"";
+  $("#legend").innerHTML=m==="double"?`<span><i style="background:#fff"></i>腹線（程差 0, λ, 2λ…）</span><span><i style="background:var(--pink)"></i>節線（程差 λ/2, 3λ/2…）</span><span>右緣細條＝屏上的亮度</span>`:m==="single"?`<span>右緣細條＝屏上的亮度；縫越窄，波散得越開</span>`:m==="water"?`<span>左邊是直線波，通過後看波前的形狀</span>`:`<span>上方最薄、往下越厚；白線是探針位置</span>`;
+}
+function changed(){if(S.mode==="film")buildFilm();buildField();if(S.mode!=="film"&&S.mode!=="water"){const Y=Ymax();if(Math.abs(S.probe)>Y)S.probe=Y*0.5;}drawWave();drawReal();update();}
+function setMode(m){S.mode=m;$("#tabs").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===m));
+  if(m==="single"&&S.a<=0.1)S.a=0.1;if(m==="double"&&S.a>0.1)S.a=0.06;
+  titles();buildCtl();if(m==="film"){buildField();}changed();}
+$("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+$("#play").onclick=()=>{S.play=!S.play;$("#play").textContent=S.play?"⏸ 暫停波動":"▶ 播放波動";$("#play").classList.toggle("on",S.play);};
+$("#viewBtn").onclick=()=>{S.view=S.view==="inst"?"avg":"inst";drawWave();};
+/* 探針拖曳 */
+function probeFrom(e,c){const b=c.getBoundingClientRect();const f=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width));
+  if(S.mode==="film")return;const Y=Ymax();S.probe=(f*2-1)*Y;drawReal();update();}
+[cs,cp].forEach(c=>{let dn=false;c.addEventListener("pointerdown",e=>{dn=true;c.setPointerCapture(e.pointerId);probeFrom(e,c);});c.addEventListener("pointermove",e=>{if(dn)probeFrom(e,c);});c.addEventListener("pointerup",()=>dn=false);});
+(()=>{let dn=false;const f=e=>{if(S.mode!=="film")return;const b=cv.getBoundingClientRect();const H=b.height;S.film=Math.min(1,Math.max(0,(e.clientY-b.top-16)/(H-32)));drawWave();drawReal();update();};
+  cv.addEventListener("pointerdown",e=>{dn=true;cv.setPointerCapture(e.pointerId);f(e);});cv.addEventListener("pointermove",e=>{if(dn)f(e);});cv.addEventListener("pointerup",()=>dn=false);})();
+/* 想一想 */
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=$("#"+b.dataset.a);a.hidden=!a.hidden;});
+const TRY={q1:()=>{setMode("double");S.lam=405;buildCtl();changed();},q2:()=>{setMode("double");S.d=0.1;buildCtl();changed();},q3:()=>{setMode("single");S.a=0.03;buildCtl();changed();},
+  q4:()=>{S.wl=3;S.gap=3;S.obst=false;setMode("water");},q5:()=>{S.mat=0;S.film=0.02;setMode("film");}};
+document.querySelectorAll("[data-try]").forEach(b=>b.onclick=()=>{TRY[b.dataset.try]();window.scrollTo({top:0,behavior:"smooth"});});
+/* 動畫 */
+let last=0;function loop(t){if(S.play&&t-last>33){S.ph+=0.18;last=t;if(S.mode!=="film"||true)drawWave();}requestAnimationFrame(loop);}
+let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(changed,120);});
+titles();buildCtl();changed();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
