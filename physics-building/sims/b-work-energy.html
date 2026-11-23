@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>功與動能・位能</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--cF:#8b8cff;--cW:#ffb454;--cK:#43d6ff;--cU:#c084fc;--pos:#84cc16;--neg:#ff5c8a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:76ch;margin-top:6px;font-size:15px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%}
+#scene{height:260px}
+#plot{height:240px}
+@media(max-width:560px){#scene{height:220px}#plot{height:220px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.state{margin-top:12px;padding:10px 14px;border-radius:11px;font-weight:700;font-size:15px;text-align:center;border:1px solid var(--line)}
+.state.p{background:rgba(132,204,22,.1);color:var(--pos);border-color:rgba(132,204,22,.4)}
+.state.n{background:rgba(255,92,138,.1);color:var(--neg);border-color:rgba(255,92,138,.4)}
+.state.z{background:rgba(132,146,170,.1);color:var(--muted)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.qq button.ok{border-color:var(--pos);color:var(--pos)}
+.qq button.bad{border-color:var(--neg);color:var(--neg)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips button{font-size:12.5px;padding:5px 9px}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">5-1 · Work, Kinetic &amp; Potential Energy</div>
+  <h1>功與動能・位能</h1>
+  <p class="lede">力作用在物體上、物體沿力的方向移動，力就對物體作了功：W = F·d·cos θ。水平推動木塊，功變成動能 K = ½mv²；等速把物體舉高，功變成重力位能 U = mgh。</p>
+  <div class="tabs" role="group" aria-label="模式">
+    <button type="button" id="tabA" aria-pressed="true">① 推木塊：功 → 動能</button>
+    <button type="button" id="tabB" aria-pressed="false">② 舉高物體：功 → 位能</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t" id="sTitle">木塊受力與運動</span><span class="n" id="sNote"></span></div>
+      <div class="box"><canvas id="scene" aria-label="物體受力與運動情形"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t" id="pTitle">能量–位移圖</span><span class="n" id="pNote"></span></div>
+      <div class="box"><canvas id="plot" aria-label="功與能量隨位移的變化"></canvas></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="card">
+      <!-- 模式 A -->
+      <div id="ctlA">
+        <div class="head"><span class="t">推力與條件</span><span class="n">光滑水平面（不計摩擦）</span></div>
+        <div class="pad" style="padding-top:2px">
+          <div class="ctl"><div class="r"><label for="aF">力的大小 F</label><span id="oaF"></span></div><input type="range" id="aF" min="0" max="20" step="0.5" value="8"></div>
+          <div class="ctl"><div class="r"><label for="aT">力與位移的夾角 θ</label><span id="oaT"></span></div><input type="range" id="aT" min="0" max="180" step="5" value="0"></div>
+          <div class="chips"><button data-th="0">同向 0°</button><button data-th="45">銳角 45°</button><button data-th="90">垂直 90°</button><button data-th="135">鈍角 135°</button><button data-th="180">反向 180°</button></div>
+          <div class="ctl"><div class="r"><label for="aM">木塊質量 m</label><span id="oaM"></span></div><input type="range" id="aM" min="0.5" max="10" step="0.5" value="2"></div>
+          <div class="ctl"><div class="r"><label for="aV">初速 v₀（向右）</label><span id="oaV"></span></div><input type="range" id="aV" min="0" max="8" step="0.5" value="0"></div>
+          <div class="ctl"><div class="r"><label for="aD">移動距離 d</label><span id="oaD"></span></div><input type="range" id="aD" min="0.5" max="10" step="0.5" value="2"></div>
+          <div class="seg" style="margin-top:12px"><button class="primary" id="aGo">▶ 開始推</button><button id="aReset">重來</button></div>
+          <div class="state" id="aState"></div>
+          <div class="read">
+            <div><small>F 對木塊作的功 W</small><b id="rW"></b></div>
+            <div><small>動能 K = ½mv²</small><b id="rK"></b></div>
+            <div><small>速度 v</small><b id="rV"></b></div>
+            <div><small>經過時間 t</small><b id="rT"></b></div>
+            <div><small>加速度 a = F cos θ / m</small><b id="rA"></b></div>
+            <div><small>平均功率 P = W / t</small><b id="rP"></b></div>
+          </div>
+          <div class="note" id="aSee"></div>
+        </div>
+      </div>
+      <!-- 模式 B -->
+      <div id="ctlB" hidden>
+        <div class="head"><span class="t">舉高的條件</span><span class="n">g = 9.8 m/s²，等速移動</span></div>
+        <div class="pad" style="padding-top:2px">
+          <div class="ctl"><div class="r"><label for="bM">物體質量 m</label><span id="obM"></span></div><input type="range" id="bM" min="0.5" max="20" step="0.5" value="2"></div>
+          <div class="ctl"><div class="r"><label for="bH">舉高的高度 h</label><span id="obH"></span></div><input type="range" id="bH" min="0.5" max="5" step="0.5" value="2"></div>
+          <div class="ctl"><div class="r"><label for="bS">花的時間 Δt</label><span id="obS"></span></div><input type="range" id="bS" min="1" max="20" step="1" value="4"></div>
+          <div class="seg" style="margin-top:10px" role="group" aria-label="路徑">
+            <button id="pUp" aria-pressed="true">直接往上舉</button><button id="pRamp" aria-pressed="false">沿光滑斜面推上去</button>
+          </div>
+          <div class="ctl" id="angBox" hidden><div class="r"><label for="bA">斜面傾角 φ</label><span id="obA"></span></div><input type="range" id="bA" min="10" max="80" step="5" value="30"></div>
+          <div class="seg" style="margin-top:12px"><button class="primary" id="bGo">▶ 開始舉高</button><button id="bReset">放回地面</button></div>
+          <div class="state p" id="bState"></div>
+          <div class="read">
+            <div><small>施力 F</small><b id="sF"></b></div>
+            <div><small>沿路徑移動 s</small><b id="sS"></b></div>
+            <div><small>施力作的功 W = Fs</small><b id="sW"></b></div>
+            <div><small>位能 U = mgh</small><b id="sU"></b></div>
+            <div><small>動能 K（等速）</small><b id="sK"></b></div>
+            <div><small>功率 P = ΔW / Δt</small><b id="sP"></b></div>
+          </div>
+          <div class="note" id="bSee"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">範例 5-1</span><span class="n">光滑水平面、靜止木塊</span></div>
+      <div class="pad" style="padding-top:2px" id="ex"></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">正功、負功、不作功（小百科）</span><span class="n">先判斷，再到模擬裡看</span></div>
+      <div class="pad" style="padding-top:2px" id="quiz"></div>
+    </section>
+  </div>
+
+  <footer>
+    <b>教學提示：</b>功是純量，單位焦耳（1 J = 1 N·m）。只有「沿位移方向的分力」F cos θ 會作功：0° ≤ θ &lt; 90° 作正功、動能增加；θ = 90° 不作功；90° &lt; θ ≤ 180° 作負功、動能減少。在光滑水平面上，合力作的功等於動能的變化 W = ΔK；等速舉高時物體動能不變，外力作的功全部存成重力位能 U = mgh，和走哪一條路徑無關——斜面省力但要走比較遠，F·s 一樣。功率 P = ΔW / Δt 表示作功的快慢，單位瓦特（1 W = 1 J/s）。<br>
+    <b>課本對照：</b>基礎物理 Ch05 能量 5-1 功、位能、動能（p.141–143 圖 5-1～5-3、小百科、範例 5-1、知識延長線）。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const g0=9.8;
+const fmt=(n,d=1)=>{const r=+(+n).toFixed(d);return(Object.is(r,-0)?0:r).toFixed(d).replace("-","−");};
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w,h};}
+function arrow(g,x1,y1,x2,y2,col,lab,lx,ly){
+  const L=Math.hypot(x2-x1,y2-y1);if(L<2)return;
+  g.strokeStyle=col;g.fillStyle=col;g.lineWidth=4;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
+  const ux=(x2-x1)/L,uy=(y2-y1)/L;g.beginPath();g.moveTo(x2+ux*10,y2+uy*10);g.lineTo(x2-uy*7,y2+ux*7);g.lineTo(x2+uy*7,y2-ux*7);g.closePath();g.fill();
+  if(lab){g.font="700 14px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="middle";g.fillText(lab,lx,ly);}
+}
+let mode="A";
+
+/* ===== 模式 A：功 → 動能 ===== */
+const A={F:8,th:0,m:2,v0:0,d:2,x:0,v:0,t:0,run:false,done:false,stopped:false};
+const aAcc=()=>A.F*Math.cos(A.th*Math.PI/180)/A.m;
+function aPlan(){ // 終點：走完 d 或中途停下
+  const a=aAcc(),v0=A.v0;
+  if(Math.abs(a)<1e-9){ if(v0<=0) return {xEnd:0,tEnd:0,stop:true}; return {xEnd:A.d,tEnd:A.d/v0,stop:false}; }
+  if(a<0){ const xs=v0*v0/(-2*a); if(xs<A.d) return {xEnd:xs,tEnd:v0/(-a),stop:true}; }
+  const disc=v0*v0+2*a*A.d; const t=(-v0+Math.sqrt(Math.max(0,disc)))/a; return {xEnd:A.d,tEnd:t,stop:false};
+}
+function aReset(){A.x=0;A.v=A.v0;A.t=0;A.run=false;A.done=false;A.stopped=false;$("#aGo").textContent="▶ 開始推";}
+function aStep(dt){
+  if(!A.run) return;
+  const p=aPlan(); const speedUp=Math.max(1,p.tEnd/3.5);
+  let t=A.t+dt*speedUp;
+  if(t>=p.tEnd){t=p.tEnd;A.run=false;A.done=true;A.stopped=p.stop;$("#aGo").textContent="▶ 再推一次";}
+  const a=aAcc(); A.t=t; A.x=A.v0*t+0.5*a*t*t; A.v=A.v0+a*t; if(A.v<0)A.v=0;
+  if(A.done){A.x=p.xEnd;}
+}
+const aW=()=>A.F*Math.cos(A.th*Math.PI/180)*A.x;
+function drawA(){
+  const {g,w,h}=fit($("#scene"));g.clearRect(0,0,w,h);
+  const gy=h*0.74, L=36, R=36, track=w-L-R, bw=Math.min(84,w*0.18), bh=bw*0.72;
+  const sx=track-bw, X=x=>L+sx*(x/A.d);
+  g.fillStyle="#2a3448";g.fillRect(0,gy,w,8);
+  // 起點與終點
+  g.setLineDash([5,4]);g.strokeStyle="#5b6880";g.lineWidth=1.5;
+  [[0,"起點"],[A.d,"d = "+fmt(A.d,1)+" m"]].forEach(([xx,lab],i)=>{const px=X(xx)+bw/2;g.beginPath();g.moveTo(px,gy-bh-26);g.lineTo(px,gy+20);g.stroke();g.fillStyle="#8492aa";g.font="12px 'JetBrains Mono',monospace";g.textAlign=i?"right":"left";g.textBaseline="top";g.fillText(lab,i?Math.min(w-4,px+30):Math.max(4,px-30),gy+12);});
+  g.setLineDash([]);
+  // 位移箭頭
+  if(A.x>0.001){arrow(g,X(0)+bw/2,gy+40,X(A.x)+bw/2,gy+40,"#5b6880","",0,0);g.fillStyle="#8492aa";g.font="12px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="bottom";g.fillText("位移 "+fmt(A.x,2)+" m",(X(0)+X(A.x))/2+bw/2,gy+34);}
+  // 木塊
+  const bx=X(A.x),by=gy-bh;
+  g.fillStyle="#9a6b3f";g.fillRect(bx,by,bw,bh);g.strokeStyle="#6b4523";g.lineWidth=3;g.strokeRect(bx,by,bw,bh);
+  g.fillStyle="#fff";g.font="700 13px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="middle";g.fillText(fmt(A.m,1)+" kg",bx+bw/2,by+bh/2);
+  // 力
+  const th=A.th*Math.PI/180, sc=Math.min(5,(h*0.4)/20)*Math.max(.6,Math.min(1.4,w/600));
+  const cx=bx+bw/2, cy=by+bh/2, len=A.F*sc*1.6;
+  if(A.F>0.01){
+    arrow(g,cx,cy,cx+len*Math.cos(th),cy-len*Math.sin(th),"#8b8cff","",0,0);
+    g.fillStyle="#8b8cff";g.font="700 14px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="bottom";g.fillText("F",cx+len*Math.cos(th)+8,cy-len*Math.sin(th)-4);
+    if(A.th>0&&A.th<180){ // 分力
+      g.globalAlpha=.55;arrow(g,cx,cy+2,cx+len*Math.cos(th),cy+2,"#ffb454","",0,0);g.globalAlpha=1;
+      g.fillStyle="#ffb454";g.font="12px 'JetBrains Mono',monospace";g.textAlign="center";g.textBaseline="top";g.fillText("F cos θ",cx+len*Math.cos(th)/2,cy+8);
+      g.strokeStyle="#ffd166";g.lineWidth=1.5;g.beginPath();g.arc(cx,cy,18,-th,0);g.stroke();
+    }
+  }
+  // 速度箭頭
+  if(A.v>0.01){const vl=Math.min(120,A.v*14);arrow(g,bx+bw/2,by-16,bx+bw/2+vl,by-16,"#43d6ff","",0,0);g.fillStyle="#43d6ff";g.font="12px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="bottom";g.fillText("v = "+fmt(A.v,2)+" m/s",bx,by-24);}
+  g.fillStyle="#8492aa";g.font="12px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="top";g.fillText("t = "+fmt(A.t,2)+" s",10,8);
+  const sp=Math.max(1,aPlan().tEnd/3.5);if(sp>1.05&&A.run){g.textAlign="right";g.fillText("動畫 ×"+fmt(sp,1),w-10,8);}
+}
+function drawPlotA(){
+  const {g,w,h}=fit($("#plot"));g.clearRect(0,0,w,h);
+  const L=50,R=16,T=22,B=30;
+  const c=Math.cos(A.th*Math.PI/180), K0=0.5*A.m*A.v0*A.v0, Wd=A.F*c*A.d;
+  const ymax=Math.max(4,K0+Math.max(0,Wd),K0,Math.abs(Wd))*1.15, ymin=Math.min(0,Wd*(Wd<0?1:0))*1.15;
+  const X=x=>L+(w-L-R)*x/A.d, Y=v=>T+(h-T-B)*(ymax-v)/(ymax-ymin);
+  g.font="11px 'JetBrains Mono',monospace";
+  const nice=r=>{const p=Math.pow(10,Math.floor(Math.log10(r)));const f=r/p;return(f<1.5?1:f<3.5?2:f<7.5?5:10)*p;};
+  const sy=nice((ymax-ymin)/5);
+  for(let v=Math.ceil(ymin/sy)*sy;v<=ymax+1e-9;v+=sy){g.strokeStyle="rgba(120,140,180,.14)";g.lineWidth=1;g.beginPath();g.moveTo(L,Y(v));g.lineTo(w-R,Y(v));g.stroke();g.fillStyle="#5b6880";g.textAlign="right";g.textBaseline="middle";g.fillText(fmt(v,sy<1?1:0),L-6,Y(v));}
+  const sx=nice(A.d/5);
+  for(let x=0;x<=A.d+1e-9;x+=sx){g.strokeStyle="rgba(120,140,180,.14)";g.beginPath();g.moveTo(X(x),T);g.lineTo(X(x),h-B);g.stroke();g.fillStyle="#5b6880";g.textAlign="center";g.textBaseline="top";g.fillText(fmt(x,sx<1?1:0),X(x),h-B+5);}
+  g.strokeStyle="#5b6880";g.lineWidth=1.5;g.beginPath();g.moveTo(L,T);g.lineTo(L,h-B);g.moveTo(L,Y(0));g.lineTo(w-R,Y(0));g.stroke();
+  g.fillStyle="#8492aa";g.textAlign="left";g.textBaseline="top";g.fillText("能量 (J)",6,2);g.textAlign="right";g.textBaseline="bottom";g.fillText("位移 x (m)",w-R,h-B-3);
+  // 預測虛線
+  const p=aPlan(), xe=p.xEnd;
+  g.setLineDash([5,4]);g.lineWidth=1.5;
+  g.strokeStyle="rgba(255,180,84,.45)";g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(xe),Y(A.F*c*xe));g.stroke();
+  g.strokeStyle="rgba(67,214,255,.45)";g.beginPath();g.moveTo(X(0),Y(K0));g.lineTo(X(xe),Y(K0+A.F*c*xe));g.stroke();
+  g.setLineDash([]);
+  // 實際
+  g.lineWidth=3;
+  g.strokeStyle="#ffb454";g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(A.x),Y(aW()));g.stroke();
+  const K=0.5*A.m*A.v*A.v;
+  g.strokeStyle="#43d6ff";g.beginPath();g.moveTo(X(0),Y(K0));g.lineTo(X(A.x),Y(K));g.stroke();
+  [[aW(),"#ffb454"],[K,"#43d6ff"]].forEach(([v,col])=>{g.fillStyle=col;g.beginPath();g.arc(X(A.x),Y(v),5,0,7);g.fill();});
+  if(K0>0.01){g.fillStyle="#43d6ff";g.textAlign="left";g.textBaseline="bottom";g.fillText("K₀ = "+fmt(K0,1)+" J",L+4,Y(K0)-4);}
+}
+function uiA(){
+  $("#oaF").textContent=fmt(A.F,1)+" N";$("#oaT").textContent=A.th+"°";$("#oaM").textContent=fmt(A.m,1)+" kg";$("#oaV").textContent=fmt(A.v0,1)+" m/s";$("#oaD").textContent=fmt(A.d,1)+" m";
+  const W=aW(),K=0.5*A.m*A.v*A.v,a=aAcc();
+  $("#rW").textContent=fmt(W,2)+" J";$("#rK").textContent=fmt(K,2)+" J";$("#rV").textContent=fmt(A.v,2)+" m/s";$("#rT").textContent=fmt(A.t,2)+" s";$("#rA").textContent=fmt(a,2)+" m/s²";
+  $("#rP").textContent=A.t>0?fmt(W/A.t,2)+" W":"—";
+  const c=Math.cos(A.th*Math.PI/180), s=$("#aState");
+  if(A.F<0.01||Math.abs(c)<1e-6){s.className="state z";s.textContent=A.F<0.01?"沒有施力：F 不作功":"θ = 90°：力與位移垂直，F 不作功（W = 0）";}
+  else if(c>0){s.className="state p";s.textContent=`正功：W = F d cos θ = ${fmt(A.F,1)} × ${fmt(A.x,2)} × ${fmt(c,2)} = ${fmt(W,2)} J`;}
+  else{s.className="state n";s.textContent=`負功：W = F d cos θ = ${fmt(A.F,1)} × ${fmt(A.x,2)} × (${fmt(c,2)}) = ${fmt(W,2)} J`;}
+  const K0=0.5*A.m*A.v0*A.v0; let msg;
+  const p=aPlan();
+  if(A.v0<=0&&c<=1e-6) msg="<b>木塊推不動。</b>木塊原本靜止，F 沒有向右的分力，所以不會向右移動，也就沒有作功。試著把 θ 調小，或給木塊一個初速 v₀。";
+  else if(A.done&&A.stopped) msg=`<b>木塊在 x = ${fmt(A.x,2)} m 停下來了。</b>F 作負功 ${fmt(W,2)} J，剛好把原來的動能 ${fmt(K0,2)} J 全部消耗掉。之後 F 會把木塊推回左邊。`;
+  else if(!A.run&&!A.done) msg=`按「開始推」。預測：走完 ${fmt(p.xEnd,2)} m 時，F 作功 ${fmt(A.F*c*p.xEnd,2)} J，動能由 ${fmt(K0,2)} J 變成 ${fmt(K0+A.F*c*p.xEnd,2)} J。`;
+  else msg=`<b>功能定理：</b>W = K − K₀ → ${fmt(W,2)} J = ${fmt(K,2)} J − ${fmt(K0,2)} J。${c>0?"正功讓木塊越來越快。":c<0?"負功讓木塊越來越慢。":"F 垂直位移，速度不變。"}`;
+  $("#aSee").innerHTML=msg;
+  $("#sNote").textContent=A.run?"運動中":A.done?"完成":"準備";
+}
+
+/* ===== 模式 B：功 → 位能 ===== */
+const B={m:2,h:2,dt:4,ramp:false,phi:30,y:0,t:0,run:false};
+const bForce=()=>B.ramp?B.m*g0*Math.sin(B.phi*Math.PI/180):B.m*g0;
+const bPath=()=>B.ramp?B.h/Math.sin(B.phi*Math.PI/180):B.h;
+function bReset(){B.y=0;B.t=0;B.run=false;$("#bGo").textContent="▶ 開始舉高";}
+function bStep(dt){if(!B.run)return;const sp=Math.max(1,B.dt/4);B.t=Math.min(B.dt,B.t+dt*sp);B.y=B.h*B.t/B.dt;if(B.t>=B.dt){B.run=false;$("#bGo").textContent="▶ 再舉一次";}}
+function drawB(){
+  const {g,w,h}=fit($("#scene"));g.clearRect(0,0,w,h);
+  const gy=h-30, top=26, scale=(gy-top-40)/5; // 5 m 最高
+  g.fillStyle="#2a3448";g.fillRect(0,gy,w,8);
+  // 高度尺
+  g.font="11px 'JetBrains Mono',monospace";g.fillStyle="#5b6880";g.strokeStyle="rgba(120,140,180,.18)";g.lineWidth=1;
+  for(let k=0;k<=5;k++){const yy=gy-k*scale;g.beginPath();g.moveTo(30,yy);g.lineTo(w-8,yy);g.stroke();g.textAlign="right";g.textBaseline="middle";g.fillText(k+" m",26,yy);}
+  const s=34, phi=B.phi*Math.PI/180;
+  let bx,by;
+  if(!B.ramp){bx=w*0.5;by=gy-B.y*scale;
+    g.setLineDash([5,4]);g.strokeStyle="#ffd166";g.beginPath();g.moveTo(bx,gy);g.lineTo(bx,gy-B.h*scale);g.stroke();g.setLineDash([]);
+  }else{
+    const run=B.h/Math.tan(phi)*scale, x0=Math.max(46,w*0.5-run/2), x1=x0+Math.min(run,w-x0-20), hh=B.h*scale;
+    const k=Math.min(1,(w-x0-20)/Math.max(1,run)); // 太長時縮
+    g.fillStyle="#1d2638";g.beginPath();g.moveTo(x0,gy);g.lineTo(x1,gy);g.lineTo(x1,gy-hh);g.closePath();g.fill();g.strokeStyle="#3b4862";g.lineWidth=2;g.stroke();
+    const fr=B.y/B.h; bx=x0+(x1-x0)*fr; by=gy-hh*fr;
+    if(k<1){g.fillStyle="#8492aa";g.textAlign="left";g.textBaseline="top";g.fillText("（斜面水平方向已縮小）",x0,gy+10);}
+    g.save();g.translate(bx,by);g.rotate(-phi);g.fillStyle="#7c5cc4";g.fillRect(-s/2,-s,s,s);g.strokeStyle="#4c2f8a";g.lineWidth=3;g.strokeRect(-s/2,-s,s,s);g.restore();
+    const cx=bx-Math.sin(phi)*s/2, cy=by-Math.cos(phi)*s/2, F=bForce(), L=Math.min(90,F*1.6);
+    arrow(g,cx,cy,cx+L*Math.cos(phi),cy-L*Math.sin(phi),"#8b8cff","",0,0);
+    g.fillStyle="#8b8cff";g.font="700 13px 'JetBrains Mono',monospace";g.textAlign="left";g.textBaseline="bottom";g.fillText("F = mg sin φ",cx+L*Math.cos(phi)+6,cy-L*Math.sin(phi));
+    const Lg=Math.min(90,B.m*g0*1.6);arrow(g,cx,cy,cx,cy+Lg,"#93a3bf","",0,0);g.fillStyle="#93a3bf";g.textAlign="right";g.textBaseline="top";g.fillText("mg",cx-8,cy+Lg-8);
+  }
+  if(!B.ramp){
+    g.fillStyle="#7c5cc4";g.fillRect(bx-s/2,by-s,s,s);g.strokeStyle="#4c2f8a";g.lineWidth=3;g.strokeRect(bx-s/2,by-s,s,s);
+    const L=Math.min(90,B.m*g0*1.6);
+    arrow(g,bx-8,by-s,bx-8,by-s-L,"#8b8cff","",0,0);arrow(g,bx+8,by,bx+8,by+Math.min(L,gy-by+20),"#93a3bf","",0,0);
+    g.font="700 13px 'JetBrains Mono',monospace";g.fillStyle="#8b8cff";g.textAlign="right";g.textBaseline="middle";g.fillText("F = mg",bx-16,by-s-L/2);
+    g.fillStyle="#93a3bf";g.textAlign="left";g.fillText("mg",bx+18,by+12);
+  }
+  g.fillStyle="#c084fc";g.font="700 13px 'JetBrains Mono',monospace";g.textAlign="right";g.textBaseline="top";g.fillText("h = "+fmt(B.y,2)+" m",w-10,6);
+  g.fillStyle="#8492aa";g.font="12px 'JetBrains Mono',monospace";g.textAlign="left";g.fillText("t = "+fmt(B.t,1)+" s",34,6);
+}
+function drawPlotB(){
+  const {g,w,h}=fit($("#plot"));g.clearRect(0,0,w,h);
+  const L=50,R=16,T=22,B2=30, Umax=B.m*g0*B.h*1.15||1;
+  const X=y=>L+(w-L-R)*y/B.h, Y=v=>T+(h-T-B2)*(1-v/Umax);
+  const nice=r=>{const p=Math.pow(10,Math.floor(Math.log10(r)));const f=r/p;return(f<1.5?1:f<3.5?2:f<7.5?5:10)*p;};
+  g.font="11px 'JetBrains Mono',monospace";
+  const sy=nice(Umax/5);
+  for(let v=0;v<=Umax;v+=sy){g.strokeStyle="rgba(120,140,180,.14)";g.lineWidth=1;g.beginPath();g.moveTo(L,Y(v));g.lineTo(w-R,Y(v));g.stroke();g.fillStyle="#5b6880";g.textAlign="right";g.textBaseline="middle";g.fillText(fmt(v,sy<1?1:0),L-6,Y(v));}
+  const sx=nice(B.h/5);
+  for(let x=0;x<=B.h+1e-9;x+=sx){g.strokeStyle="rgba(120,140,180,.14)";g.beginPath();g.moveTo(X(x),T);g.lineTo(X(x),h-B2);g.stroke();g.fillStyle="#5b6880";g.textAlign="center";g.textBaseline="top";g.fillText(fmt(x,sx<1?1:0),X(x),h-B2+5);}
+  g.strokeStyle="#5b6880";g.lineWidth=1.5;g.beginPath();g.moveTo(L,T);g.lineTo(L,h-B2);g.lineTo(w-R,h-B2);g.stroke();
+  g.fillStyle="#8492aa";g.textAlign="left";g.textBaseline="top";g.fillText("能量 (J)",6,2);g.textAlign="right";g.textBaseline="bottom";g.fillText("高度 h (m)",w-R,h-B2-3);
+  const U=B.m*g0*B.y;
+  g.lineWidth=6;g.strokeStyle="rgba(255,180,84,.8)";g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(B.y),Y(U));g.stroke();
+  g.lineWidth=2.5;g.strokeStyle="#c084fc";g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(B.y),Y(U));g.stroke();
+  g.lineWidth=2;g.strokeStyle="#43d6ff";g.beginPath();g.moveTo(X(0),Y(0)-1);g.lineTo(X(B.y),Y(0)-1);g.stroke();
+  g.fillStyle="#c084fc";g.beginPath();g.arc(X(B.y),Y(U),5,0,7);g.fill();
+}
+function uiB(){
+  $("#obM").textContent=fmt(B.m,1)+" kg";$("#obH").textContent=fmt(B.h,1)+" m";$("#obS").textContent=B.dt+" s";$("#obA").textContent=B.phi+"°";
+  const F=bForce(), sTot=bPath(), s=sTot*B.y/B.h, W=F*s, U=B.m*g0*B.y;
+  $("#sF").textContent=fmt(F,1)+" N";$("#sS").textContent=fmt(s,2)+" m";$("#sW").textContent=fmt(W,1)+" J";$("#sU").textContent=fmt(U,1)+" J";$("#sK").textContent="0 J";
+  $("#sP").textContent=fmt(B.m*g0*B.h/B.dt,1)+" W";
+  $("#bState").textContent=`W = F × s = ${fmt(F,1)} × ${fmt(s,2)} = ${fmt(W,1)} J ＝ U = mgh = ${fmt(U,1)} J`;
+  const full=B.m*g0*B.h;
+  $("#bSee").innerHTML=B.ramp
+    ?`<b>沿斜面比較省力：</b>F = mg sin ${B.phi}° = ${fmt(F,1)} N，只有直接舉高 ${fmt(B.m*g0,1)} N 的 ${fmt(Math.sin(B.phi*Math.PI/180)*100,0)}%；但要走 s = h / sin φ = ${fmt(sTot,2)} m。作的功一樣是 ${fmt(full,1)} J——重力位能只和高度有關，與路徑無關。`
+    :`<b>等速舉高：</b>手的力 F 剛好等於重量 mg = ${fmt(F,1)} N，物體的動能不變，F 作的功全部變成重力位能。舉到 ${fmt(B.h,1)} m 共作功 ${fmt(full,1)} J；花 ${B.dt} 秒完成，功率 ${fmt(full/B.dt,1)} W，越快完成功率越大，但功一樣。`;
+  $("#sNote").textContent=B.run?"舉高中":B.y>=B.h-1e-9?"完成":"準備";
+}
+
+/* ===== 介面 ===== */
+function setMode(m){mode=m;$("#tabA").setAttribute("aria-pressed",m==="A");$("#tabB").setAttribute("aria-pressed",m==="B");$("#ctlA").hidden=m!=="A";$("#ctlB").hidden=m!=="B";
+  $("#sTitle").textContent=m==="A"?"木塊受力與運動":"等速舉高物體";$("#pTitle").textContent=m==="A"?"能量–位移圖":"能量–高度圖";
+  $("#pNote").textContent=m==="A"?"虛線是預測":"兩條線重疊：W = U";
+  $("#legend").innerHTML=m==="A"?'<span><i style="background:var(--cW)"></i>F 作的功 W</span><span><i style="background:var(--cK)"></i>動能 K</span>':'<span><i style="background:var(--cW)"></i>施力作的功 W</span><span><i style="background:var(--cU)"></i>位能 U = mgh</span><span><i style="background:var(--cK)"></i>動能 K（不變）</span>';}
+$("#tabA").onclick=()=>setMode("A");$("#tabB").onclick=()=>setMode("B");
+const bindA=(id,key)=>$(id).addEventListener("input",()=>{A[key]=+$(id).value;aReset();});
+bindA("#aF","F");bindA("#aT","th");bindA("#aM","m");bindA("#aV","v0");bindA("#aD","d");
+document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{A.th=+b.dataset.th;$("#aT").value=A.th;aReset();});
+$("#aGo").onclick=()=>{if(A.run){A.run=false;$("#aGo").textContent="▶ 繼續";return;}if(A.done)aReset();if(aPlan().tEnd<=0){aReset();return;}A.run=true;$("#aGo").textContent="❚❚ 暫停";};
+$("#aReset").onclick=aReset;
+const bindB=(id,key)=>$(id).addEventListener("input",()=>{B[key]=+$(id).value;bReset();});
+bindB("#bM","m");bindB("#bH","h");bindB("#bS","dt");bindB("#bA","phi");
+const setRamp=r=>{B.ramp=r;$("#pUp").setAttribute("aria-pressed",!r);$("#pRamp").setAttribute("aria-pressed",r);$("#angBox").hidden=!r;bReset();};
+$("#pUp").onclick=()=>setRamp(false);$("#pRamp").onclick=()=>setRamp(true);
+$("#bGo").onclick=()=>{if(B.run){B.run=false;$("#bGo").textContent="▶ 繼續";return;}if(B.t>=B.dt)bReset();B.run=true;$("#bGo").textContent="❚❚ 暫停";};
+$("#bReset").onclick=bReset;
+function setA(o){setMode("A");Object.assign(A,o);$("#aF").value=A.F;$("#aT").value=A.th;$("#aM").value=A.m;$("#aV").value=A.v0;$("#aD").value=A.d;aReset();}
+
+/* 範例 5-1 */
+const EX=[
+  {q:"在光滑水平面上，以 8 N 的水平力推動靜止的 2 kg 木塊，經過 1 秒。(1) 木塊的速度為多少？",a:"a = F / m = 8 ÷ 2 = 4 m/s²，v = at = 4 × 1 = <b>4 m/s</b>。"},
+  {q:"(2) 這 1 秒內木塊移動多遠？推力作了多少功？",a:"d = ½at² = ½ × 4 × 1² = <b>2 m</b>；W = Fd = 8 × 2 = <b>16 J</b>。"},
+  {q:"(3) 木塊的動能為多少？和推力作的功比較。",a:"K = ½mv² = ½ × 2 × 4² = <b>16 J</b>，恰好等於推力作的功：在光滑水平面上，推力作的功全部變成木塊的動能。"}
+];
+EX.forEach(o=>{const d=document.createElement("div");d.className="qq";d.innerHTML=`<p>${o.q}</p><div class="seg"><button>在模擬裡推推看</button><button>看答案</button></div><div class="ans" hidden>${o.a}</div>`;
+  const [b1,b2]=d.querySelectorAll("button");
+  b1.onclick=()=>{setA({F:8,th:0,m:2,v0:0,d:2});A.run=true;$("#aGo").textContent="❚❚ 暫停";};
+  b2.onclick=()=>{d.querySelector(".ans").hidden=false;};
+  $("#ex").appendChild(d);});
+
+/* 正功負功判斷 */
+const QZ=[
+  {q:"推購物車向前走，推力水平向前。推力對車作什麼功？",k:"正",set:{F:8,th:0,m:4,v0:1,d:4},a:"力與位移同向（θ = 0°），W = Fd &gt; 0，作<b>正功</b>，車的動能增加。"},
+  {q:"用繩子斜向上拉行李箱前進，拉力與地面夾 45°。",k:"正",set:{F:8,th:45,m:4,v0:1,d:4},a:"夾銳角，只有水平分力 F cos 45° 作功，仍是<b>正功</b>，但比同向拉時小。"},
+  {q:"提著書包在水平走廊上等速走，手對書包的力向上。",k:"零",set:{F:8,th:90,m:2,v0:2,d:4},a:"手的力向上、位移水平，兩者垂直（θ = 90°），cos 90° = 0，手對書包<b>不作功</b>。"},
+  {q:"滑行中的木塊受到向後的力（與運動方向相反）。",k:"負",set:{F:6,th:180,m:2,v0:6,d:8},a:"力與位移反向（θ = 180°），W = −Fd，作<b>負功</b>，木塊越來越慢，甚至停下來。"},
+  {q:"滑行中的木塊被斜向後上方的繩子拉住（夾 135°）。",k:"負",set:{F:8,th:135,m:2,v0:5,d:6},a:"夾鈍角，cos 135° &lt; 0，作<b>負功</b>，動能減少。"},
+  {q:"把物體等速舉高 1 m，重力對物體作什麼功？",k:"負",set:null,a:"重力向下、位移向上，反向，重力作<b>負功</b> −mgh；同時手作正功 +mgh，合力的功為零，所以動能不變，手作的功存成位能。"}
+];
+const LAB={"正":"正功","負":"負功","零":"不作功"};
+QZ.forEach(o=>{const d=document.createElement("div");d.className="qq";
+  d.innerHTML=`<p>${o.q}</p><div class="seg">${["正","負","零"].map(k=>`<button data-k="${k}">${LAB[k]}</button>`).join("")}${o.set?'<button data-s="1">到模擬看</button>':'<button data-s="2">到舉高模式看</button>'}</div><div class="ans" hidden>${o.a}</div>`;
+  d.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{d.querySelectorAll("[data-k]").forEach(x=>x.classList.remove("ok","bad"));b.classList.add(b.dataset.k===o.k?"ok":"bad");d.querySelector(".ans").hidden=false;});
+  d.querySelector("[data-s]").onclick=()=>{if(o.set){setA(o.set);A.run=true;$("#aGo").textContent="❚❚ 暫停";}else{setMode("B");$("#bH").value=1;B.h=1;setRamp(false);B.run=true;$("#bGo").textContent="❚❚ 暫停";}scrollTo({top:0,behavior:"smooth"});};
+  $("#quiz").appendChild(d);});
+
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(mode==="A"){aStep(dt);drawA();drawPlotA();uiA();}else{bStep(dt);drawB();drawPlotB();uiB();}
+  requestAnimationFrame(loop);}
+setMode("A");aReset();requestAnimationFrame(loop);
+window.__we=()=>({A:{...A,W:aW(),K:0.5*A.m*A.v*A.v,plan:aPlan()},B:{...B,F:bForce(),s:bPath()}});
+})();
+</script>
+</body>
+</html>
