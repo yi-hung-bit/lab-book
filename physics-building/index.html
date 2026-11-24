@@ -225,7 +225,7 @@ button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.roo
   <div class="top">
     <div>
       <h1>物理研究院</h1>
-      <p>競賽大樓分 A、B 兩棟：A 棟依物奧概念分層，後方的 B 棟依學科能力競賽主題分層，兩棟在 6F、9F 以空橋相連；模擬大樓收國中到競賽的物理模擬，和 A 棟在 3F 相連；競賽大樓旁的實驗大樓是競賽實驗題的虛擬實驗室，另有物理藏經閣、二階資料庫與休閒中心。</p>
+      <p>競賽大樓分 A、B 兩棟：A 棟依物奧概念分層，後方的 B 棟依學科能力競賽主題分層，兩棟在 3F、9F 以空橋相連；模擬大樓收國中到競賽的物理模擬，和 A 棟在 3F 相連；競賽大樓旁的實驗大樓是競賽實驗題的虛擬實驗室，另有物理藏經閣、二階資料庫與休閒中心。</p>
     </div>
     <div class="count" id="count"></div>
   </div>
@@ -420,7 +420,7 @@ const KB=[
   {id:"14",name:"近代物理",n:3,color:"--g-mod"},
   {id:"15",name:"未分類",n:1,color:"--g-math"}
 ].map(f=>({...f,lvl:f.id+"F",rooms:[]}));
-const KB_BRIDGES=["6","9"];   // A 棟與 B 棟在 6F、9F 以空橋相連
+const KB_BRIDGES=["3","9"];   // A 棟與 B 棟在 3F、9F 以空橋相連
 const kFloor=id=>KB.find(f=>f.id===id);
 
 const $=s=>document.querySelector(s);
@@ -799,7 +799,7 @@ function init3D(){
   /* 空橋支柱 */
   [bcx-bl/4,bcx+bl/4].forEach(px=>scene.add(mesh(new THREE.CylinderGeometry(.12,.12,by,10),M.trim,px,by/2,.4)));
 
-  /* 競賽大樓 B 棟：A 棟正後方（隔著後方道路），6F、9F 以南北向空橋相連 */
+  /* 競賽大樓 B 棟：A 棟正後方（隔著後方道路），3F、9F 以南北向空橋相連 */
   const KX=TX+1.6, KZ=-11.2;
   scene.add(mesh(B(W+2,.06,D+2),M.pave,KX,.03,KZ,false,true));
   {const g0=scene.children.length; lobby(KX,M.wallT); scene.children.slice(g0).forEach(o=>o.position.z+=KZ);}
