@@ -225,7 +225,7 @@ button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.roo
   <div class="top">
     <div>
       <h1>物理研究院</h1>
-      <p>競賽大樓依競賽概念分層，模擬大樓收國中到競賽的物理模擬，兩棟在 3F 以空橋相連；競賽大樓旁的實驗大樓是競賽實驗題的虛擬實驗室，另有物理藏經閣、二階資料庫與休閒中心。</p>
+      <p>競賽大樓分 A、B 兩棟：A 棟依物奧概念分層，後方的 B 棟依學科能力競賽主題分層，兩棟在 6F、9F 以空橋相連；模擬大樓收國中到競賽的物理模擬，和 A 棟在 3F 相連；競賽大樓旁的實驗大樓是競賽實驗題的虛擬實驗室，另有物理藏經閣、二階資料庫與休閒中心。</p>
     </div>
     <div class="count" id="count"></div>
   </div>
@@ -401,6 +401,27 @@ const LAB={t:"實驗培訓",d:"歷屆物理學科能力競賽實驗題的虛擬�
 /* 實驗大樓講義：只能線上閱覽，不提供下載（PDF 放在 labdoc/） */
 const LABDOCS=[{t:"物理實驗培訓講義",d:"有效數字・誤差・實驗數據的作圖・光學・十個實驗・實驗報告寫作要點",pdf:"lab-training-notes.pdf",pages:46}];
 const BRIDGE_LEVEL="3";
+/* 競賽大樓 B 棟：學科能力競賽理論試題，一層一個主題（依「培訓講義_依主題」）；題目 PDF 在 b2/k-NN.pdf，只供閱覽
+   新主題排版完成後：把 pdf 與 pages 填上即可 */
+const KB=[
+  {id:"1",name:"運動學",n:26,color:"--g-kin",pdf:"k-01.pdf",pages:12},
+  {id:"2",name:"力與牛頓定律",n:28,color:"--g-dyn",pdf:"k-02.pdf",pages:14},
+  {id:"3",name:"功能與動量",n:49,color:"--g-energy",pdf:"k-03.pdf",pages:23},
+  {id:"4",name:"圓周與轉動",n:49,color:"--g-rot",pdf:"k-04.pdf",pages:27},
+  {id:"5",name:"萬有引力",n:26,color:"--g-grav"},
+  {id:"6",name:"振動",n:33,color:"--g-wave"},
+  {id:"7",name:"流體",n:38,color:"--g-fluid"},
+  {id:"8",name:"熱學",n:60,color:"--g-heat"},
+  {id:"9",name:"波動與聲音",n:47,color:"--g-wave"},
+  {id:"10",name:"光學",n:45,color:"--g-opt"},
+  {id:"11",name:"靜電",n:28,color:"--g-estat"},
+  {id:"12",name:"電流與電路",n:5,color:"--g-em",pdf:"k-12.pdf",pages:3},
+  {id:"13",name:"電磁",n:0,color:"--g-em"},
+  {id:"14",name:"近代物理",n:3,color:"--g-mod"},
+  {id:"15",name:"未分類",n:1,color:"--g-math"}
+].map(f=>({...f,lvl:f.id+"F",rooms:[]}));
+const KB_BRIDGES=["6","9"];   // A 棟與 B 棟在 6F、9F 以空橋相連
+const kFloor=id=>KB.find(f=>f.id===id);
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -412,7 +433,7 @@ const SIM_UP=SIM.slice().sort((a,b)=>(a.id==="R")-(b.id==="R")||Number(a.id)-Num
 const ROOMS=SIM.flatMap(f=>f.rooms);
 const tFloor=id=>THEORY.find(f=>f.id===id), sFloor=id=>SIM.find(f=>f.id===id);
 const roomCount=THEORY.reduce((a,f)=>a+f.rooms.length,0);
-$("#count").textContent=`競賽大樓 ${THEORY.length} 層・${roomCount} 間教室・${Object.keys(QB).length} 題｜模擬大樓 ${SIM.length} 層・${ROOMS.length} 間教室`;
+$("#count").textContent=`競賽 A 棟 ${THEORY.length} 層・${roomCount} 間教室・${Object.keys(QB).length} 題｜B 棟 ${KB.length} 層｜模擬大樓 ${SIM.length} 層・${ROOMS.length} 間教室`;
 
 /* ---------- routing: #t3 競賽大樓 3F、#s3 模擬大樓 3F、#bridge 空橋 ---------- */
 function current(){
@@ -421,6 +442,7 @@ function current(){
   m=/^q(\d{4}-\d{2})$/.exec(h); if(m&&QOWN[m[1]]){const r=QOWN[m[1]]; return {b:"t",id:r.f.id,troom:r,q:m[1]};}
   m=/^u(\w+)-(\d+)$/.exec(h); if(m&&tFloor(m[1])){const r=tFloor(m[1]).rooms[Number(m[2])-1]; if(r) return {b:"t",id:m[1],troom:r};}
   m=/^t(\w+)$/.exec(h); if(m&&tFloor(m[1])) return {b:"t",id:m[1]};
+  m=/^k(\d+)$/.exec(h); if(m&&kFloor(m[1])) return {b:"k",id:m[1]};
   m=/^s(\w+)$/.exec(h); if(m&&sFloor(m[1])) return {b:"s",id:m[1]};
   if(h==="bridge") return {b:"bridge"};
   if(h==="gym") return {b:"gym"};
@@ -434,15 +456,15 @@ const go=h=>{location.hash=h;};
 $("#homeBtn").onclick=()=>{history.replaceState(null,"",location.pathname+location.search);route();};
 
 function elevator(b,activeId){
-  const list=b==="t"?THEORY:SIM_UP;
-  return `<div class="elevator" role="group" aria-label="${b==="t"?"競賽大樓":"模擬大樓"}電梯">
-    <span class="lab">${b==="t"?"競賽":"模擬"}電梯</span>
+  const list=b==="t"?THEORY:b==="k"?KB:SIM_UP;
+  return `<div class="elevator" role="group" aria-label="${b==="t"?"競賽大樓 A 棟":b==="k"?"競賽大樓 B 棟":"模擬大樓"}電梯">
+    <span class="lab">${b==="t"?"A 棟":b==="k"?"B 棟":"模擬"}電梯</span>
     ${list.map(f=>`<button type="button" class="ebtn" data-h="${b}${f.id}" aria-current="${f.id===activeId}" title="${esc(f.name)}">${f.lvl}</button>`).join("")}
-    <button type="button" class="ebtn out" data-h="bridge">空橋</button></div>`;
+    ${b==="k"?`<button type="button" class="ebtn out" data-h="t1">A 棟</button>`:`<button type="button" class="ebtn out" data-h="bridge">空橋</button>${b==="t"?`<button type="button" class="ebtn out" data-h="k1">B 棟</button>`:""}`}</div>`;
 }
 function dirRow(b,f){
   return `<button type="button" class="dir-row" data-h="${b}${f.id}" style="--fc:var(${f.color})">
-    <span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${esc(b==="t"?f.rooms.map(r=>r.t).join("・"):(f.sub?f.sub+"・":"")+f.rooms.length+" 間教室")}</small></span></button>`;
+    <span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${esc(b==="k"?(f.n?f.n+" 題・"+(f.pdf?"可閱覽":"排版中"):"彙編中沒有此主題的題目"):b==="t"?f.rooms.map(r=>r.t).join("・"):(f.sub?f.sub+"・":"")+f.rooms.length+" 間教室")}</small></span></button>`;
 }
 function route(){
   const p=$("#panel"), c=current();
@@ -453,16 +475,29 @@ function route(){
     if(c.troom){
       const r=c.troom, years={};
       r.qs.forEach(q=>(years[q.slice(0,4)]=years[q.slice(0,4)]||[]).push(q));
-      p.innerHTML=`<div class="panel-head"><div class="badge">${roomNo(r)}</div><div><div class="bld">競賽大樓 ${f.lvl}・${esc(f.name)}</div><h2>${esc(r.t)}</h2><p>物奧初選 ${r.qs.length} 題</p></div></div>
+      p.innerHTML=`<div class="panel-head"><div class="badge">${roomNo(r)}</div><div><div class="bld">競賽大樓 A 棟 ${f.lvl}・${esc(f.name)}</div><h2>${esc(r.t)}</h2><p>物奧初選 ${r.qs.length} 題</p></div></div>
         ${elevator("t",f.id)}
         <div class="qlist">${r.qs.length?Object.keys(years).sort().map(y=>`<div class="qyear"><span class="yy">${y}</span><div class="chips">${years[y].map(q=>`<button type="button" class="chip" data-h="q${q}" title="${esc(QB[q][0])}">第 ${Number(q.slice(5))} 題</button>`).join("")}</div></div>`).join(""):`<p class="empty">這間教室還沒有題目。</p>`}</div>
         <button type="button" class="backrow" data-h="t${f.id}">← 回到 ${f.lvl} 走廊</button>`;
     }else
-    p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">競賽大樓</div><h2>${esc(f.name)}</h2><p>${esc(f.en)}・${f.rooms.length} 間教室・${nq} 題</p></div></div>
+    p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">競賽大樓 A 棟・物奧初選</div><h2>${esc(f.name)}</h2><p>${esc(f.en)}・${f.rooms.length} 間教室・${nq} 題</p></div></div>
       ${elevator("t",f.id)}
       <div class="corridor">${f.rooms.map((r,i)=>`<button type="button" class="room" data-h="u${f.id}-${i+1}"><span class="plate"><span class="no">${roomNo(r)}</span><b>${esc(r.t)}</b></span><span class="door">${r.qs.length?`<span class="cnt"><b>${r.qs.length}</b> 題</span>`:`<span class="soon">籌備中</span>`}</span></button>`).join("")}</div>
       ${f.id===BRIDGE_LEVEL?`<p class="note">本層有空橋通往模擬大樓 3F（選修物理一・力學一）。</p>`:""}
+      ${KB_BRIDGES.includes(f.id)?`<p class="note">本層有空橋通往 <button type="button" class="dir-row" data-h="k${f.id}" style="--fc:var(${kFloor(f.id).color});display:inline-flex;width:auto;padding:2px 10px;margin:0 2px"><b>B 棟 ${f.id}F ${esc(kFloor(f.id).name)}</b></button>（學科能力競賽）。</p>`:""}
       ${FY_CLOSED?"":`<p class="note">各層題目是物奧初選；複賽歷屆試題與詳解在 <button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t);display:inline-flex;width:auto;padding:2px 10px;margin:0 2px"><b>複賽室</b></button>。</p>`}`;
+  }else if(c.b==="k"){
+    const f=kFloor(c.id), done=KB.filter(x=>x.pdf).length;
+    p.style.setProperty("--fc",`var(${f.color})`);
+    const a=tFloor(f.id);
+    p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">競賽大樓 B 棟・學科能力競賽</div><h2>${esc(f.name)}</h2><p>理論試題彙編・${f.n} 題</p></div></div>
+      ${elevator("k",f.id)}
+      <div class="dbyears">${f.pdf?`<div class="dbrow"><span class="yy">${f.lvl}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(f.pdf)}"><em>${esc(f.name)}・題目 <small>${f.n} 題・${f.pages} 頁</small></em><button type="button" class="kpv">閱覽</button></span></div></div>`
+        :`<div class="dbrow"><span class="yy">${f.lvl}</span><div class="dbfiles"><span class="dbmiss">${f.n?`${f.n} 題，題目排版中，完成後放在這裡`:"彙編中沒有此主題的題目"}</span></div></div>`}</div>
+      ${KB_BRIDGES.includes(f.id)&&a?`<p class="note">本層有空橋通往 <button type="button" class="dir-row" data-h="t${a.id}" style="--fc:var(${a.color});display:inline-flex;width:auto;padding:2px 10px;margin:0 2px"><b>A 棟 ${a.lvl} ${esc(a.name)}</b></button>（物奧初選）。</p>`:""}
+      <p class="note">B 棟收學科能力競賽理論試題，一層一個主題，目前 ${done} 個主題可以線上閱覽；點「閱覽」在這裡直接翻頁看。</p>`;
+    p.querySelectorAll(".kpv").forEach(b=>b.onclick=()=>openPdf(kFile(f)));
+    p.querySelectorAll(".dbfile").forEach(el=>fetch("b2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
   }else if(c.b==="s"){
     const f=sFloor(c.id);
     p.style.setProperty("--fc",`var(${f.color})`);
@@ -525,7 +560,8 @@ function route(){
     p.style.setProperty("--fc","var(--plate)");
     p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
       <div class="dir">
-        <section><h3>競賽大樓 <small>${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button>`}</section>
+        <section><h3>競賽大樓 B 棟 <small>學科能力競賽・${KB.length} 層</small></h3>${KB.slice().reverse().map(f=>dirRow("k",f)).join("")}</section>
+        <section><h3>競賽大樓 A 棟 <small>物奧初選・${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button>`}</section>
         <section><h3>實驗大樓 <small>競賽實驗題</small></h3><button type="button" class="dir-row" data-h="lab" style="--fc:var(--lab)"><span class="n">實</span><span><b>實驗大樓</b><small>${esc(LAB.t)}・歷屆學科能力競賽實驗題虛擬實驗室・講義 ${LABDOCS.length} 份</small></span></button></section>
         <section><h3>物理藏經閣 <small>選訓教材 ${LIBRARY.length} 冊</small></h3><button type="button" class="dir-row" data-h="lib" style="--fc:var(--lib)"><span class="n">經</span><span><b>物理藏經閣</b><small>${esc(LIBRARY.map(v=>v.vol+" "+v.theme).join("・"))}</small></span></button></section>
         <section><h3>二階資料庫 <small>申請入學二階筆試</small></h3><button type="button" class="dir-row" data-h="db" style="--fc:var(--db)"><span class="n">二</span><span><b>二階資料庫</b><small>${esc(DB2_BOOK)}・依章閱覽與下載</small></span></button></section>
@@ -540,6 +576,7 @@ function route(){
 }
 
 /* ---------- 藏經閣：PDF 閱覽與下載 ---------- */
+const kFile=f=>({v:{vol:"B 棟"},ch:{t:f.lvl},f:{label:f.name+"・題目",by:"學科能力競賽"},url:"b2/"+f.pdf,name:`學科能力競賽 ${f.name} 題目.pdf`,viewOnly:true});
 const fyFile=b=>{const d=OLY2.find(x=>x.y==b.dataset.y), f=d.files[b.dataset.f]; return {v:{vol:"複賽"},ch:{t:d.y+" 年"},f:{label:f.label,by:"物奧複賽"},url:"db2/"+f.pdf,name:`物奧複賽 ${d.y} ${f.label}.pdf`};};
 const dbFile=b=>{const d=DB2[b.dataset.i]; return {v:{vol:"二階"},ch:{t:/^\d+$/.test(d.no)?"第 "+d.no+" 章":d.no},f:{label:d.t,by:DB2_BOOK},url:"db2/"+d.pdf,name:`二階 ${DB2_BOOK} ${d.no} ${d.t}.pdf`};};
 const libFile=b=>{const v=LIBRARY[b.dataset.v], ch=v.chapters[b.dataset.c], f=ch.files[b.dataset.f]; return {v,ch,f,url:"library/"+f.pdf,name:`選訓教材 ${v.vol} ${ch.t}（${f.label}）.pdf`};};
@@ -742,7 +779,7 @@ function init3D(){
   thUpper.forEach((f,i)=>buildFloor("t"+f.id,f,"t",TX,BASE+i*H,W,D,H,f.rooms.length));
   const thRoof=BASE+thUpper.length*H; roof(TX,thRoof);
   {const o=buildFloor("tR",tFloor("R"),"t",TX-1.1,thRoof+.18,4.2,3,1.1,3); o.z0=-.4;}
-  roofSign(TX,thRoof,"競 賽 大 樓","C O N T E S T","--plate-t");
+  roofSign(TX,thRoof,"競 賽 A 棟","C O N T E S T  A","--plate-t");
   /* 競賽大樓頂：天文台圓頂 */
   scene.add(mesh(new THREE.CylinderGeometry(.9,.9,.5,24),M.wallT,TX+1.9,thRoof+.43,-1.2));
   scene.add(mesh(new THREE.SphereGeometry(.9,24,12,0,Math.PI*2,0,Math.PI/2),M.slab,TX+1.9,thRoof+.68,-1.2));
@@ -761,6 +798,24 @@ function init3D(){
   bridge.add(mesh(B(bl-.4,.03,.5),bridgeLit,0,H*.8,0,false,false));
   /* 空橋支柱 */
   [bcx-bl/4,bcx+bl/4].forEach(px=>scene.add(mesh(new THREE.CylinderGeometry(.12,.12,by,10),M.trim,px,by/2,.4)));
+
+  /* 競賽大樓 B 棟：A 棟正後方（隔著後方道路），6F、9F 以南北向空橋相連 */
+  const KX=TX+1.6, KZ=-11.2;
+  scene.add(mesh(B(W+2,.06,D+2),M.pave,KX,.03,KZ,false,true));
+  {const g0=scene.children.length; lobby(KX,M.wallT); scene.children.slice(g0).forEach(o=>o.position.z+=KZ);}
+  KB.forEach((f,i)=>{const o=buildFloor("k"+f.id,f,"t",KX,BASE+i*H,W,D,H,4); o.bld="k"; o.z0=KZ; o.g.position.z=KZ;});
+  const kRoof=BASE+KB.length*H;
+  {const g0=scene.children.length; roof(KX,kRoof); roofSign(KX-2.8,kRoof,"競 賽 B 棟","A C A D E M I C  B","--plate-t"); scene.children.slice(g0).forEach(o=>o.position.z+=KZ);}
+  KB_BRIDGES.forEach(id=>{
+    const yi=thUpper.findIndex(f=>f.id===id), y=BASE+yi*H, z0=-D/2, z1=KZ+D/2, l=z0-z1, cz=(z0+z1)/2, bw=1.4, cx=(Math.max(TX,KX)-W/2+Math.min(TX,KX)+W/2)/2;
+    const g=new THREE.Group(); g.position.set(cx,y,cz); g.rotation.y=Math.PI/2; scene.add(g);
+    const fl=mesh(B(l,.14,bw),M.slab,0,.07,0), rf=mesh(B(l,.1,bw+.1),M.trim,0,H*.86,0), tb=mesh(B(l,H*.72,bw),M.tube,0,H*.5,0,false,false);
+    [fl,rf,tb].forEach(o=>{g.add(o);o.userData.key="k"+id;pickables.push(o);});
+    for(let i=0;i<=4;i++){const px=-l/2+l*i/4;[-1,1].forEach(s=>g.add(mesh(B(.06,H*.72,.06),M.trim,px,H*.5,s*bw/2)));}
+    g.add(mesh(B(l-.4,.03,.45),bridgeLit,0,H*.8,0,false,false));
+  });
+  {const cx=(Math.max(TX,KX)-W/2+Math.min(TX,KX)+W/2)/2, ph=BASE+(Number(KB_BRIDGES[0])-1)*H;
+   [-3.4,-7.4].forEach(pz=>scene.add(mesh(new THREE.CylinderGeometry(.12,.12,ph,10),M.trim,cx,ph/2,pz)));}
 
   /* 院區裡四處走動的 12 個人（11 男 1 女） */
   const lin=h=>new THREE.Color(h).convertSRGBToLinear();
@@ -802,7 +857,7 @@ function init3D(){
   /* 可走的地面：大樓前廣場、大樓後方、兩棟之間的通道 */
   const ZONES={
     front:{x0:-9.5,x1:9.5,z0:D/2+1.6,z1:D/2+7.6},
-    back:{x0:-10,x1:10,z0:-D/2-7,z1:-D/2-1.6},
+    back:{x0:-10,x1:10,z0:-D/2-6,z1:-D/2-1.6},
     gap:{x0:bx0+.8,x1:bx1-.8,z0:-D/2,z1:D/2+1}
   };
   const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -1053,7 +1108,7 @@ function init3D(){
   /* 中央大道兩側植栽 */
   const TREES=[[-2.4,D/2+5.6],[2.4,D/2+5.6],[-2.4,D/2+9],[2.4,D/2+9],
     [-22,RZ1-2.6],[-9.6,RZ1-2.6],[9.6,RZ1-2.6],[22,RZ1-2.6],
-    [-6,RZ0+2.2],[0,RZ0+2.2],[5,RZ0+2.2],[-15,-1.6],[-9.8,-6.8],[9.8,-6.8],
+    [-6,RZ0+2.2],[0,RZ0+2.2],[5,RZ0+2.2],[-15,-1.6],[-9.8,-6.8],[1.6,-7.6],
     [23.4,-4.6],[-22.9,3.4],[-14.6,2.4],[25.6,3.4],[25.6,8.6],[-26,-14],[26,-15.5],[-26,9],[-9.6,-14.6]];
   TREES.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
@@ -1065,12 +1120,12 @@ function init3D(){
   Object.values(floorObjs).forEach(o=>{
     const b=document.createElement("button"); b.type="button"; b.className="flabel"; b.style.setProperty("--fc",`var(${o.f.color})`);
     b.innerHTML=`<i>${o.f.lvl}</i><span class="nm">${esc(o.f.name)}</span>`;
-    b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
+    b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓 A 棟":o.bld==="k"?"競賽大樓 B 棟":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
     b.onclick=()=>go(o.key); labelBox.appendChild(b); labels[o.key]=b;
   });
-  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"],["lab",EX-3.4,EH+1.1,"實驗大樓","--lab"]].map(([k,x,y,t,pv])=>{
+  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽 A 棟","--plate-t"],["k",KX,kRoof+1.9,"競賽 B 棟","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"],["lab",EX-3.4,EH+1.1,"實驗大樓","--lab"]].map(([k,x,y,t,pv])=>{
     const b=document.createElement("button"); b.type="button"; b.className="blabel"; b.textContent=t; b.style.setProperty("--bp",`var(${pv})`);
-    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"||k==="db"||k==="lab"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="gym"?GZ:k==="lib"?LZ:k==="db"?DZ:k==="lab"?EZ:0)};
+    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"||k==="db"||k==="lab"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="k"?KZ:k==="gym"?GZ:k==="lib"?LZ:k==="db"?DZ:k==="lab"?EZ:0)};
   });
 
   let night=false;
@@ -1098,7 +1153,7 @@ function init3D(){
 
   /* camera */
   const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const topY=thRoof+2.6;
+  const topY=Math.max(thRoof,kRoof)+2.6;
   let az=.38, el=.2, dist=40, lastUser=-1e9; const t0=performance.now();
   const target=new THREE.Vector3(0,topY/2-1,0);
   function fit(){
@@ -1136,7 +1191,7 @@ function init3D(){
     cam.position.set(target.x+dist*Math.sin(a)*Math.cos(el),target.y+dist*Math.sin(el),target.z+dist*Math.cos(a)*Math.cos(el));
     cam.lookAt(target);
     if(!cls.hidden||!qv.hidden||!pv.hidden) return;
-    const c=current(), sel=c.b==="t"||c.b==="s"?c.b+c.id:null;
+    const c=current(), sel=c.b==="t"||c.b==="s"||c.b==="k"?c.b+c.id:null;
     litC.set(css("--glass-lit")||"#ffd978").convertSRGBToLinear();
     let gl=null;
     Object.values(floorObjs).forEach(o=>{
