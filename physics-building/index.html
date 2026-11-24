@@ -372,7 +372,7 @@ const QOWN={}; THEORY.forEach(f=>f.rooms.forEach(r=>r.qs.forEach(q=>QOWN[q]=r)))
 /* 休閒中心：小遊戲（連到外部網址，在新分頁開啟）。新增遊戲就在 GAMES 加一筆 {t:名稱, d:說明, url:網址, tag:標籤} */
 /* 物理藏經閣：物奧國家代表隊選訓教材。每章 files 列出放在 library/ 的 PDF：{label:版本名稱, pdf:檔名, by:整理者}；空陣列表示還沒上架 */
 const LIBRARY=[
-  {vol:"第一冊",theme:"力學・熱學",chapters:[{t:"力學",p:1,files:[]},{t:"剛體力學",p:42,files:[{label:"文字版",pdf:"v1-02-rigid-body-text.pdf",by:"郭鴻銘 整理",pages:49}]},{t:"振動和波",p:81,files:[{label:"文字版",pdf:"v1-03-oscillations-waves-text.pdf",by:"林明瑞 整理",pages:42}]},{t:"熱力學與分子動力論",p:118,files:[{label:"文字版",pdf:"v1-04-thermodynamics-text.pdf",by:"王婉美 整理",pages:43}]}]},
+  {vol:"第一冊",theme:"力學・熱學",chapters:[{t:"力學",p:1,files:[{label:"文字版",pdf:"v1-01-mechanics-text.pdf",by:"蔣亨進、褚德三 整理",pages:46}]},{t:"剛體力學",p:42,files:[{label:"文字版",pdf:"v1-02-rigid-body-text.pdf",by:"郭鴻銘 整理",pages:49}]},{t:"振動和波",p:81,files:[{label:"文字版",pdf:"v1-03-oscillations-waves-text.pdf",by:"林明瑞 整理",pages:42}]},{t:"熱力學與分子動力論",p:118,files:[{label:"文字版",pdf:"v1-04-thermodynamics-text.pdf",by:"王婉美 整理",pages:43}]}]},
   {vol:"第二冊",theme:"電磁・光學",chapters:[{t:"電荷與電場",p:1,files:[]},{t:"電流與磁場",p:24,files:[]},{t:"電磁波",p:112,files:[]},{t:"光學",p:130,files:[]},{t:"如何處理物體的移動和轉動",p:180,files:[]},{t:"物理例題集錦",p:205,files:[]}]},
   {vol:"第三冊",theme:"近代物理・實驗",chapters:[{t:"力學續論",p:1,files:[]},{t:"狹義相對論",p:54,files:[]},{t:"量子物理",p:95,files:[]},{t:"物質",p:110,files:[]},{t:"微中子",p:144,files:[]},{t:"熵的統計觀點",p:155,files:[]},{t:"實驗數據的處理",p:159,files:[]}]}
 ];
