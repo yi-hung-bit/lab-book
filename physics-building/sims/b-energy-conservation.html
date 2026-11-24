@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>力學能守恆</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cK:#43d6ff;--cU:#c084fc;--cE:#ffd166;--cQ:#ff7a5c;--pos:#84cc16;--neg:#ff5c8a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:78ch;margin-top:6px;font-size:15px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;position:relative}
+canvas{display:block;width:100%;touch-action:none}
+#scene{height:300px}
+#plot{height:220px}
+@media(max-width:560px){#scene{height:250px}#plot{height:200px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+select{font-family:inherit;font-size:13px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:100%}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+@media(max-width:420px){.read{grid-template-columns:repeat(2,1fr)}}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.bars{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;align-items:end}
+.bar{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.bar .tube{width:100%;max-width:58px;height:120px;border:1px solid var(--line);border-radius:8px;background:#0a0f1a;position:relative;overflow:hidden}
+.bar .fill{position:absolute;left:0;right:0;bottom:0;height:0}
+.bar small{font-size:12px;color:var(--muted);text-align:center;line-height:1.3}
+.bar b{font-family:"JetBrains Mono",monospace;font-size:12.5px}
+.state{margin-top:12px;padding:10px 14px;border-radius:11px;font-weight:700;font-size:14.5px;text-align:center;border:1px solid var(--line)}
+.state.p{background:rgba(132,204,22,.1);color:var(--pos);border-color:rgba(132,204,22,.4)}
+.state.n{background:rgba(255,92,138,.1);color:var(--neg);border-color:rgba(255,92,138,.4)}
+.state.z{background:rgba(132,146,170,.1);color:var(--muted)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips button{font-size:12.5px;padding:5px 9px}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:center}
+th{color:var(--dim);font-weight:500;font-size:12px}
+td{font-family:"JetBrains Mono",monospace;color:var(--phos)}
+td:first-child{font-family:inherit;color:var(--txt);text-align:left}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">5-1 · Conservation of Mechanical Energy</div>
+  <h1>力學能守恆</h1>
+  <p class="lede">只有重力作功時，動能 K 與重力位能 U 可以互相轉換，但兩者的和 <b style="color:var(--acc)">力學能 E = K + U</b> 保持不變。小車在山丘與低谷間運動：往下時 U 變成 K、往上時 K 變回 U；有摩擦時力學能會減少，少掉的部分變成熱能。</p>
+  <div class="tabs" role="group" aria-label="模式">
+    <button type="button" data-mode="A" aria-pressed="true">① 軌道上的力學能</button>
+    <button type="button" data-mode="B" aria-pressed="false">② 山丘、低谷與平直軌道競走</button>
+    <button type="button" data-mode="C" aria-pressed="false">③ 水滑道（範例 5-2）</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t" id="sTitle">軌道與小車</span><span class="n" id="sNote"></span></div>
+      <div class="box"><canvas id="scene" aria-label="軌道與小車的運動"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t" id="pTitle">能量–時間圖</span><span class="n" id="pNote"></span></div>
+      <div class="box"><canvas id="plot" aria-label="能量隨時間的變化"></canvas></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="card">
+      <!-- 模式 A -->
+      <div id="ctlA">
+        <div class="head"><span class="t">軌道與條件</span><span class="n">拖曳白色圓點改變軌道高度</span></div>
+        <div class="pad" style="padding-top:2px">
+          <div class="chips" id="presets"></div>
+          <div class="ctl"><div class="r"><label for="aM">小車質量 m</label><span id="oaM"></span></div><input type="range" id="aM" min="1" max="100" step="1" value="50"></div>
+          <div class="ctl"><div class="r"><label for="aV">初速 v₀（向右）</label><span id="oaV"></span></div><input type="range" id="aV" min="0" max="25" step="0.5" value="0"></div>
+          <div class="ctl"><div class="r"><label for="aMu">摩擦係數 μ</label><span id="oaMu"></span></div><input type="range" id="aMu" min="0" max="0.3" step="0.01" value="0"></div>
+          <div class="seg" style="margin-top:10px" role="group" aria-label="重力加速度">
+            <button type="button" data-g="9.8" aria-pressed="true">g = 9.8 m/s²</button><button type="button" data-g="10" aria-pressed="false">g = 10 m/s²</button>
+            <button type="button" id="spd" title="播放速度">速度 1×</button>
+          </div>
+          <div class="seg" style="margin-top:12px"><button class="primary" id="aGo">▶ 放手</button><button id="aReset">放回起點</button></div>
+          <div class="state z" id="aState"></div>
+          <div class="bars" id="bars"></div>
+          <div class="read">
+            <div><small>時間 t</small><b id="rT"></b></div>
+            <div><small>速率 v</small><b id="rV"></b></div>
+            <div><small>高度 h</small><b id="rH"></b></div>
+            <div><small>力學能 E = K + U</small><b id="rE"></b></div>
+            <div><small>熱能（摩擦生熱）</small><b id="rQ"></b></div>
+            <div><small>K + U + 熱能</small><b id="rS"></b></div>
+          </div>
+          <div class="note" id="aSee"></div>
+        </div>
+      </div>
+      <!-- 模式 B -->
+      <div id="ctlB" hidden>
+        <div class="head"><span class="t">競走條件</span><span class="n">三條軌道起點、終點一樣高，不計摩擦</span></div>
+        <div class="pad" style="padding-top:2px">
+          <div class="ctl"><div class="r"><label for="bV">相同的初速 v₀</label><span id="obV"></span></div><input type="range" id="bV" min="1" max="12" step="0.5" value="5"></div>
+          <div class="ctl"><div class="r"><label for="bD">山丘高度 = 低谷深度 d</label><span id="obD"></span></div><input type="range" id="bD" min="0.2" max="3" step="0.1" value="1"></div>
+          <div class="seg" style="margin-top:12px"><button class="primary" id="bGo">▶ 同時出發</button><button id="bReset">回到起點</button></div>
+          <table aria-label="競走結果"><thead><tr><th>軌道</th><th>經過時間</th><th>終點速率</th><th>最低／最高點速率</th></tr></thead><tbody id="bTab"></tbody></table>
+          <div class="note" id="bSee"></div>
+        </div>
+      </div>
+      <!-- 模式 C -->
+      <div id="ctlC" hidden>
+        <div class="head"><span class="t">兩條水滑道</span><span class="n">由靜止滑下，不計摩擦</span></div>
+        <div class="pad" style="padding-top:2px">
+          <div class="ctl"><div class="r"><label for="cH">落差 H</label><span id="ocH"></span></div><input type="range" id="cH" min="2" max="20" step="0.5" value="10"></div>
+          <div class="ctl"><div class="r"><label for="cA">甲 滑道形狀</label><span></span></div><select id="cA"></select></div>
+          <div class="ctl"><div class="r"><label for="cB">乙 滑道形狀</label><span></span></div><select id="cB"></select></div>
+          <div class="seg" style="margin-top:12px"><button class="primary" id="cGo">▶ 同時滑下</button><button id="cReset">回到頂端</button></div>
+          <table aria-label="水滑道結果"><thead><tr><th>滑道</th><th>經過時間</th><th>到底速率</th><th>√(2gH)</th></tr></thead><tbody id="cTab"></tbody></table>
+          <div class="note" id="cSee"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">範例 5-3 雲霄飛車</span><span class="n">g = 10 m/s²，不計摩擦</span></div>
+      <div class="pad" style="padding-top:2px" id="ex"></div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">想一想・示範實驗 4</span><span class="n">先猜，再到模擬裡比比看</span></div>
+      <div class="pad" style="padding-top:2px" id="quiz"></div>
+    </section>
+  </div>
+
+  <footer>
+    <b>模擬說明：</b>小車視為質點沿軌道運動，切線方向加速度 a = −g sin θ − μ g cos θ（摩擦力近似為 μ·mg cos θ，與速度反向）；每一步以 K + U + 熱能 = 定值校正速率，μ = 0 時力學能完全守恆。重力位能以地面（h = 0）為零位面，零位面換了 U 會差一個常數，但 E 的變化量不變。來源：基礎物理 Ch05 5-1 力學能守恆（圖 5-4、想一想、範例 5-2、範例 5-3），5-3 示範實驗 4。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const fmt=(n,d=1)=>{const r=+(+n).toFixed(d);return(Object.is(r,-0)?0:r).toFixed(d).replace("-","−");};
+const fJ=n=>Math.abs(n)>=1e4?fmt(n/1000,2)+" kJ":fmt(n,0)+" J";
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w,h};}
+const C={K:"#43d6ff",U:"#c084fc",E:"#ffd166",Q:"#ff7a5c",S:"#e8edf6"};
+let g=9.8, speed=1, mode="A";
+
+/* ===== 軌道：給 y(x) 取樣成折線，用弧長 s 描述位置 ===== */
+function makeTrack(fn,x0,x1,N=900){
+  const xs=[],ys=[],ss=[0];
+  for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N;xs.push(x);ys.push(fn(x));}
+  for(let i=1;i<=N;i++) ss.push(ss[i-1]+Math.hypot(xs[i]-xs[i-1],ys[i]-ys[i-1]));
+  return {xs,ys,ss,L:ss[N],N,fn,x0,x1};
+}
+function at(T,s){
+  s=Math.max(0,Math.min(T.L,s));
+  let lo=0,hi=T.N;while(hi-lo>1){const m=(lo+hi)>>1;if(T.ss[m]<=s)lo=m;else hi=m;}
+  const ds=T.ss[hi]-T.ss[lo]||1e-9,f=(s-T.ss[lo])/ds;
+  const dx=T.xs[hi]-T.xs[lo],dy=T.ys[hi]-T.ys[lo];
+  return {x:T.xs[lo]+f*dx,y:T.ys[lo]+f*dy,sin:dy/ds,cos:dx/ds};
+}
+/* 物體：s 弧長、v 沿軌道速度（向右為正）、Q 摩擦生熱 */
+function body(T,v0,m,mu){const p=at(T,0);return {T,s:0,v:v0,m,mu,Q:0,t:0,h0:p.y,v0,done:false,end:"",vmin:Math.abs(v0),vmax:Math.abs(v0),stuck:false};}
+function step(b,dt){
+  if(b.done) return;
+  const H=0.001; let n=Math.max(1,Math.round(dt/H)); const h=dt/n;
+  for(let i=0;i<n&&!b.done;i++){
+    const p=at(b.T,b.s);
+    if(b.mu>0&&Math.abs(b.v)<1e-3&&Math.abs(p.sin)<=b.mu*p.cos){b.v=0;b.stuck=true;b.done=true;b.end="stop";break;}
+    const fr=b.mu>0?(b.v!==0?b.mu*g*p.cos*Math.sign(b.v):Math.sign(p.sin)*b.mu*g*p.cos):0;
+    const a=-g*p.sin-fr;
+    let vn=b.v+a*h; const ds=(b.v+vn)/2*h;
+    if(b.mu>0&&b.v!==0&&Math.sign(vn)!==Math.sign(b.v)) vn=0;   // 摩擦力不會讓物體倒退
+    b.s+=ds; b.Q+=b.mu*b.m*g*Math.abs(p.cos)*Math.abs(ds); b.t+=h;
+    const q=at(b.T,b.s);
+    {const v2=b.v0*b.v0+2*g*(b.h0-q.y)-2*b.Q/b.m; if(v2>0&&(b.mu===0||vn!==0)) vn=(Math.sign(vn)||Math.sign(-q.sin)||1)*Math.sqrt(v2);}   // 由 K + U + 熱能 守恆校正速率
+    b.v=vn; const sp=Math.abs(vn); b.vmin=Math.min(b.vmin,sp); b.vmax=Math.max(b.vmax,sp);
+    if(b.s>=b.T.L){b.s=b.T.L;b.done=true;b.end="end";}
+    else if(b.s<=0&&b.v<=0){b.s=0;b.done=true;b.end="back";}
+  }
+}
+const KE=b=>0.5*b.m*b.v*b.v, PE=b=>b.m*g*at(b.T,b.s).y;
+
+/* ===== 模式 A ===== */
+const PRESET={
+  "山丘":{y:[2,2,7,7,2,2],v0:12,mu:0},
+  "低谷":{y:[8,8,1,1,8,8],v0:0.5,mu:0},
+  "雲霄飛車":{y:[9,0.5,6,1.5,4,1],v0:0,mu:0},
+  "範例 5-3":{y:[0,3,8,2,6,4],v0:20,mu:0,m:50,g:10},
+  "有摩擦的 U 形谷":{y:[9,4,0.6,0.6,4,9],v0:0,mu:0.05},
+};
+const A={xs:[0,4,8,12,16,20],y:[9,0.5,6,1.5,4,1],m:50,v0:0,mu:0,b:null,run:false,hist:[],drag:-1};
+function spline(xs,ys){ // Catmull-Rom
+  return x=>{const n=xs.length-1,seg=Math.min(n-1,Math.max(0,Math.floor((x-xs[0])/(xs[1]-xs[0]))));
+    const t=(x-xs[seg])/(xs[seg+1]-xs[seg]),p0=ys[Math.max(0,seg-1)],p1=ys[seg],p2=ys[seg+1],p3=ys[Math.min(n,seg+2)];
+    const t2=t*t,t3=t2*t;return Math.max(0,0.5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t2+(-p0+3*p1-3*p2+p3)*t3));};
+}
+function aBuild(){A.T=makeTrack(spline(A.xs,A.y),0,20);aReset();}
+function aReset(){A.b=body(A.T,A.v0,A.m,A.mu);A.run=false;A.hist=[{t:0,K:KE(A.b),U:PE(A.b),Q:0}];$("#aGo").textContent="▶ 放手";uiA();}
+const AX={x0:-0.6,x1:20.6,y0:-0.6,y1:12};
+function aMap(w,h){const L=14,R=14,T=14,B=24;const sx=(w-L-R)/(AX.x1-AX.x0),sy=(h-T-B)/(AX.y1-AX.y0);return {X:x=>L+(x-AX.x0)*sx,Y:y=>h-B-(y-AX.y0)*sy,ix:px=>AX.x0+(px-L)/sx,iy:py=>AX.y0+(h-B-py)/sy};}
+function drawTrackLine(g2,T,X,Y,col="#cbd5e1",fillTo=null){
+  g2.beginPath();for(let i=0;i<=T.N;i+=3){const px=X(T.xs[i]),py=Y(T.ys[i]);i?g2.lineTo(px,py):g2.moveTo(px,py);}
+  if(fillTo!=null){const last=g2;g2.lineTo(X(T.xs[T.N]),fillTo);g2.lineTo(X(T.xs[0]),fillTo);g2.closePath();g2.fillStyle="rgba(100,116,139,.13)";g2.fill();
+    g2.beginPath();for(let i=0;i<=T.N;i+=3){const px=X(T.xs[i]),py=Y(T.ys[i]);i?g2.lineTo(px,py):g2.moveTo(px,py);}}
+  g2.strokeStyle=col;g2.lineWidth=3;g2.stroke();
+}
+function cart(g2,X,Y,b,col,sc=1){
+  const p=at(b.T,b.s),px=X(p.x),py=Y(p.y);
+  const ang=Math.atan2(-(Y(p.y+p.sin)-py),X(p.x+p.cos)-px);
+  g2.save();g2.translate(px,py);g2.rotate(-ang);
+  g2.fillStyle=col;g2.beginPath();g2.roundRect?g2.roundRect(-13*sc,-17*sc,26*sc,12*sc,3):g2.rect(-13*sc,-17*sc,26*sc,12*sc);g2.fill();
+  g2.fillStyle="#0b1220";g2.strokeStyle="#e8edf6";g2.lineWidth=1.5;[-7,7].forEach(dx=>{g2.beginPath();g2.arc(dx*sc,-4*sc,4*sc,0,7);g2.fill();g2.stroke();});
+  g2.restore();return {px,py};
+}
+function drawA(){
+  const {g:G,w,h}=fit($("#scene"));G.clearRect(0,0,w,h);const M=aMap(w,h);
+  // 地面與刻度
+  G.fillStyle="#1a2234";G.fillRect(0,M.Y(0),w,h-M.Y(0));
+  G.strokeStyle="#1b2336";G.lineWidth=1;G.font="11px 'JetBrains Mono',monospace";G.fillStyle="#5b6880";G.textAlign="left";G.textBaseline="middle";
+  for(let y=2;y<=10;y+=2){G.beginPath();G.moveTo(M.X(0),M.Y(y));G.lineTo(w,M.Y(y));G.stroke();G.fillText(y+" m",4,M.Y(y)-7);}
+  const b=A.b;
+  // 能到達的最高高度：E/(mg)
+  const E=KE(b)+PE(b), hmax=E/(b.m*g);
+  if(hmax<AX.y1+.5){G.setLineDash([6,5]);G.strokeStyle="rgba(255,209,102,.7)";G.lineWidth=1.5;G.beginPath();G.moveTo(M.X(0),M.Y(hmax));G.lineTo(w,M.Y(hmax));G.stroke();G.setLineDash([]);
+    G.fillStyle="#ffd166";G.textAlign="right";G.fillText("最高可到 h = E/mg = "+fmt(hmax,2)+" m",w-8,M.Y(hmax)-9);}
+  drawTrackLine(G,A.T,M.X,M.Y,"#cbd5e1",M.Y(0));
+  // 控制點
+  if(!A.run) A.xs.forEach((x,i)=>{G.beginPath();G.arc(M.X(x),M.Y(A.y[i]),i===A.drag?10:8,0,7);G.fillStyle="rgba(255,255,255,.9)";G.fill();G.strokeStyle="#0c1322";G.lineWidth=2;G.stroke();});
+  const c=cart(G,M.X,M.Y,b,"#ffb454",1.15);
+  // 高度標示
+  const p=at(b.T,b.s);G.setLineDash([3,4]);G.strokeStyle="rgba(192,132,252,.8)";G.lineWidth=1.5;G.beginPath();G.moveTo(c.px+18,c.py);G.lineTo(c.px+18,M.Y(0));G.stroke();G.setLineDash([]);
+  G.fillStyle="#c084fc";G.textAlign="left";G.fillText("h = "+fmt(p.y,2)+" m",Math.min(w-80,c.px+22),(c.py+M.Y(0))/2);
+  // 速度箭頭
+  if(Math.abs(b.v)>0.05){const L=Math.min(70,Math.abs(b.v)*4+8)*Math.sign(b.v);const ux=p.cos,uy=p.sin;const x2=c.px+ux*L,y2=c.py-uy*L-20;
+    G.strokeStyle=C.K;G.fillStyle=C.K;G.lineWidth=3;G.beginPath();G.moveTo(c.px,c.py-20);G.lineTo(x2,y2);G.stroke();
+    const vx=x2-c.px,vy=y2-(c.py-20),l=Math.hypot(vx,vy)||1;G.beginPath();G.moveTo(x2+vx/l*8,y2+vy/l*8);G.lineTo(x2-vy/l*6,y2+vx/l*6);G.lineTo(x2+vy/l*6,y2-vx/l*6);G.fill();}
+  $("#sNote").textContent=b.mu>0?"μ = "+fmt(b.mu,2)+"，摩擦生熱":"不計摩擦";
+}
+function drawPlotA(){
+  const {g:G,w,h}=fit($("#plot"));G.clearRect(0,0,w,h);
+  const L=46,R=10,T=12,B=26,H=A.hist,tm=Math.max(4,H[H.length-1].t*1.05);
+  const S0=H[0].K+H[0].U; let ymax=Math.max(1,S0)*1.12;
+  const X=t=>L+(w-L-R)*t/tm,Y=v=>h-B-(h-T-B)*v/ymax;
+  G.strokeStyle="#1b2336";G.lineWidth=1;G.font="11px 'JetBrains Mono',monospace";G.fillStyle="#5b6880";G.textAlign="right";G.textBaseline="middle";
+  for(let k=0;k<=4;k++){const v=ymax*k/4;G.beginPath();G.moveTo(L,Y(v));G.lineTo(w-R,Y(v));G.stroke();G.fillText(v>=1e4?fmt(v/1000,0)+"k":fmt(v,0),L-4,Y(v));}
+  G.textAlign="center";G.textBaseline="top";const st=tm>20?5:tm>8?2:1;for(let t=0;t<=tm;t+=st)G.fillText(t+"",X(t),h-B+5);G.textBaseline="bottom";G.textAlign="right";G.fillText("t (s)",w-R-2,h-B-3);
+  const line=(f,col,wd=2,dash)=>{G.strokeStyle=col;G.lineWidth=wd;G.setLineDash(dash||[]);G.beginPath();H.forEach((p,i)=>{const px=X(p.t),py=Y(f(p));i?G.lineTo(px,py):G.moveTo(px,py);});G.stroke();G.setLineDash([]);};
+  line(p=>p.U,C.U);line(p=>p.K,C.K);if(A.mu>0||H.some(p=>p.Q>0)){line(p=>p.Q,C.Q);line(p=>p.K+p.U+p.Q,C.S,1.5,[5,4]);}line(p=>p.K+p.U,C.E,3);
+  $("#pNote").textContent="E = K + U"+(A.mu>0?"；虛線 = K + U + 熱能":"");
+}
+function bar(id,lab,val,max,col){return `<div class="bar"><div class="tube"><div class="fill" style="height:${Math.max(0,Math.min(100,val/max*100))}%;background:${col}"></div></div><b style="color:${col}">${fJ(val)}</b><small>${lab}</small></div>`;}
+function uiA(){
+  const b=A.b,K=KE(b),U=PE(b),E=K+U,S=E+b.Q,S0=A.hist[0].K+A.hist[0].U,p=at(b.T,b.s);
+  $("#oaM").textContent=A.m+" kg";$("#oaV").textContent=fmt(A.v0,1)+" m/s";$("#oaMu").textContent=fmt(A.mu,2);
+  $("#bars").innerHTML=bar("K","動能 K",K,S0,C.K)+bar("U","位能 U",U,S0,C.U)+bar("Q","熱能",b.Q,S0,C.Q)+bar("E","力學能 E",E,S0,C.E);
+  $("#rT").textContent=fmt(b.t,2)+" s";$("#rV").textContent=fmt(Math.abs(b.v),2)+" m/s";$("#rH").textContent=fmt(p.y,2)+" m";
+  $("#rE").textContent=fJ(E);$("#rQ").textContent=fJ(b.Q);$("#rS").textContent=fJ(S);
+  const st=$("#aState");
+  if(b.done){st.className="state "+(b.end==="end"?"p":"n");
+    st.textContent=b.end==="end"?`到達右端：v = ${fmt(Math.abs(b.v),2)} m/s，K = ${fJ(K)}`:b.end==="back"?"爬不過去，滑回起點":"摩擦力讓小車停在軌道上";}
+  else if(A.run){st.className="state z";st.textContent=Math.abs(b.v)<0.3&&b.t>0.2?"接近最高點：K 幾乎全變成 U":-b.v*p.sin>0?"下坡：U → K，越跑越快":b.v*p.sin>0?"上坡：K → U，越跑越慢":"水平：K、U 都不變";}
+  else{st.className="state z";st.textContent=`起點 h = ${fmt(p.y,2)} m，E = ${fJ(E)}；按「放手」`;}
+  const hm=E/(b.m*g), top=Math.max(...A.T.ys);
+  $("#aSee").innerHTML=A.mu===0
+    ?`不計摩擦：E = ½mv² + mgh = <b>${fJ(S0)}</b> 一直不變。黃色虛線是 K 全部變成 U 時的高度 h = E/(mg) = <b>${fmt(hm,2)} m</b>；軌道最高點 ${fmt(top,2)} m ${hm>top?"比它低，小車一定過得去":"比它高，小車到不了，會在虛線高度停下再滑回來"}。同一高度速率相同：v = √(v₀² + 2g(h₀ − h))。`
+    :`有摩擦：力學能 E 由 ${fJ(S0)} 減少到 ${fJ(E)}，少掉的 <b>${fJ(b.Q)}</b> 變成熱能；K + U + 熱能 = ${fJ(S)}，<b>總能量仍守恆</b>。摩擦力 ≈ μmg cos θ：軌道越平緩正向力越大，走同樣路程生熱越多；來回擺盪的高度一次比一次低。`;
+}
+function setPreset(k){const P=PRESET[k];A.y=P.y.slice();A.v0=P.v0;A.mu=P.mu;if(P.m)A.m=P.m;setG(P.g||9.8);
+  $("#aV").value=A.v0;$("#aMu").value=A.mu;$("#aM").value=A.m;aBuild();}
+$("#presets").innerHTML=Object.keys(PRESET).map(k=>`<button type="button" data-p="${k}">${k}</button>`).join("");
+$$("#presets button").forEach(b=>b.onclick=()=>setPreset(b.dataset.p));
+$("#aM").oninput=e=>{A.m=+e.target.value;aReset();};
+$("#aV").oninput=e=>{A.v0=+e.target.value;aReset();};
+$("#aMu").oninput=e=>{A.mu=+e.target.value;aReset();};
+$("#aGo").onclick=()=>{if(A.b.done)aReset();A.run=!A.run;$("#aGo").textContent=A.run?"❚❚ 暫停":"▶ 繼續";};
+$("#aReset").onclick=aReset;
+function setG(v){g=v;$$("[data-g]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.g===g)));}
+$$("[data-g]").forEach(b=>b.onclick=()=>{setG(+b.dataset.g);aReset();bReset();cReset();});
+$("#spd").onclick=()=>{speed=speed===1?2:speed===2?0.5:1;$("#spd").textContent="速度 "+speed+"×";};
+// 拖曳控制點
+const sc=$("#scene");
+function ptr(e){const r=sc.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+sc.addEventListener("pointerdown",e=>{if(mode!=="A")return;const {w,h}=fit(sc),M=aMap(w,h),p=ptr(e);let best=-1,bd=24;
+  A.xs.forEach((x,i)=>{const d=Math.hypot(M.X(x)-p.x,M.Y(A.y[i])-p.y);if(d<bd){bd=d;best=i;}});
+  if(best>=0){A.drag=best;A.run=false;sc.setPointerCapture(e.pointerId);e.preventDefault();}});
+sc.addEventListener("pointermove",e=>{if(A.drag<0)return;const {w,h}=fit(sc),M=aMap(w,h),p=ptr(e);A.y[A.drag]=Math.round(Math.max(0,Math.min(11,M.iy(p.y)))*10)/10;aBuild();});
+const endDrag=()=>{A.drag=-1;};sc.addEventListener("pointerup",endDrag);sc.addEventListener("pointercancel",endDrag);
+sc.style.touchAction="pan-y";
+
+/* ===== 模式 B：甲山丘、乙低谷、丙平直 ===== */
+const B={v0:5,d:1,run:false,bs:[]};
+const bump=x=>x<3||x>9?0:0.5*(1-Math.cos(2*Math.PI*(x-3)/6));
+const LANES=[["甲 山丘",s=>1],["乙 低谷",s=>-1],["丙 平直",s=>0]];
+const LCOL=["#ffb454","#43d6ff","#a3e635"];
+function bReset(){B.bs=LANES.map(([n,sg])=>body(makeTrack(x=>sg()*B.d*bump(x),0,12,600),B.v0,1,0));B.run=false;$("#bGo").textContent="▶ 同時出發";uiB();}
+function drawB(){
+  const {g:G,w,h}=fit(sc);G.clearRect(0,0,w,h);
+  const lh=h/3,L=60,R=14,sx=(w-L-R)/12,sy=Math.min(lh*0.32/3.2*1.0,sx)*1.0, ysc=lh*0.3/Math.max(1,3);
+  B.bs.forEach((b,i)=>{const base=lh*i+lh*0.6;const X=x=>L+x*sx,Y=y=>base-y*ysc;
+    G.fillStyle="#5b6880";G.font="12px 'Noto Sans TC',sans-serif";G.textAlign="left";G.textBaseline="middle";G.fillText(LANES[i][0],6,base);
+    G.strokeStyle="#1b2336";G.setLineDash([4,4]);G.beginPath();G.moveTo(X(12),lh*i+6);G.lineTo(X(12),lh*(i+1)-6);G.stroke();G.setLineDash([]);
+    drawTrackLine(G,b.T,X,Y,"#cbd5e1");cart(G,X,Y,b,LCOL[i],0.85);
+    G.fillStyle=LCOL[i];G.font="11px 'JetBrains Mono',monospace";G.textAlign="right";G.fillText("t = "+fmt(b.t,2)+" s  v = "+fmt(Math.abs(b.v),2)+" m/s",w-R,lh*i+12);
+    if(b.end==="back"){G.fillStyle="#ff5c8a";G.textAlign="center";G.fillText("爬不過山丘，滑回起點",X(6),base+18);}
+  });
+  $("#sNote").textContent="d = "+fmt(B.d,1)+" m，v₀ = "+fmt(B.v0,1)+" m/s";
+}
+function uiB(){
+  $("#obV").textContent=fmt(B.v0,1)+" m/s";$("#obD").textContent=fmt(B.d,1)+" m";
+  const vt=Math.sqrt(B.v0*B.v0+2*g*B.d), vb2=B.v0*B.v0-2*g*B.d;
+  $("#bTab").innerHTML=B.bs.map((b,i)=>`<tr><td style="color:${LCOL[i]}">${LANES[i][0]}</td><td>${b.done?(b.end==="end"?fmt(b.t,2)+" s":"—"):fmt(b.t,2)+" s"}</td><td>${b.done&&b.end==="end"?fmt(Math.abs(b.v),2):"…"}</td><td>${i===0?(vb2>=0?fmt(Math.sqrt(vb2),2)+"（最高點）":"到不了頂"):i===1?fmt(vt,2)+"（最低點）":fmt(B.v0,2)}</td></tr>`).join("");
+  const done=B.bs.every(b=>b.done);
+  $("#bSee").innerHTML=(vb2<0?`山丘頂需要 v₀ ≥ √(2gd) = <b>${fmt(Math.sqrt(2*g*B.d),2)} m/s</b> 才過得去，現在甲會滑回來。`:"")+
+    `三台車起點與終點一樣高，<b>到終點的速率都等於 v₀</b>（力學能守恆）。但過程中乙在低谷把 U 變成 K、一路比 v₀ 快，甲在山丘上比 v₀ 慢，所以 <b>乙最先到、甲最後到</b>。示範實驗 4：鋼珠走凹陷軌道比走平直軌道先到終點。`+
+    (done&&B.bs.every(b=>b.end==="end")?` 這次時間：乙 ${fmt(B.bs[1].t,2)} s ＜ 丙 ${fmt(B.bs[2].t,2)} s ＜ 甲 ${fmt(B.bs[0].t,2)} s。`:"");
+}
+$("#bV").oninput=e=>{B.v0=+e.target.value;bReset();};
+$("#bD").oninput=e=>{B.d=+e.target.value;bReset();};
+$("#bGo").onclick=()=>{if(B.bs.every(b=>b.done))bReset();B.run=!B.run;$("#bGo").textContent=B.run?"❚❚ 暫停":"▶ 繼續";};
+$("#bReset").onclick=bReset;
+
+/* ===== 模式 C：水滑道 ===== */
+const SHAPES={
+  "先陡後緩（往下凹）":(u)=>0.25*(1-u)+0.75*(1-u)*(1-u),
+  "直線斜坡":(u)=>1-u,
+  "先緩後陡（往上凸）":(u)=>1-0.25*u-0.75*u*u,
+  "陡直線（水平距離一半）":(u)=>Math.max(0,1-2*u),
+};
+const Cs={H:10,a:"先陡後緩（往下凹）",b:"先緩後陡（往上凸）",run:false,bs:[]};
+["#cA","#cB"].forEach((id,i)=>{$(id).innerHTML=Object.keys(SHAPES).map(k=>`<option${k===(i?Cs.b:Cs.a)?" selected":""}>${k}</option>`).join("");});
+function cReset(){const Lx=12;Cs.bs=[Cs.a,Cs.b].map(k=>body(makeTrack(x=>Cs.H*SHAPES[k](x/Lx),0,Lx,900),0,1,0));Cs.bs.forEach(b=>{b.v0=0;});Cs.run=false;$("#cGo").textContent="▶ 同時滑下";uiC();}
+function drawC(){
+  const {g:G,w,h}=fit(sc);G.clearRect(0,0,w,h);
+  const L=40,R=16,T=26,Bm=26,sx=(w-L-R)/12,sy=(h-T-Bm)/20,X=x=>L+x*sx,Y=y=>h-Bm-y*sy;
+  G.fillStyle="#1a2234";G.fillRect(0,Y(0),w,h-Y(0));
+  G.fillStyle="rgba(67,214,255,.25)";G.fillRect(X(11.2),Y(0)-6,w-X(11.2),6);
+  G.setLineDash([5,4]);G.strokeStyle="#5b6880";G.lineWidth=1;G.beginPath();G.moveTo(L-30,Y(Cs.H));G.lineTo(w,Y(Cs.H));G.stroke();G.setLineDash([]);
+  G.fillStyle="#8492aa";G.font="11px 'JetBrains Mono',monospace";G.textAlign="left";G.textBaseline="bottom";G.fillText("H = "+fmt(Cs.H,1)+" m",4,Y(Cs.H)-3);
+  const cols=["#ffb454","#43d6ff"];
+  Cs.bs.forEach((b,i)=>{drawTrackLine(G,b.T,X,Y,cols[i]);});
+  Cs.bs.forEach((b,i)=>{cart(G,X,Y,b,cols[i],0.95);});
+  G.textAlign="right";G.textBaseline="top";Cs.bs.forEach((b,i)=>{G.fillStyle=cols[i];G.fillText((i?"乙":"甲")+"  t = "+fmt(b.t,2)+" s  v = "+fmt(Math.abs(b.v),2)+" m/s",w-R,6+i*15);});
+  $("#sNote").textContent="甲（橘）、乙（藍）";
+}
+function uiC(){
+  $("#ocH").textContent=fmt(Cs.H,1)+" m";const vt=Math.sqrt(2*g*Cs.H);
+  $("#cTab").innerHTML=Cs.bs.map((b,i)=>`<tr><td>${i?"乙":"甲"}</td><td>${b.done?fmt(b.t,2)+" s":fmt(b.t,2)+" s…"}</td><td>${b.done?fmt(Math.abs(b.v),2)+" m/s":"…"}</td><td>${fmt(vt,2)} m/s</td></tr>`).join("");
+  const d=Cs.bs.every(b=>b.done), [a,b]=Cs.bs;
+  $("#cSee").innerHTML=`甲乙落差都是 H，由 mgH = ½mv² 得到底速率 <b>v = √(2gH) = ${fmt(vt,2)} m/s</b>，和滑道形狀、質量都無關。但力學能守恆不告訴我們時間：<b>一開始就陡的滑道</b>很快把位能換成動能，整段都跑得比較快，所以先到。`+
+    (d?` 這次：${a.t<b.t?"甲":"乙"}先到，快了 ${fmt(Math.abs(a.t-b.t),2)} s。`:"");
+}
+$("#cH").oninput=e=>{Cs.H=+e.target.value;cReset();};
+$("#cA").onchange=e=>{Cs.a=e.target.value;cReset();};
+$("#cB").onchange=e=>{Cs.b=e.target.value;cReset();};
+$("#cGo").onclick=()=>{if(Cs.bs.every(b=>b.done))cReset();Cs.run=!Cs.run;$("#cGo").textContent=Cs.run?"❚❚ 暫停":"▶ 繼續";};
+$("#cReset").onclick=cReset;
+
+/* ===== 模式切換與圖例 ===== */
+function setMode(m){mode=m;$$("[data-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
+  ["A","B","C"].forEach(k=>$("#ctl"+k).hidden=k!==m);
+  $("#sTitle").textContent=m==="A"?"軌道與小車":m==="B"?"甲乙丙三條軌道":"兩條水滑道";
+  $("#pTitle").textContent=m==="A"?"能量–時間圖":"速率–時間圖";
+  $("#legend").innerHTML=m==="A"?`<span><i style="background:${C.K}"></i>動能 K</span><span><i style="background:${C.U}"></i>位能 U</span><span><i style="background:${C.E}"></i>力學能 E = K + U</span><span><i style="background:${C.Q}"></i>熱能</span><span><i style="background:${C.S}"></i>K + U + 熱能</span>`
+    :m==="B"?LANES.map((l,i)=>`<span><i style="background:${LCOL[i]}"></i>${l[0]}</span>`).join(""):`<span><i style="background:#ffb454"></i>甲</span><span><i style="background:#43d6ff"></i>乙</span>`;
+}
+$$("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+const VH={B:[],C:[]};
+function drawPlotV(list,cols){
+  const {g:G,w,h}=fit($("#plot"));G.clearRect(0,0,w,h);
+  const L=40,R=10,T=12,Bm=26;const tm=Math.max(2,...list.flat().map(p=>p.t))*1.05,vm=Math.max(1,...list.flat().map(p=>p.v))*1.15;
+  const X=t=>L+(w-L-R)*t/tm,Y=v=>h-Bm-(h-T-Bm)*v/vm;
+  G.strokeStyle="#1b2336";G.lineWidth=1;G.font="11px 'JetBrains Mono',monospace";G.fillStyle="#5b6880";G.textAlign="right";G.textBaseline="middle";
+  for(let k=0;k<=4;k++){const v=vm*k/4;G.beginPath();G.moveTo(L,Y(v));G.lineTo(w-R,Y(v));G.stroke();G.fillText(fmt(v,0),L-4,Y(v));}
+  G.textAlign="center";G.textBaseline="top";const st=tm>8?2:tm>4?1:0.5;for(let t=0;t<=tm+1e-9;t+=st)G.fillText(fmt(t,st<1?1:0),X(t),h-Bm+5);G.textBaseline="bottom";G.textAlign="right";G.fillText("t (s)",w-R-2,h-Bm-3);
+  G.save();G.translate(10,T+4);G.textAlign="left";G.fillText("v (m/s)",0,0);G.restore();
+  list.forEach((H,i)=>{G.strokeStyle=cols[i];G.lineWidth=2.5;G.beginPath();H.forEach((p,j)=>{j?G.lineTo(X(p.t),Y(p.v)):G.moveTo(X(p.t),Y(p.v));});G.stroke();});
+  $("#pNote").textContent="終點速率相同，曲線下面積（路程）不同";
+}
+
+/* ===== 範例與想一想 ===== */
+$("#ex").innerHTML=`<div class="qq"><p>質量 50 kg 的雲霄飛車（含乘客）以 20 m/s 由地面出發，沿無摩擦軌道上上下下，最後到達高 4 m 的終點。到終點時動能與速率各為多少？</p>
+<div class="seg"><button type="button" id="exAns">看解法</button><button type="button" id="exSim">在模擬裡跑一次</button></div>
+<div class="ans" hidden id="exBox">起點：K₀ = ½ × 50 × 20² = <b>10000 J</b>，U₀ = 0<br>終點：U = mgh = 50 × 10 × 4 = <b>2000 J</b><br>力學能守恆：K = 10000 − 2000 = <b>8000 J</b><br>½ × 50 × v² = 8000 → v² = 320 → <b>v = 8√5 ≈ 17.9 m/s</b><br>中間的山丘多高、多陡都不影響答案，只要最高點低於 K₀/(mg) = 20 m。</div></div>`;
+$("#exAns").onclick=()=>{$("#exBox").hidden=!$("#exBox").hidden;};
+$("#exSim").onclick=()=>{setMode("A");setPreset("範例 5-3");A.run=true;$("#aGo").textContent="❚❚ 暫停";$("#scene").scrollIntoView({behavior:"smooth",block:"center"});};
+const QZ=[
+  {q:"想一想：甲乙兩人以相同的初速 v₀ 出發，甲越過一座山丘、乙經過一個低谷，起點與終點一樣高（不計摩擦）。誰到終點時速率較大？誰先到？",a:"到終點的速率<b>一樣大</b>（都等於 v₀，因為高度相同、力學能守恆）；但乙在低谷裡一直比 v₀ 快，<b>乙先到</b>。",go:()=>{setMode("B");bReset();B.run=true;$("#bGo").textContent="❚❚ 暫停";}},
+  {q:"示範實驗 4：兩顆相同的鋼珠以相同速率進入一條凹陷軌道與一條平直軌道，兩軌道水平長度相同。哪一顆先到終點？",a:"走<b>凹陷軌道</b>的鋼珠先到：往下時位能變動能而加速，在凹陷處速率都比平直軌道的大；回到原高度時速率又變回一樣。",go:()=>{setMode("B");B.d=1.5;$("#bD").value=1.5;bReset();B.run=true;$("#bGo").textContent="❚❚ 暫停";}},
+  {q:"範例 5-2 水滑道：甲乙兩條滑道落差 H 相同，甲一開始很陡、乙一開始很緩。由靜止滑下，誰到底的速率大？誰先到？",a:"到底速率<b>相同</b>，都是 √(2gH)；<b>甲先到</b>，因為一開始就把位能大量轉成動能。",go:()=>{setMode("C");cReset();Cs.run=true;$("#cGo").textContent="❚❚ 暫停";}},
+];
+$("#quiz").innerHTML=QZ.map((o,i)=>`<div class="qq"><p>${o.q}</p><div class="seg"><button type="button" data-qa="${i}">看答案</button><button type="button" data-qs="${i}">到模擬看</button></div><div class="ans" hidden id="qa${i}">${o.a}</div></div>`).join("");
+$$("[data-qa]").forEach(b=>b.onclick=()=>{const e=$("#qa"+b.dataset.qa);e.hidden=!e.hidden;});
+$$("[data-qs]").forEach(b=>b.onclick=()=>{QZ[b.dataset.qs].go();$("#scene").scrollIntoView({behavior:"smooth",block:"center"});});
+
+/* ===== 主迴圈 ===== */
+const oldBReset=bReset, oldCReset=cReset;
+bReset=function(){oldBReset();VH.B=[[],[],[]];};
+cReset=function(){oldCReset();VH.C=[[],[]];};
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000)*speed; last=now;
+  if(mode==="A"){
+    if(A.run&&!A.b.done){step(A.b,dt);const b=A.b,lh=A.hist[A.hist.length-1];if(b.t-lh.t>=0.03||b.done)A.hist.push({t:b.t,K:KE(b),U:PE(b),Q:b.Q});
+      if(b.done){A.run=false;$("#aGo").textContent="▶ 再放一次";}uiA();}
+    drawA();drawPlotA();
+  }else if(mode==="B"){
+    if(B.run){B.bs.forEach((b,i)=>{step(b,dt);const H=VH.B[i];if(!H.length||b.t-H[H.length-1].t>=0.03||(b.done&&H[H.length-1].t<b.t))H.push({t:b.t,v:Math.abs(b.v)});});
+      if(B.bs.every(b=>b.done)){B.run=false;$("#bGo").textContent="▶ 再跑一次";}uiB();}
+    if(!VH.B[0].length)B.bs.forEach((b,i)=>VH.B[i].push({t:0,v:Math.abs(b.v)}));
+    drawB();drawPlotV(VH.B,LCOL);
+  }else{
+    if(Cs.run){Cs.bs.forEach((b,i)=>{step(b,dt);const H=VH.C[i];if(!H.length||b.t-H[H.length-1].t>=0.03||(b.done&&H[H.length-1].t<b.t))H.push({t:b.t,v:Math.abs(b.v)});});
+      if(Cs.bs.every(b=>b.done)){Cs.run=false;$("#cGo").textContent="▶ 再滑一次";}uiC();}
+    if(!VH.C[0].length)Cs.bs.forEach((b,i)=>VH.C[i].push({t:0,v:0}));
+    drawC();drawPlotV(VH.C,["#ffb454","#43d6ff"]);
+  }
+  requestAnimationFrame(frame);
+}
+aBuild();bReset();cReset();setMode("A");
+window.__sim={A,B,Cs,step,body,makeTrack,at,KE,PE,setPreset,setMode,get g(){return g;}};
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
