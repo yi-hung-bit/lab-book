@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>氣體分子運動・溫度與絕對零度</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cyan:#43d6ff;--red:#ff7a7a;--hot:#ff8fa3;--cold:#6fd3e0;--mol:#b48cff;--g1:#38a8e8;--g2:#f28b30;--g3:#7ed957;--g4:#8a7dff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(180,140,255,.08),transparent 60%),var(--bg);overflow-x:hidden}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:78ch;margin-top:6px;font-size:15px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.tabs button{flex:1 1 150px}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono","Noto Sans TC",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b}
+canvas{display:block;width:100%;touch-action:none}
+#c0{height:380px}#h0{height:200px}#c1{height:330px}#g1{height:200px}#c2{height:300px}#g2{height:330px}#c3{height:380px}
+@media(max-width:560px){#c0{height:320px}#c1{height:280px}#g2{height:280px}#c3{height:340px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button.on{border-color:var(--cyan);color:var(--cyan)}
+button:disabled{opacity:.45;cursor:default}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+@media(max-width:420px){.pair{grid-template-columns:1fr}}
+.read{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:4px}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.read b.h{color:var(--hot)} .read b.c{color:var(--cold)} .read b.k{color:var(--acc)} .read b.m{color:var(--mol)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.eq{font-family:"JetBrains Mono","Noto Sans TC",monospace;font-size:13px;color:var(--muted);margin-top:8px;line-height:1.9;word-break:break-word}
+.eq em{font-style:normal;color:var(--txt)}
+.chk{display:inline-flex;gap:6px;align-items:center;font-size:13.5px;color:var(--muted);margin:10px 14px 0 0;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted);padding:0 16px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.tbl{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-family:"JetBrains Mono","Noto Sans TC",monospace}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center;white-space:nowrap}
+th{color:var(--muted);font-weight:500;background:#0a0f1a}
+td.k{color:var(--acc);font-weight:700}
+.conv{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:12px}
+.conv label{display:block;font-size:12px;color:var(--dim)}
+.conv input{width:100%;font-family:"JetBrains Mono",monospace;font-size:16px;background:#0a0f1a;color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:6px 8px}
+.conv span{color:var(--muted);font-size:18px}
+.marks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.marks button{font-size:12.5px;padding:5px 9px}
+.quiz{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.quiz button{text-align:left;padding:9px 26px 9px 10px;font-size:14px;position:relative;min-height:52px}
+.quiz button .rk{position:absolute;right:8px;top:6px;font-family:"JetBrains Mono",monospace;color:var(--acc);font-size:15px;font-weight:700}
+.quiz button.ok{border-color:var(--phos)} .quiz button.bad{border-color:var(--red)}
+.quiz small{display:block;color:var(--dim);font-size:12px}
+.ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.ans b{color:var(--phos)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:86ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">5-2 · Kinetic Theory · Absolute Zero</div>
+  <h1>氣體分子運動・溫度與絕對零度</h1>
+  <p class="lede">把氣體放大到分子的尺度：密閉瓶裡的分子不停亂撞，撞擊瓶壁形成氣壓。<b style="color:var(--hot)">溫度越高，分子平均速率越快、平均動能越大</b>；理想氣體的熱能就是所有分子動能的總和。再看熱如何經由分子碰撞從高溫傳到低溫，以及為什麼溫度有最低點 −273.15 ℃（0 K）。</p>
+
+  <div class="tabs seg" id="tabs" role="tablist">
+    <button class="on" data-t="0">① 瓶中的氣體分子</button>
+    <button data-t="1">② 微觀的熱傳導</button>
+    <button data-t="2">③ 絕對零度的存在</button>
+    <button data-t="3">④ 溫標換算・範例 5-4</button>
+  </div>
+
+  <!-- ① 瓶中的氣體分子 -->
+  <div id="t0" class="grid">
+    <section class="card">
+      <div class="head"><span class="t">氣體分子的微觀運動（圖 5-6①）</span><span class="n" id="n0"></span></div>
+      <div class="box"><canvas id="c0" aria-label="密閉瓶中的氣體分子亂撞，瓶底有可調溫度的熱源"></canvas></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg">
+          <button class="primary" id="b0Heat">熱源接觸：開</button>
+          <button id="b0Reset">↺ 重新放入（瓶內溫度 = 熱源溫度）</button>
+          <button id="b0Pause">❚❚ 暫停</button>
+        </div>
+        <div class="pair">
+          <div class="ctl"><div class="r">瓶底熱源溫度<span id="v0T"></span></div><input type="range" id="s0T" min="50" max="1200" step="10" value="300"></div>
+          <div class="ctl"><div class="r">分子數<span id="v0N"></span></div><input type="range" id="s0N" min="20" max="160" step="10" value="80"></div>
+        </div>
+        <div class="ctl"><div class="r">氣體種類</div>
+          <div class="seg" id="gasSel"><button data-g="0">氦 He（4）</button><button data-g="1" class="on">氮 N₂（28）</button><button data-g="2">氧 O₂（32）</button><button data-g="3">二氧化碳 CO₂（44）</button></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="k0Arrow" checked> 速度箭頭</label>
+        <label class="chk"><input type="checkbox" id="k0Track" checked> 追蹤一個分子（橘色）</label>
+        <label class="chk"><input type="checkbox" id="k0Color"> 依速率上色</label>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">讀數</span><span class="n">換算成真實氣體分子的數值</span></div>
+      <div class="pad" style="padding-top:6px">
+        <div class="read">
+          <div><small>瓶內溫度 T（由分子平均動能算出）</small><b class="h" id="r0T">—</b></div>
+          <div><small>分子平均速率</small><b id="r0V">—</b></div>
+          <div><small>每個分子平均動能</small><b class="k" id="r0K">—</b></div>
+          <div><small>熱能＝全部分子動能總和</small><b class="k" id="r0E">—</b></div>
+          <div><small>橘色分子此刻的速率</small><b class="m" id="r0One">—</b></div>
+          <div><small>每秒撞擊瓶壁次數（模擬）</small><b id="r0Hit">—</b></div>
+        </div>
+      </div>
+      <div class="head" style="padding-top:2px"><span class="t">分子速率分布</span><span class="n">長條：模擬統計　曲線：理論分布</span></div>
+      <div class="box"><canvas id="h0" aria-label="分子速率分布長條圖"></canvas></div>
+      <div class="pad" style="padding-top:0">
+        <p class="note" id="m0"></p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ② 微觀的熱傳導 -->
+  <div id="t1" class="grid" hidden>
+    <section class="card">
+      <div class="head"><span class="t">微觀上的熱傳導（圖 5-6②）</span><span class="n" id="n1">接觸前</span></div>
+      <div class="box"><canvas id="c1" aria-label="左邊高溫、右邊低溫的兩區氣體，中間以隔板分開"></canvas></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="seg">
+          <button class="primary" id="b1Touch">讓兩區接觸（導熱隔板）</button>
+          <button id="b1Open">抽掉隔板</button>
+          <button id="b1Reset">↺ 回到接觸前</button>
+          <button id="b1Pause">❚❚ 暫停</button>
+        </div>
+        <div class="pair">
+          <div class="ctl"><div class="r">左區（高溫）起始溫度<span id="v1L"></span></div><input type="range" id="s1L" min="200" max="1200" step="10" value="700"></div>
+          <div class="ctl"><div class="r">右區（低溫）起始溫度<span id="v1R"></span></div><input type="range" id="s1R" min="50" max="600" step="10" value="150"></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="k1Arrow" checked> 速度箭頭</label>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">讀數</span><span class="n">兩區都是 70 個氮分子</span></div>
+      <div class="pad" style="padding-top:6px">
+        <div class="read">
+          <div><small>左區溫度</small><b class="h" id="r1L">—</b></div>
+          <div><small>右區溫度</small><b class="c" id="r1R">—</b></div>
+          <div><small>左區分子平均動能</small><b class="h" id="r1KL">—</b></div>
+          <div><small>右區分子平均動能</small><b class="c" id="r1KR">—</b></div>
+          <div><small>經隔板由左傳到右的能量</small><b class="k" id="r1Q">—</b></div>
+          <div><small>熱傳遞方向</small><b id="r1Dir">—</b></div>
+        </div>
+      </div>
+      <div class="head" style="padding-top:2px"><span class="t">溫度—時間</span><span class="n">虛線：預期的熱平衡溫度</span></div>
+      <div class="box"><canvas id="g1" aria-label="兩區溫度隨時間變化圖"></canvas></div>
+      <div class="pad" style="padding-top:0"><p class="note" id="m1"></p></div>
+    </section>
+  </div>
+
+  <!-- ③ 絕對零度的存在 -->
+  <div id="t2" class="grid" hidden>
+    <section class="card">
+      <div class="head"><span class="t">定容氣體的壓力與溫度</span><span class="n" id="n2"></span></div>
+      <div class="box"><canvas id="c2" aria-label="密閉鋼瓶中的氣體、溫度計與壓力計"></canvas></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="ctl"><div class="r">選一瓶氣體（瓶內氣體多寡不同）</div>
+          <div class="seg" id="bSel"><button data-b="0" class="on">氣體 1</button><button data-b="1">氣體 2</button><button data-b="2">氣體 3</button><button data-b="3">氣體 4</button></div>
+        </div>
+        <div class="ctl"><div class="r">水浴溫度 t<span id="v2t"></span></div><input type="range" id="s2t" min="-100" max="200" step="5" value="20"></div>
+        <div class="seg" style="margin-top:12px">
+          <button class="primary" id="b2Rec">● 記錄這一點</button>
+          <button id="b2Auto">自動量 5 點</button>
+          <button id="b2All">四瓶全部量</button>
+          <button id="b2Clr">清除</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="k2Ext" checked> 把直線外插到壓力為零</label>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">壓力 P – 溫度 t 圖（圖 5-7）</span><span class="n">實線：量測範圍　虛線：外插</span></div>
+      <div class="box"><canvas id="g2" aria-label="四種氣體的壓力對溫度圖，外插後交於負 273.15 度"></canvas></div>
+      <div class="legend"><span><i style="background:var(--g1)"></i>氣體 1</span><span><i style="background:var(--g2)"></i>氣體 2</span><span><i style="background:var(--g3)"></i>氣體 3</span><span><i style="background:var(--g4)"></i>氣體 4</span></div>
+      <div class="pad" style="padding-top:6px">
+        <div class="tbl"><table><thead><tr><th>氣體</th><th>點數</th><th>斜率（kPa/℃）</th><th>外插 P = 0 時的 t</th></tr></thead><tbody id="tb2"></tbody></table></div>
+        <p class="note" id="m2"></p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ④ 溫標換算 -->
+  <div id="t3" class="grid" hidden>
+    <section class="card">
+      <div class="head"><span class="t">溫標的轉換（圖 5-8）</span><span class="n">拖曳溫度計或滑桿</span></div>
+      <div class="box"><canvas id="c3" aria-label="攝氏溫標與絕對溫標兩支溫度計"></canvas></div>
+      <div class="pad" style="padding-top:2px">
+        <div class="ctl"><div class="r">溫度<span id="v3"></span></div><input type="range" id="s3" min="-273.15" max="120" step="0.05" value="25"></div>
+        <div class="conv">
+          <div><label for="i3C">攝氏 ℃</label><input id="i3C" type="number" step="any" inputmode="decimal"></div>
+          <span>⇄</span>
+          <div><label for="i3K">絕對溫度 K</label><input id="i3K" type="number" step="any" inputmode="decimal"></div>
+        </div>
+        <div class="marks" id="marks"></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">範例 5-4　溫標</span><span class="n" id="n3">依序點選：由高到低</span></div>
+      <div class="pad" style="padding-top:6px">
+        <p style="font-size:14px" id="q3Text">下列各溫度條件，由高而低依序為何？</p>
+        <div class="quiz" id="quiz"></div>
+        <div class="seg" style="margin-top:10px">
+          <button class="primary" id="b3Chk">檢查</button>
+          <button id="b3Undo">清除選擇</button>
+          <button id="b3New">換一題</button>
+          <button id="b3Ex">回到範例 5-4</button>
+        </div>
+        <div class="ans" id="ans3"></div>
+        <p class="note"><b>K = ℃ + 273.15</b>：絕對溫標每差 1 K 和攝氏溫標每差 1 ℃ 一樣大，只是零點不同。比較溫度高低時，先全部換成同一種溫標。絕對溫度沒有負值，0 K 是理論上的最低溫，只能接近、無法達到；目前實驗室做到的最低溫約 100 nK（0.000 000 1 K）。</p>
+      </div>
+    </section>
+  </div>
+
+  <footer><b>關於這個模擬：</b>分子在三維空間運動，畫面上看到的是它們在紙面上的投影；瓶內溫度由分子平均動能算出（理想氣體每個分子平均動能 = 3/2 kT，k = 1.38 × 10⁻²³ J/K，選修物理會再學到）。真實瓶中約有 10²² 個分子，這裡只畫幾十個，所以讀數會上下跳動，取平均才穩定。趣味實作「我們都是小焦耳」：用力搖晃裝水的保溫瓶，水分子被搖得更快，溫度會稍微上升。（基礎物理 Ch05 5-2 微觀尺度下的能量 p.148–151 圖 5-6～5-8、範例 5-4）</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const R=8.314, NA=6.022e23, KB=1.380649e-23;
+const GAS=[{n:"氦 He",M:0.004},{n:"氮 N₂",M:0.028},{n:"氧 O₂",M:0.032},{n:"二氧化碳 CO₂",M:0.044}];
+const fmt=(x,d=0)=>Number(x).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d}).replace("-","−");
+const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+function fit(c){const r=c.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);c.width=Math.max(1,Math.round(r.width*d));c.height=Math.max(1,Math.round(r.height*d));c.getContext("2d").setTransform(d,0,0,d,0,0);return [r.width,r.height];}
+function rr(c,x,y,w,h,r){c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h);}
+/* 溫度 → 顏色（低溫藍、高溫粉紅） */
+function tcol(T,a=1){const k=Math.max(0,Math.min(1,(T-100)/700));const r=Math.round(90+150*k),g=Math.round(190-60*k),b=Math.round(215-60*k);return `rgba(${r},${g},${b},${a})`;}
+function speedCol(v,vr){const k=Math.max(0,Math.min(1,v/(2*vr)));return `hsl(${Math.round(220-220*k)},85%,${Math.round(62+6*k)}%)`;}
+/* 一個分子：x,y（畫面 px）、vx,vy,vz（真實 m/s） */
+function sampleV(T,M){const s=Math.sqrt(R*T/M);return [gauss()*s,gauss()*s,gauss()*s];}
+function tempOf(list,M){if(!list.length)return 0;let s=0;list.forEach(p=>s+=p.vx*p.vx+p.vy*p.vy+p.vz*p.vz);return M*(s/list.length)/(3*R);}
+/* 分子間碰撞（等質量彈性碰撞，接觸點在紙面前後隨機錯開，三個方向都會交換能量） */
+function collide(ps,rad){
+  const d2=4*rad*rad;
+  for(let i=0;i<ps.length;i++){const a=ps[i];
+    for(let j=i+1;j<ps.length;j++){const b=ps[j];
+      const dx=b.x-a.x, dy=b.y-a.y; if(dx*dx+dy*dy>d2) continue;
+      if((a.vx-b.vx)*dx+(a.vy-b.vy)*dy<=0) continue;
+      const dz=(Math.random()*2-1)*rad*1.4, L=Math.hypot(dx,dy,dz)||1, nx=dx/L, ny=dy/L, nz=dz/L;
+      const p=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny+(a.vz-b.vz)*nz; if(p<=0) continue;
+      a.vx-=p*nx;a.vy-=p*ny;a.vz-=p*nz;b.vx+=p*nx;b.vy+=p*ny;b.vz+=p*nz;
+    }}
+}
+function arrow(c,x,y,vx,vy,len,col){const L=Math.hypot(vx,vy);if(L<1e-6)return;const ex=x+vx/L*len, ey=y+vy/L*len;
+  c.strokeStyle=col;c.fillStyle=col;c.lineWidth=1.4;c.beginPath();c.moveTo(x,y);c.lineTo(ex,ey);c.stroke();
+  const a=Math.atan2(vy,vx);c.beginPath();c.moveTo(ex,ey);c.lineTo(ex-5*Math.cos(a-.45),ey-5*Math.sin(a-.45));c.lineTo(ex-5*Math.cos(a+.45),ey-5*Math.sin(a+.45));c.closePath();c.fill();}
+
+/* ================= ① 瓶中的氣體分子 ================= */
+const c0=$("#c0"), x0=c0.getContext("2d"), h0=$("#h0"), hx=h0.getContext("2d");
+let W0=0,H0=0,HW=0,HH=0;
+const S0={T:300,N:80,g:1,heat:true,pause:false,arrow:true,track:true,color:false};
+let P0=[], hits=0, hitRate=0, hist=null, Tm=300, Tsm=300, trail=[], oneV=0;
+const RAD0=4.5;
+const box0=()=>{const w=Math.min(W0-40,560), h=H0-74; return {x:(W0-w)/2, y:44, w, h};};
+const SC=()=>Math.max(W0,560)/2200;   // 畫面速度（px/s）÷ 真實速度（m/s）
+function reset0(){
+  const b=box0(), M=GAS[S0.g].M; P0=[];
+  for(let i=0;i<S0.N;i++){const [vx,vy,vz]=sampleV(S0.T,M);P0.push({x:b.x+RAD0+Math.random()*(b.w-2*RAD0),y:b.y+RAD0+Math.random()*(b.h-2*RAD0),vx,vy,vz});}
+  hist=null; trail=[]; Tsm=tempOf(P0,M);
+}
+function step0(dt){
+  const b=box0(), M=GAS[S0.g].M, sc=SC();
+  let vmax=1; P0.forEach(p=>vmax=Math.max(vmax,Math.hypot(p.vx,p.vy)));
+  const n=Math.min(12,Math.max(1,Math.ceil(vmax*sc*dt/RAD0)));
+  const h=dt/n;
+  for(let s=0;s<n;s++){
+    P0.forEach(p=>{
+      p.x+=p.vx*sc*h; p.y+=p.vy*sc*h;
+      if(p.x<b.x+RAD0){p.x=b.x+RAD0;p.vx=Math.abs(p.vx);hits++;}
+      if(p.x>b.x+b.w-RAD0){p.x=b.x+b.w-RAD0;p.vx=-Math.abs(p.vx);hits++;}
+      if(p.y<b.y+RAD0){p.y=b.y+RAD0;p.vy=Math.abs(p.vy);hits++;}
+      if(p.y>b.y+b.h-RAD0){p.y=b.y+b.h-RAD0;hits++;
+        if(S0.heat){ /* 碰到熱源：以熱源溫度重新彈出 */
+          const s=Math.sqrt(R*S0.T/M); p.vy=-s*Math.sqrt(-2*Math.log(Math.random()||1e-9)); p.vx=gauss()*s; p.vz=gauss()*s;
+        } else p.vy=-Math.abs(p.vy);
+      }
+    });
+    collide(P0,RAD0);
+  }
+}
+function draw0(){
+  const c=x0, b=box0(), M=GAS[S0.g].M, vr=Math.sqrt(3*R*Math.max(Tm,1)/M), sc=SC();
+  c.clearRect(0,0,W0,H0);
+  /* 瓶身 */
+  c.fillStyle="#2a3142"; rr(c,b.x+b.w*.18,b.y-30,b.w*.64,22,6); c.fill();
+  c.fillStyle="#3b4458"; rr(c,b.x+b.w*.14,b.y-14,b.w*.72,12,4); c.fill();
+  c.fillStyle=tcol(Tm,.13); rr(c,b.x,b.y,b.w,b.h,14); c.fill();
+  c.strokeStyle="rgba(200,215,240,.55)"; c.lineWidth=2; rr(c,b.x,b.y,b.w,b.h,14); c.stroke();
+  /* 熱源 */
+  c.fillStyle=S0.heat?tcol(S0.T,.95):"#333a48"; rr(c,b.x-6,b.y+b.h+2,b.w+12,12,4); c.fill();
+  c.fillStyle=S0.heat?"#0b0f18":"#8492aa"; c.font="12px 'Noto Sans TC',sans-serif"; c.textAlign="center";
+  c.fillText(S0.heat?`熱源 ${S0.T} K`:"熱源已移開（瓶壁隔熱）",W0/2,b.y+b.h+12);
+  /* 軌跡 */
+  if(S0.track&&trail.length>1){c.strokeStyle="rgba(255,159,67,.45)";c.lineWidth=1.5;c.beginPath();trail.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.stroke();}
+  P0.forEach((p,i)=>{
+    const v=Math.hypot(p.vx,p.vy,p.vz), one=S0.track&&i===0;
+    if(S0.arrow) arrow(c,p.x,p.y,p.vx,p.vy,Math.min(34,6+Math.hypot(p.vx,p.vy)*sc*.22),one?"rgba(255,159,67,.9)":"rgba(210,220,240,.55)");
+    c.fillStyle=one?"#ff9f43":S0.color?speedCol(v,vr):"#b48cff";
+    c.beginPath();c.arc(p.x,p.y,one?RAD0+1.5:RAD0,0,7);c.fill();
+  });
+  c.fillStyle="#8492aa";c.font="12px 'JetBrains Mono',monospace";c.textAlign="left";
+  c.fillText(`${GAS[S0.g].n}・${P0.length} 個分子`,10,18);
+  c.textAlign="right";c.fillStyle=tcol(Tm);c.fillText(`T ≈ ${Math.round(Tsm)} K`,W0-10,18);
+}
+function drawHist(){
+  const c=hx, M=GAS[S0.g].M; c.clearRect(0,0,HW,HH);
+  const T=Math.max(Tsm,1), vp=Math.sqrt(2*R*T/M), vmax=Math.max(4.2*Math.sqrt(2*R*Math.max(S0.T,Tsm)/M),1);
+  const nb=24, L=34, Rr=10, Tp=12, B=26, w=HW-L-Rr, h=HH-Tp-B;
+  const cnt=new Array(nb).fill(0); P0.forEach(p=>{const k=Math.floor(Math.hypot(p.vx,p.vy,p.vz)/vmax*nb);if(k>=0&&k<nb)cnt[k]++;});
+  if(!hist||hist.length!==nb||hist.vmax!==vmax){hist=cnt.slice();hist.vmax=vmax;} else for(let k=0;k<nb;k++) hist[k]=hist[k]*.96+cnt[k]*.04;
+  const tot=hist.reduce((a,b)=>a+b,0)||1, dv=vmax/nb;
+  const f=v=>4*Math.PI*Math.pow(M/(2*Math.PI*R*T),1.5)*v*v*Math.exp(-M*v*v/(2*R*T));
+  const ymax=Math.max(f(vp)*dv*1.25,...hist.map(x=>x/tot*1.05));
+  c.strokeStyle="#2a3550";c.lineWidth=1;c.beginPath();c.moveTo(L,Tp);c.lineTo(L,Tp+h);c.lineTo(L+w,Tp+h);c.stroke();
+  for(let k=0;k<nb;k++){const bh=hist[k]/tot/ymax*h;c.fillStyle="rgba(180,140,255,.55)";c.fillRect(L+k*w/nb+1,Tp+h-bh,w/nb-2,bh);}
+  c.strokeStyle="#ffd166";c.lineWidth=2;c.beginPath();
+  for(let i=0;i<=120;i++){const v=vmax*i/120,y=Tp+h-f(v)*dv/ymax*h;i?c.lineTo(L+w*i/120,y):c.moveTo(L,y);}c.stroke();
+  /* 平均速率標記 */
+  const vav=Math.sqrt(8*R*T/(Math.PI*M)), xa=L+w*vav/vmax;
+  c.strokeStyle="rgba(125,255,196,.8)";c.setLineDash([4,4]);c.beginPath();c.moveTo(xa,Tp);c.lineTo(xa,Tp+h);c.stroke();c.setLineDash([]);
+  c.fillStyle="#7dffc4";c.font="11px 'Noto Sans TC',sans-serif";c.textAlign=xa>L+w*.7?"right":"left";c.fillText("平均速率",xa+(xa>L+w*.7?-4:4),Tp+10);
+  c.fillStyle="#8492aa";c.font="11px 'JetBrains Mono',monospace";c.textAlign="center";
+  const st=vmax>2500?1000:vmax>1200?500:200;
+  for(let v=0;v<=vmax;v+=st){const x=L+w*v/vmax;c.fillText(v,x,Tp+h+14);}
+  c.textAlign="right";c.fillText("速率（m/s）",L+w,HH-1);
+  c.save();c.translate(11,Tp+h/2);c.rotate(-Math.PI/2);c.textAlign="center";c.fillText("分子比例",0,0);c.restore();
+}
+function read0(dt){
+  const M=GAS[S0.g].M; Tm=tempOf(P0,M); Tsm+=(Tm-Tsm)*Math.min(1,dt*2.5);
+  hitRate+=(hits/dt-hitRate)*Math.min(1,dt*1.5); hits=0;
+  const T=Tsm, vav=Math.sqrt(8*R*T/(Math.PI*M)), Kav=1.5*KB*T;
+  let sv=0;P0.forEach(p=>sv+=Math.hypot(p.vx,p.vy,p.vz)); sv/=P0.length||1;
+  $("#r0T").textContent=`${Math.round(T)} K（${fmt(T-273.15,0)} ℃）`;
+  $("#r0V").textContent=`${fmt(sv)} m/s`;
+  $("#r0K").textContent=`${(Kav*1e21).toFixed(2)} × 10⁻²¹ J`;
+  $("#r0E").textContent=`${fmt(P0.length*Kav*1e21,0)} × 10⁻²¹ J`;
+  if(P0[0]){oneV=Math.hypot(P0[0].vx,P0[0].vy,P0[0].vz);$("#r0One").textContent=`${fmt(oneV)} m/s（${oneV>sv?"比平均快":"比平均慢"}）`;}
+  $("#r0Hit").textContent=`${fmt(hitRate)} 次／秒`;
+  $("#n0").textContent=`理論平均速率 ${fmt(vav)} m/s`;
+  const diff=S0.T-T;
+  $("#m0").innerHTML=S0.heat&&Math.abs(diff)>Math.max(15,.05*S0.T)
+    ?(diff>0?`瓶底比瓶內熱：碰到瓶底的分子被彈得更快，再經碰撞把能量分給其他分子，瓶內溫度慢慢升高到 ${S0.T} K。注意<b>不是每個分子都同時變快</b>，有的分子剛被撞慢了。`
+            :`瓶底比瓶內冷：碰到瓶底的分子速率變慢，瓶內分子平均動能下降，溫度慢慢降到 ${S0.T} K。`)
+    :`熱平衡：溫度固定時，分子的<b>平均</b>速率與平均動能固定，但每個分子的速率仍然各不相同、一直改變（看橘色分子與速率分布）。對理想氣體加熱時，並不是每一個分子的動能都變大，而是平均動能變大。${S0.g===0?"同溫度時，質量小的氦分子跑得比較快，但平均動能和其他氣體一樣。":"換成氦試試：同溫度時平均動能相同，但輕的分子跑得快。"}`;
+}
+
+/* ================= ② 微觀的熱傳導 ================= */
+const c1=$("#c1"), x1=c1.getContext("2d"), g1=$("#g1"), gx1=g1.getContext("2d");
+let W1=0,H1=0,GW1=0,GH1=0;
+const S1={TL:700,TR:150,state:"apart",pause:false,arrow:true,t:0};
+const M1=0.028, N1=70, RAD1=4.5, NSEG=12;
+let P1=[], seg=[], Qlr=0, hist1=[], TLs=0, TRs=0;
+const box1=()=>({x:12,y:30,w:W1-24,h:H1-48});
+function reset1(){
+  const b=box1(), half=b.w/2; P1=[];
+  for(let i=0;i<2*N1;i++){const left=i<N1,[vx,vy,vz]=sampleV(left?S1.TL:S1.TR,M1);
+    P1.push({x:b.x+(left?0:half)+RAD1+3+Math.random()*(half-2*RAD1-6),y:b.y+RAD1+Math.random()*(b.h-2*RAD1),vx,vy,vz,side:left?0:1});}
+  /* 把兩區調到正好是設定溫度 */
+  [0,1].forEach(sd=>{const L=P1.filter(p=>p.side===sd),T=tempOf(L,M1),f=Math.sqrt((sd?S1.TR:S1.TL)/T);L.forEach(p=>{p.vx*=f;p.vy*=f;p.vz*=f;});});
+  seg=new Array(NSEG).fill(0); S1.state="apart"; S1.eq=false; S1.t=0; Qlr=0; hist1=[]; TLs=S1.TL; TRs=S1.TR;
+  $("#b1Touch").disabled=false; $("#b1Open").disabled=false;
+}
+function step1(dt){
+  const b=box1(), sc=Math.max(W1,560)/2200, mid=b.x+b.w/2, m=M1/NA;
+  let vmax=1;P1.forEach(p=>vmax=Math.max(vmax,Math.hypot(p.vx,p.vy)));
+  const n=Math.min(12,Math.max(1,Math.ceil(vmax*sc*dt/RAD1))), h=dt/n;
+  for(let s=0;s<n;s++){
+    P1.forEach(p=>{
+      const ox=p.x; p.x+=p.vx*sc*h; p.y+=p.vy*sc*h;
+      if(p.x<b.x+RAD1){p.x=b.x+RAD1;p.vx=Math.abs(p.vx);}
+      if(p.x>b.x+b.w-RAD1){p.x=b.x+b.w-RAD1;p.vx=-Math.abs(p.vx);}
+      if(p.y<b.y+RAD1){p.y=b.y+RAD1;p.vy=Math.abs(p.vy);}
+      if(p.y>b.y+b.h-RAD1){p.y=b.y+b.h-RAD1;p.vy=-Math.abs(p.vy);}
+      if(S1.state!=="open"){
+        const fromL=ox<=mid&&p.x>mid-RAD1&&p.vx>0, fromR=ox>=mid&&p.x<mid+RAD1&&p.vx<0;
+        if(fromL||fromR){
+          p.x=fromL?mid-RAD1:mid+RAD1;
+          const u=Math.abs(p.vx);
+          if(S1.state==="touch"){ /* 隔板上的粒子：和分子交換 x 方向的動能（等質量彈性碰撞） */
+            const k=Math.min(NSEG-1,Math.max(0,Math.floor((p.y-b.y)/b.h*NSEG))), w=seg[k];
+            seg[k]=u; const nv=Math.max(w,u*.02);
+            const dE=.5*m*(u*u-nv*nv); Qlr+=fromL?dE:-dE;
+            p.vx=fromL?-nv:nv;
+          } else p.vx=fromL?-u:u;
+        }
+      }
+    });
+    if(S1.state==="open") collide(P1,RAD1);
+    else {collide(P1.filter(p=>p.x<mid),RAD1);collide(P1.filter(p=>p.x>=mid),RAD1);}
+  }
+}
+function temps1(){const b=box1(),mid=b.x+b.w/2;return [tempOf(P1.filter(p=>p.x<mid),M1),tempOf(P1.filter(p=>p.x>=mid),M1)];}
+function draw1(){
+  const c=x1,b=box1(),mid=b.x+b.w/2,sc=Math.max(W1,560)/2200; c.clearRect(0,0,W1,H1);
+  c.fillStyle=tcol(TLs,.28);rr(c,b.x,b.y,b.w/2,b.h,8);c.fill();
+  c.fillStyle=tcol(TRs,.28);rr(c,mid,b.y,b.w/2,b.h,8);c.fill();
+  c.strokeStyle="rgba(200,215,240,.45)";c.lineWidth=1.5;rr(c,b.x,b.y,b.w,b.h,8);c.stroke();
+  if(S1.state==="apart"){c.fillStyle="#5b6880";c.fillRect(mid-3,b.y,6,b.h);}
+  else if(S1.state==="touch"){c.strokeStyle="#e8edf6";c.lineWidth=2;c.setLineDash([6,5]);c.beginPath();c.moveTo(mid,b.y);c.lineTo(mid,b.y+b.h);c.stroke();c.setLineDash([]);}
+  P1.forEach(p=>{if(S1.arrow)arrow(c,p.x,p.y,p.vx,p.vy,Math.min(32,5+Math.hypot(p.vx,p.vy)*sc*.22),"rgba(225,230,245,.6)");
+    c.fillStyle=S1.state==="open"?(p.side?"#7fd8e6":"#ff9fb2"):"#b48cff";c.beginPath();c.arc(p.x,p.y,RAD1,0,7);c.fill();});
+  c.font="13px 'Noto Sans TC',sans-serif";c.textAlign="center";
+  c.fillStyle=tcol(TLs);c.fillText(`左區 ${Math.round(TLs)} K`,b.x+b.w/4,20);
+  c.fillStyle=tcol(TRs);c.fillText(`右區 ${Math.round(TRs)} K`,b.x+3*b.w/4,20);
+  if(S1.state!=="apart"&&Math.abs(TLs-TRs)>25){c.fillStyle="#9aa6ff";c.fillText(TLs>TRs?"熱傳遞方向 →":"← 熱傳遞方向",mid,20);}
+  if(S1.state==="open"){c.fillStyle="#8492aa";c.font="11.5px 'Noto Sans TC',sans-serif";c.fillText("粉紅：原本在左區的分子　藍：原本在右區的分子",W1/2,H1-4);}
+}
+function drawG1(){
+  const c=gx1;c.clearRect(0,0,GW1,GH1);
+  const L=40,Rr=10,Tp=12,B=24,w=GW1-L-Rr,h=GH1-Tp-B, tspan=40;
+  const Tmax=Math.max(S1.TL,S1.TR)*1.15;
+  c.strokeStyle="#2a3550";c.lineWidth=1;c.beginPath();c.moveTo(L,Tp);c.lineTo(L,Tp+h);c.lineTo(L+w,Tp+h);c.stroke();
+  c.fillStyle="#8492aa";c.font="11px 'JetBrains Mono',monospace";c.textAlign="right";
+  const st=Tmax>900?200:100;for(let T=0;T<=Tmax;T+=st){const y=Tp+h-T/Tmax*h;c.fillText(T,L-4,y+4);c.strokeStyle="#161d2e";c.beginPath();c.moveTo(L,y);c.lineTo(L+w,y);c.stroke();}
+  c.textAlign="center";const t0=Math.max(0,S1.t-tspan);for(let s=Math.ceil(t0/10)*10;s<=t0+tspan;s+=10)c.fillText(s+" s",L+(s-t0)/tspan*w,Tp+h+14);
+  c.save();c.translate(10,Tp+h/2);c.rotate(-Math.PI/2);c.fillText("溫度（K）",0,0);c.restore();
+  const Teq=(S1.TL+S1.TR)/2,ye=Tp+h-Teq/Tmax*h;c.strokeStyle="rgba(255,209,102,.7)";c.setLineDash([5,5]);c.beginPath();c.moveTo(L,ye);c.lineTo(L+w,ye);c.stroke();c.setLineDash([]);
+  c.fillStyle="#ffd166";c.textAlign="left";c.fillText(`${Math.round(Teq)} K`,L+4,ye-4);
+  [[1,"#ff8fa3"],[2,"#6fd3e0"]].forEach(([k,col])=>{c.strokeStyle=col;c.lineWidth=2;c.beginPath();let st=false;
+    hist1.forEach(q=>{if(q[0]<t0)return;const x=L+(q[0]-t0)/tspan*w,y=Tp+h-q[k]/Tmax*h;st?c.lineTo(x,y):(c.moveTo(x,y),st=true);});c.stroke();});
+}
+function read1(dt){
+  const [a,b]=temps1(); TLs+=(a-TLs)*Math.min(1,dt*.7); TRs+=(b-TRs)*Math.min(1,dt*.7);
+  if(!S1.pause){S1.t+=dt; if(!hist1.length||S1.t-hist1[hist1.length-1][0]>.2) hist1.push([S1.t,TLs,TRs]); if(hist1.length>600)hist1.shift();}
+  $("#r1L").textContent=`${Math.round(TLs)} K`; $("#r1R").textContent=`${Math.round(TRs)} K`;
+  $("#r1KL").textContent=`${(1.5*KB*TLs*1e21).toFixed(2)} × 10⁻²¹ J`; $("#r1KR").textContent=`${(1.5*KB*TRs*1e21).toFixed(2)} × 10⁻²¹ J`;
+  $("#r1Q").textContent=S1.state==="touch"?`${(Qlr*1e21).toFixed(1)} × 10⁻²¹ J`:S1.state==="open"?"分子直接混合":"—";
+  const Ta=(TLs+TRs)/2, dif=Math.abs(TLs-TRs); if(S1.state!=="apart"&&dif<.06*Ta) S1.eq=true;
+  const close=S1.eq?dif<2.5*Ta*Math.sqrt(4/(3*N1)):dif<.06*Ta;
+  $("#r1Dir").textContent=S1.state==="apart"?"隔熱，沒有傳遞":close?"≈ 熱平衡":TLs>TRs?"左 → 右":"右 → 左";
+  $("#n1").textContent=S1.state==="apart"?"接觸前":S1.state==="touch"?"接觸中（導熱隔板）":"隔板抽掉";
+  $("#m1").innerHTML=S1.state==="apart"
+    ?"接觸前：兩區被隔熱板分開。左區分子平均動能大（高溫），右區分子平均動能小（低溫）。按「讓兩區接觸」。"
+    :S1.state==="touch"
+      ?(close?"<b>熱平衡</b>：兩區分子的平均動能相同、溫度相同，熱不再淨流動（每次碰撞仍會交換能量，只是兩個方向一樣多）。高溫區放出的熱 = 低溫區吸收的熱，總能量守恆。這裡每區只有 70 個分子，所以兩區溫度會在平衡值附近上下跳動；真實氣體分子極多，看起來就是固定的。"
+             :"分子撞擊導熱隔板時交換能量：快的分子把能量交給隔板，隔板再交給另一邊的慢分子。所以熱由<b>分子平均動能大（高溫）的區域</b>傳到<b>平均動能小（低溫）的區域</b>，直到兩邊溫度相同。")
+      :"隔板抽掉後，兩區分子直接互相碰撞並混合，同樣會達到相同溫度（熱平衡）。";
+}
+
+/* ================= ③ 絕對零度 ================= */
+const c2=$("#c2"), x2=c2.getContext("2d"), g2=$("#g2"), gx2=g2.getContext("2d");
+let W2=0,H2=0,GW2=0,GH2=0;
+const BOT=[{P0:160,col:"#38a8e8"},{P0:120,col:"#f28b30"},{P0:80,col:"#7ed957"},{P0:40,col:"#8a7dff"}];
+const S2={b:0,t:20,ext:true}; let data2=[[],[],[],[]], P2=[], tShow=20;
+const Ptrue=(b,t)=>BOT[b].P0*(t+273.15)/273.15;
+function reset2(){P2=[];const n=Math.round(BOT[S2.b].P0/160*60)+8;for(let i=0;i<n;i++)P2.push({x:Math.random(),y:Math.random(),a:Math.random()*6.283,v:.6+Math.random()*.8});}
+function rec2(b,t){const P=Ptrue(b,t)*(1+gauss()*.002);const d=data2[b].filter(q=>Math.abs(q[0]-t)>.1);d.push([t,P]);d.sort((a,c)=>a[0]-c[0]);data2[b]=d;}
+function fitLine(d){const n=d.length;if(n<2)return null;let sx=0,sy=0,sxx=0,sxy=0;d.forEach(([x,y])=>{sx+=x;sy+=y;sxx+=x*x;sxy+=x*y;});const a=(n*sxy-sx*sy)/(n*sxx-sx*sx);if(!isFinite(a))return null;const b=(sy-a*sx)/n;return {a,b,t0:-b/a};}
+function draw2(dt){
+  const c=x2;c.clearRect(0,0,W2,H2);
+  const T=S2.t+273.15, bw=Math.min(170,W2*.36), bh=H2-90, bx=W2*.38-bw/2, by=60;
+  /* 水浴 */
+  c.fillStyle=tcol(T,.18);rr(c,bx-26,by+bh*.28,bw+52,bh*.72+16,10);c.fill();
+  c.strokeStyle="rgba(150,170,200,.4)";c.lineWidth=1.5;rr(c,bx-26,by+bh*.28,bw+52,bh*.72+16,10);c.stroke();
+  /* 鋼瓶 */
+  c.fillStyle="rgba(30,38,56,.92)";rr(c,bx,by,bw,bh,22);c.fill();
+  c.strokeStyle=BOT[S2.b].col;c.lineWidth=2.5;rr(c,bx,by,bw,bh,22);c.stroke();
+  c.fillStyle="#3b4458";c.fillRect(bx+bw/2-8,by-26,16,26);
+  const sp=Math.sqrt(T/293)*.5;
+  P2.forEach(p=>{p.x+=Math.cos(p.a)*p.v*sp*dt;p.y+=Math.sin(p.a)*p.v*sp*dt*bw/bh;
+    if(p.x<0){p.x=-p.x;p.a=Math.PI-p.a;}if(p.x>1){p.x=2-p.x;p.a=Math.PI-p.a;}if(p.y<0){p.y=-p.y;p.a=-p.a;}if(p.y>1){p.y=2-p.y;p.a=-p.a;}
+    c.fillStyle="#b48cff";c.beginPath();c.arc(bx+10+p.x*(bw-20),by+10+p.y*(bh-20),3.2,0,7);c.fill();});
+  /* 壓力計 */
+  const gx=bx+bw/2, gy=by-40, gr=24, P=Ptrue(S2.b,S2.t), Pmax=260;
+  c.strokeStyle="#3b4458";c.lineWidth=3;c.beginPath();c.moveTo(gx,by-26);c.lineTo(gx,gy+gr);c.stroke();
+  c.fillStyle="#0b101a";c.beginPath();c.arc(gx,gy,gr,0,7);c.fill();c.strokeStyle="#c9d3e6";c.lineWidth=1.5;c.stroke();
+  for(let i=0;i<=10;i++){const a=Math.PI*.75+i/10*Math.PI*1.5;c.beginPath();c.moveTo(gx+Math.cos(a)*(gr-3),gy+Math.sin(a)*(gr-3));c.lineTo(gx+Math.cos(a)*(gr-7),gy+Math.sin(a)*(gr-7));c.stroke();}
+  const an=Math.PI*.75+Math.min(1,P/Pmax)*Math.PI*1.5;c.strokeStyle="#ff7a7a";c.lineWidth=2;c.beginPath();c.moveTo(gx,gy);c.lineTo(gx+Math.cos(an)*(gr-6),gy+Math.sin(an)*(gr-6));c.stroke();
+  c.fillStyle="#ffd166";c.font="13px 'JetBrains Mono',monospace";c.textAlign="left";c.fillText(`P = ${P.toFixed(1)} kPa`,gx+gr+8,gy+5);
+  /* 溫度計 */
+  const tx=Math.min(W2-36,bx+bw+64), ty0=by+10, ty1=by+bh-10, tf=(S2.t+100)/300;
+  c.fillStyle="#1b2336";rr(c,tx-7,ty0,14,ty1-ty0,7);c.fill();c.fillStyle=tcol(T);rr(c,tx-4,ty1-(ty1-ty0-6)*tf-3,8,(ty1-ty0-6)*tf+3,4);c.fill();
+  c.beginPath();c.arc(tx,ty1+6,10,0,7);c.fill();
+  c.fillStyle="#e8edf6";c.textAlign="center";c.font="13px 'JetBrains Mono',monospace";c.fillText(`${S2.t} ℃`,tx,ty0-8);
+  c.fillStyle="#8492aa";c.font="12px 'Noto Sans TC',sans-serif";c.textAlign="left";c.fillText(`氣體 ${S2.b+1}（體積固定）`,10,18);
+}
+function drawG2(){
+  const c=gx2;c.clearRect(0,0,GW2,GH2);
+  const L=40,Rr=12,Tp=12,B=30,w=GW2-L-Rr,h=GH2-Tp-B, tmin=-300,tmax=220,Pmax=300;
+  const X=t=>L+(t-tmin)/(tmax-tmin)*w, Y=P=>Tp+h-P/Pmax*h;
+  c.strokeStyle="#161d2e";c.lineWidth=1;
+  for(let P=0;P<=Pmax;P+=50){c.beginPath();c.moveTo(L,Y(P));c.lineTo(L+w,Y(P));c.stroke();}
+  c.strokeStyle="#2a3550";c.beginPath();c.moveTo(L,Tp);c.lineTo(L,Tp+h);c.lineTo(L+w,Tp+h);c.stroke();
+  c.beginPath();c.moveTo(X(0),Tp);c.lineTo(X(0),Tp+h);c.stroke();
+  c.fillStyle="#8492aa";c.font="11px 'JetBrains Mono',monospace";c.textAlign="center";
+  [-200,-100,0,100,200].forEach(t=>c.fillText(String(t).replace("-","−"),X(t),Tp+h+13));
+  c.textAlign="right";for(let P=50;P<=Pmax;P+=50)c.fillText(P,L-4,Y(P)+4);
+  c.fillText("t（℃）",L+w,Tp+h+26);c.save();c.translate(10,Tp+h/2);c.rotate(-Math.PI/2);c.textAlign="center";c.fillText("壓力 P（kPa）",0,0);c.restore();
+  let any=false;
+  data2.forEach((d,b)=>{const f=fitLine(d),col=BOT[b].col;
+    if(f){any=true;const ta=d[0][0],tb=d[d.length-1][0];
+      c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(X(ta),Y(f.a*ta+f.b));c.lineTo(X(tb),Y(f.a*tb+f.b));c.stroke();
+      if(S2.ext){c.setLineDash([3,4]);c.beginPath();c.moveTo(X(ta),Y(f.a*ta+f.b));c.lineTo(X(f.t0),Y(0));c.stroke();c.setLineDash([]);}}
+    d.forEach(([t,P])=>{c.fillStyle=col;c.beginPath();c.arc(X(t),Y(P),3.6,0,7);c.fill();});});
+  /* 目前狀態 */
+  const Pn=Ptrue(S2.b,S2.t);c.strokeStyle=BOT[S2.b].col;c.lineWidth=1.5;c.beginPath();c.arc(X(S2.t),Y(Pn),6,0,7);c.stroke();
+  if(S2.ext&&any){c.fillStyle="#ff5c8a";c.beginPath();c.arc(X(-273.15),Y(0),5,0,7);c.fill();c.font="bold 12px 'JetBrains Mono',monospace";c.textAlign="center";c.fillText("−273.15",Math.max(L+24,X(-273.15)),Tp+h+13);}
+  /* 表格 */
+  $("#tb2").innerHTML=data2.map((d,b)=>{const f=fitLine(d);return `<tr><td style="color:${BOT[b].col}">氣體 ${b+1}</td><td>${d.length}</td><td>${f?f.a.toFixed(3):"—"}</td><td class="k">${f?f.t0.toFixed(1)+" ℃":"至少量 2 點"}</td></tr>`;}).join("");
+  const fs=data2.map(fitLine).filter(Boolean), avg=fs.length?fs.reduce((a,f)=>a+f.t0,0)/fs.length:null;
+  $("#m2").innerHTML=fs.length<2
+    ?"固定體積的氣體，溫度下降時壓力也呈直線下降。選一瓶氣體，改變水浴溫度並記錄壓力（或按「四瓶全部量」），再比較四條直線。"
+    :`四條直線的斜率不同（瓶內氣體越多越陡），但外插到壓力為零時都交在約 <b>${avg.toFixed(1)} ℃</b>（理論值 −273.15 ℃）。溫度再低，壓力就要變成負的——不可能，所以 <b>−273.15 ℃ 是溫度的下限，稱為絕對零度</b>。克耳文在 1848 年以它為零點訂出絕對溫標：K = ℃ + 273.15。真實氣體降溫時會先液化，所以只能用外插（虛線）推得。`;
+  $("#n2").textContent=`P = ${Pn.toFixed(1)} kPa・T = ${(S2.t+273.15).toFixed(2)} K`;
+}
+
+/* ================= ④ 溫標換算 ================= */
+const c3=$("#c3"), x3=c3.getContext("2d"); let W3=0,H3=0, t3=25, drag3=false;
+const MARKS=[["絕對零度",-273.15],["宇宙背景 3 K",-270.15],["液態氮 −196 ℃",-196],["乾冰 −78.5 ℃",-78.5],["冰的熔點 0 ℃",0],["室溫 300 K",26.85],["體溫 37 ℃",37],["85 ℃ 咖啡",85],["水的沸點 100 ℃",100]];
+const TMIN=-273.15, TMAX=120;
+const thermoY=()=>({y0:36,y1:H3-56});
+const tToY=t=>{const {y0,y1}=thermoY();return y1-(t-TMIN)/(TMAX-TMIN)*(y1-y0);};
+const yToT=y=>{const {y0,y1}=thermoY();return TMIN+(y1-y)/(y1-y0)*(TMAX-TMIN);};
+function set3(t,src){t3=Math.max(TMIN,Math.min(TMAX,Math.round(t*100)/100));$("#s3").value=t3;
+  $("#v3").textContent=`${fmt(t3,2)} ℃ = ${(t3+273.15).toFixed(2)} K`;
+  if(src!=="C")$("#i3C").value=+t3.toFixed(2); if(src!=="K")$("#i3K").value=+(t3+273.15).toFixed(2); draw3();}
+function draw3(){
+  const c=x3;c.clearRect(0,0,W3,H3);const {y0,y1}=thermoY();
+  const xs=[W3*.27,W3*.73], cols=["#f0508a","#43b4f0"], names=["攝氏溫標","絕對溫標"];
+  xs.forEach((x,i)=>{c.fillStyle=cols[i];c.font="bold 15px 'Noto Sans TC',sans-serif";c.textAlign="center";c.fillText(names[i],x,20);
+    c.fillStyle="#2a2f55";rr(c,x-13,y0-6,26,y1-y0+12,13);c.fill();c.beginPath();c.arc(x,y1+24,22,0,7);c.fill();
+    c.fillStyle="#0b101a";rr(c,x-7,y0,14,y1-y0,7);c.fill();
+    c.fillStyle=cols[i];const yt=tToY(t3);rr(c,x-5,yt,10,y1-yt+10,5);c.fill();c.beginPath();c.arc(x,y1+24,16,0,7);c.fill();
+    c.fillStyle="#fff";c.font="bold 15px 'JetBrains Mono',monospace";c.fillText(i?"K":"℃",x,y1+29);});
+  /* 參考點 */
+  [[100,"1 atm 下，水的沸點"],[0,"1 atm 下，水的凝固點"],[-273.15,"絕對零度"]].forEach(([t,lab])=>{const y=tToY(t);
+    c.strokeStyle="#7a78d0";c.setLineDash([4,4]);c.lineWidth=1.5;c.beginPath();c.moveTo(xs[0]+14,y);c.lineTo(xs[1]-14,y);c.stroke();c.setLineDash([]);
+    c.fillStyle="#a9b4cc";c.font="11.5px 'Noto Sans TC',sans-serif";c.textAlign="center";c.fillText(lab,W3/2,y-5);
+    c.font="12px 'JetBrains Mono',monospace";c.textAlign="right";c.fillStyle="#c9d3e6";c.fillText(`${String(t).replace("-","−")} ℃`,xs[0]-18,y+4);
+    c.textAlign="left";c.fillText(`${(t+273.15).toFixed(2)} K`,xs[1]+18,y+4);});
+  /* 目前溫度 */
+  const y=tToY(t3);c.strokeStyle="#ffd166";c.lineWidth=2;c.beginPath();c.moveTo(xs[0]-12,y);c.lineTo(xs[1]+12,y);c.stroke();
+  c.fillStyle="#ffd166";c.font="bold 13px 'JetBrains Mono',monospace";
+  const yy=Math.max(y0+10,Math.min(y1-4,y+(Math.abs(y-tToY(0))<16||Math.abs(y-tToY(100))<16||Math.abs(y-tToY(-273.15))<16?-14:-6)));
+  c.textAlign="right";c.fillText(`${fmt(t3,2)} ℃`,xs[0]-18,yy);c.textAlign="left";c.fillText(`${(t3+273.15).toFixed(2)} K`,xs[1]+18,yy);
+}
+c3.addEventListener("pointerdown",e=>{drag3=true;c3.setPointerCapture(e.pointerId);const r=c3.getBoundingClientRect();set3(yToT(e.clientY-r.top));});
+c3.addEventListener("pointermove",e=>{if(!drag3)return;const r=c3.getBoundingClientRect();set3(yToT(e.clientY-r.top));});
+c3.addEventListener("pointerup",()=>drag3=false);c3.addEventListener("pointercancel",()=>drag3=false);
+$("#s3").oninput=e=>set3(+e.target.value);
+$("#i3C").oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v)){if(v<TMIN){$("#v3").textContent="低於 −273.15 ℃（絕對零度）的溫度不存在";return;}if(v>TMAX){t3=v;$("#i3K").value=+(v+273.15).toFixed(2);$("#v3").textContent=`${v} ℃ = ${(v+273.15).toFixed(2)} K（超出溫度計範圍）`;return;}set3(v,"C");}};
+$("#i3K").oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v)){if(v<0){$("#v3").textContent="絕對溫度沒有負值";return;}if(v-273.15>TMAX){$("#i3C").value=+(v-273.15).toFixed(2);$("#v3").textContent=`${v} K = ${(v-273.15).toFixed(2)} ℃（超出溫度計範圍）`;return;}set3(v-273.15,"K");}};
+$("#marks").innerHTML=MARKS.map(([n,t])=>`<button data-t="${t}">${n}</button>`).join("");
+$$("#marks button").forEach(b=>b.onclick=()=>set3(+b.dataset.t));
+
+/* 範例 5-4 排序 */
+const POOL=[
+  {s:"宇宙的背景溫度 3 K",K:3},{s:"1 大氣壓下冰的熔點",K:273.15,h:"0 ℃"},{s:"85 ℃ 的咖啡",K:358.15},{s:"氣體溫度 300 K",K:300},
+  {s:"液態氮 −196 ℃",K:77.15},{s:"乾冰 −78.5 ℃",K:194.65},{s:"人體體溫 37 ℃",K:310.15},{s:"1 大氣壓下水的沸點",K:373.15,h:"100 ℃"},
+  {s:"冷凍庫 −18 ℃",K:255.15},{s:"氣體溫度 250 K",K:250},{s:"熱水 330 K",K:330},{s:"南極冬季 −60 ℃",K:213.15},{s:"氣體溫度 20 K",K:20},{s:"室溫 25 ℃",K:298.15}
+];
+const LAB=["甲","乙","丙","丁"]; let Q3=[], pick3=[];
+function setQ(items){Q3=items;pick3=[];renderQ();$("#ans3").innerHTML="";}
+function renderQ(){
+  $("#quiz").innerHTML=Q3.map((q,i)=>{const r=pick3.indexOf(i);return `<button data-i="${i}">（${LAB[i]}）${q.s}${r>=0?`<span class="rk">${r+1}</span>`:""}</button>`;}).join("");
+  $$("#quiz button").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(pick3.includes(i))return;pick3.push(i);renderQ();if(pick3.length===4)check3();});
+  $("#n3").textContent=pick3.length<4?`依序點選：由高到低（已選 ${pick3.length}/4）`:"已選完";
+}
+function check3(){
+  if(pick3.length<4){$("#ans3").innerHTML="請依「由高到低」把四個都點選完。";return;}
+  const order=[0,1,2,3].sort((a,b)=>Q3[b].K-Q3[a].K), ok=order.every((v,i)=>v===pick3[i]);
+  $$("#quiz button").forEach(b=>{const i=+b.dataset.i;b.classList.add(pick3.indexOf(i)===order.indexOf(i)?"ok":"bad");});
+  $("#ans3").innerHTML=(ok?"<b>答對了！</b>":"<span style='color:var(--red)'>順序不對</span>，看看換算：")+"<br>"+
+    Q3.map((q,i)=>{const C=q.K-273.15;return `（${LAB[i]}）${q.s}${q.h?"（"+q.h+"）":""} ⇒ ${fmt(C,2)} ℃ = <b>${fmt(q.K,2)} K</b>`;}).join("<br>")+
+    `<br>由高而低：${order.map(i=>"（"+LAB[i]+"）").join(" ＞ ")}`;
+}
+$("#b3Chk").onclick=check3; $("#b3Undo").onclick=()=>{pick3=[];renderQ();$("#ans3").innerHTML="";};
+$("#b3New").onclick=()=>{let a;do{a=POOL.slice().sort(()=>Math.random()-.5).slice(0,4);}while(a.some((x,i)=>a.some((y,j)=>i!==j&&Math.abs(x.K-y.K)<5)));setQ(a);};
+$("#b3Ex").onclick=()=>setQ(POOL.slice(0,4));
+
+/* ================= 共用：分頁、縮放、主迴圈 ================= */
+let tab=0;
+function showTab(i){tab=i;$$("#tabs button").forEach(b=>b.classList.toggle("on",+b.dataset.t===i));[0,1,2,3].forEach(k=>$("#t"+k).hidden=k!==i);resize();}
+$$("#tabs button").forEach(b=>b.onclick=()=>showTab(+b.dataset.t));
+function resize(){
+  if(tab===0){const old=W0;[W0,H0]=fit(c0);[HW,HH]=fit(h0);if(!P0.length||Math.abs(old-W0)>2)reset0Keep(old);}
+  if(tab===1){const old=W1;[W1,H1]=fit(c1);[GW1,GH1]=fit(g1);if(!P1.length)reset1();else if(Math.abs(old-W1)>2)rescale(P1,old?W1/old:1);}
+  if(tab===2){[W2,H2]=fit(c2);[GW2,GH2]=fit(g2);drawG2();}
+  if(tab===3){[W3,H3]=fit(c3);draw3();}
+}
+function rescale(ps,f){ps.forEach(p=>p.x*=f);}
+function reset0Keep(old){if(!P0.length||!old){reset0();return;}const b=box0();P0.forEach(p=>{p.x=Math.max(b.x+RAD0,Math.min(b.x+b.w-RAD0,p.x*W0/old));p.y=Math.max(b.y+RAD0,Math.min(b.y+b.h-RAD0,p.y));});}
+window.addEventListener("resize",resize);
+
+/* 控制項：① */
+function lab0(){$("#v0T").textContent=`${S0.T} K（${S0.T-273} ℃）`;$("#v0N").textContent=`${S0.N} 個`;}
+$("#s0T").oninput=e=>{S0.T=+e.target.value;lab0();};
+$("#s0N").oninput=e=>{S0.N=+e.target.value;lab0();const M=GAS[S0.g].M,b=box0(),T=Math.max(tempOf(P0,M),10);
+  while(P0.length>S0.N)P0.pop();while(P0.length<S0.N){const [vx,vy,vz]=sampleV(T,M);P0.push({x:b.x+RAD0+Math.random()*(b.w-2*RAD0),y:b.y+RAD0+Math.random()*(b.h-2*RAD0),vx,vy,vz});}};
+$$("#gasSel button").forEach(b=>b.onclick=()=>{const M0=GAS[S0.g].M;S0.g=+b.dataset.g;$$("#gasSel button").forEach(x=>x.classList.toggle("on",x===b));
+  const f=Math.sqrt(M0/GAS[S0.g].M);P0.forEach(p=>{p.vx*=f;p.vy*=f;p.vz*=f;});hist=null;});
+$("#b0Heat").onclick=()=>{S0.heat=!S0.heat;$("#b0Heat").textContent=S0.heat?"熱源接觸：開":"熱源接觸：關";$("#b0Heat").classList.toggle("primary",S0.heat);};
+$("#b0Reset").onclick=()=>reset0();
+$("#b0Pause").onclick=()=>{S0.pause=!S0.pause;$("#b0Pause").textContent=S0.pause?"▶ 繼續":"❚❚ 暫停";};
+$("#k0Arrow").onchange=e=>S0.arrow=e.target.checked;$("#k0Track").onchange=e=>{S0.track=e.target.checked;trail=[];};$("#k0Color").onchange=e=>S0.color=e.target.checked;
+/* 控制項：② */
+function lab1(){$("#v1L").textContent=`${S1.TL} K`;$("#v1R").textContent=`${S1.TR} K`;}
+$("#s1L").oninput=e=>{S1.TL=+e.target.value;lab1();reset1();};$("#s1R").oninput=e=>{S1.TR=+e.target.value;lab1();reset1();};
+$("#b1Touch").onclick=()=>{if(S1.state!=="apart")return;S1.state="touch";const s=Math.sqrt(R*(S1.TL+S1.TR)/2/M1);seg=seg.map(()=>Math.abs(gauss())*s);$("#b1Touch").disabled=true;};
+$("#b1Open").onclick=()=>{S1.state="open";$("#b1Touch").disabled=true;$("#b1Open").disabled=true;};
+$("#b1Reset").onclick=()=>reset1();
+$("#b1Pause").onclick=()=>{S1.pause=!S1.pause;$("#b1Pause").textContent=S1.pause?"▶ 繼續":"❚❚ 暫停";};
+$("#k1Arrow").onchange=e=>S1.arrow=e.target.checked;
+/* 控制項：③ */
+function lab2(){$("#v2t").textContent=`${S2.t} ℃（${(S2.t+273.15).toFixed(2)} K）`;}
+$("#s2t").oninput=e=>{S2.t=+e.target.value;lab2();drawG2();};
+$$("#bSel button").forEach(b=>b.onclick=()=>{S2.b=+b.dataset.b;$$("#bSel button").forEach(x=>x.classList.toggle("on",x===b));reset2();drawG2();});
+$("#b2Rec").onclick=()=>{rec2(S2.b,S2.t);drawG2();};
+$("#b2Auto").onclick=()=>{[-50,0,50,100,150].forEach(t=>rec2(S2.b,t));drawG2();};
+$("#b2All").onclick=()=>{[0,1,2,3].forEach(b=>[-50,0,50,100,150].forEach(t=>rec2(b,t)));drawG2();};
+$("#b2Clr").onclick=()=>{data2=[[],[],[],[]];drawG2();};
+$("#k2Ext").onchange=e=>{S2.ext=e.target.checked;drawG2();};
+
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(tab===0&&W0){if(!S0.pause){step0(dt);if(S0.track&&P0[0]){trail.push([P0[0].x,P0[0].y]);if(trail.length>90)trail.shift();}}else hits=0;if(dt>0)read0(Math.max(dt,1e-3));draw0();drawHist();}
+  if(tab===1&&W1){if(!S1.pause)step1(dt);read1(Math.max(dt,1e-3));draw1();drawG1();}
+  if(tab===2&&W2){draw2(dt);}
+  requestAnimationFrame(loop);
+}
+lab0();lab1();lab2();reset2();
+showTab(0);reset0();setQ(POOL.slice(0,4));set3(25);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
