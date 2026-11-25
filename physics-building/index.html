@@ -219,6 +219,14 @@ button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.roo
   .scene{height:520px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* 動態桌布模式（網址加 ?wallpaper，可給 Lively Wallpaper 用）：只留 3D 院區，置中、約螢幕一半大、緩慢旋轉，依時間自動切換白天／夜晚
+   參數：wallpaper=50（佔螢幕寬高的百分比）、theme=auto|day|night */
+html.wp,html.wp body{overflow:hidden;height:100%}
+html.wp body{background:linear-gradient(var(--sky-top),var(--sky))}
+html.wp body>*{visibility:hidden}
+html.wp #scene{visibility:visible;position:fixed!important;left:50%;top:50%;transform:translate(-50%,-50%);width:var(--wpw,50vw)!important;height:var(--wph,50vh)!important;max-height:none!important;margin:0!important;z-index:50;pointer-events:none;box-shadow:none!important}
+html.wp #scene *{visibility:visible}
+html.wp #scene .hint,html.wp #scene .home,html.wp #scene .flabel{display:none!important}
 </style>
 
 <div class="wrap">
@@ -271,6 +279,12 @@ button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.roo
 
 <script src="vendor/three.min.js"></script>
 <script>
+/* 動態桌布模式 */
+const WPQ=new URLSearchParams(location.search), WPM=WPQ.has("wallpaper");
+if(WPM){const r=document.documentElement, pct=Math.min(100,Math.max(20,Number(WPQ.get("wallpaper"))||50));
+  r.classList.add("wp"); r.style.setProperty("--wpw",pct+"vw"); r.style.setProperty("--wph",pct+"vh");
+  const th=WPQ.get("theme")||"auto", setTh=()=>{const h=new Date().getHours(); r.dataset.theme=th==="night"?"dark":th==="day"?"light":(h>=18||h<6)?"dark":"light";};
+  setTh(); if(th==="auto") setInterval(setTh,5*60*1000);}
 /* 模擬大樓：一層樓一冊，每間教室一個模擬（模擬檔在 sims/）。
    新增教室時加在該樓層 rooms 的最後面：{t:標題, d:說明, sims:[["模式名稱或空字串","檔名不含.html"]], net:需要網路才加 true} */
 const SIM=[
@@ -1281,7 +1295,7 @@ function init3D(){
     requestAnimationFrame(frame);
     const dt=Math.min(.05,(now-last)/1000); last=now;
     const idle=now-lastUser>3500&&!drag&&!reduce;
-    const a=az+(idle?Math.sin((now-t0)/6000)*.18:0);
+    const a=WPM?az+(now-t0)/1000*.05:az+(idle?Math.sin((now-t0)/6000)*.18:0);   // 桌布模式：每約 2 分鐘轉一圈
     cam.position.set(target.x+dist*Math.sin(a)*Math.cos(el),target.y+dist*Math.sin(el),target.z+dist*Math.cos(a)*Math.cos(el));
     cam.lookAt(target);
     if(!cls.hidden||!qv.hidden||!pv.hidden) return;
