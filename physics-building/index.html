@@ -874,7 +874,7 @@ function init3D(){
   };
   const EDGES=[["p0","pL"],["p0","pR"],["pL","fL"],["pR","fR"],["p0","gb"],
     ["gb","bL"],["gb","bR"],["bL","cp"],["cp","bLL"],["bR","gy"],["gy","bRR"],["cp","cpD"],["gy","gyD"],
-    ["bL","sL"],["sL","rL"],["bR","lbR"],["lbR","lab"],["sR","rR"],["sL","lib"],["sR","db"],
+    ["bL","sL"],["bR","lbR"],["lbR","lab"],["sL","lib"],["sR","db"],
     ["fL","fR"],["fL","rL"],["rL","cLF"],["fR","rR"],["rR","cRF"],
     ["cLF","bLL"],["bLL","cLB"],["cRF","eRR"],["eRR","bRR"],["lbR","eR"],["eR","sR"],["eR","eM"],["eM","eRR"],["bRR","cRB"],["cLB","mB"],["mB","cRB"]];
   const NB={}; Object.keys(NODES).forEach(k=>NB[k]=[]);
@@ -1056,7 +1056,7 @@ function init3D(){
     scene.add(mesh(B(.4,.04,.16),lampLit,x,2.15,z,false,false));
   }
   /* 外環道路燈（放在高架橋墩的內側，不會撞到） */
-  for(let x=-RX+5;x<=RX-5;x+=7.5){lamp(x,RZ1-RW/2-1.1);lamp(x,RZ0+RW/2+1.1);}
+  for(let x=-RX+5;x<=RX-5;x+=7.5){if(Math.abs(Math.abs(x)-SR)>2) lamp(x,RZ1-RW/2-1.1); lamp(x,RZ0+RW/2+1.1);}
   [-25,-19,-7,7,19,25,31,-31].forEach(x=>lamp(x,BZ-IW/2-.4));
   [16,21.5,27].forEach(x=>lamp(x,EWZ+IW/2+.4));
   [-.4,9,13.5,18].forEach(z=>{lamp(-SR-IW/2-.4,z);lamp(SR+IW/2+.4,z);});
@@ -1112,7 +1112,12 @@ function init3D(){
     const add=(o)=>{o.rotation.y=ry; scene.add(o);};
     add(mesh(B(L,.35,VW),viaM,cx,VH,cz));
     add(mesh(B(L,.04,VW-.5),roadM,cx,VH+.195,cz,false,true));
-    [-1,1].forEach(sd=>add(mesh(B(L,.36,.16),viaM,cx-g.dz*sd*(VW/2-.08),VH+.36,cz+g.dx*sd*(VW/2-.08))));
+    const front=Math.abs(g.dz)<.01&&Math.abs(g.z0-RZ1)<.01&&g.l>20;
+    [-1,1].forEach(sd=>{
+      if(front&&sd<0){  /* 前方內側護欄在匝道口留開口 */
+        const a=Math.min(g.x0,g.x0+g.dx*g.l), b=Math.max(g.x0,g.x0+g.dx*g.l), cuts=[[a,-SR-1.5],[-SR+1.5,SR-1.5],[SR+1.5,b]];
+        cuts.forEach(([u,v])=>{if(v-u>.1) scene.add(mesh(B(v-u,.36,.16),viaM,(u+v)/2,VH+.36,cz-(VW/2-.08)));});
+      }else add(mesh(B(L,.36,.16),viaM,cx-g.dz*sd*(VW/2-.08),VH+.36,cz+g.dx*sd*(VW/2-.08)));});
     if(g.l>3) for(let t=1;t<g.l-1;t+=2.2){const o=mesh(B(1.1,.02,.08),lineM,g.x0+g.dx*t,VH+.225,g.z0+g.dz*t,false,false); o.rotation.y=ry; scene.add(o);}
   });
   /* 橋墩：直線段用跨過外環道的門型墩，圓弧段用單柱 */
@@ -1126,20 +1131,49 @@ function init3D(){
     const hd=mesh(B(.18,.05,.5),M.trim,q.x+ox*.82,VH+1.5,q.z+oz*.82); hd.rotation.y=yaw(q.dx,q.dz); scene.add(hd);
     const lt=mesh(B(.14,.03,.36),lampLit,q.x+ox*.82,VH+1.47,q.z+oz*.82,false,false); lt.rotation.y=yaw(q.dx,q.dz); scene.add(lt);}
   /* 車輛：外側車道順向、內側車道逆向 */
-  const hwCars=[], NC=16;
-  for(let i=0;i<NC;i++){
-    const dir=i%2?1:-1, g=new THREE.Group(); scene.add(g);
+  /* 車輛：外側車道順向、內側車道逆向 */
+  function makeCar(i){
+    const g=new THREE.Group(); scene.add(g); g.rotation.order="YZX";
     const col=carC[(i*3)%carC.length], bus=i%7===3, len=bus?2.6:1.4;
     g.add(mesh(B(len,bus?.75:.34,.68),mat(col),0,bus?.5:.3,0));
     if(!bus) g.add(mesh(B(.75,.26,.6),M.glass,-.05,.58,0));
     else g.add(mesh(B(len-.3,.22,.7),M.glass,0,.62,0,false,false));
     [-1,1].forEach(sz=>{g.add(mesh(B(.04,.08,.14),lampLit,len/2+.01,.32,sz*.2,false,false)); g.add(mesh(B(.04,.08,.14),tailLit,-len/2-.01,.32,sz*.2,false,false));});
     [[-len/2+.35,.35],[len/2-.35,.35],[-len/2+.35,-.35],[len/2-.35,-.35]].forEach(([wx,wz])=>{const w=mesh(new THREE.CylinderGeometry(.13,.13,.1,10),mat("#1b1b1b"),wx,.13,wz);w.rotation.x=Math.PI/2;g.add(w);});
-    hwCars.push({g,dir,s:vLen*((i*0.618)%1),v:bus?3.2:4.2+((i*7)%5)*.5});
+    return {g,bus};
   }
-  const placeCar=c=>{const q=vAt(c.s), off=c.dir>0?.78:-.78; c.g.position.set(q.x+q.dz*off,VH+.21,q.z-q.dx*off); c.g.rotation.y=yaw(q.dx*c.dir,q.dz*c.dir);};
+  const hwCars=[], NC=12;
+  for(let i=0;i<NC;i++){const {g,bus}=makeCar(i), dir=i%2?1:-1; hwCars.push({g,dir,s:vLen*((i*0.618)%1),v:bus?3.2:4.2+((i*7)%5)*.5});}
+  const placeCar=c=>{const q=vAt(c.s), off=c.dir>0?.78:-.78; c.g.position.set(q.x+q.dz*off,VH+.21,q.z-q.dx*off); c.g.rotation.set(0,yaw(q.dx*c.dir,q.dz*c.dir),0);};
   hwCars.forEach(placeCar);
   tick.push(dt=>hwCars.forEach(c=>{c.s=(c.s+c.dir*c.v*dt+vLen)%vLen; placeCar(c);}));
+
+  /* 上下匝道：前方高架在兩條南北向側路（x = ±SR）上各有一條匝道接到平面道路，雙向兩線道 */
+  const RL=11, RWd=2.6, zTop=RZ1-VW/2, zBot=zTop-RL, rAng=Math.atan2(VH,RL), rLen=Math.hypot(VH,RL);
+  [-SR,SR].forEach(x=>{
+    const yc=(VH+.05)/2;
+    const deck=mesh(B(RWd,.3,rLen),viaM,x,yc,(zTop+zBot)/2); deck.rotation.x=-rAng; scene.add(deck);
+    const asp=mesh(B(RWd-.4,.04,rLen),roadM,x,yc+.17,(zTop+zBot)/2,false,true); asp.rotation.x=-rAng; scene.add(asp);
+    [-1,1].forEach(sd=>{const w=mesh(B(.16,.36,rLen),viaM,x+sd*(RWd/2-.08),yc+.33,(zTop+zBot)/2); w.rotation.x=-rAng; scene.add(w);});
+    for(let t=.15;t<.95;t+=.1){const zz=zTop-t*RL, yy=VH*(1-t)+.05*t; const o=mesh(B(.08,.02,.55),lineM,x,yy+.2,zz,false,false); o.rotation.x=-rAng; scene.add(o);}
+    [.3,.65].forEach(t=>{const zz=zTop-t*RL, h=VH*(1-t)-.1; scene.add(mesh(B(RWd-.6,h,.4),viaM,x,h/2,zz));});
+  });
+  /* 走匝道的車：從高架順向開到左側匝道 → 下到平面，沿側路、後方道路繞到右側 → 從右側匝道上高架（反向的車走另一線道） */
+  const yD=VH+.21, yG=.05, rp=[];
+  {const sF=vSeg.reduce((m,q)=>Math.abs(q.dz)<.01&&Math.abs(q.z0-RZ1)<.01&&q.l>20?q:m,null);   // 前方直線段
+   const sStart=sF.s0+(SR-sF.x0), sEnd=sF.s0+(-SR-sF.x0)+vLen;   // 從右側匝道口往前繞一圈到左側匝道口
+   for(let s2=sStart;s2<=sEnd;s2+=1.5){const q=vAt(s2); rp.push([q.x,yD,q.z]);}
+   rp.push([-SR,yD,RZ1],[-SR,yD,zTop],[-SR,yG,zBot],[-SR,yG,BZ],[SR,yG,BZ],[SR,yG,zBot],[SR,yD,zTop],[SR,yD,RZ1]);}
+  const rSeg=[]; let rTot=0;
+  for(let i=0;i<rp.length-1;i++){const [x0,y0,z0]=rp[i],[x1,y1,z1]=rp[i+1], h=Math.hypot(x1-x0,z1-z0), l=Math.hypot(h,y1-y0); if(l<1e-6) continue;
+    rSeg.push({x0,y0,z0,dx:(x1-x0)/(h||1),dz:(z1-z0)/(h||1),dy:y1-y0,h,l,s0:rTot}); rTot+=l;}
+  const rAt=s=>{s=((s%rTot)+rTot)%rTot; const g=rSeg.find(q=>s<q.s0+q.l)||rSeg[rSeg.length-1], t=(s-g.s0)/g.l; return {x:g.x0+g.dx*g.h*t,y:g.y0+g.dy*t,z:g.z0+g.dz*g.h*t,dx:g.dx,dz:g.dz,pitch:Math.atan2(g.dy,g.h)};};
+  const rampCars=[];
+  for(let i=0;i<6;i++){const {g}=makeCar(i+20), dir=i%2?-1:1; rampCars.push({g,dir,s:rTot*i/6,v:3.6+(i%3)*.5});}
+  const placeRamp=c=>{const q=rAt(c.s), ground=q.y<VH-.01&&Math.abs(q.pitch)<.01, off=(c.dir>0?1:-1)*(ground?.42:Math.abs(q.pitch)>.01?.6:.78);
+    c.g.position.set(q.x+q.dz*off,q.y,q.z-q.dx*off); c.g.rotation.set(0,yaw(q.dx*c.dir,q.dz*c.dir),q.pitch*c.dir);};
+  rampCars.forEach(placeRamp);
+  tick.push(dt=>rampCars.forEach(c=>{c.s=(c.s+c.dir*c.v*dt+rTot)%rTot; placeRamp(c);}));
 
   /* 風力發電機 */
   function turbine(x,z,h,ph){
@@ -1157,7 +1191,7 @@ function init3D(){
     [-6,RZ0+2.2],[0,RZ0+2.2],[5,RZ0+2.2],[-15,-1.6],[-9.8,-6.8],[1.6,-7.6],
     [23.4,-4.6],[-22.9,3.4],[-14.6,2.4],[25.6,3.4],[25.6,8.6],[-26,-14],[26,-15.5],[-26,9],[-9.6,-14.6],
     /* 拓寬後的新腹地：外圈綠帶 */
-    ...[-32,-24,-14,-4,6,16,26,33].flatMap((x,i)=>[[x+(i%2)*1.5,RZ0+3.6],[x-(i%2),RZ1-3.8]]),
+    ...[-32,-24,-17,-4,6,18,26,33].flatMap((x,i)=>[[x+(i%2)*1.5,RZ0+3.6],[x-(i%2),RZ1-3.8]]),
     ...[-14,-6,2,10,18].flatMap((z,i)=>[[-RX+3.8,z+(i%2)],[RX-3.8,z-(i%2)*1.2],[-33,z+3],[33.5,z-2.5]])];
   TREES.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
