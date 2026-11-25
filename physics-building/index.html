@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
 <title>物理研究院</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1f3347">
@@ -899,8 +899,28 @@ function init3D(){
     if(startNode!==endNode) route(startNode,endNode).forEach(k=>{const [x,z]=NODES[k]; path.push(jit(x,z,.35));});
     path.push(dest); w.path=path;
   }
+  /* 電動滑板車／賽格威（人物原點在腳底、面向 +z） */
+  function makeRide(type){
+    const g=new THREE.Group(), dark=mat("#2d2d30"), acc=mat(type==="scooter"?"#2bb3a3":"#e8e8e6"), tire=mat("#1b1b1b");
+    if(type==="scooter"){
+      g.add(mesh(B(.16,.04,.74),acc,0,.11,0,false,false));
+      [-.34,.34].forEach(z=>{const w=mesh(new THREE.CylinderGeometry(.075,.075,.05,12),tire,0,.075,z,false,false); w.rotation.z=Math.PI/2; g.add(w);});
+      const st=mesh(B(.04,.95,.04),dark,0,.58,.36,false,false); st.rotation.x=-.12; g.add(st);
+      g.add(mesh(B(.44,.04,.04),dark,0,1.04,.42,false,false));
+    }else{
+      g.add(mesh(B(.44,.08,.28),acc,0,.15,0,false,false));
+      [-.27,.27].forEach(x=>{const w=mesh(new THREE.CylinderGeometry(.17,.17,.07,16),tire,x,.17,0,false,false); w.rotation.z=Math.PI/2; g.add(w);
+        g.add(mesh(new THREE.CylinderGeometry(.08,.08,.075,12),acc,x,.17,0,false,false).rotateZ(Math.PI/2));});
+      g.add(mesh(B(.05,.86,.05),dark,0,.6,.12,false,false));
+      g.add(mesh(B(.46,.05,.05),dark,0,1.03,.14,false,false));
+    }
+    return g;
+  }
   const walkers=PEOPLE.map((o,i)=>{
-    const p=makePerson(o), w={...p,o,path:[],wait:rnd(0,2.5),t:rnd(0,6),speed:rnd(.85,1.25)};
+    const p=makePerson(o), w={...p,o,path:[],wait:rnd(0,2.5),t:rnd(0,6),speed:rnd(.85,1.25),base:0};
+    /* 有些人騎電動滑板車或賽格威（地面行人每 3 人 1 個，輪流） */
+    if(o.zone!=="bridge"&&i>=3&&i%3===0){w.ride=(i/3)%2?"scooter":"segway"; p.root.add(makeRide(w.ride)); w.base=w.ride==="scooter"?.13:.19; p.body.position.y=w.base;
+      p.arms.forEach(a=>a.rotation.x=-1.05); p.legs[0].rotation.x=w.ride==="scooter"?.18:0; p.legs[1].rotation.x=w.ride==="scooter"?-.18:0;}
     if(o.zone==="bridge"){bridge.add(p.root);p.root.position.set(rnd(-bl/2+.6,bl/2-.6),.14,(i?.35:-.35));w.dir=i?-1:1;}
     else{scene.add(p.root);const s=randIn(i%4===0?"back":"front");p.root.position.copy(s);p.root.rotation.y=rnd(0,Math.PI*2);}
     return w;
@@ -915,12 +935,13 @@ function init3D(){
         w.root.rotation.y=w.dir>0?Math.PI/2:-Math.PI/2;
       }else{
         if(!w.path.length) planGround(w);
-        const tgt=w.path[0], dx=tgt.x-pos.x, dz=tgt.z-pos.z, d=Math.hypot(dx,dz), sp=1.6*w.speed*dt;
+        const tgt=w.path[0], dx=tgt.x-pos.x, dz=tgt.z-pos.z, d=Math.hypot(dx,dz), sp=(w.ride?3:1.6)*w.speed*dt;
         if(d<=sp){pos.x=tgt.x;pos.z=tgt.z;w.path.shift();if(!w.path.length)w.wait=rnd(1,4.5);}
         else{pos.x+=dx/d*sp;pos.z+=dz/d*sp;moving=true;
           let ry=Math.atan2(dx,dz)-w.root.rotation.y; ry=Math.atan2(Math.sin(ry),Math.cos(ry)); w.root.rotation.y+=ry*Math.min(1,dt*8);}
       }
-      if(moving){w.t+=dt*8.5*w.speed;const s=Math.sin(w.t)*.55;
+      if(w.ride){w.t+=dt*3; w.body.position.y=w.base+(moving?Math.sin(w.t)*.008:0);}
+      else if(moving){w.t+=dt*8.5*w.speed;const s=Math.sin(w.t)*.55;
         w.legs[0].rotation.x=s;w.legs[1].rotation.x=-s;w.arms[0].rotation.x=-s*.8;w.arms[1].rotation.x=s*.8;w.body.position.y=Math.abs(Math.cos(w.t))*.03;}
       else{[...w.legs,...w.arms].forEach(l=>l.rotation.x*=.8);w.body.position.y*=.8;}
     });
@@ -1302,6 +1323,7 @@ route();
 window.addEventListener("hashchange",route);
 if(!init3D()){$("#scene").hidden=true;$("#nogl").hidden=false;}
 </script>
+
 
 <script>
 if("serviceWorker" in navigator){
