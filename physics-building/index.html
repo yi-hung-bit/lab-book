@@ -676,7 +676,7 @@ function init3D(){
   const hemi=new THREE.HemisphereLight(0xffffff,0x88907a,.75); scene.add(hemi);
   const sun=new THREE.DirectionalLight(0xffffff,.95); sun.position.set(14,26,18); sun.castShadow=true;
   sun.shadow.mapSize.set(2048,2048);
-  Object.assign(sun.shadow.camera,{left:-30,right:30,top:28,bottom:-12,near:1,far:100});
+  Object.assign(sun.shadow.camera,{left:-44,right:44,top:36,bottom:-18,near:1,far:120});
   scene.add(sun);
   const glow=new THREE.PointLight(0xffd27a,0,14); scene.add(glow);
 
@@ -696,7 +696,7 @@ function init3D(){
 
   /* ground */
   /* 科技園區基地：方整草坪＋外環道 */
-  const PW=64, PD=44, PZ=.6;
+  const PW=84, PD=60, PZ=.6;
   scene.add(mesh(B(PW+1.2,.5,PD+1.2),M.slab,0,-.35,PZ,false,true));
   scene.add(mesh(B(PW,.3,PD),M.lawn,0,-.15,PZ,false,true));
   scene.add(mesh(B(W+2.6,.06,D+2.6),M.pave,SX,.03,0,false,true));
@@ -1055,11 +1055,12 @@ function init3D(){
     scene.add(mesh(B(.55,.08,.2),M.trim,x,2.2,z));
     scene.add(mesh(B(.4,.04,.16),lampLit,x,2.15,z,false,false));
   }
-  [-25,-19,-13,-7,7,13,19,25].forEach(x=>{lamp(x,RZ1-RW/2-.5);lamp(x,RZ0+RW/2+.5);});
-  [-25,-19,-7,7,19,25].forEach(x=>lamp(x,BZ-IW/2-.4));
+  /* 外環道路燈（放在高架橋墩的內側，不會撞到） */
+  for(let x=-RX+5;x<=RX-5;x+=7.5){lamp(x,RZ1-RW/2-1.1);lamp(x,RZ0+RW/2+1.1);}
+  [-25,-19,-7,7,19,25,31,-31].forEach(x=>lamp(x,BZ-IW/2-.4));
   [16,21.5,27].forEach(x=>lamp(x,EWZ+IW/2+.4));
   [-.4,9,13.5,18].forEach(z=>{lamp(-SR-IW/2-.4,z);lamp(SR+IW/2+.4,z);});
-  [RZ0+7,RZ0+15,RZ0+23,RZ0+31].forEach(z=>{lamp(-RX+RW/2+.5,z);lamp(RX-RW/2-.5,z);});
+  for(let z=RZ0+6;z<=RZ1-6;z+=7.5){lamp(-RX+RW/2+1.1,z);lamp(RX-RW/2-1.1,z);}
   [D/2+4,D/2+7.5].forEach(z=>{lamp(-2.2,z);lamp(2.2,z);});
   /* 園區入口：原子雕塑水池＋入口標牌 */
   const AZ=RZ1-3.2;
@@ -1095,35 +1096,50 @@ function init3D(){
     g.add(mesh(B(.8,.28,.62),M.glass,-.05,.6,0));
     [[-.5,.36],[.5,.36],[-.5,-.36],[.5,-.36]].forEach(([wx,wz])=>{const w=mesh(new THREE.CylinderGeometry(.14,.14,.1,10),mat("#1b1b1b"),wx,.14,wz);w.rotation.x=Math.PI/2;g.add(w);});
   });
-  /* 高架橋：沿著院區後方外環道上空東西向穿過，兩線道，車子來回行駛（從基地邊緣駛入、駛出） */
-  const VH=3.6, VZ=RZ0, VW=3.4, VL=PW/2+.6;
+  /* 高架橋：沿著外環道上空繞園區一圈的環狀高架（四角是圓弧），雙向兩線道，車子沿著迴路一直繞 */
+  const VH=3.6, VW=3.4, VR=7;
   const viaM=new THREE.MeshStandardMaterial({color:0xb9bec4,roughness:.85});
   const tailLit=new THREE.MeshStandardMaterial({color:0x8a1a1a,emissive:new THREE.Color(0xff3030).convertSRGBToLinear(),emissiveIntensity:.6});
-  scene.add(mesh(B(2*VL,.35,VW),viaM,0,VH,VZ));                     // 橋面
-  scene.add(mesh(B(2*VL,.04,VW-.5),roadM,0,VH+.195,VZ,false,true));  // 柏油
-  [-1,1].forEach(sd=>scene.add(mesh(B(2*VL,.36,.16),viaM,0,VH+.36,VZ+sd*(VW/2-.08))));   // 護欄
-  for(let x=-VL+1;x<VL-1;x+=2.2) scene.add(mesh(B(1.1,.02,.08),lineM,x,VH+.225,VZ,false,false));  // 車道虛線
-  for(let k=-5;k<=4;k++){const x=k*6+3;                             // 門型橋墩，柱子在外環道兩側
-    [-1,1].forEach(sd=>scene.add(mesh(B(.45,VH,.45),viaM,x,VH/2,VZ+sd*(RW/2+.4))));
-    scene.add(mesh(B(.6,.45,RW+1.4),viaM,x,VH-.3,VZ));}
-  for(let x=-VL+4;x<VL-2;x+=8){                                     // 橋上路燈
-    scene.add(mesh(new THREE.CylinderGeometry(.04,.05,1.3,8),M.trim,x,VH+.85,VZ-VW/2+.1));
-    scene.add(mesh(B(.5,.05,.18),M.trim,x,VH+1.5,VZ-VW/2+.32));
-    scene.add(mesh(B(.36,.03,.14),lampLit,x,VH+1.47,VZ-VW/2+.32,false,false));}
-  const hwCars=[];
-  for(let i=0;i<10;i++){
+  /* 迴路折線：前方直線 → 右前圓弧 → 右側直線 → 右後圓弧 → 後方直線 → 左後圓弧 → 左側直線 → 左前圓弧 */
+  const vPts=[], arc=(cx,cz,a0,a1)=>{for(let k=0;k<=14;k++){const a=a0+(a1-a0)*k/14; vPts.push([cx+VR*Math.cos(a),cz+VR*Math.sin(a)]);}};
+  arc(RX-VR,RZ1-VR,Math.PI/2,0); arc(RX-VR,RZ0+VR,0,-Math.PI/2); arc(-RX+VR,RZ0+VR,-Math.PI/2,-Math.PI); arc(-RX+VR,RZ1-VR,Math.PI,Math.PI/2);
+  vPts.push(vPts[0]);
+  const vSeg=[]; let vLen=0;
+  for(let i=0;i<vPts.length-1;i++){const [x0,z0]=vPts[i],[x1,z1]=vPts[i+1], l=Math.hypot(x1-x0,z1-z0); if(l<1e-6) continue; vSeg.push({x0,z0,dx:(x1-x0)/l,dz:(z1-z0)/l,l,s0:vLen}); vLen+=l;}
+  const vAt=s=>{s=((s%vLen)+vLen)%vLen; let g=vSeg.find(q=>s<q.s0+q.l)||vSeg[vSeg.length-1]; const t=s-g.s0; return {x:g.x0+g.dx*t,z:g.z0+g.dz*t,dx:g.dx,dz:g.dz};};
+  const yaw=(dx,dz)=>Math.atan2(-dz,dx);
+  vSeg.forEach(g=>{const cx=g.x0+g.dx*g.l/2, cz=g.z0+g.dz*g.l/2, ry=yaw(g.dx,g.dz), L=g.l+.06;
+    const add=(o)=>{o.rotation.y=ry; scene.add(o);};
+    add(mesh(B(L,.35,VW),viaM,cx,VH,cz));
+    add(mesh(B(L,.04,VW-.5),roadM,cx,VH+.195,cz,false,true));
+    [-1,1].forEach(sd=>add(mesh(B(L,.36,.16),viaM,cx-g.dz*sd*(VW/2-.08),VH+.36,cz+g.dx*sd*(VW/2-.08))));
+    if(g.l>3) for(let t=1;t<g.l-1;t+=2.2){const o=mesh(B(1.1,.02,.08),lineM,g.x0+g.dx*t,VH+.225,g.z0+g.dz*t,false,false); o.rotation.y=ry; scene.add(o);}
+  });
+  /* 橋墩：直線段用跨過外環道的門型墩，圓弧段用單柱 */
+  for(let s=3;s<vLen;s+=7){const q=vAt(s), onRoad=Math.abs(Math.abs(q.x)-RX)<.3||Math.abs(q.z-RZ0)<.3||Math.abs(q.z-RZ1)<.3, ry=yaw(q.dx,q.dz);
+    if(onRoad){[-1,1].forEach(sd=>scene.add(mesh(B(.45,VH,.45),viaM,q.x-q.dz*sd*(RW/2+.4),VH/2,q.z+q.dx*sd*(RW/2+.4))));
+      const cb=mesh(B(.6,.45,RW+1.4),viaM,q.x,VH-.3,q.z); cb.rotation.y=ry; scene.add(cb);}
+    else scene.add(mesh(new THREE.CylinderGeometry(.32,.38,VH,12),viaM,q.x,VH/2,q.z));}
+  /* 橋上路燈（外側護欄） */
+  for(let s=5;s<vLen;s+=10){const q=vAt(s), ox=q.dz*(VW/2-.1), oz=-q.dx*(VW/2-.1);
+    scene.add(mesh(new THREE.CylinderGeometry(.04,.05,1.3,8),M.trim,q.x+ox,VH+.85,q.z+oz));
+    const hd=mesh(B(.18,.05,.5),M.trim,q.x+ox*.82,VH+1.5,q.z+oz*.82); hd.rotation.y=yaw(q.dx,q.dz); scene.add(hd);
+    const lt=mesh(B(.14,.03,.36),lampLit,q.x+ox*.82,VH+1.47,q.z+oz*.82,false,false); lt.rotation.y=yaw(q.dx,q.dz); scene.add(lt);}
+  /* 車輛：外側車道順向、內側車道逆向 */
+  const hwCars=[], NC=16;
+  for(let i=0;i<NC;i++){
     const dir=i%2?1:-1, g=new THREE.Group(); scene.add(g);
-    const col=carC[(i*3)%carC.length], bus=i===3, len=bus?2.6:1.4;
+    const col=carC[(i*3)%carC.length], bus=i%7===3, len=bus?2.6:1.4;
     g.add(mesh(B(len,bus?.75:.34,.68),mat(col),0,bus?.5:.3,0));
     if(!bus) g.add(mesh(B(.75,.26,.6),M.glass,-.05,.58,0));
     else g.add(mesh(B(len-.3,.22,.7),M.glass,0,.62,0,false,false));
     [-1,1].forEach(sz=>{g.add(mesh(B(.04,.08,.14),lampLit,len/2+.01,.32,sz*.2,false,false)); g.add(mesh(B(.04,.08,.14),tailLit,-len/2-.01,.32,sz*.2,false,false));});
     [[-len/2+.35,.35],[len/2-.35,.35],[-len/2+.35,-.35],[len/2-.35,-.35]].forEach(([wx,wz])=>{const w=mesh(new THREE.CylinderGeometry(.13,.13,.1,10),mat("#1b1b1b"),wx,.13,wz);w.rotation.x=Math.PI/2;g.add(w);});
-    g.rotation.y=dir>0?0:Math.PI;
-    const c={g,dir,x:-VL+((i*2*VL/10*1.7)%(2*VL)),v:bus?3:4+((i*7)%5)*.6,z:VZ+(dir>0?.78:-.78)};
-    g.position.set(c.x,VH+.21,c.z); hwCars.push(c);
+    hwCars.push({g,dir,s:vLen*((i*0.618)%1),v:bus?3.2:4.2+((i*7)%5)*.5});
   }
-  tick.push(dt=>hwCars.forEach(c=>{c.x+=c.dir*c.v*dt; if(c.x>VL) c.x-=2*VL; if(c.x<-VL) c.x+=2*VL; c.g.position.x=c.x;}));
+  const placeCar=c=>{const q=vAt(c.s), off=c.dir>0?.78:-.78; c.g.position.set(q.x+q.dz*off,VH+.21,q.z-q.dx*off); c.g.rotation.y=yaw(q.dx*c.dir,q.dz*c.dir);};
+  hwCars.forEach(placeCar);
+  tick.push(dt=>hwCars.forEach(c=>{c.s=(c.s+c.dir*c.v*dt+vLen)%vLen; placeCar(c);}));
 
   /* 風力發電機 */
   function turbine(x,z,h,ph){
@@ -1139,7 +1155,10 @@ function init3D(){
   const TREES=[[-2.4,D/2+5.6],[2.4,D/2+5.6],[-2.4,D/2+9],[2.4,D/2+9],
     [-22,RZ1-2.6],[-9.6,RZ1-2.6],[9.6,RZ1-2.6],[22,RZ1-2.6],
     [-6,RZ0+2.2],[0,RZ0+2.2],[5,RZ0+2.2],[-15,-1.6],[-9.8,-6.8],[1.6,-7.6],
-    [23.4,-4.6],[-22.9,3.4],[-14.6,2.4],[25.6,3.4],[25.6,8.6],[-26,-14],[26,-15.5],[-26,9],[-9.6,-14.6]];
+    [23.4,-4.6],[-22.9,3.4],[-14.6,2.4],[25.6,3.4],[25.6,8.6],[-26,-14],[26,-15.5],[-26,9],[-9.6,-14.6],
+    /* 拓寬後的新腹地：外圈綠帶 */
+    ...[-32,-24,-14,-4,6,16,26,33].flatMap((x,i)=>[[x+(i%2)*1.5,RZ0+3.6],[x-(i%2),RZ1-3.8]]),
+    ...[-14,-6,2,10,18].flatMap((z,i)=>[[-RX+3.8,z+(i%2)],[RX-3.8,z-(i%2)*1.2],[-33,z+3],[33.5,z-2.5]])];
   TREES.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
@@ -1184,12 +1203,12 @@ function init3D(){
   /* camera */
   const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const topY=Math.max(thRoof,kRoof)+2.6;
-  let az=.38, el=.2, dist=40, lastUser=-1e9; const t0=performance.now();
-  const target=new THREE.Vector3(0,topY/2-1,0);
+  let az=.38, el=.34, dist=40, lastUser=-1e9; const t0=performance.now();
+  const target=new THREE.Vector3(0,topY*.28,0);
   function fit(){
     const w=box.clientWidth,h=box.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; box.classList.toggle("narrow",w<560);
     const vf=THREE.MathUtils.degToRad(cam.fov)/2, hf=Math.atan(Math.tan(vf)*cam.aspect);
-    dist=Math.max((topY+1.5)/2/Math.tan(vf),(PW+2)/2/Math.tan(hf))*1.0;
+    dist=Math.max((topY+1.5)/2/Math.tan(vf),(PW+4)/2/Math.tan(hf))*1.0;
     cam.updateProjectionMatrix();
   }
   fit(); new ResizeObserver(fit).observe(box);
