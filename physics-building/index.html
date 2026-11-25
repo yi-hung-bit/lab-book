@@ -1042,7 +1042,9 @@ function init3D(){
   const BZ=-D/2-2.6, SR=12.4, IW=1.7;
   /* 實驗大樓與二階資料庫之間的東西向道路（東側道路接到外環道） */
   const EWZ=5.6;
-  const inner=[[(SR+RX)/2,EWZ,RX-SR,IW],[0,BZ,2*RX,IW],[-SR,(BZ+RZ1)/2,IW,RZ1-BZ],[SR,(BZ+RZ1)/2,IW,RZ1-BZ],[0,(BZ+D/2+1.8)/2,IW,D/2+1.8-BZ]];
+  /* 藏經閣、二階資料庫門前的東西向道路（側路接到外環道） */
+  const FZ=16.4;
+  const inner=[[-(SR+RX)/2,FZ,RX-SR,IW],[(SR+RX)/2,FZ,RX-SR,IW],[(SR+RX)/2,EWZ,RX-SR,IW],[0,BZ,2*RX,IW],[-SR,(BZ+RZ1)/2,IW,RZ1-BZ],[SR,(BZ+RZ1)/2,IW,RZ1-BZ],[0,(BZ+D/2+1.8)/2,IW,D/2+1.8-BZ]];
   [[0,RZ0,2*RX+RW,RW],[0,RZ1,2*RX+RW,RW],[-RX,(RZ0+RZ1)/2,RW,RZ1-RZ0],[RX,(RZ0+RZ1)/2,RW,RZ1-RZ0],...inner].forEach(([x,z,w,d])=>{
     scene.add(mesh(B(w,.05,d),roadM,x,.025,z,false,true));
     const along=w>d, L=along?w:d;
@@ -1059,6 +1061,7 @@ function init3D(){
   for(let x=-RX+5;x<=RX-5;x+=7.5){lamp(x,RZ1-RW/2-1.1); lamp(x,RZ0+RW/2+1.1);}
   [-25,-19,-7,7,19,25,31,-31].forEach(x=>lamp(x,BZ-IW/2-.4));
   [16,21.5,27].forEach(x=>lamp(x,EWZ+IW/2+.4));
+  [16,22.5,29,35.5].forEach(x=>{lamp(-x,FZ+IW/2+.4);lamp(x,FZ+IW/2+.4);});
   [-.4,9,13.5,18].forEach(z=>{lamp(-SR-IW/2-.4,z);lamp(SR+IW/2+.4,z);});
   for(let z=RZ0+6;z<=RZ1-6;z+=7.5){lamp(-RX+RW/2+1.1,z);lamp(RX-RW/2-1.1,z);}
   [D/2+4,D/2+7.5].forEach(z=>{lamp(-2.2,z);lamp(2.2,z);});
@@ -1098,7 +1101,7 @@ function init3D(){
   });
 
   /* ===== 科技元素：太陽能發電場、電動車充電站、B 棟屋頂太陽能、自駕接駁車、無人機 ===== */
-  const SF={x0:-34,x1:-23.5,z0:-22,z1:-15}, EV={cx:29,cz:14.5,w:13,d:7};
+  const SF={x0:-34,x1:-23.5,z0:-22,z1:-15}, EV={cx:29,cz:11.2,w:13,d:7};
   /* 太陽能發電場（左後方新腹地）：一排排傾斜的光電板 */
   scene.add(mesh(B(SF.x1-SF.x0+1.4,.04,SF.z1-SF.z0+1.4),M.pave,(SF.x0+SF.x1)/2,.02,(SF.z0+SF.z1)/2,false,true));
   for(let z=SF.z0+.6;z<=SF.z1-.4;z+=1.7){
@@ -1179,7 +1182,7 @@ function init3D(){
     ...[-32,-26,-4,6,26,33].flatMap((x,i)=>[[x+(i%2)*1.5,RZ0+3.6],[x-(i%2),RZ1-3.8]]),
     ...[-14,-6,2,10,18].flatMap((z,i)=>[[-RX+3.8,z+(i%2)],[RX-3.8,z-(i%2)*1.2],[-33,z+3],[33.5,z-2.5]])];
   const inR=(x,z,x0,x1,z0,z1)=>x>x0&&x<x1&&z>z0&&z<z1;
-  TREES.filter(([x,z])=>!inR(x,z,SF.x0-1.5,SF.x1+2.5,SF.z0-1.5,SF.z1+2)&&!inR(x,z,EV.cx-EV.w/2-1.5,EV.cx+EV.w/2+1.5,EV.cz-EV.d/2-1.5,EV.cz+EV.d/2+1.5)).forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
+  TREES.filter(([x,z])=>!(Math.abs(z-FZ)<1.6&&Math.abs(x)>SR-1)&&!inR(x,z,SF.x0-1.5,SF.x1+2.5,SF.z0-1.5,SF.z1+2)&&!inR(x,z,EV.cx-EV.w/2-1.5,EV.cx+EV.w/2+1.5,EV.cz-EV.d/2-1.5,EV.cz+EV.d/2+1.5)).forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.65*s,0),M.leaf,x+.3*s,2.1*s,z-.1));});
