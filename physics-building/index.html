@@ -691,7 +691,7 @@ function init3D(){
   const mesh=(g,m,x,y,z,cast=true,recv=true)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=recv;return o;};
   const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
 
-  const H=1.08, BASE=1.4, W=6.4, D=4.8, SX=-6.4, TX=6.4;
+  const H=1.08, BASE=1.4, W=6.4, D=4.8, SX=-8.6, TX=8.6;
   const floorObjs={}, pickables=[];
 
   /* ground */
@@ -800,7 +800,7 @@ function init3D(){
   [bcx-bl/4,bcx+bl/4].forEach(px=>scene.add(mesh(new THREE.CylinderGeometry(.12,.12,by,10),M.trim,px,by/2,.4)));
 
   /* 競賽大樓 B 棟：A 棟正後方（隔著後方道路），3F、9F 以南北向空橋相連 */
-  const KX=TX+1.6, KZ=-11.2;
+  const KX=TX+1.6, KZ=-14;
   scene.add(mesh(B(W+2,.06,D+2),M.pave,KX,.03,KZ,false,true));
   {const g0=scene.children.length; lobby(KX,M.wallT); scene.children.slice(g0).forEach(o=>o.position.z+=KZ);}
   KB.forEach((f,i)=>{const o=buildFloor("k"+f.id,f,"t",KX,BASE+i*H,W,D,H,4); o.bld="k"; o.z0=KZ; o.g.position.z=KZ;});
@@ -815,7 +815,7 @@ function init3D(){
     g.add(mesh(B(l-.4,.03,.45),bridgeLit,0,H*.8,0,false,false));
   });
   {const cx=(Math.max(TX,KX)-W/2+Math.min(TX,KX)+W/2)/2, ph=BASE+(Number(KB_BRIDGES[0])-1)*H;
-   [-3.4,-7.4].forEach(pz=>scene.add(mesh(new THREE.CylinderGeometry(.12,.12,ph,10),M.trim,cx,ph/2,pz)));}
+   [-3.4,-7.2,-10.6].forEach(pz=>scene.add(mesh(new THREE.CylinderGeometry(.12,.12,ph,10),M.trim,cx,ph/2,pz)));}
 
   /* 院區裡四處走動的 12 個人（11 男 1 女） */
   const lin=h=>new THREE.Color(h).convertSRGBToLinear();
@@ -856,20 +856,20 @@ function init3D(){
   ];
   /* 可走的地面：大樓前廣場、大樓後方、兩棟之間的通道 */
   const ZONES={
-    front:{x0:-9.5,x1:9.5,z0:D/2+1.6,z1:D/2+7.6},
-    back:{x0:-10,x1:10,z0:-D/2-6,z1:-D/2-1.6},
+    front:{x0:-12,x1:12,z0:D/2+1.6,z1:D/2+7.6},
+    back:{x0:-12,x1:12,z0:-D/2-6,z1:-D/2-1.6},
     gap:{x0:bx0+.8,x1:bx1-.8,z0:-D/2,z1:D/2+1}
   };
   const rnd=(a,b)=>a+Math.random()*(b-a);
   const zoneOf=p=>p.z>D/2+1.2?"front":p.z<-D/2-1.2?"back":"gap";
   const randIn=k=>{const z=ZONES[k];return new THREE.Vector3(rnd(z.x0,z.x1),0,rnd(z.z0,z.z1));};
   /* 園區步道網：沿著外環道、後方道路、兩側道路走到藏經閣、二階資料庫、休閒中心、停車場、入口 */
-  const wRX=PW/2-1.9, wZ0=PZ-PD/2+1.9, wZ1=PZ+PD/2-1.9, wBZ=-D/2-2.6, wSR=12.4;
+  const wRX=PW/2-1.9, wZ0=PZ-PD/2+1.9, wZ1=PZ+PD/2-1.9, wBZ=-D/2-2.6, wSR=18;
   const NODES={
-    p0:[0,D/2+1.4], pL:[-8,D/2+1.4], pR:[8,D/2+1.4], fL:[-8,wZ1], fR:[8,wZ1], gb:[0,wBZ],
-    bL:[-wSR,wBZ], bR:[wSR,wBZ], bLL:[-wRX,wBZ], bRR:[wRX,wBZ], cp:[-16.4,wBZ], gy:[18.7,wBZ],
-    cpD:[-16.4,-6.4], gyD:[18.7,-6.9], lbR:[wSR,2.8], lab:[18.8,2.8],
-    sL:[-wSR,15.4], sR:[wSR,15.2], lib:[-17.6,15.4], db:[17.6,15.2], eR:[wSR,5.6], eRR:[wRX,5.6], eM:[17.6,5.6],
+    p0:[0,D/2+1.4], pL:[-10,D/2+1.4], pR:[10,D/2+1.4], fL:[-10,wZ1], fR:[10,wZ1], gb:[0,wBZ],
+    bL:[-wSR,wBZ], bR:[wSR,wBZ], bLL:[-wRX,wBZ], bRR:[wRX,wBZ], cp:[-27,wBZ], gy:[28,wBZ],
+    cpD:[-27,-7.6], gyD:[28,-11.6], lbR:[wSR,3], lab:[28,3],
+    sL:[-wSR,16.6], sR:[wSR,16.3], lib:[-27,16.6], db:[27,16.3], eR:[wSR,5.6], eRR:[wRX,5.6], eM:[27,5.6],
     rL:[-wSR,wZ1], rR:[wSR,wZ1], cLF:[-wRX,wZ1], cRF:[wRX,wZ1], cLB:[-wRX,wZ0], cRB:[wRX,wZ0], mB:[0,wZ0]
   };
   const EDGES=[["p0","pL"],["p0","pR"],["pL","fL"],["pR","fR"],["p0","gb"],
@@ -927,7 +927,7 @@ function init3D(){
 
   /* trees */
   /* 休閒中心（體育館）：在兩棟大樓後方，圓弧屋頂 */
-  const GX=18.7, GZ=-10.6, GR=0, GW=8.4, GD=5.4, GH=2.4;
+  const GX=28, GZ=-15, GR=0, GW=8.4, GD=5.4, GH=2.4;
   const gymWall=new THREE.MeshStandardMaterial({roughness:.8}), gymRoof=new THREE.MeshStandardMaterial({roughness:.55,metalness:.25,side:THREE.DoubleSide}), gymAcc=new THREE.MeshStandardMaterial({roughness:.5});
   const gym=new THREE.Group(); gym.position.set(GX,0,GZ); gym.rotation.y=GR; scene.add(gym);
   gym.add(mesh(B(GW+2,.06,GD+2.6),M.pave,0,.03,.9,false,true));
@@ -952,7 +952,7 @@ function init3D(){
     const rim=mesh(new THREE.TorusGeometry(.18,.025,6,16),gymAcc,hx-sx*.28,1.55,GD/2+1.2,false,false); rim.rotation.x=Math.PI/2; gym.add(rim);});
 
   /* 物理藏經閣：模擬大樓左側的兩層樓閣，重簷屋頂 */
-  const LX=-17.6, LZ=11.5, LR=0;
+  const LX=-27, LZ=13, LR=0;
   const libWall=new THREE.MeshStandardMaterial({roughness:.85}), libRoof=new THREE.MeshStandardMaterial({roughness:.6,flatShading:true}), libRed=new THREE.MeshStandardMaterial({roughness:.5}), libStone=new THREE.MeshStandardMaterial({roughness:.95});
   const lib=new THREE.Group(); lib.position.set(LX,0,LZ); lib.rotation.y=LR; scene.add(lib);
   const LW=6.4, LD=4.6;
@@ -975,7 +975,7 @@ function init3D(){
   [lBase,lBody1,lBody2,lRoof1,lRoof2,lDoor].forEach(o=>{o.userData.key="lib";pickables.push(o);});
 
   /* 二階資料庫：模擬大樓的對面（右前方），像資料中心的方塊大樓 */
-  const DX=17.6, DZ=11.5, DR=0, DW=5.6, DD=4.2, DH=3.6;
+  const DX=27, DZ=13, DR=0, DW=5.6, DD=4.2, DH=3.6;
   const dbWall=new THREE.MeshStandardMaterial({roughness:.75}), dbAcc=new THREE.MeshStandardMaterial({roughness:.45}), dbGlass=new THREE.MeshStandardMaterial({roughness:.2,metalness:.5});
   const dbLit=new THREE.MeshStandardMaterial({color:0xd8f4ff,emissive:new THREE.Color(0x7fe0ff).convertSRGBToLinear(),emissiveIntensity:0});
   const db=new THREE.Group(); db.position.set(DX,0,DZ); db.rotation.y=DR; scene.add(db);
@@ -996,7 +996,7 @@ function init3D(){
   [dPlinth,dBody,dFace,dRoof].forEach(o=>{o.userData.key="db";pickables.push(o);});
 
   /* 實驗大樓：競賽大樓右側（東側道路外），四層實驗室，鋸齒狀天窗屋頂＋排氣管 */
-  const EX=18.8, EZ=-.4, EW=6.2, ED=4, EH=4.4;
+  const EX=28, EZ=-.6, EW=6.2, ED=4, EH=4.4;
   const labWall=new THREE.MeshStandardMaterial({roughness:.8}), labAcc=new THREE.MeshStandardMaterial({roughness:.45}), labGlass=new THREE.MeshStandardMaterial({roughness:.2,metalness:.5});
   const labLit=new THREE.MeshStandardMaterial({color:0xf3ffe0,emissive:new THREE.Color(0xd8ff9a).convertSRGBToLinear(),emissiveIntensity:0});
   const lab=new THREE.Group(); lab.position.set(EX,0,EZ); scene.add(lab);
@@ -1039,7 +1039,7 @@ function init3D(){
   const RX=PW/2-1.9, RZ0=PZ-PD/2+1.9, RZ1=PZ+PD/2-1.9, RW=2;
   /* 外環道（含白色虛線） */
   /* 園區內道路：大樓後方的東西向道路、兩側南北向道路、穿過空橋下的中央連絡道 */
-  const BZ=-D/2-2.6, SR=12.4, IW=1.7;
+  const BZ=-D/2-2.6, SR=18, IW=1.7;
   /* 實驗大樓與二階資料庫之間的東西向道路（東側道路接到外環道） */
   const EWZ=5.6;
   const inner=[[(SR+RX)/2,EWZ,RX-SR,IW],[0,BZ,2*RX,IW],[-SR,(BZ+RZ1)/2,IW,RZ1-BZ],[SR,(BZ+RZ1)/2,IW,RZ1-BZ],[0,(BZ+D/2+1.8)/2,IW,D/2+1.8-BZ]];
@@ -1058,7 +1058,7 @@ function init3D(){
   /* 外環道路燈 */
   for(let x=-RX+5;x<=RX-5;x+=7.5){lamp(x,RZ1-RW/2-1.1); lamp(x,RZ0+RW/2+1.1);}
   [-25,-19,-7,7,19,25,31,-31].forEach(x=>lamp(x,BZ-IW/2-.4));
-  [16,21.5,27].forEach(x=>lamp(x,EWZ+IW/2+.4));
+  [22,27,33,38].forEach(x=>lamp(x,EWZ+IW/2+.4));
   [-.4,9,13.5,18].forEach(z=>{lamp(-SR-IW/2-.4,z);lamp(SR+IW/2+.4,z);});
   for(let z=RZ0+6;z<=RZ1-6;z+=7.5){lamp(-RX+RW/2+1.1,z);lamp(RX-RW/2-1.1,z);}
   [D/2+4,D/2+7.5].forEach(z=>{lamp(-2.2,z);lamp(2.2,z);});
@@ -1080,7 +1080,7 @@ function init3D(){
   scene.add(mesh(B(4.2,1.1,.3),curbM,-5.6,.55,RZ1-2.2));
   scene.add(mesh(new THREE.PlaneGeometry(4,1),new THREE.MeshBasicMaterial({map:parkSign,transparent:true}),-5.6,.6,RZ1-2.04,false,false));
   /* 太陽能停車場（左後方） */
-  const PKX=-16.4, PKZ=-9.6;
+  const PKX=-27, PKZ=-12;
   scene.add(mesh(B(10,.05,6.4),roadM,PKX,.03,PKZ,false,true));
   for(let i=0;i<6;i++) scene.add(mesh(B(.08,.02,2.2),lineM,PKX-4+i*1.6,.06,PKZ-1.6,false,false));
   for(let i=0;i<6;i++) scene.add(mesh(B(.08,.02,2.2),lineM,PKX-4+i*1.6,.06,PKZ+1.6,false,false));
@@ -1097,6 +1097,69 @@ function init3D(){
     [[-.5,.36],[.5,.36],[-.5,-.36],[.5,-.36]].forEach(([wx,wz])=>{const w=mesh(new THREE.CylinderGeometry(.14,.14,.1,10),mat("#1b1b1b"),wx,.14,wz);w.rotation.x=Math.PI/2;g.add(w);});
   });
 
+  /* ===== 科技元素：太陽能發電場、電動車充電站、B 棟屋頂太陽能、自駕接駁車、無人機 ===== */
+  const SF={x0:-36,x1:-24,z0:-25,z1:-18.6}, EV={cx:29,cz:22,w:13,d:7};
+  /* 太陽能發電場（左後方新腹地）：一排排傾斜的光電板 */
+  scene.add(mesh(B(SF.x1-SF.x0+1.4,.04,SF.z1-SF.z0+1.4),M.pave,(SF.x0+SF.x1)/2,.02,(SF.z0+SF.z1)/2,false,true));
+  for(let z=SF.z0+.6;z<=SF.z1-.4;z+=1.7){
+    const pnl=mesh(B(SF.x1-SF.x0,.06,1.15),solarM,(SF.x0+SF.x1)/2,.75,z); pnl.rotation.x=-.5; scene.add(pnl);
+    for(let k=1;k<10;k++) pnl.add(mesh(B(.03,.08,1.1),M.trim,-(SF.x1-SF.x0)/2+k*(SF.x1-SF.x0)/10,0,0,false,false));
+    for(let x=SF.x0+.5;x<SF.x1;x+=2.6){scene.add(mesh(B(.06,.6,.06),M.trim,x,.3,z-.3)); scene.add(mesh(B(.06,.95,.06),M.trim,x,.47,z+.3));}
+  }
+  scene.add(mesh(B(1.2,1,.8),M.wallT,SF.x1+1.2,.5,SF.z0+.4));   // 變流器箱
+  const sfSign=signTexture("太 陽 能 發 電 場","S O L A R  F A R M","--plate"); signs.push(sfSign);
+  scene.add(mesh(new THREE.PlaneGeometry(3,.75),new THREE.MeshBasicMaterial({map:sfSign,transparent:true}),(SF.x0+SF.x1)/2,.75,SF.z1+1.1,false,false));
+
+  /* 電動車充電站（右前方新腹地）：太陽能頂棚＋充電樁（螢幕會發綠光）＋電動車 */
+  const evLit=new THREE.MeshStandardMaterial({color:0x9dffb8,emissive:new THREE.Color(0x35e07a).convertSRGBToLinear(),emissiveIntensity:.9});
+  scene.add(mesh(B(EV.w,.05,EV.d),roadM,EV.cx,.03,EV.cz,false,true));
+  for(let i=0;i<7;i++) scene.add(mesh(B(.08,.02,2.4),lineM,EV.cx-EV.w/2+1+i*1.8,.06,EV.cz-1.9,false,false));
+  const evRoof=mesh(B(EV.w-.6,.1,2.9),solarM,EV.cx,2.05,EV.cz-2.1); evRoof.rotation.x=.12; scene.add(evRoof);
+  for(let k=1;k<6;k++) evRoof.add(mesh(B(.03,.12,2.85),M.trim,-(EV.w-.6)/2+k*(EV.w-.6)/6,0,0,false,false));
+  [-1,1].forEach(sd=>scene.add(mesh(new THREE.CylinderGeometry(.07,.07,2,8),M.trim,EV.cx+sd*(EV.w/2-.8),1,EV.cz-1)));
+  const evC=["#f4f4f0","#2b64b8","#c9ccd1","#167a82","#f4f4f0","#b03a4a"];
+  for(let i=0;i<6;i++){const x=EV.cx-EV.w/2+1.9+i*1.8;
+    const post=mesh(B(.22,.9,.18),M.wallT,x,.45,EV.cz-3.2); scene.add(post);
+    scene.add(mesh(B(.16,.22,.02),evLit,x,.7,EV.cz-3.1,false,false));
+    if(i===4) continue;   // 留一格空位
+    const g=new THREE.Group(); g.position.set(x,0,EV.cz-1.9); g.rotation.y=-Math.PI/2; scene.add(g);
+    g.add(mesh(B(1.55,.3,.72),mat(evC[i]),0,.28,0));
+    const cab=mesh(B(.95,.24,.64),M.glass,-.05,.53,0); g.add(cab);
+    g.add(mesh(B(.04,.04,.6),evLit,.78,.3,0,false,false));          // 前燈條
+    [[-.52,.37],[.52,.37],[-.52,-.37],[.52,-.37]].forEach(([wx,wz])=>{const w=mesh(new THREE.CylinderGeometry(.14,.14,.1,12),mat("#1b1b1b"),wx,.14,wz);w.rotation.x=Math.PI/2;g.add(w);});
+    scene.add(mesh(B(.03,.03,1.2),M.trim,x,.5,EV.cz-2.6,false,false));   // 充電線
+  }
+  const evSign=signTexture("電 動 車 充 電 站","E V  C H A R G I N G","--plate"); signs.push(evSign);
+  scene.add(mesh(new THREE.PlaneGeometry(3,.75),new THREE.MeshBasicMaterial({map:evSign,transparent:true}),EV.cx,.75,EV.cz+EV.d/2+.2,false,false));
+
+  /* 競賽 B 棟屋頂太陽能板 */
+  for(let r=0;r<3;r++){const pnl=mesh(B(W-1.6,.05,.9),solarM,KX-.4,kRoof+.5,KZ-1.4+r*1.15); pnl.rotation.x=-.45; scene.add(pnl);}
+
+  /* 自駕電動接駁車：沿外環道（地面）繞園區 */
+  const ringPts=[[-RX,RZ1],[RX,RZ1],[RX,RZ0],[-RX,RZ0]], ringL=2*(2*RX)+2*(RZ1-RZ0);
+  const ringAt=s=>{s=((s%ringL)+ringL)%ringL; for(let i=0;i<4;i++){const [x0,z0]=ringPts[i],[x1,z1]=ringPts[(i+1)%4], l=Math.hypot(x1-x0,z1-z0); if(s<=l) return {x:x0+(x1-x0)*s/l,z:z0+(z1-z0)*s/l,dx:(x1-x0)/l,dz:(z1-z0)/l}; s-=l;} return {x:-RX,z:RZ1,dx:1,dz:0};};
+  const shuttles=[0,1,2].map(i=>{const g=new THREE.Group(); scene.add(g);
+    g.add(mesh(B(1.9,.62,.82),mat(i===1?"#2b64b8":"#f4f4f0"),0,.45,0));
+    g.add(mesh(B(1.7,.26,.84),M.glass,0,.58,0,false,false));
+    g.add(mesh(B(1.92,.05,.84),evLit,0,.2,0,false,false));
+    [[-.6,.42],[.6,.42],[-.6,-.42],[.6,-.42]].forEach(([wx,wz])=>{const w=mesh(new THREE.CylinderGeometry(.15,.15,.1,12),mat("#1b1b1b"),wx,.15,wz);w.rotation.x=Math.PI/2;g.add(w);});
+    return {g,s:ringL*i/3,dir:i===1?-1:1,v:2.6+i*.3};});
+  const placeShuttle=c=>{const q=ringAt(c.s), off=c.dir*.45; c.g.position.set(q.x-q.dz*off,.05,q.z+q.dx*off); c.g.rotation.y=Math.atan2(-q.dz*c.dir,q.dx*c.dir);};
+  shuttles.forEach(placeShuttle);
+  tick.push(dt=>shuttles.forEach(c=>{c.s+=c.dir*c.v*dt; placeShuttle(c);}));
+
+  /* 無人機：在園區上空巡航，螺旋槳會轉、底部燈會閃 */
+  const droneLit=new THREE.MeshStandardMaterial({color:0xff6b6b,emissive:new THREE.Color(0xff3b3b).convertSRGBToLinear(),emissiveIntensity:1});
+  const drones=[[0,2,14,9,.22],[-14,-6,8,11,-.3],[18,4,10,7.5,.27]].map(([cx,cz,r,h,w],i)=>{const g=new THREE.Group(); scene.add(g);
+    g.add(mesh(B(.36,.12,.36),mat("#2d2d30"),0,0,0,false,false));
+    const props=[];
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>{g.add(mesh(B(.36,.03,.04),mat("#2d2d30"),a*.17,.02,b*.17,false,false).rotateY(a*b*Math.PI/4));
+      const pr=mesh(B(.34,.01,.05),mat("#c9ccd1"),a*.3,.07,b*.3,false,false); g.add(pr); props.push(pr);});
+    g.add(mesh(B(.08,.05,.08),droneLit,0,-.08,0,false,false));
+    return {g,props,cx,cz,r,h,w,ph:i*2.1};});
+  tick.push((dt,t)=>drones.forEach(d=>{const a=d.ph+t/1000*d.w; d.g.position.set(d.cx+Math.cos(a)*d.r,d.h+Math.sin(t/700+d.ph)*.3,d.cz+Math.sin(a)*d.r);
+    d.g.rotation.y=-a-(d.w>0?0:Math.PI); d.props.forEach(p=>p.rotation.y+=dt*40); droneLit.emissiveIntensity=(Math.floor(t/600)%2)?1.4:.2;}));
+
   /* 風力發電機 */
   function turbine(x,z,h,ph){
     scene.add(mesh(new THREE.CylinderGeometry(.08,.16,h,10),curbM,x,h/2,z));
@@ -1106,7 +1169,7 @@ function init3D(){
     for(let k=0;k<3;k++){const bl=new THREE.Group(); bl.rotation.z=k*Math.PI*2/3; bl.add(mesh(B(.12,1.9,.04),curbM,0,.95,0)); hub.add(bl);}
     tick.push((dt)=>{hub.rotation.z+=dt*(.9+ph*.2);});
   }
-  turbine(-21.6,-2.2,6.5,0); turbine(-21.6,2.4,5.6,1);
+  turbine(-31,-2.2,6.5,0); turbine(-31,2.4,5.6,1);
   /* 中央大道兩側植栽 */
   const TREES=[[-2.4,D/2+5.6],[2.4,D/2+5.6],[-2.4,D/2+9],[2.4,D/2+9],
     [-26,RZ1-2.6],[-9.6,RZ1-2.6],[9.6,RZ1-2.6],[26,RZ1-2.6],
@@ -1115,7 +1178,11 @@ function init3D(){
     /* 拓寬後的新腹地：外圈綠帶 */
     ...[-32,-26,-4,6,26,33].flatMap((x,i)=>[[x+(i%2)*1.5,RZ0+3.6],[x-(i%2),RZ1-3.8]]),
     ...[-14,-6,2,10,18].flatMap((z,i)=>[[-RX+3.8,z+(i%2)],[RX-3.8,z-(i%2)*1.2],[-33,z+3],[33.5,z-2.5]])];
-  TREES.forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
+  const inR=(x,z,x0,x1,z0,z1)=>x>x0&&x<x1&&z>z0&&z<z1;
+  const BLOCK=[[SF.x0-1.5,SF.x1+2.5,SF.z0-1.5,SF.z1+2],[EV.cx-EV.w/2-1.5,EV.cx+EV.w/2+1.5,EV.cz-EV.d/2-1.5,EV.cz+EV.d/2+1.5],
+    [LX-5,LX+5,LZ-4.5,LZ+4.5],[DX-4.5,DX+4.5,DZ-4,DZ+4],[EX-5,EX+5,EZ-3.5,EZ+4.5],[GX-6,GX+6,GZ-4.5,GZ+4.5],[PKX-6,PKX+6,PKZ-4.2,PKZ+4.2],
+    [KX-4.6,KX+4.6,KZ-3.6,KZ+3.6],[SX-4.4,TX+4.4,-3.8,3.8],[-33,-29,-4.5,4.5]];
+  TREES.filter(([x,z])=>!BLOCK.some(r=>inR(x,z,...r))).forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.65*s,0),M.leaf,x+.3*s,2.1*s,z-.1));});
