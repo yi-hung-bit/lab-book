@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>能量轉換與發電效率</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cU:#c084fc;--cK:#43d6ff;--cR:#5eead4;--cE:#ffd166;--cQ:#ff7a5c;--cC:#a3e635;--cT:#fb923c;--pos:#84cc16;--neg:#ff5c8a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:78ch;margin-top:6px;font-size:15px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;position:relative}
+canvas{display:block;width:100%;touch-action:manipulation}
+#scene{height:320px}
+@media(max-width:560px){#scene{height:250px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+@media(max-width:420px){.read{grid-template-columns:repeat(2,1fr)}}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;color:var(--phos);word-break:break-all}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:4px;margin:4px 14px 6px}
+.flow .st{flex:1 1 90px;min-width:0;border:1px solid var(--line);border-left:4px solid var(--c);border-radius:9px;padding:6px 8px;background:#0a0f1a}
+.flow .st small{display:block;font-size:11.5px;color:var(--muted);line-height:1.35}
+.flow .st b{font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--c);word-break:break-all}
+.flow .ar{align-self:center;color:var(--dim);font-size:14px}
+.stack{margin:6px 14px 4px;height:26px;border-radius:8px;overflow:hidden;display:flex;border:1px solid var(--line);background:#0a0f1a}
+.stack i{display:block;height:100%;transition:width .3s}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:4px 16px 12px}
+.legend i{display:inline-block;width:12px;height:10px;border-radius:3px;vertical-align:middle;margin-right:5px}
+.state{margin-top:12px;padding:10px 14px;border-radius:11px;font-weight:700;font-size:14.5px;text-align:center;border:1px solid var(--line)}
+.state.p{background:rgba(132,204,22,.1);color:var(--pos);border-color:rgba(132,204,22,.4)}
+.state.n{background:rgba(255,92,138,.1);color:var(--neg);border-color:rgba(255,92,138,.4)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.qq{padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#0a0f1a;margin-top:8px}
+.qq p{font-size:14px}
+.qq .seg{margin-top:6px}
+.qq .ans{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.8}
+.qq .ans b{color:var(--phos)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips button{font-size:12.5px;padding:5px 9px}
+.sol{font-size:13.5px;color:var(--muted);line-height:1.9}
+.sol b{color:var(--phos);font-family:"JetBrains Mono",monospace;font-weight:500}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">5-3 · Energy Conversion &amp; Power Plants</div>
+  <h1>能量轉換與發電效率</h1>
+  <p class="lede">發電廠不會「製造」能量，只是把一種形式的能量<b style="color:var(--acc)">轉換</b>成電能：水力發電把水的重力位能變成動能、再變成渦輪的轉動動能與電能；火力發電把燃料的化學能變成高溫蒸氣的熱能，再推動汽輪機發電。每一步都有一部分能量變成廢熱，<b style="color:var(--acc)">能量的總和不變（能量守恆）</b>，但能用的電能只占一部分，這個比例就是效率。</p>
+  <div class="tabs" role="group" aria-label="模式">
+    <button type="button" data-mode="A" aria-pressed="true">① 水力發電（範例 5-5）</button>
+    <button type="button" data-mode="B" aria-pressed="false">② 火力發電與廢熱</button>
+    <button type="button" data-mode="C" aria-pressed="false">③ 用電度數與延長線安全負載</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t" id="sTitle"></span><span class="n" id="sNote"></span></div>
+      <div class="box"><canvas id="scene" aria-label="發電廠示意動畫"></canvas></div>
+      <div class="head" style="padding-top:2px"><span class="t" id="fTitle">每秒的能量流向</span><span class="n" id="fNote"></span></div>
+      <div class="flow" id="flow"></div>
+      <div class="stack" id="stack" aria-hidden="true"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="card">
+      <!-- 模式 A 水力 -->
+      <div id="ctlA">
+        <div class="head"><span class="t">水力發電廠</span><span class="n">水的密度 1000 kg/m³</span></div>
+        <div class="pad" style="padding-top:2px">
+          <div class="chips"><button type="button" id="aEx">載入範例 5-5 烏山頭</button><button type="button" id="aBig">大型水庫（100 m、200 m³/s）</button></div>
+          <div class="ctl"><div class="r"><label for="aH">水位落差 h</label><span id="oaH"></span></div><input type="range" id="aH" min="5" max="200" step="1" value="24"></div>
+          <div class="ctl"><div class="r"><label for="aQ">流量 Q（每秒流下的水）</label><span id="oaQ"></span></div><input type="range" id="aQ" min="1" max="300" step="1" value="41"></div>
+          <div class="ctl"><div class="r"><label for="aE">力學能 → 電能 的效率 η</label><span id="oaE"></span></div><input type="range" id="aE" min="40" max="100" step="1" value="90"></div>
+          <div class="seg" style="margin-top:10px" role="group" aria-label="重力加速度"><button type="button" data-g="9.8" aria-pressed="false">g = 9.8 m/s²</button><button type="button" data-g="10" aria-pressed="true">g = 10 m/s²</button></div>
+          <div class="read">
+            <div><small>每秒流下的水質量</small><b id="rM"></b></div>
+            <div><small>每秒減少的重力位能</small><b id="rU"></b></div>
+            <div><small>發電功率 P</small><b id="rP"></b></div>
+            <div><small>水落到底的速率 √(2gh)</small><b id="rV"></b></div>
+            <div><small>每小時發電</small><b id="rKWh"></b></div>
+            <div><small>約可供家庭數</small><b id="rHome"></b></div>
+          </div>
+          <div class="note" id="aSee"></div>
+        </div>
+      </div>
+      <!-- 模式 B 火力 -->
+      <div id="ctlB" hidden>
+        <div class="head"><span class="t">火力發電廠</span><span class="n">圖 5-13 的流程</span></div>
+        <div class="pad" style="padding-top:2px">
+          <div class="seg" role="group" aria-label="燃料"><button type="button" data-fuel="coal" aria-pressed="true">燃煤</button><button type="button" data-fuel="gas" aria-pressed="false">天然氣</button></div>
+          <div class="ctl"><div class="r"><label for="bR">每秒燃燒的燃料</label><span id="obR"></span></div><input type="range" id="bR" min="5" max="150" step="1" value="60"></div>
+          <div class="ctl"><div class="r"><label for="bB">鍋爐效率（燃料 → 蒸氣熱能）</label><span id="obB"></span></div><input type="range" id="bB" min="60" max="95" step="1" value="88"></div>
+          <div class="ctl"><div class="r"><label for="bT">汽輪機效率（熱能 → 轉動動能）</label><span id="obT"></span></div><input type="range" id="bT" min="20" max="60" step="1" value="45"></div>
+          <div class="ctl"><div class="r"><label for="bG">發電機效率（動能 → 電能）</label><span id="obG"></span></div><input type="range" id="bG" min="85" max="99" step="1" value="98"></div>
+          <div class="read">
+            <div><small>燃料每秒放出的化學能</small><b id="rIn"></b></div>
+            <div><small>發電功率</small><b id="rOut"></b></div>
+            <div><small>整體效率</small><b id="rEta"></b></div>
+            <div><small>冷凝器排到海水的廢熱</small><b id="rCond"></b></div>
+            <div><small>煙囪帶走的廢熱</small><b id="rStack"></b></div>
+            <div><small>發 1 度電要燒</small><b id="rPer"></b></div>
+          </div>
+          <div class="note" id="bSee"></div>
+        </div>
+      </div>
+      <!-- 模式 C 用電 -->
+      <div id="ctlC" hidden>
+        <div class="head"><span class="t">電器插上延長線</span><span class="n">點電器插上或拔掉</span></div>
+        <div class="pad" style="padding-top:2px">
+          <div class="chips" id="apps"></div>
+          <div class="chips"><button type="button" id="cEx">載入圖 5-22</button><button type="button" id="cClr">全部拔掉</button></div>
+          <div class="seg" style="margin-top:10px" role="group" aria-label="電壓"><button type="button" data-v="110" aria-pressed="true">110 V</button><button type="button" data-v="220" aria-pressed="false">220 V</button></div>
+          <div class="ctl"><div class="r"><label for="cL">延長線安全負載</label><span id="ocL"></span></div><input type="range" id="cL" min="7" max="15" step="1" value="12"></div>
+          <div class="ctl"><div class="r"><label for="cH">每天使用時間</label><span id="ocH"></span></div><input type="range" id="cH" min="0.5" max="12" step="0.5" value="1"></div>
+          <div class="ctl"><div class="r"><label for="cR">電價（可自行調整）</label><span id="ocR"></span></div><input type="range" id="cR" min="1.5" max="7" step="0.1" value="3"></div>
+          <div class="state" id="cState"></div>
+          <div class="read">
+            <div><small>總功率</small><b id="rTP"></b></div>
+            <div><small>總電流 I = P／V</small><b id="rTI"></b></div>
+            <div><small>每天用電</small><b id="rDay"></b></div>
+            <div><small>每天用電（焦耳）</small><b id="rJ"></b></div>
+            <div><small>每月（30 天）電費</small><b id="rFee"></b></div>
+            <div><small>插座安全負載</small><b>15 A</b></div>
+          </div>
+          <div class="note" id="cSee"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <div class="head"><span class="t">範例 5-5 烏山頭水力發電廠</span><span class="n">g = 10 m/s²</span></div>
+      <div class="pad sol" style="padding-top:2px">
+        <p>烏山頭水庫與送水口約 <b>24 m</b> 的水位落差，設計流量每秒 <b>41 m³</b>，水的力學能轉換成電能的效率 <b>90 %</b>，求發電功率。</p>
+        <p>① 1 m³ 的水質量 1000 kg，每秒流下 41 000 kg。</p>
+        <p>② 每秒減少的重力位能 U = mgh = 41 000 × 10 × 24 = 9.84 × 10⁶ J ≈ <b>9.8 × 10⁶ J</b>。</p>
+        <p>③ P = ΔW／Δt × 90 % = 9.8 × 10⁶ J／1 s × 90 % = <b>8.820 × 10⁶ W = 8820 kW</b>。</p>
+        <p style="color:var(--dim)">（不先取兩位有效數字直接乘是 8856 kW，和課本只差在中間的四捨五入。模擬右邊的讀數不做中間四捨五入。）</p>
+      </div>
+    </section>
+    <section class="card">
+      <div class="head"><span class="t">想一想</span><span class="n">先想，再按看答案</span></div>
+      <div class="pad" style="padding-top:2px" id="quiz"></div>
+    </section>
+  </div>
+
+  <footer>
+    <b>模擬說明：</b>水力發電以 P = η·ρQgh 計算（ρ = 1000 kg/m³），水落到底的速率用不計摩擦的 √(2gh) 估計；「約可供家庭數」假設每戶每月用電 300 度（平均約 0.42 kW），只是比較用的量級。火力發電的燃料熱值取約略值：煤約 2.5 × 10⁷ J/kg、天然氣約 5.0 × 10⁷ J/kg；整體效率 = 鍋爐效率 × 汽輪機效率 × 發電機效率，各段損失加上電能等於燃料放出的化學能（能量守恆）。延長線模式中 I = P／V，1 度 = 1 kW·h = 3.6 × 10⁶ J，電價可自行調整。來源：基礎物理 Ch05 5-3 能量守恆 p.152–157（圖 5-9、小百科、範例 5-5、圖 5-13）、5-4 p.166 圖 5-22 安全負載。
+  </footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const fmt=(n,d=1)=>{const r=+(+n).toFixed(d);return(Object.is(r,-0)?0:r).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});};
+const sci=(n,d=2)=>{if(n===0)return"0";const e=Math.floor(Math.log10(Math.abs(n)));const m=n/Math.pow(10,e);const sup=String(e).replace(/-/,"⁻").replace(/\d/g,c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[c]);return fmt(m,d)+" × 10"+sup;};
+const fW=w=>w>=1e9?fmt(w/1e9,2)+" GW":w>=1e6?fmt(w/1e6,2)+" MW":w>=1e3?fmt(w/1e3,1)+" kW":fmt(w,0)+" W";
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w,h};}
+const CV=$("#scene");
+const COL={U:"#c084fc",K:"#43d6ff",R:"#5eead4",E:"#ffd166",Q:"#ff7a5c",C:"#a3e635",T:"#fb923c"};
+let mode="A";
+
+/* ---------- 共用：能量流向 ---------- */
+function setFlow(steps,stack,legend,note){
+  $("#flow").innerHTML=steps.map((s,i)=>(i?`<span class="ar">→</span>`:"")+`<div class="st" style="--c:${s.c}"><small>${s.t}</small><b>${s.v}</b></div>`).join("");
+  const tot=stack.reduce((a,s)=>a+s.v,0)||1;
+  $("#stack").innerHTML=stack.map(s=>`<i style="width:${(s.v/tot*100).toFixed(2)}%;background:${s.c}" title="${s.t}"></i>`).join("");
+  $("#legend").innerHTML=stack.map(s=>`<span><i style="background:${s.c}"></i>${s.t} ${fmt(s.v/tot*100,1)}%</span>`).join("");
+  $("#fNote").textContent=note||"";
+}
+
+/* ================= 模式 A：水力 ================= */
+const A={h:24,Q:41,eta:.9,g:10};
+function calcA(){const m=1000*A.Q, U=m*A.g*A.h, P=U*A.eta; return {m,U,P,v:Math.sqrt(2*A.g*A.h)};}
+function updA(){
+  A.h=+$("#aH").value; A.Q=+$("#aQ").value; A.eta=+$("#aE").value/100;
+  $("#oaH").textContent=A.h+" m"; $("#oaQ").textContent=A.Q+" m³/s"; $("#oaE").textContent=Math.round(A.eta*100)+" %";
+  const r=calcA();
+  $("#rM").textContent=fmt(r.m,0)+" kg"; $("#rU").textContent=sci(r.U)+" J"; $("#rP").textContent=fmt(r.P/1000,0)+" kW";
+  $("#rV").textContent=fmt(r.v,1)+" m/s"; $("#rKWh").textContent=fmt(r.P/1000,0)+" 度";
+  $("#rHome").textContent=fmt(r.P/1000/(300/30/24),0)+" 戶";
+  setFlow([
+    {t:"水的重力位能（每秒）",v:sci(r.U)+" J",c:COL.U},
+    {t:"水流的動能",v:sci(r.U)+" J",c:COL.K},
+    {t:"渦輪機轉動動能",v:"葉片、轉軸",c:COL.R},
+    {t:"電能（每秒）",v:sci(r.P)+" J",c:COL.E}],
+    [{t:"電能",v:r.P,c:COL.E},{t:"損失（摩擦、亂流 → 熱能與聲音）",v:r.U-r.P,c:COL.Q}],
+    [],`P = η × mgh／Δt`);
+  const ex=A.h===24&&A.Q===41&&Math.round(A.eta*100)===90&&A.g===10;
+  $("#aSee").innerHTML=ex?`<b>這就是範例 5-5：</b>U = mgh = 41 000 × 10 × 24 = 9.84 × 10⁶ J，乘上 90 % 得 ${fW(r.P)}；課本先把 U 寫成 9.8 × 10⁶ J，所以答案是 8820 kW。`
+    :`<b>發電功率和落差、流量都成正比：</b>落差加倍或流量加倍，每秒的重力位能就加倍，發電功率也加倍；效率只決定其中有多少變成電能，剩下的變成熱能和聲音，總能量不會少。`;
+}
+$("#aEx").onclick=()=>{$("#aH").value=24;$("#aQ").value=41;$("#aE").value=90;setG(10);updA();};
+$("#aBig").onclick=()=>{$("#aH").value=100;$("#aQ").value=200;$("#aE").value=90;updA();};
+["#aH","#aQ","#aE"].forEach(s=>$(s).addEventListener("input",updA));
+function setG(v){A.g=v;$$("[data-g]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.g===v)));}
+$$("[data-g]").forEach(b=>b.onclick=()=>{setG(+b.dataset.g);updA();});
+
+const drops=[]; let turbA=0;
+function drawA(dt){
+  const {g,w,h}=fit(CV); g.clearRect(0,0,w,h);
+  const r=calcA();
+  // 天空與山
+  const sky=g.createLinearGradient(0,0,0,h); sky.addColorStop(0,"#0b1424"); sky.addColorStop(1,"#05070d"); g.fillStyle=sky; g.fillRect(0,0,w,h);
+  g.fillStyle="#13261c"; g.beginPath(); g.moveTo(0,h*.45); g.lineTo(w*.18,h*.2); g.lineTo(w*.34,h*.38); g.lineTo(w*.5,h*.16); g.lineTo(w*.7,h*.4); g.lineTo(w,h*.3); g.lineTo(w,h); g.lineTo(0,h); g.fill();
+  const base=h-34, dropPx=Math.min(base-40,30+Math.sqrt(A.h/200)*(base-70));
+  const top=base-dropPx, damX=w*.36;
+  // 水庫
+  g.fillStyle="#1d4f7a"; g.fillRect(0,top,damX,base-top+10);
+  g.fillStyle="rgba(140,200,255,.25)"; g.fillRect(0,top,damX,3);
+  // 下游河
+  g.fillStyle="#1d4f7a"; g.fillRect(w*.72,base-4,w*.28,38);
+  // 地面
+  g.fillStyle="#2a2f38"; g.fillRect(damX,base,w*.36,34);
+  // 壩體
+  g.fillStyle="#9aa3ad"; g.beginPath(); g.moveTo(damX-6,top-10); g.lineTo(damX+12,top-10); g.lineTo(damX+44,base); g.lineTo(damX-6,base); g.closePath(); g.fill();
+  // 引水管
+  const px0=damX-2, py0=top+(base-top)*.35, tx=w*.62, ty=base-20;
+  g.strokeStyle="#5b6b7d"; g.lineWidth=12; g.lineCap="round"; g.beginPath(); g.moveTo(px0,py0); g.lineTo(damX+40,py0+10); g.lineTo(tx-24,ty); g.stroke();
+  g.strokeStyle="#2c7fc0"; g.lineWidth=6; g.stroke();
+  // 水滴粒子
+  const L1=Math.hypot(damX+40-px0,10), L2=Math.hypot(tx-24-damX-40,ty-py0-10), Ltot=L1+L2;
+  const rate=Math.min(60,4+A.Q/5), sp=40+r.v*2.2;
+  if(Math.random()<rate*dt) drops.push({s:0});
+  g.fillStyle="#bfe6ff";
+  for(let i=drops.length-1;i>=0;i--){const d=drops[i]; d.s+=sp*dt*(0.4+0.6*d.s/Ltot+.2); if(d.s>Ltot){drops.splice(i,1);continue;}
+    let x,y; if(d.s<L1){x=px0+(damX+40-px0)*d.s/L1;y=py0+10*d.s/L1;} else {const f=(d.s-L1)/L2;x=damX+40+(tx-24-damX-40)*f;y=py0+10+(ty-py0-10)*f;}
+    g.beginPath(); g.arc(x,y,2,0,7); g.fill();}
+  // 發電廠房
+  g.fillStyle="#3a4352"; g.fillRect(tx-30,base-46,64,46); g.fillStyle="#fb923c"; g.fillRect(tx-22,base-62,48,16);
+  // 渦輪
+  turbA+=dt*Math.min(30,1+r.v*.5);
+  g.save(); g.translate(tx+2,ty); g.strokeStyle=COL.R; g.lineWidth=3;
+  for(let k=0;k<6;k++){g.rotate(Math.PI/3); g.beginPath(); g.moveTo(0,0); g.lineTo(13*Math.cos(turbA),13*Math.sin(turbA)); g.stroke();}
+  g.restore();
+  // 排水
+  g.strokeStyle="#2c7fc0"; g.lineWidth=6; g.beginPath(); g.moveTo(tx+30,ty+4); g.lineTo(w*.74,base+6); g.stroke();
+  // 電塔與燈泡
+  const twx=w*.86, twy=base-6;
+  g.strokeStyle="#8a94a6"; g.lineWidth=2; g.beginPath(); g.moveTo(twx-12,twy); g.lineTo(twx,twy-70); g.lineTo(twx+12,twy); g.moveTo(twx-18,twy-56); g.lineTo(twx+18,twy-56); g.stroke();
+  g.strokeStyle="rgba(255,209,102,.55)"; g.beginPath(); g.moveTo(tx+2,base-62); g.quadraticCurveTo((tx+twx)/2,base-40,twx-18,twy-56); g.stroke();
+  const nb=Math.max(1,Math.min(10,Math.round(Math.log10(r.P/1000+1)*2.2)));
+  for(let k=0;k<10;k++){const bx=w-14-(k%5)*14, by=16+Math.floor(k/5)*20; g.fillStyle=k<nb?"#ffd166":"#2a3242"; g.beginPath(); g.arc(bx,by,5,0,7); g.fill(); if(k<nb){g.fillStyle="rgba(255,209,102,.18)";g.beginPath();g.arc(bx,by,9,0,7);g.fill();}}
+  // 落差標示
+  g.strokeStyle="#c084fc"; g.setLineDash([4,4]); g.lineWidth=1.5; g.beginPath(); g.moveTo(14,top); g.lineTo(14,ty); g.stroke(); g.setLineDash([]);
+  g.beginPath(); g.moveTo(8,top); g.lineTo(damX-8,top); g.moveTo(8,ty); g.lineTo(tx-30,ty); g.strokeStyle="rgba(192,132,252,.4)"; g.stroke();
+  g.fillStyle="#c084fc"; g.font="600 13px 'JetBrains Mono',monospace"; g.fillText("h = "+A.h+" m",20,(top+ty)/2);
+  g.fillStyle="#8492aa"; g.font="12px 'Noto Sans TC',sans-serif"; g.fillText("水庫",10,top+18); g.fillText("渦輪機・發電機",Math.max(damX+46,tx-56),base-68);
+  g.fillStyle="#ffd166"; g.font="600 13px 'JetBrains Mono',monospace"; g.textAlign="right"; g.fillText(fW(r.P),w-10,62); g.textAlign="left";
+}
+
+/* ================= 模式 B：火力 ================= */
+const FUEL={coal:{n:"煤",H:2.5e7},gas:{n:"天然氣",H:5.0e7}};
+const B={fuel:"coal",r:60,eb:.88,et:.45,eg:.98};
+function calcB(){const Pin=B.r*FUEL[B.fuel].H, Pst=Pin*(1-B.eb), Ph=Pin*B.eb, Pcond=Ph*(1-B.et), Pk=Ph*B.et, Pgen=Pk*(1-B.eg), Pe=Pk*B.eg; return {Pin,Pst,Ph,Pcond,Pk,Pgen,Pe,eta:Pe/Pin};}
+function updB(){
+  B.r=+$("#bR").value; B.eb=+$("#bB").value/100; B.et=+$("#bT").value/100; B.eg=+$("#bG").value/100;
+  $("#obR").textContent=B.r+" kg/s"; $("#obB").textContent=Math.round(B.eb*100)+" %"; $("#obT").textContent=Math.round(B.et*100)+" %"; $("#obG").textContent=Math.round(B.eg*100)+" %";
+  const r=calcB();
+  $("#rIn").textContent=fW(r.Pin); $("#rOut").textContent=fW(r.Pe); $("#rEta").textContent=fmt(r.eta*100,1)+" %";
+  $("#rCond").textContent=fW(r.Pcond); $("#rStack").textContent=fW(r.Pst);
+  $("#rPer").textContent=fmt(3.6e6/(r.eta*FUEL[B.fuel].H),2)+" kg "+FUEL[B.fuel].n;
+  setFlow([
+    {t:FUEL[B.fuel].n+"的化學能",v:fW(r.Pin),c:COL.C},
+    {t:"高溫蒸氣的熱能",v:fW(r.Ph),c:COL.T},
+    {t:"汽輪機轉動動能",v:fW(r.Pk),c:COL.R},
+    {t:"電能",v:fW(r.Pe),c:COL.E}],
+    [{t:"電能",v:r.Pe,c:COL.E},{t:"冷凝器廢熱（海水）",v:r.Pcond,c:"#38bdf8"},{t:"煙囪廢熱",v:r.Pst,c:COL.Q},{t:"發電機損失",v:r.Pgen,c:"#f472b6"}],
+    [],`整體效率 ${fmt(r.eta*100,1)} %`);
+  $("#bSee").innerHTML=`<b>大部分的能量變成廢熱：</b>汽輪機只能把蒸氣熱能的一部分變成轉動動能，用過的低溫廢氣要在冷凝器裡被海水冷卻成水，再送回鍋爐，這一步排出的熱（${fmt(r.Pcond/r.Pin*100,0)} %）比發出的電還多。把四段加起來：${fW(r.Pe)} + ${fW(r.Pcond)} + ${fW(r.Pst)} + ${fW(r.Pgen)} = ${fW(r.Pin)}，能量守恆。`;
+}
+["#bR","#bB","#bT","#bG"].forEach(s=>$(s).addEventListener("input",updB));
+$$("[data-fuel]").forEach(b=>b.onclick=()=>{B.fuel=b.dataset.fuel;$$("[data-fuel]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));updB();});
+const smoke=[], warm=[], steam=[]; let turbB=0, tB=0;
+function drawB(dt){
+  const {g,w,h}=fit(CV); g.clearRect(0,0,w,h); tB+=dt;
+  const r=calcB(), k=B.r/150;
+  g.fillStyle="#070b14"; g.fillRect(0,0,w,h);
+  const gy=h-60;
+  g.fillStyle="#3b2f2f"; g.fillRect(0,gy,w,60);
+  // 海水
+  g.fillStyle="#1d4f7a"; g.fillRect(w*.74,gy+8,w*.26,52);
+  g.fillStyle="#8492aa"; g.font="12px 'Noto Sans TC',sans-serif"; g.fillText("海水",w*.86,gy+50);
+  // 煙囪
+  const cx=w*.6; g.fillStyle="#9aa3ad"; g.fillRect(cx-10,gy-150,22,150); g.fillStyle="#ef4444"; g.fillRect(cx-10,gy-140,22,6); g.fillRect(cx-10,gy-110,22,6);
+  if(Math.random()<dt*(4+12*k)) smoke.push({x:cx+1,y:gy-152,r:4,a:.5});
+  for(let i=smoke.length-1;i>=0;i--){const s=smoke[i]; s.y-=dt*24; s.x+=dt*10; s.r+=dt*6; s.a-=dt*.12; if(s.a<=0){smoke.splice(i,1);continue;} g.fillStyle=`rgba(180,180,190,${s.a})`; g.beginPath(); g.arc(s.x,s.y,s.r,0,7); g.fill();}
+  // 鍋爐
+  const bx=w*.38, bw=w*.16; g.fillStyle="#4b5563"; g.fillRect(bx,gy-110,bw,110);
+  for(let i=0;i<5;i++){const fx=bx+8+i*(bw-16)/4, fh=14+30*k*(0.7+0.3*Math.sin(tB*9+i*1.7)); const gr=g.createLinearGradient(0,gy,0,gy-fh); gr.addColorStop(0,"#f97316"); gr.addColorStop(1,"rgba(250,204,21,0)"); g.fillStyle=gr; g.beginPath(); g.moveTo(fx-7,gy-4); g.quadraticCurveTo(fx,gy-fh*1.6,fx+7,gy-4); g.fill();}
+  g.strokeStyle="#ef4444"; g.lineWidth=3; for(let i=0;i<4;i++){const x=bx+10+i*(bw-20)/3; g.beginPath(); g.moveTo(x,gy-30); g.lineTo(x,gy-100); g.stroke();}
+  g.fillStyle="#8492aa"; g.fillText("鍋爐",bx+bw/2+10,gy-116);
+  // 燃料堆
+  g.fillStyle=B.fuel==="coal"?"#111":"#334155"; g.beginPath(); g.moveTo(bx+bw+4,gy); g.lineTo(bx+bw+30,gy-18); g.lineTo(bx+bw+56,gy); g.fill();
+  g.fillStyle="#8492aa"; g.fillText(B.fuel==="coal"?"煤":"天然氣管",bx+bw+12,gy+16);
+  // 蒸氣管 鍋爐 → 汽輪機
+  const tx=w*.2, ty=gy-60;
+  g.strokeStyle="#ef4444"; g.lineWidth=8; g.beginPath(); g.moveTo(bx+bw/2,gy-110); g.lineTo(bx+bw/2,gy-132); g.lineTo(tx+20,gy-132); g.lineTo(tx+20,ty-22); g.stroke();
+  if(Math.random()<dt*(6+20*k)) steam.push({s:0});
+  const sp1=[[bx+bw/2,gy-110],[bx+bw/2,gy-132],[tx+20,gy-132],[tx+20,ty-22]];
+  const segL=[];let LL=0;for(let i=1;i<sp1.length;i++){const l=Math.hypot(sp1[i][0]-sp1[i-1][0],sp1[i][1]-sp1[i-1][1]);segL.push(l);LL+=l;}
+  g.fillStyle="#fecaca";
+  for(let i=steam.length-1;i>=0;i--){const s=steam[i]; s.s+=dt*(90+60*k); if(s.s>LL){steam.splice(i,1);continue;} let d=s.s,j=0; while(d>segL[j]){d-=segL[j];j++;} const f=d/segL[j]; g.beginPath(); g.arc(sp1[j][0]+(sp1[j+1][0]-sp1[j][0])*f,sp1[j][1]+(sp1[j+1][1]-sp1[j][1])*f,2,0,7); g.fill();}
+  // 汽輪機
+  turbB+=dt*(2+14*k);
+  g.fillStyle="#7f1d1d"; g.beginPath(); g.moveTo(tx-26,ty-18); g.lineTo(tx+34,ty-30); g.lineTo(tx+34,ty+30); g.lineTo(tx-26,ty+18); g.closePath(); g.fill();
+  g.strokeStyle="#fca5a5"; g.lineWidth=2; for(let i=0;i<7;i++){const x=tx-20+i*8, a=Math.sin(turbB+i)*.5+.5, hh=14+i*2; g.globalAlpha=.4+.6*a; g.beginPath(); g.moveTo(x,ty-hh); g.lineTo(x,ty+hh); g.stroke();} g.globalAlpha=1;
+  g.fillStyle="#8492aa"; g.fillText("汽輪機",tx-22,ty-36);
+  // 發電機
+  const gx=w*.06; g.fillStyle="#f97316"; g.fillRect(gx-14,ty-20,30,40); g.fillStyle="#1f2937"; g.fillRect(gx-8,ty-12,18,10);
+  g.strokeStyle="#5b6b7d"; g.lineWidth=4; g.beginPath(); g.moveTo(gx+16,ty); g.lineTo(tx-26,ty); g.stroke();
+  g.fillStyle="#8492aa"; g.fillText("發電機",gx-14,ty+36);
+  g.strokeStyle="rgba(255,209,102,.7)"; g.lineWidth=2; for(let i=0;i<3;i++){g.beginPath(); g.moveTo(gx-14,ty-10+i*10); g.lineTo(0,ty-10+i*10); g.stroke();}
+  // 冷凝器
+  const kx=tx-10, ky=gy+6; g.fillStyle="#1e3a5f"; g.fillRect(kx-24,ky,70,30); g.fillStyle="#cbd5e1"; g.fillText("冷凝器",kx-18,ky+20);
+  g.strokeStyle="#64748b"; g.lineWidth=6; g.beginPath(); g.moveTo(tx+4,ty+24); g.lineTo(tx+4,ky); g.stroke();
+  // 冷凝水回鍋爐
+  g.strokeStyle="#60a5fa"; g.lineWidth=4; g.beginPath(); g.moveTo(kx+46,ky+15); g.lineTo(bx+12,ky+15); g.lineTo(bx+12,gy); g.stroke();
+  // 海水循環（溫水排出）
+  g.strokeStyle="#38bdf8"; g.lineWidth=4; g.beginPath(); g.moveTo(kx-24,ky+24); g.lineTo(kx-24,h-6); g.lineTo(w*.76,h-6); g.stroke();
+  const condK=r.Pcond/(150*5e7*.6);
+  if(Math.random()<dt*(3+20*condK)) warm.push({s:0});
+  const L2=(h-6-(ky+24))+(w*.76-(kx-24));
+  for(let i=warm.length-1;i>=0;i--){const s=warm[i]; s.s+=dt*80; if(s.s>L2){warm.splice(i,1);continue;} let x,y; const l1=h-6-(ky+24); if(s.s<l1){x=kx-24;y=ky+24+s.s;} else {x=kx-24+(s.s-l1);y=h-6;} g.fillStyle="#fb7185"; g.beginPath(); g.arc(x,y,2.4,0,7); g.fill();}
+  g.fillStyle="#fb7185"; g.font="12px 'Noto Sans TC',sans-serif"; g.fillText("溫水（廢熱）",w*.5,h-12);
+  g.fillStyle="#ffd166"; g.font="600 13px 'JetBrains Mono',monospace"; g.textAlign="right"; g.fillText("電能 "+fW(r.Pe),w-10,20); g.fillStyle="#8492aa"; g.fillText("效率 "+fmt(r.eta*100,1)+" %",w-10,38); g.textAlign="left";
+}
+
+/* ================= 模式 C：用電與延長線 ================= */
+const APPS=[{n:"熱水瓶",p:550,ic:"♨"},{n:"電子鍋",p:660,ic:"🍚"},{n:"微波爐",p:990,ic:"▦"},{n:"吹風機",p:1200,ic:"〰"},{n:"電暖器",p:1000,ic:"☀"},{n:"電冰箱",p:150,ic:"❄"},{n:"筆記型電腦",p:65,ic:"⌨"},{n:"LED 檯燈",p:10,ic:"💡"}];
+const C={on:new Set([0,1,2]),V:110,L:12,hr:1,rate:3};
+const MAXS=4;
+$("#apps").innerHTML=APPS.map((a,i)=>`<button type="button" data-app="${i}" aria-pressed="false">${a.n} ${a.p} W</button>`).join("");
+$$("[data-app]").forEach(b=>b.onclick=()=>{const i=+b.dataset.app; if(C.on.has(i)) C.on.delete(i); else { if(C.on.size>=MAXS){flash=1.2; return;} C.on.add(i);} updC();});
+$("#cEx").onclick=()=>{C.on=new Set([0,1,2]); setV(110); $("#cL").value=12; updC();};
+$("#cClr").onclick=()=>{C.on.clear(); updC();};
+function setV(v){C.V=v;$$("[data-v]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.v===v)));}
+$$("[data-v]").forEach(b=>b.onclick=()=>{setV(+b.dataset.v);updC();});
+["#cL","#cH","#cR"].forEach(s=>$(s).addEventListener("input",updC));
+let flash=0;
+function calcC(){const list=[...C.on].sort((a,b)=>a-b).map(i=>({...APPS[i],I:APPS[i].p/C.V})); const P=list.reduce((a,x)=>a+x.p,0); return {list,P,I:P/C.V};}
+function updC(){
+  C.L=+$("#cL").value; C.hr=+$("#cH").value; C.rate=+$("#cR").value;
+  $("#ocL").textContent=C.L+" A"; $("#ocH").textContent=C.hr+" 小時"; $("#ocR").textContent=fmt(C.rate,1)+" 元/度";
+  $$("[data-app]").forEach(b=>b.setAttribute("aria-pressed",String(C.on.has(+b.dataset.app))));
+  const r=calcC(), kwh=r.P/1000*C.hr;
+  $("#rTP").textContent=fmt(r.P,0)+" W"; $("#rTI").textContent=fmt(r.I,1)+" A";
+  $("#rDay").textContent=fmt(kwh,2)+" 度"; $("#rJ").textContent=kwh?sci(kwh*3.6e6)+" J":"0 J"; $("#rFee").textContent=fmt(kwh*30*C.rate,0)+" 元";
+  const st=$("#cState");
+  if(r.I>15){st.className="state n";st.textContent=`⚠ ${fmt(r.I,1)} A 超過插座 15 A 與延長線 ${C.L} A 的安全負載！`;}
+  else if(r.I>C.L){st.className="state n";st.textContent=`⚠ ${fmt(r.I,1)} A 超過延長線的安全負載 ${C.L} A，電線會過熱！`;}
+  else {st.className="state p";st.textContent=`✓ ${fmt(r.I,1)} A，在延長線 ${C.L} A 與插座 15 A 的安全負載內`;}
+  const ex=C.on.size===3&&C.on.has(0)&&C.on.has(1)&&C.on.has(2)&&C.V===110;
+  $("#cSee").innerHTML=(ex?`<b>圖 5-22：</b>熱水瓶 550 W ÷ 110 V = 5 A、電子鍋 660 W ÷ 110 V = 6 A、微波爐 990 W ÷ 110 V = 9 A，三個電流相加 5 + 6 + 9 = 20 A，超過插座 15 A 和延長線 12 A 的安全負載，就可能釀成災害。`
+    :`<b>每個電器的電流 I = P／V</b>，插在同一條延長線上的電流會相加，全部從延長線的電線流過。耗電大的電熱類電器（熱水瓶、吹風機、電暖器）最好不要插在同一條延長線上。`)+
+    ` 用電度數 = 功率（kW）× 時間（h），1 度 = 1 kW × 1 h = 3.6 × 10⁶ J，大約可以把一部 1000 kg 的汽車舉高 ${fmt(3.6e6/(1000*9.8),0)} m。`;
+  setFlow([
+    {t:"電能（每秒）",v:fmt(r.P,0)+" J",c:COL.E},
+    {t:"電流",v:fmt(r.I,1)+" A",c:COL.K},
+    {t:"每天",v:fmt(kwh,2)+" 度",c:COL.C}],
+    r.list.length?r.list.map((x,i)=>({t:x.n+" "+fmt(x.I,1)+" A",v:x.p,c:["#ffd166","#a3e635","#43d6ff","#fb923c","#f472b6","#c084fc","#5eead4","#e8edf6"][APPS.indexOf(APPS.find(a=>a.n===x.n))]})):[{t:"沒有插電器",v:1,c:"#2a3242"}],
+    [],`各電器電流相加`);
+}
+function drawC(dt){
+  const {g,w,h}=fit(CV); g.clearRect(0,0,w,h);
+  const r=calcC(), over=r.I>C.L, wallOver=r.I>15;
+  g.fillStyle="#0a0f1a"; g.fillRect(0,0,w,h);
+  // 牆上插座
+  const wx=24, wy=30; g.fillStyle=wallOver?"#7f1d1d":"#f97316"; g.fillRect(wx,wy,58,38); g.fillStyle="#111"; g.fillRect(wx+12,wy+12,8,14); g.fillRect(wx+36,wy+12,8,14);
+  g.fillStyle="#8492aa"; g.font="12px 'Noto Sans TC',sans-serif"; g.fillText("插座 15 A",wx+64,wy+24);
+  // 延長線
+  const sx=wx+12, sy=wy+70, sw=Math.min(70,w*.16), sh=h-sy-20;
+  const heat=Math.max(0,Math.min(1,(r.I-C.L*.6)/(C.L*.8)));
+  g.strokeStyle=`rgb(${60+195*heat},${60+20*(1-heat)},${70*(1-heat)})`; g.lineWidth=5; g.beginPath(); g.moveTo(wx+16,wy+38); g.lineTo(sx+sw/2,sy); g.stroke();
+  if(over){g.strokeStyle=`rgba(255,80,60,${.3+.3*Math.sin(performance.now()/120)})`; g.lineWidth=12; g.stroke();}
+  g.fillStyle="#c9b8a6"; g.fillRect(sx,sy,sw,sh);
+  g.save(); g.translate(sx+sw/2-4,sy+sh/2); g.rotate(-Math.PI/2); g.fillStyle="#3b2f2f"; g.font="600 12px 'Noto Sans TC',sans-serif"; g.textAlign="center"; g.fillText("延長線 "+C.L+" A",0,4); g.restore();
+  const slots=MAXS, gap=sh/slots;
+  for(let i=0;i<slots;i++){const y=sy+gap*(i+.5); g.fillStyle="#2a2f38"; g.fillRect(sx+sw-16,y-8,12,16);}
+  r.list.forEach((a,i)=>{
+    const y=sy+gap*(i+.5), ax=Math.max(sx+sw+70,w*.5), aw=Math.min(150,w-ax-12);
+    g.strokeStyle="#1f2937"; g.lineWidth=3; g.beginPath(); g.moveTo(sx+sw-4,y); g.bezierCurveTo(sx+sw+30,y,ax-30,y,ax,y); g.stroke();
+    g.fillStyle="#ef4444"; g.font="700 14px 'JetBrains Mono',monospace"; g.fillText(fmt(a.I,1)+" A",sx+sw+8,y-8);
+    g.fillStyle="#1e293b"; g.strokeStyle="#334155"; g.lineWidth=1; g.beginPath(); g.roundRect?g.roundRect(ax,y-gap*.38,aw,gap*.76,8):g.rect(ax,y-gap*.38,aw,gap*.76); g.fill(); g.stroke();
+    if(gap*.76>=40){g.fillStyle="#e8edf6"; g.font="600 13px 'Noto Sans TC',sans-serif"; g.fillText(a.n,ax+8,y-2); g.fillStyle="#8492aa"; g.font="11px 'JetBrains Mono',monospace"; g.fillText(C.V+" V，"+a.p+" W",ax+8,y+14);} else {g.fillStyle="#e8edf6"; g.font="600 12px 'Noto Sans TC',sans-serif"; g.fillText(a.n+" "+a.p+" W",ax+8,y+4);}
+  });
+  if(!r.list.length){g.fillStyle="#5b6880"; g.font="13px 'Noto Sans TC',sans-serif"; g.fillText("在右邊點電器插上延長線",sx+sw+20,sy+sh/2);}
+  // 總電流爆炸框
+  const bxx=w-12; g.textAlign="right"; g.font="700 15px 'JetBrains Mono',monospace";
+  g.fillStyle=over?"#ff5c8a":"#84cc16"; g.fillText(r.list.map(a=>fmt(a.I,1)).join(" + ")+(r.list.length?" = ":"")+fmt(r.I,1)+" A",bxx,22);
+  g.font="12px 'Noto Sans TC',sans-serif"; g.fillStyle="#8492aa"; g.fillText(over?(wallOver?"> 插座 15 A、延長線 "+C.L+" A":"> 延長線 "+C.L+" A"):"≤ 延長線 "+C.L+" A",bxx,40); g.textAlign="left";
+  if(flash>0){flash-=dt; g.fillStyle=`rgba(255,92,138,${Math.min(1,flash)})`; g.font="600 13px 'Noto Sans TC',sans-serif"; g.fillText("這條延長線只有 "+MAXS+" 個插孔",sx+sw+20,sy-6);}
+}
+
+/* ---------- 想一想 ---------- */
+const QZ=[
+  {q:"陳同學家的電力來自水力發電，打開電燈立刻得到光能與熱能。這些能量最初來自哪裡？依序經過哪些轉換？",a:"最初來自<b>太陽</b>：太陽的輻射能讓海水蒸發、水氣上升凝結成雨，落到高處的水庫，存成<b>重力位能</b>；水流下變成<b>動能</b>，推動渦輪成為<b>轉動動能</b>，發電機再用電磁感應轉成<b>電能</b>，送到家裡的電燈變成<b>光能與熱能</b>。"},
+  {q:"把範例 5-5 的流量改成兩倍、落差改成一半，發電功率會怎樣？",a:"P = η·ρQgh，Q 變 2 倍、h 變 1/2，乘積不變，<b>發電功率不變</b>，仍約 8.8 × 10³ kW。在模擬裡把 h 調到 12 m、Q 調到 82 m³/s 試試看。"},
+  {q:"火力發電廠的整體效率大約只有四成，其餘六成的能量消失了嗎？",a:"沒有消失。大部分在<b>冷凝器</b>以熱的形式排進海水（所以電廠排水口的海水比較溫暖），一部分隨煙囪的廢氣帶走，少部分在發電機變成熱。各部分加起來剛好等於燃料放出的化學能，<b>能量守恆</b>；只是變成難以再利用的低溫熱能。"},
+  {q:"1 度電可以讓 10 W 的 LED 燈亮多久？可以讓 1200 W 的吹風機吹多久？",a:"1 度 = 1 kW·h = 1000 W·h。LED 燈：1000 ÷ 10 = <b>100 小時</b>；吹風機：1000 ÷ 1200 ≈ <b>0.83 小時，約 50 分鐘</b>。"}
+];
+$("#quiz").innerHTML=QZ.map((x,i)=>`<div class="qq"><p>${i+1}. ${x.q}</p><div class="seg"><button type="button" data-qa="${i}">看答案</button></div><div class="ans" id="qa${i}" hidden>${x.a}</div></div>`).join("");
+$$("[data-qa]").forEach(b=>b.onclick=()=>{const a=$("#qa"+b.dataset.qa); a.hidden=!a.hidden; b.textContent=a.hidden?"看答案":"收起";});
+
+/* ---------- 模式切換與動畫 ---------- */
+const TITLES={A:["水力發電廠（圖 5-9）","重力位能 → 動能 → 轉動動能 → 電能"],B:["火力發電廠（圖 5-13）","化學能 → 熱能 → 轉動動能 → 電能"],C:["延長線與安全負載（圖 5-22）","電流相加，不要超過安全負載"]};
+function setMode(m){mode=m; $$("[data-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
+  $("#ctlA").hidden=m!=="A"; $("#ctlB").hidden=m!=="B"; $("#ctlC").hidden=m!=="C";
+  $("#sTitle").textContent=TITLES[m][0]; $("#sNote").textContent=TITLES[m][1];
+  $("#fTitle").textContent=m==="C"?"用電與電流":"每秒的能量流向";
+  (m==="A"?updA:m==="B"?updB:updC)();}
+$$("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000); last=now; (mode==="A"?drawA:mode==="B"?drawB:drawC)(dt); requestAnimationFrame(loop);}
+setMode("A"); requestAnimationFrame(loop);
+window.__sim={calcA,calcB,calcC,setMode,A,B,C};
+})();
+</script>
+</body>
+</html>
