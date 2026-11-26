@@ -444,6 +444,8 @@ const MB=[
   ["第三篇 特殊函數","--g-opt",[["Legendre 多項式・球函數",["Legendre 方程及 Legendre 多項式","Legendre 多項式的性質","締合 Legendre 方程及締合 Legendre 函數","球函數方程和球函數"]],["Bessel 函數・柱函數",["Bessel 方程及柱函數","Bessel 函數的性質","虛宗量 Bessel 方程和虛宗量柱函數","球 Bessel 方程和球 Bessel 函數"]],["Sturm-Liouville 本徵值問題",["Sturm-Liouville 方程","Sturm-Liouville 本徵值問題","Sturm-Liouville 本徵值問題的一般性質"]]]]
 ].flatMap(([part,color,chs])=>chs.map(([name,rooms])=>({part,color,name,rooms})))
  .map((f,i)=>({...f,id:String(i+1),lvl:(i+1)+"F"}));
+/* 數學大樓各層講義（PDF 在 math/）：樓層 id → {t, pdf, pages} */
+const MB_DOCS={"11":{t:"第六章 變分法（講義）",pdf:"m2-06-variational.pdf",pages:9}};
 const mFloor=id=>MB.find(f=>f.id===id);
 
 const $=s=>document.querySelector(s);
@@ -488,7 +490,7 @@ function elevator(b,activeId){
 }
 function dirRow(b,f){
   return `<button type="button" class="dir-row" data-h="${b}${f.id}" style="--fc:var(${f.color})">
-    <span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${esc(b==="m"?f.rooms.join("・"):b==="k"?(f.n?f.n+" 題・"+(f.pdf?"可閱覽":"排版中"):"彙編中沒有此主題的題目"):b==="t"?f.rooms.map(r=>r.t).join("・"):(f.sub?f.sub+"・":"")+f.rooms.length+" 間教室")}</small></span></button>`;
+    <span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${esc(b==="m"?(MB_DOCS[f.id]?"講義可閱覽・":"")+f.rooms.join("・"):b==="k"?(f.n?f.n+" 題・"+(f.pdf?"可閱覽":"排版中"):"彙編中沒有此主題的題目"):b==="t"?f.rooms.map(r=>r.t).join("・"):(f.sub?f.sub+"・":"")+f.rooms.length+" 間教室")}</small></span></button>`;
 }
 function route(){
   const p=$("#panel"), c=current();
@@ -515,8 +517,12 @@ function route(){
     p.style.setProperty("--fc",`var(${f.color})`);
     p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">數學大樓・${esc(f.part)}</div><h2>${esc(f.name)}</h2><p>數學物理方法・${f.rooms.length} 間教室</p></div></div>
       ${elevator("m",f.id)}
+      ${MB_DOCS[f.id]?(d=>`<div class="dbyears"><div class="dbrow"><span class="yy">講義</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(d.pdf)}"><em>${esc(d.t)} <small>${d.pages} 頁</small></em><button type="button" class="mpv">閱覽</button>${DB2_VIEW_ONLY?"":`<button type="button" class="pd mpd">下載</button>`}</span></div></div></div>`)(MB_DOCS[f.id]):""}
       <div class="corridor">${f.rooms.map((r,i)=>`<div class="room"><span class="plate"><span class="no">${f.id}${String(i+1).padStart(2,"0")}</span><b>${esc(r)}</b></span><span class="door"><span class="soon">籌備中</span></span></div>`).join("")}</div>
       <p class="note">數學大樓依《數學物理方法學習指導》（姚端正）分層：1–5F 複變函數論、6–11F 數學物理方程、12–14F 特殊函數。各間教室的內容之後陸續放上。</p>`;
+    {const d=MB_DOCS[f.id]; if(d){const it={v:{vol:"數學大樓"},ch:{t:f.lvl+" "+f.name},f:{label:"講義",by:"數學物理方法"},url:"math/"+d.pdf,name:`數學物理方法 ${d.t}.pdf`};
+      p.querySelectorAll(".mpv").forEach(b=>b.onclick=()=>openPdf(it)); p.querySelectorAll(".mpd").forEach(b=>b.onclick=()=>downloadPdf(it,b));
+      p.querySelectorAll(".dbfile").forEach(el=>fetch("math/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));}}
   }else if(c.b==="k"){
     const f=kFloor(c.id), done=KB.filter(x=>x.pdf).length;
     p.style.setProperty("--fc",`var(${f.color})`);
@@ -626,7 +632,7 @@ async function openPdf(it){
   const body=$("#pvBody"); body.innerHTML=`<p class="pvmsg">載入中…</p>`; body.scrollTop=0;
   pv.hidden=false; document.documentElement.classList.add("in-class"); $("#pvClose").focus();
   $("#pvDl").onclick=()=>downloadPdf(it,$("#pvDl"));
-  $("#pvDl").hidden=!!it.viewOnly||DB2_VIEW_ONLY&&(it.url.startsWith("db2/ge-")||it.url.startsWith("library/"));
+  $("#pvDl").hidden=!!it.viewOnly||DB2_VIEW_ONLY&&(it.url.startsWith("db2/ge-")||it.url.startsWith("library/")||it.url.startsWith("math/"));
   try{
     const lib=await loadPdfJs();
     const doc=await lib.getDocument({url:it.url}).promise; if(pv.hidden) return; pvDoc=doc;
