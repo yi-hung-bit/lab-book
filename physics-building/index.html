@@ -233,7 +233,7 @@ html.wp #scene .hint,html.wp #scene .home,html.wp #scene .flabel{display:none!im
   <div class="top">
     <div>
       <h1>物理研究院</h1>
-      <p>競賽大樓分 A、B 兩棟：A 棟依物奧概念分層，後方的 B 棟依學科能力競賽主題分層，兩棟在 3F、9F 以空橋相連；模擬大樓收國中到競賽的物理模擬，和 A 棟在 3F 相連；競賽大樓旁的實驗大樓是競賽實驗題的虛擬實驗室，另有物理藏經閣、二階資料庫與休閒中心。</p>
+      <p>競賽大樓分 A、B 兩棟：A 棟依物奧概念分層，後方的 B 棟依學科能力競賽主題分層，兩棟在 3F、9F 以空橋相連；模擬大樓收國中到競賽的物理模擬，和 A 棟在 3F 相連；競賽大樓旁的實驗大樓是競賽實驗題的虛擬實驗室，左後方的數學大樓依數學物理方法分層，另有物理藏經閣、二階資料庫與休閒中心。</p>
     </div>
     <div class="count" id="count"></div>
   </div>
@@ -437,6 +437,14 @@ const KB=[
 ].map(f=>({...f,lvl:f.id+"F",rooms:[]}));
 const KB_BRIDGES=["3","9"];   // A 棟與 B 棟在 3F、9F 以空橋相連
 const kFloor=id=>KB.find(f=>f.id===id);
+/* 數學大樓：依姚端正《數學物理方法學習指導》目錄分層（一章一層），各層教室是該章「內容提要」的小節；內容之後再放 */
+const MB=[
+  ["第一篇 複變函數論","--g-math",[["解析函數",["複數及其運算","複變函數","微商及解析函數","初等解析函數"]],["解析函數積分",["複變函數的積分","Cauchy 定理","Cauchy 積分公式"]],["無窮級數",["複數級數","冪級數","Taylor 級數","Laurent 級數","單值函數的孤立奇點"]],["解析延拓・Γ 函數",["解析延拓","Γ 函數"]],["留數理論",["留數定理","利用留數計算實積分"]]]],
+  ["第二篇 數學物理方程","--g-wave",[["定解問題",["基本概念","數理方程的建立（導出）","定解條件"]],["行波法",["d'Alembert 公式","反射波","Poisson 公式","純強迫振動","有源空間波"]],["分離變量法",["分離變量法的精神和解題要領","非齊次方程的求解：本徵函數展開法","非齊次邊界條件的處理","正交曲線坐標系中的分離變量","本章常用的常微分方程公式"]],["積分變換法",["積分變換法","Fourier 變換","Laplace 變換"]],["Green 函數法",["δ 函數","Poisson 方程的邊值問題","Green 函數的一般求法","幾個有用的公式"]],["變分法",["泛函和泛函的極值","求解數理方程的變分法"]]]],
+  ["第三篇 特殊函數","--g-opt",[["Legendre 多項式・球函數",["Legendre 方程及 Legendre 多項式","Legendre 多項式的性質","締合 Legendre 方程及締合 Legendre 函數","球函數方程和球函數"]],["Bessel 函數・柱函數",["Bessel 方程及柱函數","Bessel 函數的性質","虛宗量 Bessel 方程和虛宗量柱函數","球 Bessel 方程和球 Bessel 函數"]],["Sturm-Liouville 本徵值問題",["Sturm-Liouville 方程","Sturm-Liouville 本徵值問題","Sturm-Liouville 本徵值問題的一般性質"]]]]
+].flatMap(([part,color,chs])=>chs.map(([name,rooms])=>({part,color,name,rooms})))
+ .map((f,i)=>({...f,id:String(i+1),lvl:(i+1)+"F"}));
+const mFloor=id=>MB.find(f=>f.id===id);
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -448,7 +456,7 @@ const SIM_UP=SIM.slice().sort((a,b)=>(a.id==="R")-(b.id==="R")||Number(a.id)-Num
 const ROOMS=SIM.flatMap(f=>f.rooms);
 const tFloor=id=>THEORY.find(f=>f.id===id), sFloor=id=>SIM.find(f=>f.id===id);
 const roomCount=THEORY.reduce((a,f)=>a+f.rooms.length,0);
-$("#count").textContent=`競賽 A 棟 ${THEORY.length} 層・${roomCount} 間教室・${Object.keys(QB).length} 題｜B 棟 ${KB.length} 層｜模擬大樓 ${SIM.length} 層・${ROOMS.length} 間教室`;
+$("#count").textContent=`競賽 A 棟 ${THEORY.length} 層・${roomCount} 間教室・${Object.keys(QB).length} 題｜B 棟 ${KB.length} 層｜數學大樓 ${MB.length} 層｜模擬大樓 ${SIM.length} 層・${ROOMS.length} 間教室`;
 
 /* ---------- routing: #t3 競賽大樓 3F、#s3 模擬大樓 3F、#bridge 空橋 ---------- */
 function current(){
@@ -458,6 +466,7 @@ function current(){
   m=/^u(\w+)-(\d+)$/.exec(h); if(m&&tFloor(m[1])){const r=tFloor(m[1]).rooms[Number(m[2])-1]; if(r) return {b:"t",id:m[1],troom:r};}
   m=/^t(\w+)$/.exec(h); if(m&&tFloor(m[1])) return {b:"t",id:m[1]};
   m=/^k(\d+)$/.exec(h); if(m&&kFloor(m[1])) return {b:"k",id:m[1]};
+  m=/^m(\d+)$/.exec(h); if(m&&mFloor(m[1])) return {b:"m",id:m[1]};
   m=/^s(\w+)$/.exec(h); if(m&&sFloor(m[1])) return {b:"s",id:m[1]};
   if(h==="bridge") return {b:"bridge"};
   if(h==="gym") return {b:"gym"};
@@ -471,15 +480,15 @@ const go=h=>{location.hash=h;};
 $("#homeBtn").onclick=()=>{history.replaceState(null,"",location.pathname+location.search);route();};
 
 function elevator(b,activeId){
-  const list=b==="t"?THEORY:b==="k"?KB:SIM_UP;
+  const list=b==="t"?THEORY:b==="k"?KB:b==="m"?MB:SIM_UP;
   return `<div class="elevator" role="group" aria-label="${b==="t"?"競賽大樓 A 棟":b==="k"?"競賽大樓 B 棟":"模擬大樓"}電梯">
-    <span class="lab">${b==="t"?"A 棟":b==="k"?"B 棟":"模擬"}電梯</span>
+    <span class="lab">${b==="t"?"A 棟":b==="k"?"B 棟":b==="m"?"數學":"模擬"}電梯</span>
     ${list.map(f=>`<button type="button" class="ebtn" data-h="${b}${f.id}" aria-current="${f.id===activeId}" title="${esc(f.name)}">${f.lvl}</button>`).join("")}
-    ${b==="k"?`<button type="button" class="ebtn out" data-h="t1">A 棟</button>`:`<button type="button" class="ebtn out" data-h="bridge">空橋</button>${b==="t"?`<button type="button" class="ebtn out" data-h="k1">B 棟</button>`:""}`}</div>`;
+    ${b==="m"?"":b==="k"?`<button type="button" class="ebtn out" data-h="t1">A 棟</button>`:`<button type="button" class="ebtn out" data-h="bridge">空橋</button>${b==="t"?`<button type="button" class="ebtn out" data-h="k1">B 棟</button>`:""}`}</div>`;
 }
 function dirRow(b,f){
   return `<button type="button" class="dir-row" data-h="${b}${f.id}" style="--fc:var(${f.color})">
-    <span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${esc(b==="k"?(f.n?f.n+" 題・"+(f.pdf?"可閱覽":"排版中"):"彙編中沒有此主題的題目"):b==="t"?f.rooms.map(r=>r.t).join("・"):(f.sub?f.sub+"・":"")+f.rooms.length+" 間教室")}</small></span></button>`;
+    <span class="n">${f.lvl}</span><span><b>${esc(f.name)}</b><small>${esc(b==="m"?f.rooms.join("・"):b==="k"?(f.n?f.n+" 題・"+(f.pdf?"可閱覽":"排版中"):"彙編中沒有此主題的題目"):b==="t"?f.rooms.map(r=>r.t).join("・"):(f.sub?f.sub+"・":"")+f.rooms.length+" 間教室")}</small></span></button>`;
 }
 function route(){
   const p=$("#panel"), c=current();
@@ -501,6 +510,13 @@ function route(){
       ${f.id===BRIDGE_LEVEL?`<p class="note">本層有空橋通往模擬大樓 3F（選修物理一・力學一）。</p>`:""}
       ${KB_BRIDGES.includes(f.id)?`<p class="note">本層有空橋通往 <button type="button" class="dir-row" data-h="k${f.id}" style="--fc:var(${kFloor(f.id).color});display:inline-flex;width:auto;padding:2px 10px;margin:0 2px"><b>B 棟 ${f.id}F ${esc(kFloor(f.id).name)}</b></button>（學科能力競賽）。</p>`:""}
       ${FY_CLOSED?"":`<p class="note">各層題目是物奧初選；複賽歷屆試題與詳解在 <button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t);display:inline-flex;width:auto;padding:2px 10px;margin:0 2px"><b>複賽室</b></button>。</p>`}`;
+  }else if(c.b==="m"){
+    const f=mFloor(c.id);
+    p.style.setProperty("--fc",`var(${f.color})`);
+    p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">數學大樓・${esc(f.part)}</div><h2>${esc(f.name)}</h2><p>數學物理方法・${f.rooms.length} 間教室</p></div></div>
+      ${elevator("m",f.id)}
+      <div class="corridor">${f.rooms.map((r,i)=>`<div class="room"><span class="plate"><span class="no">${f.id}${String(i+1).padStart(2,"0")}</span><b>${esc(r)}</b></span><span class="door"><span class="soon">籌備中</span></span></div>`).join("")}</div>
+      <p class="note">數學大樓依《數學物理方法學習指導》（姚端正）分層：1–5F 複變函數論、6–11F 數學物理方程、12–14F 特殊函數。各間教室的內容之後陸續放上。</p>`;
   }else if(c.b==="k"){
     const f=kFloor(c.id), done=KB.filter(x=>x.pdf).length;
     p.style.setProperty("--fc",`var(${f.color})`);
@@ -575,6 +591,7 @@ function route(){
     p.style.setProperty("--fc","var(--plate)");
     p.innerHTML=`<div class="panel-head"><div class="badge">院</div><div><div class="bld">院區導覽</div><h2>物理研究院</h2><p>點樓層或上方大樓查看</p></div></div>
       <div class="dir">
+        <section><h3>數學大樓 <small>數學物理方法・${MB.length} 層</small></h3>${MB.slice().reverse().map(f=>dirRow("m",f)).join("")}</section>
         <section><h3>競賽大樓 B 棟 <small>學科能力競賽・${KB.length} 層</small></h3>${KB.slice().reverse().map(f=>dirRow("k",f)).join("")}</section>
         <section><h3>競賽大樓 A 棟 <small>物奧初選・${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button>`}</section>
         <section><h3>實驗大樓 <small>競賽實驗題</small></h3><button type="button" class="dir-row" data-h="lab" style="--fc:var(--lab)"><span class="n">實</span><span><b>實驗大樓</b><small>${esc(LAB.t)}・歷屆學科能力競賽實驗題虛擬實驗室・講義 ${LABDOCS.length} 份</small></span></button></section>
@@ -815,6 +832,7 @@ function init3D(){
   [bcx-bl/4,bcx+bl/4].forEach(px=>scene.add(mesh(new THREE.CylinderGeometry(.12,.12,by,10),M.trim,px,by/2,.4)));
 
   /* 競賽大樓 B 棟：A 棟正後方（隔著後方道路），3F、9F 以南北向空橋相連 */
+  let mLabel=[0,0,0];
   const KX=TX+1.6, KZ=-11.2;
   scene.add(mesh(B(W+2,.06,D+2),M.pave,KX,.03,KZ,false,true));
   {const g0=scene.children.length; lobby(KX,M.wallT); scene.children.slice(g0).forEach(o=>o.position.z+=KZ);}
@@ -1137,7 +1155,15 @@ function init3D(){
   });
 
   /* ===== 科技元素：太陽能發電場、電動車充電站、B 棟屋頂太陽能、自駕接駁車、無人機 ===== */
-  const SF={x0:-34,x1:-23.5,z0:-22,z1:-15}, EV={cx:29,cz:11.2,w:13,d:7};
+  const SF={x0:24,x1:35,z0:-24,z1:-17}, EV={cx:29,cz:11.2,w:13,d:7};
+  /* 數學大樓（左後方，原太陽能發電場的位置；太陽能板移到右後方） */
+  const MX=-28.7, MZ=-18.5;
+  scene.add(mesh(B(W+2,.06,D+2.4),M.pave,MX,.03,MZ,false,true));
+  {const g0=scene.children.length; lobby(MX,M.wallT); scene.children.slice(g0).forEach(o=>o.position.z+=MZ);}
+  MB.forEach((f,i)=>{const o=buildFloor("m"+f.id,f,"t",MX,BASE+i*H,W,D,H,4); o.bld="m"; o.z0=MZ; o.g.position.z=MZ;});
+  const mRoof=BASE+MB.length*H;
+  {const g0=scene.children.length; roof(MX,mRoof); roofSign(MX,mRoof,"數 學 大 樓","M A T H E M A T I C S","--plate-t"); scene.children.slice(g0).forEach(o=>o.position.z+=MZ);}
+  mLabel=[MX,mRoof,MZ];
   /* 太陽能發電場（左後方新腹地）：一排排傾斜的光電板 */
   scene.add(mesh(B(SF.x1-SF.x0+1.4,.04,SF.z1-SF.z0+1.4),M.pave,(SF.x0+SF.x1)/2,.02,(SF.z0+SF.z1)/2,false,true));
   for(let z=SF.z0+.6;z<=SF.z1-.4;z+=1.7){
@@ -1218,7 +1244,7 @@ function init3D(){
     ...[-32,-26,-4,6,26,33].flatMap((x,i)=>[[x+(i%2)*1.5,RZ0+3.6],[x-(i%2),RZ1-3.8]]),
     ...[-14,-6,2,10,18].flatMap((z,i)=>[[-RX+3.8,z+(i%2)],[RX-3.8,z-(i%2)*1.2],[-33,z+3],[33.5,z-2.5]])];
   const inR=(x,z,x0,x1,z0,z1)=>x>x0&&x<x1&&z>z0&&z<z1;
-  TREES.filter(([x,z])=>!(Math.abs(z-FZ)<1.6&&Math.abs(x)>SR-1)&&!inR(x,z,SF.x0-1.5,SF.x1+2.5,SF.z0-1.5,SF.z1+2)&&!inR(x,z,EV.cx-EV.w/2-1.5,EV.cx+EV.w/2+1.5,EV.cz-EV.d/2-1.5,EV.cz+EV.d/2+1.5)).forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
+  TREES.filter(([x,z])=>!(Math.abs(z-FZ)<1.6&&Math.abs(x)>SR-1)&&!inR(x,z,MX-5,MX+5,MZ-4,MZ+4)&&!inR(x,z,SF.x0-1.5,SF.x1+2.5,SF.z0-1.5,SF.z1+2)&&!inR(x,z,EV.cx-EV.w/2-1.5,EV.cx+EV.w/2+1.5,EV.cz-EV.d/2-1.5,EV.cz+EV.d/2+1.5)).forEach(([x,z],i)=>{const s=.8+((i*37)%10)/25;
     scene.add(mesh(new THREE.CylinderGeometry(.1*s,.14*s,1*s,7),M.trunk,x,.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.9*s,0),M.leaf,x,1.5*s,z));
     scene.add(mesh(new THREE.IcosahedronGeometry(.65*s,0),M.leaf,x+.3*s,2.1*s,z-.1));});
@@ -1228,12 +1254,12 @@ function init3D(){
   Object.values(floorObjs).forEach(o=>{
     const b=document.createElement("button"); b.type="button"; b.className="flabel"; b.style.setProperty("--fc",`var(${o.f.color})`);
     b.innerHTML=`<i>${o.f.lvl}</i><span class="nm">${esc(o.f.name)}</span>`;
-    b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓 A 棟":o.bld==="k"?"競賽大樓 B 棟":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
+    b.setAttribute("aria-label",`${o.bld==="t"?"競賽大樓 A 棟":o.bld==="k"?"競賽大樓 B 棟":o.bld==="m"?"數學大樓":"模擬大樓"} ${o.f.lvl} ${o.f.name}`);
     b.onclick=()=>go(o.key); labelBox.appendChild(b); labels[o.key]=b;
   });
-  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽 A 棟","--plate-t"],["k",KX,kRoof+1.9,"競賽 B 棟","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"],["lab",EX-3.4,EH+1.1,"實驗大樓","--lab"]].map(([k,x,y,t,pv])=>{
+  const bLabels=[["s",SX,simRoof+1.9,"模擬大樓","--plate"],["t",TX,thRoof+1.9,"競賽 A 棟","--plate-t"],["k",KX,kRoof+1.9,"競賽 B 棟","--plate-t"],["m",mLabel[0],mLabel[1]+1.9,"數學大樓","--plate-t"],["bridge",bcx,by+H+.35,"空橋","--plate"],["gym",GX,GH+2.2,"休閒中心","--gym"],["lib",LX,5.6,"物理藏經閣","--lib"],["db",DX,DH+2.2,"二階資料庫","--db"],["lab",EX-3.4,EH+1.1,"實驗大樓","--lab"]].map(([k,x,y,t,pv])=>{
     const b=document.createElement("button"); b.type="button"; b.className="blabel"; b.textContent=t; b.style.setProperty("--bp",`var(${pv})`);
-    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"||k==="db"||k==="lab"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="k"?KZ:k==="gym"?GZ:k==="lib"?LZ:k==="db"?DZ:k==="lab"?EZ:0)};
+    b.onclick=()=>go(k==="bridge"||k==="gym"||k==="lib"||k==="db"||k==="lab"?k:k+"1"); labelBox.appendChild(b); return {b,p:new THREE.Vector3(x,y,k==="bridge"?.4:k==="k"?KZ:k==="m"?mLabel[2]:k==="gym"?GZ:k==="lib"?LZ:k==="db"?DZ:k==="lab"?EZ:0)};
   });
 
   let night=false;
@@ -1299,7 +1325,7 @@ function init3D(){
     cam.position.set(target.x+dist*Math.sin(a)*Math.cos(el),target.y+dist*Math.sin(el),target.z+dist*Math.cos(a)*Math.cos(el));
     cam.lookAt(target);
     if(!cls.hidden||!qv.hidden||!pv.hidden) return;
-    const c=current(), sel=c.b==="t"||c.b==="s"||c.b==="k"?c.b+c.id:null;
+    const c=current(), sel=c.b==="t"||c.b==="s"||c.b==="k"||c.b==="m"?c.b+c.id:null;
     litC.set(css("--glass-lit")||"#ffd978").convertSRGBToLinear();
     let gl=null;
     Object.values(floorObjs).forEach(o=>{
