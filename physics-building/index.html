@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
 <title>物理研究院</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1f3347">
@@ -420,22 +420,24 @@ const BRIDGE_LEVEL="3";
 /* 競賽大樓 B 棟：學科能力競賽理論試題，一層一個主題（依「培訓講義_依主題」）；題目 PDF 在 b2/k-NN.pdf，只供閱覽
    新主題排版完成後：把 pdf 與 pages 填上即可 */
 const KB=[
-  {id:"1",name:"運動學",n:26,color:"--g-kin",pdf:"k-01.pdf",pages:12},
-  {id:"2",name:"力與牛頓定律",n:28,color:"--g-dyn",pdf:"k-02.pdf",pages:14},
-  {id:"3",name:"功能與動量",n:49,color:"--g-energy",pdf:"k-03.pdf",pages:23},
-  {id:"4",name:"圓周與轉動",n:49,color:"--g-rot",pdf:"k-04.pdf",pages:27},
-  {id:"5",name:"萬有引力",n:26,color:"--g-grav"},
+  {id:"1",name:"運動學",n:26,color:"--g-kin",pdf:"k-01.pdf",pages:12,sol:"ks-01.pdf",solPages:39},
+  {id:"2",name:"力與牛頓定律",n:28,color:"--g-dyn",pdf:"k-02.pdf",pages:14,sol:"ks-02.pdf",solPages:39},
+  {id:"3",name:"功能與動量",n:49,color:"--g-energy",pdf:"k-03.pdf",pages:23,sol:"ks-03.pdf",solPages:69},
+  {id:"4",name:"圓周與轉動",n:49,color:"--g-rot",pdf:"k-04.pdf",pages:27,sol:"ks-04.pdf",solPages:77},
+  {id:"5",name:"萬有引力",n:26,color:"--g-grav",pdf:"k-05.pdf",pages:17,sol:"ks-05.pdf",solPages:45},
   {id:"6",name:"振動",n:33,color:"--g-wave"},
   {id:"7",name:"流體",n:38,color:"--g-fluid"},
   {id:"8",name:"熱學",n:60,color:"--g-heat"},
   {id:"9",name:"波動與聲音",n:47,color:"--g-wave"},
   {id:"10",name:"光學",n:45,color:"--g-opt"},
   {id:"11",name:"靜電",n:28,color:"--g-estat"},
-  {id:"12",name:"電流與電路",n:5,color:"--g-em",pdf:"k-12.pdf",pages:3},
+  {id:"12",name:"電流與電路",n:5,color:"--g-em",pdf:"k-12.pdf",pages:3,sol:"ks-12.pdf",solPages:7},
   {id:"13",name:"電磁",n:0,color:"--g-em"},
   {id:"14",name:"近代物理",n:3,color:"--g-mod"},
   {id:"15",name:"未分類",n:1,color:"--g-math"}
 ].map(f=>({...f,lvl:f.id+"F",rooms:[]}));
+/* 詳解版（b2/ks-NN.pdf）只放在研究院，學生版不顯示也不放檔案 */
+const KB_SOL=!/github\.io$/.test(location.hostname);
 const KB_BRIDGES=["3","9"];   // A 棟與 B 棟在 3F、9F 以空橋相連
 const kFloor=id=>KB.find(f=>f.id===id);
 /* 數學大樓：依姚端正《數學物理方法學習指導》目錄分層（一章一層），各層教室是該章「內容提要」的小節；內容之後再放 */
@@ -530,11 +532,13 @@ function route(){
     const a=tFloor(f.id);
     p.innerHTML=`<div class="panel-head"><div class="badge">${f.lvl}</div><div><div class="bld">競賽大樓 B 棟・學科能力競賽</div><h2>${esc(f.name)}</h2><p>理論試題彙編・${f.n} 題</p></div></div>
       ${elevator("k",f.id)}
-      <div class="dbyears">${f.pdf?`<div class="dbrow"><span class="yy">${f.lvl}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(f.pdf)}"><em>${esc(f.name)}・題目 <small>${f.n} 題・${f.pages} 頁</small></em><button type="button" class="kpv">閱覽</button></span></div></div>`
+      <div class="dbyears">${f.pdf?`<div class="dbrow"><span class="yy">${f.lvl}</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(f.pdf)}"><em>${esc(f.name)}・題目 <small>${f.n} 題・${f.pages} 頁</small></em><button type="button" class="kpv">閱覽</button></span></div></div>${KB_SOL&&f.sol?`<div class="dbrow"><span class="yy">詳解</span><div class="dbfiles"><span class="dbfile" data-pdf="${esc(f.sol)}"><em>${esc(f.name)}・詳解版 <small>${f.solPages} 頁</small></em><button type="button" class="kspv">閱覽</button><button type="button" class="pd kspd">下載</button></span></div></div>`:""}`
         :`<div class="dbrow"><span class="yy">${f.lvl}</span><div class="dbfiles"><span class="dbmiss">${f.n?`${f.n} 題，題目排版中，完成後放在這裡`:"彙編中沒有此主題的題目"}</span></div></div>`}</div>
       ${KB_BRIDGES.includes(f.id)&&a?`<p class="note">本層有空橋通往 <button type="button" class="dir-row" data-h="t${a.id}" style="--fc:var(${a.color});display:inline-flex;width:auto;padding:2px 10px;margin:0 2px"><b>A 棟 ${a.lvl} ${esc(a.name)}</b></button>（物奧初選）。</p>`:""}
       <p class="note">B 棟收學科能力競賽理論試題，一層一個主題，目前 ${done} 個主題可以線上閱覽；點「閱覽」在這裡直接翻頁看。</p>`;
     p.querySelectorAll(".kpv").forEach(b=>b.onclick=()=>openPdf(kFile(f)));
+    if(f.sol){const it={v:{vol:"B 棟"},ch:{t:f.lvl},f:{label:f.name+"・詳解版",by:"學科能力競賽"},url:"b2/"+f.sol,name:`學科能力競賽 ${f.name} 詳解版.pdf`};
+      p.querySelectorAll(".kspv").forEach(b=>b.onclick=()=>openPdf(it)); p.querySelectorAll(".kspd").forEach(b=>b.onclick=()=>downloadPdf(it,b));}
     p.querySelectorAll(".dbfile").forEach(el=>fetch("b2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
   }else if(c.b==="s"){
     const f=sFloor(c.id);
@@ -1370,6 +1374,7 @@ route();
 window.addEventListener("hashchange",route);
 if(!init3D()){$("#scene").hidden=true;$("#nogl").hidden=false;}
 </script>
+
 
 <script>
 if("serviceWorker" in navigator){
