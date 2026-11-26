@@ -445,7 +445,7 @@ const MB=[
 ].flatMap(([part,color,chs])=>chs.map(([name,rooms])=>({part,color,name,rooms})))
  .map((f,i)=>({...f,id:String(i+1),lvl:(i+1)+"F"}));
 /* 數學大樓各層講義（PDF 在 math/）：樓層 id → {t, pdf, pages} */
-const MB_DOCS={"11":{t:"第六章 變分法（講義）",pdf:"m2-06-variational.pdf",pages:9}};
+const MB_DOCS={"1":{t:"第一章 解析函數（講義）",pdf:"m1-01-analytic.pdf",pages:8},"11":{t:"第六章 變分法（講義）",pdf:"m2-06-variational.pdf",pages:9}};
 const mFloor=id=>MB.find(f=>f.id===id);
 
 const $=s=>document.querySelector(s);
