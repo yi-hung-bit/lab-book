@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <style>
 /* Layout: 院區 3D 場景（左：模擬大樓、右：競賽大樓，3F 空橋相連）＋ 右側導覽面板（院區名錄／樓層教室） */
 :root{
@@ -214,6 +217,20 @@ button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.roo
 .qbody img{display:block;width:100%;max-width:900px;height:auto;background:#fff}
 .qbody img+img{border-top:1px dashed #d5dade}
 .qmeta{width:100%;max-width:900px;font-size:13px;color:var(--muted);margin-bottom:8px}
+/* 複賽文字題卡（FYQ）：截圖樣式——藍標頭＋題目＋詳解框；卡片固定淺色，與題目截圖一致 */
+.fyq{width:100%;max-width:900px;background:#fff;border:2px solid #2f6fa8;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.12);text-align:left;color:#1c2228}
+.fyq header{display:flex;align-items:baseline;gap:10px;padding:8px 14px;background:#2f6fa8;color:#fff}
+.fyq header b{font-size:16px;letter-spacing:.1em}
+.fyq header span{font-size:13px;opacity:.9}
+.fyq .qb{padding:14px 18px;font-size:16px;line-height:1.9}
+.fyq .qb p{margin:0 0 10px}
+.fyq .qb p:last-child{margin-bottom:0}
+.fyq .blank{display:inline-block;min-width:64px;border-bottom:2px solid #2f6fa8;text-align:center;font-family:var(--f-mono);font-weight:600;color:#2f6fa8}
+.fyq .sol{margin:0 14px 14px;border:1px solid #d5dade;border-radius:8px;background:#f4f6f7;padding:12px 16px}
+.fyq .sol h4{margin:0 0 8px;font-size:15px}
+.fyq .sol p{margin:0 0 8px;font-size:15px;line-height:1.9}
+.fyq .sol p:last-child{margin-bottom:0}
+.fyq .katex-display{margin:.6em 0}
 @media (max-width:900px){
   .site{grid-template-columns:1fr}
   .scene{height:520px}
@@ -395,6 +412,11 @@ const LIBRARY=[
 ];
 /* 競賽大樓 複賽室：物理奧林匹亞複賽歷屆試題與詳解（OLY2，PDF 在 db2/fy-*.pdf；新增年份就加一筆 {y:年份, files:[{k:"q"|"a"|"semi",label,pdf,pages,note?}]}） */
 const OLY2=[{"y":1994,"files":[{"k":"q","label":"題目","pdf":"fy-1994-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1994-a.pdf","pages":7}]},{"y":1995,"files":[{"k":"q","label":"題目","pdf":"fy-1995-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1995-a.pdf","pages":8}]},{"y":1996,"files":[{"k":"q","label":"題目","pdf":"fy-1996-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1996-a.pdf","pages":8},{"k":"semi","label":"準決選題目","pdf":"fy-1996-semi.pdf","pages":3}]},{"y":1997,"files":[{"k":"q","label":"題目","pdf":"fy-1997-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-1997-a.pdf","pages":7},{"k":"semi","label":"準決選題目","pdf":"fy-1997-semi.pdf","pages":3}]},{"y":1998,"files":[{"k":"q","label":"題目","pdf":"fy-1998-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1998-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1998-semi.pdf","pages":3}]},{"y":1999,"files":[{"k":"q","label":"題目","pdf":"fy-1999-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1999-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1999-semi.pdf","pages":3}]},{"y":2000,"files":[{"k":"q","label":"題目","pdf":"fy-2000-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2000-a.pdf","pages":11}]},{"y":2001,"files":[{"k":"q","label":"題目","pdf":"fy-2001-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2001-a.pdf","pages":10}]},{"y":2002,"files":[{"k":"q","label":"題目","pdf":"fy-2002-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-2002-a.pdf","pages":12}]},{"y":2003,"files":[{"k":"q","label":"題目","pdf":"fy-2003-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2003-a.pdf","pages":11}]},{"y":2004,"files":[{"k":"q","label":"題目","pdf":"fy-2004-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2004-a.pdf","pages":9}]},{"y":2005,"files":[{"k":"q","label":"題目","pdf":"fy-2005-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2005-a.pdf","pages":12}]},{"y":2006,"files":[{"k":"q","label":"題目","pdf":"fy-2006-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2006-a.pdf","pages":12}]},{"y":2007,"files":[{"k":"q","label":"題目","pdf":"fy-2007-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2007-a.pdf","pages":18}]},{"y":2008,"files":[{"k":"q","label":"題目","pdf":"fy-2008-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2008-a.pdf","pages":11}]},{"y":2009,"files":[{"k":"q","label":"題目","pdf":"fy-2009-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2009-a.pdf","pages":20}]},{"y":2010,"files":[{"k":"q","label":"題目","pdf":"fy-2010-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2010-a.pdf","pages":12}]},{"y":2011,"files":[{"k":"q","label":"題目","pdf":"fy-2011-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2011-a.pdf","pages":14}]},{"y":2012,"files":[{"k":"q","label":"題目","pdf":"fy-2012-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2012-a.pdf","pages":10}]},{"y":2013,"files":[{"k":"q","label":"題目","pdf":"fy-2013-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2013-a.pdf","pages":12}]},{"y":2014,"files":[{"k":"q","label":"題目","pdf":"fy-2014-q.pdf","pages":9},{"k":"a","label":"詳解","pdf":"fy-2014-a.pdf","pages":14}]},{"y":2017,"files":[{"k":"q","label":"題目","pdf":"fy-2017-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2017-a.pdf","pages":7}]},{"y":2018,"files":[{"k":"a","label":"詳解","pdf":"fy-2018-a.pdf","pages":14,"note":"翻拍"}]},{"y":2019,"files":[{"k":"a","label":"詳解","pdf":"fy-2019-a.pdf","pages":10,"note":"翻拍"}]},{"y":2020,"files":[{"k":"a","label":"詳解","pdf":"fy-2020-a.pdf","pages":10,"note":"翻拍"}]},{"y":2021,"files":[{"k":"a","label":"詳解","pdf":"fy-2021-a.pdf","pages":11,"note":"翻拍"}]},{"y":2026,"files":[{"k":"q","label":"題目","pdf":"fy-2026-q.pdf","pages":10,"note":"翻拍"},{"k":"a","label":"參考解答","pdf":"fy-2026-a.pdf","pages":15,"note":"翻拍"}]}];
+/* 複賽文字題卡（FYQ）：題目與詳解打字版，KaTeX 數學；路由 #fqYYYY-NN（例 #fq2018-11）。
+   複賽室目前學生版關閉（FY_CLOSED），文字卡片先以直接連結看；之後題目多了、要開複賽室時，再在 fy 面板加文字題卡入口。 */
+const FYQ=[{id:"2018-11",y:2018,n:11,cat:"力學・天體",sec:"萬有引力與天體運動",
+body:`<p>十一、考慮一密度均勻，質量為 \\(M\\)，半徑為 \\(R\\) 的星體。欲計算該星體的重力位能 \\(U\\)，可以假想將構成該星體的物質逐層加至半徑為 \\(r\\) 的球狀準星體表面所作的功，並讓 \\(r\\) 由 \\(r=0\\) 逐漸增加到 \\(r=R\\)。試計算 \\(U\\)，答案以萬有引力常數 \\(G\\)、\\(M\\) 和 \\(R\\) 表示。</p><p>\\(U =\\) <span class="blank">（21）</span>；假設該星體的組成物質粒子平均質量為 \\(m\\)，可視為理想氣體，且該星體形成時，有一半的重力位能轉換為星體內能，另一半則以輻射形式散失。試求該星體的溫度 \\(T\\)，答案以 \\(G\\)、\\(M\\)、\\(R\\)、\\(m\\) 和波茲曼常數 \\(k_B\\) 表示。</p><p>\\(T =\\) <span class="blank">（22）</span>。</p>`,
+sol:`<h4>詳解</h4><p>（21）半徑 \\(r\\) 的球已有質量 \\(M\\dfrac{r^3}{R^3}\\)。再加上一層 \\(dm=3M\\dfrac{r^2}{R^3}dr\\)，自無窮遠移來，位能變化為 \\(-\\dfrac{G}{r}\\left(M\\dfrac{r^3}{R^3}\\right)dm\\)：</p><p>\\[U=-\\int_0^R \\frac{3GM^2r^4}{R^6}\\,dr=-\\frac{3GM^2}{5R}\\]</p><p>（22）一半的 \\(|U|\\) 轉為內能，粒子數 \\(N=M/m\\)，單原子理想氣體內能 \\(\\dfrac32 Nk_BT\\)：</p><p>\\[\\frac32\\frac{M}{m}k_BT=\\frac12|U|=\\frac{3GM^2}{10R}\\]</p><p>\\[\\therefore\\quad T=\\frac{GMm}{5Rk_B}\\]</p>`}];
 /* 二階資料庫：大學申請入學第二階段物理筆試（台大電機）的普通物理銜接講義，依章拆成 PDF 放在 db2/ge-*.pdf */
 const DB2=[{"no": "全", "t": "普通物理銜接講義（全本）", "g": "全本", "pdf": "ge-full.pdf", "pages": 310}, {"no": "前", "t": "封面・給讀者・目錄", "g": "導讀", "pdf": "ge-front.pdf", "pages": 11}, {"no": "0", "t": "導讀與數學工具", "g": "導讀", "pdf": "ge-00.pdf", "pages": 9}, {"no": "1", "t": "運動學", "g": "力學", "pdf": "ge-01.pdf", "pages": 13}, {"no": "2", "t": "靜力平衡", "g": "力學", "pdf": "ge-02.pdf", "pages": 13}, {"no": "3", "t": "牛頓運動定律", "g": "力學", "pdf": "ge-03.pdf", "pages": 16}, {"no": "4", "t": "功與能", "g": "力學", "pdf": "ge-04.pdf", "pages": 18}, {"no": "5", "t": "行星運動與萬有引力", "g": "力學", "pdf": "ge-05.pdf", "pages": 13}, {"no": "6", "t": "碰撞", "g": "力學", "pdf": "ge-06.pdf", "pages": 13}, {"no": "7", "t": "轉動", "g": "力學", "pdf": "ge-07.pdf", "pages": 19}, {"no": "8", "t": "流體力學", "g": "流體與熱學", "pdf": "ge-08.pdf", "pages": 18}, {"no": "9", "t": "熱力學", "g": "流體與熱學", "pdf": "ge-09.pdf", "pages": 22}, {"no": "10", "t": "振動與聲波", "g": "波動與光學", "pdf": "ge-10.pdf", "pages": 16}, {"no": "11", "t": "幾何光學", "g": "波動與光學", "pdf": "ge-11.pdf", "pages": 18}, {"no": "12", "t": "物理光學", "g": "波動與光學", "pdf": "ge-12.pdf", "pages": 20}, {"no": "13", "t": "靜電學", "g": "電磁學", "pdf": "ge-13.pdf", "pages": 16}, {"no": "14", "t": "電路", "g": "電磁學", "pdf": "ge-14.pdf", "pages": 22}, {"no": "15", "t": "磁場", "g": "電磁學", "pdf": "ge-15.pdf", "pages": 13}, {"no": "16", "t": "電磁感應", "g": "電磁學", "pdf": "ge-16.pdf", "pages": 13}, {"no": "17", "t": "近代物理", "g": "近代物理", "pdf": "ge-17.pdf", "pages": 15}, {"no": "A", "t": "模擬試題", "g": "附錄", "pdf": "ge-A.pdf", "pages": 4}, {"no": "B", "t": "歷屆題號與章節對照", "g": "附錄", "pdf": "ge-B.pdf", "pages": 2}, {"no": "C", "t": "常數與公式速查", "g": "附錄", "pdf": "ge-C.pdf", "pages": 3}, {"no": "D", "t": "近年試題速查（111、113、114年）", "g": "附錄", "pdf": "ge-D.pdf", "pages": 3}];
 const DB2_TITLE="大學申請入學 第二階段物理筆試";
@@ -468,6 +490,7 @@ function current(){
   const h=location.hash.slice(1);
   let m=/^r(\w+)$/.exec(h); if(m){const r=ROOMS.find(x=>x.no===m[1]); if(r) return {b:"s",id:r.f.id,room:r};}
   m=/^q(\d{4}-\d{2})$/.exec(h); if(m&&QOWN[m[1]]){const r=QOWN[m[1]]; return {b:"t",id:r.f.id,troom:r,q:m[1]};}
+  m=/^fq(\d{4}-\d{2})$/.exec(h); if(m&&FYQ.find(x=>x.id===m[1])) return {b:"fq",id:m[1]};
   m=/^u(\w+)-(\d+)$/.exec(h); if(m&&tFloor(m[1])){const r=tFloor(m[1]).rooms[Number(m[2])-1]; if(r) return {b:"t",id:m[1],troom:r};}
   m=/^t(\w+)$/.exec(h); if(m&&tFloor(m[1])) return {b:"t",id:m[1]};
   m=/^k(\d+)$/.exec(h); if(m&&kFloor(m[1])) return {b:"k",id:m[1]};
@@ -615,7 +638,7 @@ function route(){
   }
   p.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>go(b.dataset.h));
   if(c.room) enter(c.room); else if(!cls.hidden) leave();
-  if(c.q) openQ(c.q); else if(!qv.hidden) closeQ();
+  if(c.q) openQ(c.q); else if(c.b==="fq") openFQ(c.id); else if(!qv.hidden) closeQ();
 }
 
 /* ---------- 藏經閣：PDF 閱覽與下載 ---------- */
@@ -674,6 +697,7 @@ async function downloadPdf(it,btn){
 /* ---------- 題目與詳解 ---------- */
 const qv=$("#qview");
 function openQ(id){
+  $("#qBack").textContent="← 回到教室";
   const r=QOWN[id], [sec,unit,n]=QB[id], i=r.qs.indexOf(id);
   $("#qNo").textContent=`${id.slice(0,4)} 年 第 ${Number(id.slice(5))} 題`;
   $("#qRoom").textContent=`${r.f.lvl} ${r.t}・${i+1}/${r.qs.length}`;
@@ -683,6 +707,21 @@ function openQ(id){
     Array.from({length:n},(_,k)=>`<img src="q/${id}-${k+1}.jpg" alt="${id.slice(0,4)} 年第 ${Number(id.slice(5))} 題 題目與詳解${n>1?"（"+(k+1)+"/"+n+"）":""}" loading="lazy">`).join("");
   $("#qBody").scrollTop=0;
   if(qv.hidden){qv.hidden=false;document.documentElement.classList.add("in-class");$("#qBack").focus();}
+}
+/* 複賽文字題卡（FYQ）：文字＋KaTeX 渲染，與 openQ 共用 #qview；上一題／下一題在 FYQ 內切換 */
+function openFQ(id){
+  const d=FYQ.find(x=>x.id===id); if(!d) return;
+  const i=FYQ.indexOf(d);
+  $("#qNo").textContent=`${d.y} 年 複賽第 ${d.n} 題`;
+  $("#qRoom").textContent=`複賽室・${d.sec}・${i+1}/${FYQ.length}`;
+  $("#qPrev").disabled=i<=0; $("#qNext").disabled=i>=FYQ.length-1;
+  $("#qPrev").onclick=()=>go("fq"+FYQ[i-1].id); $("#qNext").onclick=()=>go("fq"+FYQ[i+1].id);
+  $("#qBack").textContent="← 回首頁";
+  $("#qBody").innerHTML=`<div class="qmeta">原分類：${esc(d.cat)}｜${esc(d.sec)}</div>`+
+    `<article class="fyq"><header><b>${d.y}年 第 ${d.n} 題</b><span>物奧複賽・${esc(d.sec)}</span></header><div class="qb">${d.body}</div><div class="sol">${d.sol}</div></article>`;
+  $("#qBody").scrollTop=0;
+  if(qv.hidden){qv.hidden=false;document.documentElement.classList.add("in-class");$("#qBack").focus();}
+  if(window.renderMathInElement) renderMathInElement($("#qBody"),{delimiters:[{left:"\\[",right:"\\]",display:true},{left:"\\(",right:"\\)",display:false}],throwOnError:false});
 }
 function closeQ(){qv.hidden=true;document.documentElement.classList.remove("in-class");}
 $("#qBack").onclick=()=>{const c=current(); go(c.troom?"u"+c.troom.no:"");};
