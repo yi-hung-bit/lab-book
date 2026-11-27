@@ -602,7 +602,7 @@ function route(){
       <p class="note">閱覽會在這裡直接翻頁看，下載會存成 PDF 檔。2018–2021 詳解與 2026 試題是紙本翻拍。</p>`;
     p.querySelectorAll(".fpv").forEach(b=>b.onclick=()=>openPdf(fyFile(b)));
     p.querySelectorAll(".fpd").forEach(b=>b.onclick=()=>downloadPdf(fyFile(b),b));
-    p.querySelectorAll(".dbfile").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
+    p.querySelectorAll(".dbfile[data-pdf]").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
   }else if(c.b==="db"){
     p.style.setProperty("--fc","var(--db)");
     const groups=[]; DB2.forEach(d=>{let g=groups.find(x=>x.g===d.g); if(!g){g={g:d.g,rows:[]};groups.push(g);} g.rows.push(d);});
