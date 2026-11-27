@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script id="katex-auto" defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <style>
 /* Layout: 院區 3D 場景（左：模擬大樓、右：競賽大樓，3F 空橋相連）＋ 右側導覽面板（院區名錄／樓層教室） */
 :root{
@@ -718,6 +718,9 @@ function openQ(id){
   if(qv.hidden){qv.hidden=false;document.documentElement.classList.add("in-class");$("#qBack").focus();}
 }
 /* 複賽文字題卡（FYQ）：文字＋KaTeX 渲染，與 openQ 共用 #qview；上一題／下一題在 FYQ 內切換 */
+function typesetQ(){var el=document.getElementById("qBody");if(!el)return;
+ if(typeof window.renderMathInElement==="function"){renderMathInElement(el,{delimiters:[{left:"\\[",right:"\\]",display:true},{left:"\\(",right:"\\)",display:false}],throwOnError:false});return;}
+ var s=document.getElementById("katex-auto");if(s&&!s._q){s._q=1;s.addEventListener("load",typesetQ);}}
 function openFQ(id){
   const d=FYQ.find(x=>x.id===id); if(!d) return;
   const i=FYQ.indexOf(d);
@@ -730,7 +733,7 @@ function openFQ(id){
     `<article class="fyq"><header><b>${d.y}年 複賽第 ${d.n} 題</b><span>物奧複賽・${esc(d.sec)}</span></header><div class="qb">${d.body}</div><div class="sol">${d.sol}</div></article>`;
   $("#qBody").scrollTop=0;
   if(qv.hidden){qv.hidden=false;document.documentElement.classList.add("in-class");$("#qBack").focus();}
-  if(window.renderMathInElement) renderMathInElement($("#qBody"),{delimiters:[{left:"\\[",right:"\\]",display:true},{left:"\\(",right:"\\)",display:false}],throwOnError:false});
+  typesetQ();
 }
 function closeQ(){qv.hidden=true;document.documentElement.classList.remove("in-class");}
 $("#qBack").onclick=()=>{const c=current(); go(c.troom?"u"+c.troom.no:"");};
