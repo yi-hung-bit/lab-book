@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>物理研究院</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1f3347">
@@ -10,9 +10,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<script id="katex-auto" defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <style>
 /* Layout: 院區 3D 場景（左：模擬大樓、右：競賽大樓，3F 空橋相連）＋ 右側導覽面板（院區名錄／樓層教室） */
 :root{
@@ -217,29 +214,6 @@ button.room:hover .door,button.room:focus-visible .door,a.room:hover .door,a.roo
 .qbody img{display:block;width:100%;max-width:900px;height:auto;background:#fff}
 .qbody img+img{border-top:1px dashed #d5dade}
 .qmeta{width:100%;max-width:900px;font-size:13px;color:var(--muted);margin-bottom:8px}
-/* 複賽文字題卡（FYQ）：截圖樣式——藍標頭＋題目＋詳解框；卡片固定淺色，與題目截圖一致 */
-.fyq{width:100%;max-width:900px;background:#fff;border:2px solid #2f6fa8;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.12);text-align:left;color:#1c2228}
-.fyq header{display:flex;align-items:baseline;gap:10px;padding:8px 14px;background:#2f6fa8;color:#fff}
-.fyq header b{font-size:16px;letter-spacing:.1em}
-.fyq header span{font-size:13px;opacity:.9}
-.fyq .qb{padding:14px 18px;font-size:16px;line-height:1.9}
-.fyq .qb p{margin:0 0 10px}
-.fyq .qb p:last-child{margin-bottom:0}
-.fyq .blank{display:inline-block;min-width:64px;border-bottom:2px solid #2f6fa8;text-align:center;font-family:var(--f-mono);font-weight:600;color:#2f6fa8}
-.fyq .sol{margin:0 14px 14px;border:1px solid #d5dade;border-radius:8px;background:#f4f6f7;padding:12px 16px}
-.fyq .sol h4{margin:0 0 8px;font-size:15px}
-.fyq .sol p{margin:0 0 8px;font-size:15px;line-height:1.9}
-.fyq .sol p:last-child{margin-bottom:0}
-.fyq .katex-display{margin:.6em 0}
-.fyq .qb::after{content:"";display:block;clear:both}
-.fyq .fig{float:right;width:200px;margin:2px 0 10px 16px;text-align:center}
-.fyq .fig img{width:100%;height:auto;background:#fff}
-.fyq .fig span{display:block;font-size:13px;color:#5b6670;margin-top:4px}
-@media (max-width:640px){.fyq .fig{float:none;width:min(240px,80%);margin:0 auto 12px}}
-.fyq table{border-collapse:collapse;margin:4px 0 12px;font-size:14.5px}
-.fyq th,.fyq td{border:1px solid #b9c0c4;padding:4px 10px;text-align:center}
-.fyq th{background:#e8edf0}
-.fyq .fnote{font-size:13.5px;color:#5b6670;border-top:1px dashed #cfd4d6;padding-top:8px}
 @media (max-width:900px){
   .site{grid-template-columns:1fr}
   .scene{height:520px}
@@ -375,7 +349,8 @@ const SIM=[
     {t:"功與動能・位能",d:"水平力 F 推光滑水平面上的木塊，可調 F、力與位移的夾角 θ、質量、初速與距離，看 W = Fd cos θ 與動能 K = ½mv² 一起變化（功能定理 W = ΔK），同向、銳角作正功、垂直不作功、鈍角與反向作負功；等速把物體直接舉高或沿光滑斜面推上去，W = mgh 存成重力位能，斜面省力但路程較長、功相同，並算功率 P = ΔW／Δt。附範例 5-1（8 N、2 kg、1 秒 → 4 m/s、2 m、16 J）與正功負功判斷練習（圖 5-1～5-3、小百科）。",sims:[["","b-work-energy"]]},
     {t:"力學能守恆",d:"小車在可拖曳改變高度的山丘與低谷軌道上運動，即時看動能 K、位能 U 與力學能 E = K + U 的長條與能量–時間圖（圖 5-4），黃色虛線標出能到達的最高高度 E/mg；加上摩擦看力學能減少、變成熱能，但 K + U + 熱能仍守恆。另有甲乙丙相同初速越過山丘、低谷與平直軌道的競走（想一想、示範實驗 4：凹陷軌道先到）、範例 5-2 水滑道落差相同末速都是 √(2gH) 但一開始陡的先到，以及範例 5-3 雲霄飛車 50 kg、20 m/s 到 4 m 高終點 K = 8000 J、v = 8√5 m/s。",sims:[["","b-energy-conservation"]]},
     {t:"氣體分子運動・溫度與絕對零度",d:"密閉瓶中的氣體分子亂撞，調整瓶底熱源溫度與氣體種類，看溫度越高、分子平均速率與平均動能越大，熱能是所有分子動能的總和，但每個分子的速率仍各不相同（速率分布、追蹤一個分子）；高溫區與低溫區經導熱隔板接觸，分子碰撞把能量由高溫傳到低溫直到熱平衡（圖 5-6）；四瓶定容氣體量壓力–溫度直線，外插都交在 −273.15 ℃，引出絕對零度與 K = ℃ + 273.15（圖 5-7、圖 5-8），附範例 5-4 溫度排序與換一題練習。",sims:[["","b-gas-temperature"]]},
-    {t:"能量轉換與發電效率",d:"水力發電：可調水位落差、流量與效率，看水的重力位能 → 動能 → 渦輪轉動動能 → 電能，P = η·ρQgh，附範例 5-5 烏山頭水力發電廠 24 m、41 m³/s、90 % → 8820 kW（圖 5-9）；火力發電：燃料化學能 → 高溫蒸氣 → 汽輪機 → 電能，調整鍋爐、汽輪機與發電機效率，看大部分能量從冷凝器排進海水、各部分加起來仍等於燃料的化學能（圖 5-13）；再把熱水瓶、電子鍋、微波爐插上延長線，I = P／V 相加 5 + 6 + 9 = 20 A 超過安全負載（圖 5-22），並換算用電度數（1 度 = 3.6 × 10⁶ J）與電費。",sims:[["","b-power-generation"]]}
+    {t:"能量轉換與發電效率",d:"水力發電：可調水位落差、流量與效率，看水的重力位能 → 動能 → 渦輪轉動動能 → 電能，P = η·ρQgh，附範例 5-5 烏山頭水力發電廠 24 m、41 m³/s、90 % → 8820 kW（圖 5-9）；火力發電：燃料化學能 → 高溫蒸氣 → 汽輪機 → 電能，調整鍋爐、汽輪機與發電機效率，看大部分能量從冷凝器排進海水、各部分加起來仍等於燃料的化學能（圖 5-13）；再把熱水瓶、電子鍋、微波爐插上延長線，I = P／V 相加 5 + 6 + 9 = 20 A 超過安全負載（圖 5-22），並換算用電度數（1 度 = 3.6 × 10⁶ J）與電費。",sims:[["","b-power-generation"]]},
+    {t:"質能互換與核分裂連鎖反應",d:"兩個質子與兩個中子 4.031884 u 結合成氦核 4.0017 u，少了 0.0302 u 變成能量，E = (Δm)c² ≈ 28 MeV（圖 5-15）；再比較太陽 4 個氫核融合（圖 5-16）、氘氚融合（圖 5-17）與鈾-235 分裂的質量虧損比例。連鎖反應：可調每次分裂放出的中子數 ν 與被下一個鈾核吸收的比例 f，一代一代看分裂樹與 kⁿ，比較熄滅、可控（核電廠）與失控（原子彈）；附範例 5-6 燃料丸減少 0.1 mg → 9 × 10⁹ J → 2500 度電，以及 α、β、γ、中子對紙、鋁板、鉛板、混凝土的穿透力（圖 5-20）。",sims:[["","b-mass-energy"]]}
   ]},
   {id:"1",lvl:"1F",name:"國中自然",sub:"",color:"var(--f1)",rooms:[
     {t:"台灣電力系統：電壓相位",d:"比較住宅的單相三線制和工廠的三相四線制，看各線電壓的波形、相位差與相量圖。",sims:[["","j-power-phase"]]},
@@ -420,19 +395,15 @@ const LIBRARY=[
   {vol:"第三冊",theme:"近代物理・實驗",chapters:[{t:"力學續論",p:1,files:[]},{t:"狹義相對論",p:54,files:[]},{t:"量子物理",p:95,files:[]},{t:"物質",p:110,files:[]},{t:"微中子",p:144,files:[]},{t:"熵的統計觀點",p:155,files:[]},{t:"實驗數據的處理",p:159,files:[]}]}
 ];
 /* 競賽大樓 複賽室：物理奧林匹亞複賽歷屆試題與詳解（OLY2，PDF 在 db2/fy-*.pdf；新增年份就加一筆 {y:年份, files:[{k:"q"|"a"|"semi",label,pdf,pages,note?}]}） */
-const OLY2=[{"y":1994,"files":[{"k":"q","label":"題目","pdf":"fy-1994-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1994-a.pdf","pages":7}]},{"y":1995,"files":[{"k":"q","label":"題目","pdf":"fy-1995-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1995-a.pdf","pages":8}]},{"y":1996,"files":[{"k":"q","label":"題目","pdf":"fy-1996-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1996-a.pdf","pages":8},{"k":"semi","label":"準決選題目","pdf":"fy-1996-semi.pdf","pages":3}]},{"y":1997,"files":[{"k":"q","label":"題目","pdf":"fy-1997-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-1997-a.pdf","pages":7},{"k":"semi","label":"準決選題目","pdf":"fy-1997-semi.pdf","pages":3}]},{"y":1998,"files":[{"k":"q","label":"題目","pdf":"fy-1998-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1998-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1998-semi.pdf","pages":3}]},{"y":1999,"files":[{"k":"q","label":"題目","pdf":"fy-1999-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1999-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1999-semi.pdf","pages":3}]},{"y":2000,"files":[{"k":"q","label":"題目","pdf":"fy-2000-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2000-a.pdf","pages":11}]},{"y":2001,"files":[{"k":"q","label":"題目","pdf":"fy-2001-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2001-a.pdf","pages":10}]},{"y":2002,"files":[{"k":"q","label":"題目","pdf":"fy-2002-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-2002-a.pdf","pages":12}]},{"y":2003,"files":[{"k":"q","label":"題目","pdf":"fy-2003-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2003-a.pdf","pages":11}]},{"y":2004,"files":[{"k":"q","label":"題目","pdf":"fy-2004-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2004-a.pdf","pages":9}]},{"y":2005,"files":[{"k":"q","label":"題目","pdf":"fy-2005-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2005-a.pdf","pages":12}]},{"y":2006,"files":[{"k":"q","label":"題目","pdf":"fy-2006-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2006-a.pdf","pages":12}]},{"y":2007,"files":[{"k":"q","label":"題目","pdf":"fy-2007-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2007-a.pdf","pages":18}]},{"y":2008,"files":[{"k":"q","label":"題目","pdf":"fy-2008-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2008-a.pdf","pages":11}]},{"y":2009,"files":[{"k":"q","label":"題目","pdf":"fy-2009-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2009-a.pdf","pages":20}]},{"y":2010,"files":[{"k":"q","label":"題目","pdf":"fy-2010-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2010-a.pdf","pages":12}]},{"y":2011,"files":[{"k":"q","label":"題目","pdf":"fy-2011-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2011-a.pdf","pages":14}]},{"y":2012,"files":[{"k":"q","label":"題目","pdf":"fy-2012-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2012-a.pdf","pages":10}]},{"y":2013,"files":[{"k":"q","label":"題目・力學","pdf":"fy-2013-01-q.pdf","pages":2},{"k":"a","label":"詳解・力學","pdf":"fy-2013-01-a.pdf","pages":3},{"k":"q","label":"題目・力學","pdf":"fy-2013-02-q.pdf","pages":2},{"k":"a","label":"詳解・力學","pdf":"fy-2013-02-a.pdf","pages":4},{"k":"q","label":"題目・熱學","pdf":"fy-2013-03-q.pdf","pages":3},{"k":"a","label":"詳解・熱學","pdf":"fy-2013-03-a.pdf","pages":7},{"k":"q","label":"題目・光學","pdf":"fy-2013-04-q.pdf","pages":2},{"k":"a","label":"詳解・光學","pdf":"fy-2013-04-a.pdf","pages":3},{"k":"q","label":"題目・電學","pdf":"fy-2013-05-q.pdf","pages":1},{"k":"a","label":"詳解・電學","pdf":"fy-2013-05-a.pdf","pages":4},{"k":"q","label":"題目・電磁學","pdf":"fy-2013-06-q.pdf","pages":2},{"k":"a","label":"詳解・電磁學","pdf":"fy-2013-06-a.pdf","pages":5}]},{"y":2014,"files":[{"k":"q","label":"題目・振動","pdf":"fy-2014-01-q.pdf","pages":3},{"k":"a","label":"詳解・振動","pdf":"fy-2014-01-a.pdf","pages":6},{"k":"q","label":"題目・電學","pdf":"fy-2014-02-q.pdf","pages":2},{"k":"a","label":"詳解・電學","pdf":"fy-2014-02-a.pdf","pages":4},{"k":"q","label":"題目・磁學","pdf":"fy-2014-03-q.pdf","pages":2},{"k":"a","label":"詳解・磁學","pdf":"fy-2014-03-a.pdf","pages":5},{"k":"q","label":"題目・熱學","pdf":"fy-2014-04-q.pdf","pages":2},{"k":"a","label":"詳解・熱學","pdf":"fy-2014-04-a.pdf","pages":3},{"k":"q","label":"題目・光學","pdf":"fy-2014-05-q.pdf","pages":2},{"k":"a","label":"詳解・光學","pdf":"fy-2014-05-a.pdf","pages":7},{"k":"q","label":"題目・原子力顯微術","pdf":"fy-2014-06-q.pdf","pages":2},{"k":"a","label":"詳解・原子力顯微術","pdf":"fy-2014-06-a.pdf","pages":5}]},{"y":2017,"files":[{"k":"q","label":"題目・熱學","pdf":"fy-2017-01-q.pdf","pages":2},{"k":"a","label":"詳解・熱學","pdf":"fy-2017-01-a.pdf","pages":3},{"k":"q","label":"題目・光學","pdf":"fy-2017-02-q.pdf","pages":3},{"k":"a","label":"詳解・光學","pdf":"fy-2017-02-a.pdf","pages":7},{"k":"q","label":"題目・磁學","pdf":"fy-2017-03-q.pdf","pages":2},{"k":"a","label":"詳解・磁學","pdf":"fy-2017-03-a.pdf","pages":4},{"k":"q","label":"題目・力學","pdf":"fy-2017-04-q.pdf","pages":1},{"k":"a","label":"詳解・力學","pdf":"fy-2017-04-a.pdf","pages":3},{"k":"q","label":"題目・電磁學","pdf":"fy-2017-05-q.pdf","pages":2},{"k":"a","label":"詳解・電磁學","pdf":"fy-2017-05-a.pdf","pages":3},{"k":"q","label":"題目・電子學","pdf":"fy-2017-06-q.pdf","pages":2},{"k":"a","label":"詳解・電子學","pdf":"fy-2017-06-a.pdf","pages":4}]}];
-/* 複賽文字題卡（FYQ）：題目與詳解打字版，KaTeX 數學；路由 #fqYYYY-NN（例 #fq2017-01）。
-   複賽室已開放（FY_CLOSED=false，2026-11-27），文字題卡列表在 fy 面板上方；新增題目就加一筆 FYQ，列表會自動出現。
-   2026-11-27：2017-01 範例卡片依 yihung 要求刪除（2017 已有重新排版 PDF 12 本）；機制保留，FYQ 為空時列表與「文字題卡 N 題」字樣不顯示。 */
-const FYQ=[];
+const OLY2=[{"y":1994,"files":[{"k":"q","label":"題目","pdf":"fy-1994-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1994-a.pdf","pages":7}]},{"y":1995,"files":[{"k":"q","label":"題目","pdf":"fy-1995-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1995-a.pdf","pages":8}]},{"y":1996,"files":[{"k":"q","label":"題目","pdf":"fy-1996-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1996-a.pdf","pages":8},{"k":"semi","label":"準決選題目","pdf":"fy-1996-semi.pdf","pages":3}]},{"y":1997,"files":[{"k":"q","label":"題目","pdf":"fy-1997-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-1997-a.pdf","pages":7},{"k":"semi","label":"準決選題目","pdf":"fy-1997-semi.pdf","pages":3}]},{"y":1998,"files":[{"k":"q","label":"題目","pdf":"fy-1998-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1998-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1998-semi.pdf","pages":3}]},{"y":1999,"files":[{"k":"q","label":"題目","pdf":"fy-1999-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-1999-a.pdf","pages":9},{"k":"semi","label":"準決選題目","pdf":"fy-1999-semi.pdf","pages":3}]},{"y":2000,"files":[{"k":"q","label":"題目","pdf":"fy-2000-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2000-a.pdf","pages":11}]},{"y":2001,"files":[{"k":"q","label":"題目","pdf":"fy-2001-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2001-a.pdf","pages":10}]},{"y":2002,"files":[{"k":"q","label":"題目","pdf":"fy-2002-q.pdf","pages":3},{"k":"a","label":"詳解","pdf":"fy-2002-a.pdf","pages":12}]},{"y":2003,"files":[{"k":"q","label":"題目","pdf":"fy-2003-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2003-a.pdf","pages":11}]},{"y":2004,"files":[{"k":"q","label":"題目","pdf":"fy-2004-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2004-a.pdf","pages":9}]},{"y":2005,"files":[{"k":"q","label":"題目","pdf":"fy-2005-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2005-a.pdf","pages":12}]},{"y":2006,"files":[{"k":"q","label":"題目","pdf":"fy-2006-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2006-a.pdf","pages":12}]},{"y":2007,"files":[{"k":"q","label":"題目","pdf":"fy-2007-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2007-a.pdf","pages":18}]},{"y":2008,"files":[{"k":"q","label":"題目","pdf":"fy-2008-q.pdf","pages":4},{"k":"a","label":"詳解","pdf":"fy-2008-a.pdf","pages":11}]},{"y":2009,"files":[{"k":"q","label":"題目","pdf":"fy-2009-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2009-a.pdf","pages":20}]},{"y":2010,"files":[{"k":"q","label":"題目","pdf":"fy-2010-q.pdf","pages":6},{"k":"a","label":"詳解","pdf":"fy-2010-a.pdf","pages":12}]},{"y":2011,"files":[{"k":"q","label":"題目","pdf":"fy-2011-q.pdf","pages":5},{"k":"a","label":"詳解","pdf":"fy-2011-a.pdf","pages":14}]},{"y":2012,"files":[{"k":"q","label":"題目","pdf":"fy-2012-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2012-a.pdf","pages":10}]},{"y":2013,"files":[{"k":"q","label":"題目","pdf":"fy-2013-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2013-a.pdf","pages":12}]},{"y":2014,"files":[{"k":"q","label":"題目","pdf":"fy-2014-q.pdf","pages":9},{"k":"a","label":"詳解","pdf":"fy-2014-a.pdf","pages":14}]},{"y":2017,"files":[{"k":"q","label":"題目","pdf":"fy-2017-q.pdf","pages":7},{"k":"a","label":"詳解","pdf":"fy-2017-a.pdf","pages":7}]},{"y":2018,"files":[{"k":"a","label":"詳解","pdf":"fy-2018-a.pdf","pages":14,"note":"翻拍"}]},{"y":2019,"files":[{"k":"a","label":"詳解","pdf":"fy-2019-a.pdf","pages":10,"note":"翻拍"}]},{"y":2020,"files":[{"k":"a","label":"詳解","pdf":"fy-2020-a.pdf","pages":10,"note":"翻拍"}]},{"y":2021,"files":[{"k":"a","label":"詳解","pdf":"fy-2021-a.pdf","pages":11,"note":"翻拍"}]},{"y":2026,"files":[{"k":"q","label":"題目","pdf":"fy-2026-q.pdf","pages":10,"note":"翻拍"},{"k":"a","label":"參考解答","pdf":"fy-2026-a.pdf","pages":15,"note":"翻拍"}]}];
 /* 二階資料庫：大學申請入學第二階段物理筆試（台大電機）的普通物理銜接講義，依章拆成 PDF 放在 db2/ge-*.pdf */
 const DB2=[{"no": "全", "t": "普通物理銜接講義（全本）", "g": "全本", "pdf": "ge-full.pdf", "pages": 310}, {"no": "前", "t": "封面・給讀者・目錄", "g": "導讀", "pdf": "ge-front.pdf", "pages": 11}, {"no": "0", "t": "導讀與數學工具", "g": "導讀", "pdf": "ge-00.pdf", "pages": 9}, {"no": "1", "t": "運動學", "g": "力學", "pdf": "ge-01.pdf", "pages": 13}, {"no": "2", "t": "靜力平衡", "g": "力學", "pdf": "ge-02.pdf", "pages": 13}, {"no": "3", "t": "牛頓運動定律", "g": "力學", "pdf": "ge-03.pdf", "pages": 16}, {"no": "4", "t": "功與能", "g": "力學", "pdf": "ge-04.pdf", "pages": 18}, {"no": "5", "t": "行星運動與萬有引力", "g": "力學", "pdf": "ge-05.pdf", "pages": 13}, {"no": "6", "t": "碰撞", "g": "力學", "pdf": "ge-06.pdf", "pages": 13}, {"no": "7", "t": "轉動", "g": "力學", "pdf": "ge-07.pdf", "pages": 19}, {"no": "8", "t": "流體力學", "g": "流體與熱學", "pdf": "ge-08.pdf", "pages": 18}, {"no": "9", "t": "熱力學", "g": "流體與熱學", "pdf": "ge-09.pdf", "pages": 22}, {"no": "10", "t": "振動與聲波", "g": "波動與光學", "pdf": "ge-10.pdf", "pages": 16}, {"no": "11", "t": "幾何光學", "g": "波動與光學", "pdf": "ge-11.pdf", "pages": 18}, {"no": "12", "t": "物理光學", "g": "波動與光學", "pdf": "ge-12.pdf", "pages": 20}, {"no": "13", "t": "靜電學", "g": "電磁學", "pdf": "ge-13.pdf", "pages": 16}, {"no": "14", "t": "電路", "g": "電磁學", "pdf": "ge-14.pdf", "pages": 22}, {"no": "15", "t": "磁場", "g": "電磁學", "pdf": "ge-15.pdf", "pages": 13}, {"no": "16", "t": "電磁感應", "g": "電磁學", "pdf": "ge-16.pdf", "pages": 13}, {"no": "17", "t": "近代物理", "g": "近代物理", "pdf": "ge-17.pdf", "pages": 15}, {"no": "A", "t": "模擬試題", "g": "附錄", "pdf": "ge-A.pdf", "pages": 4}, {"no": "B", "t": "歷屆題號與章節對照", "g": "附錄", "pdf": "ge-B.pdf", "pages": 2}, {"no": "C", "t": "常數與公式速查", "g": "附錄", "pdf": "ge-C.pdf", "pages": 3}, {"no": "D", "t": "近年試題速查（111、113、114年）", "g": "附錄", "pdf": "ge-D.pdf", "pages": 3}];
 const DB2_TITLE="大學申請入學 第二階段物理筆試";
 const DB2_BOOK="普通物理銜接講義";
-/* 學生版（GitHub Pages）：二階講義、藏經閣與複賽室只能線上閱覽，不提供下載按鈕（2026-11-27 複賽室亦改為不提供下載） */
+/* 學生版（GitHub Pages）：二階講義與藏經閣只能線上閱覽，不提供下載按鈕 */
 const DB2_VIEW_ONLY=/github\.io$/.test(location.hostname);
-/* 競賽大樓複賽室已開放（2026-11-27，yihung 決定打開） */
-const FY_CLOSED=false;
+/* 學生版先關閉競賽大樓複賽室 */
+const FY_CLOSED=DB2_VIEW_ONLY;
 const LIB_TITLE="2009 年國際物理奧林匹亞競賽 國家代表隊選訓教材";
 const GAMES=[
   {t:"物理快打：科學家格鬥賽",d:"選牛頓、愛因斯坦等科學家和電腦對戰，用萬有引力蘋果之類的物理必殺技一決勝負。",url:"https://yi-hung-bit.github.io/physics-fighter/",tag:"格鬥"},
@@ -498,7 +469,6 @@ function current(){
   const h=location.hash.slice(1);
   let m=/^r(\w+)$/.exec(h); if(m){const r=ROOMS.find(x=>x.no===m[1]); if(r) return {b:"s",id:r.f.id,room:r};}
   m=/^q(\d{4}-\d{2})$/.exec(h); if(m&&QOWN[m[1]]){const r=QOWN[m[1]]; return {b:"t",id:r.f.id,troom:r,q:m[1]};}
-  m=/^fq(\d{4}-\d{2})$/.exec(h); if(m&&FYQ.find(x=>x.id===m[1])) return {b:"fq",id:m[1]};
   m=/^u(\w+)-(\d+)$/.exec(h); if(m&&tFloor(m[1])){const r=tFloor(m[1]).rooms[Number(m[2])-1]; if(r) return {b:"t",id:m[1],troom:r};}
   m=/^t(\w+)$/.exec(h); if(m&&tFloor(m[1])) return {b:"t",id:m[1]};
   m=/^k(\d+)$/.exec(h); if(m&&kFloor(m[1])) return {b:"k",id:m[1]};
@@ -593,15 +563,14 @@ function route(){
     p.style.setProperty("--fc","var(--plate-t)");
     const nf=OLY2.reduce((a,d)=>a+d.files.length,0), decs={};
     OLY2.slice().reverse().forEach(d=>{const k=Math.floor(d.y/10)*10;(decs[k]=decs[k]||[]).push(d);});
-    p.innerHTML=`<div class="panel-head"><div class="badge">複</div><div><div class="bld">競賽大樓・複賽室</div><h2>物奧複賽</h2><p>物理奧林匹亞複賽 歷屆試題與詳解・${OLY2.length} 屆・${nf} 份 PDF${FYQ.length?`・文字題卡 ${FYQ.length} 題`:``}</p></div></div>
+    p.innerHTML=`<div class="panel-head"><div class="badge">複</div><div><div class="bld">競賽大樓・複賽室</div><h2>物奧複賽</h2><p>物理奧林匹亞複賽 歷屆試題與詳解・${OLY2.length} 屆・${nf} 份 PDF</p></div></div>
       ${elevator("t",null)}
-      ${FYQ.length?`<p class="dbdec">文字題卡</p><div class="dbyears">${FYQ.slice().reverse().map(d=>`<div class="dbrow"><span class="yy">${d.y}<small>第 ${d.n} 題</small></span><div class="dbfiles"><span class="dbfile"><em>複賽第 ${d.n} 題・${esc(d.sec)} <small>${esc(d.cat)}・打字版</small></em><button type="button" data-h="fq${d.id}">看題卡</button></span></div></div>`).join("")}</div>`:""}
       <div class="dbyears">${Object.keys(decs).sort((a,b)=>b-a).map(k=>`<p class="dbdec">${k} 年代</p>`+decs[k].map(d=>{const has=t=>d.files.some(f=>f.k===t);
-        return `<div class="dbrow"><span class="yy">${d.y}</span><div class="dbfiles">${d.files.map((f,fi)=>`<span class="dbfile" data-pdf="${esc(f.pdf)}"><em>${esc(f.label)} <small>${f.pages} 頁${f.note?"・"+esc(f.note):""}</small></em><button type="button" class="fpv" data-y="${d.y}" data-f="${fi}">閱覽</button>${DB2_VIEW_ONLY?"":`<button type="button" class="pd fpd" data-y="${d.y}" data-f="${fi}">下載</button>`}</span>`).join("")}${has("q")?"":`<span class="dbmiss">題目尚未收錄</span>`}${has("a")?"":`<span class="dbmiss">詳解尚未收錄</span>`}</div></div>`;}).join("")).join("")}</div>
-      <p class="note">${DB2_VIEW_ONLY?"點「閱覽」在這裡直接翻頁看。":"閱覽會在這裡直接翻頁看，下載會存成 PDF 檔。"}</p>`;
+        return `<div class="dbrow"><span class="yy">${d.y}</span><div class="dbfiles">${d.files.map((f,fi)=>`<span class="dbfile" data-pdf="${esc(f.pdf)}"><em>${esc(f.label)} <small>${f.pages} 頁${f.note?"・"+esc(f.note):""}</small></em><button type="button" class="fpv" data-y="${d.y}" data-f="${fi}">閱覽</button><button type="button" class="pd fpd" data-y="${d.y}" data-f="${fi}">下載</button></span>`).join("")}${has("q")?"":`<span class="dbmiss">題目尚未收錄</span>`}${has("a")?"":`<span class="dbmiss">詳解尚未收錄</span>`}</div></div>`;}).join("")).join("")}</div>
+      <p class="note">閱覽會在這裡直接翻頁看，下載會存成 PDF 檔。2018–2021 詳解與 2026 試題是紙本翻拍。</p>`;
     p.querySelectorAll(".fpv").forEach(b=>b.onclick=()=>openPdf(fyFile(b)));
     p.querySelectorAll(".fpd").forEach(b=>b.onclick=()=>downloadPdf(fyFile(b),b));
-    p.querySelectorAll(".dbfile[data-pdf]").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
+    p.querySelectorAll(".dbfile").forEach(el=>fetch("db2/"+el.dataset.pdf,{method:"HEAD"}).then(r=>{if(!r.ok)throw 0;}).catch(()=>{el.querySelectorAll("button").forEach(x=>x.disabled=true);el.querySelector("small").textContent+="・僅限研究院";}));
   }else if(c.b==="db"){
     p.style.setProperty("--fc","var(--db)");
     const groups=[]; DB2.forEach(d=>{let g=groups.find(x=>x.g===d.g); if(!g){g={g:d.g,rows:[]};groups.push(g);} g.rows.push(d);});
@@ -636,7 +605,7 @@ function route(){
       <div class="dir">
         <section><h3>數學大樓 <small>數學物理方法・${MB.length} 層</small></h3>${MB.slice().reverse().map(f=>dirRow("m",f)).join("")}</section>
         <section><h3>競賽大樓 B 棟 <small>學科能力競賽・${KB.length} 層</small></h3>${KB.slice().reverse().map(f=>dirRow("k",f)).join("")}</section>
-        <section><h3>競賽大樓 A 棟 <small>物奧初選・${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}${FYQ.length?`・文字題卡 ${FYQ.length} 題`:``}</small></span></button>`}</section>
+        <section><h3>競賽大樓 A 棟 <small>物奧初選・${THEORY.length} 層</small></h3>${THEORY.slice().reverse().map(f=>dirRow("t",f)).join("")}${FY_CLOSED?"":`<button type="button" class="dir-row" data-h="fy" style="--fc:var(--plate-t)"><span class="n">複</span><span><b>複賽室</b><small>物奧複賽歷屆試題與詳解・${OLY2[0].y}–${OLY2[OLY2.length-1].y}</small></span></button>`}</section>
         <section><h3>實驗大樓 <small>競賽實驗題</small></h3><button type="button" class="dir-row" data-h="lab" style="--fc:var(--lab)"><span class="n">實</span><span><b>實驗大樓</b><small>${esc(LAB.t)}・歷屆學科能力競賽實驗題虛擬實驗室・講義 ${LABDOCS.length} 份</small></span></button></section>
         <section><h3>物理藏經閣 <small>選訓教材 ${LIBRARY.length} 冊</small></h3><button type="button" class="dir-row" data-h="lib" style="--fc:var(--lib)"><span class="n">經</span><span><b>物理藏經閣</b><small>${esc(LIBRARY.map(v=>v.vol+" "+v.theme).join("・"))}</small></span></button></section>
         <section><h3>二階資料庫 <small>申請入學二階筆試</small></h3><button type="button" class="dir-row" data-h="db" style="--fc:var(--db)"><span class="n">二</span><span><b>二階資料庫</b><small>${esc(DB2_BOOK)}・依章閱覽與下載</small></span></button></section>
@@ -647,7 +616,7 @@ function route(){
   }
   p.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>go(b.dataset.h));
   if(c.room) enter(c.room); else if(!cls.hidden) leave();
-  if(c.q) openQ(c.q); else if(c.b==="fq") openFQ(c.id); else if(!qv.hidden) closeQ();
+  if(c.q) openQ(c.q); else if(!qv.hidden) closeQ();
 }
 
 /* ---------- 藏經閣：PDF 閱覽與下載 ---------- */
@@ -669,7 +638,7 @@ async function openPdf(it){
   const body=$("#pvBody"); body.innerHTML=`<p class="pvmsg">載入中…</p>`; body.scrollTop=0;
   pv.hidden=false; document.documentElement.classList.add("in-class"); $("#pvClose").focus();
   $("#pvDl").onclick=()=>downloadPdf(it,$("#pvDl"));
-  $("#pvDl").hidden=!!it.viewOnly||DB2_VIEW_ONLY&&(it.url.startsWith("db2/ge-")||it.url.startsWith("db2/fy-")||it.url.startsWith("library/")||it.url.startsWith("math/"));
+  $("#pvDl").hidden=!!it.viewOnly||DB2_VIEW_ONLY&&(it.url.startsWith("db2/ge-")||it.url.startsWith("library/")||it.url.startsWith("math/"));
   try{
     const lib=await loadPdfJs();
     const doc=await lib.getDocument({url:it.url}).promise; if(pv.hidden) return; pvDoc=doc;
@@ -706,7 +675,6 @@ async function downloadPdf(it,btn){
 /* ---------- 題目與詳解 ---------- */
 const qv=$("#qview");
 function openQ(id){
-  $("#qBack").textContent="← 回到教室";
   const r=QOWN[id], [sec,unit,n]=QB[id], i=r.qs.indexOf(id);
   $("#qNo").textContent=`${id.slice(0,4)} 年 第 ${Number(id.slice(5))} 題`;
   $("#qRoom").textContent=`${r.f.lvl} ${r.t}・${i+1}/${r.qs.length}`;
@@ -716,24 +684,6 @@ function openQ(id){
     Array.from({length:n},(_,k)=>`<img src="q/${id}-${k+1}.jpg" alt="${id.slice(0,4)} 年第 ${Number(id.slice(5))} 題 題目與詳解${n>1?"（"+(k+1)+"/"+n+"）":""}" loading="lazy">`).join("");
   $("#qBody").scrollTop=0;
   if(qv.hidden){qv.hidden=false;document.documentElement.classList.add("in-class");$("#qBack").focus();}
-}
-/* 複賽文字題卡（FYQ）：文字＋KaTeX 渲染，與 openQ 共用 #qview；上一題／下一題在 FYQ 內切換 */
-function typesetQ(){var el=document.getElementById("qBody");if(!el)return;
- if(typeof window.renderMathInElement==="function"){renderMathInElement(el,{delimiters:[{left:"\\[",right:"\\]",display:true},{left:"\\(",right:"\\)",display:false}],throwOnError:false});return;}
- var s=document.getElementById("katex-auto");if(s&&!s._q){s._q=1;s.addEventListener("load",typesetQ);}}
-function openFQ(id){
-  const d=FYQ.find(x=>x.id===id); if(!d) return;
-  const i=FYQ.indexOf(d);
-  $("#qNo").textContent=`${d.y} 年 複賽第 ${d.n} 題`;
-  $("#qRoom").textContent=`複賽室・${d.sec}・${i+1}/${FYQ.length}`;
-  $("#qPrev").disabled=i<=0; $("#qNext").disabled=i>=FYQ.length-1;
-  $("#qPrev").onclick=()=>go("fq"+FYQ[i-1].id); $("#qNext").onclick=()=>go("fq"+FYQ[i+1].id);
-  $("#qBack").textContent="← 回首頁";
-  $("#qBody").innerHTML=`<div class="qmeta">原分類：${esc(d.cat)}｜${esc(d.sec)}</div>`+
-    `<article class="fyq"><header><b>${d.y}年 複賽第 ${d.n} 題</b><span>物奧複賽・${esc(d.sec)}</span></header><div class="qb">${d.body}</div><div class="sol">${d.sol}</div></article>`;
-  $("#qBody").scrollTop=0;
-  if(qv.hidden){qv.hidden=false;document.documentElement.classList.add("in-class");$("#qBack").focus();}
-  typesetQ();
 }
 function closeQ(){qv.hidden=true;document.documentElement.classList.remove("in-class");}
 $("#qBack").onclick=()=>{const c=current(); go(c.troom?"u"+c.troom.no:"");};
@@ -1425,7 +1375,6 @@ route();
 window.addEventListener("hashchange",route);
 if(!init3D()){$("#scene").hidden=true;$("#nogl").hidden=false;}
 </script>
-
 
 <script>
 if("serviceWorker" in navigator){

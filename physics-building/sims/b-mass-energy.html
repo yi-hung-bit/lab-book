@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>質能互換與核分裂連鎖反應</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070a12;--bg2:#0c111d;--panel:#111726;--panel2:#161d2e;--line:#222c42;--txt:#e8edf6;--muted:#8492aa;--dim:#5b6880;--acc:#ffd166;--phos:#7dffc4;--cP:#ff6b6b;--cN:#5aa9ff;--cE:#ffd166;--cU:#a3e635;--pos:#84cc16;--neg:#ff5c8a;--warn:#fb923c}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{padding:clamp(12px,2.2vw,28px);background:radial-gradient(900px 500px at 80% -10%,rgba(255,209,102,.07),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font-size:clamp(23px,3.3vw,36px);line-height:1.2}
+.lede{color:var(--muted);max-width:78ch;margin-top:6px;font-size:15px}
+.lede b{color:var(--acc)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+button{font-family:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:7px 10px;border-radius:9px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+button.primary{background:var(--acc);border-color:var(--acc);color:#231a02;font-weight:700}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.pad{padding:14px 16px}
+.head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;padding:12px 16px 4px}
+.head .t{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.head .n{font-size:12.5px;color:var(--muted)}
+.box{margin:6px 14px 10px;border-radius:10px;overflow:hidden;border:1px solid #1b2336;background:#04060b;position:relative}
+canvas{display:block;width:100%;touch-action:manipulation}
+#sTitle{text-transform:none;letter-spacing:.08em}
+#scene{height:340px}
+#chart{height:170px}
+@media(max-width:560px){#scene{height:270px}#chart{height:150px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.ctl{margin-top:12px}
+.ctl .r{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:8px}
+.ctl .r span{font-family:"JetBrains Mono",monospace;color:var(--acc);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;background:linear-gradient(90deg,#334155,#64748b)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0c1322;cursor:pointer}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+@media(max-width:420px){.read{grid-template-columns:repeat(2,1fr)}}
+.read div{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.read small{display:block;font-size:11.5px;color:var(--dim)}
+.read b{font-family:"JetBrains Mono",monospace;font-size:14.5px;font-weight:700;color:var(--phos);word-break:break-all}
+.state{margin-top:12px;padding:10px 14px;border-radius:11px;font-weight:700;font-size:14.5px;text-align:center;border:1px solid var(--line)}
+.state.p{background:rgba(132,204,22,.1);color:var(--pos);border-color:rgba(132,204,22,.4)}
+.state.n{background:rgba(255,92,138,.1);color:var(--neg);border-color:rgba(255,92,138,.4)}
+.state.w{background:rgba(251,146,60,.1);color:var(--warn);border-color:rgba(251,146,60,.4)}
+.note{margin-top:12px;padding:12px 14px;background:#0a0f1a;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--acc);font-weight:500}
+.eq{font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--txt);background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:10px;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips button{font-size:12.5px;padding:5px 9px}
+.sol{font-size:13.5px;color:var(--muted);line-height:1.9;margin-top:10px}
+.sol b{color:var(--phos);font-family:"JetBrains Mono",monospace;font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);padding:0 16px 12px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:middle;margin-right:5px}
+.tog{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tog label{display:flex;align-items:center;gap:5px;font-size:13px;border:1px solid var(--line);border-radius:9px;padding:5px 9px;background:var(--panel2);cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+th,td{border-bottom:1px solid var(--line);padding:5px 4px;text-align:center}
+th{color:var(--dim);font-weight:500}
+td.ok{color:var(--pos)} td.no{color:var(--neg)} td.half{color:var(--warn)}
+footer{margin-top:18px;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:84ch}
+footer b{color:var(--muted);font-weight:500}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">5-4 · Mass–Energy Equivalence &amp; Nuclear Energy</div>
+  <h1>質能互換與核分裂連鎖反應</h1>
+  <p class="lede">兩個質子和兩個中子結合成氦核後，總質量<b>反而變少了</b>。少掉的質量 Δm 並沒有消失，而是變成能量放出來：<b>E = (Δm)c²</b>。因為 c² = 9 × 10¹⁶ m²/s² 非常大，一點點質量就對應極大的能量，這就是太陽發光（核融合）與核能發電（核分裂）的能量來源。</p>
+  <div class="tabs" role="group" aria-label="模式">
+    <button type="button" data-mode="A" aria-pressed="true">① 質量虧損 E = (Δm)c²</button>
+    <button type="button" data-mode="B" aria-pressed="false">② 核分裂連鎖反應</button>
+    <button type="button" data-mode="C" aria-pressed="false">③ 範例 5-6 燃料丸</button>
+    <button type="button" data-mode="D" aria-pressed="false">④ 輻射的穿透力</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><span class="t" id="sTitle"></span><span class="n" id="sNote"></span></div>
+      <div class="box"><canvas id="scene" aria-label="核反應示意動畫"></canvas></div>
+      <div id="chartWrap" hidden>
+        <div class="head" style="padding-top:0"><span class="t">每一代的分裂次數（對數座標）</span><span class="n">長條＝這次模擬，虛線＝kⁿ</span></div>
+        <div class="box"><canvas id="chart" aria-label="每一代分裂次數長條圖"></canvas></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="card">
+      <!-- A -->
+      <div id="ctlA" class="pad">
+        <div class="head" style="padding:0 0 4px"><span class="t">選一個核反應</span><span class="n">1 u = 1.6605 × 10⁻²⁷ kg</span></div>
+        <div class="seg" role="group" aria-label="核反應" id="rxBtns"></div>
+        <div class="eq" id="rxEq"></div>
+        <div class="read">
+          <div><small>反應前總質量</small><b id="aM1"></b></div>
+          <div><small>反應後總質量</small><b id="aM2"></b></div>
+          <div><small>質量虧損 Δm</small><b id="aDm"></b></div>
+          <div><small>Δm（公斤）</small><b id="aDk"></b></div>
+          <div><small>放出能量 E = (Δm)c²</small><b id="aEJ"></b></div>
+          <div><small>換成 MeV</small><b id="aEM"></b></div>
+          <div><small>質量減少的比例</small><b id="aPct"></b></div>
+          <div><small>1 kg 燃料放出</small><b id="aPerKg"></b></div>
+          <div><small>相當於燒煤</small><b id="aCoal"></b></div>
+        </div>
+        <div class="seg" style="margin-top:12px"><button type="button" id="aPlay" class="primary">再看一次反應</button></div>
+        <div class="note" id="aNote"></div>
+      </div>
+
+      <!-- B -->
+      <div id="ctlB" class="pad" hidden>
+        <div class="head" style="padding:0 0 4px"><span class="t">鈾-235 的連鎖反應</span><span class="n">每次分裂約放出 200 MeV</span></div>
+        <div class="chips"><button type="button" data-pre="die">熄滅（k &lt; 1）</button><button type="button" data-pre="ok">核電廠：可控（k = 1）</button><button type="button" data-pre="boom">失控：原子彈（k &gt; 1）</button></div>
+        <div class="ctl"><div class="r"><label for="bNu">每次分裂平均放出的中子數 ν</label><span id="obNu"></span></div><input type="range" id="bNu" min="2" max="3" step="0.1" value="2.5"></div>
+        <div class="ctl"><div class="r"><label for="bF">中子被下一個鈾-235 吸收而引發分裂的比例 f</label><span id="obF"></span></div><input type="range" id="bF" min="0.1" max="1" step="0.01" value="0.4"></div>
+        <p style="font-size:12.5px;color:var(--dim);margin-top:4px">其餘的中子跑出反應爐，或被控制棒（硼、鎘）等吸收。控制棒插得越深，f 越小。</p>
+        <div class="seg" style="margin-top:12px"><button type="button" id="bStep" class="primary">下一代 ▶</button><button type="button" id="bAuto">自動</button><button type="button" id="bReset">重來</button></div>
+        <div class="read">
+          <div><small>增殖因數 k = ν × f</small><b id="bK"></b></div>
+          <div><small>目前世代 n</small><b id="bGen"></b></div>
+          <div><small>這一代的分裂次數</small><b id="bNow"></b></div>
+          <div><small>上一代放出的中子</small><b id="bNeu"></b></div>
+          <div><small>累計分裂次數</small><b id="bTot"></b></div>
+          <div><small>累計放出能量</small><b id="bE"></b></div>
+        </div>
+        <div class="state" id="bState"></div>
+        <div class="note">一顆中子打中鈾-235，原子核分裂成<b>鋇</b>、<b>氪</b>兩個較輕的核，並放出 2～3 個中子。這些中子若再打中其他鈾-235，就會一代接一代地分裂下去（連鎖反應）。平均每次分裂能引發 <b>k</b> 次下一代分裂：k &lt; 1 反應逐漸停止，k = 1 每代分裂數大致不變（核電廠用控制棒維持），k &gt; 1 分裂數 kⁿ 急速增加、能量在極短時間內爆發（原子彈）。</div>
+      </div>
+
+      <!-- C -->
+      <div id="ctlC" class="pad" hidden>
+        <div class="head" style="padding:0 0 4px"><span class="t">範例 5-6 核燃料丸</span><span class="n">c = 3 × 10⁸ m/s</span></div>
+        <div class="chips"><button type="button" data-dm="0.1">課本：0.1 mg</button><button type="button" data-dm="0.01">0.01 mg</button><button type="button" data-dm="1">1 mg</button><button type="button" data-dm="10">10 mg</button></div>
+        <div class="ctl"><div class="r"><label for="cDm">燃料丸在核反應中減少的質量 Δm</label><span id="ocDm"></span></div><input type="range" id="cDm" min="-2" max="1" step="0.01" value="-1"></div>
+        <div class="read">
+          <div><small>Δm（公斤）</small><b id="cDk"></b></div>
+          <div><small>E = (Δm)c²</small><b id="cEJ"></b></div>
+          <div><small>電能（度＝kWh）</small><b id="cKWh"></b></div>
+          <div><small>家庭用電（每月 300 度）</small><b id="cHome"></b></div>
+          <div><small>相當於燒煤</small><b id="cCoal"></b></div>
+          <div><small>60 W 燈泡可亮</small><b id="cBulb"></b></div>
+        </div>
+        <div class="sol" id="cSol"></div>
+        <div class="note">1 度電 = 1 kWh = 1000 W × 3600 s = <b>3.6 × 10⁶ J</b>。範例假設減少的質量全部變成電能；實際核電廠把熱能轉成電能的效率約只有三分之一，其餘成為廢熱。比較「燒煤」一欄，以煤每公斤約 2.9 × 10⁷ J 估計。</div>
+      </div>
+
+      <!-- D -->
+      <div id="ctlD" class="pad" hidden>
+        <div class="head" style="padding:0 0 4px"><span class="t">放射線與遮蔽物</span><span class="n">圖 5-20</span></div>
+        <div class="seg" role="group" aria-label="放射線種類" id="dKinds">
+          <button type="button" data-k="all" aria-pressed="true">全部</button>
+          <button type="button" data-k="a" aria-pressed="false">α 射線</button>
+          <button type="button" data-k="b" aria-pressed="false">β 射線</button>
+          <button type="button" data-k="g" aria-pressed="false">γ 射線</button>
+          <button type="button" data-k="n" aria-pressed="false">中子</button>
+        </div>
+        <div class="tog" id="dWalls"></div>
+        <table aria-label="各種放射線通過遮蔽物的比例">
+          <thead><tr><th>到達偵測器</th><th>α</th><th>β</th><th>γ</th><th>中子</th></tr></thead>
+          <tbody><tr><td>比例</td><td id="dpa"></td><td id="dpb"></td><td id="dpg"></td><td id="dpn"></td></tr></tbody>
+        </table>
+        <div class="note"><b>α 射線</b>是氦核（帶 +2e），一張紙就擋住；<b>β 射線</b>是高速電子，可穿過紙，需要幾毫米的金屬板（例如鋁板）；<b>γ 射線</b>是能量很高的電磁波，要用很厚的鉛板或混凝土才能大幅減弱；<b>中子</b>不帶電，連鉛板都容易穿過，要用很厚的混凝土或水（含大量氫原子）才能擋下。所以核電廠的反應爐外有厚厚的混凝土屏蔽。</div>
+      </div>
+    </section>
+  </div>
+
+  <footer><b>教學提示：</b>① 先讓學生猜「兩個質子加兩個中子結合後質量是多少」，再揭曉 4.0017 u 比 4.031884 u 少了 0.0302 u。② 比較四個反應的「質量減少比例」：核融合約 0.4%～0.7%，核分裂約 0.08%，但都比燃燒（化學反應，約十億分之一）大上百萬倍。③ 連鎖反應中先把 k 固定在 1，再只改控制棒（f）讓學生體會「控制棒插入→k 變小→反應變慢」。④ 原子質量取自原子質量表（含電子），課本氦核數值為 4.0017 u。</footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const fmt=(n,d=1)=>{const r=+(+n).toFixed(d);return(Object.is(r,-0)?0:r).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});};
+const sup=e=>String(e).replace(/-/,"⁻").replace(/\d/g,c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[c]);
+const sci=(n,d=2)=>{if(n===0)return"0";const e=Math.floor(Math.log10(Math.abs(n)));let m=n/Math.pow(10,e);if(+m.toFixed(d)>=10){m/=10;return fmt(m,d)+" × 10"+sup(e+1);}return fmt(m,d)+" × 10"+sup(e);};
+const big=(n)=>n<1e5?fmt(n,0):sci(n,2);
+function fit(cv){const d=Math.min(2,devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w,h};}
+const C2=9e16, U_KG=1.6605e-27, U_MEV=931.5, MEV_J=1.602e-13, COAL=2.9e7;
+const COL={p:"#ff6b6b",n:"#5aa9ff",e:"#ffd166",dim:"#5b6880",txt:"#e8edf6",mut:"#8492aa",phos:"#7dffc4",u:"#a3e635",ba:"#c084fc",kr:"#43d6ff"};
+
+let mode="A";
+const scene=$("#scene"), chart=$("#chart");
+
+/* ================= A：質量虧損 ================= */
+const RX={
+  he:{name:"氦核的結合",fig:"圖 5-15",eq:"2 ¹₁p + 2 ¹₀n → ⁴₂He（氦核）",
+      left:[["質子","p",1.007276],["質子","p",1.007276],["中子","n",1.008665],["中子","n",1.008665]],
+      right:[["氦核","He",4.0017]],bookM1:4.031884,
+      note:"課本圖 5-15：2 個質子與 2 個中子分開時總質量 4.031884 u，結合成氦核後只剩 4.0017 u，少了約 0.0302 u。少掉的質量以能量（約 28 MeV）放出，這也是把氦核拆開所需的能量（結合能），所以氦核很穩定。"},
+  sun:{name:"太陽：4 個氫核融合",fig:"圖 5-16",eq:"4 ¹₁H → ⁴₂He + 能量（經過數個步驟）",
+      left:[["氫","p",1.007825],["氫","p",1.007825],["氫","p",1.007825],["氫","p",1.007825]],
+      right:[["氦","He",4.002603]],
+      note:"太陽核心溫度約 1500 萬 K，氫核（質子）以極高速度互撞而融合，經過數個步驟，4 個氫核變成 1 個氦核。每秒約有 4 × 10⁹ kg（四百萬噸）的質量變成能量輻射出去。（此處用原子質量計算，已包含電子。）"},
+  dt:{name:"氘氚核融合",fig:"圖 5-17",eq:"²₁H + ³₁H → ⁴₂He + ¹₀n",
+      left:[["氘","D",2.014102],["氚","T",3.016049]],
+      right:[["氦","He",4.002603],["中子","n",1.008665]],
+      note:"氘（重氫）與氚（超重氫）融合成氦並放出一個中子，約放出 17.6 MeV。氘可以從海水中提取，是未來核融合發電（例如 ITER 計畫）最主要的反應，但要把燃料加熱到上億度並約束住，目前仍在研究中。"},
+  u:{name:"鈾-235 核分裂",fig:"核分裂",eq:"¹₀n + ²³⁵₉₂U → ¹⁴¹₅₆Ba + ⁹²₃₆Kr + 3 ¹₀n",
+      left:[["中子","n",1.008665],["鈾-235","U",235.043930]],
+      right:[["鋇-141","Ba",140.914411],["氪-92","Kr",91.926156],["中子","n",1.008665],["中子","n",1.008665],["中子","n",1.008665]],
+      note:"中子打進鈾-235，原子核分裂成兩塊較輕的核（例如鋇與氪）並放出 2～3 個中子。這一個反應約少了 0.186 u（約 173 MeV，再加上碎片後續的衰變，每次分裂共約 200 MeV）。放出的中子可以再引發其他鈾核分裂，形成連鎖反應（見模式 ②）。"}
+};
+let rx="he", aT=0;
+const rxBtns=$("#rxBtns");
+Object.entries(RX).forEach(([k,r])=>{const b=document.createElement("button");b.type="button";b.dataset.rx=k;b.textContent=r.name;b.setAttribute("aria-pressed",String(k===rx));b.onclick=()=>{rx=k;aT=0;$$("#rxBtns button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.rx===rx)));updA();};rxBtns.appendChild(b);});
+function rxMass(r){const m1=r.bookM1||r.left.reduce((a,x)=>a+x[2],0), m2=r.right.reduce((a,x)=>a+x[2],0);return{m1,m2,dm:m1-m2};}
+function updA(){
+  const r=RX[rx],{m1,m2,dm}=rxMass(r);
+  $("#rxEq").textContent=r.eq;
+  $("#aM1").textContent=fmt(m1,6)+" u"; $("#aM2").textContent=fmt(m2,6)+" u";
+  $("#aDm").textContent=fmt(dm,4)+" u";
+  const dk=dm*U_KG, EJ=dk*C2, frac=dm/m1;
+  $("#aDk").textContent=sci(dk,2)+" kg"; $("#aEJ").textContent=sci(EJ,2)+" J";
+  $("#aEM").textContent=fmt(dm*U_MEV,1)+" MeV";
+  $("#aPct").textContent=fmt(frac*100,frac<0.001?3:2)+" %";
+  $("#aPerKg").textContent=sci(frac*C2,1)+" J";
+  $("#aCoal").textContent=sci(frac*C2/COAL,1)+" kg 煤";
+  $("#aNote").innerHTML=r.note.replace(/(\d[\d.]* ?u|約 [\d.]+ MeV|E = \(Δm\)c²)/g,"<b>$1</b>");
+  $("#sNote").textContent=r.fig;
+}
+$("#aPlay").onclick=()=>{aT=0;};
+
+function nucleus(g,x,y,R,kind,label){
+  const map={p:COL.p,n:COL.n,He:"#ffb86b",D:"#ff8fa3",T:"#ff9de2",U:COL.u,Ba:COL.ba,Kr:COL.kr};
+  const c=map[kind]||"#aaa";
+  const gr=g.createRadialGradient(x-R*.35,y-R*.35,R*.1,x,y,R);gr.addColorStop(0,"#fff");gr.addColorStop(.25,c);gr.addColorStop(1,shade(c));
+  g.fillStyle=gr;g.beginPath();g.arc(x,y,R,0,7);g.fill();
+  if(label){g.fillStyle=COL.txt;g.font=`500 ${Math.max(10,Math.min(13,R*.7))}px "Noto Sans TC",sans-serif`;g.textAlign="center";g.fillText(label,x,y+R+14);}
+}
+function shade(h){const n=parseInt(h.slice(1),16);const r=(n>>16)*.45,gg=((n>>8)&255)*.45,b=(n&255)*.45;return`rgb(${r|0},${gg|0},${b|0})`;}
+function clusterPos(n,r){const out=[];if(n===1)return[[0,0]];for(let i=0;i<n;i++){const a=i/n*Math.PI*2+.6;out.push([Math.cos(a)*r,Math.sin(a)*r]);}return out;}
+function drawA(dt){
+  const {g,w,h}=fit(scene); g.clearRect(0,0,w,h);
+  const r=RX[rx],{m1,m2,dm}=rxMass(r);
+  aT+=dt; const T=4.2, t=Math.min(aT,T);
+  const s=w/640, midY=h*.36;
+  // phases: 0-1.4 approach, 1.4-1.9 flash, after: products separate
+  const p1=Math.min(1,t/1.4), flash=t>1.3&&t<2.4?Math.sin((t-1.3)/1.1*Math.PI):0, p3=Math.max(0,Math.min(1,(t-1.6)/1.6));
+  const cx=w/2;
+  // title
+  g.fillStyle=COL.mut;g.font=`500 ${Math.max(11,12*s)}px "Noto Sans TC",sans-serif`;g.textAlign="left";
+  g.fillText(t<1.4?"反應前：各自分開":"反應後",12,20);
+  if(rx==="u"){
+    const R=Math.max(26,40*s);
+    const nx=12+ (cx-R-20-12)*p1, ny=midY;
+    if(t<1.4){nucleus(g,cx,midY,R,"U","鈾-235");nucleus(g,nx,ny,7*Math.max(1,s),"n","中子");}
+    else{
+      const spread=p3*w*.28;
+      nucleus(g,cx-spread*.9,midY-spread*.25,R*.78,"Ba","鋇-141");
+      nucleus(g,cx+spread*.9,midY+spread*.2,R*.66,"Kr","氪-92");
+      [-.6,.3,1.2].forEach((a,i)=>{const d=spread*1.5+10;nucleus(g,cx+Math.cos(a+Math.PI*.5*i)*d,midY+Math.sin(a+Math.PI*.5*i)*d*.6,7*Math.max(1,s),"n",i===0?"中子 ×3":"");});
+    }
+  }else{
+    const L=r.left, Rn=r.right;
+    const small=Math.max(9,14*s);
+    if(t<1.4){
+      const far=Math.min(w*.36,200*s)*(1-p1)+small*1.2*p1;
+      L.forEach((x,i)=>{const a=i/L.length*Math.PI*2+.7;const R=x[1]==="p"||x[1]==="n"?small:small*1.35;nucleus(g,cx+Math.cos(a)*far,midY+Math.sin(a)*far*.62,R,x[1],p1<.6?x[0]:"");});
+    }else{
+      Rn.forEach((x,i)=>{
+        if(x[1]==="He"){ // cluster of 4
+          const ox=Rn.length>1?-p3*w*.18:0;
+          clusterPos(4,small*.85).forEach(([dx,dy],k)=>nucleus(g,cx+ox+dx,midY+dy,small*.9,k%2?"n":"p",""));
+          g.fillStyle=COL.txt;g.textAlign="center";g.font=`500 ${Math.max(11,12*s)}px "Noto Sans TC",sans-serif`;g.fillText(x[0],cx+ox,midY+small*2.6);
+        }else nucleus(g,cx+p3*w*.3,midY-p3*20,small,x[1],x[0]);
+      });
+    }
+  }
+  if(flash>0){
+    const R=60*s+flash*90*s;const gr=g.createRadialGradient(cx,midY,0,cx,midY,R);gr.addColorStop(0,`rgba(255,240,180,${.9*flash})`);gr.addColorStop(1,"rgba(255,209,102,0)");
+    g.fillStyle=gr;g.beginPath();g.arc(cx,midY,R,0,7);g.fill();
+  }
+  if(t>1.7){
+    const al=Math.min(1,(t-1.7)/.5);g.globalAlpha=al;
+    // energy rays
+    for(let i=0;i<8;i++){const a=i/8*Math.PI*2+t*.4;const r0=48*s+ (t-1.7)*30*s, r1=r0+18*s;g.strokeStyle=COL.e;g.lineWidth=2;g.beginPath();
+      for(let k=0;k<=10;k++){const rr=r0+(r1-r0)*k/10, wob=Math.sin(k*1.9)*3;g.lineTo(cx+Math.cos(a)*rr-Math.sin(a)*wob,midY+Math.sin(a)*rr*.75+Math.cos(a)*wob);}g.stroke();}
+    g.fillStyle=COL.e;g.font=`700 ${Math.max(12,14*s)}px "JetBrains Mono",monospace`;g.textAlign="right";
+    g.fillText("E = (Δm)c² ≈ "+fmt(dm*U_MEV,1)+" MeV",w-12,20);
+    g.globalAlpha=1;
+  }
+  // mass bars
+  const bx=Math.max(70,90*s), bw=w-bx-24, by=h*.7, bh=Math.max(14,18*s);
+  const lo=m2-dm*2.2, hi=m1+dm*.3, X=m=>bx+(m-lo)/(hi-lo)*bw;
+  g.font=`500 ${Math.max(11,12*s)}px "Noto Sans TC",sans-serif`;g.textAlign="right";g.fillStyle=COL.mut;
+  g.fillText("反應前",bx-8,by+bh*.75);g.fillText("反應後",bx-8,by+bh*1.9+bh*.75);
+  g.fillStyle="#2b3550";g.fillRect(bx,by,X(m1)-bx,bh);
+  g.fillStyle="#3f5e8c";g.fillRect(bx,by+bh*1.9,X(m2)-bx,bh);
+  const shown=t>1.7;
+  g.fillStyle=shown?"rgba(255,209,102,.85)":"rgba(255,209,102,.18)";g.fillRect(X(m2),by+bh*1.9,X(m1)-X(m2),bh);
+  g.strokeStyle=COL.e;g.setLineDash([4,4]);g.beginPath();g.moveTo(X(m1),by-4);g.lineTo(X(m1),by+bh*2.9+4);g.stroke();g.setLineDash([]);
+  g.fillStyle=COL.txt;g.textAlign="left";g.font=`600 ${Math.max(10,11*s)}px "JetBrains Mono",monospace`;
+  g.fillText(fmt(m1,4)+" u",bx+4,by+bh*.75);g.fillText(fmt(m2,4)+" u",bx+4,by+bh*1.9+bh*.75);
+  g.fillStyle=COL.e;g.textAlign="center";
+  const dmx=(X(m1)+X(m2))/2;
+  g.fillText("Δm",dmx,by+bh*3.6);
+  g.fillStyle=COL.dim;g.font=`400 ${Math.max(10,10.5*s)}px "Noto Sans TC",sans-serif`;g.textAlign="left";
+  g.fillText("※ 長條的左端不是 0：放大了質量的差別",bx,h-8);
+}
+
+/* ================= B：連鎖反應 ================= */
+let gens=[], bAuto=null, totF=0;
+const nu=()=>+$("#bNu").value, ff=()=>+$("#bF").value;
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function binom(n,p){if(n<60){let k=0;for(let i=0;i<n;i++)if(Math.random()<p)k++;return k;}return Math.max(0,Math.min(n,Math.round(n*p+Math.sqrt(n*p*(1-p))*gauss())));}
+function resetB(){gens=[{f:1,neu:0,kids:null,lost:0}];totF=1;stopAuto();updB();}
+function stepB(){
+  const last=gens[gens.length-1]; if(last.f===0||gens.length>=40){stopAuto();return;}
+  const v=nu(), p3=v-2;
+  // neutrons emitted by last generation
+  let neu, perFission=null;
+  if(last.f<=80){perFission=[];neu=0;for(let i=0;i<last.f;i++){const k=Math.random()<p3?3:2;perFission.push(k);neu+=k;}}
+  else{neu=2*last.f+binom(last.f,p3);}
+  last.neu=neu;
+  const nf=binom(neu,ff());
+  // assign which neutrons cause fission (for drawing)
+  if(perFission){const hits=Array(neu).fill(false);let c=0;const idx=[...Array(neu).keys()].sort(()=>Math.random()-.5);for(let i=0;i<nf;i++)hits[idx[i]]=true;
+    last.kids=[];let q=0;perFission.forEach(k=>{const arr=[];for(let j=0;j<k;j++)arr.push(hits[q++]);last.kids.push(arr);});}
+  last.lost=neu-nf;
+  gens.push({f:nf,neu:0,kids:null,lost:0}); totF+=nf;
+  if(nf===0) stopAuto();
+  updB();
+}
+function stopAuto(){if(bAuto){clearInterval(bAuto);bAuto=null;}$("#bAuto").textContent="自動";}
+$("#bStep").onclick=stepB; $("#bReset").onclick=resetB;
+$("#bAuto").onclick=()=>{if(bAuto){stopAuto();return;}bAuto=setInterval(stepB,700);$("#bAuto").textContent="暫停";};
+$("#bNu").oninput=$("#bF").oninput=()=>{updB();};
+$$("[data-pre]").forEach(b=>b.onclick=()=>{const P={die:[2.5,.3],ok:[2.5,.4],boom:[2.5,.9]}[b.dataset.pre];$("#bNu").value=P[0];$("#bF").value=P[1];resetB();});
+function updB(){
+  const k=nu()*ff(), n=gens.length-1, cur=gens[n];
+  $("#obNu").textContent=fmt(nu(),1)+" 個"; $("#obF").textContent=fmt(ff()*100,0)+" %";
+  $("#bK").textContent=fmt(k,2); $("#bGen").textContent=n;
+  $("#bNow").textContent=big(cur.f); $("#bNeu").textContent=n>0?big(gens[n-1].neu):"—";
+  $("#bTot").textContent=big(totF);
+  const EJ=totF*200*MEV_J; $("#bE").textContent=sci(EJ,2)+" J";
+  const st=$("#bState");
+  if(cur.f===0){st.className="state n";st.textContent=`第 ${n} 代沒有分裂，連鎖反應停止了`;}
+  else if(k<0.97){st.className="state n";st.textContent=`k = ${fmt(k,2)} < 1：分裂次數一代比一代少，反應會逐漸熄滅`;}
+  else if(k<=1.03){st.className="state p";st.textContent=`k ≈ 1：每代分裂次數大致不變，穩定放出能量（核電廠）`;}
+  else{st.className="state w";st.textContent=`k = ${fmt(k,2)} > 1：分裂次數每代乘上 ${fmt(k,2)}，${n>=1?`第 ${n} 代約 ${big(Math.pow(k,n))} 次`:"急速增加"}（失控）`;}
+}
+function drawB(){
+  const {g,w,h}=fit(scene); g.clearRect(0,0,w,h);
+  const top=26, rowH=Math.min(54,(h-top-14)/6), maxRows=Math.floor((h-top-14)/rowH);
+  const start=Math.max(0,gens.length-maxRows);
+  g.font='500 11px "Noto Sans TC",sans-serif';
+  let prevPos=null;
+  for(let gi=start;gi<gens.length;gi++){
+    const G=gens[gi], y=top+(gi-start)*rowH+rowH*.35;
+    g.fillStyle=COL.dim;g.textAlign="left";g.fillText("第 "+gi+" 代",6,y+4);
+    const x0=56, x1=w-10, n=G.f;
+    const pos=[];
+    if(n===0){g.fillStyle=COL.mut;g.fillText("沒有分裂",x0+6,y+4);prevPos=null;continue;}
+    if(n<=48){
+      for(let i=0;i<n;i++){pos.push(x0+(x1-x0)*(i+.5)/n);}
+      const R=Math.max(3.5,Math.min(9,(x1-x0)/n*.32));
+      // links from prev
+      if(prevPos&&gens[gi-1].kids){let q=0;gens[gi-1].kids.forEach((arr,pi)=>{arr.forEach((hit,j)=>{const px=prevPos[pi],py=y-rowH;
+        if(hit){const cxp=pos[q++];g.strokeStyle="rgba(90,169,255,.55)";g.lineWidth=1.2;g.beginPath();g.moveTo(px,py+5);g.lineTo(cxp,y-R);g.stroke();}
+        else{const dx=(j-(arr.length-1)/2)*Math.min(14,(x1-x0)/gens[gi-1].f*.3);g.strokeStyle="rgba(91,104,128,.6)";g.beginPath();g.moveTo(px,py+5);g.lineTo(px+dx,py+rowH*.45);g.stroke();
+          g.fillStyle="#5b6880";g.fillText("×",px+dx-3,py+rowH*.45+8);} });});}
+      pos.forEach(x=>{nucleus(g,x,y,R,"U","");});
+      // flashes
+      pos.forEach(x=>{g.fillStyle="rgba(255,209,102,.35)";g.beginPath();g.arc(x,y,R*1.7,0,7);g.fill();});
+      prevPos=pos;
+    }else{
+      // summarized band
+      const frac=Math.min(1,Math.log10(n)/Math.log10(1e12));
+      const bw=(x1-x0)*Math.max(.25,frac);
+      const grd=g.createLinearGradient(x0,0,x0+bw,0);grd.addColorStop(0,"rgba(163,230,53,.6)");grd.addColorStop(1,"rgba(255,209,102,.6)");
+      g.fillStyle=grd;g.fillRect(x0,y-7,bw,14);
+      g.fillStyle=COL.txt;g.textAlign="left";g.font='600 11px "JetBrains Mono",monospace';g.fillText(big(n)+" 次分裂",x0+6,y+4);g.font='500 11px "Noto Sans TC",sans-serif';
+      prevPos=null;
+    }
+  }
+  g.fillStyle=COL.mut;g.textAlign="right";g.font='500 11px "Noto Sans TC",sans-serif';
+  g.fillText("● 鈾-235 分裂　— 中子引發分裂　× 中子被吸收或逃逸",w-8,14);
+  drawChart();
+}
+function drawChart(){
+  const {g,w,h}=fit(chart); g.clearRect(0,0,w,h);
+  const L=36,R=10,T=10,B=22, n=Math.max(gens.length,8);
+  const maxV=Math.max(10,...gens.map(x=>x.f),Math.pow(Math.max(1,nu()*ff()),n-1));
+  const lmax=Math.ceil(Math.log10(maxV));
+  const Y=v=>h-B-(Math.log10(Math.max(v,1))/lmax)*(h-T-B);
+  g.strokeStyle="#1b2336";g.fillStyle=COL.dim;g.font='10px "JetBrains Mono",monospace';g.textAlign="right";
+  for(let e=0;e<=lmax;e+=Math.max(1,Math.ceil(lmax/5))){const y=Y(Math.pow(10,e));g.beginPath();g.moveTo(L,y);g.lineTo(w-R,y);g.stroke();g.fillText(e===0?"1":"10"+sup(e),L-4,y+3);}
+  const bw=(w-L-R)/n;
+  gens.forEach((G,i)=>{if(G.f<1)return;g.fillStyle="rgba(163,230,53,.75)";const y=Y(G.f);g.fillRect(L+i*bw+bw*.15,y,bw*.7,h-B-y);});
+  const k=nu()*ff();g.strokeStyle=COL.e;g.setLineDash([5,4]);g.lineWidth=1.5;g.beginPath();
+  for(let i=0;i<n;i++){const v=Math.pow(k,i);const x=L+i*bw+bw/2,y=Y(Math.max(v,1));i?g.lineTo(x,y):g.moveTo(x,y);if(v<1)break;}g.stroke();g.setLineDash([]);
+  g.fillStyle=COL.dim;g.textAlign="center";for(let i=0;i<n;i+=Math.max(1,Math.ceil(n/10)))g.fillText(i,L+i*bw+bw/2,h-8);
+  g.textAlign="left";g.fillText("代數 n",L,h-8+0);
+}
+
+/* ================= C：燃料丸 ================= */
+$$("[data-dm]").forEach(b=>b.onclick=()=>{$("#cDm").value=Math.log10(+b.dataset.dm);updC();});
+$("#cDm").oninput=updC;
+let cT=0;
+function updC(){
+  const mg=Math.pow(10,+$("#cDm").value), kg=mg*1e-6, E=kg*C2, kwh=E/3.6e6;
+  $("#ocDm").textContent=(mg<1?fmt(mg,mg<0.1?3:2):fmt(mg,1))+" mg";
+  $("#cDk").textContent=sci(kg,1)+" kg"; $("#cEJ").textContent=sci(E,2)+" J";
+  $("#cKWh").textContent=kwh<1e5?fmt(kwh,0)+" 度":sci(kwh,2)+" 度";
+  const months=kwh/300; $("#cHome").textContent=months<24?fmt(months,1)+" 個月":fmt(months/12,1)+" 年";
+  $("#cCoal").textContent=E/COAL<1e4?fmt(E/COAL,0)+" kg":sci(E/COAL/1000,2)+" 公噸";
+  const yrs=E/60/3600/24/365; $("#cBulb").textContent=yrs>=1?fmt(yrs,1)+" 年":fmt(yrs*365,0)+" 天";
+  $("#cSol").innerHTML=`Δm = ${mg<1?fmt(mg,mg<0.1?3:2):fmt(mg,1)} mg = <b>${sci(kg,1)} kg</b><br>E = (Δm)c² = ${sci(kg,1)} × (3 × 10⁸)² = <b>${sci(E,2)} J</b><br>電能 = ${sci(E,2)} ÷ (3.6 × 10⁶) ≈ <b>${kwh<1e5?fmt(kwh,0):sci(kwh,2)} 度</b>${Math.abs(mg-0.1)<1e-6?"　（課本答案：2500 度）":""}`;
+}
+function drawC(dt){
+  cT+=dt;const {g,w,h}=fit(scene); g.clearRect(0,0,w,h);
+  const mg=Math.pow(10,+$("#cDm").value), kwh=mg*1e-6*C2/3.6e6;
+  const s=Math.min(1.2,w/560);
+  // fuel pellet
+  const px=w*.2, py=h*.42, pw=40*s, ph=54*s;
+  g.fillStyle="#3b4256";g.fillRect(px-pw/2,py-ph/2,pw,ph);
+  const gr=g.createLinearGradient(px-pw/2,0,px+pw/2,0);gr.addColorStop(0,"#4b5563");gr.addColorStop(.5,"#9ca3af");gr.addColorStop(1,"#4b5563");
+  g.fillStyle=gr;g.fillRect(px-pw/2,py-ph/2,pw,ph);
+  g.fillStyle="#d1d5db";g.beginPath();g.ellipse(px,py-ph/2,pw/2,6*s,0,0,7);g.fill();
+  g.fillStyle=COL.txt;g.textAlign="center";g.font=`500 ${Math.max(11,12*s)}px "Noto Sans TC",sans-serif`;g.fillText("核燃料丸",px,py+ph/2+18);
+  g.fillStyle=COL.e;g.fillText("少了 "+(mg<1?fmt(mg,mg<0.1?3:2):fmt(mg,1))+" mg",px,py+ph/2+36);
+  // arrow & energy
+  const ax0=px+pw, ax1=w*.55;
+  for(let i=0;i<5;i++){const t=((cT*.8+i/5)%1);const x=ax0+(ax1-ax0)*t;g.fillStyle=`rgba(255,209,102,${1-t})`;g.beginPath();g.arc(x,py+Math.sin(t*9+i)*8,4,0,7);g.fill();}
+  g.fillStyle=COL.e;g.font=`700 ${Math.max(12,13*s)}px "JetBrains Mono",monospace`;g.fillText("E = (Δm)c²",(ax0+ax1)/2,py-38*s);
+  // houses grid: each house icon = 300 kWh (1 個月)
+  const gx=w*.58, gw=w-gx-12, gy=24, gh=h-60;
+  const months=kwh/300, unit=months>200?Math.pow(10,Math.ceil(Math.log10(months/200))):1;
+  const n=Math.min(200,Math.round(months/unit));
+  const cols=Math.max(5,Math.ceil(Math.sqrt(n*gw/gh))), cell=Math.min(gw/cols,gh/Math.ceil(Math.max(n,1)/cols),26);
+  for(let i=0;i<n;i++){const cx=gx+(i%cols)*cell+cell/2, cy=gy+Math.floor(i/cols)*cell+cell/2, z=cell*.36;
+    g.fillStyle=COL.phos;g.beginPath();g.moveTo(cx-z,cy);g.lineTo(cx,cy-z);g.lineTo(cx+z,cy);g.closePath();g.fill();g.fillRect(cx-z*.7,cy,z*1.4,z*.85);}
+  g.fillStyle=COL.mut;g.font=`500 ${Math.max(10,11*s)}px "Noto Sans TC",sans-serif`;g.textAlign="right";
+  g.fillText(`⌂ = 一個家庭用電 ${unit>1?big(unit)+" 個月":"1 個月"}（300 度）`,w-10,h-14);
+}
+
+/* ================= D：穿透力 ================= */
+const KINDS={a:{n:"α",c:"#ff6b6b",r:4},b:{n:"β",c:"#5aa9ff",r:2.5},g:{n:"γ",c:"#ffd166",r:0},n:{n:"中子",c:"#c0c8d8",r:3.2}};
+const WALLS=[{k:"paper",n:"紙",c:"#e5e7eb",w:4,stop:{a:1,b:.15,g:0,n:0}},{k:"al",n:"鋁板（數 mm）",c:"#9ca3af",w:9,stop:{a:1,b:1,g:.12,n:.03}},{k:"pb",n:"鉛板（數 cm）",c:"#64748b",w:16,stop:{a:1,b:1,g:.75,n:.08}},{k:"cc",n:"厚混凝土",c:"#a8a29e",w:30,stop:{a:1,b:1,g:.8,n:.92}}];
+const wallOn={paper:true,al:true,pb:true,cc:true};
+let dKind="all", parts=[], dCount={a:[0,0],b:[0,0],g:[0,0],n:[0,0]}, spawnT=0;
+const dWalls=$("#dWalls");
+WALLS.forEach(W=>{const l=document.createElement("label");l.innerHTML=`<input type="checkbox" checked> ${W.n}`;l.querySelector("input").onchange=e=>{wallOn[W.k]=e.target.checked;resetD();};dWalls.appendChild(l);});
+$$("#dKinds button").forEach(b=>b.onclick=()=>{dKind=b.dataset.k;$$("#dKinds button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));resetD();});
+function resetD(){parts=[];dCount={a:[0,0],b:[0,0],g:[0,0],n:[0,0]};updD();}
+function passProb(k){return WALLS.reduce((p,W)=>p*(wallOn[W.k]?1-W.stop[k]:1),1);}
+function updD(){["a","b","g","n"].forEach(k=>{const p=passProb(k), el=$("#dp"+k);el.textContent=p<0.005?"0 %":fmt(p*100,0)+" %";el.className=p<0.005?"no":p>0.6?"ok":"half";});}
+function wallX(i,w){return w*(.28+i*.15);}
+function drawD(dt){
+  const {g,w,h}=fit(scene); g.clearRect(0,0,w,h);
+  const kinds=dKind==="all"?["a","b","g","n"]:[dKind];
+  spawnT+=dt; while(spawnT>.06){spawnT-=.06;const k=kinds[Math.floor(Math.random()*kinds.length)];
+    const lane=dKind==="all"?["a","b","g","n"].indexOf(k):Math.random()*3.2;
+    parts.push({k,x:46,y:h*.18+((dKind==="all"?lane:lane)+Math.random()*.8)*(h*.62/4),v:(k==="g"?420:k==="b"?300:k==="n"?240:160)*(w/640+.4),stopAt:null,done:false,ph:Math.random()*6});
+    const P=parts[parts.length-1]; // decide stop position
+    for(let i=0;i<WALLS.length;i++){const W=WALLS[i];if(!wallOn[W.k])continue;if(Math.random()<W.stop[k]){P.stopAt=wallX(i,w)+Math.random()*W.w*(w/640+.4);break;}}
+  }
+  // source
+  g.fillStyle="#2b3550";g.fillRect(8,h*.15,30,h*.68);g.fillStyle=COL.e;g.font='600 11px "Noto Sans TC",sans-serif';g.textAlign="center";g.save();g.translate(23,h*.5);g.rotate(-Math.PI/2);g.fillText("放射源",0,4);g.restore();
+  // walls
+  WALLS.forEach((W,i)=>{const x=wallX(i,w), ww=W.w*(w/640+.4);g.globalAlpha=wallOn[W.k]?1:.15;g.fillStyle=W.c;g.fillRect(x,h*.1,ww,h*.76);g.globalAlpha=1;
+    g.fillStyle=wallOn[W.k]?COL.txt:COL.dim;g.font='500 11px "Noto Sans TC",sans-serif';g.textAlign="center";const nm=W.n.split("（");g.fillText(nm[0],x+ww/2,h*.94);});
+  // detector
+  const dx=w-22;g.fillStyle="#173a2c";g.fillRect(dx,h*.15,14,h*.68);g.save();g.translate(dx+7,h*.5);g.rotate(Math.PI/2);g.fillStyle=COL.phos;g.font='600 11px "Noto Sans TC",sans-serif';g.fillText("偵測器",0,4);g.restore();
+  parts.forEach(P=>{
+    P.x+=P.v*dt;
+    if(P.stopAt!=null&&P.x>=P.stopAt){P.x=P.stopAt;P.done=true;P.fade=(P.fade||1)-dt*2.5;}
+    if(P.x>=dx){P.done=true;P.hit=true;P.fade=(P.fade||1)-dt*4;}
+    const K=KINDS[P.k], a=Math.max(0,P.fade==null?1:P.fade);
+    g.globalAlpha=a;
+    if(P.k==="g"){g.strokeStyle=K.c;g.lineWidth=1.6;g.beginPath();for(let i=0;i<=14;i++){const xx=P.x-28+i*2;g.lineTo(xx,P.y+Math.sin(xx*.5+P.ph)*4);}g.stroke();}
+    else{g.fillStyle=K.c;g.beginPath();g.arc(P.x,P.y,K.r,0,7);g.fill();}
+    g.globalAlpha=1;
+  });
+  parts=parts.filter(P=>!(P.done&&P.fade<=0));
+  if(parts.length>500)parts.splice(0,parts.length-500);
+}
+
+/* ================= mode switching & loop ================= */
+const TITLES={A:"質量虧損",B:"連鎖反應的分裂樹",C:"0.1 mg 質量的能量",D:"α、β、γ 與中子的穿透力"};
+function setMode(m){
+  mode=m; $$("[data-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
+  ["A","B","C","D"].forEach(k=>$("#ctl"+k).hidden=k!==m);
+  $("#chartWrap").hidden=m!=="B";
+  $("#sTitle").textContent=TITLES[m];
+  $("#sNote").textContent=m==="A"?RX[rx].fig:m==="B"?"鈾-235 · 每次分裂 ≈ 200 MeV":m==="C"?"範例 5-6":"圖 5-20";
+  $("#legend").innerHTML=m==="A"?`<span><i style="background:${COL.p}"></i>質子／氫核</span><span><i style="background:${COL.n}"></i>中子</span><span><i style="background:#ffb86b"></i>氦核</span><span><i style="background:${COL.e}"></i>放出的能量</span>`
+    :m==="B"?`<span><i style="background:${COL.u}"></i>分裂的鈾-235</span><span><i style="background:${COL.n}"></i>引發分裂的中子</span><span><i style="background:${COL.dim}"></i>逃逸或被控制棒吸收的中子</span>`
+    :m==="D"?Object.values(KINDS).map(K=>`<span><i style="background:${K.c}"></i>${K.n}${K.n==="γ"?"（波浪線）":""}</span>`).join(""):"";
+  if(m==="A"){aT=0;updA();}
+  if(m==="B"){if(!gens.length)resetB();else updB();}
+  if(m==="C")updC();
+  if(m==="D")updD();
+}
+$$("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(mode==="A")drawA(dt);else if(mode==="B")drawB();else if(mode==="C")drawC(dt);else drawD(dt);
+  requestAnimationFrame(loop);}
+setMode("A");
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
