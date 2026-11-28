@@ -37,7 +37,6 @@ const FILES=[
  "sims/b-lenz-galvanometer.html",
  "sims/b-light-interference.html",
  "sims/b-magnetic-field.html",
- "sims/b-mass-energy.html",
  "sims/b-microphone.html",
  "sims/b-motion-graphs.html",
  "sims/b-motor-generator.html",
